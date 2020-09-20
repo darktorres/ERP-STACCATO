@@ -53,7 +53,7 @@ bool Contas::validarData(const QModelIndex &index) {
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
@@ -62,12 +62,12 @@ bool Contas::validarData(const QModelIndex &index) {
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
       modelPendentes.setData(row, "dataPagamento", oldDate);
-      return qApp->enqueueError(false, "Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
+      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
       modelPendentes.setData(row, "dataPagamento", oldDate);
-      return qApp->enqueueError(false, "Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
+      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
     }
   }
 
@@ -87,13 +87,13 @@ void Contas::preencher(const QModelIndex &index) {
       query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
       query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando valor: " + query.lastError().text(), this); }
+      if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando valor: " + query.lastError().text(), this); }
 
       const double oldValor = query.value("valor").toDouble();
       const double newValor = modelPendentes.data(row, "valor").toDouble();
 
       if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-        qApp->enqueueError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
+        throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
         modelPendentes.setData(row, "valor", oldValor);
       }
     }
@@ -105,7 +105,7 @@ void Contas::preencher(const QModelIndex &index) {
       QSqlQuery queryConta;
 
       if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
       }
 
       if (queryConta.first()) {
@@ -292,12 +292,12 @@ bool Contas::verifyFields() {
     const QString status = modelPendentes.data(row, "status").toString();
 
     if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
-      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal") == 0) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
-      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "idConta") == 0) { return qApp->enqueueError(false, "'Conta' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto") == 0) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
-      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }
+      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { throw RuntimeError("'Data Realizado' vazio!", this); }
+      if (modelPendentes.data(row, "valorReal") == 0) { throw RuntimeError("'R$ Real' vazio!", this); }
+      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { throw RuntimeError("'Tipo Real' vazio!", this); }
+      if (modelPendentes.data(row, "idConta") == 0) { throw RuntimeError("'Conta' vazio!", this); }
+      if (modelPendentes.data(row, "centroCusto") == 0) { throw RuntimeError("'Centro Custo' vazio!", this); }
+      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio!", this); }
     }
   }
 
@@ -327,7 +327,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
   query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", idPagamento);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
   const QString idVenda = query.value("idVenda").toString();
 

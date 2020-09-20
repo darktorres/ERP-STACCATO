@@ -12,9 +12,9 @@
 #include <QSqlError>
 #include <QTimer>
 
-RuntimeException::RuntimeException(const QString &message) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message); }
+RuntimeException::RuntimeException(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message, parent); }
 
-RuntimeError::RuntimeError(const QString &message) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message); }
+RuntimeError::RuntimeError(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message, parent); }
 
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
@@ -36,17 +36,17 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 }
 
 // for system errors
-void Application::enqueueException(const QString &error, QWidget *parent) {
+void Application::enqueueException(const QString &exception, QWidget *parent) {
   // TODO: guardar o arquivo/linha que chamou essa funcao
-  exceptionQueue << Message{error, parent};
+  exceptionQueue << Message{exception, parent};
 
-  Log::createLog("Exceção", error);
+  Log::createLog("Exceção", exception);
 
   showMessages();
 }
 
-bool Application::enqueueException(const bool boolean, const QString &error, QWidget *parent) {
-  enqueueException(error, parent);
+bool Application::enqueueException(const bool boolean, const QString &exception, QWidget *parent) {
+  enqueueException(exception, parent);
   return boolean;
 }
 
@@ -91,7 +91,7 @@ void Application::readSettingsFile() {
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
-bool Application::userLogin(const QString &user) {
+void Application::userLogin(const QString &user) {
   db.close();
 
   db.setUserName(user);
@@ -99,22 +99,13 @@ bool Application::userLogin(const QString &user) {
   db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
   //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 
-  if (not db.open()) {
-    loginError();
-
-    return false;
-  }
-
-  return true;
+  if (not db.open()) { loginError(); }
 }
 
-bool Application::genericLogin(const QString &hostname) {
+void Application::genericLogin(const QString &hostname) {
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro lendo mysql.txt: " + file.errorString());
-    return false;
-  }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString()); }
 
   const QString systemPassword = file.readAll();
 
@@ -145,14 +136,8 @@ bool Application::genericLogin(const QString &hostname) {
       }
     }
 
-    if (not connected) {
-      loginError();
-
-      return false;
-    }
+    if (not connected) { loginError(); }
   }
-
-  return true;
 }
 
 void Application::loginError() {
@@ -165,7 +150,7 @@ void Application::loginError() {
   if (error.contains("Access denied for user")) { message = "Login inválido!"; }
   if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
 
-  QMessageBox::critical(nullptr, "Erro!", message);
+  throw RuntimeException(message);
 }
 
 bool Application::dbReconnect(const bool silent) {
@@ -183,20 +168,17 @@ bool Application::dbReconnect(const bool silent) {
 }
 
 bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
-  if (not genericLogin(hostname)) { return false; }
+  genericLogin(hostname);
 
-  if (not UserSession::login(user, userPassword)) {
-    QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
-    return false;
-  }
+  UserSession::login(user, userPassword);
 
-  if (not userLogin(user)) { return false; }
+  userLogin(user);
 
   // ------------------------------------------------------------
 
   isConnected = true;
 
-  if (not runSqlJobs()) { return false; }
+  runSqlJobs();
 
   startSqlPing();
   startUpdaterPing();
@@ -204,40 +186,23 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
   return true;
 }
 
-bool Application::runSqlJobs() {
+void Application::runSqlJobs() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro verificando lastInvalidated: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
 
   if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_produtos_expirados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { throw RuntimeException("Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_staccatoOff()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_staccatoOff: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_staccatoOff()")) { throw RuntimeException("Erro executando invalidar_staccatoOff: " + query.lastError().text()); }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
     query.bindValue(":lastInvalidated", serverDateTime().toString("yyyy-MM-dd"));
 
-    if (not query.exec()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro atualizando lastInvalidated: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { throw RuntimeException("Erro atualizando lastInvalidated: " + query.lastError().text()); }
   }
-
-  return true;
 }
 
 void Application::startSqlPing() {

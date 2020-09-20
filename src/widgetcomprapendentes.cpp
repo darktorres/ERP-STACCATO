@@ -33,7 +33,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
 
   // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
@@ -129,7 +129,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 
   const QString status = modelViewVendaProduto.data(row, "status").toString();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { throw RuntimeError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
   const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
   const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
@@ -199,9 +199,9 @@ void WidgetCompraPendentes::montaFiltro() {
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
-  if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
+  if (ui->itemBoxProduto->text().isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { throw RuntimeError("Deve escolher uma quantidade!", this); }
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
 
@@ -254,7 +254,7 @@ void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged(const doubl
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
@@ -265,7 +265,7 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 

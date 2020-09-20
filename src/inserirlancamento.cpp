@@ -114,19 +114,19 @@ void InserirLancamento::on_pushButtonSalvar_clicked() {
 
 bool InserirLancamento::verifyFields() {
   for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { throw RuntimeError("Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { throw RuntimeError("Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
 
-    if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
+    if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { throw RuntimeError("Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "dataPagamento").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataPagamento").toDate().isNull()) { throw RuntimeError("Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
   }
 
   return true;
@@ -151,7 +151,7 @@ void InserirLancamento::unsetConnections() {
 void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
 
   const int row = list.first().row();
   const int newRow = modelContaPagamento.insertRowAtEnd();
@@ -184,7 +184,7 @@ void InserirLancamento::preencher(const QModelIndex &index) {
       QSqlQuery queryConta;
 
       if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
       }
 
       if (queryConta.first()) {

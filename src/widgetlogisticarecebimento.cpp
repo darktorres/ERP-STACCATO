@@ -155,7 +155,7 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
 void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList ids;
   QStringList idVendas;
@@ -195,7 +195,7 @@ void WidgetLogisticaRecebimento::montaFiltro() {
 void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::AgendarRecebimento, this);
 
@@ -241,7 +241,7 @@ void WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
 void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) {
     const QString idVenda = modelViewRecebimento.data(index.row(), "idVenda").toString();
@@ -261,7 +261,7 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
 void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList idVendas;
 

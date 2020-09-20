@@ -424,7 +424,7 @@ Qt::ItemFlags SqlTreeModel::flags(const QModelIndex &index) const {
 int SqlTreeModel::fieldIndex(const QString &fieldName) const {
   const int field = modelAt(0)->record().indexOf(fieldName) - 1;
 
-  if (field == -1) { qApp->enqueueException(fieldName + " não encontrado na arvore!"); }
+  if (field == -1) { throw RuntimeException(fieldName + " não encontrado na arvore!"); }
 
   return field;
 }

@@ -48,7 +48,7 @@ void CadastroNCM::setupTables() {
 
 void CadastroNCM::on_pushButtonSalvar_clicked() {
   for (int row = 0; row < model.rowCount(); ++row) {
-    if (model.data(row, "ncm").toString().length() != 8) { return qApp->enqueueError("NCM deve ter 8 dígitos!", this); }
+    if (model.data(row, "ncm").toString().length() != 8) { throw RuntimeError("NCM deve ter 8 dígitos!", this); }
     // TODO: se houver algum dado em CEST verificar se o tamanho é 7
   }
 
@@ -70,7 +70,7 @@ void CadastroNCM::on_pushButtonAdicionar_clicked() {
 void CadastroNCM::on_pushButtonRemover_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (const auto &index : selection) { model.removeRow(index.row()); }
 

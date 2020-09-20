@@ -196,7 +196,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
     return;
   }
 
-  if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Nenhum item no veículo!", this); }
+  if (modelTranspAtual.rowCount() == 0) { throw RuntimeError("Nenhum item no veículo!", this); }
 
   QModelIndexList list;
 
@@ -219,7 +219,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::AgendarColeta, this);
   // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
@@ -293,7 +293,7 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
   modelTranspAtual.select();
 
@@ -329,18 +329,18 @@ void WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
-  if (ui->itemBoxVeiculo->getId().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!", this); }
+  if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
   for (const auto &index : list) {
     const auto listMatch = modelTranspAtual.match("idEstoque", modelEstoque.data(index.row(), "idEstoque"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
+    if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
   }
 
   adicionarProduto(list);
@@ -351,7 +351,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
   const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
 }
@@ -390,7 +390,7 @@ void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) {
     const QString idVenda = modelEstoque.data(index.row(), "idVenda").toString();

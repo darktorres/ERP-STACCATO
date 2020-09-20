@@ -82,16 +82,14 @@ void CadastroCliente::setupTables() {
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
-bool CadastroCliente::verifyFields() {
+void CadastroCliente::verifyFields() {
   const auto children = ui->frame->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!", this); }
+  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CPF inválido!"); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
+  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CNPJ inválido!"); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
@@ -99,12 +97,10 @@ bool CadastroCliente::verifyFields() {
     query.bindValue(":cpf", ui->lineEditCPF->text());
     query.bindValue(":cnpj", ui->lineEditCNPJ->text());
 
-    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se CPF/CNPJ já cadastrado!", this); }
+    if (not query.exec()) { throw RuntimeException("Erro verificando se CPF/CNPJ já cadastrado!"); }
 
-    if (query.first()) { return qApp->enqueueError(false, "CPF/CNPJ já cadastrado!", this); }
+    if (query.first()) { throw RuntimeError("CPF/CNPJ já cadastrado!"); }
   }
-
-  return true;
 }
 
 void CadastroCliente::savingProcedures() {
@@ -233,7 +229,7 @@ bool CadastroCliente::viewRegister() {
 
   const bool existeVinculo = verificaVinculo();
 
-  const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
+  const bool administrativo = UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO" or UserSession::tipoUsuario == "DIRETOR";
 
   const bool bloquear = (existeVinculo and not administrativo);
 
@@ -246,7 +242,7 @@ bool CadastroCliente::viewRegister() {
   ui->pushButtonAtualizarEnd->setDisabled(bloquear);
   ui->groupBoxPFPJ->setDisabled(bloquear);
 
-  if (bloquear and UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (bloquear and UserSession::tipoUsuario != "GERENTE LOJA" and UserSession::tipoUsuario != "DIRETOR" and UserSession::tipoUsuario != "ADMINISTRADOR") {
     if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setReadOnly(true); }
     if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setReadOnly(true); }
     if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setReadOnly(true); }
@@ -286,10 +282,10 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cpf = :cpf");
     query.bindValue(":cpf", text);
 
-    if (not query.exec()) { return qApp->enqueueException("Erro buscando CPF: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando CPF: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      qApp->enqueueError("CPF já cadastrado!", this);
+      throw RuntimeError("CPF já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -303,10 +299,10 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cnpj = :cnpj");
     query.bindValue(":cnpj", text);
 
-    if (not query.exec()) { return qApp->enqueueException("Erro buscando CNPJ: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando CNPJ: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      qApp->enqueueError("CNPJ já cadastrado!", this);
+      throw RuntimeError("CNPJ já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -314,13 +310,13 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
 
 bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
-    qApp->enqueueError("CEP inválido!", this);
+    throw RuntimeError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
   if (ui->lineEditNro->text().isEmpty()) {
-    qApp->enqueueError("Número vazio!", this);
+    throw RuntimeError("Número vazio!", this);
     ui->lineEditNro->setFocus();
     return false;
   }

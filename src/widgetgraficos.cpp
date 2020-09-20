@@ -21,14 +21,14 @@ void WidgetGraficos::resetTables() {}
 
 void WidgetGraficos::updateTables() {
   if (not isSet) {
-    if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+    if (UserSession::tipoUsuario == "GERENTE LOJA") {
       const QString nomeLoja = UserSession::fromLoja("descricao").toString();
 
-      if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, UserSession::idLoja()); }
+      if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, UserSession::idLoja); }
     } else {
       QSqlQuery query;
 
-      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueException("Erro: " + query.lastError().text(), this); }
+      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text(), this); }
 
       while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
     }
@@ -62,7 +62,7 @@ void WidgetGraficos::updateTables() {
 
     auto axes = chart.axes();
 
-    if (axes.isEmpty()) { return qApp->enqueueException("Sem eixos X e Y!", this); }
+    if (axes.isEmpty()) { throw RuntimeException("Sem eixos X e Y!", this); }
 
     auto axisX = static_cast<QValueAxis *>(axes.at(0));
     auto axisY = static_cast<QValueAxis *>(axes.at(1));
@@ -90,14 +90,14 @@ void WidgetGraficos::updateTables() {
       if (not queryChart.exec("SELECT dia, @s12:=@s12 + mes12 AS mes12, @s11:=@s11 + mes11 AS mes11, @s10:=@s10 + mes10 AS mes10, @s9:=@s9 + mes9 AS mes9, @s8:=@s8 + mes8 AS mes8, @s7:=@s7 + mes7 AS "
                               "mes7, @s6:=@s6 + mes6 AS mes6, @s5:=@s5 + mes5 AS mes5, @s4:=@s4 + mes4 AS mes4, @s3:=@s3 + mes3 AS mes3, @s2:=@s2 + mes2 AS mes2, @s1:=@s1 + mes1 AS mes1, @s0:=@s0 + "
                               "mes0 AS mes0 FROM view_grafico_lojas v JOIN (SELECT @s12:=0, @s11:=0,@s10:=0,@s9:=0,@s8:=0,@s7:=0,@s6:=0,@s5:=0,@s4:=0,@s3:=0,@s2:=0,@s1:=0,@s0:=0) s")) {
-        return qApp->enqueueException("Erro lendo tabela: " + queryChart.lastError().text(), this);
+        throw RuntimeException("Erro lendo tabela: " + queryChart.lastError().text(), this);
       }
     } else {
       if (not queryChart.exec("SELECT dia, @s12:=@s12 + mes12 AS mes12, @s11:=@s11 + mes11 AS mes11, @s10:=@s10 + mes10 AS mes10, @s9:=@s9 + mes9 AS mes9, @s8:=@s8 + mes8 AS mes8, @s7:=@s7 + mes7 AS "
                               "mes7, @s6:=@s6 + mes6 AS mes6, @s5:=@s5 + mes5 AS mes5, @s4:=@s4 + mes4 AS mes4, @s3:=@s3 + mes3 AS mes3, @s2:=@s2 + mes2 AS mes2, @s1:=@s1 + mes1 AS mes1, @s0:=@s0 + "
                               "mes0 AS mes0 FROM view_grafico_loja v JOIN (SELECT @s12:=0, @s11:=0,@s10:=0,@s9:=0,@s8:=0,@s7:=0,@s6:=0,@s5:=0,@s4:=0,@s3:=0,@s2:=0,@s1:=0,@s0:=0) s WHERE idLoja = " +
                               ui->comboBoxLojas->getCurrentValue().toString() + " ORDER BY dia")) {
-        return qApp->enqueueException("Erro lendo tabela: " + queryChart.lastError().text(), this);
+        throw RuntimeException("Erro lendo tabela: " + queryChart.lastError().text(), this);
       }
     }
 
@@ -117,7 +117,7 @@ void WidgetGraficos::updateTables() {
 
     auto axes = chart.axes();
 
-    if (axes.isEmpty()) { return qApp->enqueueException("Sem eixos X e Y!", this); }
+    if (axes.isEmpty()) { throw RuntimeException("Sem eixos X e Y!", this); }
 
     auto axisX = static_cast<QValueAxis *>(axes.at(0));
     auto axisY = static_cast<QValueAxis *>(axes.at(1));

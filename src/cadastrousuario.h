@@ -39,6 +39,6 @@ private:
   auto setupTables() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verifyFields() -> bool final;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

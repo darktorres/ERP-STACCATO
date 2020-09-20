@@ -96,11 +96,11 @@ void InputDialogConfirmacao::cadastrar() {
 
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega)) {
-    if (ui->lineEditRecebeu->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem recebeu!", this); }
+    if (ui->lineEditRecebeu->text().isEmpty()) { throw RuntimeError("Faltou preencher quem recebeu!", this); }
   }
 
   if (tipo == Tipo::Entrega) {
-    if (ui->lineEditEntregou->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem entregou!", this); }
+    if (ui->lineEditEntregou->text().isEmpty()) { throw RuntimeError("Faltou preencher quem entregou!", this); }
   }
 
   if (tipo != Tipo::Representacao) {
@@ -264,7 +264,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
 
   const auto list = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
@@ -274,7 +274,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
 
@@ -299,7 +299,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
 
   const auto list = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -557,7 +557,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   QFile *file = new QFile(filePath);
 
-  if (not file->open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file->errorString(), this); }
+  if (not file->open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file->errorString(), this); }
 
   auto *manager = new QNetworkAccessManager(this);
 

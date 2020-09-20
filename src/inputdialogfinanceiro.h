@@ -50,5 +50,5 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

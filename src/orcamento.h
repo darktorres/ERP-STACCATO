@@ -66,7 +66,7 @@ private:
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto recalcularTotais() -> bool;
+  auto recalcularTotais() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
   auto savingProcedures() -> void final;
@@ -76,8 +76,8 @@ private:
   auto successMessage() -> void final;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
-  auto verificaCadastroCliente() -> bool;
-  auto verificaDisponibilidadeEstoque() -> bool;
-  auto verifyFields() -> bool final;
+  auto verificaCadastroCliente() -> void;
+  auto verificaDisponibilidadeEstoque() -> void;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

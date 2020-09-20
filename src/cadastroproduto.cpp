@@ -41,7 +41,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
 
   ui->groupBox->hide();
   ui->groupBox_4->hide();
@@ -81,42 +81,20 @@ void CadastroProduto::registerMode() {
   ui->pushButtonRemover->hide();
 }
 
-bool CadastroProduto::verifyFields() {
+void CadastroProduto::verifyFields() {
   const auto children = findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->comboBoxUn->currentText().isEmpty()) {
-    qApp->enqueueError("Faltou preencher unidade!", this);
-    ui->comboBoxUn->setFocus();
-    return false;
-  }
+  if (ui->comboBoxUn->currentText().isEmpty()) { throw RuntimeError("Faltou preencher unidade!"); }
 
-  if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") {
-    qApp->enqueueError("Faltou preencher validade!", this);
-    ui->dateEditValidade->setFocus();
-    return false;
-  }
+  if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") { throw RuntimeError("Faltou preencher validade!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) {
-    qApp->enqueueError("Custo inválido!", this);
-    ui->doubleSpinBoxCusto->setFocus();
-    return false;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) { throw RuntimeError("Custo inválido!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) {
-    qApp->enqueueError("Preço inválido!", this);
-    ui->doubleSpinBoxVenda->setFocus();
-    return false;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) { throw RuntimeError("Preço inválido!"); }
 
-  if (ui->itemBoxFornecedor->getId().isNull()) {
-    qApp->enqueueError("Faltou preencher fornecedor!", this);
-    ui->itemBoxFornecedor->setFocus();
-    return false;
-  }
+  if (ui->itemBoxFornecedor->getId().isNull()) { throw RuntimeError("Faltou preencher fornecedor!"); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
@@ -124,12 +102,10 @@ bool CadastroProduto::verifyFields() {
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se produto já cadastrado!", this); }
+    if (not query.exec()) { throw RuntimeException("Erro verificando se produto já cadastrado!"); }
 
-    if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!", this); }
+    if (query.first()) { throw RuntimeError("Código comercial já cadastrado!"); }
   }
-
-  return true;
 }
 
 void CadastroProduto::setupMapper() {

@@ -201,14 +201,14 @@ bool XML::validar() {
 }
 
 bool XML::verificaCNPJ() {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!", parent); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
 
   return true;
 }
 
 bool XML::verificaValido() {
-  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", parent); }
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { throw RuntimeError("NFe não está autorizada pela SEFAZ!", parent); }
 
   return true;
 }
@@ -226,7 +226,7 @@ bool XML::verificaNCMs() {
 
   ncms.removeDuplicates();
 
-  if (not ncms.isEmpty()) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
+  if (not ncms.isEmpty()) { throw RuntimeError("Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
 
   return true;
 }

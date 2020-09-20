@@ -88,7 +88,7 @@ void TreeView::setModel(QAbstractItemModel *model) {
 
   baseModel = qobject_cast<SqlTreeModel *>(model);
 
-  if (not baseModel) { qApp->enqueueException("Sem baseModel!"); }
+  if (not baseModel) { throw RuntimeException("Sem baseModel!"); }
 
   resizeAllColumns();
 }
@@ -104,7 +104,7 @@ int TreeView::columnIndex(const QString &column) const {
 
   if (baseModel) { columnIndex = baseModel->fieldIndex(column); }
 
-  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { throw RuntimeException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }

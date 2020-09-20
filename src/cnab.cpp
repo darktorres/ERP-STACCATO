@@ -386,7 +386,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
 void CNAB::retornoGareItau240(const QString &filePath) {
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file.errorString(), parent); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), parent); }
 
   QStringList lines;
 

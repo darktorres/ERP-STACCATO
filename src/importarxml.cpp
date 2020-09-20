@@ -440,16 +440,16 @@ void ImportarXML::salvarDadosCompra() {
 bool ImportarXML::verifyFields() {
   const auto list = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}}, false);
 
-  if (list.isEmpty()) { return qApp->enqueueError(false, "Nenhuma compra pareada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma compra pareada!", this); }
 
   //----------------------------------------------------------------
 
   const auto list2 = modelEstoque.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-  if (not list2.isEmpty()) { return qApp->enqueueError(false, "Nem todos os estoques estão ok!", this); }
+  if (not list2.isEmpty()) { throw RuntimeError("Nem todos os estoques estão ok!", this); }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (modelEstoque.data(row, "lote").toString().isEmpty()) { return qApp->enqueueError(false, "Lote vazio! Se não há coloque 'N/D'!", this); }
+    if (modelEstoque.data(row, "lote").toString().isEmpty()) { throw RuntimeError("Lote vazio! Se não há coloque 'N/D'!", this); }
   }
 
   return true;
@@ -617,7 +617,7 @@ bool ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
 bool ImportarXML::verificaExiste(const XML &xml) {
   const auto list = modelNFe.multiMatch({{"chaveAcesso", xml.chaveAcesso}}, false);
 
-  if (not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+  if (not list.isEmpty()) { throw RuntimeError("Nota já cadastrada!", this); }
 
   // ----------------------------------------------------------------
 
@@ -628,9 +628,9 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text()); }
 
   if (query.first()) {
-    if (query.value("utilizada").toBool()) { return qApp->enqueueError(true, "Nota já utilizada!", this); }
+    if (query.value("utilizada").toBool()) { throw RuntimeError("Nota já utilizada!", this); }
 
-    if (query.value("status") == "CANCELADA") { return qApp->enqueueError(true, "Nota cancelada!", this); }
+    if (query.value("status") == "CANCELADA") { throw RuntimeError("Nota cancelada!", this); }
 
     if (query.value("status") == "RESUMO") {
       QSqlQuery queryAtualiza;
@@ -684,10 +684,10 @@ bool ImportarXML::usarXMLBaixado() {
   QSqlQuery query;
 
   if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
-    return qApp->enqueueException(false, "Erro buscando XML: " + query.lastError().text(), this);
+    throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (query.value("status") != "AUTORIZADO") { return qApp->enqueueError(false, "NFe não está autorizada!", this); }
+  if (query.value("status") != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
 
   const auto fileContent = query.value("xml").toByteArray();
 
@@ -696,7 +696,7 @@ bool ImportarXML::usarXMLBaixado() {
   XML xml(fileContent, XML::Tipo::Entrada, this);
 
   // verifica se já cadastrado dentre as notas utilizadas nessa importacao
-  if (mapNFes.contains(xml.chaveAcesso)) { return qApp->enqueueError(false, "Nota já cadastrada!", this); }
+  if (mapNFes.contains(xml.chaveAcesso)) { throw RuntimeError("Nota já cadastrada!", this); }
 
   if (not xml.verificaNCMs()) { return false; }
 
@@ -777,7 +777,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
   if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) {
-    return qApp->enqueueException(false, "Erro buscando lojas: " + query.lastError().text(), this);
+    throw RuntimeException("Erro buscando lojas: " + query.lastError().text(), this);
   }
 
   QStringList lojas{"CD"};
@@ -887,7 +887,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-  if (list.isEmpty()) { return qApp->enqueueException(false, "Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
+  if (list.isEmpty()) { throw RuntimeException("Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
 
   const int rowVenda = list.first();
 
@@ -895,8 +895,8 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const double restanteEstoque = qApp->roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
   const double quantConsumo = qApp->roundDouble(qMin(quantVenda, restanteEstoque));
 
-  if (qFuzzyIsNull(quantConsumo)) { return qApp->enqueueException(false, "quantConsumo = 0!", this); }
-  if (quantConsumo < quantVenda) { return qApp->enqueueException(false, "quantConsumo < quantVenda", this); }
+  if (qFuzzyIsNull(quantConsumo)) { throw RuntimeException("quantConsumo = 0!", this); }
+  if (quantConsumo < quantVenda) { throw RuntimeException("quantConsumo < quantVenda", this); }
 
   modelVenda.setData(rowVenda, "status", "EM COLETA");
   modelVenda.setData(rowVenda, "dataRealFat", dataFaturamento);
@@ -929,7 +929,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   queryProduto.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   queryProduto.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
-  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
+  if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
 
   const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
 

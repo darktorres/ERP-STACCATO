@@ -30,9 +30,9 @@ void WidgetRelatorio::setConnections() {
 void WidgetRelatorio::setFilterTotaisVendedor() {
   QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString tipoUsuario = UserSession::tipoUsuario;
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
 
   if (tipoUsuario == "GERENTE LOJA") {
     const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
@@ -52,7 +52,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 void WidgetRelatorio::setFilterTotaisLoja() {
   QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+  if (UserSession::tipoUsuario == "GERENTE LOJA") {
     const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
 
     if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
@@ -137,10 +137,10 @@ void WidgetRelatorio::calcularTotalVendedor() {
 
 void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString tipoUsuario = UserSession::tipoUsuario;
   QString filter = "Mês = '" + date + "'";
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
 
   if (tipoUsuario == "GERENTE LOJA") {
     const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
@@ -160,7 +160,7 @@ void WidgetRelatorio::setFilterRelatorio() {
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 
 void WidgetRelatorio::updateTables() {
-  const auto tipo = UserSession::tipoUsuario();
+  const auto tipo = UserSession::tipoUsuario;
 
   if (not isSet) {
     if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
@@ -204,7 +204,7 @@ void WidgetRelatorio::updateTables() {
 void WidgetRelatorio::setResumoOrcamento() {
   //  QSqlQuery query;
 
-  //  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text(),
+  //  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { throw RuntimeError("Erro comunicando com o banco de dados: " + query.lastError().text(),
   //  this); }
 
   //  modelOrcamento.setTable("view_resumo_relatorio");

@@ -30,7 +30,7 @@ Comprovantes::~Comprovantes() { delete ui; }
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE idVenda = '" + idVenda + "'");
 
-  if (model.lastError().isValid()) { return qApp->enqueueException("Erro procurando comprovantes: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro procurando comprovantes: " + model.lastError().text(), this); }
 
   model.setHeaderData("fotoEntrega", "Arquivo");
 
@@ -42,7 +42,7 @@ void Comprovantes::setFilter(const QString &idVenda) {
 void Comprovantes::on_pushButtonAbrir_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // --------------------------------------------------------------------------
 
@@ -54,18 +54,18 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   auto reply = manager->get(request);
 
   connect(reply, &QNetworkReply::finished, [=] {
-    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString(), this); }
+    if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }
 
     const QString filename = url.split("/").last();
     const QString path = QDir::currentPath() + "/arquivos/";
 
     QDir dir;
 
-    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!", this); }
+    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
 
     QFile file(path + filename);
 
-    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
     file.write(reply->readAll());
 

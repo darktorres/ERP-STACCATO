@@ -45,7 +45,7 @@ void WidgetLogisticaEntregues::updateTables() {
 
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
+  if (modelProdutos.lastError().isValid()) { throw RuntimeException("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
 }
 
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
@@ -94,7 +94,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
       "FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueException("Erro: " + modelProdutos.lastError().text(), this); }
+  if (modelProdutos.lastError().isValid()) { throw RuntimeException("Erro: " + modelProdutos.lastError().text(), this); }
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -121,12 +121,12 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (const auto &index : list) {
     const QString status = modelProdutos.data(index.row(), "status").toString();
 
-    if (status != "ENTREGUE") { return qApp->enqueueError("Produto não marcado como 'ENTREGUE'!", this); }
+    if (status != "ENTREGUE") { throw RuntimeError("Produto não marcado como 'ENTREGUE'!", this); }
   }
 
   QStringList idVendas;

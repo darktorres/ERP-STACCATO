@@ -76,7 +76,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
   queryVerifica.prepare("SELECT * FROM comissao WHERE Mês = :mes");
   queryVerifica.bindValue(":mes", mes.toString("yyyy-MM"));
 
-  if (not queryVerifica.exec()) { return qApp->enqueueException("Erro buscando dados da comissão: " + queryVerifica.lastError().text(), this); }
+  if (not queryVerifica.exec()) { throw RuntimeException("Erro buscando dados da comissão: " + queryVerifica.lastError().text(), this); }
 
   if (queryVerifica.first()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Este mês já está cadastrado. Deseja substituir os dados?", QMessageBox::Yes | QMessageBox::No, this);
@@ -89,7 +89,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
     queryRemove.prepare("DELETE FROM comissao WHERE Mês = :mes");
     queryRemove.bindValue(":mes", mes.toString("yyyy-MM"));
 
-    if (not queryRemove.exec()) { return qApp->enqueueException("Erro removendo dados: " + queryRemove.lastError().text(), this); }
+    if (not queryRemove.exec()) { throw RuntimeException("Erro removendo dados: " + queryRemove.lastError().text(), this); }
   }
 
   QSqlQuery queryRelatorio;
@@ -97,7 +97,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
   queryRelatorio.bindValue(":mes", mes.toString("yyyy-MM"));
 
   // get data from view_relatorio
-  if (not queryRelatorio.exec()) { return qApp->enqueueException("Erro buscando dados da comissão: " + queryRelatorio.lastError().text(), this); }
+  if (not queryRelatorio.exec()) { throw RuntimeException("Erro buscando dados da comissão: " + queryRelatorio.lastError().text(), this); }
 
   if (not queryRelatorio.first()) { return qApp->enqueueInformation("Não há dados para este mês!", this); }
 

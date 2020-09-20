@@ -192,11 +192,11 @@ void WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
 
-  if (folderKey.isEmpty()) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
+  if (folderKey.isEmpty()) { throw RuntimeError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //
 
@@ -483,7 +483,7 @@ void WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");

@@ -89,13 +89,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     verificaVersao();
   }
 
-  if (tipo == Tipo::Autorizacao) {
-    if (not UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text())) {
-      ui->lineEditPass->setFocus();
-      QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
-      return;
-    }
-  }
+  if (tipo == Tipo::Autorizacao) { UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text()); }
 
   accept();
 }

@@ -144,7 +144,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   if (selection.isEmpty()) { return; }
 
   if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) {
-    return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
+    throw RuntimeError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
   }
 
   if (model.tableName() == "view_produto") {
@@ -170,7 +170,7 @@ QString SearchDialog::getText(const QVariant &id) {
   QSqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) {
-    qApp->enqueueException("Erro na query getText: " + query.lastError().text(), this);
+    throw RuntimeException("Erro na query getText: " + query.lastError().text(), this);
     return QString();
   }
 
@@ -382,12 +382,12 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::vendedor(QWidget *parent) {
-  const int idLoja = UserSession::idLoja();
-  const bool specialSeller = (UserSession::tipoUsuario() == "VENDEDOR ESPECIAL");
+  const int idLoja = UserSession::idLoja;
+  const bool specialSeller = (UserSession::tipoUsuario == "VENDEDOR ESPECIAL");
 
   const QString filtro = "desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')";
   const QString filtroLoja = (idLoja == 1 or specialSeller) ? "" : " AND idLoja = " + QString::number(idLoja);
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString tipoUsuario = UserSession::tipoUsuario;
   const QString filtroAdmin = (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO") ? "" : " AND nome != 'REPOSIÇÂO'";
 
   SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, parent);

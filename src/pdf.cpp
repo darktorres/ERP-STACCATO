@@ -24,7 +24,7 @@ void PDF::gerarPdf() {
 
   const QString folderKey = UserSession::getSetting(folder).toString();
 
-  if (folderKey.isEmpty()) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
+  if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
 
   setQuerys();
 
@@ -34,7 +34,7 @@ void PDF::gerarPdf() {
 
   dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
-  if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) { return qApp->enqueueException("Não encontrou o modelo de impressão!", parent); }
+  if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
 
   dataManager->setReportVariable("Loja", queryLoja.value("descricao"));
   dataManager->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" + queryLojaEnd.value("bairro").toString() + "\n" +
@@ -106,7 +106,7 @@ void PDF::gerarPdf() {
 
       const QString current = QString::number(i);
 
-      if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { return qApp->enqueueException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text(), parent); }
+      if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text(), parent); }
 
       if (queryPgt.value("valor") == 0) { continue; }
 
@@ -124,7 +124,7 @@ void PDF::gerarPdf() {
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!", parent); }
+  if (not dir.exists() and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta escolhida nas configurações!", parent); }
 
   QString fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".pdf";
   fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
@@ -133,7 +133,7 @@ void PDF::gerarPdf() {
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
 
   file.close();
 

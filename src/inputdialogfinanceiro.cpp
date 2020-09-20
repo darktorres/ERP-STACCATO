@@ -273,7 +273,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       query2.bindValue(":pagamento", tipoPgt);
       query2.bindValue(":parcela", parcelas);
 
-      if (not query2.exec() or not query2.first()) { return qApp->enqueueException("Erro buscando taxa: " + query2.lastError().text(), this); }
+      if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
       const int idConta = query2.value("idConta").toInt();
       const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
@@ -472,7 +472,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
     const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
 
-    if (match.isEmpty()) { return qApp->enqueueException("Erro atualizando valores na linha mãe!", this); }
+    if (match.isEmpty()) { throw RuntimeException("Erro atualizando valores na linha mãe!", this); }
 
     const int rowMae = match.first().row();
 
@@ -632,7 +632,7 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   unsetConnections();
 
   [=] {
-    if (not verifyFields()) { return; }
+    verifyFields();
 
     qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
 
@@ -649,32 +649,30 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   setConnections();
 }
 
-bool InputDialogFinanceiro::verifyFields() {
+void InputDialogFinanceiro::verifyFields() {
   // TODO: implementar outras verificacoes necessarias
 
-  if (ui->widgetPgts->isHidden()) { return true; }
+  if (ui->widgetPgts->isHidden()) { return; }
 
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
   if (tipo == Tipo::ConfirmarCompra) {
     for (auto &index : selection) {
       if (modelPedidoFornecedor2.data(index.row(), "fornecedor") == "PORTINARI" and modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) {
-        return qApp->enqueueError(false, "Não preencheu código do fornecedor!", this);
+        throw RuntimeError("Não preencheu código do fornecedor!");
       }
     }
   }
 
   if (not representacao) {
-    if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!", this); }
+    if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
-    if (not ui->widgetPgts->verifyFields()) { return false; }
+    ui->widgetPgts->verifyFields();
 
-    if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
+    if (modelFluxoCaixa.rowCount() == 0) { throw RuntimeError("Sem linhas de pagamento!"); }
   }
-
-  return true;
 }
 
 void InputDialogFinanceiro::cadastrar() {
@@ -704,11 +702,11 @@ void InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled(const bool checked) {
 void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Selecione os produtos que terão o fluxo corrigido!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Selecione os produtos que terão o fluxo corrigido!", this); }
 
   const auto selection2 = ui->tableFluxoCaixa->selectionModel()->selectedRows();
 
-  if (selection2.isEmpty()) { return qApp->enqueueError("Selecione os pagamentos que serão substituídos!", this); }
+  if (selection2.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
 
   //--------------------------------------------------
 

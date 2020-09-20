@@ -76,7 +76,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
@@ -129,7 +129,7 @@ void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);

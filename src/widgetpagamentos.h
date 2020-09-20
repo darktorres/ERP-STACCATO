@@ -27,7 +27,7 @@ public:
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setTipo(const Tipo &novoTipo) -> void;
   auto setTotal(double value) -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 
   // attributes
   int pagamentos = 0; // TODO: rename this to count

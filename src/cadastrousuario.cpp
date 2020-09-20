@@ -32,7 +32,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->table->hide(); }
+  if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->table->hide(); }
 
   setupTables();
   fillCombobox();
@@ -73,20 +73,12 @@ void CadastroUsuario::modificarUsuario() {
   ui->comboBoxTipo->setDisabled(true);
 }
 
-bool CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
+void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
   const auto children = ui->tab->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
-    qApp->enqueueError("As senhas não batem!", this);
-    ui->lineEditPasswd->setFocus();
-    return false;
-  }
-
-  return true;
+  if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
 }
 
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }
@@ -176,7 +168,7 @@ void CadastroUsuario::fillCombobox() {
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
-  ui->comboBoxLoja->setCurrentValue(UserSession::idLoja());
+  ui->comboBoxLoja->setCurrentValue(UserSession::idLoja);
 }
 
 void CadastroUsuario::on_pushButtonCadastrar_clicked() { save(); }
@@ -232,7 +224,7 @@ void CadastroUsuario::cadastrar() {
 void CadastroUsuario::criarUsuarioMySQL() {
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString(), this); }
 
   const QString password = file.readAll();
 
@@ -241,12 +233,12 @@ void CadastroUsuario::criarUsuarioMySQL() {
   query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
 
   query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
   if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
 }
@@ -258,9 +250,9 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) { return qApp->enqueueException("Erro buscando usuário: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando usuário: " + query.lastError().text(), this); }
 
-  if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!", this); }
+  if (query.first()) { throw RuntimeError("Nome de usuário já existe!", this); }
 }
 
 void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {

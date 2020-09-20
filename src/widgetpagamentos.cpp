@@ -132,7 +132,7 @@ void WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
 
   QSqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-  queryPag.bindValue(":idLoja", UserSession::idLoja());
+  queryPag.bindValue(":idLoja", UserSession::idLoja);
 
   if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
@@ -198,7 +198,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   if (text == "CONTA CLIENTE") {
     if (qFuzzyIsNull(ui->doubleSpinBoxCreditoDisponivel->value())) {
       listTipoPgt.at(index)->setCurrentIndex(0);
-      return qApp->enqueueError("Não há saldo cliente restante!", this);
+      throw RuntimeError("Não há saldo cliente restante!", this);
     }
 
     double currentValue = listValorPgt.at(index)->value();
@@ -217,7 +217,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listTipoPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
   const int parcelas = query.value("parcelas").toInt();
 
@@ -291,7 +291,7 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
 }
 
 void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
-  if (novoTipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;
 
@@ -338,7 +338,7 @@ void WidgetPagamentos::calcularTotal() {
 }
 
 void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   auto *frame = new QFrame(this);
   auto *layout = new QHBoxLayout(frame);
@@ -397,7 +397,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
 
 void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
-  if (pagamentos == 0) { return qApp->enqueueError("Preencha os pagamentos primeiro!", this); }
+  if (pagamentos == 0) { throw RuntimeError("Preencha os pagamentos primeiro!", this); }
 
   LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
@@ -407,7 +407,7 @@ void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
 }
 
 void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
-  if (qFuzzyIsNull(frete)) { return qApp->enqueueError("Não há frete!", this); }
+  if (qFuzzyIsNull(frete)) { throw RuntimeError("Não há frete!", this); }
 
   resetarPagamentos();
 
@@ -421,26 +421,12 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
   listValorPgt.at(0)->setReadOnly(true);
 }
 
-bool WidgetPagamentos::verifyFields() {
+void WidgetPagamentos::verifyFields() {
   for (int i = 0; i < pagamentos; ++i) {
-    if (listTipoPgt.at(i)->currentText() == "ESCOLHA UMA OPÇÃO!") {
-      qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
-      listTipoPgt.at(i)->setFocus();
-      return false;
-    }
+    if (listTipoPgt.at(i)->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!"); }
 
-    if (qFuzzyIsNull(listValorPgt.at(i)->value())) {
-      qApp->enqueueError("Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
-      listValorPgt.at(i)->setFocus();
-      return false;
-    }
+    if (qFuzzyIsNull(listValorPgt.at(i)->value())) { throw RuntimeError("Pagamento " + QString::number(i + 1) + " está com valor 0!"); }
 
-    if (tipo == Tipo::Venda and listObservacao.at(i)->text().isEmpty()) {
-      qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
-      listObservacao.at(i)->setFocus();
-      return false;
-    }
+    if (tipo == Tipo::Venda and listObservacao.at(i)->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!"); }
   }
-
-  return true;
 }

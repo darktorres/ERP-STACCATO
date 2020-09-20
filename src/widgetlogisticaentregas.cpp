@@ -137,7 +137,7 @@ void WidgetLogisticaEntregas::setupTables() {
 void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::AgendarEntrega, this);
 
@@ -187,11 +187,11 @@ void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
 void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
 
-  if (lojaACBr == 0) { return qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+  if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
@@ -302,7 +302,7 @@ void WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const Q
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // TODO: see if this can be read after InputDialogConfirmacao and place inside confirmarEntrega
   QStringList idVendas;
@@ -332,7 +332,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   ACBr acbrLocal;
   acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
@@ -353,7 +353,7 @@ void WidgetLogisticaEntregas::montaFiltro() {
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -470,7 +470,7 @@ void WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QStrin
 void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
   const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
@@ -481,35 +481,35 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
                                  "FROM view_calendario_produto WHERE idVenda = '" +
                                  idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
-  if (modelProdutosAgrupado.lastError().isValid()) { return qApp->enqueueException("Erro buscando dados: " + modelProdutosAgrupado.lastError().text(), this); }
+  if (modelProdutosAgrupado.lastError().isValid()) { throw RuntimeException("Erro buscando dados: " + modelProdutosAgrupado.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
-  if (modelProdutosAgrupado.rowCount() > 60) { return qApp->enqueueException("Mais produtos do que cabe no modelo do Excel!", this); }
+  if (modelProdutosAgrupado.rowCount() > 60) { throw RuntimeException("Mais produtos do que cabe no modelo do Excel!", this); }
 
   // -------------------------------------------------------------------------
 
   const QString folderKey = UserSession::getSetting("User/EntregasPdfFolder").toString();
 
-  if (folderKey.isEmpty()) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
+  if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
   const QString path = folderKey;
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!", this); }
+  if (not dir.exists() and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta escolhida nas configurações!", this); }
 
   const QString arquivoModelo = "espelho_entrega.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueException("Não encontrou o modelo do Excel!", this); }
+  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!", this); }
 
   const QString fileName = path + "/" + idEvento + "_" + idVenda + ".xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
 
   file.close();
 
@@ -524,7 +524,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
                        "v.idCliente = c.idCliente LEFT JOIN profissional p ON v.idProfissional = p.idProfissional WHERE v.idVenda = :idVenda");
   queryCliente.bindValue(":idVenda", idVenda);
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
+  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
 
   QString telefones;
 
@@ -549,7 +549,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
   queryEndereco.bindValue(":idVenda", idVenda);
 
-  if (not queryEndereco.exec()) { return qApp->enqueueException("Erro buscando endereço: " + queryEndereco.lastError().text(), this); }
+  if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço: " + queryEndereco.lastError().text(), this); }
 
   if (queryEndereco.first()) {
     xlsx.write("J19", queryEndereco.value("logradouro").toString() + " " + queryEndereco.value("numero").toString() + " " + queryEndereco.value("complemento").toString() + " - " +
@@ -566,7 +566,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueException("Ocorreu algum erro ao salvar o arquivo!", this); }
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!", this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);

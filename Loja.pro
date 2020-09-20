@@ -189,6 +189,7 @@ SOURCES += \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
+    src/sqlquery.cpp \
     src/sqlquerymodel.cpp \
     src/sqltablemodel.cpp \
     src/sqltreemodel.cpp \
@@ -319,6 +320,7 @@ HEADERS  += \
     src/smtp.h \
     src/sortfilterproxymodel.h \
     src/sql.h \
+    src/sqlquery.h \
     src/sqlquerymodel.h \
     src/sqltablemodel.h \
     src/sqltreemodel.h \

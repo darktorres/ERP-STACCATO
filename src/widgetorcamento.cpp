@@ -21,7 +21,7 @@ void WidgetOrcamento::setPermissions() {
   [&] {
     listarLojas();
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") { ui->groupBoxMes->setChecked(true); }
 
@@ -36,7 +36,7 @@ void WidgetOrcamento::setPermissions() {
 
     (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
+    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
 
     on_comboBoxLojas_currentIndexChanged();
 
@@ -144,7 +144,7 @@ void WidgetOrcamento::montaFiltro() {
 
   QString filtroLoja;
 
-  if (const auto tipoUsuario = UserSession::tipoUsuario(); not ui->comboBoxLojas->currentText().isEmpty()) {
+  if (const auto tipoUsuario = UserSession::tipoUsuario; not ui->comboBoxLojas->currentText().isEmpty()) {
     filtroLoja = "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
   } else if (tipoUsuario == "GERENTE LOJA") {
     filtroLoja = "(Código LIKE '%" + UserSession::fromLoja("sigla").toString() + "%')";
@@ -167,7 +167,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + UserSession::nome() + "'" + " OR Consultor = '" + UserSession::nome() + "')";
+  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -202,7 +202,7 @@ void WidgetOrcamento::montaFiltro() {
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const QString codigo = modelViewOrcamento.data(list.first().row(), "Código").toString();
 
@@ -246,12 +246,12 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
     while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     // -------------------------------------------------------------------------
 
     if (tipoUsuario == "VENDEDOR") {
-      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja()) {
+      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
         ui->radioButtonTodos->setDisabled(true);
         ui->radioButtonProprios->setChecked(true);
       } else {

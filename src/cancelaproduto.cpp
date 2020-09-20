@@ -86,11 +86,11 @@ void CancelaProduto::setupTables() {
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {
-  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueException("Não implementado!", this); }
+  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { throw RuntimeException("Não implementado!", this); }
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhum produto!", this); }
 
   qApp->startTransaction("CancelaProduto::on_pushButtonSalvar");
 

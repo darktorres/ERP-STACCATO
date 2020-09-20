@@ -62,7 +62,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando quantCaixa: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando quantCaixa: " + query.lastError().text(), this); }
 
   const double step = query.value("quantCaixa").toDouble();
 
@@ -77,7 +77,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
       "('CANCELADO' , 'QUEBRADO') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
+  if (modelEstoque.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -150,7 +150,7 @@ void ProdutosPendentes::recarregarTabelas() {
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueException("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
+  if (modelEstoque.lastError().isValid()) { throw RuntimeException("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
 
   ui->tableProdutos->clearSelection();
 
@@ -161,11 +161,11 @@ void ProdutosPendentes::recarregarTabelas() {
 void ProdutosPendentes::on_pushButtonComprar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { return qApp->enqueueError("Para comprar menos que o total selecione uma linha por vez!", this); }
+  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { throw RuntimeError("Para comprar menos que o total selecione uma linha por vez!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { return qApp->enqueueError("Quantidade 0!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { throw RuntimeError("Quantidade 0!", this); }
 
   const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
 
@@ -201,13 +201,13 @@ void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (listProduto.size() > 1) { return qApp->enqueueError("Selecione apenas um item na tabela de produtos!", this); }
+  if (listProduto.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
 
-  if (listProduto.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
+  if (listProduto.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
   const auto listEstoque = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (listEstoque.isEmpty()) { return qApp->enqueueError("Nenhum estoque selecionado!", this); }
+  if (listEstoque.isEmpty()) { throw RuntimeError("Nenhum estoque selecionado!", this); }
 
   //--------------------------------------------------------------------
 

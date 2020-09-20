@@ -51,12 +51,12 @@ protected:
   virtual auto clearFields() -> void = 0;
   virtual auto newRegister() -> bool;
   virtual auto registerMode() -> void = 0;
-  virtual auto save(const bool silent = false) -> bool final;
+  virtual auto save(const bool silent = false) -> void final;
   virtual auto savingProcedures() -> void = 0;
   virtual auto setupMapper() -> void = 0;
   virtual auto successMessage() -> void = 0;
   virtual auto updateMode() -> void = 0;
-  virtual auto verifyFields() -> bool = 0;
-  virtual auto verifyRequiredField(QLineEdit &line, const bool silent = false) -> bool;
+  virtual auto verifyFields() -> void = 0;
+  virtual auto verifyRequiredField(QLineEdit &line) -> void;
   virtual auto viewRegister() -> bool;
 };

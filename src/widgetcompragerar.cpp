@@ -451,32 +451,25 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 }
 
 void WidgetCompraGerar::cancelar(const QModelIndexList &list) {
-  SqlQuery query1;
-  query1.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
-                 "idVendaProdutoFK = :idVendaProduto1");
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE idPedidoFK = :idPedidoFK");
 
-  SqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido1 = :idPedido1");
-
-  SqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE idPedidoFK = :idPedidoFK");
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
+                     "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+                     "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = 'INICIADO' AND "
+                     "idVendaProdutoFK = :idVendaProduto1");
 
   for (const auto &index : list) {
-    query1.bindValue(":idVendaProduto1", modelProdutos.data(index.row(), "idVendaProduto1"));
+    queryCompra.bindValue(":idPedidoFK", modelProdutos.data(index.row(), "idPedido1"));
 
-    if (not query1.exec()) { throw RuntimeException("Erro voltando status do produto: " + query1.lastError().text()); }
-
-    // ---------------------------------------------------------
-
-    query2.bindValue(":idPedido1", modelProdutos.data(index.row(), "idPedido1"));
-
-    if (not query2.exec()) { throw RuntimeException("Erro cancelando compra: " + query2.lastError().text()); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro cancelando compra: " + queryCompra.lastError().text()); }
 
     // ---------------------------------------------------------
 
-    query3.bindValue(":idPedidoFK", modelProdutos.data(index.row(), "idPedido1"));
+    queryVenda.bindValue(":idVendaProduto1", modelProdutos.data(index.row(), "idVendaProduto1"));
 
-    if (not query3.exec()) { throw RuntimeException("Erro cancelando compra: " + query3.lastError().text()); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro voltando status do produto: " + queryVenda.lastError().text()); }
   }
 }
 

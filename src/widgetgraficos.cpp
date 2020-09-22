@@ -5,7 +5,6 @@
 #include "usersession.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) {
   ui->setupUi(this);
@@ -26,7 +25,7 @@ void WidgetGraficos::updateTables() {
 
       if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, UserSession::idLoja); }
     } else {
-      QSqlQuery query;
+      SqlQuery query;
 
       if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text(), this); }
 
@@ -84,7 +83,7 @@ void WidgetGraficos::updateTables() {
   }
 
   if (isSet) {
-    QSqlQuery queryChart;
+    SqlQuery queryChart;
 
     if (ui->comboBoxLojas->currentText().isEmpty()) {
       if (not queryChart.exec("SELECT dia, @s12:=@s12 + mes12 AS mes12, @s11:=@s11 + mes11 AS mes11, @s10:=@s10 + mes10 AS mes10, @s9:=@s9 + mes9 AS mes9, @s8:=@s8 + mes8 AS mes8, @s7:=@s7 + mes7 AS "

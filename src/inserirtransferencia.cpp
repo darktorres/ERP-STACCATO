@@ -5,7 +5,6 @@
 
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);

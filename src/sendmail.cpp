@@ -26,7 +26,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
     ui->lineEditTitulo->setText("PEDIDO " + info.baseName());
 
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 

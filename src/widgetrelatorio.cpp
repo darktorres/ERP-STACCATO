@@ -202,7 +202,7 @@ void WidgetRelatorio::updateTables() {
 }
 
 void WidgetRelatorio::setResumoOrcamento() {
-  //  QSqlQuery query;
+  //  SqlQuery query;
 
   //  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { throw RuntimeError("Erro comunicando com o banco de dados: " + query.lastError().text(),
   //  this); }

@@ -143,7 +143,7 @@ void CadastroProfissional::updateMode() {
 }
 
 bool CadastroProfissional::verificaVinculo() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString())) {
     throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());

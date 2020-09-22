@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
@@ -32,7 +31,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::Pagamento) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
     query.bindValue(":idLoja", UserSession::idLoja);
 
@@ -46,7 +45,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::Conta) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { throw RuntimeException("Erro lendo contas da loja: " + query.lastError().text(), parent); }
 
@@ -56,7 +55,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::Grupo) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { throw RuntimeException("Erro lendo grupos de despesa: " + query.lastError().text(), parent); }
 

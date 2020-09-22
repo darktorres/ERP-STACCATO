@@ -1,8 +1,7 @@
 #pragma once
 
+#include "sqlquery.h"
 #include "xlsxdocument.h"
-
-#include <QSqlQuery>
 
 class Excel final {
 
@@ -16,15 +15,15 @@ private:
   // attributes
   const Tipo tipo;
   const QString id;
-  QSqlQuery query;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndEnt;
-  QSqlQuery queryEndFat;
-  QSqlQuery queryLoja;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery queryProduto;
-  QSqlQuery queryProfissional;
-  QSqlQuery queryVendedor;
+  SqlQuery query;
+  SqlQuery queryCliente;
+  SqlQuery queryEndEnt;
+  SqlQuery queryEndFat;
+  SqlQuery queryLoja;
+  SqlQuery queryLojaEnd;
+  SqlQuery queryProduto;
+  SqlQuery queryProfissional;
+  SqlQuery queryVendedor;
   QString fileName;
   QWidget *parent;
   // methods

@@ -6,12 +6,12 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);
@@ -100,12 +100,10 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   qApp->endTransaction();
 
   updateTables();
-
-  qApp->enqueueInformation("Compra confirmada!", this);
 }
 
 void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 IN (SELECT "
                      "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE)");
   queryVenda.bindValue(":dataRealConf", dataConf);
@@ -116,7 +114,7 @@ void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
   //------------------------------------------------
 
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
                       "AND idCompra = :idCompra AND selecionado = TRUE");
   queryCompra.bindValue(":dataRealConf", dataConf);

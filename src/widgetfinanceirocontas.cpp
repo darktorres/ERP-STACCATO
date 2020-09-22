@@ -10,12 +10,12 @@
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) { ui->setupUi(this); }
@@ -371,7 +371,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET desativado = TRUE WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
@@ -394,7 +394,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  QSqlQuery queryPagamento;
+  SqlQuery queryPagamento;
   queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
@@ -409,7 +409,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
@@ -452,13 +452,13 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag");
 
   for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
-    QSqlQuery queryLoja;
+    SqlQuery queryLoja;
 
     if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
       throw RuntimeException("Erro buscando idLoja: " + queryLoja.lastError().text());
     }
 
-    QSqlQuery queryConta;
+    SqlQuery queryConta;
 
     if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.read(rowExcel, 7).toString() + "'") or not queryConta.first()) {
       throw RuntimeException("Erro buscando idConta: " + queryConta.lastError().text());
@@ -511,7 +511,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
 
   for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     throw RuntimeException("Erro alterando GARE: " + query.lastError().text(), this);

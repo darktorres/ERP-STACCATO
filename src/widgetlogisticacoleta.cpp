@@ -5,13 +5,13 @@
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "sql.h"
+#include "sqlquery.h"
 #include "venda.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 
@@ -109,19 +109,19 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 }
 
 void WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE status = 'EM COLETA' AND idPedido2 IN "
                  "(SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   // salvar status na venda
   query3.prepare("UPDATE venda_has_produto2 SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE status = 'EM COLETA' AND idVendaProduto2 IN (SELECT "
                  "idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
-  QSqlQuery query4;
+  SqlQuery query4;
   query4.prepare("UPDATE veiculo_has_produto SET status = 'COLETADO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {
@@ -179,15 +179,15 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 }
 
 void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM COLETA'");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM COLETA'");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {
@@ -234,15 +234,15 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
 }
 
 void WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND status = 'EM COLETA'");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare(
       "UPDATE venda_has_produto2 SET dataPrevColeta = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque = :idEstoque) AND status = 'EM COLETA'");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET data = NULL WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {

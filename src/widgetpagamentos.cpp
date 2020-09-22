@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <QLineEdit>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamentos) {
   ui->setupUi(this);
@@ -130,7 +129,7 @@ void WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   auto *comboBoxPgt = new QComboBox(this);
   comboBoxPgt->setMinimumWidth(140);
 
-  QSqlQuery queryPag;
+  SqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja);
 
@@ -165,14 +164,14 @@ void WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
 
   if (idOrcamento.isEmpty()) { throw RuntimeError("Orçamento vazio!"); }
 
-  QSqlQuery queryOrc;
+  SqlQuery queryOrc;
   queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioConsultor, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, "
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
   if (not queryOrc.exec() or not queryOrc.first()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
 
-  QSqlQuery queryPag;
+  SqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = :apenasRepresentacao");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
   queryPag.bindValue(":apenasRepresentacao", representacao);
@@ -213,7 +212,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   listValorPgt.at(index)->setMaximum(total);
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listTipoPgt.at(index)->currentText());
 

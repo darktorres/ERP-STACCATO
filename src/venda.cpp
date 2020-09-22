@@ -276,7 +276,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery queryOrc;
+  SqlQuery queryOrc;
   queryOrc.prepare("SELECT idUsuario, idLoja, idUsuarioConsultor, idCliente, idEnderecoEntrega, idProfissional, data, subTotalBru, subTotalLiq, frete, "
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
@@ -313,7 +313,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery queryFrete;
+  SqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja);
 
@@ -326,7 +326,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery queryCredito;
+  SqlQuery queryCredito;
   queryCredito.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryCredito.bindValue(":idCliente", queryOrc.value("idCliente"));
 
@@ -350,7 +350,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery queryFornecedor;
+  SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
 
@@ -583,7 +583,7 @@ bool Venda::viewRegister() {
       // -------------------------------------------------------------------------
 
       if (representacao) {
-        QSqlQuery queryFornecedor;
+        SqlQuery queryFornecedor;
         queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
         queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
 
@@ -635,7 +635,7 @@ void Venda::criarComissaoProfissional() {
     const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
 
     if (not qFuzzyIsNull(valor)) {
-      QSqlQuery query1;
+      SqlQuery query1;
       query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
                      "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
       query1.bindValue(":dataEmissao", date);
@@ -658,7 +658,7 @@ void Venda::criarComissaoProfissional() {
 }
 
 void Venda::verificaDisponibilidadeEstoque() {
-  QSqlQuery query;
+  SqlQuery query;
 
   QStringList produtos;
 
@@ -709,7 +709,7 @@ void Venda::montarFluxoCaixa() {
 
   const QString fornecedor = modelItem.data(0, "fornecedor").toString();
 
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query1.bindValue(":razaoSocial", fornecedor);
 
@@ -753,7 +753,7 @@ void Venda::montarFluxoCaixa() {
       continue;
     }
 
-    QSqlQuery query2;
+    SqlQuery query2;
     query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
                    "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
     query2.bindValue(":pagamento", tipoPgt);
@@ -883,7 +883,7 @@ void Venda::montarFluxoCaixa() {
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  [&] {
+  try {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -901,7 +901,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
     ui->widgetPgts->setTotal(total);
     ui->widgetPgts->resetarPagamentos();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -933,12 +933,12 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  [&] {
+  try {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -946,7 +946,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
-  [&] {
+  try {
     const double descontoPorc2 = descontoPorc / 100;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -964,7 +964,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -972,7 +972,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [&] {
+  try {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 
@@ -990,7 +990,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1019,7 +1019,7 @@ void Venda::atualizarCredito() {
   }
 
   if (update) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("UPDATE cliente SET credito = :credito WHERE idCliente = :idCliente");
     query.bindValue(":credito", creditoRestante);
     query.bindValue(":idCliente", ui->itemBoxCliente->getId());
@@ -1072,7 +1072,7 @@ void Venda::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    QSqlQuery query3;
+    SqlQuery query3;
     query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
     query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
@@ -1101,7 +1101,7 @@ void Venda::cadastrar() {
 }
 
 void Venda::criarConsumos() {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant FROM venda_has_produto2 vp2 LEFT JOIN produto p ON vp2.idProduto = p.idProduto WHERE vp2.idVenda = :idVenda AND vp2.estoque > 0");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
@@ -1116,7 +1116,7 @@ void Venda::criarConsumos() {
 void Venda::cancelamento() {
   const QString idOrcamento = ui->lineEditIdOrcamento->text();
 
-  QSqlQuery query1;
+  SqlQuery query1;
 
   if (not idOrcamento.isEmpty()) {
     query1.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
@@ -1127,7 +1127,7 @@ void Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda SET status = 'CANCELADO', statusFinanceiro = 'CANCELADO' WHERE idVenda = :idVenda");
   query2.bindValue(":idVenda", ui->lineEditVenda->text());
 
@@ -1135,7 +1135,7 @@ void Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery queryDelete;
+  SqlQuery queryDelete;
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
   queryDelete.bindValue(":idVenda", ui->lineEditVenda->text());
 
@@ -1143,7 +1143,7 @@ void Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
   query3.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1152,13 +1152,13 @@ void Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query4;
+  SqlQuery query4;
   query4.prepare("UPDATE venda_has_produto2 SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query4.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query4.exec()) { throw RuntimeException("Erro marcando produtos da venda como cancelados: " + query4.lastError().text()); }
 
-  QSqlQuery query5;
+  SqlQuery query5;
   query5.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query5.bindValue(":idVenda", ui->lineEditVenda->text());
 
@@ -1170,7 +1170,7 @@ void Venda::cancelamento() {
       if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 
-      QSqlQuery query6;
+      SqlQuery query6;
       query6.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");
       query6.bindValue(":valor", credito);
       query6.bindValue(":idCliente", model.data(0, "idCliente"));
@@ -1179,13 +1179,13 @@ void Venda::cancelamento() {
     }
   }
 
-  QSqlQuery query7;
+  SqlQuery query7;
   query7.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query7.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query7.exec()) { throw RuntimeException("Erro marcando contas como canceladas: " + query7.lastError().text()); }
 
-  QSqlQuery query8;
+  SqlQuery query8;
   query8.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query8.bindValue(":idVenda", ui->lineEditVenda->text());
 
@@ -1270,7 +1270,7 @@ void Venda::generateId() {
 
   QString id = siglaLoja + "-" + ui->dateTimeEdit->date().toString("yy");
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");
   query.bindValue(":id", id + "%");
 
@@ -1350,7 +1350,7 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
 void Venda::on_pushButtonCorrigirFluxo_clicked() {
   // TODO: usar um delegate para colocar o texto das linhas substituidas como tachado
 
-  QSqlQuery queryPag;
+  SqlQuery queryPag;
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));
 
@@ -1377,7 +1377,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
 void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
   if (checked) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
     query.bindValue(":idProfissional", ui->itemBoxProfissional->getId());
 
@@ -1416,7 +1416,7 @@ void Venda::on_checkBoxRT_toggled(bool checked) {
 void Venda::on_itemBoxProfissional_textChanged(const QString &) { on_checkBoxPontuacaoPadrao_toggled(ui->checkBoxPontuacaoPadrao->isChecked()); }
 
 void Venda::copiaProdutosOrcamento() {
-  QSqlQuery queryProdutos;
+  SqlQuery queryProdutos;
   queryProdutos.prepare("SELECT * FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
   queryProdutos.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
@@ -1436,7 +1436,7 @@ void Venda::copiaProdutosOrcamento() {
     }
 
     if (modelItem.data(rowItem, "estoque").toInt() > 0) {
-      QSqlQuery queryStatus;
+      SqlQuery queryStatus;
 
       if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString()) or
           not queryStatus.first()) {

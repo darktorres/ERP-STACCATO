@@ -102,7 +102,7 @@ void PDF::gerarPdf() {
                              id + "' AND tipo LIKE '%1%' AND tipo NOT IN ('%1. Comissão', '%1. Taxa Cartão') AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')";
 
     for (int i = 1; i <= 5; ++i) {
-      QSqlQuery queryPgt;
+      SqlQuery queryPgt;
 
       const QString current = QString::number(i);
 

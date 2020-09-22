@@ -4,9 +4,9 @@
 #include "application.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
@@ -106,12 +106,12 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
 void CancelaProduto::cancelar(const QModelIndexList &list) {
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE `idPedido2` = :idPedido2");
 
   const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
                      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
@@ -132,7 +132,7 @@ void CancelaProduto::cancelar(const QModelIndexList &list) {
 
     idVendas << model.data(row, "idVenda").toString();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("CALL update_pedido_fornecedor_status(" + model.data(row, "idPedidoFK").toString() + ")")) {
       throw RuntimeException("Erro atualizando status compra: " + query.lastError().text());

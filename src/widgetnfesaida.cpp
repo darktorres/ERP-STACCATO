@@ -6,19 +6,16 @@
 #include "doubledelegate.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
-#include "sendmail.h"
+#include "sqlquery.h"
 #include "usersession.h"
 #include "xml_viewer.h"
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
-#include <QUrl>
 
 WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
 
@@ -92,7 +89,7 @@ void WidgetNfeSaida::setupTables() {
 }
 
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
@@ -223,7 +220,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   if (not report.loadFromFile("relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
                 "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
@@ -258,7 +255,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
   ACBr acbrLocal;
@@ -311,14 +308,14 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -355,7 +352,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
 
   if (status.isEmpty()) { throw RuntimeException("Erro status vazio"); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":status", status);
   query.bindValue(":xml", xml);
@@ -365,7 +362,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
 }
 
 void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 

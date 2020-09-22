@@ -3,13 +3,13 @@
 
 #include "application.h"
 #include "palletitem.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QDrag>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsRectItem>
 #include <QSqlError>
-#include <QSqlQuery>
 
 Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) { ui->setupUi(this); }
 
@@ -93,7 +93,7 @@ void Galpao::carregarPallets() {
 
   scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT g.*, v.id, v.tipo, CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, REPLACE(v.descricao, '-', '') AS descricao, v.idVendaProduto2 FROM galpao g LEFT JOIN view_galpao v ON "
                      "g.bloco = v.bloco ORDER BY CAST(g.bloco AS UNSIGNED) ASC, id ASC")) {
@@ -160,7 +160,7 @@ void Galpao::salvarPallets() {
     if (auto pallet = dynamic_cast<PalletItem *>(item)) {
       QString pos = QString::number(pallet->scenePos().x()) + "," + QString::number(pallet->scenePos().y());
 
-      QSqlQuery query;
+      SqlQuery query;
 
       if (not query.exec("UPDATE galpao SET posicao = '" + pos + "' WHERE bloco = '" + pallet->getLabel() + "'")) {
         throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);

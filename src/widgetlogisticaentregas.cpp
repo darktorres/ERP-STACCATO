@@ -17,7 +17,6 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QUrl>
 
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
@@ -155,13 +154,13 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 }
 
 void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE venda_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE idEvento = :idEvento");
 
   for (const auto &index : list) {
@@ -268,13 +267,13 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
 }
 
 void WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND "
                  "idVendaProduto2 = :idVendaProduto2");
 
@@ -381,16 +380,16 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   const int idEvento = modelCarga.data(list.first().row(), "idEvento").toInt();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT `idVendaProduto2` FROM veiculo_has_produto WHERE idEvento = :idEvento");
   query.bindValue(":idEvento", idEvento);
 
   if (not query.exec()) { throw RuntimeException("Erro buscando produtos: " + query.lastError().text()); }
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
@@ -404,7 +403,7 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
     if (not query3.exec()) { throw RuntimeException("Erro voltando status produto compra: " + query3.lastError().text()); }
   }
 
-  QSqlQuery query4;
+  SqlQuery query4;
   query4.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
   query4.bindValue(":idEvento", idEvento);
 
@@ -434,20 +433,20 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 }
 
 void WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QString &xml) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { throw RuntimeException("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text()); }
 
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
@@ -519,7 +518,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   xlsx.currentWorksheet()->setFitToHeight(true);
   xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
 
-  QSqlQuery queryCliente;
+  SqlQuery queryCliente;
   queryCliente.prepare("SELECT v.idProfissional, c.nome_razao, c.tel AS clienteTel, c.telCel AS clienteCel, p.tel AS profissionalTel, p.telCel AS profissionalCel FROM venda v LEFT JOIN cliente c ON "
                        "v.idCliente = c.idCliente LEFT JOIN profissional p ON v.idProfissional = p.idProfissional WHERE v.idVenda = :idVenda");
   queryCliente.bindValue(":idVenda", idVenda);
@@ -545,7 +544,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   xlsx.write("G11", queryCliente.value("nome_razao"));
   xlsx.write("Y11", telefones);
 
-  QSqlQuery queryEndereco;
+  SqlQuery queryEndereco;
   queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
   queryEndereco.bindValue(":idVenda", idVenda);
 

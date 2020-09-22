@@ -35,7 +35,7 @@ void FollowUp::on_pushButtonCancelar_clicked() { close(); }
 void FollowUp::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  QSqlQuery query;
+  SqlQuery query;
   if (tipo == Tipo::Orcamento) {
     query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idOrcamentoBase, idLoja, idUsuario, semaforo, observacao, dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idOrcamentoBase, "
                   ":idLoja, :idUsuario, :semaforo, :observacao, :dataFollowup, :dataProxFollowup)");

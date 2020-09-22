@@ -10,7 +10,6 @@
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);

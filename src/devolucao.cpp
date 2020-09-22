@@ -10,7 +10,6 @@
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 #include <cmath>
 
@@ -54,7 +53,7 @@ void Devolucao::unsetConnections() {
 }
 
 void Devolucao::determinarIdDevolucao() {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(NOW()) HAVING MAX(idVenda) IS NOT NULL");
   query.bindValue(":idVenda", idVenda + "D%");
 
@@ -364,7 +363,7 @@ void Devolucao::on_doubleSpinBoxCredito_valueChanged(const double credito) {
 }
 
 void Devolucao::criarDevolucao() {
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
   query2.bindValue(":idVenda", idVenda + "D%");
 
@@ -533,13 +532,13 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 }
 
 void Devolucao::atualizarDevolucao() {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto2 WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idDevolucao);
 
   if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados da devolução: " + query.lastError().text()); }
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda SET subTotalBru = :subTotalBru, subTotalLiq = :subTotalLiq, total = :total WHERE idVenda = :idVenda");
   query2.bindValue(":subTotalBru", query.value("parcial"));
   query2.bindValue(":subTotalLiq", query.value("parcialDesc"));
@@ -605,7 +604,7 @@ void Devolucao::atualizarIdRelacionado(const int currentRow) {
   // get modelDevolvidos lastInsertId for modelConsumos
   const QString idVendaProduto1_Devolucao = modelDevolvidos1.query().lastInsertId().toString();
 
-  QSqlQuery queryBusca;
+  SqlQuery queryBusca;
 
   if (not queryBusca.exec("SELECT idVendaProduto2 FROM venda_has_produto2 WHERE idVendaProdutoFK = " + idVendaProduto1_Devolucao) or not queryBusca.first()) {
     throw RuntimeException("Erro buscando idVendaProduto2: " + queryBusca.lastError().text());
@@ -613,7 +612,7 @@ void Devolucao::atualizarIdRelacionado(const int currentRow) {
 
   //------------------------------------
 
-  QSqlQuery queryRelacionado;
+  SqlQuery queryRelacionado;
 
   if (not queryRelacionado.exec("UPDATE venda_has_produto2 SET idRelacionado = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString() +
                                 " WHERE idVendaProduto2 = " + queryBusca.value("idVendaProduto2").toString())) {

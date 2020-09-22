@@ -9,10 +9,10 @@
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QtMath>
 
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
@@ -49,7 +49,7 @@ bool Contas::validarData(const QModelIndex &index) {
     const int row = index.row();
     const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
 
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
@@ -79,11 +79,11 @@ void Contas::preencher(const QModelIndex &index) {
 
   unsetConnections();
 
-  [&] {
+  try {
     const int row = index.row();
 
     if (index.column() == ui->tablePendentes->columnIndex("valor")) {
-      QSqlQuery query;
+      SqlQuery query;
       query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
       query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
@@ -102,7 +102,7 @@ void Contas::preencher(const QModelIndex &index) {
       const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
       const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
-      QSqlQuery queryConta;
+      SqlQuery queryConta;
 
       if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
         throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
@@ -160,7 +160,7 @@ void Contas::preencher(const QModelIndex &index) {
 
       if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -323,7 +323,7 @@ void Contas::viewContaPagar(const QString &dataPagamento) {
 }
 
 void Contas::viewContaReceber(const QString &idPagamento, const QString &contraparte) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", idPagamento);
 

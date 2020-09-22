@@ -4,10 +4,10 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
   ui->setupUi(this);
@@ -28,7 +28,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   ui->comboBoxLoja->addItem("GABR");
   ui->comboBoxLoja->addItem("GRAN");
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { throw RuntimeException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
 
@@ -99,7 +99,7 @@ void AnteciparRecebimento::calcularTotais() {
   ui->doubleSpinBoxValorLiquido->setValue(liquido);
 
   unsetConnections();
-  [&] { ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100)); }();
+  ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100));
   setConnections();
 
   ui->doubleSpinBoxIOF->setValue(0);
@@ -174,11 +174,15 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
   ui->doubleSpinBoxDescTotal->setValue(descTotal * 100);
 
   const double valor = descTotal / prazoMedio * 30 * 100;
+
   unsetConnections();
-  [&] { ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor); }();
+  ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor);
   setConnections();
+
   ui->doubleSpinBoxIOF->setValue(0);
+
   if (ui->checkBoxIOF->isChecked()) { ui->doubleSpinBoxIOF->setValue(ui->doubleSpinBoxValorPresente->value() * (0.0038 + 0.0041 * prazoMedio)); }
+
   ui->doubleSpinBoxLiqIOF->setValue(ui->doubleSpinBoxValorPresente->value() - ui->doubleSpinBoxIOF->value());
 }
 
@@ -203,7 +207,7 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   SqlTableModel modelContaPagar;
   modelContaPagar.setTable("conta_a_pagar_has_pagamento");
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
   query.bindValue(":idConta", ui->itemBoxConta->getId());
 

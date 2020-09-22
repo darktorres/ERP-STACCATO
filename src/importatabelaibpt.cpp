@@ -1,11 +1,11 @@
 #include "importatabelaibpt.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QTextStream>
 
 ImportaTabelaIBPT::ImportaTabelaIBPT(QWidget *parent) : QDialog(parent) { setupTables(); }
@@ -21,7 +21,7 @@ void ImportaTabelaIBPT::importar() {
 
   const QString versao = fileInfo.completeBaseName().right(6);
 
-  QSqlQuery queryVersao;
+  SqlQuery queryVersao;
 
   if (not queryVersao.exec("SELECT versao FROM ibpt WHERE versao = '" + versao + "' LIMIT 1")) { throw RuntimeException("Erro verificando versão: " + queryVersao.lastError().text(), this); }
 

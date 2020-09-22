@@ -16,7 +16,6 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QStandardItemModel>
 #include <QUrl>
 
@@ -209,6 +208,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   qApp->endTransaction();
 
   updateTables();
+
   qApp->enqueueInformation("Agendado com sucesso!", this);
 
   ui->frameCaminhao->hide();
@@ -237,14 +237,14 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
 }
 
 void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga) {
-  QSqlQuery queryTemp;
+  SqlQuery queryTemp;
   queryTemp.prepare("SELECT codComercial FROM estoque WHERE idEstoque = :idEstoque");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE venda_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = "
                  ":idEstoque)");
 
@@ -253,7 +253,7 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     QString codComercial;
 
     if (montarCarga) {
-      QSqlQuery query;
+      SqlQuery query;
       query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto");
       query.first();
 
@@ -289,7 +289,7 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 }
 
 void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
@@ -344,8 +344,6 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
   }
 
   adicionarProduto(list);
-
-  modelTranspAtual.select();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {

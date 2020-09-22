@@ -8,7 +8,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QThread>
 #include <QUrl>
 
@@ -31,13 +30,13 @@ ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
 void ACBr::error() {
   const QString errorString = socket.errorString();
 
+  progressDialog->cancel();
+
   if (errorString == "Connection refused" or errorString == "Connection timed out") {
     throw RuntimeException("Erro conectando ao ACBr! Verifique se ele está aberto!");
   } else {
     throw RuntimeException("Erro socket: " + socket.errorString());
   }
-
-  progressDialog->cancel();
 }
 
 void ACBr::write() { enviado = true; }
@@ -71,7 +70,7 @@ void ACBr::readSocket() {
 void ACBr::gerarDanfe(const int idNFe) {
   if (idNFe == 0) { throw RuntimeError("Produto não possui nota!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
@@ -109,7 +108,7 @@ QString ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 }
 
 std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
@@ -148,19 +147,19 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 void ACBr::removerNota(const int idNFe) {
   qApp->startTransaction("ACBr::removerNota");
 
-  QSqlQuery query2a;
+  SqlQuery query2a;
   query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
   query2a.bindValue(":idNFeSaida", idNFe);
 
   if (not query2a.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + query2a.lastError().text()); }
 
-  QSqlQuery query3a;
+  SqlQuery query3a;
   query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
   query3a.bindValue(":idNFeSaida", idNFe);
 
   if (not query3a.exec()) { throw RuntimeException("Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
 
-  QSqlQuery queryNota;
+  SqlQuery queryNota;
   queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
   queryNota.bindValue(":idNFe", idNFe);
 

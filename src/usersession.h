@@ -4,7 +4,6 @@
 #include "sqlquery.h"
 
 #include <QSettings>
-#include <QSqlQuery>
 
 class UserSession final {
 

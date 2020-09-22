@@ -26,7 +26,7 @@ void UserSession::login(const QString &user, const QString &password) {
 }
 
 void UserSession::autorizacao(const QString &user, const QString &password) {
-  QSqlQuery queryAutorizar;
+  SqlQuery queryAutorizar;
   queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
                          "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
   queryAutorizar.bindValue(":user", user);
@@ -38,7 +38,7 @@ void UserSession::autorizacao(const QString &user, const QString &password) {
 }
 
 QVariant UserSession::fromLoja(const QString &parameter, const QString &user) {
-  QSqlQuery queryLoja;
+  SqlQuery queryLoja;
   queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
   queryLoja.bindValue(":nome", user);
 

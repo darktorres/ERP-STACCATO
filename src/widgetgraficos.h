@@ -2,7 +2,6 @@
 
 #include "chartview.h"
 
-#include <QSqlQuery>
 #include <QWidget>
 #include <QtCharts>
 

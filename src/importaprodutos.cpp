@@ -7,13 +7,13 @@
 #include "importaprodutosproxymodel.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 #include "validadedialog.h"
 
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::ImportaProdutos) {
@@ -44,7 +44,7 @@ void ImportaProdutos::importarTabela() {
 }
 
 void ImportaProdutos::verificaSeRepresentacao() {
-  QSqlQuery queryFornecedor;
+  SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
@@ -373,7 +373,7 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
 
     fornecedores.insert(fornecedor, idFornecedor);
 
-    QSqlQuery queryFornecedor;
+    SqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
     queryFornecedor.bindValue(":validade", (validade == -1) ? QVariant() : qApp->serverDate().addDays(validade));
     queryFornecedor.bindValue(":razaoSocial", fornecedor);
@@ -399,7 +399,7 @@ void ImportaProdutos::mostraApenasEstesFornecedores() {
 }
 
 void ImportaProdutos::marcaTodosProdutosDescontinuados() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE produto SET descontinuado = TRUE WHERE idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)))) {
     throw RuntimeException("Erro marcando produtos descontinuados: " + query.lastError().text());
@@ -842,7 +842,7 @@ void ImportaProdutos::insereEmOk() {
   modelProduto.setData(row, "validadeUpd", green);
 
   if (tipo == Tipo::Promocao) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE idFornecedor = :idFornecedor AND codComercial = :codComercial AND promocao = FALSE AND estoque = FALSE");
     query.bindValue(":idFornecedor", produto.idFornecedor);
     query.bindValue(":codComercial", modelProduto.data(row, "codComercial"));
@@ -860,7 +860,7 @@ void ImportaProdutos::insereEmOk() {
 }
 
 int ImportaProdutos::buscarCadastrarFornecedor() {
-  QSqlQuery queryFornecedor;
+  SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
@@ -885,7 +885,7 @@ void ImportaProdutos::salvar() {
 
   modelEstoque.submitAll();
 
-  QSqlQuery queryPrecos;
+  SqlQuery queryPrecos;
 
   if (validade != -1) {
     queryPrecos.prepare(
@@ -952,7 +952,8 @@ void ImportaProdutos::closeEvent(QCloseEvent *event) {
 void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
   for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) { modelProduto.setData(row, "representacao", checked); }
 
-  QSqlQuery query;
+  SqlQuery query;
+
   if (not query.exec("UPDATE fornecedor SET representacao = " + QString(checked ? "TRUE" : "FALSE") + " WHERE idFornecedor IN (" + idsFornecedor + ")")) {
     throw RuntimeException("Erro guardando 'Representacao' em Fornecedor: " + query.lastError().text());
   }

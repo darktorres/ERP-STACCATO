@@ -353,7 +353,7 @@ void CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   SqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade WHERE fornecedor = :fornecedor AND descontinuado = FALSE AND estoque = FALSE AND promocao = FALSE");
+  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = FALSE WHERE fornecedor = :fornecedor AND estoque = FALSE AND promocao = FALSE");
   query.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
@@ -365,6 +365,10 @@ void CadastroFornecedor::ajustarValidade(const int novaValidade) {
   query2.bindValue(":fornecedor", fornecedor);
 
   if (not query2.exec()) { throw RuntimeException("Erro atualizando validade no fornecedor: " + query2.lastError().text()); }
+
+  SqlQuery query3;
+
+  if (not query3.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + query3.lastError().text()); }
 }
 
 void CadastroFornecedor::on_pushButtonValidade_clicked() {

@@ -10,12 +10,12 @@
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QtMath>
 
 InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
@@ -93,12 +93,12 @@ void InserirLancamento::setupTables() {
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   unsetConnections();
 
-  [&] {
+  try {
     const int newRow = modelContaPagamento.insertRowAtEnd();
 
     modelContaPagamento.setData(newRow, "status", "PENDENTE");
     modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -173,14 +173,14 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 void InserirLancamento::preencher(const QModelIndex &index) {
   unsetConnections();
 
-  [&] {
+  try {
     const int row = index.row();
 
     if (index.column() == ui->table->columnIndex("dataRealizado")) {
       const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
       const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
 
-      QSqlQuery queryConta;
+      SqlQuery queryConta;
 
       if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
         throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
@@ -198,7 +198,7 @@ void InserirLancamento::preencher(const QModelIndex &index) {
       modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
       modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }

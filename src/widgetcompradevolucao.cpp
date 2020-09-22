@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
 

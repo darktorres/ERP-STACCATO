@@ -5,11 +5,11 @@
 #include "estoqueprazoproxymodel.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 
@@ -99,10 +99,10 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 }
 
 void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
   for (const auto &index : list) {

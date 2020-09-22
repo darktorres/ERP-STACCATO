@@ -4,11 +4,11 @@
 #include "application.h"
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
@@ -82,7 +82,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 

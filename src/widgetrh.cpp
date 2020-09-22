@@ -4,10 +4,10 @@
 #include "application.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetRh::WidgetRh(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRh) { ui->setupUi(this); }
 
@@ -72,7 +72,7 @@ void WidgetRh::setupTables() {
 void WidgetRh::on_pushButtonSalvarMes_clicked() {
   const QDate mes = ui->dateEdit->date();
 
-  QSqlQuery queryVerifica;
+  SqlQuery queryVerifica;
   queryVerifica.prepare("SELECT * FROM comissao WHERE Mês = :mes");
   queryVerifica.bindValue(":mes", mes.toString("yyyy-MM"));
 
@@ -85,14 +85,14 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
 
     if (msgBox.exec() == QMessageBox::No) { return; }
 
-    QSqlQuery queryRemove;
+    SqlQuery queryRemove;
     queryRemove.prepare("DELETE FROM comissao WHERE Mês = :mes");
     queryRemove.bindValue(":mes", mes.toString("yyyy-MM"));
 
     if (not queryRemove.exec()) { throw RuntimeException("Erro removendo dados: " + queryRemove.lastError().text(), this); }
   }
 
-  QSqlQuery queryRelatorio;
+  SqlQuery queryRelatorio;
   queryRelatorio.prepare("SELECT * FROM view_relatorio WHERE Mês = :mes");
   queryRelatorio.bindValue(":mes", mes.toString("yyyy-MM"));
 

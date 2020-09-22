@@ -1,6 +1,7 @@
 #include "palletitem.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QGraphicsProxyWidget>
@@ -10,7 +11,6 @@
 #include <QPainter>
 #include <QScrollArea>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QToolTip>
 
 PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsObject(parent), size(size) {
@@ -144,7 +144,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
   const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
     event->ignore();

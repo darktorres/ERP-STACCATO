@@ -8,12 +8,12 @@
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);
@@ -78,10 +78,10 @@ void WidgetCompraFaturar::updateTables() {
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
 void WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
@@ -172,10 +172,10 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 
   const QDate dataPrevista = input.getNextDate();
 
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   for (const auto &index : list) {

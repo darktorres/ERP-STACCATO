@@ -10,7 +10,6 @@
 
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
 

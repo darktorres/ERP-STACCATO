@@ -4,12 +4,11 @@
 #include "usersession.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 
 void Log::createLog(const QString &tipo, const QString &message) {
   if (not QSqlDatabase::database().isOpen()) { return; }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("INSERT INTO log (idUsuario, versao, tipo, message) VALUES (:idUsuario, :versao, :tipo, :message)");
   query.bindValue(":idUsuario", UserSession::idUsuario);
   query.bindValue(":versao", qApp->applicationVersion());

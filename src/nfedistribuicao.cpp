@@ -58,7 +58,7 @@ void NFeDistribuicao::buscarNSU() {
 
   if (idLoja == "0") { throw RuntimeError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
-  QSqlQuery queryLoja;
+  SqlQuery queryLoja;
 
   if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja) or not queryLoja.first()) {
     throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this);
@@ -194,7 +194,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   desconhecer();
   naoRealizar();
 
-  QSqlQuery queryMaintenance;
+  SqlQuery queryMaintenance;
 
   if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
 
@@ -266,7 +266,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       ui->spinBoxMaxNSU->setValue(maxNSU.toInt());
       ui->spinBoxUltNSU->setValue(ultNSU.toInt());
 
-      QSqlQuery queryLoja2;
+      SqlQuery queryLoja2;
 
       if (not queryLoja2.exec("UPDATE loja SET ultimoNSU = " + ultNSU + ", maximoNSU = " + maxNSU + " WHERE idLoja = " + idLoja)) {
         throw RuntimeException("Erro guardando NSU: " + queryLoja2.lastError().text());
@@ -332,7 +332,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       //----------------------------------------------------------
 
-      QSqlQuery queryExiste;
+      SqlQuery queryExiste;
 
       if (not queryExiste.exec("SELECT status FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
         throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text());
@@ -346,7 +346,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         const QString status = (schemaEvento == "procNFe") ? "AUTORIZADO" : "RESUMO";
         const QString ciencia = (schemaEvento == "procNFe") ? "0" : "1";
 
-        QSqlQuery queryCadastrar;
+        SqlQuery queryCadastrar;
         queryCadastrar.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES "
                                "(:numeroNFe, 'ENTRADA', :xml, :status, :emitente, :cnpjDest, :cnpjOrig, :chaveAcesso, :transportadora, :valor, :infCpl, :nsu, 'DESCONHECIDO', :ciencia)");
         queryCadastrar.bindValue(":numeroNFe", numeroNFe);
@@ -368,7 +368,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       if (existe and schemaEvento == "procNFe") {
         if (queryExiste.value("status").toString() == "AUTORIZADO") { continue; }
 
-        QSqlQuery queryAtualizar;
+        SqlQuery queryAtualizar;
         queryAtualizar.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
         queryAtualizar.bindValue(":xml", xml);
         queryAtualizar.bindValue(":transportadora", encontraTransportadora(xml));
@@ -396,7 +396,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       //----------------------------------------------------------
 
-      QSqlQuery queryExiste;
+      SqlQuery queryExiste;
 
       if (not queryExiste.exec("SELECT statusDistribuicao FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
         throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text());
@@ -406,7 +406,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         const QString statusDistribuicao = queryExiste.value("statusDistribuicao").toString();
 
         if (eventoTipo == "Ciencia da Operacao" and statusDistribuicao == "DESCONHECIDO") {
-          QSqlQuery queryAtualiza;
+          SqlQuery queryAtualiza;
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso +
                                      "'")) {
@@ -415,7 +415,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         }
 
         if (eventoTipo == "Confirmacao da Operacao" and (statusDistribuicao == "DESCONHECIDO" or statusDistribuicao == "CIÊNCIA")) {
-          QSqlQuery queryAtualiza;
+          SqlQuery queryAtualiza;
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                                      chaveAcesso + "'")) {
@@ -424,7 +424,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         }
 
         if (eventoTipo == "CANCELAMENTO" and statusDistribuicao != "CANCELADA") {
-          QSqlQuery queryAtualiza;
+          SqlQuery queryAtualiza;
 
           if (not queryAtualiza.exec(
                   "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
@@ -603,7 +603,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
       const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
-      QSqlQuery query;
+      SqlQuery query;
 
       if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                          chaveAcesso + "'")) {
@@ -618,7 +618,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
       const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
-      QSqlQuery query;
+      SqlQuery query;
 
       if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
                          "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso + "'")) {
@@ -689,14 +689,14 @@ void NFeDistribuicao::montaFiltro() {
 void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 

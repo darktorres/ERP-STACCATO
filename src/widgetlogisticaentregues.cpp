@@ -5,11 +5,11 @@
 #include "doubledelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 
@@ -155,14 +155,14 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 }
 
 void WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE `idVendaProduto2` = :idVendaProduto2");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 "
                  "AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 

@@ -6,10 +6,10 @@
 #include "editdelegate.h"
 #include "itemboxdelegate.h"
 #include "porcentagemdelegate.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroPagamento) {
   ui->setupUi(this);
@@ -280,7 +280,7 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("INSERT INTO loja_has_forma_pagamento (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
 
   for (const auto &index : list) {
@@ -304,7 +304,7 @@ void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("DELETE FROM loja_has_forma_pagamento WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
 
   for (const auto &index : list) {

@@ -117,14 +117,14 @@ void WidgetVenda::montaFiltro() {
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -134,7 +134,7 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
 void WidgetVenda::setPermissions() {
   unsetConnections();
 
-  [&] {
+  try {
     listarLojas();
 
     const QString tipoUsuario = UserSession::tipoUsuario;
@@ -151,7 +151,7 @@ void WidgetVenda::setPermissions() {
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -249,17 +249,17 @@ void WidgetVenda::updateTables() {
 void WidgetVenda::setComboBoxFornecedores() {
   unsetConnections();
 
-  [&] {
+  try {
     ui->comboBoxFornecedores->clear();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT razaoSocial FROM fornecedor")) { throw RuntimeException("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
     ui->comboBoxFornecedores->addItem("");
 
     while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -276,12 +276,12 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
-  [&] {
+  try {
     ui->comboBoxVendedores->clear();
 
     const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
       throw RuntimeException("Erro: " + query.lastError().text(), this);
@@ -305,7 +305,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
     }
 
     montaFiltro();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -332,14 +332,14 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -347,7 +347,7 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
 }
 
 void WidgetVenda::listarLojas() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
 

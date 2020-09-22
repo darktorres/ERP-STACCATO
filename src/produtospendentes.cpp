@@ -7,13 +7,13 @@
 #include "inputdialog.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
@@ -58,7 +58,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
 
@@ -247,7 +247,7 @@ void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
   const double excedente = ui->doubleSpinBoxComprar->value() - ui->doubleSpinBoxQuantTotal->value();
 
   if (excedente > 0.) { // TODO: replace query with model so values can be correctly rounded (Application::roundDouble)
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
                   "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, "
                   ":dataPrevCompra)");

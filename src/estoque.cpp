@@ -10,7 +10,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
@@ -169,7 +168,7 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 void Estoque::on_pushButtonExibirNfe_clicked() { exibirNota(); }
 
 void Estoque::exibirNota() {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
 
@@ -213,7 +212,7 @@ void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
     modelConsumo.setData(rowConsumo, index, value);
   }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
@@ -239,7 +238,7 @@ void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   const QString lote = modelEstoque.data(rowEstoque, "lote").toString();
 
   if (not lote.isEmpty() and lote != "N/D") {
-    QSqlQuery queryProduto;
+    SqlQuery queryProduto;
     queryProduto.prepare("UPDATE venda_has_produto2 SET lote = :lote WHERE idVendaProduto2 = :idVendaProduto2");
     queryProduto.bindValue(":lote", modelEstoque.data(rowEstoque, "lote"));
     queryProduto.bindValue(":idVendaProduto2", idVendaProduto2);
@@ -264,7 +263,7 @@ void Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
   //--------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", idVendaProduto2);
 
@@ -330,20 +329,20 @@ void Estoque::desfazerConsumo(const int idVendaProduto2) {
   // TODO: se houver agendamento de estoque remover
 
   // NOTE: estoque_has_consumo may have the same idVendaProduto2 in more than one row (only until the field is made UNIQUE)
-  QSqlQuery queryDelete;
+  SqlQuery queryDelete;
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
   queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
 
   if (not queryDelete.exec()) { throw RuntimeException("Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
   if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare(
       "UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, lote = NULL, "
       "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "

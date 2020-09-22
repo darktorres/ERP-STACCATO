@@ -18,7 +18,7 @@ WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 void WidgetOrcamento::setPermissions() {
   unsetConnections();
 
-  [&] {
+  try {
     listarLojas();
 
     const QString tipoUsuario = UserSession::tipoUsuario;
@@ -41,7 +41,7 @@ void WidgetOrcamento::setPermissions() {
     on_comboBoxLojas_currentIndexChanged();
 
     ui->dateEdit->setDate(qApp->serverDate());
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -214,14 +214,14 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -231,12 +231,12 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
 void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
-  [&] {
+  try {
     ui->comboBoxVendedores->clear();
 
     const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
       throw RuntimeException("Erro: " + query.lastError().text());
@@ -260,13 +260,13 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
     }
 
     montaFiltro();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
 
 void WidgetOrcamento::listarLojas() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
 

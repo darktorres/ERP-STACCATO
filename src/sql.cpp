@@ -1,9 +1,9 @@
 #include "sql.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QStringList>
 
 void Sql::updateVendaStatus(const QStringList &idVendas) { updateVendaStatus(idVendas.join(", ")); }
@@ -13,7 +13,7 @@ void Sql::updateVendaStatus(const QString &idVendas) {
   list.removeDuplicates();
 
   for (auto const &idVenda : list) {
-    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { throw RuntimeException("Erro atualizando status: " + query.lastError().text()); }
+    if (SqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { throw RuntimeException("Erro atualizando status: " + query.lastError().text()); }
   }
 }
 

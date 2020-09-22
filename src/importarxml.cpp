@@ -8,13 +8,13 @@
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent)
@@ -55,7 +55,7 @@ void ImportarXML::unsetConnections() {
 void ImportarXML::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
-  [&] {
+  try {
     const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
@@ -70,9 +70,9 @@ void ImportarXML::updateTableData(const QModelIndex &topLeft) {
       const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
       modelEstoque.setData(row, "valorUnid", prcUnitario);
     }
-  }();
 
-  reparear(topLeft);
+    reparear(topLeft);
+  } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();
 }
@@ -311,7 +311,7 @@ void ImportarXML::setupTables() {
 }
 
 void ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare(
       "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
       ":estoqueRestante, p.estoqueRestanteUpd, p.quantCaixa, p.quantCaixaUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, "
@@ -382,7 +382,7 @@ void ImportarXML::atualizarNFes() {
   auto iterator = mapNFes.constBegin();
 
   while (iterator != mapNFes.constEnd()) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("UPDATE nfe SET gare = " + QString::number(iterator.value()) + ", utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
       throw RuntimeException("Erro atualizando dados da NFe: " + query.lastError().text());
@@ -429,7 +429,7 @@ void ImportarXML::salvarDadosCompra() {
 
   // TODO: ainda precisa disso considerando que agora tem o trigger no BD?
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("CALL update_pedido_fornecedor_status(" + modelCompra.data(row, "idPedidoFK").toString() + ")")) {
       throw RuntimeException("Erro atualizando status compra: " + query.lastError().text());
@@ -454,7 +454,9 @@ void ImportarXML::verifyFields() {
 }
 
 void ImportarXML::on_pushButtonImportar_clicked() {
-  verifyFields();
+  try {
+    verifyFields();
+  } catch (std::exception &e) { return; }
 
   unsetConnections();
 
@@ -466,7 +468,8 @@ void ImportarXML::on_pushButtonImportar_clicked() {
     qApp->endTransaction();
   } catch (std::exception &e) {
     qApp->rollbackTransaction();
-    close(); // TODO: is this still needed?
+    ui->pushButtonImportar->setDisabled(true);
+    return;
   }
 
   setConnections();
@@ -499,7 +502,7 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
 
   unsetConnections();
 
-  [&] {
+  try {
     usarXMLBaixado();
     parear();
 
@@ -509,7 +512,8 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
       ui->pushButtonProcurar->setDisabled(true);
       ui->itemBoxNFe->setReadOnly(true);
     }
-  }();
+  } catch (RuntimeError &e) {
+  } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();
 }
@@ -517,7 +521,7 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
 void ImportarXML::on_pushButtonProcurar_clicked() {
   unsetConnections();
 
-  [&] {
+  try {
     if (not lerXML()) {
       ui->lineEdit->clear();
       return;
@@ -531,13 +535,14 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
       ui->pushButtonProcurar->setDisabled(true);
       ui->itemBoxNFe->setReadOnly(true);
     }
-  }();
+  } catch (RuntimeError &e) {
+  } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();
 }
 
 double ImportarXML::buscarCaixas(const int rowEstoque) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT quantCaixa FROM produto WHERE codComercial = :codComercial");
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
@@ -619,7 +624,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
 
   // ----------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
@@ -631,7 +636,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
     if (query.value("status") == "CANCELADA") { throw RuntimeError("Nota cancelada!", this); }
 
     if (query.value("status") == "RESUMO") {
-      QSqlQuery queryAtualiza;
+      SqlQuery queryAtualiza;
       queryAtualiza.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso");
       queryAtualiza.bindValue(":xml", xml.fileContent);
       queryAtualiza.bindValue(":transportadora", xml.xNomeTransp);
@@ -677,7 +682,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 }
 
 void ImportarXML::usarXMLBaixado() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
@@ -696,6 +701,8 @@ void ImportarXML::usarXMLBaixado() {
 
   xml.verificaNCMs();
 
+  perguntarLocal(xml);
+
   // ----------------------------------------------------------------
 
   xml.idNFe = query.value("idNFe").toInt();
@@ -707,8 +714,6 @@ void ImportarXML::usarXMLBaixado() {
   criarPagamentoGare(gare, xml);
 
   // ----------------------------------------------------------------
-
-  perguntarLocal(xml);
 
   percorrerXml(xml);
 
@@ -744,6 +749,8 @@ bool ImportarXML::lerXML() {
 
   xml.verificaNCMs();
 
+  perguntarLocal(xml);
+
   // ----------------------------------------------------------------
 
   const int id = qApp->reservarIdNFe();
@@ -758,8 +765,6 @@ bool ImportarXML::lerXML() {
 
   // ----------------------------------------------------------------
 
-  perguntarLocal(xml);
-
   percorrerXml(xml);
 
   cadastrarNFe(xml, gare);
@@ -768,11 +773,9 @@ bool ImportarXML::lerXML() {
 }
 
 void ImportarXML::perguntarLocal(XML &xml) {
-  QSqlQuery query;
+  SqlQuery query;
 
-  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) {
-    throw RuntimeException("Erro buscando lojas: " + query.lastError().text(), this);
-  }
+  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) { throw RuntimeException("Erro buscando lojas: " + query.lastError().text(), this); }
 
   QStringList lojas{"CD"};
 
@@ -786,7 +789,7 @@ void ImportarXML::perguntarLocal(XML &xml) {
   input.setComboBoxItems(lojas);
   input.setComboBoxEditable(false);
 
-  if (input.exec() != QInputDialog::Accepted) { throw std::exception(); }
+  if (input.exec() != QInputDialog::Accepted) { throw RuntimeError("Local inválido!"); }
 
   const QString local = input.textValue();
 
@@ -915,7 +918,7 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   // -------------------------------------
 
-  QSqlQuery queryProduto;
+  SqlQuery queryProduto;
   queryProduto.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   queryProduto.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
@@ -1054,7 +1057,7 @@ void ImportarXML::reparear(const QModelIndex &index) {
 void ImportarXML::parear() {
   unsetConnections();
 
-  [&] {
+  try {
     limparAssociacoes();
 
     for (int rowEstoque = 0, totalEstoque = modelEstoque.rowCount(); rowEstoque < totalEstoque; ++rowEstoque) {
@@ -1091,7 +1094,7 @@ void ImportarXML::parear() {
     ui->tableCompra->clearSelection();
 
     ui->tableCompra->setFocus(); // for updating proxyModel
-  }();
+  } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();
 }
@@ -1141,7 +1144,7 @@ double ImportarXML::calculaGare(XML &xml) {
 }
 
 ImportarXML::NCM ImportarXML::buscaNCM(const QString &ncm) {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'") or not query.first()) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
 

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "acbr.h"
+#include "sqlquery.h"
 #include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
-#include <QSqlQuery>
 #include <QTextStream>
 
 namespace Ui {
@@ -25,13 +25,13 @@ private:
   const Tipo tipo;
   const QString idVenda;
   QDataWidgetMapper mapper;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndereco;
-  QSqlQuery queryIBGEDest;
-  QSqlQuery queryIBGEEmit;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery queryPartilhaInter;
-  QSqlQuery queryPartilhaIntra;
+  SqlQuery queryCliente;
+  SqlQuery queryEndereco;
+  SqlQuery queryIBGEDest;
+  SqlQuery queryIBGEEmit;
+  SqlQuery queryLojaEnd;
+  SqlQuery queryPartilhaInter;
+  SqlQuery queryPartilhaIntra;
   QString arquivo;
   QString chaveNum;
   QString xml;

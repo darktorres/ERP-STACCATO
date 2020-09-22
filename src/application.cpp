@@ -187,7 +187,7 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
 }
 
 void Application::runSqlJobs() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
 
@@ -257,7 +257,7 @@ void Application::lightTheme() {
 void Application::startTransaction(const QString &messageLog) {
   if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return; }
+  if (SqlQuery query; not query.exec("START TRANSACTION")) { return; }
 
   Log::createLog("Transação", messageLog);
 
@@ -267,7 +267,7 @@ void Application::startTransaction(const QString &messageLog) {
 void Application::endTransaction() {
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return; }
+  if (SqlQuery query; not query.exec("COMMIT")) { return; }
 
   inTransaction = false;
 
@@ -276,7 +276,7 @@ void Application::endTransaction() {
 
 void Application::rollbackTransaction() {
   if (inTransaction) {
-    if (QSqlQuery query; not query.exec("ROLLBACK")) { return; }
+    if (SqlQuery query; not query.exec("ROLLBACK")) { return; }
     inTransaction = false;
   }
 
@@ -377,7 +377,7 @@ void Application::setSilent(bool value) { silent = value; }
 bool Application::getInTransaction() const { return inTransaction; }
 
 QDateTime Application::serverDateTime() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT NOW()") or not query.first()) {
     enqueueException("Erro buscando data/hora: " + query.lastError().text());
@@ -389,7 +389,7 @@ QDateTime Application::serverDateTime() {
 
 QDate Application::serverDate() {
   if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT NOW()") or not query.first()) {
       enqueueException("Erro buscando data/hora: " + query.lastError().text());
@@ -422,7 +422,7 @@ QString Application::sanitizeSQL(const QString &string) {
 int Application::reservarIdEstoque() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
     throw RuntimeException("Erro reservar id estoque: " + query.lastError().text());
@@ -438,7 +438,7 @@ int Application::reservarIdEstoque() {
 int Application::reservarIdVendaProduto2() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
     throw RuntimeException("Erro reservar id venda: " + query.lastError().text());
@@ -454,7 +454,7 @@ int Application::reservarIdVendaProduto2() {
 int Application::reservarIdNFe() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
     throw RuntimeException("Erro reservar id nfe: " + query.lastError().text());
@@ -470,7 +470,7 @@ int Application::reservarIdNFe() {
 int Application::reservarIdPedido2() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
     throw RuntimeException("Erro reservar id compra: " + query.lastError().text());

@@ -1,10 +1,10 @@
 #include "xml.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 XML::XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent) : fileContent(fileContent), tipo(tipo), parent(parent) { montarArvore(); }
 
@@ -212,7 +212,7 @@ void XML::verificaNCMs() {
   QStringList ncms;
 
   for (const auto &produto : produtos) {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
 

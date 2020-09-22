@@ -95,7 +95,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 }
 
 void LoginDialog::verificaVersao() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
 

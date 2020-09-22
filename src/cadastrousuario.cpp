@@ -11,7 +11,6 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QTransposeProxyModel>
 
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
@@ -119,7 +118,7 @@ void CadastroUsuario::savingProcedures() {
 
   // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
 
@@ -162,7 +161,7 @@ bool CadastroUsuario::viewRegister() {
 }
 
 void CadastroUsuario::fillCombobox() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
@@ -229,7 +228,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
   const QString password = file.readAll();
 
   // NOTE: those query's below commit transaction so have to be done outside transaction
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
@@ -246,7 +245,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 

@@ -1,12 +1,12 @@
 #include "cnab.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QSqlError>
-#include <QSqlQuery>
 
 CNAB::CNAB(QWidget *parent) : parent(parent) {}
 
@@ -36,7 +36,7 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
 
   QTextStream stream(&arquivo);
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
     throw RuntimeException("Erro buscando sequencial CNAB: " + query.lastError().text());
@@ -210,7 +210,7 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
   file.write(arquivo.toUtf8());
   file.close();
 
-  QSqlQuery query2;
+  SqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
     throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
@@ -230,7 +230,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
 
   QTextStream stream(&arquivo);
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
     throw RuntimeException("Erro buscando sequencial CNAB: " + query.lastError().text());
@@ -368,7 +368,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
   file.write(arquivo.toUtf8());
   file.close();
 
-  QSqlQuery query2;
+  SqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
     throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
@@ -442,13 +442,13 @@ void CNAB::retornoGareItau240(const QString &filePath) {
       if (not ocorrencia1.isEmpty()) { resultado << segmentoN; }
 
       if (segmentoN.contains("PAGAMENTO EFETUADO")) {
-        QSqlQuery query1;
+        SqlQuery query1;
 
         if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj) or not query1.first()) {
           throw RuntimeException("Erro dando baixa na GARE: " + query1.lastError().text());
         }
 
-        QSqlQuery query2;
+        SqlQuery query2;
 
         if (not query2.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', valorReal = valor, dataRealizado = '" + dataPgt + "' WHERE idNFe = " + query1.value("idNFe").toString())) {
           throw RuntimeException("Erro dando baixa na GARE: " + query2.lastError().text());
@@ -476,7 +476,7 @@ void CNAB::retornoGareItau240(const QString &filePath) {
     }
   }
 
-  QSqlQuery query2;
+  SqlQuery query2;
 
   if (not query2.exec("INSERT INTO cnab (tipo, banco, conteudo) VALUES ('RETORNO', 'ITAU', '" + lines.join("") + "')")) { throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text()); }
 

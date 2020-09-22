@@ -12,7 +12,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent)
@@ -153,8 +152,8 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
     if (not silent and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
 
-  sendUpdateMessage(selection.first());
   close();
+  sendUpdateMessage(selection.first());
 }
 
 QString SearchDialog::getText(const QVariant &id) {
@@ -167,7 +166,7 @@ QString SearchDialog::getText(const QVariant &id) {
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + id.toString() + "'";
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) {
     throw RuntimeException("Erro na query getText: " + query.lastError().text(), this);

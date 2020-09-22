@@ -47,6 +47,19 @@
    </item>
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="checkBoxSemLote">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Sem lote</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -57,7 +70,23 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
+     <item row="2" column="0" colspan="3">
+      <widget class="TableView" name="tableEstoque">
+       <property name="mouseTracking">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="3">
       <widget class="TableView" name="tableConsumo">
        <property name="mouseTracking">
         <bool>true</bool>
@@ -76,56 +105,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="checkBoxSemLote">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Sem lote</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="TableView" name="tableEstoque">
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0" colspan="2">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Consumo</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Compra</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0" colspan="2">
+     <item row="6" column="0" colspan="3">
       <widget class="TableView" name="tableCompra">
        <property name="mouseTracking">
         <bool>true</bool>
@@ -144,6 +124,26 @@
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="3">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Compra</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="3">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Consumo</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -279,12 +279,18 @@ color: rgb(0, 0, 0);</string>
        <property name="text">
         <string>Importar</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonCancelar">
        <property name="text">
         <string>Cancelar</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

@@ -137,7 +137,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 void WidgetLogisticaAgendarEntrega::calcularPeso() {
   double peso = 0;
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
   const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();
@@ -230,14 +230,14 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
 void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
+  try {
     const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -374,7 +374,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 void WidgetLogisticaAgendarEntrega::processRows() {
   const QDateTime dataPrevEnt = ui->dateTimeEdit->dateTime();
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not query.first()) {
     throw RuntimeException("Erro comunicando com o banco de dados: " + query.lastError().text());
@@ -382,13 +382,13 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 
   const int idEvento = query.value(0).toInt();
 
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("SELECT idVenda, codComercial FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
@@ -416,14 +416,14 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 }
 
 void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
   for (const auto &index : list) { adicionaProdutoNoModel(index.row(), modelProdutos.data(index.row(), "caixas").toDouble()); }
 }
 
 void WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const double caixas) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
 
@@ -487,7 +487,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
@@ -798,10 +798,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 }
 
 void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE venda SET novoPrazoEntrega = :novoPrazoEntrega WHERE idVenda = :idVenda");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :tipoOperacao, "
                  ":observacao, :dataFollowup)");
 
@@ -891,7 +891,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   xml.validar();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
@@ -899,7 +899,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   if (query.first()) { throw RuntimeError("Nota já cadastrada!", this); }
 
-  QSqlQuery queryNFe;
+  SqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
                    "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
   queryNFe.bindValue(":idVenda", modelProdutos.data(0, "idVenda"));
@@ -916,7 +916,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   // update other tables
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET idNFeSaida = :idNFeSaida WHERE idVendaProduto2 = :idVendaProduto2");
 
   for (const auto &index : selection) {

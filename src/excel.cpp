@@ -127,7 +127,7 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   for (int i = 1; i <= 5; ++i) {
     const QString current = QString::number(i);
 
-    QSqlQuery queryPgt;
+    SqlQuery queryPgt;
 
     if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
 
@@ -147,7 +147,7 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   // TODO: 5refator this to start at 12
   int row = 0;
 
-  QSqlQuery queryUi; // TODO: put this query in 'setQuerys'?
+  SqlQuery queryUi; // TODO: put this query in 'setQuerys'?
   queryUi.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");
 
   do {

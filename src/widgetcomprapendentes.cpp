@@ -14,7 +14,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) { ui->setupUi(this); }
 
@@ -29,7 +28,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
     return;
   }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
@@ -222,7 +221,7 @@ void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
 
   const int newRow = model.insertRowAtEnd();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 

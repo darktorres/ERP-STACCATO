@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
   query.bindValue(":idUsuario", UserSession::idUsuario);
 

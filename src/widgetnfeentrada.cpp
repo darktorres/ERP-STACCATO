@@ -14,7 +14,6 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
@@ -66,7 +65,7 @@ void WidgetNfeEntrada::setupTables() {
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(index.row(), "idNFe"));
 
@@ -95,7 +94,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  QSqlQuery queryGare;
+  SqlQuery queryGare;
   queryGare.prepare("SELECT status, valor FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
   queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -110,7 +109,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
@@ -142,7 +141,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 }
 
 void WidgetNfeEntrada::remover(const int row) {
-  QSqlQuery queryPedidoFornecedor;
+  SqlQuery queryPedidoFornecedor;
   queryPedidoFornecedor.prepare(
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
       "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
@@ -153,7 +152,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryVendaProduto;
+  SqlQuery queryVendaProduto;
   queryVendaProduto.prepare(
       "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
       "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` IN (SELECT "
@@ -164,13 +163,13 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryEstoque;
+  SqlQuery queryEstoque;
   queryEstoque.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
   queryEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not queryEstoque.exec()) { throw RuntimeException("Erro buscando consumos: " + queryEstoque.lastError().text()); }
 
-  QSqlQuery queryDeleteConsumo;
+  SqlQuery queryDeleteConsumo;
   queryDeleteConsumo.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque = :idEstoque");
 
   while (queryEstoque.next()) {
@@ -181,7 +180,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryDeleteCompra;
+  SqlQuery queryDeleteCompra;
   queryDeleteCompra.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
   queryDeleteCompra.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -189,7 +188,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryProduto;
+  SqlQuery queryProduto;
   queryProduto.prepare("UPDATE produto SET desativado = TRUE WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   queryProduto.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -197,7 +196,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryCancelaEstoque;
+  SqlQuery queryCancelaEstoque;
   queryCancelaEstoque.prepare("UPDATE estoque SET status = 'CANCELADO', idNFe = NULL WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   queryCancelaEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -205,7 +204,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryGare;
+  SqlQuery queryGare;
   queryGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
   queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -214,13 +213,13 @@ void WidgetNfeEntrada::remover(const int row) {
   //-----------------------------------------------------------------------------
 
   if (modelViewNFeEntrada.data(row, "nsu") > 0) {
-    QSqlQuery queryUpdateNFe;
+    SqlQuery queryUpdateNFe;
     queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
     queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
     if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro voltando nota: " + queryUpdateNFe.lastError().text()); }
   } else {
-    QSqlQuery queryDeleteNFe;
+    SqlQuery queryDeleteNFe;
     queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
     queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -235,7 +234,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
   ACBr acbrLocal;

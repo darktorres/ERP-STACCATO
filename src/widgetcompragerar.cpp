@@ -132,7 +132,7 @@ void WidgetCompraGerar::updateTables() {
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
 void WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) {
-  QSqlQuery queryId;
+  SqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
     throw RuntimeException("Erro buscando idCompra: " + queryId.lastError().text());
@@ -140,15 +140,15 @@ void WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
 
   const int idCompra = queryId.value("idCompra").toInt();
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE status = 'INICIADO' AND "
                      "idVendaProdutoFK = :idVendaProduto1");
 
-  QSqlQuery queryCompra1;
+  SqlQuery queryCompra1;
   queryCompra1.prepare("UPDATE pedido_fornecedor_has_produto set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
                        ":dataPrevConf WHERE status = 'PENDENTE' AND idPedido1 = :idPedido1");
 
-  QSqlQuery queryCompra2;
+  SqlQuery queryCompra2;
   queryCompra2.prepare("UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
                        ":dataPrevConf WHERE status = 'PENDENTE' AND idPedidoFK = :idPedido1");
 
@@ -269,7 +269,7 @@ std::tuple<QDate, QDate> WidgetCompraGerar::getDates(const QList<QModelIndex> &l
 }
 
 int WidgetCompraGerar::getOrdemCompra() {
-  QSqlQuery queryOC;
+  SqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) { throw RuntimeException("Erro buscando próximo O.C.!"); }
 
@@ -279,7 +279,7 @@ int WidgetCompraGerar::getOrdemCompra() {
 
   if (not ok) { throw std::exception(); }
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("SELECT ordemCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra LIMIT 1");
 
   while (true) {
@@ -313,7 +313,7 @@ bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
   const int row = list.first().row();
   const QString fornecedor = modelProdutos.data(row, "fornecedor").toString();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", fornecedor);
 
@@ -379,7 +379,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   file.close();
 
-  QSqlQuery queryFornecedor;
+  SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
@@ -451,14 +451,14 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 }
 
 void WidgetCompraGerar::cancelar(const QModelIndexList &list) {
-  QSqlQuery query1;
+  SqlQuery query1;
   query1.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
                  "idVendaProdutoFK = :idVendaProduto1");
 
-  QSqlQuery query2;
+  SqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido1 = :idPedido1");
 
-  QSqlQuery query3;
+  SqlQuery query3;
   query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE idPedidoFK = :idPedidoFK");
 
   for (const auto &index : list) {

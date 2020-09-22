@@ -400,7 +400,7 @@ void Orcamento::removeItem() {
 
   unsetConnections();
 
-  [&] {
+  try {
     if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
 
     if (not modelItem.removeRow(currentRowItem)) { throw RuntimeException("Erro removendo linha: " + modelItem.lastError().text()); }
@@ -420,7 +420,7 @@ void Orcamento::removeItem() {
     }
 
     novoItem();
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -435,7 +435,7 @@ void Orcamento::generateId() {
   const QString replica = ui->lineEditReplicaDe->text();
 
   if (replica.isEmpty()) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT MAX(idOrcamento) AS idOrcamento FROM orcamento WHERE idOrcamento LIKE :id");
     query.bindValue(":id", id + "%");
 
@@ -449,7 +449,7 @@ void Orcamento::generateId() {
 
     if (id.size() != 12 and id.size() != 13) { throw RuntimeException("Tamanho do Id errado: " + id); }
   } else {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare(
         "SELECT COALESCE(MAX(CAST(RIGHT(idOrcamento, CHAR_LENGTH(idOrcamento) - LOCATE('Rev', idOrcamento) - 2) AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE CHAR_LENGTH(idOrcamento) > 16 "
         "AND idOrcamento LIKE :idOrcamento");
@@ -614,7 +614,7 @@ void Orcamento::buscarCadastrarConsultor() {
 
   for (auto &fornecedor : fornecedores) { fornecedor.prepend("'").append("'"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT idUsuario FROM usuario WHERE desativado = FALSE AND especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" +
                      fornecedores.join(", ") + "))")) {
@@ -630,7 +630,7 @@ void Orcamento::buscarCadastrarConsultor() {
 
 void Orcamento::atualizaReplica() {
   if (not ui->lineEditReplicaDe->text().isEmpty()) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento");
     query.bindValue(":idReplica", ui->lineEditOrcamento->text());
     query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
@@ -779,7 +779,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
   unsetConnections();
 
-  [&] {
+  try {
     if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
 
     modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt());
@@ -807,7 +807,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
     isDirty = true;
     ui->checkBoxRepresentacao->setDisabled(true);
-  }();
+  } catch (std::exception &e) {}
 
   novoItem();
 
@@ -895,7 +895,7 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
@@ -962,7 +962,7 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
   const QString idCliente = QString::number(ui->itemBoxCliente->getId().toInt());
   ui->itemBoxEndereco->setFilter("(idCliente = " + idCliente + " OR idEndereco = 1) AND desativado = FALSE");
 
-  QSqlQuery queryCliente;
+  SqlQuery queryCliente;
   queryCliente.prepare("SELECT idProfissionalRel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
@@ -1002,13 +1002,13 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   QStringList estoques;
   QVector<int> skipRows;
 
-  QSqlQuery queryProduto;
+  SqlQuery queryProduto;
   queryProduto.prepare("SELECT (descontinuado OR desativado) AS invalido FROM produto WHERE idProduto = :idProduto");
 
-  QSqlQuery queryEquivalente;
+  SqlQuery queryEquivalente;
   queryEquivalente.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
-  QSqlQuery queryEstoque;
+  SqlQuery queryEstoque;
   queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant");
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1129,7 +1129,7 @@ void Orcamento::verificaCadastroCliente() {
 
   bool incompleto = false;
 
-  QSqlQuery queryCliente;
+  SqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", idCliente);
 
@@ -1137,7 +1137,7 @@ void Orcamento::verificaCadastroCliente() {
 
   if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) { incompleto = true; }
 
-  QSqlQuery queryCadastro;
+  SqlQuery queryCadastro;
   queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE idCliente = :idCliente");
   queryCadastro.bindValue(":idCliente", idCliente);
 
@@ -1178,12 +1178,12 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
 
   unsetConnections();
 
-  [&] {
+  try {
     const double prcUn = ui->lineEditPrecoUn->getValue();
     const double itemBruto = quant * prcUn;
 
     ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1191,7 +1191,7 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
 void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [&] {
+  try {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 
@@ -1206,7 +1206,7 @@ void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double de
 
     ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1217,11 +1217,11 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  [&] {
+  try {
     ui->doubleSpinBoxTotal->setMinimum(frete);
     ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1244,7 +1244,7 @@ void Orcamento::buscarParametrosFrete() {
 
   if (idLoja == 0) { throw RuntimeException("Erro buscando idLoja!"); }
 
-  QSqlQuery queryFrete;
+  SqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja);
 
@@ -1257,7 +1257,7 @@ void Orcamento::buscarParametrosFrete() {
 void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
-  [&] {
+  try {
     const double descontoPorc2 = descontoPorc / 100;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1272,7 +1272,7 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
 
     ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1280,7 +1280,7 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
 void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  [&] {
+  try {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -1295,7 +1295,7 @@ void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
     ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
     ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1313,7 +1313,7 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
 
   unsetConnections();
 
-  [&] { ui->doubleSpinBoxDesconto->setValue(desconto); }();
+  ui->doubleSpinBoxDesconto->setValue(desconto);
 
   setConnections();
 }
@@ -1337,7 +1337,7 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 
   int peso = 0;
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1384,7 +1384,7 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 void Orcamento::on_dataEmissao_dateChanged(const QDate &date) { ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day()); }
 
 void Orcamento::verificaDisponibilidadeEstoque() {
-  QSqlQuery query;
+  SqlQuery query;
 
   QStringList produtos;
 

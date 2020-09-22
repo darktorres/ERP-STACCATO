@@ -4,12 +4,12 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
 #include <QFileDialog>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
   ui->setupUi(this);
@@ -87,7 +87,7 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   for (auto &index : selection) { ids << model.data(index.row(), "idNFe").toString(); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
@@ -140,7 +140,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
@@ -186,7 +186,7 @@ void WidgetGare::on_pushButtonRetornoItau_clicked() {
 }
 
 void WidgetGare::on_table_activated(const QModelIndex &index) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 

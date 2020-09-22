@@ -97,7 +97,7 @@ void CadastroProduto::verifyFields() {
   if (ui->itemBoxFornecedor->getId().isNull()) { throw RuntimeError("Faltou preencher fornecedor!"); }
 
   if (tipo == Tipo::Cadastrar) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial");
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
@@ -180,7 +180,7 @@ void CadastroProduto::savingProcedures() {
   setData("un", ui->comboBoxUn->currentText());
   setData("validade", ui->dateEditValidade->date());
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 

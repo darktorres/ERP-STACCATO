@@ -9,11 +9,11 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QLineEdit>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
@@ -112,7 +112,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
 
   unsetConnections();
 
-  [&] {
+  try {
     double total = 0;
 
     const auto list = ui->table->selectionModel()->selectedRows();
@@ -131,7 +131,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
 
     // TODO: adicionar frete/adicionais
     ui->doubleSpinBoxTotal->setValue(total);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -267,7 +267,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
       const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
 
-      QSqlQuery query2;
+      SqlQuery query2;
       query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
                      "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
       query2.bindValue(":pagamento", tipoPgt);
@@ -447,7 +447,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
-  [&] {
+  try {
     double total = 0;
 
     const auto list = ui->table->selectionModel()->selectedRows();
@@ -456,7 +456,7 @@ void InputDialogFinanceiro::calcularTotal() {
 
     ui->doubleSpinBoxTotal->setValue(total);
     ui->widgetPgts->setTotal(total);
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -464,7 +464,7 @@ void InputDialogFinanceiro::calcularTotal() {
 void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
-  [&] {
+  try {
     const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
@@ -495,7 +495,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
       modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
       modelPedidoFornecedor.setData(rowMae, "preco", preco);
     }
-  }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -597,7 +597,7 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
     ui->dateEditEvento->setDate(modelFluxoCaixa.data(0, "dataEmissao").toDate());
   }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
@@ -624,8 +624,6 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   // -------------------------------------------------------------------------
 
   calcularTotal();
-
-  adjustSize();
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {

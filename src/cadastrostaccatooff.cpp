@@ -3,11 +3,11 @@
 
 #include "application.h"
 #include "searchdialogproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
 CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroStaccatoOff) {
@@ -136,7 +136,7 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
   for (auto index : list) {
     const QString idProduto = model.data(index.row(), "idProduto").toString();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec("UPDATE produto SET oldPrecoVenda = precoVenda, precoVenda = precoVenda * " + QString::number(1 - (ui->doubleSpinBoxDesconto->value() / 100)) +
                        ", promocao = 2, descricao = CONCAT(descricao, ' (PROMOÇÃO STACCATO OFF " + QString::number(ui->doubleSpinBoxDesconto->value()) + "%)'), validade = '" +
@@ -171,7 +171,7 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
   for (auto index : list) {
     const QString idProduto = model.data(index.row(), "idProduto").toString();
 
-    QSqlQuery query;
+    SqlQuery query;
 
     if (not query.exec(
             "UPDATE produto SET precoVenda = oldPrecoVenda, oldPrecoVenda = NULL, promocao = 0, descricao = LEFT(descricao, CHAR_LENGTH(descricao) - 28), validade = NULL WHERE idProduto = " +

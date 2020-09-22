@@ -2,12 +2,12 @@
 #include "ui_calculofrete.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QFile>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QXmlStreamReader>
 
 CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::CalculoFrete) {
@@ -96,7 +96,7 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   ui->comboBoxDestino->clear();
   ui->lineEditDistancia->clear();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 

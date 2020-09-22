@@ -1,8 +1,8 @@
 #pragma once
 
+#include "sqlquery.h"
 #include "sqltablemodel.h"
 
-#include <QSqlQuery>
 #include <QWidget>
 
 class PDF final {
@@ -18,14 +18,14 @@ private:
   // attributes
   const Tipo tipo;
   const QString id;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndEnt;
-  QSqlQuery queryEndFat;
-  QSqlQuery queryLoja;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery query;
-  QSqlQuery queryProfissional;
-  QSqlQuery queryVendedor;
+  SqlQuery queryCliente;
+  SqlQuery queryEndEnt;
+  SqlQuery queryEndFat;
+  SqlQuery queryLoja;
+  SqlQuery queryLojaEnd;
+  SqlQuery query;
+  SqlQuery queryProfissional;
+  SqlQuery queryVendedor;
   SqlTableModel modelItem;
   QWidget *parent;
   // methods

@@ -4,6 +4,7 @@
 #include "application.h"
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -12,7 +13,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
@@ -270,7 +270,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
@@ -332,7 +332,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
 }
 
 void InputDialogConfirmacao::criarConsumoQuebrado(const int idEstoque, const double caixasDefeito, const double quantCaixa) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("INSERT INTO estoque_has_consumo (idEstoque, status, local, quant, caixas) VALUES (:idEstoque, 'QUEBRADO', 'TEMP', :quant, :caixas)");
   query.bindValue(":idEstoque", idEstoque);
   query.bindValue(":quant", caixasDefeito * quantCaixa);
@@ -438,7 +438,7 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   modelCliente.setTable("cliente");
 
   // TODO: since this is inside a transaction simplify using a UPDATE query: credito = credito + novoCredito
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idCliente FROM venda WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idVenda);
 
@@ -506,7 +506,7 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
   // TODO: pass this responsability to Estoque class
   // NOTE: verificar WidgetCompraConsumos::desfazerConsumo
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT restante FROM estoque WHERE idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
 
@@ -517,7 +517,7 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
   qDebug() << "caixasDefeito: " << caixasDefeito;
 
   if (restante < 0) { // faltando pecas para consumo, desfazer os consumos com prazo maior
-    QSqlQuery querySelect;
+    SqlQuery querySelect;
     querySelect.prepare(
         "SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp2 ON ehc.idVendaProduto2 = "
         "vp2.idVendaProduto2 LEFT JOIN venda v ON vp2.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
@@ -525,11 +525,11 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
     if (not querySelect.exec()) { throw RuntimeException("Erro buscando consumo estoque: " + querySelect.lastError().text()); }
 
-    QSqlQuery queryDelete;
+    SqlQuery queryDelete;
     // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
     queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
-    QSqlQuery queryVenda;
+    SqlQuery queryVenda;
     // TODO: should set flag 'reposicao' (where is this flag unset?)
     queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 

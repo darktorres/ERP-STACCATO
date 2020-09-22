@@ -898,6 +898,10 @@ void ImportaProdutos::salvar() {
   }
 
   if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) { throw RuntimeException("Erro comunicando com banco de dados: " + queryPrecos.lastError().text()); }
+
+  SqlQuery queryExpirar;
+
+  if (not queryExpirar.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + queryExpirar.lastError().text()); }
 }
 
 void ImportaProdutos::on_pushButtonSalvar_clicked() {

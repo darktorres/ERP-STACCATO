@@ -316,8 +316,8 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
   SearchDialog *sdFornecedor =
       new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE", parent);
 
-  sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2", "comissaoLoja", "desativado", "email", "idFornecedor", "idNextel", "inscEstadual", "nextel", "representacao", "st", "tel",
-                             "telCel", "telCom", "especialidade", "fretePagoLoja"});
+  sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2", "comissaoLoja",  "desativado",    "email", "idFornecedor", "idNextel", "inscEstadual", "nextel",    "representacao", "st",
+                             "tel",        "telCel",    "telCom",    "especialidade", "fretePagoLoja", "banco", "agencia",      "cc",       "poupanca",     "nomeBanco", "cnpjBanco"});
 
   sdFornecedor->setHeaderData("razaoSocial", "Razão Social");
   sdFornecedor->setHeaderData("nomeFantasia", "Nome Fantasia");

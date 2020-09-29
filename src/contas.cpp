@@ -80,86 +80,88 @@ void Contas::preencher(const QModelIndex &index) {
   unsetConnections();
 
   try {
-    const int row = index.row();
+    [&] {
+      const int row = index.row();
 
-    if (index.column() == ui->tablePendentes->columnIndex("valor")) {
-      SqlQuery query;
-      query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-      query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
+      if (index.column() == ui->tablePendentes->columnIndex("valor")) {
+        SqlQuery query;
+        query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
+        query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
-      if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando valor: " + query.lastError().text(), this); }
+        if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando valor: " + query.lastError().text(), this); }
 
-      const double oldValor = query.value("valor").toDouble();
-      const double newValor = modelPendentes.data(row, "valor").toDouble();
+        const double oldValor = query.value("valor").toDouble();
+        const double newValor = modelPendentes.data(row, "valor").toDouble();
 
-      if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-        throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
-        modelPendentes.setData(row, "valor", oldValor);
-      }
-    }
-
-    if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
-      const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
-      const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
-
-      SqlQuery queryConta;
-
-      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-        throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
+          throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
+          modelPendentes.setData(row, "valor", oldValor);
+        }
       }
 
-      if (queryConta.first()) {
-        const int idConta = queryConta.value("idConta").toInt();
+      if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
+        const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
+        const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
-        if (idContaExistente == 0 and idConta != 0) { modelPendentes.setData(row, "idConta", idConta); }
-      }
+        SqlQuery queryConta;
 
-      modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
-      modelPendentes.setData(row, "valorReal", modelPendentes.data(row, "valor"));
-      modelPendentes.setData(row, "tipoReal", modelPendentes.data(row, "tipo"));
-      modelPendentes.setData(row, "parcelaReal", modelPendentes.data(row, "parcela"));
-      modelPendentes.setData(row, "centroCusto", modelPendentes.data(row, "idLoja"));
+        if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+          throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        }
 
-      // -------------------------------------------------------------------------
-
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
-
-      for (const auto &rowMatch : list) {
         if (queryConta.first()) {
           const int idConta = queryConta.value("idConta").toInt();
 
-          if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", idConta); }
+          if (idContaExistente == 0 and idConta != 0) { modelPendentes.setData(row, "idConta", idConta); }
         }
 
-        modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"));
-        modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
-        modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"));
-        modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"));
-        modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"));
-        modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"));
+        modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+        modelPendentes.setData(row, "valorReal", modelPendentes.data(row, "valor"));
+        modelPendentes.setData(row, "tipoReal", modelPendentes.data(row, "tipo"));
+        modelPendentes.setData(row, "parcelaReal", modelPendentes.data(row, "parcela"));
+        modelPendentes.setData(row, "centroCusto", modelPendentes.data(row, "idLoja"));
+
+        // -------------------------------------------------------------------------
+
+        const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
+
+        for (const auto &rowMatch : list) {
+          if (queryConta.first()) {
+            const int idConta = queryConta.value("idConta").toInt();
+
+            if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", idConta); }
+          }
+
+          modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"));
+          modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+          modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"));
+          modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"));
+          modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"));
+          modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"));
+        }
       }
-    }
 
-    // buscar linha da taxa cartao e alterar a conta para ser igual
-    if (index.column() == ui->tablePendentes->columnIndex("idConta")) {
-      if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
+      // buscar linha da taxa cartao e alterar a conta para ser igual
+      if (index.column() == ui->tablePendentes->columnIndex("idConta")) {
+        if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
 
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
+        const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
-      for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
-    }
+        for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
+      }
 
-    if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {
-      if (index.data() == 0) { return; }
+      if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {
+        if (index.data() == 0) { return; }
 
-      modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"));
-    }
+        modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"));
+      }
 
-    if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
-      if (index.data().toString() == "PENDENTE") { return; }
+      if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
+        if (index.data().toString() == "PENDENTE") { return; }
 
-      if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
-    }
+        if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
+      }
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

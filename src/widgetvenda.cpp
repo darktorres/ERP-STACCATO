@@ -277,34 +277,36 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
   try {
-    ui->comboBoxVendedores->clear();
+    [&] {
+      ui->comboBoxVendedores->clear();
 
-    const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+      const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-    SqlQuery query;
+      SqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      throw RuntimeException("Erro: " + query.lastError().text(), this);
-    }
-
-    ui->comboBoxVendedores->addItem("");
-
-    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
-
-    // -------------------------------------------------------------------------
-
-    const QString tipoUsuario = UserSession::tipoUsuario;
-
-    if (tipoUsuario == "VENDEDOR") {
-      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
-        ui->radioButtonTodos->setDisabled(true);
-        ui->radioButtonProprios->setChecked(true);
-      } else {
-        ui->radioButtonTodos->setEnabled(true);
+      if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+        throw RuntimeException("Erro: " + query.lastError().text(), this);
       }
-    }
 
-    montaFiltro();
+      ui->comboBoxVendedores->addItem("");
+
+      while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+
+      // -------------------------------------------------------------------------
+
+      const QString tipoUsuario = UserSession::tipoUsuario;
+
+      if (tipoUsuario == "VENDEDOR") {
+        if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
+          ui->radioButtonTodos->setDisabled(true);
+          ui->radioButtonProprios->setChecked(true);
+        } else {
+          ui->radioButtonTodos->setEnabled(true);
+        }
+      }
+
+      montaFiltro();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

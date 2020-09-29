@@ -884,23 +884,25 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double frete = ui->doubleSpinBoxFrete->value();
-    const double descontoReais = subTotalLiq + frete - total;
-    const double descontoPorc = descontoReais / subTotalLiq;
+    [&] {
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
+      const double descontoReais = subTotalLiq + frete - total;
+      const double descontoPorc = descontoReais / subTotalLiq;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc * 100);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
+      }
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
+      ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+      ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
 
-    ui->widgetPgts->setTotal(total);
-    ui->widgetPgts->resetarPagamentos();
+      ui->widgetPgts->setTotal(total);
+      ui->widgetPgts->resetarPagamentos();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -934,10 +936,12 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
   unsetConnections();
 
   try {
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
-    ui->widgetPgts->setFrete(frete);
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+    [&] {
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+      ui->widgetPgts->setFrete(frete);
+      ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+      ui->widgetPgts->resetarPagamentos();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -947,23 +951,25 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
   unsetConnections();
 
   try {
-    const double descontoPorc2 = descontoPorc / 100;
+    [&] {
+      const double descontoPorc2 = descontoPorc / 100;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2));
+      }
 
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double frete = ui->doubleSpinBoxFrete->value();
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
+      ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
 
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+      ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+      ui->widgetPgts->resetarPagamentos();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -973,23 +979,25 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double descontoPorc = descontoReais / subTotalLiq;
+    [&] {
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double descontoPorc = descontoReais / subTotalLiq;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc * 100);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
+      }
 
-    const double frete = ui->doubleSpinBoxFrete->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
+      ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
 
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+      ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+      ui->widgetPgts->resetarPagamentos();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

@@ -19,28 +19,30 @@ void WidgetOrcamento::setPermissions() {
   unsetConnections();
 
   try {
-    listarLojas();
+    [&] {
+      listarLojas();
 
-    const QString tipoUsuario = UserSession::tipoUsuario;
+      const QString tipoUsuario = UserSession::tipoUsuario;
 
-    if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") { ui->groupBoxMes->setChecked(true); }
+      if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") { ui->groupBoxMes->setChecked(true); }
 
-    if (tipoUsuario == "GERENTE LOJA") { ui->groupBoxLojas->hide(); }
+      if (tipoUsuario == "GERENTE LOJA") { ui->groupBoxLojas->hide(); }
 
-    if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
-      ui->checkBoxValido->setChecked(true);
-      ui->checkBoxExpirado->setChecked(true);
+      if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
+        ui->checkBoxValido->setChecked(true);
+        ui->checkBoxExpirado->setChecked(true);
 
-      ui->groupBoxVendedores->hide();
-    }
+        ui->groupBoxVendedores->hide();
+      }
 
-    (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+      (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
+      ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
 
-    on_comboBoxLojas_currentIndexChanged();
+      on_comboBoxLojas_currentIndexChanged();
 
-    ui->dateEdit->setDate(qApp->serverDate());
+      ui->dateEdit->setDate(qApp->serverDate());
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -215,12 +217,14 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+    [&] {
+      const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
-    for (const auto &child : children) {
-      child->setEnabled(true);
-      child->setChecked(enabled);
-    }
+      for (const auto &child : children) {
+        child->setEnabled(true);
+        child->setChecked(enabled);
+      }
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -232,34 +236,36 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
   try {
-    ui->comboBoxVendedores->clear();
+    [&] {
+      ui->comboBoxVendedores->clear();
 
-    const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+      const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-    SqlQuery query;
+      SqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      throw RuntimeException("Erro: " + query.lastError().text());
-    }
-
-    ui->comboBoxVendedores->addItem("");
-
-    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
-
-    const QString tipoUsuario = UserSession::tipoUsuario;
-
-    // -------------------------------------------------------------------------
-
-    if (tipoUsuario == "VENDEDOR") {
-      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
-        ui->radioButtonTodos->setDisabled(true);
-        ui->radioButtonProprios->setChecked(true);
-      } else {
-        ui->radioButtonTodos->setEnabled(true);
+      if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+        throw RuntimeException("Erro: " + query.lastError().text());
       }
-    }
 
-    montaFiltro();
+      ui->comboBoxVendedores->addItem("");
+
+      while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+
+      const QString tipoUsuario = UserSession::tipoUsuario;
+
+      // -------------------------------------------------------------------------
+
+      if (tipoUsuario == "VENDEDOR") {
+        if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
+          ui->radioButtonTodos->setDisabled(true);
+          ui->radioButtonProprios->setChecked(true);
+        } else {
+          ui->radioButtonTodos->setEnabled(true);
+        }
+      }
+
+      montaFiltro();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

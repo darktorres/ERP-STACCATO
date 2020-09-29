@@ -690,12 +690,14 @@ void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>();
+    [&] {
+      const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>();
 
-    for (const auto &child : children) {
-      child->setEnabled(true);
-      child->setChecked(enabled);
-    }
+      for (const auto &child : children) {
+        child->setEnabled(true);
+        child->setChecked(enabled);
+      }
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

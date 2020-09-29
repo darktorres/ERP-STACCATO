@@ -56,22 +56,24 @@ void ImportarXML::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   try {
-    const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
-    const int row = topLeft.row();
+    [&] {
+      const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
+      const int row = topLeft.row();
 
-    // TODO: se alterar quant. tem que alterar caixas
+      // TODO: se alterar quant. tem que alterar caixas
 
-    if (header == "Quant." or header == "R$ Unid.") {
-      const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
-      modelEstoque.setData(row, "valor", preco);
-    }
+      if (header == "Quant." or header == "R$ Unid.") {
+        const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
+        modelEstoque.setData(row, "valor", preco);
+      }
 
-    if (header == "R$") {
-      const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
-      modelEstoque.setData(row, "valorUnid", prcUnitario);
-    }
+      if (header == "R$") {
+        const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
+        modelEstoque.setData(row, "valorUnid", prcUnitario);
+      }
 
-    reparear(topLeft);
+      reparear(topLeft);
+    }();
   } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();
@@ -503,15 +505,17 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
   unsetConnections();
 
   try {
-    usarXMLBaixado();
-    parear();
+    [&] {
+      usarXMLBaixado();
+      parear();
 
-    const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+      const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-    if (list.isEmpty()) {
-      ui->pushButtonProcurar->setDisabled(true);
-      ui->itemBoxNFe->setReadOnly(true);
-    }
+      if (list.isEmpty()) {
+        ui->pushButtonProcurar->setDisabled(true);
+        ui->itemBoxNFe->setReadOnly(true);
+      }
+    }();
   } catch (RuntimeError &e) {
   } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
@@ -522,19 +526,21 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
   unsetConnections();
 
   try {
-    if (not lerXML()) {
-      ui->lineEdit->clear();
-      return;
-    }
+    [&] {
+      if (not lerXML()) {
+        ui->lineEdit->clear();
+        return;
+      }
 
-    parear();
+      parear();
 
-    const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+      const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-    if (list.isEmpty()) {
-      ui->pushButtonProcurar->setDisabled(true);
-      ui->itemBoxNFe->setReadOnly(true);
-    }
+      if (list.isEmpty()) {
+        ui->pushButtonProcurar->setDisabled(true);
+        ui->itemBoxNFe->setReadOnly(true);
+      }
+    }();
   } catch (RuntimeError &e) {
   } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
@@ -1058,42 +1064,44 @@ void ImportarXML::parear() {
   unsetConnections();
 
   try {
-    limparAssociacoes();
+    [&] {
+      limparAssociacoes();
 
-    for (int rowEstoque = 0, totalEstoque = modelEstoque.rowCount(); rowEstoque < totalEstoque; ++rowEstoque) {
-      const QString codComercialEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
-      const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
+      for (int rowEstoque = 0, totalEstoque = modelEstoque.rowCount(); rowEstoque < totalEstoque; ++rowEstoque) {
+        const QString codComercialEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
+        const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
 
-      // fazer busca por quantidades iguais
-      const auto iguais =
-          modelCompra.multiMatch({{"codComercial", codComercialEstoque}, {"quant", quantEstoque}, {"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+        // fazer busca por quantidades iguais
+        const auto iguais =
+            modelCompra.multiMatch({{"codComercial", codComercialEstoque}, {"quant", quantEstoque}, {"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-      if (not iguais.isEmpty()) {
-        associarIgual(iguais.first(), rowEstoque);
-        continue;
+        if (not iguais.isEmpty()) {
+          associarIgual(iguais.first(), rowEstoque);
+          continue;
+        }
+
+        // fazer busca por quantidades diferentes
+        const auto diferentes =
+            modelCompra.multiMatch({{"codComercial", codComercialEstoque}, {"quant", quantEstoque, false}, {"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green), false}});
+
+        bool repareado = false;
+        double estoquePareado = 0;
+
+        for (const auto rowCompra : diferentes) {
+          associarDiferente(rowCompra, rowEstoque, estoquePareado, repareado);
+          if (repareado) { return; }
+          if (qFuzzyCompare(quantEstoque, estoquePareado)) { break; }
+        }
       }
 
-      // fazer busca por quantidades diferentes
-      const auto diferentes =
-          modelCompra.multiMatch({{"codComercial", codComercialEstoque}, {"quant", quantEstoque, false}, {"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green), false}});
+      ui->tableCompra->resort();
 
-      bool repareado = false;
-      double estoquePareado = 0;
+      ui->tableEstoque->clearSelection();
+      ui->tableConsumo->clearSelection();
+      ui->tableCompra->clearSelection();
 
-      for (const auto rowCompra : diferentes) {
-        associarDiferente(rowCompra, rowEstoque, estoquePareado, repareado);
-        if (repareado) { return; }
-        if (qFuzzyCompare(quantEstoque, estoquePareado)) { break; }
-      }
-    }
-
-    ui->tableCompra->resort();
-
-    ui->tableEstoque->clearSelection();
-    ui->tableConsumo->clearSelection();
-    ui->tableCompra->clearSelection();
-
-    ui->tableCompra->setFocus(); // for updating proxyModel
+      ui->tableCompra->setFocus(); // for updating proxyModel
+    }();
   } catch (std::exception &e) { ui->pushButtonImportar->setDisabled(true); }
 
   setConnections();

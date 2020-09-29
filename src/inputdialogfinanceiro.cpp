@@ -113,24 +113,26 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
   unsetConnections();
 
   try {
-    double total = 0;
+    [&] {
+      double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+      const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) {
-      const int row = index.row();
+      for (const auto &index : list) {
+        const int row = index.row();
 
-      modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota);
+        modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota);
 
-      total += modelPedidoFornecedor2.data(row, "preco").toDouble();
-    }
+        total += modelPedidoFornecedor2.data(row, "preco").toDouble();
+      }
 
-    const double valueSt = total * (aliquota / 100);
+      const double valueSt = total * (aliquota / 100);
 
-    ui->doubleSpinBoxSt->setValue(valueSt);
+      ui->doubleSpinBoxSt->setValue(valueSt);
 
-    // TODO: adicionar frete/adicionais
-    ui->doubleSpinBoxTotal->setValue(total);
+      // TODO: adicionar frete/adicionais
+      ui->doubleSpinBoxTotal->setValue(total);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -250,163 +252,181 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
   unsetConnections();
 
-  [=] {
-    if (representacao) { return; }
+  try {
+    [=] {
+      if (representacao) { return; }
 
-    modelFluxoCaixa.revertAll();
+      modelFluxoCaixa.revertAll();
 
-    if (tipo == Tipo::Financeiro) {
-      const auto selection = ui->tableFluxoCaixa->selectionModel()->selectedRows();
+      if (tipo == Tipo::Financeiro) {
+        const auto selection = ui->tableFluxoCaixa->selectionModel()->selectedRows();
 
-      for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
-    }
+        for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
+      }
 
-    for (int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento) {
-      if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
+      for (int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento) {
+        if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
 
-      const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
-      const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
+        const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
+        const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
 
-      SqlQuery query2;
-      query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
-                     "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
-      query2.bindValue(":pagamento", tipoPgt);
-      query2.bindValue(":parcela", parcelas);
+        SqlQuery query2;
+        query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+                       "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
+        query2.bindValue(":pagamento", tipoPgt);
+        query2.bindValue(":parcela", parcelas);
 
-      if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+        if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
-      const int idConta = query2.value("idConta").toInt();
-      const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
+        const int idConta = query2.value("idConta").toInt();
+        const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
 
-      //-----------------------------------------------------------------
+        //-----------------------------------------------------------------
 
-      const QString observacaoPgt = ui->widgetPgts->listObservacao.at(pagamento)->text();
+        const QString observacaoPgt = ui->widgetPgts->listObservacao.at(pagamento)->text();
 
-      const double valor = ui->widgetPgts->listValorPgt.at(pagamento)->value();
-      const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
-      const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
+        const double valor = ui->widgetPgts->listValorPgt.at(pagamento)->value();
+        const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
+        const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
 
-      for (int parcela = 0; parcela < parcelas; ++parcela) {
+        for (int parcela = 0; parcela < parcelas; ++parcela) {
+          const int row = modelFluxoCaixa.insertRowAtEnd();
+
+          modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
+          modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
+          modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
+          modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
+
+          QString tipoData = ui->widgetPgts->listTipoData.at(pagamento)->currentText();
+          QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
+
+          if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
+            dataPgt = dataPgt.addMonths(parcela);
+          } else {
+            dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
+          }
+
+          dataPgt = qApp->ajustarDiaUtil(dataPgt);
+
+          modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
+
+          double val;
+
+          if (centavoSobressalente and parcela == 0) {
+            val = valorParcela + restoParcela;
+          } else if (not centavoSobressalente and parcela == parcelas - 1) {
+            val = valorParcela + restoParcela;
+          } else {
+            val = valorParcela;
+          }
+
+          modelFluxoCaixa.setData(row, "valor", val);
+          modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);
+          modelFluxoCaixa.setData(row, "parcela", parcela + 1);
+          modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
+          modelFluxoCaixa.setData(row, "idConta", idConta);
+          modelFluxoCaixa.setData(row, "grupo", "PRODUTOS - VENDA");
+        }
+      }
+
+      if (ui->doubleSpinBoxFrete->value() > 0) {
         const int row = modelFluxoCaixa.insertRowAtEnd();
 
         modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
         modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
         modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
         modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-
-        QString tipoData = ui->widgetPgts->listTipoData.at(pagamento)->currentText();
-        QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
-
-        if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
-          dataPgt = dataPgt.addMonths(parcela);
-        } else {
-          dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
-        }
-
-        dataPgt = qApp->ajustarDiaUtil(dataPgt);
-
-        modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-
-        double val;
-
-        if (centavoSobressalente and parcela == 0) {
-          val = valorParcela + restoParcela;
-        } else if (not centavoSobressalente and parcela == parcelas - 1) {
-          val = valorParcela + restoParcela;
-        } else {
-          val = valorParcela;
-        }
-
-        modelFluxoCaixa.setData(row, "valor", val);
-        modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);
-        modelFluxoCaixa.setData(row, "parcela", parcela + 1);
-        modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
-        modelFluxoCaixa.setData(row, "idConta", idConta);
-        modelFluxoCaixa.setData(row, "grupo", "PRODUTOS - VENDA");
-      }
-    }
-
-    if (ui->doubleSpinBoxFrete->value() > 0) {
-      const int row = modelFluxoCaixa.insertRowAtEnd();
-
-      modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-      modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-      modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-      modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-      modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditFrete->date()));
-      modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
-      modelFluxoCaixa.setData(row, "tipo", "Frete");
-      modelFluxoCaixa.setData(row, "parcela", 1);
-      modelFluxoCaixa.setData(row, "observacao", "");
-      modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-      modelFluxoCaixa.setData(row, "grupo", "LOGÍSTICA - FRETES");
-    }
-
-    // set st date
-    if (updateDate) {
-      if (ui->widgetPgts->pagamentos > 0) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDataPgt.at(0)->date()); }
-    }
-
-    //----------------------------------------------
-
-    if (ui->widgetPgts->pagamentos > 0) {
-      double stForn = 0;
-      double stLoja = 0;
-
-      const auto list = ui->table->selectionModel()->selectedRows();
-
-      for (const auto &index : list) {
-        const int row = index.row();
-
-        const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
-
-        if (tipoSt == "SEM ST") { continue; }
-
-        const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
-        const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
-        const double valorSt = preco * (aliquotaSt / 100);
-
-        if (tipoSt == "ST FORNECEDOR") { stForn += valorSt; }
-        if (tipoSt == "ST LOJA") { stLoja += valorSt; }
+        modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditFrete->date()));
+        modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
+        modelFluxoCaixa.setData(row, "tipo", "Frete");
+        modelFluxoCaixa.setData(row, "parcela", 1);
+        modelFluxoCaixa.setData(row, "observacao", "");
+        modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
+        modelFluxoCaixa.setData(row, "grupo", "LOGÍSTICA - FRETES");
       }
 
-      // 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
+      // set st date
+      if (updateDate) {
+        if (ui->widgetPgts->pagamentos > 0) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDataPgt.at(0)->date()); }
+      }
 
-      const int parcelas = ui->widgetPgts->listParcela.at(0)->currentIndex() + 1;
+      //----------------------------------------------
 
-      if (stForn > 0) {
-        if (ui->checkBoxParcelarSt->isChecked()) {
-          // TODO: dividir antes o valor para achar o resto e colocar na primeira/ultima parcela
+      if (ui->widgetPgts->pagamentos > 0) {
+        double stForn = 0;
+        double stLoja = 0;
 
-          for (int parcela = 0; parcela < parcelas; ++parcela) {
+        const auto list = ui->table->selectionModel()->selectedRows();
+
+        for (const auto &index : list) {
+          const int row = index.row();
+
+          const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
+
+          if (tipoSt == "SEM ST") { continue; }
+
+          const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
+          const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
+          const double valorSt = preco * (aliquotaSt / 100);
+
+          if (tipoSt == "ST FORNECEDOR") { stForn += valorSt; }
+          if (tipoSt == "ST LOJA") { stLoja += valorSt; }
+        }
+
+        // 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
+
+        const int parcelas = ui->widgetPgts->listParcela.at(0)->currentIndex() + 1;
+
+        if (stForn > 0) {
+          if (ui->checkBoxParcelarSt->isChecked()) {
+            // TODO: dividir antes o valor para achar o resto e colocar na primeira/ultima parcela
+
+            for (int parcela = 0; parcela < parcelas; ++parcela) {
+              const int row = modelFluxoCaixa.insertRowAtEnd();
+
+              modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
+              modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
+              modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
+              modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
+
+              const QString tipoData = ui->widgetPgts->listTipoData.at(0)->currentText();
+              QDate dataPgt = ui->widgetPgts->listDataPgt.at(0)->date();
+
+              if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
+                dataPgt = dataPgt.addMonths(parcela);
+              } else {
+                dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
+              }
+
+              dataPgt = qApp->ajustarDiaUtil(dataPgt);
+
+              modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
+
+              modelFluxoCaixa.setData(row, "valor", stForn / parcelas);
+              modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
+              modelFluxoCaixa.setData(row, "parcela", parcela + 1);
+              modelFluxoCaixa.setData(row, "observacao", "");
+              modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
+              modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
+            }
+          } else {
             const int row = modelFluxoCaixa.insertRowAtEnd();
 
             modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
             modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
             modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
             modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-
-            const QString tipoData = ui->widgetPgts->listTipoData.at(0)->currentText();
-            QDate dataPgt = ui->widgetPgts->listDataPgt.at(0)->date();
-
-            if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
-              dataPgt = dataPgt.addMonths(parcela);
-            } else {
-              dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
-            }
-
-            dataPgt = qApp->ajustarDiaUtil(dataPgt);
-
-            modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-
-            modelFluxoCaixa.setData(row, "valor", stForn / parcelas);
+            modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()));
+            modelFluxoCaixa.setData(row, "valor", stForn);
             modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
-            modelFluxoCaixa.setData(row, "parcela", parcela + 1);
+            modelFluxoCaixa.setData(row, "parcela", 1);
             modelFluxoCaixa.setData(row, "observacao", "");
             modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
             modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
           }
-        } else {
+        }
+
+        if (stLoja > 0) {
           const int row = modelFluxoCaixa.insertRowAtEnd();
 
           modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
@@ -414,32 +434,16 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
           modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
           modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
           modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()));
-          modelFluxoCaixa.setData(row, "valor", stForn);
-          modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
+          modelFluxoCaixa.setData(row, "valor", stLoja);
+          modelFluxoCaixa.setData(row, "tipo", "ST Loja");
           modelFluxoCaixa.setData(row, "parcela", 1);
           modelFluxoCaixa.setData(row, "observacao", "");
           modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
           modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
         }
       }
-
-      if (stLoja > 0) {
-        const int row = modelFluxoCaixa.insertRowAtEnd();
-
-        modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-        modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-        modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-        modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-        modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()));
-        modelFluxoCaixa.setData(row, "valor", stLoja);
-        modelFluxoCaixa.setData(row, "tipo", "ST Loja");
-        modelFluxoCaixa.setData(row, "parcela", 1);
-        modelFluxoCaixa.setData(row, "observacao", "");
-        modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-        modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
-      }
-    }
-  }();
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -448,14 +452,16 @@ void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
   try {
-    double total = 0;
+    [&] {
+      double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+      const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+      for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
-    ui->doubleSpinBoxTotal->setValue(total);
-    ui->widgetPgts->setTotal(total);
+      ui->doubleSpinBoxTotal->setValue(total);
+      ui->widgetPgts->setTotal(total);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -465,36 +471,38 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   try {
-    const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
-    const int row = topLeft.row();
+    [&] {
+      const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
+      const int row = topLeft.row();
 
-    const double quant = modelPedidoFornecedor2.data(row, "quant").toDouble();
+      const double quant = modelPedidoFornecedor2.data(row, "quant").toDouble();
 
-    const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
+      const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
 
-    if (match.isEmpty()) { throw RuntimeException("Erro atualizando valores na linha mãe!", this); }
+      if (match.isEmpty()) { throw RuntimeException("Erro atualizando valores na linha mãe!", this); }
 
-    const int rowMae = match.first().row();
+      const int rowMae = match.first().row();
 
-    if (header == "Quant." or header == "$ Unit.") {
-      const double prcUnitario = modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
-      const double preco = quant * prcUnitario;
+      if (header == "Quant." or header == "$ Unit.") {
+        const double prcUnitario = modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
+        const double preco = quant * prcUnitario;
 
-      modelPedidoFornecedor2.setData(row, "preco", preco);
+        modelPedidoFornecedor2.setData(row, "preco", preco);
 
-      modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
-      modelPedidoFornecedor.setData(rowMae, "preco", preco);
-    }
+        modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
+        modelPedidoFornecedor.setData(rowMae, "preco", preco);
+      }
 
-    if (header == "Total") {
-      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
-      const double prcUnitario = preco / quant;
+      if (header == "Total") {
+        const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
+        const double prcUnitario = preco / quant;
 
-      modelPedidoFornecedor2.setData(row, "prcUnitario", prcUnitario);
+        modelPedidoFornecedor2.setData(row, "prcUnitario", prcUnitario);
 
-      modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
-      modelPedidoFornecedor.setData(rowMae, "preco", preco);
-    }
+        modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
+        modelPedidoFornecedor.setData(rowMae, "preco", preco);
+      }
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -629,20 +637,22 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   unsetConnections();
 
-  [=] {
-    verifyFields();
+  try {
+    [=] {
+      verifyFields();
 
-    qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
+      qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
 
-    cadastrar();
+      cadastrar();
 
-    qApp->endTransaction();
+      qApp->endTransaction();
 
-    qApp->enqueueInformation("Dados salvos com sucesso!", this);
+      qApp->enqueueInformation("Dados salvos com sucesso!", this);
 
-    QDialog::accept();
-    close();
-  }();
+      QDialog::accept();
+      close();
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -730,21 +740,23 @@ void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate &) { montar
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
 
-  [=] {
-    double total = 0;
+  try {
+    [=] {
+      double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+      const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+      for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
-    const double aliquota = valueSt * 100 / total;
+      const double aliquota = valueSt * 100 / total;
 
-    ui->doubleSpinBoxAliquota->setValue(aliquota);
+      ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-    for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
+      for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
 
-    ui->doubleSpinBoxTotal->setValue(total);
-  }();
+      ui->doubleSpinBoxTotal->setValue(total);
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 
@@ -754,34 +766,36 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text) {
   unsetConnections();
 
-  [=] {
-    if (text == "Sem ST") {
-      ui->doubleSpinBoxSt->setValue(0);
-      ui->doubleSpinBoxAliquota->setValue(0);
+  try {
+    [=] {
+      if (text == "Sem ST") {
+        ui->doubleSpinBoxSt->setValue(0);
+        ui->doubleSpinBoxAliquota->setValue(0);
 
-      ui->labelAliquota->hide();
-      ui->doubleSpinBoxAliquota->hide();
-      ui->labelSt->hide();
-      ui->doubleSpinBoxSt->hide();
-    }
+        ui->labelAliquota->hide();
+        ui->doubleSpinBoxAliquota->hide();
+        ui->labelSt->hide();
+        ui->doubleSpinBoxSt->hide();
+      }
 
-    if (text == "ST Fornecedor" or text == "ST Loja") {
-      ui->doubleSpinBoxAliquota->setValue(4.68);
+      if (text == "ST Fornecedor" or text == "ST Loja") {
+        ui->doubleSpinBoxAliquota->setValue(4.68);
 
-      ui->labelAliquota->show();
-      ui->doubleSpinBoxAliquota->show();
-      ui->labelSt->show();
-      ui->doubleSpinBoxSt->show();
-      ui->dateEditPgtSt->show();
-    }
+        ui->labelAliquota->show();
+        ui->doubleSpinBoxAliquota->show();
+        ui->labelSt->show();
+        ui->doubleSpinBoxSt->show();
+        ui->dateEditPgtSt->show();
+      }
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+      const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) {
-      modelPedidoFornecedor2.setData(index.row(), "st", text);
-      modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
-    }
-  }();
+      for (const auto &index : list) {
+        modelPedidoFornecedor2.setData(index.row(), "st", text);
+        modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
+      }
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 

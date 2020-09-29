@@ -401,25 +401,27 @@ void Orcamento::removeItem() {
   unsetConnections();
 
   try {
-    if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
+    [&] {
+      if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
 
-    if (not modelItem.removeRow(currentRowItem)) { throw RuntimeException("Erro removendo linha: " + modelItem.lastError().text()); }
+      if (not modelItem.removeRow(currentRowItem)) { throw RuntimeException("Erro removendo linha: " + modelItem.lastError().text()); }
 
-    if (ui->lineEditOrcamento->text() != "Auto gerado") {
-      modelItem.submitAll();
-      calcPrecoGlobalTotal();
-      save(true);
-    } else {
-      calcPrecoGlobalTotal();
-    }
+      if (ui->lineEditOrcamento->text() != "Auto gerado") {
+        modelItem.submitAll();
+        calcPrecoGlobalTotal();
+        save(true);
+      } else {
+        calcPrecoGlobalTotal();
+      }
 
-    if (modelItem.rowCount() == 0) {
-      if (ui->lineEditOrcamento->text() == "Auto gerado") { ui->checkBoxRepresentacao->setEnabled(true); }
+      if (modelItem.rowCount() == 0) {
+        if (ui->lineEditOrcamento->text() == "Auto gerado") { ui->checkBoxRepresentacao->setEnabled(true); }
 
-      ui->itemBoxProduto->setFornecedorRep("");
-    }
+        ui->itemBoxProduto->setFornecedorRep("");
+      }
 
-    novoItem();
+      novoItem();
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -656,23 +658,27 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
 
   unsetConnections();
 
-  if (currentItemIsEstoque) {
-    const double caixas = quant / step;
-    ui->doubleSpinBoxCaixas->setValue(caixas);
+  try {
+    [&] {
+      if (currentItemIsEstoque) {
+        const double caixas = quant / step;
+        ui->doubleSpinBoxCaixas->setValue(caixas);
 
-    const double itemBruto = quant * prcUn;
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-  } else {
-    const double resto = fmod(quant, step);
-    const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
-    ui->doubleSpinBoxQuant->setValue(quant2);
+        const double itemBruto = quant * prcUn;
+        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
+      } else {
+        const double resto = fmod(quant, step);
+        const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
+        ui->doubleSpinBoxQuant->setValue(quant2);
 
-    const double caixas2 = quant2 / step;
-    ui->doubleSpinBoxCaixas->setValue(caixas2);
+        const double caixas2 = quant2 / step;
+        ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-    const double itemBruto2 = quant2 * prcUn;
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-  }
+        const double itemBruto2 = quant2 * prcUn;
+        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
+      }
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -780,33 +786,35 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
   unsetConnections();
 
   try {
-    if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
+    [&] {
+      if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
 
-    modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt());
-    modelItem.setData(currentRowItem, "fornecedor", ui->lineEditFornecedor->text());
-    modelItem.setData(currentRowItem, "produto", ui->itemBoxProduto->text());
-    modelItem.setData(currentRowItem, "obs", ui->lineEditObs->text());
-    modelItem.setData(currentRowItem, "prcUnitario", ui->lineEditPrecoUn->getValue());
-    modelItem.setData(currentRowItem, "caixas", ui->doubleSpinBoxCaixas->value());
-    modelItem.setData(currentRowItem, "quant", ui->doubleSpinBoxQuant->value());
-    modelItem.setData(currentRowItem, "quantCaixa", ui->doubleSpinBoxQuant->singleStep());
-    modelItem.setData(currentRowItem, "un", ui->lineEditUn->text());
-    modelItem.setData(currentRowItem, "codComercial", ui->lineEditCodComercial->text());
-    modelItem.setData(currentRowItem, "formComercial", ui->lineEditFormComercial->text());
-    modelItem.setData(currentRowItem, "desconto", ui->doubleSpinBoxDesconto->value());
-    modelItem.setData(currentRowItem, "estoque", currentItemIsEstoque);
-    modelItem.setData(currentRowItem, "promocao", currentItemIsPromocao);
-    modelItem.setData(currentRowItem, "parcial", modelItem.data(currentRowItem, "quant").toDouble() * modelItem.data(currentRowItem, "prcUnitario").toDouble());
-    modelItem.setData(currentRowItem, "parcialDesc", ui->doubleSpinBoxTotalItem->value());
-    modelItem.setData(currentRowItem, "descGlobal", ui->doubleSpinBoxDescontoGlobal->value());
-    modelItem.setData(currentRowItem, "total", ui->doubleSpinBoxTotalItem->value() * (1 - (ui->doubleSpinBoxDescontoGlobal->value() / 100)));
+      modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt());
+      modelItem.setData(currentRowItem, "fornecedor", ui->lineEditFornecedor->text());
+      modelItem.setData(currentRowItem, "produto", ui->itemBoxProduto->text());
+      modelItem.setData(currentRowItem, "obs", ui->lineEditObs->text());
+      modelItem.setData(currentRowItem, "prcUnitario", ui->lineEditPrecoUn->getValue());
+      modelItem.setData(currentRowItem, "caixas", ui->doubleSpinBoxCaixas->value());
+      modelItem.setData(currentRowItem, "quant", ui->doubleSpinBoxQuant->value());
+      modelItem.setData(currentRowItem, "quantCaixa", ui->doubleSpinBoxQuant->singleStep());
+      modelItem.setData(currentRowItem, "un", ui->lineEditUn->text());
+      modelItem.setData(currentRowItem, "codComercial", ui->lineEditCodComercial->text());
+      modelItem.setData(currentRowItem, "formComercial", ui->lineEditFormComercial->text());
+      modelItem.setData(currentRowItem, "desconto", ui->doubleSpinBoxDesconto->value());
+      modelItem.setData(currentRowItem, "estoque", currentItemIsEstoque);
+      modelItem.setData(currentRowItem, "promocao", currentItemIsPromocao);
+      modelItem.setData(currentRowItem, "parcial", modelItem.data(currentRowItem, "quant").toDouble() * modelItem.data(currentRowItem, "prcUnitario").toDouble());
+      modelItem.setData(currentRowItem, "parcialDesc", ui->doubleSpinBoxTotalItem->value());
+      modelItem.setData(currentRowItem, "descGlobal", ui->doubleSpinBoxDescontoGlobal->value());
+      modelItem.setData(currentRowItem, "total", ui->doubleSpinBoxTotalItem->value() * (1 - (ui->doubleSpinBoxDescontoGlobal->value() / 100)));
 
-    if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(currentRowItem, "fornecedor").toString()); }
+      if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(currentRowItem, "fornecedor").toString()); }
 
-    if (tipoItem == Tipo::Cadastrar) { backupItem.append(modelItem.record(currentRowItem)); }
+      if (tipoItem == Tipo::Cadastrar) { backupItem.append(modelItem.record(currentRowItem)); }
 
-    isDirty = true;
-    ui->checkBoxRepresentacao->setDisabled(true);
+      isDirty = true;
+      ui->checkBoxRepresentacao->setDisabled(true);
+    }();
   } catch (std::exception &e) {}
 
   novoItem();
@@ -847,24 +855,28 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   unsetConnections();
 
-  if (currentItemIsEstoque) {
-    const double quant = caixas * ui->spinBoxQuantCx->value();
-    ui->doubleSpinBoxQuant->setValue(quant);
+  try {
+    [&] {
+      if (currentItemIsEstoque) {
+        const double quant = caixas * ui->spinBoxQuantCx->value();
+        ui->doubleSpinBoxQuant->setValue(quant);
 
-    const double itemBruto = quant * prcUn;
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-  } else {
-    const double step = ui->doubleSpinBoxCaixas->singleStep();
-    const double resto = fmod(caixas, step);
-    const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
-    ui->doubleSpinBoxCaixas->setValue(caixas2);
+        const double itemBruto = quant * prcUn;
+        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
+      } else {
+        const double step = ui->doubleSpinBoxCaixas->singleStep();
+        const double resto = fmod(caixas, step);
+        const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+        ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-    const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
-    ui->doubleSpinBoxQuant->setValue(quant2);
+        const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
+        ui->doubleSpinBoxQuant->setValue(quant2);
 
-    const double itemBruto2 = quant2 * prcUn;
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-  }
+        const double itemBruto2 = quant2 * prcUn;
+        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
+      }
+    }();
+  } catch (std::exception &e) {}
 
   setConnections();
 }
@@ -1179,10 +1191,12 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   unsetConnections();
 
   try {
-    const double prcUn = ui->lineEditPrecoUn->getValue();
-    const double itemBruto = quant * prcUn;
+    [&] {
+      const double prcUn = ui->lineEditPrecoUn->getValue();
+      const double itemBruto = quant * prcUn;
 
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
+      ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -1192,20 +1206,22 @@ void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double de
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double descontoPorc = descontoReais / subTotalLiq;
+    [&] {
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double descontoPorc = descontoReais / subTotalLiq;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc * 100);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
+      }
 
-    const double frete = ui->doubleSpinBoxFrete->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
+      ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -1218,9 +1234,11 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
   unsetConnections();
 
   try {
-    ui->doubleSpinBoxTotal->setMinimum(frete);
-    ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+    [&] {
+      ui->doubleSpinBoxTotal->setMinimum(frete);
+      ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -1258,20 +1276,22 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
   unsetConnections();
 
   try {
-    const double descontoPorc2 = descontoPorc / 100;
+    [&] {
+      const double descontoPorc2 = descontoPorc / 100;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2));
+      }
 
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double frete = ui->doubleSpinBoxFrete->value();
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
+      ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
+      ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();
@@ -1281,20 +1301,22 @@ void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double frete = ui->doubleSpinBoxFrete->value();
-    const double descontoReais = subTotalLiq + frete - total;
-    const double descontoPorc = descontoReais / subTotalLiq;
+    [&] {
+      const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+      const double frete = ui->doubleSpinBoxFrete->value();
+      const double descontoReais = subTotalLiq + frete - total;
+      const double descontoPorc = descontoReais / subTotalLiq;
 
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        modelItem.setData(row, "descGlobal", descontoPorc * 100);
 
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
+        const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+        modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
+      }
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
+      ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+      ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
+    }();
   } catch (std::exception &e) {}
 
   setConnections();

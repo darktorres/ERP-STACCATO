@@ -312,7 +312,7 @@ void ProdutosPendentes::atualizarVenda(const int rowProduto) {
 }
 
 void ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
-  // NOTE: *quebralinha venda_has_produto2
+  // NOTE: *quebralinha venda_produto2
 
   const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
   const double proporcao = quantSeparar / quantVenda;

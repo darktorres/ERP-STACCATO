@@ -664,13 +664,14 @@ void WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   if (modelConsumoTemp.rowCount() == 0) { return; }
 
   // -------------------------------------------------------------------------
-  // NOTE: *quebralinha estoque_has_consumo
+  // NOTE: *quebralinha estoque_consumo
 
   const double quantConsumo = modelConsumoTemp.data(0, "quant").toDouble();
   const double caixasConsumo = modelConsumoTemp.data(0, "caixas").toDouble();
   const double valorConsumo = modelConsumoTemp.data(0, "valor").toDouble();
 
   // dados da NFe
+  const double quantTrib = modelConsumoTemp.data(0, "quantTrib").toDouble();
   const double desconto = modelConsumoTemp.data(0, "desconto").toDouble();
   const double vBC = modelConsumoTemp.data(0, "vBC").toDouble();
   const double vICMS = modelConsumoTemp.data(0, "vICMS").toDouble();
@@ -684,6 +685,9 @@ void WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   modelConsumoTemp.setData(0, "quant", quantConsumo * proporcao);
   modelConsumoTemp.setData(0, "caixas", caixasConsumo * proporcao);
   modelConsumoTemp.setData(0, "valor", valorConsumo * proporcao);
+
+  // impostos
+  modelConsumoTemp.setData(0, "quantTrib", quantTrib * proporcao);
   modelConsumoTemp.setData(0, "desconto", desconto * proporcao);
   modelConsumoTemp.setData(0, "vBC", vBC * proporcao);
   modelConsumoTemp.setData(0, "vICMS", vICMS * proporcao);
@@ -715,6 +719,9 @@ void WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   modelConsumoTemp.setData(newRow, "quant", quantConsumo * proporcaoNovo);
   modelConsumoTemp.setData(newRow, "caixas", caixasConsumo * proporcaoNovo);
   modelConsumoTemp.setData(newRow, "valor", valorConsumo * proporcaoNovo);
+
+  // impostos
+  modelConsumoTemp.setData(newRow, "quantTrib", quantTrib * proporcaoNovo);
   modelConsumoTemp.setData(newRow, "desconto", desconto * proporcaoNovo);
   modelConsumoTemp.setData(newRow, "vBC", vBC * proporcaoNovo);
   modelConsumoTemp.setData(newRow, "vICMS", vICMS * proporcaoNovo);

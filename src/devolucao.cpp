@@ -726,6 +726,7 @@ void Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
   const double caixasDevolvida = ui->doubleSpinBoxCaixas->value();
 
   const double valorConsumo = modelConsumos.data(0, "valor").toDouble();
+  const double quantTrib = modelConsumos.data(0, "quantTrib").toDouble();
   const double desconto = modelConsumos.data(0, "desconto").toDouble();
   const double vBC = modelConsumos.data(0, "vBC").toDouble();
   const double vICMS = modelConsumos.data(0, "vICMS").toDouble();
@@ -741,6 +742,9 @@ void Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
   modelConsumos.setData(0, "quant", quantDevolvida * -1);
   modelConsumos.setData(0, "caixas", caixasDevolvida);
   modelConsumos.setData(0, "valor", valorConsumo * proporcao);
+
+  // impostos
+  modelConsumos.setData(0, "quantTrib", quantTrib * proporcao);
   modelConsumos.setData(0, "desconto", desconto * proporcao);
   modelConsumos.setData(0, "vBC", vBC * proporcao);
   modelConsumos.setData(0, "vICMS", vICMS * proporcao);
@@ -780,6 +784,9 @@ void Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
   modelConsumos.setData(newRow, "quant", restante * -1);
   modelConsumos.setData(newRow, "caixas", (restante / stepQuant));
   modelConsumos.setData(newRow, "valor", valorConsumo * proporcaoNovo);
+
+  // impostos
+  modelConsumos.setData(newRow, "quantTrib", quantTrib * proporcaoNovo);
   modelConsumos.setData(newRow, "desconto", desconto * proporcaoNovo);
   modelConsumos.setData(newRow, "vBC", vBC * proporcaoNovo);
   modelConsumos.setData(newRow, "vICMS", vICMS * proporcaoNovo);

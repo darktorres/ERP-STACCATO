@@ -222,6 +222,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
   ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(true, this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("dataPagamento", new EditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 
@@ -560,6 +561,8 @@ bool Venda::viewRegister() {
 
     idLoja = data("idLoja").toInt();
     representacao = data("representacao").toBool();
+
+    if (not representacao) { ui->tableFluxoCaixa->hideColumn("representacao"); }
 
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
@@ -1375,7 +1378,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (not data("representacao").toBool()) { ui->tableFluxoCaixa->hideColumn("representacao"); }
+  ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
 
   ui->tableFluxoCaixa2->show();
   ui->widgetPgts->show();

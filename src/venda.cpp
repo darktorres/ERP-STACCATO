@@ -636,12 +636,13 @@ void Venda::criarComissaoProfissional() {
 
     if (not qFuzzyIsNull(valor)) {
       SqlQuery query1;
-      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
-                     "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, idConta, centroCusto, valor, tipo, dataPagamento, grupo) "
+                     "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :idConta, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
       query1.bindValue(":dataEmissao", date);
       query1.bindValue(":idVenda", ui->lineEditVenda->text());
       query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
       query1.bindValue(":idLoja", idLoja);
+      query1.bindValue(":idConta", 8); // caixa matriz
       query1.bindValue(":centroCusto", idLoja);
       query1.bindValue(":valor", valor);
       query1.bindValue(":tipo", "1. Dinheiro");

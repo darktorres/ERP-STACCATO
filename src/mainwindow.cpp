@@ -98,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGalpao), query.value("view_tab_galpao").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), query.value("view_tab_grafico").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
     throw RuntimeException("Erro lendo permissões: " + query.lastError().text(), this);
@@ -116,17 +117,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   //---------------------------------------------------------------------------
 
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), false);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
 
   const QString nomeUsuario = UserSession::nome;
-
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or nomeUsuario == "RODRIGO TORRES" or UserSession::tipoUsuario == "GERENTE LOJA") {
-    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
-  }
-
-  //---------------------------------------------------------------------------
-
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
 
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "RODRIGO TORRES") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }

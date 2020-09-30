@@ -714,12 +714,13 @@ void InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   if (modelConsumo.rowCount() == 0) { return; }
 
   // -------------------------------------------------------------------------
-  // NOTE: *quebralinha estoque_has_consumo
+  // NOTE: *quebralinha estoque_consumo
 
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble();
 
+  const double quantTrib = modelConsumo.data(0, "quantTrib").toDouble();
   const double desconto = modelConsumo.data(0, "desconto").toDouble();
   const double vBC = modelConsumo.data(0, "vBC").toDouble();
   const double vICMS = modelConsumo.data(0, "vICMS").toDouble();
@@ -735,6 +736,9 @@ void InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   modelConsumo.setData(0, "quant", quantRestante * -1);
   modelConsumo.setData(0, "caixas", caixasRestante);
   modelConsumo.setData(0, "valor", valorConsumo * proporcao);
+
+  // impostos
+  modelConsumo.setData(0, "quantTrib", quantTrib * proporcao);
   modelConsumo.setData(0, "desconto", desconto * proporcao);
   modelConsumo.setData(0, "vBC", vBC * proporcao);
   modelConsumo.setData(0, "vICMS", vICMS * proporcao);
@@ -772,6 +776,9 @@ void InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1);
   modelConsumo.setData(newRow, "caixas", caixasDefeito);
   modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo);
+
+  // impostos
+  modelConsumo.setData(newRow, "quantTrib", quantTrib * proporcaoNovo);
   modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo);
   modelConsumo.setData(newRow, "vBC", vBC * proporcaoNovo);
   modelConsumo.setData(newRow, "vICMS", vICMS * proporcaoNovo);

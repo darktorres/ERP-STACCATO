@@ -3,8 +3,10 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
+#include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -92,6 +94,10 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(3, this));
 
+  const bool representacao = (idVenda.at(11) == "R");
+
+  representacao ? ui->tableProdutos->hideColumn("custo") : ui->tableProdutos->hideColumn("custoVenda");
+
   //-----------------------------------------------
 
   if (modelViewProdutos.rowCount() == 1) { ui->tableProdutos->selectRow(0); }
@@ -118,6 +124,7 @@ void ProdutosPendentes::setupTables() {
   modelViewProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelViewProdutos.setHeaderData("codBarras", "Cód. Barras");
   modelViewProdutos.setHeaderData("custo", "Custo");
+  modelViewProdutos.setHeaderData("custoVenda", "Custo Rep.");
   modelViewProdutos.setHeaderData("obs", "Obs.");
 
   ui->tableProdutos->setModel(&modelViewProdutos);
@@ -126,6 +133,7 @@ void ProdutosPendentes::setupTables() {
 
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("custoVenda", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("obs", new EditDelegate(this));
 
   ui->tableProdutos->hideColumn("idVenda");
@@ -280,6 +288,12 @@ void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
 
   const int newRow = model.insertRowAtEnd();
 
+  const bool representacao = (modelViewProdutos.data(row, "idVenda").toString().at(11) == "R");
+
+  const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelViewProdutos.data(row, "quant").toDouble();
+  const double custo = representacao ? modelViewProdutos.data(row, "custoVenda").toDouble() : modelViewProdutos.data(row, "custo").toDouble();
+  const double step = ui->doubleSpinBoxQuantTotal->singleStep();
+
   model.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"));
   model.setData(newRow, "idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"));
   model.setData(newRow, "idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"));
@@ -290,17 +304,12 @@ void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   model.setData(newRow, "colecao", modelViewProdutos.data(row, "colecao"));
   model.setData(newRow, "un", modelViewProdutos.data(row, "un"));
   model.setData(newRow, "un2", modelViewProdutos.data(row, "un2"));
-  model.setData(newRow, "prcUnitario", modelViewProdutos.data(row, "custo"));
+  model.setData(newRow, "prcUnitario", custo);
   model.setData(newRow, "kgcx", modelViewProdutos.data(row, "kgcx"));
   model.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"));
   model.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"));
   model.setData(newRow, "codBarras", modelViewProdutos.data(row, "codBarras"));
   model.setData(newRow, "dataPrevCompra", dataPrevista);
-
-  const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelViewProdutos.data(row, "quant").toDouble();
-  const double custo = modelViewProdutos.data(row, "custo").toDouble();
-  const double step = ui->doubleSpinBoxQuantTotal->singleStep();
-
   model.setData(newRow, "quant", quant);
   model.setData(newRow, "preco", quant * custo);
   model.setData(newRow, "caixas", quant / step);

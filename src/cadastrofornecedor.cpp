@@ -6,6 +6,7 @@
 #include "checkboxdelegate.h"
 #include "usersession.h"
 
+#include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
@@ -43,7 +44,9 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked);
+  connect(ui->pushButtonSalvarPrazos, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonSalvarPrazos_clicked);
   connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastroFornecedor::on_tabWidget_currentChanged);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked);
 }
 
@@ -397,6 +400,51 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
 
 void CadastroFornecedor::on_lineEditCNPJBancario_textEdited(const QString &text) {
   ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+}
+
+void CadastroFornecedor::on_pushButtonSalvarPrazos_clicked() {
+  const QString especialidade1 = QString::number(0) + ", '" + ui->labelEspecialidade1->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade1->value());
+  const QString especialidade2 = QString::number(1) + ", '" + ui->labelEspecialidade2->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade2->value());
+  const QString especialidade3 = QString::number(2) + ", '" + ui->labelEspecialidade3->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade3->value());
+  const QString especialidade4 = QString::number(3) + ", '" + ui->labelEspecialidade4->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade4->value());
+  const QString especialidade5 = QString::number(4) + ", '" + ui->labelEspecialidade5->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade5->value());
+
+  QSqlQuery query;
+
+  if (not query.exec("INSERT INTO fornecedor_has_prazo (especialidadeIndex, especialidade, prazo) VALUES (" + especialidade1 + "), (" + especialidade2 + "), (" + especialidade3 + "), (" +
+                     especialidade4 + "), (" + especialidade5 + ") ON DUPLICATE KEY UPDATE prazo = VALUES (prazo)")) {
+    throw RuntimeException("Erro cadastrando prazos: " + query.lastError().text());
+  }
+
+  qApp->enqueueInformation("Prazos atualizados com sucesso!", this);
+}
+
+void CadastroFornecedor::on_tabWidget_currentChanged(int index) {
+  if (ui->tabWidget->tabText(index) == "Parâmetros") {
+    QSqlQuery query;
+
+    if (not query.exec("SELECT * FROM fornecedor_has_prazo")) { throw RuntimeException("Erro buscando prazos: " + query.lastError().text()); }
+
+    if (query.first()) {
+      ui->spinBoxPrazoEspecialidade1->setValue(query.value("prazo").toInt());
+
+      query.next();
+
+      ui->spinBoxPrazoEspecialidade2->setValue(query.value("prazo").toInt());
+
+      query.next();
+
+      ui->spinBoxPrazoEspecialidade3->setValue(query.value("prazo").toInt());
+
+      query.next();
+
+      ui->spinBoxPrazoEspecialidade4->setValue(query.value("prazo").toInt());
+
+      query.next();
+
+      ui->spinBoxPrazoEspecialidade5->setValue(query.value("prazo").toInt());
+    }
+  }
 }
 
 // TODO: 5poder alterar na tela 'comissao'

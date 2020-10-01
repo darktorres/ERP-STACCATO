@@ -91,9 +91,6 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor.setHeaderData("preco", "Total");
   modelPedidoFornecedor.setHeaderData("un", "Un.");
-  modelPedidoFornecedor.setHeaderData("un2", "Un.2");
-  modelPedidoFornecedor.setHeaderData("kgcx", "Kg./Cx.");
-  modelPedidoFornecedor.setHeaderData("formComercial", "Formato");
   modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
   modelPedidoFornecedor.setHeaderData("obs", "Obs.");
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
@@ -111,11 +108,17 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
+
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
+
   if (tipo == Tipo::Faturamento) {
     ui->table->hideColumn("idPedido2");
     ui->table->hideColumn("idPedidoFK");
   }
+
+  ui->table->hideColumn("un2");
+  ui->table->hideColumn("kgcx");
+
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
@@ -132,6 +135,7 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+  ui->table->hideColumn("formComercial");
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 

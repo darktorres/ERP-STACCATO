@@ -139,6 +139,8 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
+  ui->table->setItemDelegateForColumn("obs", new EditDelegate(this));
+
   if (tipo == Tipo::GerarCompra) {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));

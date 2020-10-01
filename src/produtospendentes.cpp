@@ -122,8 +122,11 @@ void ProdutosPendentes::setupTables() {
 
   ui->tableProdutos->setModel(&modelViewProdutos);
 
+  ui->tableProdutos->setItemDelegate(new NoEditDelegate(this));
+
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("obs", new EditDelegate(this));
 
   ui->tableProdutos->hideColumn("idVenda");
   ui->tableProdutos->hideColumn("idVendaProduto2");

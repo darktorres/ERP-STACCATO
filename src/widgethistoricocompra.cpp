@@ -86,13 +86,10 @@ void WidgetHistoricoCompra::setTreeView() {
   modelTree.setHeaderData("codComercial", "Cód. Com.");
   modelTree.setHeaderData("quant", "Quant.");
   modelTree.setHeaderData("un", "Un.");
-  modelTree.setHeaderData("un2", "Un2.");
   modelTree.setHeaderData("caixas", "Cx.");
   modelTree.setHeaderData("prcUnitario", "R$ Unit.");
   modelTree.setHeaderData("preco", "R$");
-  modelTree.setHeaderData("kgcx", "Kg./Cx.");
   modelTree.setHeaderData("formComercial", "Form. Com.");
-  modelTree.setHeaderData("codBarras", "Cód. Barras");
   modelTree.setHeaderData("obs", "Obs.");
   modelTree.setHeaderData("dataPrevCompra", "Prev. Compra");
   modelTree.setHeaderData("dataRealCompra", "Compra");
@@ -123,6 +120,9 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("fornecedor");
   ui->treeView->hideColumn("idProduto");
   ui->treeView->hideColumn("quantUpd");
+  ui->treeView->hideColumn("un2");
+  ui->treeView->hideColumn("kgcx");
+  ui->treeView->hideColumn("codBarras");
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 

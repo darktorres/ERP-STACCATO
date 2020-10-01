@@ -158,7 +158,7 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor2.setHeaderData("status", "Status");
   modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");
-  modelPedidoFornecedor2.setHeaderData("idVenda", "Código");
+  modelPedidoFornecedor2.setHeaderData("idVenda", "Venda");
   modelPedidoFornecedor2.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor2.setHeaderData("descricao", "Produto");
   modelPedidoFornecedor2.setHeaderData("obs", "Obs.");
@@ -166,12 +166,9 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor2.setHeaderData("codComercial", "Cód. Com.");
   modelPedidoFornecedor2.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor2.setHeaderData("un", "Un.");
-  modelPedidoFornecedor2.setHeaderData("un2", "Un.2");
   modelPedidoFornecedor2.setHeaderData("caixas", "Caixas");
   modelPedidoFornecedor2.setHeaderData("prcUnitario", "$ Unit.");
   modelPedidoFornecedor2.setHeaderData("preco", "Total");
-  modelPedidoFornecedor2.setHeaderData("kgcx", "Kg./Cx.");
-  modelPedidoFornecedor2.setHeaderData("formComercial", "Formato");
 
   modelPedidoFornecedor2.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor2, this);
 
@@ -201,6 +198,15 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+  ui->table->hideColumn("un2");
+  ui->table->hideColumn("kgcx");
+  ui->table->hideColumn("formComercial");
+
+  if (tipo == Tipo::ConfirmarCompra) {
+    ui->table->hideColumn("status");
+    ui->table->hideColumn("ordemRepresentacao");
+    ui->table->hideColumn("codFornecedor");
+  }
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 

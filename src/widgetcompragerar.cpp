@@ -48,7 +48,7 @@ void WidgetCompraGerar::setupTables() {
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
 
-  modelProdutos.setHeaderData("idVenda", "Código");
+  modelProdutos.setHeaderData("idVenda", "Venda");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("descricao", "Descrição");
   modelProdutos.setHeaderData("colecao", "Coleção");
@@ -56,21 +56,17 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setHeaderData("quant", "Quant.");
   modelProdutos.setHeaderData("prcUnitario", "Custo Unit.");
   modelProdutos.setHeaderData("un", "Un.");
-  modelProdutos.setHeaderData("un2", "Un.2");
   modelProdutos.setHeaderData("preco", "Custo Total");
-  modelProdutos.setHeaderData("kgcx", "Kg./Cx.");
-  modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
-  modelProdutos.setHeaderData("codBarras", "Cód. Bar.");
   modelProdutos.setHeaderData("dataPrevCompra", "Prev. Compra");
   modelProdutos.setHeaderData("obs", "Obs.");
-  modelProdutos.setHeaderData("status", "Status");
 
   ui->tableProdutos->setModel(&modelProdutos);
 
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("status");
   ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("ordemRepresentacao");
   ui->tableProdutos->hideColumn("idVendaProduto1");
@@ -96,6 +92,10 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("dataRealReceb");
   ui->tableProdutos->hideColumn("aliquotaSt");
   ui->tableProdutos->hideColumn("st");
+  ui->tableProdutos->hideColumn("un2");
+  ui->tableProdutos->hideColumn("codBarras");
+  ui->tableProdutos->hideColumn("kgcx");
+  ui->tableProdutos->hideColumn("formComercial");
 
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraGerar::calcularPreco);
 }

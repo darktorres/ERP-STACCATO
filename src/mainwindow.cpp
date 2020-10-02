@@ -150,20 +150,22 @@ void MainWindow::updateTables() {
 
   qApp->setUpdating(true);
 
-  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+  try {
+    const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentTab == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentTab == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentTab == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentTab == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
-  if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentTab == "RH") { ui->widgetRh->updateTables(); }
-  if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
+    if (currentTab == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+    if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
+    if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
+    if (currentTab == "Logística") { ui->widgetLogistica->updateTables(); }
+    if (currentTab == "NFe") { ui->widgetNfe->updateTables(); }
+    if (currentTab == "Estoque") { ui->widgetEstoque->updateTables(); }
+    if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
+    if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+    if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+    if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
+    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
+    if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
+  } catch (std::exception &e) {}
 
   qApp->setUpdating(false);
 }

@@ -141,6 +141,7 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("idVendaProdutoFK");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
+  ui->tableProdutos->hideColumn("st");
 }
 
 void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {

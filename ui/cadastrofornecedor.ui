@@ -1015,7 +1015,7 @@ color: rgb(0, 0, 0);</string>
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Prazos especialidades</string>
+          <string>Prazos especialidades (dias úteis)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_14">
           <item row="3" column="1">

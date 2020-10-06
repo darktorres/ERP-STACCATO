@@ -40,6 +40,8 @@ void NFeDistribuicao::resetTables() { modelIsSet = false; }
 void NFeDistribuicao::updateTables() {
   if (not isSet) {
     setConnections();
+    ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
+    ui->lineEditCNPJ->setVisible(false);
     isSet = true;
   }
 
@@ -54,9 +56,9 @@ void NFeDistribuicao::updateTables() {
 }
 
 void NFeDistribuicao::buscarNSU() {
-  const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
+  const QString idLoja = ui->itemBoxLoja->getId().toString();
 
-  if (idLoja == "0") { throw RuntimeError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (idLoja.isEmpty()) { return; }
 
   SqlQuery queryLoja;
 
@@ -67,8 +69,6 @@ void NFeDistribuicao::buscarNSU() {
   ui->spinBoxMaxNSU->setValue(queryLoja.value("maximoNSU").toInt());
   ui->spinBoxUltNSU->setValue(queryLoja.value("ultimoNSU").toInt());
   ui->lineEditCNPJ->setText(queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-"));
-
-  ui->lineEditCNPJ->setVisible(false);
 }
 
 void NFeDistribuicao::setConnections() {
@@ -80,6 +80,8 @@ void NFeDistribuicao::setConnections() {
   connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU, connectionType);
   connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
   connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
   connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
@@ -95,6 +97,8 @@ void NFeDistribuicao::unsetConnections() {
   disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked);
   disconnect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked);
   disconnect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked);
@@ -675,6 +679,8 @@ void NFeDistribuicao::montaFiltro() {
 
   filtros << "nsu IS NOT NULL";
 
+  //-------------------------------------
+
   QStringList filtroCheck;
 
   for (const auto &child : ui->groupBoxFiltros->findChildren<QCheckBox *>()) {
@@ -682,6 +688,22 @@ void NFeDistribuicao::montaFiltro() {
   }
 
   if (not filtroCheck.isEmpty()) { filtros << "statusDistribuicao IN (" + filtroCheck.join(", ") + ")"; }
+
+  //-------------------------------------
+
+  const QString lojaNome = ui->itemBoxLoja->text();
+
+  if (not lojaNome.isEmpty()) {
+    QSqlQuery queryLoja;
+
+    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + ui->itemBoxLoja->getId().toString()) or not queryLoja.first()) {
+      throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text());
+    }
+
+    filtros << "cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
+  }
+
+  //-------------------------------------
 
   model.setFilter(filtros.join(" AND "));
 }

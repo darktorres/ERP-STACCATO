@@ -15,7 +15,7 @@
 #include <QSqlRecord>
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent)
-    : QDialog(parent), primaryKey(primaryKey), fullTextIndex(fullTextIndex), textKeys(textKeys), filter(filter), model(100), ui(new Ui::SearchDialog) {
+    : QDialog(parent), primaryKey(primaryKey), fullTextIndex(fullTextIndex), textKeys(textKeys), filter(filter), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);

@@ -354,6 +354,8 @@ void CadastroLoja::cadastrar() {
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
     for (auto &record : backupConta) { modelConta.insertRecord(-1, record); }
+
+    throw;
   }
 }
 

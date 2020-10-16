@@ -218,6 +218,8 @@ void CadastroUsuario::cadastrar() {
     qApp->rollbackTransaction();
     model.select();
     modelPermissoes.select();
+
+    throw;
   }
 }
 

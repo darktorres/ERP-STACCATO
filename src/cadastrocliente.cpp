@@ -374,6 +374,8 @@ void CadastroCliente::cadastrar() {
     modelEnd.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+
+    throw;
   }
 }
 

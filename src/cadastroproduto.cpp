@@ -227,6 +227,8 @@ void CadastroProduto::cadastrar() {
   } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
+
+    throw;
   }
 }
 

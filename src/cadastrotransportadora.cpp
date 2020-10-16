@@ -387,6 +387,8 @@ void CadastroTransportadora::cadastrar() {
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
     for (auto &record : backupVeiculo) { modelVeiculo.insertRecord(-1, record); }
+
+    throw;
   }
 }
 

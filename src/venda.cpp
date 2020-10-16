@@ -1109,6 +1109,8 @@ void Venda::cadastrar() {
     modelItem.select();
 
     for (auto &record : backupItem) { modelItem.insertRecord(-1, record); }
+
+    throw;
   }
 }
 

@@ -42,6 +42,9 @@ void NFeDistribuicao::updateTables() {
     setConnections();
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
     ui->lineEditCNPJ->setVisible(false);
+
+    if (UserSession::getSetting("User/monitorarNFe").toBool()) { ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr")); }
+
     isSet = true;
   }
 

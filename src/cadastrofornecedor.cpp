@@ -138,6 +138,14 @@ void CadastroFornecedor::savingProcedures() {
 
   setData("cc", ui->lineEditCC->text());
   setData("poupanca", ui->checkBoxPoupanca->isChecked());
+
+  QSqlQuery queryRep;
+
+  const QString isRep = ui->checkBoxRepresentacao->isChecked() ? "TRUE" : "FALSE";
+
+  if (not queryRep.exec("UPDATE produto SET representacao = " + isRep + " WHERE fornecedor = '" + ui->lineEditFornecedor->text() + "'")) {
+    throw RuntimeException("Erro atualizando representação: " + queryRep.lastError().text());
+  }
 }
 
 void CadastroFornecedor::clearFields() {

@@ -464,7 +464,7 @@ color: rgb(0, 0, 0);</string>
                <item row="2" column="7">
                 <widget class="QCheckBox" name="checkBoxRepresentacao">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="text">
                   <string>Representação</string>

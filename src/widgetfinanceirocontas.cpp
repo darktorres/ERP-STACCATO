@@ -452,6 +452,8 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag");
 
   for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
+    if (xlsx.read(rowExcel, 1).toString().isEmpty()) { continue; }
+
     SqlQuery queryLoja;
 
     if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {

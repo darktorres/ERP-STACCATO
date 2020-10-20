@@ -1243,14 +1243,11 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   // -------------------------------------------------------------------------
 
-  // TODO: readd this later
-  //  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-  //    const QString status = modelFluxoCaixa.data(row, "status").toString();
+  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
+    const QString status = modelFluxoCaixa.data(row, "status").toString();
 
-  //    if (status == "RECEBIDO") {
-  //      throw RuntimeError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
-  //    }
-  //  }
+    if (status == "RECEBIDO") { throw RuntimeError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this); }
+  }
 
   // -------------------------------------------------------------------------
 

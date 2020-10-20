@@ -400,9 +400,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   if (not queryPagamento.exec() or not queryPagamento.first()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-  if (queryPagamento.value("dataPagamento").toDate().daysTo(qApp->serverDate()) > 5) { throw RuntimeError("No máximo 5 dias para reverter!", this); }
-
-  if (queryPagamento.value("grupo").toString() == "Transferência") { throw RuntimeError("Não pode reverter transferência!", this); }
+  if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Reverter");

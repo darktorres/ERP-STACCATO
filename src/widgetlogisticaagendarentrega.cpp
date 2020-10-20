@@ -29,6 +29,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setHeaderData("dataRealReceb", "Receb.");
   modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
   modelVendas.setHeaderData("idVenda", "Venda");
+  modelVendas.setHeaderData("kg", "Kg.");
 
   modelVendas.proxyModel = new FinanceiroProxyModel(&modelVendas, this);
 

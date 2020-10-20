@@ -143,7 +143,7 @@ void CadastroFornecedor::savingProcedures() {
 
   const QString isRep = ui->checkBoxRepresentacao->isChecked() ? "TRUE" : "FALSE";
 
-  if (not queryRep.exec("UPDATE produto SET representacao = " + isRep + " WHERE fornecedor = '" + ui->lineEditFornecedor->text() + "'")) {
+  if (not queryRep.exec("UPDATE produto SET fornecedor = '" + data("razaoSocial").toString() + "', representacao = " + isRep + " WHERE idFornecedor = " + data("idFornecedor").toString())) {
     throw RuntimeException("Erro atualizando representação: " + queryRep.lastError().text());
   }
 }

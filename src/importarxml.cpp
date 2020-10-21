@@ -875,8 +875,6 @@ void ImportarXML::percorrerXml(XML &xml) {
 }
 
 void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
-  // TODO: caso dê erro criando consumo bloquear botao de importar
-
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
   const int idVendaProduto2 = modelCompra.data(rowCompra, "idVendaProduto2").toInt();
 
@@ -931,8 +929,9 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
 
   const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
-
   const double caixas = quantConsumo / quantCaixa;
+  const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
+  const double proporcao = quantConsumo / quantEstoque;
 
   modelConsumo.setData(rowConsumo, "idEstoque", idEstoque);
   modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2);
@@ -942,6 +941,37 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   modelConsumo.setData(rowConsumo, "caixas", caixas);
   const double valorUnid = modelConsumo.data(rowConsumo, "valorUnid").toDouble();
   modelConsumo.setData(rowConsumo, "valor", quantConsumo * valorUnid);
+
+  modelConsumo.setData(rowConsumo, "codBarrasTrib", modelEstoque.data(rowEstoque, "codBarrasTrib"));
+  modelConsumo.setData(rowConsumo, "unTrib", modelEstoque.data(rowEstoque, "unTrib"));
+  modelConsumo.setData(rowConsumo, "quantTrib", modelEstoque.data(rowEstoque, "quantTrib").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "valorUnidTrib", modelEstoque.data(rowEstoque, "valorUnidTrib"));
+  modelConsumo.setData(rowConsumo, "desconto", modelEstoque.data(rowEstoque, "desconto").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "compoeTotal", modelEstoque.data(rowEstoque, "compoeTotal"));
+  modelConsumo.setData(rowConsumo, "numeroPedido", modelEstoque.data(rowEstoque, "numeroPedido"));
+  modelConsumo.setData(rowConsumo, "itemPedido", modelEstoque.data(rowEstoque, "itemPedido"));
+  modelConsumo.setData(rowConsumo, "tipoICMS", modelEstoque.data(rowEstoque, "tipoICMS"));
+  modelConsumo.setData(rowConsumo, "orig", modelEstoque.data(rowEstoque, "orig"));
+  modelConsumo.setData(rowConsumo, "cstICMS", modelEstoque.data(rowEstoque, "cstICMS"));
+  modelConsumo.setData(rowConsumo, "modBC", modelEstoque.data(rowEstoque, "modBC"));
+  modelConsumo.setData(rowConsumo, "vBC", modelEstoque.data(rowEstoque, "vBC").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pICMS", modelEstoque.data(rowEstoque, "pICMS"));
+  modelConsumo.setData(rowConsumo, "vICMS", modelEstoque.data(rowEstoque, "vICMS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "modBCST", modelEstoque.data(rowEstoque, "modBCST"));
+  modelConsumo.setData(rowConsumo, "pMVAST", modelEstoque.data(rowEstoque, "pMVAST"));
+  modelConsumo.setData(rowConsumo, "vBCST", modelEstoque.data(rowEstoque, "vBCST").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pICMSST", modelEstoque.data(rowEstoque, "pICMSST"));
+  modelConsumo.setData(rowConsumo, "vICMSST", modelEstoque.data(rowEstoque, "vICMSST").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "cEnq", modelEstoque.data(rowEstoque, "cEnq"));
+  modelConsumo.setData(rowConsumo, "cstIPI", modelEstoque.data(rowEstoque, "cstIPI"));
+  modelConsumo.setData(rowConsumo, "cstPIS", modelEstoque.data(rowEstoque, "cstPIS"));
+  modelConsumo.setData(rowConsumo, "vBCPIS", modelEstoque.data(rowEstoque, "vBCPIS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pPIS", modelEstoque.data(rowEstoque, "pPIS"));
+  modelConsumo.setData(rowConsumo, "vPIS", modelEstoque.data(rowEstoque, "vPIS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "cstCOFINS", modelEstoque.data(rowEstoque, "cstCOFINS"));
+  modelConsumo.setData(rowConsumo, "vBCCOFINS", modelEstoque.data(rowEstoque, "vBCCOFINS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pCOFINS", modelEstoque.data(rowEstoque, "pCOFINS"));
+  modelConsumo.setData(rowConsumo, "vCOFINS", modelEstoque.data(rowEstoque, "vCOFINS").toDouble() * proporcao);
 }
 
 int ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {

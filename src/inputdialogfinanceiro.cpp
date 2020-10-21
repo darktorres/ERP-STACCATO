@@ -630,8 +630,6 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
     ui->pushButtonSalvar->hide();
   }
 
-  if (modelPedidoFornecedor2.data(0, "fornecedor") != "PORTINARI") { ui->groupBoxCodPortinari->hide(); }
-
   ui->widgetPgts->setRepresentacao(representacao);
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
@@ -675,9 +673,7 @@ void InputDialogFinanceiro::verifyFields() {
 
   if (tipo == Tipo::ConfirmarCompra) {
     for (auto &index : selection) {
-      if (modelPedidoFornecedor2.data(index.row(), "fornecedor") == "PORTINARI" and modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) {
-        throw RuntimeError("Não preencheu código do fornecedor!");
-      }
+      if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
     }
   }
 

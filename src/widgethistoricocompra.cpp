@@ -79,7 +79,7 @@ void WidgetHistoricoCompra::setTreeView() {
 
   modelTree.setHeaderData("status", "Status");
   modelTree.setHeaderData("statusFinanceiro", "Financeiro");
-  modelTree.setHeaderData("ordemRepresentacao", "OC Rep");
+  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelTree.setHeaderData("idVenda", "Venda");
   modelTree.setHeaderData("descricao", "Produto");
   modelTree.setHeaderData("colecao", "Coleção");

@@ -630,6 +630,8 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
     ui->pushButtonSalvar->hide();
   }
 
+  if (representacao) { ui->lineEditCodFornecedor->hide(); }
+
   ui->widgetPgts->setRepresentacao(representacao);
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
@@ -671,13 +673,13 @@ void InputDialogFinanceiro::verifyFields() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    for (auto &index : selection) {
-      if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
-    }
-  }
-
   if (not representacao) {
+    if (tipo == Tipo::ConfirmarCompra) {
+      for (auto &index : selection) {
+        if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
+      }
+    }
+
     if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
     ui->widgetPgts->verifyFields();

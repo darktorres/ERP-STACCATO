@@ -176,7 +176,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = text.isEmpty() ? ""
                                          : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR cp_idVenda LIKE '%" + text +
-                                               "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
+                                               "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%' OR codFornecedor LIKE '%" + text + "%')";
 
     //-------------------------------------
 
@@ -310,7 +310,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
   if (tipo == Tipo::Pagar) {
     ui->pushButtonAdiantarRecebimento->hide();
     ui->radioButtonRecebido->hide();
-    ui->lineEditBusca->setPlaceholderText("OC/Contraparte/NFe/Venda/Obs.");
+    ui->lineEditBusca->setPlaceholderText("OC/Contraparte/NFe/Venda/Obs./Cód. Forn.");
   }
 
   if (tipo == Tipo::Receber) {

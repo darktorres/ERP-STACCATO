@@ -395,6 +395,14 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       //----------------------------------------------------------
 
+      const int indexMotivo = evento.indexOf("\r\nxMotivo=");
+
+      if (indexMotivo == -1) { throw RuntimeException("Não encontrou o campo 'xMotivo'"); }
+
+      const QString motivo = evento.mid(indexMotivo + 10).split("\r\n").first();
+
+      //----------------------------------------------------------
+
       const int indexChave = evento.indexOf("\r\nchNFe=");
 
       if (indexChave == -1) { throw RuntimeException("Não encontrou o campo 'chNFe'!"); }
@@ -412,31 +420,33 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       if (queryExiste.first()) {
         const QString statusDistribuicao = queryExiste.value("statusDistribuicao").toString();
 
-        if (eventoTipo == "Ciencia da Operacao" and statusDistribuicao == "DESCONHECIDO") {
-          SqlQuery queryAtualiza;
+        if (motivo.contains("Evento registrado e vinculado a NF-e")) {
+          if (eventoTipo == "Ciencia da Operacao" and statusDistribuicao == "DESCONHECIDO") {
+            SqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso +
-                                     "'")) {
-            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                                       chaveAcesso + "'")) {
+              throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            }
           }
-        }
 
-        if (eventoTipo == "Confirmacao da Operacao" and (statusDistribuicao == "DESCONHECIDO" or statusDistribuicao == "CIÊNCIA")) {
-          SqlQuery queryAtualiza;
+          if (eventoTipo == "Confirmacao da Operacao" and statusDistribuicao != "CONFIRMAÇÃO") {
+            SqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
-                                     chaveAcesso + "'")) {
-            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                                       chaveAcesso + "'")) {
+              throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            }
           }
-        }
 
-        if (eventoTipo == "CANCELAMENTO" and statusDistribuicao != "CANCELADA") {
-          SqlQuery queryAtualiza;
+          if (eventoTipo == "CANCELAMENTO" and statusDistribuicao != "CANCELADA") {
+            SqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec(
-                  "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
-                  chaveAcesso + "'")) {
-            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            if (not queryAtualiza.exec(
+                    "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                    chaveAcesso + "'")) {
+              throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            }
           }
         }
 

@@ -165,8 +165,22 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     QModelIndexList cells = selectedIndexes();
     std::sort(cells.begin(), cells.end()); // Necessary, otherwise they are in column order
 
+    QString headers;
+
+    if (selectionBehavior() == QTableView::SelectRows) {
+      for (int col = 0; col < model()->columnCount(); ++col) {
+        if (isColumnHidden(col)) { continue; }
+
+        headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
+        headers += '\t';
+      }
+
+      headers += '\n';
+    }
+
     QString text;
     int currentRow = 0; // To determine when to insert newlines
+
     for (const QModelIndex &cell : cells) {
       if (text.length() == 0) {
         // First item
@@ -183,7 +197,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
       text += (cell.data().userType() == QVariant::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
     }
 
-    QApplication::clipboard()->setText(text);
+    QApplication::clipboard()->setText(headers + text);
     return;
   }
 

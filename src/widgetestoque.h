@@ -30,6 +30,7 @@ private:
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> void;
   auto getMatch() const -> QString;
   auto montaFiltro() -> void;
+  auto montaFiltro2() -> void;
   auto montaFiltroContabil() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;
   auto on_radioButtonEstoque_toggled(bool checked) -> void;

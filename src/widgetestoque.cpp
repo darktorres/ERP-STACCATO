@@ -22,6 +22,7 @@ void WidgetEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::escolheFiltro, connectionType);
+  connect(ui->lineEditBusca2, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro2, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonEstoqueContabil, &QRadioButton::clicked, this, &WidgetEstoque::montaFiltroContabil, connectionType);
@@ -159,6 +160,13 @@ void WidgetEstoque::montaFiltro() {
   if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   setHeaderData();
+}
+
+void WidgetEstoque::montaFiltro2() {
+  const QString text = ui->lineEditBusca2->text();
+
+  modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE AND (fornecedor LIKE '%" + text + "%' OR descricao LIKE '%" + text + "%' OR codComercial LIKE '%" + text +
+                          "%')");
 }
 
 void WidgetEstoque::montaFiltroContabil() {

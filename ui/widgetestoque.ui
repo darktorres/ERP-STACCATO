@@ -181,7 +181,34 @@ color: rgb(255, 255, 0);</string>
        <string>Produtos</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_8">
-       <item row="0" column="0">
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelBusca2">
+         <property name="text">
+          <string>Buscar:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEditBusca2">
+         <property name="placeholderText">
+          <string>Fornecedor/Produto/Cód. Com.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="TableView" name="tableProdutos">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QRadioButton" name="radioButtonTodos">
@@ -222,17 +249,7 @@ color: rgb(255, 255, 0);</string>
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
-        <widget class="TableView" name="tableProdutos">
-         <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
+       <item row="2" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLineEdit" name="lineEditEstoque_2">

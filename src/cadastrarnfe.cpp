@@ -230,6 +230,8 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   // erro de comunicacao/rejeicao
   qDebug() << "resposta: " << resposta;
 
+  QString respostaConsultar;
+
   if (resposta.contains("Rejeição:")) {
     qDebug() << "rejeicao";
 
@@ -244,7 +246,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   }
 
   if (not resposta.contains("Autorizado o uso da NF-e")) {
-    const QString respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
+    respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
     // erro de comunicacao/rejeicao
     if (not respostaConsultar.contains("Autorizado o uso da NF-e")) {
@@ -258,7 +260,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
   // TODO: send email from remote acbr to simplify
   // reread the file now authorized
-  if (resposta.contains("Autorizado o uso da NF-e")) {
+  if (resposta.contains("Autorizado o uso da NF-e") or respostaConsultar.contains("Autorizado o uso da NF-e")) {
     QString resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
     xml = resposta2.remove("OK: ");

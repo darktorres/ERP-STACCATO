@@ -229,20 +229,21 @@ void CadastrarNFe::removerNota(const int idNFe) {
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
   // erro de comunicacao/rejeicao
   qDebug() << "resposta: " << resposta;
+
+  if (resposta.contains("Rejeição:")) {
+    qDebug() << "rejeicao";
+
+    // TODO: cada nota gerada tem um digestValue único associado. quando a nota é emitida uma segunda vez (por qualquer motivo) ela recebe um digestValue diferente.
+    // o problema é quando a primeira nota emitida é autorizada pela sefaz mas o sistema não recebe a confirmação, o sistema então remove essa nota e posteriormente emite outra
+    // igual porem com o digestValue diferente. Ao tentar consultar essa segunda nota a sefaz ira responder com 'digestValue não confere' pois apesar de ser a mesma nota os digestValue são
+    // diferentes. o acbr substitui a primeira nota pela segunda na pasta de logs então enquanto não for feita a consulta com a sefaz dizendo se a nota existe ou não, não permitir gerar outra nota.
+
+    removerNota(idNFe);
+
+    throw RuntimeException("Resposta EnviarNFe: " + resposta, this);
+  }
+
   if (not resposta.contains("Autorizado o uso da NF-e")) {
-    if (resposta.contains("Rejeição:")) {
-      qDebug() << "rejeicao";
-
-      // TODO: cada nota gerada tem um digestValue único associado. quando a nota é emitida uma segunda vez (por qualquer motivo) ela recebe um digestValue diferente.
-      // o problema é quando a primeira nota emitida é autorizada pela sefaz mas o sistema não recebe a confirmação, o sistema então remove essa nota e posteriormente emite outra
-      // igual porem com o digestValue diferente. Ao tentar consultar essa segunda nota a sefaz ira responder com 'digestValue não confere' pois apesar de ser a mesma nota os digestValue são
-      // diferentes. o acbr substitui a primeira nota pela segunda na pasta de logs então enquanto não for feita a consulta com a sefaz dizendo se a nota existe ou não, não permitir gerar outra nota.
-
-      removerNota(idNFe);
-
-      throw RuntimeException("Resposta EnviarNFe: " + resposta, this);
-    }
-
     const QString respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
     // erro de comunicacao/rejeicao

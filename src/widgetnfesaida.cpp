@@ -363,7 +363,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
 
 void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   SqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
+  query.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
   if (not query.exec()) { throw RuntimeException("Erro marcando nota como cancelada: " + query.lastError().text()); }

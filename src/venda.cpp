@@ -1110,6 +1110,8 @@ void Venda::cadastrar() {
 
     for (auto &record : backupItem) { modelItem.insertRecord(-1, record); }
 
+    if (tipo == Tipo::Cadastrar) { ui->lineEditVenda->setText("Auto gerado"); }
+
     throw;
   }
 }

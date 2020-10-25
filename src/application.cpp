@@ -385,10 +385,7 @@ bool Application::getInTransaction() const { return inTransaction; }
 QDateTime Application::serverDateTime() {
   SqlQuery query;
 
-  if (not query.exec("SELECT NOW()") or not query.first()) {
-    enqueueException("Erro buscando data/hora: " + query.lastError().text());
-    return QDateTime();
-  }
+  if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
 
   return query.value("NOW()").toDateTime();
 }
@@ -397,10 +394,7 @@ QDate Application::serverDate() {
   if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
     SqlQuery query;
 
-    if (not query.exec("SELECT NOW()") or not query.first()) {
-      enqueueException("Erro buscando data/hora: " + query.lastError().text());
-      return QDate();
-    }
+    if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
 
     systemDate = QDate::currentDate();
     serverDateCache = query.value("NOW()").toDateTime();

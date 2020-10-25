@@ -1134,6 +1134,8 @@ void Orcamento::cadastrar() {
 
     for (auto &record : backupItem) { modelItem.insertRecord(-1, record); }
 
+    if (tipo == Tipo::Cadastrar) { ui->lineEditOrcamento->setText("Auto gerado"); }
+
     throw;
   }
 }

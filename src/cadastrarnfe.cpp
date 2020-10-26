@@ -792,7 +792,7 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) + "\n";
   //  stream << "CNPJ = 99999090910270\n";
   stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() + "\n";
-  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) + "\n";
+  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(59) + "\n";
   stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() + "\n";
   stream << "Fone = " + modelLoja.data(0, "tel").toString() + "\n";
   stream << "CEP = " + clearStr(queryLojaEnd.value("CEP").toString()) + "\n";
@@ -808,7 +808,7 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
 void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "[Destinatario]\n";
 
-  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(60) + "\n";
+  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(59) + "\n";
 
   if (queryCliente.value("pfpj").toString() == "PF") {
     stream << "CPF = " + clearStr(queryCliente.value("cpf").toString()) + "\n";
@@ -825,9 +825,9 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
 
   stream << "Fone = " + queryCliente.value("tel").toString() + "\n";
   stream << "CEP = " + clearStr(queryEndereco.value("cep").toString()) + "\n";
-  stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(60) + "\n";
+  stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(59) + "\n";
   stream << "Numero = " + queryEndereco.value("numero").toString() + "\n";
-  stream << "Complemento = " + queryEndereco.value("complemento").toString().left(60) + "\n";
+  stream << "Complemento = " + queryEndereco.value("complemento").toString().left(59) + "\n";
   stream << "Bairro = " + queryEndereco.value("bairro").toString() + "\n";
   stream << "cMun = " + queryIBGEDest.value("codigo").toString() + "\n";
   stream << "Cidade = " + queryEndereco.value("cidade").toString() + "\n";

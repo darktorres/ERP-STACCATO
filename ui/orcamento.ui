@@ -1589,9 +1589,10 @@ color: rgb(0, 0, 0);</string>
   <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxCliente</tabstop>
   <tabstop>dataEmissao</tabstop>
+  <tabstop>spinBoxValidade</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
-  <tabstop>spinBoxValidade</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>itemBoxProduto</tabstop>
   <tabstop>lineEditPrecoUn</tabstop>
   <tabstop>doubleSpinBoxCaixas</tabstop>
@@ -1610,16 +1611,22 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizarItem</tabstop>
   <tabstop>pushButtonAdicionarItem</tabstop>
   <tabstop>pushButtonRemoverItem</tabstop>
+  <tabstop>pushButtonLimparSelecao</tabstop>
   <tabstop>tableProdutos</tabstop>
   <tabstop>lineEditEstoque_4</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>
-  <tabstop>pushButtonCalcularFrete</tabstop>
-  <tabstop>checkBoxFreteManual</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>plainTextEditObs</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
+  <tabstop>lineEditReplicaDe</tabstop>
+  <tabstop>lineEditReplicadoEm</tabstop>
   <tabstop>doubleSpinBoxSubTotalBruto</tabstop>
   <tabstop>doubleSpinBoxSubTotalLiq</tabstop>
   <tabstop>doubleSpinBoxDescontoGlobalReais</tabstop>
   <tabstop>doubleSpinBoxDescontoGlobal</tabstop>
+  <tabstop>pushButtonCalcularFrete</tabstop>
+  <tabstop>checkBoxFreteManual</tabstop>
   <tabstop>doubleSpinBoxFrete</tabstop>
   <tabstop>doubleSpinBoxTotal</tabstop>
   <tabstop>pushButtonGerarVenda</tabstop>

@@ -1205,9 +1205,16 @@ color: rgb(0, 0, 0);</string>
   <tabstop>dateTimeEdit</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>pushButtonAdicionarObservacao</tabstop>
   <tabstop>lineEditEstoque_2</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>itemBoxEnderecoFat</tabstop>
+  <tabstop>plainTextEdit</tabstop>
+  <tabstop>dateTimeEditOrc</tabstop>
+  <tabstop>lineEditIdOrcamento</tabstop>
   <tabstop>checkBoxRT</tabstop>
   <tabstop>checkBoxPontuacaoIsento</tabstop>
   <tabstop>checkBoxPontuacaoPadrao</tabstop>
@@ -1224,6 +1231,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonCadastrarPedido</tabstop>
   <tabstop>pushButtonGerarExcel</tabstop>
   <tabstop>pushButtonGerarPdf</tabstop>
+  <tabstop>pushButtonComprovantes</tabstop>
   <tabstop>pushButtonDevolucao</tabstop>
   <tabstop>pushButtonCancelamento</tabstop>
   <tabstop>pushButtonVoltar</tabstop>

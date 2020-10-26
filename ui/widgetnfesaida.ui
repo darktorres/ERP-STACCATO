@@ -82,7 +82,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Cancelado</string>
+            <string>Cancelada</string>
            </property>
            <property name="checked">
             <bool>false</bool>

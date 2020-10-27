@@ -625,8 +625,9 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
     if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
-    const QString endereco = queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " + queryTransp.value("complemento").toString() + " - " +
-                             queryTransp.value("bairro").toString();
+    const QString endereco = queryTransp.value("logradouro").toString().isEmpty() ? ""
+                                                                                  : queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " +
+                                                                                        queryTransp.value("complemento").toString() + " - " + queryTransp.value("bairro").toString();
 
     ui->lineEditTransportadorCpfCnpj->setText(queryTransp.value("cnpj").toString());
     ui->lineEditTransportadorRazaoSocial->setText(queryTransp.value("razaoSocial").toString());

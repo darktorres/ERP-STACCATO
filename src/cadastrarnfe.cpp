@@ -435,7 +435,7 @@ void CadastrarNFe::preencherNumeroNFe() {
   SqlQuery queryNfe;
 
   // TODO: deve buscar tambem notas com outros status? se buscar apenas por autorizado pode pegar um numero já utlizado por uma nota pendente/cancelada
-  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE tipo = 'SAÍDA' AND status = 'AUTORIZADO' AND mid(chaveAcesso, 7, 14) = '" + cnpj +
+  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE tipo = 'SAÍDA' AND mid(chaveAcesso, 7, 14) = '" + cnpj +
                         "' AND DATE(created) BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)") or
       not queryNfe.first()) {
     throw RuntimeException("Erro buscando idNFe: " + queryNfe.lastError().text(), this);

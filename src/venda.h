@@ -73,6 +73,7 @@ private:
   auto on_pushButtonFinanceiroSalvar_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarPdf_clicked() -> void;
+  auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
   auto setConnections() -> void;
   auto setTreeView() -> void;

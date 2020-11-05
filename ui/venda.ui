@@ -253,6 +253,16 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QPushButton" name="pushButtonModelo3d">
+                   <property name="text">
+                    <string>Modelo 3D</string>
+                   </property>
+                   <property name="autoDefault">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QLineEdit" name="lineEditEstoque_2">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

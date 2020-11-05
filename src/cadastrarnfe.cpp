@@ -952,27 +952,25 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
   stream << "[Transportador]\n";
   stream << "FretePorConta = " << ui->comboBoxFreteConta->currentText().left(1) + "\n";
 
-  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) { return; }
-
   const QString razaoSocial = ui->lineEditTransportadorRazaoSocial->text();
 
-  if (razaoSocial != "RETIRA" and razaoSocial != "CARRO EXTRA") {
-    stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() + "\n";
-    stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() + "\n";
-    stream << "IE = " << ui->lineEditTransportadorInscEst->text() + "\n";
-    stream << "Endereco = " << ui->lineEditTransportadorEndereco->text() + "\n";
-    stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text() + "\n";
-    stream << "UF = " << ui->lineEditTransportadorUf->text() + "\n";
-    stream << "ValorServico = \n";
-    stream << "ValorBase = \n";
-    stream << "Aliquota = \n";
-    stream << "Valor = \n";
-    stream << "CFOP = \n";
-    stream << "CidadeCod = \n";
-    stream << "Placa = " << ui->lineEditTransportadorPlaca->text().remove("-") + "\n";
-    stream << "UFPlaca = " << ui->lineEditTransportadorUfPlaca->text() + "\n";
-    stream << "RNTC = \n";
-  }
+  if (razaoSocial == "RETIRA" or razaoSocial == "CARRO EXTRA") { return; }
+
+  stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() + "\n";
+  stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() + "\n";
+  stream << "IE = " << ui->lineEditTransportadorInscEst->text() + "\n";
+  stream << "Endereco = " << ui->lineEditTransportadorEndereco->text() + "\n";
+  stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text() + "\n";
+  stream << "UF = " << ui->lineEditTransportadorUf->text() + "\n";
+  stream << "ValorServico = \n";
+  stream << "ValorBase = \n";
+  stream << "Aliquota = \n";
+  stream << "Valor = \n";
+  stream << "CFOP = \n";
+  stream << "CidadeCod = \n";
+  stream << "Placa = " << ui->lineEditTransportadorPlaca->text().remove("-") + "\n";
+  stream << "UFPlaca = " << ui->lineEditTransportadorUfPlaca->text() + "\n";
+  stream << "RNTC = \n";
 }
 
 void CadastrarNFe::writePagamento(QTextStream &stream) {

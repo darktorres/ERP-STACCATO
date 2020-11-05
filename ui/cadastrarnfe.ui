@@ -1540,8 +1540,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>138</width>
-                   <height>98</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1690,8 +1690,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>220</width>
-                   <height>163</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -2010,8 +2010,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>251</width>
-                   <height>163</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2329,8 +2329,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>526</width>
-                   <height>290</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
@@ -3151,28 +3151,18 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>Endereço</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_40">
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEditTransportadorEndereco"/>
-              </item>
               <item row="2" column="1">
-               <widget class="QLineEdit" name="lineEditTransportadorMunicipio"/>
-              </item>
-              <item row="1" column="1">
                <widget class="QLineEdit" name="lineEditTransportadorUf"/>
               </item>
               <item row="2" column="0">
-               <widget class="QLabel" name="label_80">
-                <property name="text">
-                 <string>Município:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
                <widget class="QLabel" name="label_79">
                 <property name="text">
                  <string>UF:</string>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEditTransportadorEndereco"/>
               </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_71">
@@ -3180,6 +3170,16 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                  <string>Endereço:</string>
                 </property>
                </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_80">
+                <property name="text">
+                 <string>Município:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEditTransportadorMunicipio"/>
               </item>
              </layout>
             </widget>
@@ -3611,7 +3611,127 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
+  <tabstop>comboBoxNatureza</tabstop>
+  <tabstop>lineEditModelo</tabstop>
+  <tabstop>lineEditSerie</tabstop>
+  <tabstop>lineEditCodigo</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditEmissao</tabstop>
+  <tabstop>lineEditSaida</tabstop>
+  <tabstop>comboBoxTipo</tabstop>
+  <tabstop>lineEditFormatoPagina</tabstop>
+  <tabstop>comboBoxDestinoOperacao</tabstop>
+  <tabstop>comboBoxFinalidade</tabstop>
+  <tabstop>lineEditEmitenteNomeRazao</tabstop>
+  <tabstop>lineEditEmitenteFantasia</tabstop>
+  <tabstop>lineEditEmitenteTel1</tabstop>
+  <tabstop>lineEditEmitenteCNPJ</tabstop>
+  <tabstop>lineEditEmitenteInscEstadual</tabstop>
+  <tabstop>lineEditEmitenteTel2</tabstop>
+  <tabstop>lineEditEmitenteLogradouro</tabstop>
+  <tabstop>lineEditEmitenteNumero</tabstop>
+  <tabstop>lineEditEmitenteComplemento</tabstop>
+  <tabstop>lineEditEmitenteBairro</tabstop>
+  <tabstop>lineEditEmitenteCidade</tabstop>
+  <tabstop>lineEditEmitenteUF</tabstop>
+  <tabstop>lineEditEmitenteCEP</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>lineEditDestinatarioNomeRazao</tabstop>
+  <tabstop>lineEditDestinatarioCPFCNPJ</tabstop>
+  <tabstop>lineEditDestinatarioInscEst</tabstop>
+  <tabstop>pushButtonConsultarCadastro</tabstop>
+  <tabstop>lineEditDestinatarioTel1</tabstop>
+  <tabstop>lineEditDestinatarioTel2</tabstop>
+  <tabstop>itemBoxEnderecoFaturamento</tabstop>
+  <tabstop>lineEditDestinatarioLogradouro</tabstop>
+  <tabstop>lineEditDestinatarioNumero</tabstop>
+  <tabstop>lineEditDestinatarioComplemento</tabstop>
+  <tabstop>lineEditDestinatarioBairro</tabstop>
+  <tabstop>lineEditDestinatarioCidade</tabstop>
+  <tabstop>lineEditDestinatarioUF</tabstop>
+  <tabstop>lineEditDestinatarioCEP</tabstop>
+  <tabstop>itemBoxEnderecoEntrega</tabstop>
+  <tabstop>lineEditDestinatarioLogradouro_2</tabstop>
+  <tabstop>lineEditDestinatarioNumero_2</tabstop>
+  <tabstop>lineEditDestinatarioComplemento_2</tabstop>
+  <tabstop>lineEditDestinatarioBairro_2</tabstop>
+  <tabstop>lineEditDestinatarioCidade_2</tabstop>
+  <tabstop>lineEditDestinatarioUF_2</tabstop>
+  <tabstop>lineEditDestinatarioCEP_2</tabstop>
   <tabstop>tableItens</tabstop>
+  <tabstop>tabWidget_4</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>comboBoxCfop</tabstop>
+  <tabstop>comboBoxRegime</tabstop>
+  <tabstop>comboBoxSituacaoTributaria</tabstop>
+  <tabstop>comboBoxICMSOrig</tabstop>
+  <tabstop>comboBoxICMSModBc</tabstop>
+  <tabstop>doubleSpinBoxICMSvbc</tabstop>
+  <tabstop>doubleSpinBoxICMSpicms</tabstop>
+  <tabstop>doubleSpinBoxICMSvicms</tabstop>
+  <tabstop>comboBoxICMSModBcSt</tabstop>
+  <tabstop>doubleSpinBoxICMSpmvast</tabstop>
+  <tabstop>doubleSpinBoxICMSvbcst</tabstop>
+  <tabstop>doubleSpinBoxICMSpicmsst</tabstop>
+  <tabstop>doubleSpinBoxICMSvicmsst</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>comboBoxIPIcst</tabstop>
+  <tabstop>lineEditIPIcEnq</tabstop>
+  <tabstop>scrollArea_3</tabstop>
+  <tabstop>comboBoxPIScst</tabstop>
+  <tabstop>doubleSpinBoxPISvbc</tabstop>
+  <tabstop>doubleSpinBoxPISppis</tabstop>
+  <tabstop>doubleSpinBoxPISvpis</tabstop>
+  <tabstop>scrollArea_4</tabstop>
+  <tabstop>comboBoxCOFINScst</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvbc</tabstop>
+  <tabstop>doubleSpinBoxCOFINSpcofins</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvcofins</tabstop>
+  <tabstop>scrollArea_5</tabstop>
+  <tabstop>doubleSpinBoxPercentualFcpDestino</tabstop>
+  <tabstop>doubleSpinBoxBaseCalculoDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInternaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInter</tabstop>
+  <tabstop>doubleSpinBoxPercentualPartilha</tabstop>
+  <tabstop>doubleSpinBoxPartilhaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxPartilhaRemetente</tabstop>
+  <tabstop>doubleSpinBoxFcpDestino</tabstop>
+  <tabstop>doubleSpinBoxBaseICMS</tabstop>
+  <tabstop>doubleSpinBoxValorICMS</tabstop>
+  <tabstop>doubleSpinBoxValorPIS</tabstop>
+  <tabstop>doubleSpinBoxValorIPI</tabstop>
+  <tabstop>doubleSpinBoxValorCOFINS</tabstop>
+  <tabstop>doubleSpinBoxValorProdutos</tabstop>
+  <tabstop>doubleSpinBoxValorFrete</tabstop>
+  <tabstop>checkBoxFrete</tabstop>
+  <tabstop>doubleSpinBoxValorNota</tabstop>
+  <tabstop>comboBoxFreteConta</tabstop>
+  <tabstop>tabWidget_3</tabstop>
+  <tabstop>lineEditTransportadorCpfCnpj</tabstop>
+  <tabstop>lineEditTransportadorRazaoSocial</tabstop>
+  <tabstop>lineEditTransportadorInscEst</tabstop>
+  <tabstop>lineEditTransportadorEndereco</tabstop>
+  <tabstop>lineEditTransportadorUf</tabstop>
+  <tabstop>doubleSpinBoxTransportadorBaseCalculo</tabstop>
+  <tabstop>spinBoxTransportadorAliquota</tabstop>
+  <tabstop>doubleSpinBoxTransportadorValorServico</tabstop>
+  <tabstop>lineEditTransportadorIcmsCodMun</tabstop>
+  <tabstop>lineEditTransportadorCfop</tabstop>
+  <tabstop>doubleSpinBoxTransportadorIcmsRetido</tabstop>
+  <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>lineEditTransportadorPlaca</tabstop>
+  <tabstop>lineEditTransportadorRntc</tabstop>
+  <tabstop>lineEditTransportadorUfPlaca</tabstop>
+  <tabstop>spinBoxVolumesQuant</tabstop>
+  <tabstop>lineEditVolumesEspecie</tabstop>
+  <tabstop>lineEditVolumesMarca</tabstop>
+  <tabstop>lineEditVolumesNumeracao</tabstop>
+  <tabstop>doubleSpinBoxVolumesPesoLiq</tabstop>
+  <tabstop>doubleSpinBoxVolumesPesoBruto</tabstop>
+  <tabstop>infCompUsuario</tabstop>
+  <tabstop>infCompSistema</tabstop>
   <tabstop>pushButtonEnviarNFE</tabstop>
  </tabstops>
  <resources/>

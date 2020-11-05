@@ -70,8 +70,9 @@ private:
   auto on_pushButtonCalculadora_clicked() -> void;
   auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
-  auto on_pushButtonGerarVenda_clicked() -> void;
   auto on_pushButtonGerarPdf_clicked() -> void;
+  auto on_pushButtonGerarVenda_clicked() -> void;
+  auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;

@@ -10,7 +10,10 @@
 #include "xml.h"
 
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDir>
 #include <QMessageBox>
+#include <QNetworkReply>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -19,6 +22,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &SearchDialog::on_pushButtonModelo3d_clicked);
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
   connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
   connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled);
@@ -42,6 +46,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
   ui->treeView->hide();
+  ui->pushButtonModelo3d->hide();
 
   ui->lineEditBusca->setFocus();
 }
@@ -305,6 +310,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->ui->lineEditEstoque->show();
   sdProd->ui->lineEditEstoque_2->show();
   sdProd->ui->lineEditPromocao->show();
+  sdProd->ui->pushButtonModelo3d->show();
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 
   sdProd->ui->lineEditBusca->setPlaceholderText("Fornecedor/Descrição/Coleção/Código Comercial");
@@ -468,3 +474,47 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
 void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+
+void SearchDialog::on_pushButtonModelo3d_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  const int row = selection.first().row();
+
+  const QString ip = qApp->getWebDavIp();
+  const QString fornecedor = model.data(row, "fornecedor").toString();
+  const QString codComercial = model.data(row, "codComercial").toString();
+
+  const QString url = "http://" + ip + "/webdav/MODELOS 3D/" + fornecedor + "/" + codComercial + "_3D.skp";
+
+  auto *manager = new QNetworkAccessManager(this);
+  auto request = QNetworkRequest(QUrl(url));
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto reply = manager->get(request);
+
+  connect(reply, &QNetworkReply::finished, [=] {
+    if (reply->error() != QNetworkReply::NoError) {
+      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
+
+      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+    }
+
+    const QString filename = url.split("/").last();
+    const QString path = QDir::currentPath() + "/arquivos/";
+
+    QDir dir;
+
+    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
+
+    QFile file(path + filename);
+
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+    file.write(reply->readAll());
+
+    file.close();
+
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+  });
+}

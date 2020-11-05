@@ -18,7 +18,9 @@
 
 #include <QDebug>
 #include <QDesktopServices>
+#include <QDir>
 #include <QMessageBox>
+#include <QNetworkReply>
 #include <QSqlError>
 #include <QtMath>
 
@@ -109,6 +111,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
   connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem, connectionType);
+  connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked, connectionType);
@@ -139,6 +142,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   disconnect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem);
+  disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -1430,6 +1434,50 @@ void Orcamento::verificaDisponibilidadeEstoque() {
   if (not produtos.isEmpty()) {
     throw RuntimeError("Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada:\n    -" + produtos.join("\n    -") + "\n\nRemova ou diminua a quant. para prosseguir!");
   }
+}
+
+void Orcamento::on_pushButtonModelo3d_clicked() {
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  const int row = selection.first().row();
+
+  const QString ip = qApp->getWebDavIp();
+  const QString fornecedor = modelItem.data(row, "fornecedor").toString();
+  const QString codComercial = modelItem.data(row, "codComercial").toString();
+
+  const QString url = "http://" + ip + "/webdav/MODELOS 3D/" + fornecedor + "/" + codComercial + "_3D.skp";
+
+  auto *manager = new QNetworkAccessManager(this);
+  auto request = QNetworkRequest(QUrl(url));
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto reply = manager->get(request);
+
+  connect(reply, &QNetworkReply::finished, [=] {
+    if (reply->error() != QNetworkReply::NoError) {
+      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
+
+      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+    }
+
+    const QString filename = url.split("/").last();
+    const QString path = QDir::currentPath() + "/arquivos/";
+
+    QDir dir;
+
+    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
+
+    QFile file(path + filename);
+
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+    file.write(reply->readAll());
+
+    file.close();
+
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+  });
 }
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)

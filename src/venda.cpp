@@ -21,8 +21,11 @@
 #include "usersession.h"
 
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDir>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QNetworkReply>
 #include <QSqlError>
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
@@ -142,6 +145,7 @@ void Venda::setConnections() {
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged, connectionType);
   connect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged, connectionType);
   connect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged, connectionType);
+  connect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked, connectionType);
   connect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked, connectionType);
   connect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked, connectionType);
   connect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked, connectionType);
@@ -150,8 +154,8 @@ void Venda::setConnections() {
   connect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked, connectionType);
+  connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
-  connect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked, connectionType);
 }
 
 void Venda::unsetConnections() {
@@ -165,6 +169,7 @@ void Venda::unsetConnections() {
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged);
   disconnect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
+  disconnect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked);
   disconnect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked);
   disconnect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked);
   disconnect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked);
@@ -173,8 +178,8 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked);
+  disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
-  disconnect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked);
 }
 
 void Venda::setupTables() {
@@ -1497,6 +1502,50 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
   modelItem2.submitAll();
 
   modelTree.updateData();
+}
+
+void Venda::on_pushButtonModelo3d_clicked() {
+  const auto selection = ui->treeView->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  const int row = selection.first().row();
+
+  const QString ip = qApp->getWebDavIp();
+  const QString fornecedor = modelItem.data(row, "fornecedor").toString();
+  const QString codComercial = modelItem.data(row, "codComercial").toString();
+
+  const QString url = "http://" + ip + "/webdav/MODELOS 3D/" + fornecedor + "/" + codComercial + "_3D.skp";
+
+  auto *manager = new QNetworkAccessManager(this);
+  auto request = QNetworkRequest(QUrl(url));
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto reply = manager->get(request);
+
+  connect(reply, &QNetworkReply::finished, [=] {
+    if (reply->error() != QNetworkReply::NoError) {
+      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
+
+      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+    }
+
+    const QString filename = url.split("/").last();
+    const QString path = QDir::currentPath() + "/arquivos/";
+
+    QDir dir;
+
+    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
+
+    QFile file(path + filename);
+
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+    file.write(reply->readAll());
+
+    file.close();
+
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+  });
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

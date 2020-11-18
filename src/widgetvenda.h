@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -23,9 +24,11 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   bool financeiro = false;
+  QTimer timer;
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
+  auto delayFiltro() -> void;
   auto listarLojas() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;

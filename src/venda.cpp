@@ -1515,7 +1515,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
   const QString fornecedor = modelItem.data(row, "fornecedor").toString();
   const QString codComercial = modelItem.data(row, "codComercial").toString();
 
-  const QString url = "http://" + ip + "/webdav/MODELOS 3D/" + fornecedor + "/" + codComercial + "_3D.skp";
+  const QString url = "http://" + ip + "/webdav/METAIS_VIVIANE/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
 
   auto *manager = new QNetworkAccessManager(this);
   auto request = QNetworkRequest(QUrl(url));

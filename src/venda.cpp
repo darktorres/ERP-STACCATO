@@ -1235,6 +1235,9 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   // -------------------------------------------------------------------------
 
+  // TODO: tem 2 formas de cancelar pagamento, mudando status para cancelado ou setando flag desativado
+  // portanto a regra não deve ser verificar se status == pendente
+
   bool ok = true;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {

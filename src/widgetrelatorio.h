@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QWidget>
@@ -23,8 +24,8 @@ private:
   bool modelIsSet = false;
   SqlTableModel modelOrcamento;
   SqlTableModel modelViewRelatorio;
-  SqlTableModel modelViewRelatorioLoja;
-  SqlTableModel modelViewRelatorioVendedor;
+  SqlQueryModel modelViewRelatorioLoja;
+  SqlQueryModel modelViewRelatorioVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;
@@ -36,6 +37,5 @@ private:
   auto setFilterRelatorio() -> void;
   auto setFilterTotaisLoja() -> void;
   auto setFilterTotaisVendedor() -> void;
-  auto setResumoOrcamento() -> void;
   auto setupTables() -> void;
 };

@@ -4,6 +4,7 @@
 #include "application.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
 
@@ -15,7 +16,6 @@
 
 WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) {
   ui->setupUi(this);
-  ui->groupBoxResumoOrcamento->hide();
 }
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
@@ -28,41 +28,62 @@ void WidgetRelatorio::setConnections() {
 }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
-  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
+  QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
   const QString tipoUsuario = UserSession::tipoUsuario;
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
+  QString idUsuario;
 
-  if (tipoUsuario == "GERENTE LOJA") {
-    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
+  if (tipoUsuario == "VENDEDOR") { idUsuario = QString::number(UserSession::idUsuario); }
 
-    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
-  }
+  QString idUsuarioConsultor;
 
-  filter += " ORDER BY Loja, Vendedor";
+  if (tipoUsuario == "VENDEDOR ESPECIAL") { idUsuarioConsultor = QString::number(UserSession::idUsuario); }
 
-  modelViewRelatorioVendedor.setFilter(filter);
+  QString loja;
 
-  qDebug() << "filter2: " << modelViewRelatorioVendedor.filter();
+  if (tipoUsuario == "GERENTE LOJA") { loja = UserSession::fromLoja("descricao").toString(); }
 
-  modelViewRelatorioVendedor.select();
+  modelViewRelatorioVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
+
+  ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
+
+  ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+
+  ui->tableTotalVendedor->hideColumn("Mês");
+  ui->tableTotalVendedor->hideColumn("idUsuario");
+  ui->tableTotalVendedor->hideColumn("idUsuarioConsultor");
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
-  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
+  QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  if (UserSession::tipoUsuario == "GERENTE LOJA") {
-    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
+  const QString tipoUsuario = UserSession::tipoUsuario;
 
-    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
-  }
+  QString idUsuario;
 
-  filter += " ORDER BY Loja";
+  if (tipoUsuario == "VENDEDOR") { idUsuario = QString::number(UserSession::idUsuario); }
 
-  modelViewRelatorioLoja.setFilter(filter);
+  QString idUsuarioConsultor;
 
-  modelViewRelatorioLoja.select();
+  if (tipoUsuario == "VENDEDOR ESPECIAL") { idUsuarioConsultor = QString::number(UserSession::idUsuario); }
+
+  QString loja;
+
+  if (tipoUsuario == "GERENTE LOJA") { loja = UserSession::fromLoja("descricao").toString(); }
+
+  modelViewRelatorioLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
+
+  ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
+
+  ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+  ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
+
+  ui->tableTotalLoja->hideColumn("Mês");
 }
 
 void WidgetRelatorio::setupTables() {
@@ -78,32 +99,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
-
-  // -------------------------------------------------------------------------
-
-  modelViewRelatorioVendedor.setTable("view_relatorio_vendedor");
-
-  ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
-
-  ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
-
-  ui->tableTotalVendedor->hideColumn("idUsuario");
-  ui->tableTotalVendedor->hideColumn("Mês");
-
-  // -------------------------------------------------------------------------
-
-  modelViewRelatorioLoja.setTable("view_relatorio_loja");
-
-  ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
-
-  ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
-  ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
-
-  ui->tableTotalLoja->hideColumn("Mês");
+  ui->tableRelatorio->hideColumn("idUsuarioConsultor");
 }
 
 void WidgetRelatorio::calcularTotalGeral() {
@@ -140,7 +136,9 @@ void WidgetRelatorio::setFilterRelatorio() {
   const QString tipoUsuario = UserSession::tipoUsuario;
   QString filter = "Mês = '" + date + "'";
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
+  if (tipoUsuario == "VENDEDOR") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
+
+  if (tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuarioConsultor = " + QString::number(UserSession::idUsuario); }
 
   if (tipoUsuario == "GERENTE LOJA") {
     const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
@@ -152,7 +150,7 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   modelViewRelatorio.setFilter(filter);
 
-  qDebug() << "filter1: " << modelViewRelatorio.filter();
+  qDebug() << "filter_Pedidos: " << modelViewRelatorio.filter();
 
   modelViewRelatorio.select();
 }
@@ -163,13 +161,6 @@ void WidgetRelatorio::updateTables() {
   const auto tipo = UserSession::tipoUsuario;
 
   if (not isSet) {
-    if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
-      ui->labelTotalLoja->hide();
-      ui->tableTotalLoja->hide();
-      ui->doubleSpinBoxGeral->hide();
-      ui->groupBoxResumoOrcamento->hide();
-    }
-
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
     isSet = true;
@@ -180,53 +171,16 @@ void WidgetRelatorio::updateTables() {
     modelIsSet = true;
   }
 
-  if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
-    setFilterRelatorio();
-    setFilterTotaisVendedor();
-
-    calcularTotalVendedor();
-  } else {
-    QElapsedTimer time;
-    time.start();
-    setFilterRelatorio();
-    qDebug() << "1: " << time.restart();
-    setFilterTotaisVendedor();
-    qDebug() << "2: " << time.restart();
-    setFilterTotaisLoja();
-    qDebug() << "3: " << time.restart();
-    calcularTotalGeral();
-    qDebug() << "4: " << time.restart();
-    setResumoOrcamento();
-    qDebug() << "5: " << time.restart();
-  }
-}
-
-void WidgetRelatorio::setResumoOrcamento() {
-  //  SqlQuery query;
-
-  //  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { throw RuntimeError("Erro comunicando com o banco de dados: " + query.lastError().text(),
-  //  this); }
-
-  //  modelOrcamento.setTable("view_resumo_relatorio");
-
-  //  modelOrcamento.setFilter("");
-
-  //  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-  //    if (const auto descricaoLoja = UserSession::fromLoja("descricao")) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
-  //  }
-
-  //  modelOrcamento.select();
-
-  //  ui->tableResumoOrcamento->setModel(&modelOrcamento);
-
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Anteriores", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Gerados Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Revalidados Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Fechados Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Perdidos Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(false, this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(false, this));
+  QElapsedTimer time;
+  time.start();
+  setFilterRelatorio();
+  qDebug() << "setFilterRelatorio: " << time.restart();
+  setFilterTotaisVendedor();
+  qDebug() << "setFilterTotaisVendedor: " << time.restart();
+  setFilterTotaisLoja();
+  qDebug() << "setFilterTotaisLoja: " << time.restart();
+  calcularTotalGeral();
+  qDebug() << "calcularTotalGeral: " << time.restart();
 }
 
 void WidgetRelatorio::resetTables() { modelIsSet = false; }

@@ -666,7 +666,7 @@ color: rgb(0, 0, 0);</string>
                  <widget class="LineEditDecimal" name="lineEditPrecoUn">
                   <property name="maximumSize">
                    <size>
-                    <width>60</width>
+                    <width>80</width>
                     <height>16777215</height>
                    </size>
                   </property>

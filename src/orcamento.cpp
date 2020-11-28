@@ -648,7 +648,7 @@ void Orcamento::atualizaReplica() {
 void Orcamento::clearFields() {
   RegisterDialog::clearFields();
 
-  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") { ui->itemBoxVendedor->setId(UserSession::idUsuario); }
+  if (UserSession::tipoUsuario == "VENDEDOR") { ui->itemBoxVendedor->setId(UserSession::idUsuario); }
 
   //  ui->itemBoxEndereco->setDisabled(true);
 }

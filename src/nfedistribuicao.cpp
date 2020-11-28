@@ -32,8 +32,8 @@ void NFeDistribuicao::downloadAutomatico() {
     on_pushButtonPesquisar_clicked();
   } catch (std::exception &e) {
     qDebug() << "what: " << e.what();
-    qApp->rollbackTransaction();
     qApp->setSilent(false);
+    qApp->rollbackTransaction();
     return;
   }
 

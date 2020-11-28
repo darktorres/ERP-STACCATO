@@ -276,6 +276,11 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
+  // TODO: caso dê erro ao enviar email ou imprimir danfe fechar a tela de emissão porque a nota já foi emitida, evitando que seja enviada novamente em duplicidade.
+  // fechando a tela vai aparecer para o usuario ou nota pendente ou nota autorizada
+
+  qApp->setSilent(false);
+
   // TODO: verificar isso antes de abrir CadastrarNFe
   // se os emails nao estiverem configurados avisar antes de gerar a nota
   const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();

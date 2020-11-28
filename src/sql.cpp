@@ -245,6 +245,59 @@ QString Sql::view_a_pagar_vencer() {
            "(SELECT @running_total:=0) r";
 }
 
+QString Sql::view_relatorio_loja(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
+  QStringList filtros;
+  filtros << mes;
+  if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
+  if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
+  if (not loja.isEmpty()) { filtros << "v.loja = '" + loja + "'"; }
+  QString filtro;
+  if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
+
+  return "SELECT"
+         "`v`.`Loja` AS `Loja`,"
+         "SUM(`v`.`Faturamento`) AS `Faturamento`,"
+         "SUM(`v`.`Comissão`) AS `Comissão`,"
+         "((SUM(`v`.`Comissão`) / SUM(`v`.`Faturamento`)) * 100) AS `%`,"
+         "`v`.`Mês` AS `Mês`,"
+         "(GROUP_CONCAT(DISTINCT `r`.`custoReposicao`"
+         "SEPARATOR ',') + 0.0) AS `Reposição` "
+         "FROM "
+         "`view_relatorio` `v` "
+         "LEFT JOIN "
+         "view_relatorio_reposicao r ON `r`.`loja` = `v`.`Loja` "
+         "AND r.data = v.Mês " +
+         filtro +
+         " GROUP BY `v`.`Loja` "
+         "ORDER BY `v`.`Loja`";
+}
+
+QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
+  QStringList filtros;
+  filtros << mes;
+  if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
+  if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
+  if (not loja.isEmpty()) { filtros << "loja = '" + loja + "'"; }
+  QString filtro;
+  if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
+
+  return "SELECT"
+         "`c`.`Loja` AS `Loja`,"
+         "`c`.`Vendedor` AS `Vendedor`,"
+         "`c`.`idUsuario` AS `idUsuario`,"
+         "GROUP_CONCAT(DISTINCT `c`.`idUsuarioConsultor`"
+         "SEPARATOR ',') AS `idUsuarioConsultor`,"
+         "SUM(`c`.`Faturamento`) AS `Faturamento`,"
+         "SUM(`c`.`Comissão`) AS `Comissão`,"
+         "((SUM(`c`.`Comissão`) / SUM(`c`.`Faturamento`)) * 100) AS `%`,"
+         "`c`.`Mês` AS `Mês` "
+         "FROM "
+         "`comissao` `c` " +
+         filtro +
+         " GROUP BY `c`.`idUsuario` , `c`.`Loja` , `c`.`Mês` "
+         "ORDER BY `c`.`Loja`, c.`Vendedor`";
+}
+
 // clang-format on
 
 // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem

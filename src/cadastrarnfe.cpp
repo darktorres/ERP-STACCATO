@@ -1712,7 +1712,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
   const QString resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
 
-  if (resposta.contains("XMotivo=Consulta cadastro com uma ocorrência")) {
+  if (resposta.contains("CStat=111")) { // Consulta cadastro com uma ocorrência
     QStringList list = resposta.mid(resposta.indexOf("IE=")).split("\r\n");
     const QString insc = list.first().remove("IE=");
 

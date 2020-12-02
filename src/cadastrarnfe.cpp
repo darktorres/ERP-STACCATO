@@ -590,7 +590,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   //
 
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF_2->text());
 
   ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
 

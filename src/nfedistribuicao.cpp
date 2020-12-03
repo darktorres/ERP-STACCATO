@@ -169,9 +169,9 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   // 4. fazer evento de ciencia para cada nota
   // 5. repetir passo 1 para pegar os xmls das notas
 
-  const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
+  const QString idLoja = ui->itemBoxLoja->getId().toString();
 
-  if (idLoja == "0") { throw RuntimeError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
 
   //----------------------------------------------------------
 
@@ -406,12 +406,18 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         queryAtualizar.bindValue(":chaveAcesso", chaveAcesso);
 
         if (not queryAtualizar.exec()) { throw RuntimeException("Erro atualizando xml: " + queryAtualizar.lastError().text()); }
+      } else if (existe and schemaEvento == "resNFe") {
+        continue;
       } else {
-        throw RuntimeException("Evento não tratado: " + evento);
+        throw RuntimeException("Evento de NFe não tratado: " + evento);
       }
     }
 
     if (evento.contains("[InfEve")) {
+      if (evento.contains("Comprovante de Entrega do CT-e")) { continue; }
+
+      //----------------------------------------------------------
+
       const int indexTipo = evento.indexOf("\r\nxEvento=");
 
       if (indexTipo == -1) { throw RuntimeException("Não encontrou o campo 'xEvento': " + evento); }
@@ -438,12 +444,18 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       SqlQuery queryExiste;
 
-      if (not queryExiste.exec("SELECT statusDistribuicao FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+      if (not queryExiste.exec("SELECT nsu, statusDistribuicao FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
         throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text());
-      } else if (queryExiste.first()) {
+      }
+
+      if (queryExiste.first()) {
+        if (queryExiste.value("nsu") == 0) { continue; }
+
         const QString statusDistribuicao = queryExiste.value("statusDistribuicao").toString();
 
         if (motivo.contains("Evento registrado e vinculado a NF-e")) {
+          if (statusDistribuicao == "") { continue; }
+
           if (eventoTipo == "Ciencia da Operacao" and statusDistribuicao == "DESCONHECIDO") {
             SqlQuery queryAtualiza;
 
@@ -467,15 +479,13 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
               throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
             }
           } else {
-            throw RuntimeException("Evento não tratado: " + motivo);
+            throw RuntimeException("Evento de informação não tratado: " + evento);
           }
         }
 
         // TODO: implement
         //        if (eventoTipo == "DESCONHECIMENTO" and statusDistribuicao == "DESCONHECIDO") {}
         //        if (eventoTipo == "NÃO REALIZADA" and statusDistribuicao == "DESCONHECIDO") {}
-      } else {
-        throw RuntimeError("Evento não tratado: " + evento);
       }
     }
   }
@@ -677,7 +687,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
         throw RuntimeException("Erro atualizando status da NFe: " + query.lastError().text());
       }
     } else {
-      throw RuntimeException("Evento não tratado: " + motivo);
+      throw RuntimeException("Evento não tratado: " + evento);
     }
   }
 

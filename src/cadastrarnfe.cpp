@@ -834,7 +834,15 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(59) + "\n";
   stream << "Numero = " + queryEndereco.value("numero").toString() + "\n";
   stream << "Complemento = " + queryEndereco.value("complemento").toString().left(59) + "\n";
-  stream << "Bairro = " + queryEndereco.value("bairro").toString() + "\n";
+
+  const QString bairro = queryEndereco.value("bairro").toString();
+
+  if (bairro.isEmpty()) {
+    stream << "Bairro = SEM BAIRRO\n";
+  } else {
+    stream << "Bairro = " + queryEndereco.value("bairro").toString() + "\n";
+  }
+
   stream << "cMun = " + queryIBGEDest.value("codigo").toString() + "\n";
   stream << "Cidade = " + queryEndereco.value("cidade").toString() + "\n";
   stream << "UF = " + queryEndereco.value("uf").toString() + "\n";

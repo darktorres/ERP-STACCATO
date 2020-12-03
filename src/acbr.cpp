@@ -34,6 +34,8 @@ void ACBr::error() {
 
   if (errorString == "Connection refused" or errorString == "Connection timed out") {
     throw RuntimeException("Erro conectando ao ACBr! Verifique se ele está aberto!");
+  } else if (errorString == "The remote host closed the connection") {
+    throw RuntimeException("ACBr encerrou a conexão!");
   } else {
     throw RuntimeException("Erro socket: " + socket.errorString());
   }

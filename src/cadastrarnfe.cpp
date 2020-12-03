@@ -590,7 +590,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   //
 
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF_2->text());
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF_2->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
 
   ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
 
@@ -1232,16 +1232,6 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
   ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
   ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
-
-  // ------------------------------------------------------------
-
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
-
-  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
-
-  // ------------------------------------------------------------
-
-  buscarAliquotas();
 }
 
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
@@ -1262,6 +1252,16 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
 
   updateComplemento();
+
+  // ------------------------------------------------------------
+
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
+
+  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
+
+  // ------------------------------------------------------------
+
+  buscarAliquotas();
 }
 
 void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
@@ -1860,7 +1860,7 @@ void CadastrarNFe::unsetConnections() {
 }
 
 void CadastrarNFe::listarCfop() {
-  const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+  const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
   const bool entrada = (ui->comboBoxTipo->currentText() == "0 Entrada");
 
   const QString stringUF = (mesmaUF ? "CFOP_DE" : "CFOP_FE");

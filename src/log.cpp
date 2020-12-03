@@ -3,6 +3,7 @@
 #include "application.h"
 #include "usersession.h"
 
+#include <QDebug>
 #include <QSqlError>
 
 void Log::createLog(const QString &tipo, const QString &message) {
@@ -15,5 +16,5 @@ void Log::createLog(const QString &tipo, const QString &message) {
   query.bindValue(":tipo", tipo);
   query.bindValue(":message", message);
 
-  query.exec();
+  qDebug() << "save log: " << query.exec();
 }

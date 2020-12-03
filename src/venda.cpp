@@ -1221,7 +1221,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
   const QDate dataVenda = data("data").toDate();
   const QDate dataAtual = qApp->serverDate();
 
-  if (dataVenda.month() != dataAtual.month()) {
+  if (dataVenda.month() != dataAtual.month()) { // trocar para dataAtual.month == dataVenda.month + 1 pois pode ser apenas no mês seguinte e não qualquer mês seguinte
     const int diaSemana = dataAtual.dayOfWeek();
     const int dia = dataAtual.day();
 

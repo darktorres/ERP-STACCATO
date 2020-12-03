@@ -228,7 +228,6 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
   // erro de comunicacao/rejeicao
-  qDebug() << "resposta: " << resposta;
 
   QString respostaConsultar;
 
@@ -264,6 +263,8 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     QString resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
     xml = resposta2.remove("OK: ");
+
+    // TODO: create folder if it doesnt exists
 
     QFile file(filePath); // write file locally for sending email
 

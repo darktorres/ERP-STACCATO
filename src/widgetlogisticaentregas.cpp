@@ -188,10 +188,6 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
-
-  if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
-
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
   QStringList lista;

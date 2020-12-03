@@ -17,6 +17,10 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   setWindowFlags(Qt::Window);
 
+  const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
+
+  if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
 

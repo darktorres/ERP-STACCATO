@@ -180,7 +180,14 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   qApp->endTransaction();
 
   updateTables();
-  qApp->enqueueInformation(resposta, this);
+
+  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+
+  if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'xMotivo': " + resposta); }
+
+  const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+  qApp->enqueueInformation(xMotivo, this);
 
   gravarArquivo(resposta, chaveAcesso);
 
@@ -188,12 +195,12 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  //  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  ACBr acbrLocal;
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
-  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
+  //  ACBr acbrLocal;
+  //  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -341,14 +348,20 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   updateTables();
 
-  qApp->enqueueInformation(resposta, this);
+  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+
+  if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo':\n" + resposta); }
+
+  const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+  qApp->enqueueInformation(xMotivo, this);
 }
 
 void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
   QString status;
 
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
-  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CAMCELADO"; }
+  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CANCELADA"; }
 
   if (status.isEmpty()) { throw RuntimeException("Erro status vazio"); }
 

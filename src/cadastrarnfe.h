@@ -24,6 +24,7 @@ private:
   // attributes
   const Tipo tipo;
   const QString idVenda;
+  bool erroRejeicao = false;
   QDataWidgetMapper mapper;
   SqlQuery queryCliente;
   SqlQuery queryEndereco;
@@ -33,7 +34,7 @@ private:
   SqlQuery queryPartilhaInter;
   SqlQuery queryPartilhaIntra;
   QString arquivo;
-  QString chaveNum;
+  QString chaveAcesso;
   QString xml;
   SqlTableModel modelLoja;
   SqlTableModel modelViewProdutoEstoque;
@@ -48,10 +49,14 @@ private:
   auto calculaIcms() -> void;
   auto calculaPis() -> void;
   auto calculaSt() -> void;
+  auto carregarArquivo(ACBr &acbrRemoto, const QString &filePath) -> void;
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> void;
-  auto gerarNota() -> QString;
+  auto enviarEmail(ACBr &acbrRemoto) -> void;
+  auto enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) -> void;
+  auto gerarNota(ACBr &acbrRemoto) -> QString;
   auto listarCfop() -> void;
+  auto montarXML() -> QString;
   auto on_checkBoxFrete_toggled(bool checked) -> void;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;

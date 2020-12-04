@@ -7,6 +7,7 @@
 #include "usersession.h"
 
 #include <QDate>
+#include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
@@ -20,6 +21,14 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
 
   if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+
+  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
+
+  if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+
+  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
+
+  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
@@ -122,7 +131,7 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->hideColumn("itemPedido");
 }
 
-QString CadastrarNFe::gerarNota() {
+QString CadastrarNFe::montarXML() {
   QString nfe;
 
   QTextStream stream(&nfe);
@@ -149,14 +158,38 @@ QString CadastrarNFe::gerarNota() {
   return nfe;
 }
 
+QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
+  QString resposta = acbrRemoto.enviarComando(montarXML());
+  //  qDebug() << "resposta: " << resposta;
+
+  //-------------------------------------------
+
+  if (not resposta.contains("OK")) { throw RuntimeException(resposta, this); }
+
+  const QStringList respostaSplit = resposta.remove("OK: ").split("\r\n", Qt::SkipEmptyParts);
+
+  if (not respostaSplit.filter("Alertas:", Qt::CaseInsensitive).isEmpty()) { throw RuntimeException(respostaSplit.at(1), this); }
+
+  //-------------------------------------------
+
+  const QString filePath = respostaSplit.at(0);
+  xml = respostaSplit.at(1);
+
+  return filePath;
+}
+
 int CadastrarNFe::preCadastrarNota() {
+  //  qDebug() << "precadastrar";
+
+  qApp->startTransaction("CadastrarNFe::preCadastrarNota");
+
   SqlQuery queryNota;
   queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
                     "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'NOTA PENDENTE', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
   queryNota.bindValue(":idVenda", idVenda);
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":xml", xml);
-  queryNota.bindValue(":chaveAcesso", chaveNum);
+  queryNota.bindValue(":chaveAcesso", chaveAcesso);
   queryNota.bindValue(":cnpjOrig", clearStr(ui->lineEditEmitenteCNPJ->text()));
   queryNota.bindValue(":cnpjDest", clearStr(ui->lineEditDestinatarioCPFCNPJ->text()));
   queryNota.bindValue(":valor", ui->doubleSpinBoxValorNota->value());
@@ -193,6 +226,8 @@ int CadastrarNFe::preCadastrarNota() {
       if (not query3.exec()) { throw RuntimeException("Erro atualizando carga veiculo: " + query3.lastError().text()); }
     }
   }
+
+  qApp->endTransaction();
 
   return id.toInt();
 }
@@ -231,53 +266,21 @@ void CadastrarNFe::removerNota(const int idNFe) {
 }
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
-  // erro de comunicacao/rejeicao
-
-  QString respostaConsultar;
-
   if (resposta.contains("Rejeição:")) {
-    qDebug() << "rejeicao";
-
-    // TODO: cada nota gerada tem um digestValue único associado. quando a nota é emitida uma segunda vez (por qualquer motivo) ela recebe um digestValue diferente.
-    // o problema é quando a primeira nota emitida é autorizada pela sefaz mas o sistema não recebe a confirmação, o sistema então remove essa nota e posteriormente emite outra
-    // igual porem com o digestValue diferente. Ao tentar consultar essa segunda nota a sefaz ira responder com 'digestValue não confere' pois apesar de ser a mesma nota os digestValue são
-    // diferentes. o acbr substitui a primeira nota pela segunda na pasta de logs então enquanto não for feita a consulta com a sefaz dizendo se a nota existe ou não, não permitir gerar outra nota.
+    //    qDebug() << "rejeicao";
 
     removerNota(idNFe);
 
-    throw RuntimeException("Resposta EnviarNFe: " + resposta, this);
+    const QString rejeicao = resposta.split("\r\n\r\n", Qt::SkipEmptyParts).at(1);
+
+    erroRejeicao = true;
+    throw RuntimeException("Enviar NFe:\n" + rejeicao, this);
   }
 
-  if (not resposta.contains("Autorizado o uso da NF-e")) {
-    respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
-
-    // erro de comunicacao/rejeicao
-    if (not respostaConsultar.contains("Autorizado o uso da NF-e")) {
-      qDebug() << "!consulta";
-
-      removerNota(idNFe);
-
-      throw RuntimeException("Resposta ConsultarNFe: " + respostaConsultar, this);
-    }
-  }
-
-  // TODO: send email from remote acbr to simplify
   // reread the file now authorized
-  if (resposta.contains("Autorizado o uso da NF-e") or respostaConsultar.contains("Autorizado o uso da NF-e")) {
-    QString resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
+  if (resposta.contains("Autorizado o uso da NF-e")) { return carregarArquivo(acbrRemoto, filePath); }
 
-    xml = resposta2.remove("OK: ");
-
-    // TODO: create folder if it doesnt exists
-
-    QFile file(filePath); // write file locally for sending email
-
-    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
-
-    file.write(xml.toLatin1());
-
-    file.close();
-  }
+  throw RuntimeException("Resposta não tratada:\n" + resposta);
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
@@ -285,18 +288,6 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // fechando a tela vai aparecer para o usuario ou nota pendente ou nota autorizada
 
   qApp->setSilent(false);
-
-  // TODO: verificar isso antes de abrir CadastrarNFe
-  // se os emails nao estiverem configurados avisar antes de gerar a nota
-  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
-
-  if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
-
-  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
-
-  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
-
-  //
 
   if (not validar()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Validação apresentou problemas! Deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
@@ -310,56 +301,21 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   ACBr acbrRemoto;
 
-  QString resposta = acbrRemoto.enviarComando(gerarNota());
-
-  // TODO: validar resposta
-
-  const QString respostaCopy = resposta;
-
-  qDebug() << "gerarNota: " << respostaCopy;
-
-  const QStringList respostaSplit = resposta.remove("OK: ").split("\r\n");
-
-  qDebug() << "split: " << respostaSplit;
-
-  if (respostaCopy.contains("Alertas:")) { throw RuntimeException(respostaSplit.at(1), this); }
-
-  if (not respostaCopy.contains("OK")) { throw RuntimeException(respostaCopy, this); }
-
-  const QString filePath = respostaSplit.at(0);
-  xml = respostaSplit.at(1);
-
-  qDebug() << "filePath: " << filePath;
-
-  qApp->startTransaction("CadastrarNFe::on_pushButtonEnviarNFe_precadastrar");
+  const QString filePath = gerarNota(acbrRemoto);
 
   const int idNFe = preCadastrarNota();
-  qDebug() << "precadastrar";
 
-  qApp->endTransaction();
+  try {
+    enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
+    enviarEmail(acbrRemoto);                // close if error
 
-  const QString resposta2 = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
-
-  qDebug() << "enviar nfe: " << resposta2;
-
-  processarResposta(resposta2, filePath, idNFe, acbrRemoto);
-
-  qApp->startTransaction("CadastrarNFe::on_pushButtonEnviarNFe_cadastrar");
-
-  cadastrar(idNFe);
-
-  qApp->endTransaction();
-
-  qApp->enqueueInformation(resposta2, this);
-
-  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
-
-  ACBr acbrLocal;
-
-  // TODO: enviar email separado para cliente
-  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
-
-  acbrLocal.gerarDanfe(xml.toLatin1());
+    ACBr acbrLocal;
+    acbrLocal.gerarDanfe(xml.toLatin1()); // close if error
+  } catch (std::exception &e) {
+    if (not erroRejeicao) { close(); }
+    erroRejeicao = false;
+    throw;
+  }
 
   close();
 }
@@ -595,7 +551,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   //
 
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF_2->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
 
   ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
 
@@ -747,9 +703,9 @@ void CadastrarNFe::criarChaveAcesso() {
                                  "1",
                                  ui->lineEditCodigo->text()};
 
-  chaveNum = listChave.join("");
+  chaveAcesso = listChave.join("");
 
-  calculaDigitoVerificador(chaveNum);
+  calculaDigitoVerificador(chaveAcesso);
 }
 
 QString CadastrarNFe::clearStr(const QString &str) const { return QString(str).remove(".").remove("/").remove("-").remove(" ").remove("(").remove(")"); }
@@ -1245,6 +1201,16 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
   ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
   ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+
+  // ------------------------------------------------------------
+
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+
+  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
+
+  // ------------------------------------------------------------
+
+  buscarAliquotas();
 }
 
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
@@ -1265,16 +1231,6 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
 
   updateComplemento();
-
-  // ------------------------------------------------------------
-
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
-
-  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
-
-  // ------------------------------------------------------------
-
-  buscarAliquotas();
 }
 
 void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
@@ -1542,8 +1498,8 @@ bool CadastrarNFe::validar() {
   queryLojaEnd.bindValue(":idLoja", modelLoja.data(0, "idLoja"));
 
   if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
-    throw RuntimeException("Erro lendo tabela de endereços da loja: " + queryLojaEnd.lastError().text(), this);
     ok = false;
+    throw RuntimeException("Erro lendo tabela de endereços da loja: " + queryLojaEnd.lastError().text(), this);
   }
 
   if (clearStr(queryLojaEnd.value("CEP").toString()).isEmpty()) {
@@ -1579,8 +1535,8 @@ bool CadastrarNFe::validar() {
   // [Destinatario]
 
   if (modelVenda.data(0, "idCliente").toString().isEmpty()) {
-    throw RuntimeException("Cliente vazio!", this);
     ok = false;
+    throw RuntimeException("Cliente vazio!", this);
   }
 
   // -------------------------------------------------------------------------
@@ -1589,8 +1545,8 @@ bool CadastrarNFe::validar() {
   queryCliente.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
 
   if (not queryCliente.exec() or not queryCliente.first()) {
-    throw RuntimeException("Erro buscando endereço do destinatário: " + queryCliente.lastError().text(), this);
     ok = false;
+    throw RuntimeException("Erro buscando endereço do destinatário: " + queryCliente.lastError().text(), this);
   }
 
   if (queryCliente.value("nome_razao").toString().isEmpty()) {
@@ -1618,8 +1574,8 @@ bool CadastrarNFe::validar() {
   queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
   if (not queryEndereco.exec() or not queryEndereco.first()) {
-    throw RuntimeException("Erro buscando endereço cliente: " + queryEndereco.lastError().text(), this);
     ok = false;
+    throw RuntimeException("Erro buscando endereço cliente: " + queryEndereco.lastError().text(), this);
   }
 
   if (queryEndereco.value("cep").toString().isEmpty()) {
@@ -1649,8 +1605,8 @@ bool CadastrarNFe::validar() {
   queryIBGEEmit.bindValue(":uf", queryLojaEnd.value("uf"));
 
   if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) {
-    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
     ok = false;
+    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
   }
 
   // -------------------------------------------------------------------------
@@ -1660,8 +1616,8 @@ bool CadastrarNFe::validar() {
   queryIBGEDest.bindValue(":uf", queryEndereco.value("uf"));
 
   if (not queryIBGEDest.exec() or not queryIBGEDest.first()) {
-    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
     ok = false;
+    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
   }
 
   // -------------------------------------------------------------------------
@@ -1873,7 +1829,7 @@ void CadastrarNFe::unsetConnections() {
 }
 
 void CadastrarNFe::listarCfop() {
-  const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text() or ui->lineEditDestinatarioUF_2->text().isEmpty());
+  const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
   const bool entrada = (ui->comboBoxTipo->currentText() == "0 Entrada");
 
   const QString stringUF = (mesmaUF ? "CFOP_DE" : "CFOP_FE");
@@ -1901,6 +1857,50 @@ void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
 
   if (checked) { ui->doubleSpinBoxValorNota->setValue(total + frete); }
   if (not checked) { ui->doubleSpinBoxValorNota->setValue(total - frete); }
+}
+
+void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
+  const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
+
+  //  qDebug() << "enviar nfe: " << resposta;
+
+  processarResposta(resposta, filePath, idNFe, acbrRemoto);
+
+  qApp->startTransaction("CadastrarNFe::enviarNFe");
+
+  cadastrar(idNFe);
+
+  qApp->endTransaction();
+
+  qApp->enqueueInformation("Autorizado o uso da NF-e", this);
+}
+
+void CadastrarNFe::enviarEmail(ACBr &acbrRemoto) {
+  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
+  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
+  const QString filePath = QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml";
+
+  // TODO: enviar email separado para cliente
+  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
+}
+
+void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
+  QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
+
+  xml = resposta.remove("OK: ");
+
+  QDir dir(QDir::currentPath() + "/temp/");
+
+  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/temp/")) { throw RuntimeException("Erro ao criar pasta para XML!"); }
+
+  QFile file(QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+  file.write(xml.toLatin1());
+
+  file.close();
 }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo

@@ -55,6 +55,8 @@ void WidgetLogisticaEntregas::updateTables() {
     modelIsSet = true;
   }
 
+  // -----------------------------------------------------------------
+
   modelCalendario.select();
 
   // -----------------------------------------------------------------
@@ -415,15 +417,26 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbrRemoto;
 
-  const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
+  try {
+    const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
 
-  qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConsultarNFe");
+    qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConsultarNFe");
 
-  processarConsultaNFe(idNFe, xml);
+    processarConsultaNFe(idNFe, xml);
 
-  qApp->endTransaction();
+    qApp->endTransaction();
 
-  qApp->enqueueInformation(resposta, this);
+    const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+
+    if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo': " + resposta); }
+
+    const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+    qApp->enqueueInformation(xMotivo, this);
+  } catch (std::exception &e) {
+    updateTables();
+    throw;
+  }
 
   updateTables();
 }

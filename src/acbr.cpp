@@ -116,34 +116,40 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando XML: " + query.lastError().text()); }
 
+  //-------------------------------------------
+
   const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
 
-  const QString resposta1 = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
+  const QString respostaSalvar = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
 
-  // TODO: validar resposta1
+  if (not respostaSalvar.contains("OK")) { throw RuntimeException(respostaSalvar); }
 
-  qDebug() << "resposta1: " << resposta1;
+  //  qDebug() << "respostaSalvar: " << respostaSalvar;
 
-  const QString resposta2 = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
+  //-------------------------------------------
 
-  qDebug() << "resposta2: " << resposta2;
+  const QString respostaConsultar = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
-  if (resposta2.contains("NF-e não consta na base de dados da SEFAZ")) {
+  //  qDebug() << "respostaConsultar: " << respostaConsultar;
+
+  if (respostaConsultar.contains("NF-e não consta na base de dados da SEFAZ")) {
     removerNota(idNFe);
     throw RuntimeException("NFe não consta na SEFAZ, removendo do sistema...");
   }
 
-  if (not resposta2.contains("XMotivo=Autorizado o uso da NF-e") and not resposta2.contains("xEvento=Cancelamento registrado")) { throw RuntimeException(resposta2); }
+  if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e") and not respostaConsultar.contains("xEvento=Cancelamento registrado")) { throw RuntimeException(respostaConsultar); }
 
-  QString resposta3 = enviarComando("NFe.LoadFromFile(" + filePath + ")");
+  //-------------------------------------------
 
-  // TODO: validar resposta3
+  QString respostaCarregar = enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
-  qDebug() << "resposta3: " << resposta3;
+  if (not respostaCarregar.contains("OK")) { throw RuntimeException(respostaCarregar); }
 
-  const QString xml = resposta3.remove("OK: ");
+  //  qDebug() << "respostaCarregar: " << respostaCarregar;
 
-  return std::make_tuple<>(xml, resposta2);
+  const QString xml = respostaCarregar.remove("OK: ");
+
+  return std::make_tuple<>(xml, respostaConsultar);
 }
 
 void ACBr::removerNota(const int idNFe) {

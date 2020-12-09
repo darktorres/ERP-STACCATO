@@ -200,8 +200,8 @@ void XML::validar() {
 }
 
 void XML::verificaCNPJ() {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Entrada and cnpjDest.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
 }
 
 void XML::verificaValido() {

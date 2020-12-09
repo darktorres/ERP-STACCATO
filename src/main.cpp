@@ -5,12 +5,12 @@
 #include <QMessageBox>
 #include <QSharedMemory>
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 
 int main(int argc, char *argv[]) {
-#ifdef _WIN32
+#ifdef Q_OS_WIN
   if (AttachConsole(ATTACH_PARENT_PROCESS)) {
     freopen("CONOUT$", "w", stdout);
     freopen("CONOUT$", "w", stderr);

@@ -160,7 +160,7 @@ QString CadastrarNFe::montarXML() {
 
 QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
   QString resposta = acbrRemoto.enviarComando(montarXML());
-  //  qDebug() << "resposta: " << resposta;
+  qDebug() << "resposta: " << resposta;
 
   //-------------------------------------------
 
@@ -179,7 +179,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 }
 
 int CadastrarNFe::preCadastrarNota() {
-  //  qDebug() << "precadastrar";
+  qDebug() << "precadastrar";
 
   qApp->startTransaction("CadastrarNFe::preCadastrarNota");
 
@@ -267,7 +267,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
   if (resposta.contains("Rejeição:")) {
-    //    qDebug() << "rejeicao";
+    qDebug() << "rejeicao";
 
     removerNota(idNFe);
 
@@ -284,9 +284,6 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
-  // TODO: caso dê erro ao enviar email ou imprimir danfe fechar a tela de emissão porque a nota já foi emitida, evitando que seja enviada novamente em duplicidade.
-  // fechando a tela vai aparecer para o usuario ou nota pendente ou nota autorizada
-
   qApp->setSilent(false);
 
   if (not validar()) {
@@ -1861,8 +1858,7 @@ void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
 
 void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
   const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
-
-  //  qDebug() << "enviar nfe: " << resposta;
+  qDebug() << "enviar nfe: " << resposta;
 
   processarResposta(resposta, filePath, idNFe, acbrRemoto);
 

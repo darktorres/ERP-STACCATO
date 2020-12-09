@@ -217,13 +217,13 @@ void WidgetNfeEntrada::remover(const int row) {
     queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
     queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-    if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro voltando nota: " + queryUpdateNFe.lastError().text()); }
+    if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NFe como não utilizada: " + queryUpdateNFe.lastError().text()); }
   } else {
     SqlQuery queryDeleteNFe;
     queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
     queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-    if (not queryDeleteNFe.exec()) { throw RuntimeException("Erro cancelando nota: " + queryDeleteNFe.lastError().text()); }
+    if (not queryDeleteNFe.exec()) { throw RuntimeException("Erro removendo NFe: " + queryDeleteNFe.lastError().text()); }
   }
 }
 

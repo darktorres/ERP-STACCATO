@@ -12,7 +12,7 @@
 #include <QUrl>
 
 ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
-  connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error); // TODO: change in 5.15 to errorOcurred
+  connect(&socket, &QAbstractSocket::errorOccurred, this, &ACBr::error);
   connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
   connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
   connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);

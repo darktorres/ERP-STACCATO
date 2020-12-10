@@ -113,7 +113,7 @@ QByteArray Chipper::cryptString(QString value)
 {
     QByteArray buff;
     QByteArray result;
-    buff += value;
+    buff += value.toUtf8();
     WTB pt, ct, prior;
 
     if (!d->isPrepared())

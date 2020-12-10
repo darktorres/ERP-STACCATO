@@ -120,7 +120,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  if (modelViewNFeEntrada.data(row, "nsu") > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { throw RuntimeError("NFe não utilizada!", this); }
+  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { throw RuntimeError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -212,7 +212,7 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  if (modelViewNFeEntrada.data(row, "nsu") > 0) {
+  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0) {
     SqlQuery queryUpdateNFe;
     queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
     queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));

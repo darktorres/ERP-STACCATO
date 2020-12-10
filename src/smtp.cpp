@@ -214,14 +214,14 @@ void Smtp::readyRead() {
     // qDebug() << "Username";
     // GMAIL is using XOAUTH2 protocol, which basically means that password and username has to be sent in base64 coding
     // https://developers.google.com/gmail/xoauth2_protocol
-    *t << QByteArray().append(user).toBase64() << "\r\n";
+    *t << QByteArray().append(user.toUtf8()).toBase64() << "\r\n";
     t->flush();
 
     state = States::Pass;
   } else if (state == States::Pass and responseLine == "334") {
     // Trying pass
     // qDebug() << "Pass";
-    *t << QByteArray().append(pass).toBase64() << "\r\n";
+    *t << QByteArray().append(pass.toUtf8()).toBase64() << "\r\n";
     t->flush();
 
     state = States::Mail;

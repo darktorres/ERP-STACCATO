@@ -46,7 +46,7 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 }
 
 void PalletItem::setText(const QString &value) {
-  auto lines = value.split("\n", QString::SkipEmptyParts);
+  auto lines = value.split("\n", Qt::SkipEmptyParts);
 
   int pos = 15;
 
@@ -136,7 +136,7 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
 
-  QStringList text = event->mimeData()->text().split(" - ", QString::SkipEmptyParts);
+  QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
 
   if (text.isEmpty()) { return; }
 

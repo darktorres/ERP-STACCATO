@@ -119,7 +119,7 @@ void Galpao::carregarPallets() {
       existente += tamanho;
     }
 
-    if (query.value("id") > 0) {
+    if (query.value("id").toInt() > 0) {
       if (not existente.isEmpty()) { existente += "\n"; }
 
       existente += item;

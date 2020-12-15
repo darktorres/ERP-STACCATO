@@ -24,7 +24,7 @@ private:
   // attributes
   const Tipo tipo;
   const QString idVenda;
-  bool erroRejeicao = false;
+  bool manterAberto = false;
   QDataWidgetMapper mapper;
   SqlQuery queryCliente;
   SqlQuery queryEndereco;

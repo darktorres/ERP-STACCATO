@@ -273,8 +273,17 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     const QString rejeicao = resposta.split("\r\n\r\n", Qt::SkipEmptyParts).at(1);
 
-    erroRejeicao = true;
+    manterAberto = true;
     throw RuntimeException("Enviar NFe:\n" + rejeicao, this);
+  }
+
+  if (resposta.contains("Erro Interno")) {
+    qDebug() << "erro interno sefaz";
+
+    removerNota(idNFe);
+
+    manterAberto = true;
+    throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
 
   // reread the file now authorized
@@ -309,8 +318,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     ACBr acbrLocal;
     acbrLocal.gerarDanfe(xml.toLatin1()); // close if error
   } catch (std::exception &e) {
-    if (not erroRejeicao) { close(); }
-    erroRejeicao = false;
+    if (not manterAberto) { close(); }
+    manterAberto = false;
     throw;
   }
 
@@ -412,12 +421,6 @@ void CadastrarNFe::preencherNumeroNFe() {
 
 void CadastrarNFe::prepararNFe(const QStringList &items) {
   // TODO: divide into smaller functions
-
-  for (const auto &item : items) {
-    SqlQuery query; // verificando se existe consumo para cada idVendaProduto2
-
-    if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE `idVendaProduto2` = " + item) or not query.first()) { throw RuntimeException("Erro buscando idVendaProduto2 " + item, this); }
-  }
 
   modelViewProdutoEstoque.setFilter("idVendaProduto2 IN (" + items.join(", ") + ")");
 

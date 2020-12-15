@@ -467,10 +467,6 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
     if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
-    if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { throw RuntimeError("Produto não está em estoque!", this); }
-
-    if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { throw RuntimeError("Produto ainda não possui nota de entrada!", this); }
-
     if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
   }
 
@@ -546,12 +542,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (not list2.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
-  if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { throw RuntimeError("Produto não está em estoque!", this); }
-
   // TODO: calcular o peso parcial e não o total para comparar
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
-
-  if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { throw RuntimeError("Produto ainda não possui nota de entrada!", this); }
 
   if (modelProdutos.data(row, "caixas").toInt() == 1) { throw RuntimeError("Produto tem apenas uma caixa!", this); }
 
@@ -858,8 +850,6 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   for (const auto &index : list) {
     if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui nota futura!", this); }
-
-    if (modelProdutos.data(index.row(), "idConsumo").toInt() == 0) { throw RuntimeError("Nem todos os produtos selecionados possuem nota de entrada!", this); }
   }
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();

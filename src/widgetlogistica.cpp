@@ -8,8 +8,8 @@
 WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
   ui->setupUi(this);
 
-  ui->splitter_6->setStretchFactor(0, 0);
-  ui->splitter_6->setStretchFactor(1, 1);
+  ui->splitter->setStretchFactor(0, 1);
+  ui->splitter->setStretchFactor(1, 0);
 
   setConnections();
 }
@@ -66,6 +66,7 @@ void WidgetLogistica::updateTables() {
   if (currentTab == "Representação") { ui->widgetRepresentacao->updateTables(); }
   if (currentTab == "Entregues") { ui->widgetEntregues->updateTables(); }
   if (currentTab == "Calendário") { ui->widgetCalendario->updateTables(); }
+  if (currentTab == "Devolução") { ui->widgetDevolucao->updateTables(); }
 }
 
 void WidgetLogistica::on_tableForn_clicked(const QModelIndex &index) {

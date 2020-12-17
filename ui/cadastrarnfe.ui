@@ -123,7 +123,7 @@
           <item row="7" column="0">
            <widget class="QLabel" name="labelSaida">
             <property name="text">
-             <string>Saída</string>
+             <string>Entrada/Saída</string>
             </property>
            </widget>
           </item>
@@ -264,6 +264,11 @@
             <item>
              <property name="text">
               <string>2 Complementar</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 Ajuste</string>
              </property>
             </item>
             <item>
@@ -598,6 +603,9 @@
        </item>
        <item row="3" column="0">
         <widget class="QGroupBox" name="groupBox_20">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="title">
           <string>Endereço Entrega</string>
          </property>
@@ -892,6 +900,24 @@
           <string>Cliente</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_75">
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioTel1">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_9">
             <item row="0" column="0">
@@ -903,6 +929,52 @@
             </item>
             <item row="0" column="1">
              <widget class="ItemBox" name="itemBoxCliente"/>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>Insc. Est.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonConsultarCadastro">
+              <property name="text">
+               <string>Consultar cadastro</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <widget class="QLabel" name="label_54">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioTel2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -935,67 +1007,6 @@
             </item>
             <item>
              <widget class="QLineEdit" name="lineEditDestinatarioCPFCNPJ">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="2">
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <item>
-             <widget class="QLabel" name="label_55">
-              <property name="text">
-               <string>Insc. Est.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonConsultarCadastro">
-              <property name="text">
-               <string>Consultar cadastro</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_14">
-            <item>
-             <widget class="QLabel" name="label_42">
-              <property name="text">
-               <string>Tel.:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioTel1">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_24">
-            <item>
-             <widget class="QLabel" name="label_54">
-              <property name="text">
-               <string>Tel.:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioTel2">
               <property name="readOnly">
                <bool>true</bool>
               </property>
@@ -1061,8 +1072,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1041</width>
-                   <height>337</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1540,8 +1551,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1690,8 +1701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -2010,8 +2021,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2329,13 +2340,16 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
                   <item row="0" column="0">
                    <widget class="QFrame" name="frameInterEstadual">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="frameShape">
                      <enum>QFrame::StyledPanel</enum>
                     </property>

@@ -41,6 +41,8 @@ void WidgetVenda::setupTables() {
 void WidgetVenda::montaFiltro() {
   QStringList filtros;
 
+  //-------------------------------------
+
   QString filtroLoja;
 
   if (const auto tipoUsuario = UserSession::tipoUsuario; not ui->comboBoxLojas->currentText().isEmpty()) {

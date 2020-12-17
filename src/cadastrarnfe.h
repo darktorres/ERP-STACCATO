@@ -16,9 +16,10 @@ class CadastrarNFe final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Futura, Normal, NormalAposFutura };
+  enum class Tipo { Entrada, Saida, Futura, SaidaAposFutura };
   explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
+  auto show() -> void;
 
 private:
   // attributes
@@ -26,11 +27,8 @@ private:
   const QString idVenda;
   bool manterAberto = false;
   QDataWidgetMapper mapper;
-  SqlQuery queryCliente;
-  SqlQuery queryEndereco;
   SqlQuery queryIBGEDest;
   SqlQuery queryIBGEEmit;
-  SqlQuery queryLojaEnd;
   SqlQuery queryPartilhaInter;
   SqlQuery queryPartilhaIntra;
   QString arquivo;
@@ -90,7 +88,13 @@ private:
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
   auto preCadastrarNota() -> int;
+  auto preencherDadosNFe() -> void;
+  auto preencherDestinatario() -> void;
+  auto preencherEmitente() -> void;
+  auto preencherImpostos() -> void;
   auto preencherNumeroNFe() -> void;
+  auto preencherTotais() -> void;
+  auto preencherTransporte(const QStringList &items) -> void;
   auto prepararNFe(const QStringList &items) -> void;
   auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;
@@ -100,6 +104,7 @@ private:
   auto updateComplemento() -> void;
   auto updateTotais() -> void;
   auto validar() -> bool;
+  auto writeComplemento(QTextStream &stream) const -> void;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;
   auto writeIdentificacao(QTextStream &stream) -> void;

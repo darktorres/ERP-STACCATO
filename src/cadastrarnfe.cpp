@@ -73,6 +73,11 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
 CadastrarNFe::~CadastrarNFe() { delete ui; }
 
+void CadastrarNFe::show() {
+  QDialog::show();
+  validar();
+}
+
 void CadastrarNFe::setupTables() {
   modelVenda.setTable("venda");
 
@@ -146,13 +151,8 @@ QString CadastrarNFe::montarXML() {
   writeTransportadora(stream);
   writePagamento(stream);
   writeVolume(stream);
+  writeComplemento(stream);
 
-  const QString infUsuario = ui->infCompUsuario->toPlainText().isEmpty() ? "" : ui->infCompUsuario->toPlainText();
-  const QString infComp = (infUsuario.isEmpty() ? "" : infUsuario + ";") + ui->infCompSistema->toPlainText();
-
-  stream << "[DadosAdicionais]\n";
-  stream << "infCpl = " + infComp + "\n";
-  //  stream << "\",0)\n"; // dont return xml
   stream << "\",1)\n"; // return xml
 
   return nfe;
@@ -200,7 +200,7 @@ int CadastrarNFe::preCadastrarNota() {
 
   if (queryNota.lastInsertId().isNull()) { throw RuntimeException("Erro lastInsertId"); }
 
-  if (tipo == Tipo::Normal or tipo == Tipo::NormalAposFutura) {
+  if (tipo == Tipo::Saida or tipo == Tipo::SaidaAposFutura) {
     SqlQuery query1;
     query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
@@ -406,10 +406,7 @@ void CadastrarNFe::preencherNumeroNFe() {
 
   SqlQuery queryNfe;
 
-  // TODO: deve buscar tambem notas com outros status? se buscar apenas por autorizado pode pegar um numero já utlizado por uma nota pendente/cancelada
-  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE tipo = 'SAÍDA' AND mid(chaveAcesso, 7, 14) = '" + cnpj +
-                        "' AND DATE(created) BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)") or
-      not queryNfe.first()) {
+  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE cnpjOrig = '" + cnpj + "'") or not queryNfe.first()) {
     throw RuntimeException("Erro buscando idNFe: " + queryNfe.lastError().text(), this);
   }
 
@@ -420,274 +417,18 @@ void CadastrarNFe::preencherNumeroNFe() {
 }
 
 void CadastrarNFe::prepararNFe(const QStringList &items) {
-  // TODO: divide into smaller functions
-
   modelViewProdutoEstoque.setFilter("idVendaProduto2 IN (" + items.join(", ") + ")");
 
   modelViewProdutoEstoque.select();
 
-  //--------------------------------------
-
-  // TODO: return if error?
-  preencherNumeroNFe();
-
-  ui->lineEditModelo->setText("55");
-  ui->lineEditSerie->setText("001");
-  ui->lineEditEmissao->setText(qApp->serverDate().toString("dd/MM/yy"));
-  ui->lineEditSaida->setText(qApp->serverDate().toString("dd/MM/yy"));
-  ui->comboBoxTipo->setCurrentIndex(1);
-  ui->lineEditFormatoPagina->setText("0");
-
-  //-----------------------
-
-  SqlQuery queryEmitente;
-  queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
-  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
-
-  if (not queryEmitente.exec() or not queryEmitente.first()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
-
-  ui->lineEditEmitenteNomeRazao->setText(queryEmitente.value("razaoSocial").toString());
-  ui->lineEditEmitenteFantasia->setText(queryEmitente.value("nomeFantasia").toString());
-  ui->lineEditEmitenteCNPJ->setText(queryEmitente.value("cnpj").toString());
-  ui->lineEditEmitenteInscEstadual->setText(queryEmitente.value("inscEstadual").toString());
-  ui->lineEditEmitenteTel1->setText(queryEmitente.value("tel").toString());
-  ui->lineEditEmitenteTel2->setText(queryEmitente.value("tel2").toString());
-
-  //--------------------------------------
-
-  SqlQuery queryEmitenteEndereco;
-  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
-
-  if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
-
-  ui->lineEditEmitenteLogradouro->setText(queryEmitenteEndereco.value("logradouro").toString());
-  ui->lineEditEmitenteNumero->setText(queryEmitenteEndereco.value("numero").toString());
-  ui->lineEditEmitenteComplemento->setText(queryEmitenteEndereco.value("complemento").toString());
-  ui->lineEditEmitenteBairro->setText(queryEmitenteEndereco.value("bairro").toString());
-  ui->lineEditEmitenteCidade->setText(queryEmitenteEndereco.value("cidade").toString());
-  ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
-  ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
-
-  //-----------------------
-
-  SqlQuery queryDestinatario;
-  queryDestinatario.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
-  queryDestinatario.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
-
-  if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do cliente: " + queryDestinatario.lastError().text(), this); }
-
-  ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("nome_razao").toString());
-  ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value(queryDestinatario.value("pfpj").toString() == "PF" ? "cpf" : "cnpj").toString());
-  ui->lineEditDestinatarioInscEst->setText(queryDestinatario.value("inscEstadual").toString());
-  ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
-  ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("telCel").toString());
-
-  ui->itemBoxCliente->setId(modelVenda.data(0, "idCliente"));
-
-  // endereco faturamento
-  ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
-  ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
-
-  SqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
-
-  if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-    throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this);
-  }
-
-  ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
-  ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
-  ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
-  ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
-  ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
-  ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
-  ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
-
-  // endereco entrega
-
-  ui->itemBoxEnderecoEntrega->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
-  ui->itemBoxEnderecoEntrega->setId(modelVenda.data(0, "idEnderecoEntrega"));
-
-  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
-
-  if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-    throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this);
-  }
-
-  ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
-  ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
-  ui->lineEditDestinatarioComplemento_2->setText(queryDestinatarioEndereco.value("complemento").toString());
-  ui->lineEditDestinatarioBairro_2->setText(queryDestinatarioEndereco.value("bairro").toString());
-  ui->lineEditDestinatarioCidade_2->setText(queryDestinatarioEndereco.value("cidade").toString());
-  ui->lineEditDestinatarioUF_2->setText(queryDestinatarioEndereco.value("uf").toString());
-  ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
-
-  //-----------------------
-
-  double valorProdutos = 0;
-
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) { valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble(); }
-
-  const double frete = modelVenda.data(0, "frete").toDouble();
-  const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
-  const double freteProporcional = valorProdutos / totalVenda * frete;
-
-  ui->doubleSpinBoxValorProdutos->setValue(valorProdutos);
-  ui->doubleSpinBoxValorFrete->setValue(freteProporcional);
-  ui->doubleSpinBoxValorNota->setValue(valorProdutos + freteProporcional);
-
-  //------------------------
-
-  const double porcentagemPIS = UserSession::fromLoja("porcentagemPIS").toDouble();
-
-  if (qFuzzyIsNull(porcentagemPIS)) { throw RuntimeException("Erro buscando % PIS!", this); }
-
-  const double porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS").toDouble();
-
-  if (qFuzzyIsNull(porcentagemCOFINS)) { throw RuntimeException("Erro buscando % COFINS!", this); }
-
-  //
-
-  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
-
-  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
-
-  // TODO: verificar na nota futura qual transportadora preencher
-  if (tipo == Tipo::Normal) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
-        if (modelViewProdutoEstoque.data(row, col).isNull()) {
-          modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
-        }
-      }
-
-      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5403" : "6403");
-
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
-
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
-      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
-
-      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
-    }
-
-    SqlQuery queryTransp;
-    queryTransp.prepare(
-        "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
-        "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
-        "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
-    queryTransp.bindValue(":idVendaProduto2", items.first());
-
-    if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
-
-    const QString endereco = queryTransp.value("logradouro").toString().isEmpty() ? ""
-                                                                                  : queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " +
-                                                                                        queryTransp.value("complemento").toString() + " - " + queryTransp.value("bairro").toString();
-
-    ui->lineEditTransportadorCpfCnpj->setText(queryTransp.value("cnpj").toString());
-    ui->lineEditTransportadorRazaoSocial->setText(queryTransp.value("razaoSocial").toString());
-    ui->lineEditTransportadorInscEst->setText(queryTransp.value("inscEstadual").toString());
-    ui->lineEditTransportadorEndereco->setText(endereco);
-    ui->lineEditTransportadorUf->setText(queryTransp.value("uf").toString());
-    ui->lineEditTransportadorMunicipio->setText(queryTransp.value("cidade").toString());
-
-    ui->lineEditTransportadorPlaca->setText(queryTransp.value("placa").toString());
-    ui->lineEditTransportadorRntc->setText(queryTransp.value("antt").toString());
-    ui->lineEditTransportadorUfPlaca->setText(queryTransp.value("ufPlaca").toString());
-
-    // somar pesos para os campos do transporte
-    double caixas = 0;
-    double peso = 0;
-
-    SqlQuery queryProduto;
-    queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
-
-      queryProduto.bindValue(":idProduto", modelViewProdutoEstoque.data(row, "idProduto"));
-
-      if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando peso do produto: " + queryProduto.lastError().text(), this); }
-
-      peso += queryProduto.value("kgcx").toDouble() * modelViewProdutoEstoque.data(row, "caixas").toInt();
-    }
-
-    ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
-    ui->lineEditVolumesEspecie->setText("Caixas");
-    ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
-    ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
-  }
-
-  if (tipo == Tipo::Futura) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
-      }
-
-      modelViewProdutoEstoque.setData(row, "cfop", "5922");
-
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
-
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
-      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
-
-      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
-    }
-
-    ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
-  }
-
-  if (tipo == Tipo::NormalAposFutura) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
-      }
-
-      modelViewProdutoEstoque.setData(row, "cfop", "5117");
-
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS90");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "90");
-
-      modelViewProdutoEstoque.setData(row, "cstPIS", "49");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", 0);
-      modelViewProdutoEstoque.setData(row, "pPIS", 0);
-      modelViewProdutoEstoque.setData(row, "vPIS", 0);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "49");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", 0);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", 0);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", 0);
-    }
-
-    ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
-  }
-
-  //
-
-  validar();
-
+  preencherDadosNFe();
+  preencherEmitente();
+  preencherDestinatario();
+  preencherTotais();
+  preencherImpostos();
+  preencherTransporte(items);
   buscarAliquotas();
-
   updateTotais();
-
   setConnections();
 
   ui->comboBoxRegime->setCurrentText("Tributação Normal");
@@ -742,7 +483,19 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
   stream << "indPres = 1\n";
   stream << "indFinal = 1\n";
 
-  if (tipo == Tipo::NormalAposFutura) {
+  if (tipo == Tipo::Entrada) {
+    SqlQuery query;
+    query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT vp3.idNFeSaida FROM venda_has_produto2 vp2 LEFT JOIN venda_has_produto2 vp3 ON vp2.idRelacionado = vp3.idVendaProduto2 WHERE "
+                  "vp2.idVendaProduto2 = :idVendaProduto2)");
+    query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
+
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando NFe referenciada!", this); }
+
+    stream << "[NFRef001]\n";
+    stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
+  }
+
+  if (tipo == Tipo::SaidaAposFutura) {
     SqlQuery query;
     query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2)");
     query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
@@ -758,55 +511,55 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "[Emitente]\n";
   stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) + "\n";
   //  stream << "CNPJ = 99999090910270\n";
-  stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() + "\n";
-  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(59) + "\n";
-  stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() + "\n";
-  stream << "Fone = " + modelLoja.data(0, "tel").toString() + "\n";
-  stream << "CEP = " + clearStr(queryLojaEnd.value("CEP").toString()) + "\n";
-  stream << "Logradouro = " + queryLojaEnd.value("logradouro").toString() + "\n";
-  stream << "Numero = " + queryLojaEnd.value("numero").toString() + "\n";
-  stream << "Complemento = " + queryLojaEnd.value("complemento").toString() + "\n";
-  stream << "Bairro = " + queryLojaEnd.value("bairro").toString() + "\n";
+  stream << "IE = " + ui->lineEditEmitenteInscEstadual->text() + "\n";
+  stream << "Razao = " + ui->lineEditEmitenteNomeRazao->text().left(59) + "\n";
+  stream << "Fantasia = " + ui->lineEditEmitenteFantasia->text() + "\n";
+  stream << "Fone = " + ui->lineEditEmitenteTel1->text() + "\n";
+  stream << "CEP = " + clearStr(ui->lineEditEmitenteCEP->text()) + "\n";
+  stream << "Logradouro = " + ui->lineEditEmitenteLogradouro->text() + "\n";
+  stream << "Numero = " + ui->lineEditEmitenteNumero->text() + "\n";
+  stream << "Complemento = " + ui->lineEditEmitenteComplemento->text() + "\n";
+  stream << "Bairro = " + ui->lineEditEmitenteBairro->text() + "\n";
   stream << "cMun = " + queryIBGEEmit.value("codigo").toString() + "\n";
-  stream << "Cidade = " + queryLojaEnd.value("cidade").toString() + "\n";
-  stream << "UF = " + queryLojaEnd.value("uf").toString() + "\n";
+  stream << "Cidade = " + ui->lineEditEmitenteCidade->text() + "\n";
+  stream << "UF = " + ui->lineEditEmitenteUF->text() + "\n";
 }
 
 void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "[Destinatario]\n";
 
-  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(59) + "\n";
+  stream << "NomeRazao = " + ui->lineEditDestinatarioNomeRazao->text().left(59) + "\n";
 
-  if (queryCliente.value("pfpj").toString() == "PF") {
-    stream << "CPF = " + clearStr(queryCliente.value("cpf").toString()) + "\n";
+  if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 14) {
+    stream << "CPF = " + clearStr(ui->lineEditDestinatarioCPFCNPJ->text()) + "\n";
     stream << "indIEDest = 9\n";
   }
 
-  if (queryCliente.value("pfpj").toString() == "PJ") {
-    stream << "CNPJ = " + clearStr(queryCliente.value("cnpj").toString()) + "\n";
+  if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 18) {
+    stream << "CNPJ = " + clearStr(ui->lineEditDestinatarioCPFCNPJ->text()) + "\n";
 
-    const QString inscEst = queryCliente.value("inscEstadual").toString();
+    const QString inscEst = ui->lineEditDestinatarioInscEst->text();
 
     stream << (inscEst == "ISENTO" or inscEst.isEmpty() ? "indIEDest = 9" : "IE = " + clearStr(inscEst)) + "\n";
   }
 
-  stream << "Fone = " + queryCliente.value("tel").toString() + "\n";
-  stream << "CEP = " + clearStr(queryEndereco.value("cep").toString()) + "\n";
-  stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(59) + "\n";
-  stream << "Numero = " + queryEndereco.value("numero").toString() + "\n";
-  stream << "Complemento = " + queryEndereco.value("complemento").toString().left(59) + "\n";
+  stream << "Fone = " + ui->lineEditDestinatarioTel1->text() + "\n";
+  stream << "CEP = " + clearStr(ui->lineEditDestinatarioCEP->text()) + "\n";
+  stream << "Logradouro = " + ui->lineEditDestinatarioLogradouro->text().left(59) + "\n";
+  stream << "Numero = " + ui->lineEditDestinatarioNumero->text() + "\n";
+  stream << "Complemento = " + ui->lineEditDestinatarioComplemento->text().left(59) + "\n";
 
-  const QString bairro = queryEndereco.value("bairro").toString();
+  const QString bairro = ui->lineEditDestinatarioBairro->text();
 
   if (bairro.isEmpty()) {
     stream << "Bairro = SEM BAIRRO\n";
   } else {
-    stream << "Bairro = " + queryEndereco.value("bairro").toString() + "\n";
+    stream << "Bairro = " + bairro + "\n";
   }
 
   stream << "cMun = " + queryIBGEDest.value("codigo").toString() + "\n";
-  stream << "Cidade = " + queryEndereco.value("cidade").toString() + "\n";
-  stream << "UF = " + queryEndereco.value("uf").toString() + "\n";
+  stream << "Cidade = " + ui->lineEditDestinatarioCidade->text() + "\n";
+  stream << "UF = " + ui->lineEditDestinatarioUF->text() + "\n";
 }
 
 void CadastrarNFe::writeProduto(QTextStream &stream) const {
@@ -873,7 +626,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     // PARTILHA ICMS
 
-    const QString inscEst = queryCliente.value("inscEstadual").toString();
+    const QString inscEst = ui->lineEditDestinatarioInscEst->text();
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
       stream << "[ICMSUFDest" + numProd + "]\n";
@@ -888,7 +641,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
       stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) + "\n";
     }
 
-    //    http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
+    // http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
   }
 }
 
@@ -905,7 +658,7 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
 
   // PARTILHA ICMS
 
-  const QString inscEst = queryCliente.value("inscEstadual").toString();
+  const QString inscEst = ui->lineEditDestinatarioInscEst->text();
 
   if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
     double totalIcmsDest = 0;
@@ -948,10 +701,18 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
 }
 
 void CadastrarNFe::writePagamento(QTextStream &stream) {
-  stream << "[Pag001]\n";
+  if (tipo == Tipo::Entrada) {
+    stream << "[Pag001]\n";
 
-  stream << "tPag = 01\n";
-  stream << "vPag = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
+    stream << "tPag = 90\n"; // sem pagamento
+  }
+
+  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
+    stream << "[Pag001]\n";
+
+    stream << "tPag = 01\n";
+    stream << "vPag = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
+  }
 }
 
 void CadastrarNFe::writeVolume(QTextStream &stream) const {
@@ -963,6 +724,18 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
   stream << "Numeracao = " << ui->lineEditVolumesNumeracao->text() + "\n";
   stream << "PesoLiquido = " << QString::number(ui->doubleSpinBoxVolumesPesoLiq->value(), 'f', 3) + "\n";
   stream << "PesoBruto = " << QString::number(ui->doubleSpinBoxVolumesPesoBruto->value(), 'f', 3) + "\n";
+}
+
+void CadastrarNFe::writeComplemento(QTextStream &stream) const {
+  if (tipo == Tipo::Entrada) {}
+
+  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
+    const QString infUsuario = ui->infCompUsuario->toPlainText().isEmpty() ? "" : ui->infCompUsuario->toPlainText();
+    const QString infComp = (infUsuario.isEmpty() ? "" : infUsuario + ";") + ui->infCompSistema->toPlainText();
+
+    stream << "[DadosAdicionais]\n";
+    stream << "infCpl = " + infComp + "\n";
+  }
 }
 
 void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
@@ -1010,6 +783,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
       ui->frameIPI->setEnabled(true);
       ui->framePIS->setEnabled(true);
       ui->frameCOFINS->setEnabled(true);
+      ui->frameInterEstadual->setEnabled(true);
 
       listarCfop();
 
@@ -1456,16 +1230,15 @@ void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
 }
 
 bool CadastrarNFe::validar() {
-  // validacao do model
-
   // TODO: 5recalcular todos os valores dos itens para verificar se os dados batem (usar o 174058 de referencia)
+
+  // validacao do model
 
   bool ok = true;
 
   // -------------------------------------------------------------------------
 
   if (ui->itemBoxLoja->text().isEmpty()) {
-    // assume no certificate in acbr
     qApp->enqueueError("Escolha um certificado para o ACBr!", this);
     ok = false;
   }
@@ -1473,162 +1246,99 @@ bool CadastrarNFe::validar() {
   // [Emitente]
 
   if (clearStr(modelLoja.data(0, "cnpj").toString()).isEmpty()) {
-    qApp->enqueueError("CNPJ emitente vazio!", this);
+    qApp->enqueueError("CNPJ do emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "razaoSocial").toString().isEmpty()) {
-    qApp->enqueueError("Razão Social emitente vazio!", this);
+    qApp->enqueueError("Razão Social do emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "nomeFantasia").toString().isEmpty()) {
-    qApp->enqueueError("Nome Fantasia emitente vazio!", this);
+    qApp->enqueueError("Nome Fantasia do emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "tel").toString().isEmpty()) {
-    qApp->enqueueError("Telefone emitente vazio!", this);
+    qApp->enqueueError("Telefone do emitente vazio!", this);
     ok = false;
   }
 
-  // -------------------------------------------------------------------------
-
-  queryLojaEnd.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryLojaEnd.bindValue(":idLoja", modelLoja.data(0, "idLoja"));
-
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
-    ok = false;
-    throw RuntimeException("Erro lendo tabela de endereços da loja: " + queryLojaEnd.lastError().text(), this);
-  }
-
-  if (clearStr(queryLojaEnd.value("CEP").toString()).isEmpty()) {
-    qApp->enqueueError("CEP vazio!", this);
+  if (clearStr(ui->lineEditEmitenteCEP->text()).isEmpty()) {
+    qApp->enqueueError("CEP do emitente vazio!", this);
     ok = false;
   }
 
-  if (queryLojaEnd.value("logradouro").toString().isEmpty()) {
-    qApp->enqueueError("Logradouro vazio!", this);
+  if (ui->lineEditEmitenteLogradouro->text().isEmpty()) {
+    qApp->enqueueError("Logradouro do emitente vazio!", this);
     ok = false;
   }
 
-  if (queryLojaEnd.value("numero").toString().isEmpty()) {
-    qApp->enqueueError("Número vazio!", this);
+  if (ui->lineEditEmitenteNumero->text().isEmpty()) {
+    qApp->enqueueError("Número do emitente vazio!", this);
     ok = false;
   }
 
-  if (queryLojaEnd.value("bairro").toString().isEmpty()) {
-    qApp->enqueueError("Bairro vazio!", this);
+  if (ui->lineEditEmitenteBairro->text().isEmpty()) {
+    qApp->enqueueError("Bairro do emitente vazio!", this);
     ok = false;
   }
 
-  if (queryLojaEnd.value("cidade").toString().isEmpty()) {
-    qApp->enqueueError("Cidade vazio!", this);
+  if (ui->lineEditEmitenteCidade->text().isEmpty()) {
+    qApp->enqueueError("Cidade do emitente vazio!", this);
     ok = false;
   }
 
-  if (queryLojaEnd.value("uf").toString().isEmpty()) {
-    qApp->enqueueError("UF vazio!", this);
+  if (ui->lineEditEmitenteUF->text().isEmpty()) {
+    qApp->enqueueError("UF do emitente vazio!", this);
     ok = false;
   }
 
   // [Destinatario]
 
   if (modelVenda.data(0, "idCliente").toString().isEmpty()) {
-    ok = false;
-    throw RuntimeException("Cliente vazio!", this);
-  }
-
-  // -------------------------------------------------------------------------
-
-  queryCliente.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel FROM cliente WHERE idCliente = :idCliente");
-  queryCliente.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
-
-  if (not queryCliente.exec() or not queryCliente.first()) {
-    ok = false;
-    throw RuntimeException("Erro buscando endereço do destinatário: " + queryCliente.lastError().text(), this);
-  }
-
-  if (queryCliente.value("nome_razao").toString().isEmpty()) {
-    qApp->enqueueError("Nome/Razão vazio!", this);
+    qApp->enqueueError("Cliente vazio!", this);
     ok = false;
   }
 
-  if (queryCliente.value("pfpj").toString() == "PF") {
-    if (clearStr(queryCliente.value("cpf").toString()).isEmpty()) {
-      qApp->enqueueError("CPF destinatário vazio!", this);
+  if (ui->lineEditDestinatarioNomeRazao->text().isEmpty()) {
+    qApp->enqueueError("Nome/Razão do destinatário vazio!", this);
+    ok = false;
+  }
+
+    if (clearStr(ui->lineEditDestinatarioCPFCNPJ->text()).isEmpty()) {
+      qApp->enqueueError("CPF/CNPJ do destinatário vazio!", this);
       ok = false;
     }
-  }
 
-  if (queryCliente.value("pfpj").toString() == "PJ") {
-    if (clearStr(queryCliente.value("cnpj").toString()).isEmpty()) {
-      qApp->enqueueError("CNPJ destinatário vazio!", this);
+    if (ui->lineEditDestinatarioCEP->text().isEmpty()) {
+      qApp->enqueueError("CEP do destinatário vazio!", this);
       ok = false;
     }
-  }
 
-  // -------------------------------------------------------------------------
-
-  queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
-
-  if (not queryEndereco.exec() or not queryEndereco.first()) {
-    ok = false;
-    throw RuntimeException("Erro buscando endereço cliente: " + queryEndereco.lastError().text(), this);
-  }
-
-  if (queryEndereco.value("cep").toString().isEmpty()) {
-    qApp->enqueueError("CEP cliente vazio!", this);
+  if (ui->lineEditDestinatarioLogradouro->text().isEmpty()) {
+    qApp->enqueueError("Logradouro do destinatário vazio!", this);
     ok = false;
   }
 
-  if (queryEndereco.value("logradouro").toString().isEmpty()) {
-    qApp->enqueueError("Logradouro cliente vazio!", this);
+  if (ui->lineEditDestinatarioNumero->text().isEmpty()) {
+    qApp->enqueueError("Número endereço do destinatário vazio!", this);
     ok = false;
   }
 
-  if (queryEndereco.value("numero").toString().isEmpty()) {
-    qApp->enqueueError("Número endereço do cliente vazio!", this);
+  if (ui->lineEditDestinatarioBairro->text().isEmpty()) {
+    qApp->enqueueError("Bairro do destinatário vazio!", this);
     ok = false;
   }
 
-  if (queryEndereco.value("bairro").toString().isEmpty()) {
-    qApp->enqueueError("Bairro do cliente vazio!", this);
+  if (ui->lineEditDestinatarioCidade->text().isEmpty()) {
+    qApp->enqueueError("Cidade do destinatário vazio!", this);
     ok = false;
   }
 
-  // -------------------------------------------------------------------------
-
-  queryIBGEEmit.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
-  queryIBGEEmit.bindValue(":cidade", queryLojaEnd.value("cidade"));
-  queryIBGEEmit.bindValue(":uf", queryLojaEnd.value("uf"));
-
-  if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) {
-    ok = false;
-    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
-  }
-
-  // -------------------------------------------------------------------------
-
-  queryIBGEDest.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
-  queryIBGEDest.bindValue(":cidade", queryEndereco.value("cidade"));
-  queryIBGEDest.bindValue(":uf", queryEndereco.value("uf"));
-
-  if (not queryIBGEDest.exec() or not queryIBGEDest.first()) {
-    ok = false;
-    throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this);
-  }
-
-  // -------------------------------------------------------------------------
-
-  if (queryEndereco.value("cidade").toString().isEmpty()) {
-    qApp->enqueueError("Cidade cliente vazio!", this);
-    ok = false;
-  }
-
-  if (queryEndereco.value("uf").toString().isEmpty()) {
-    qApp->enqueueError("UF cliente vazio!", this);
+  if (ui->lineEditDestinatarioUF->text().isEmpty()) {
+    qApp->enqueueError("UF do destinatário vazio!", this);
     ok = false;
   }
 
@@ -1637,14 +1347,14 @@ bool CadastrarNFe::validar() {
   // [Produto]
 
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    if (modelViewProdutoEstoque.data(row, "cfop").toString().isEmpty()) { qApp->enqueueWarning("CFOP vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "ncm").toString().isEmpty()) { qApp->enqueueWarning("NCM vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "codComercial").toString().isEmpty()) { qApp->enqueueWarning("Código vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "produto").toString().isEmpty()) { qApp->enqueueWarning("Descrição vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "un").toString().isEmpty()) { qApp->enqueueWarning("Unidade vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "quant").toString().isEmpty()) { qApp->enqueueWarning("Quantidade vazio!", this); }
-    if (qFuzzyIsNull(modelViewProdutoEstoque.data(row, "descUnitario").toDouble())) { qApp->enqueueWarning("Preço unitário = R$ 0!", this); }
-    if (modelViewProdutoEstoque.data(row, "total").toString().isEmpty()) { qApp->enqueueWarning("Total produto vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "cfop").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": CFOP vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "ncm").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "codComercial").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Código vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "produto").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Descrição vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "un").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Unidade vazio!", this); }
+    if (modelViewProdutoEstoque.data(row, "quant").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Quantidade vazio!", this); }
+    if (qFuzzyIsNull(modelViewProdutoEstoque.data(row, "descUnitario").toDouble())) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Preço unitário = R$ 0!", this); }
+    if (modelViewProdutoEstoque.data(row, "total").toString().isEmpty()) { qApp->enqueueWarning("Linha " + QString::number(row + 1) + ": Total produto vazio!", this); }
   }
 
   return ok;
@@ -1652,16 +1362,16 @@ bool CadastrarNFe::validar() {
 
 void CadastrarNFe::buscarAliquotas() {
   queryPartilhaInter.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
-  queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
-  queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
+  queryPartilhaInter.bindValue(":origem", ui->lineEditEmitenteUF->text());
+  queryPartilhaInter.bindValue(":destino", ui->lineEditDestinatarioUF->text());
 
   if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) { throw RuntimeException("Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text()); }
 
   // -------------------------------------------------------------------------
 
   queryPartilhaIntra.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
-  queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));
-  queryPartilhaIntra.bindValue(":destino", queryEndereco.value("uf"));
+  queryPartilhaIntra.bindValue(":origem", ui->lineEditDestinatarioUF->text());
+  queryPartilhaIntra.bindValue(":destino", ui->lineEditDestinatarioUF->text());
 
   if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) { throw RuntimeException("Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text()); }
 }
@@ -1724,34 +1434,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
   }
 
   preencherNumeroNFe();
-
-  // TODO: refactor this code with the one in prepararNFe
-  SqlQuery queryEmitente;
-  queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
-  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
-
-  if (not queryEmitente.exec() or not queryEmitente.first()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
-
-  ui->lineEditEmitenteNomeRazao->setText(queryEmitente.value("razaoSocial").toString());
-  ui->lineEditEmitenteFantasia->setText(queryEmitente.value("nomeFantasia").toString());
-  ui->lineEditEmitenteCNPJ->setText(queryEmitente.value("cnpj").toString());
-  ui->lineEditEmitenteInscEstadual->setText(queryEmitente.value("inscEstadual").toString());
-  ui->lineEditEmitenteTel1->setText(queryEmitente.value("tel").toString());
-  ui->lineEditEmitenteTel2->setText(queryEmitente.value("tel2").toString());
-
-  SqlQuery queryEmitenteEndereco;
-  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
-
-  if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
-
-  ui->lineEditEmitenteLogradouro->setText(queryEmitenteEndereco.value("logradouro").toString());
-  ui->lineEditEmitenteNumero->setText(queryEmitenteEndereco.value("numero").toString());
-  ui->lineEditEmitenteComplemento->setText(queryEmitenteEndereco.value("complemento").toString());
-  ui->lineEditEmitenteBairro->setText(queryEmitenteEndereco.value("bairro").toString());
-  ui->lineEditEmitenteCidade->setText(queryEmitenteEndereco.value("cidade").toString());
-  ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
-  ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
+  preencherEmitente();
 }
 
 void CadastrarNFe::setConnections() {
@@ -1902,6 +1585,376 @@ void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
   file.close();
 }
 
+void CadastrarNFe::preencherDadosNFe() {
+  preencherNumeroNFe();
+
+  ui->lineEditModelo->setText("55");
+  ui->lineEditSerie->setText("001");
+  ui->lineEditEmissao->setText(qApp->serverDate().toString("dd/MM/yy"));
+  ui->lineEditSaida->setText(qApp->serverDate().toString("dd/MM/yy"));
+  ui->lineEditFormatoPagina->setText("0");
+
+  if (tipo == Tipo::Entrada) {
+    ui->comboBoxNatureza->setCurrentIndex(3);
+    ui->comboBoxTipo->setCurrentIndex(0);
+    ui->comboBoxFinalidade->setCurrentIndex(3);
+  }
+
+  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) { ui->comboBoxTipo->setCurrentIndex(1); }
+}
+
+void CadastrarNFe::preencherEmitente() {
+  // dados do emitente
+
+  SqlQuery queryEmitente;
+  queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
+  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
+
+  if (not queryEmitente.exec() or not queryEmitente.first()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
+
+  ui->lineEditEmitenteNomeRazao->setText(queryEmitente.value("razaoSocial").toString());
+  ui->lineEditEmitenteFantasia->setText(queryEmitente.value("nomeFantasia").toString());
+  ui->lineEditEmitenteCNPJ->setText(queryEmitente.value("cnpj").toString());
+  ui->lineEditEmitenteInscEstadual->setText(queryEmitente.value("inscEstadual").toString());
+  ui->lineEditEmitenteTel1->setText(queryEmitente.value("tel").toString());
+  ui->lineEditEmitenteTel2->setText(queryEmitente.value("tel2").toString());
+
+  // endereço do emitente
+
+  SqlQuery queryEmitenteEndereco;
+  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
+
+  if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
+
+  ui->lineEditEmitenteLogradouro->setText(queryEmitenteEndereco.value("logradouro").toString());
+  ui->lineEditEmitenteNumero->setText(queryEmitenteEndereco.value("numero").toString());
+  ui->lineEditEmitenteComplemento->setText(queryEmitenteEndereco.value("complemento").toString());
+  ui->lineEditEmitenteBairro->setText(queryEmitenteEndereco.value("bairro").toString());
+  ui->lineEditEmitenteCidade->setText(queryEmitenteEndereco.value("cidade").toString());
+  ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
+  ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
+}
+
+void CadastrarNFe::preencherDestinatario() {
+  if (tipo == Tipo::Entrada) { // usar dados da loja
+    ui->itemBoxCliente->setDisabled(true);
+
+    // dados do destinatario
+
+    SqlQuery queryDestinatario;
+    queryDestinatario.prepare("SELECT razaoSocial, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
+    queryDestinatario.bindValue(":idLoja", ui->itemBoxLoja->getId());
+
+    if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
+
+    ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("razaoSocial").toString());
+    ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value("cnpj").toString());
+    ui->lineEditDestinatarioInscEst->setText(queryDestinatario.value("inscEstadual").toString());
+    ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
+    ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("tel2").toString());
+
+    // endereco faturamento
+
+    ui->itemBoxEnderecoFaturamento->setDisabled(true);
+
+    ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
+    ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
+
+    SqlQuery queryDestinatarioEndereco;
+    queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+    queryDestinatarioEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
+
+    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
+      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
+    }
+
+    ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
+    ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
+    ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
+    ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
+    ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
+    ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
+    ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+
+    // endereco entrega
+
+    ui->itemBoxEnderecoEntrega->setDisabled(true);
+  }
+
+  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
+    // dados do destinatario
+
+    SqlQuery queryDestinatario;
+    queryDestinatario.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
+    queryDestinatario.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
+
+    if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
+
+    ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("nome_razao").toString());
+    ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value(queryDestinatario.value("pfpj").toString() == "PF" ? "cpf" : "cnpj").toString());
+    ui->lineEditDestinatarioInscEst->setText(queryDestinatario.value("inscEstadual").toString());
+    ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
+    ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("telCel").toString());
+
+    ui->itemBoxCliente->setId(modelVenda.data(0, "idCliente"));
+
+    // endereco faturamento
+
+    ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
+    ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
+
+    SqlQuery queryDestinatarioEndereco;
+    queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
+
+    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
+      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
+    }
+
+    ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
+    ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
+    ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
+    ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
+    ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
+    ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
+    ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+
+    // endereco entrega
+
+    ui->itemBoxEnderecoEntrega->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
+    ui->itemBoxEnderecoEntrega->setId(modelVenda.data(0, "idEnderecoEntrega"));
+
+    queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
+
+    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
+      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
+    }
+
+    ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
+    ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
+    ui->lineEditDestinatarioComplemento_2->setText(queryDestinatarioEndereco.value("complemento").toString());
+    ui->lineEditDestinatarioBairro_2->setText(queryDestinatarioEndereco.value("bairro").toString());
+    ui->lineEditDestinatarioCidade_2->setText(queryDestinatarioEndereco.value("cidade").toString());
+    ui->lineEditDestinatarioUF_2->setText(queryDestinatarioEndereco.value("uf").toString());
+    ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
+  }
+
+  // -------------------------------------------------------------------------
+
+  queryIBGEEmit.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
+  queryIBGEEmit.bindValue(":cidade", ui->lineEditEmitenteCidade->text());
+  queryIBGEEmit.bindValue(":uf", ui->lineEditEmitenteUF->text());
+
+  if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+
+  // -------------------------------------------------------------------------
+
+  queryIBGEDest.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
+  queryIBGEDest.bindValue(":cidade", ui->lineEditDestinatarioCidade->text());
+  queryIBGEDest.bindValue(":uf", ui->lineEditDestinatarioUF->text());
+
+  if (not queryIBGEDest.exec() or not queryIBGEDest.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+}
+
+void CadastrarNFe::preencherTotais() {
+  double valorProdutos = 0;
+
+  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) { valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble(); }
+
+  const double frete = modelVenda.data(0, "frete").toDouble();
+  const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
+  const double freteProporcional = valorProdutos / totalVenda * frete;
+
+  ui->doubleSpinBoxValorProdutos->setValue(valorProdutos);
+  ui->doubleSpinBoxValorFrete->setValue(freteProporcional);
+  ui->doubleSpinBoxValorNota->setValue(valorProdutos + freteProporcional);
+}
+
+void CadastrarNFe::preencherImpostos() {
+  // buscar aliquotas
+
+  const double porcentagemPIS = UserSession::fromLoja("porcentagemPIS").toDouble();
+
+  if (qFuzzyIsNull(porcentagemPIS)) { throw RuntimeException("Erro buscando % PIS!", this); }
+
+  const double porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS").toDouble();
+
+  if (qFuzzyIsNull(porcentagemCOFINS)) { throw RuntimeException("Erro buscando % COFINS!", this); }
+
+  // determinar operacao inter/intra
+
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+
+  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
+
+  if (tipo == Tipo::Entrada) {
+    // usar mesmos dados da NFe de saida
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (modelViewProdutoEstoque.data(row, col).isNull()) {
+          modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+        }
+      }
+
+      // CFOP 1202 - Devolução de venda de mercadoria adquirida ou recebida de terceiros
+      // CFOP 1.411 - Devolução de venda de mercadoria adquirida ou recebida de terceiros em operação com mercadoria sujeita ao regime de substituição tributária
+
+      modelViewProdutoEstoque.setData(row, "cfop", "1202");
+
+      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
+      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+
+      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
+      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+    }
+  }
+
+  if (tipo == Tipo::Saida) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (modelViewProdutoEstoque.data(row, col).isNull()) {
+          modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+        }
+      }
+
+      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5403" : "6403");
+
+      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
+      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+
+      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
+      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+    }
+  }
+
+  if (tipo == Tipo::Futura) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+      }
+
+      modelViewProdutoEstoque.setData(row, "cfop", "5922");
+
+      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
+      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+
+      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
+      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
+      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+    }
+
+    ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
+  }
+
+  if (tipo == Tipo::SaidaAposFutura) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+      }
+
+      modelViewProdutoEstoque.setData(row, "cfop", "5117");
+
+      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS90");
+      modelViewProdutoEstoque.setData(row, "cstICMS", "90");
+
+      modelViewProdutoEstoque.setData(row, "cstPIS", "49");
+      modelViewProdutoEstoque.setData(row, "vBCPIS", 0);
+      modelViewProdutoEstoque.setData(row, "pPIS", 0);
+      modelViewProdutoEstoque.setData(row, "vPIS", 0);
+      modelViewProdutoEstoque.setData(row, "cstCOFINS", "49");
+      modelViewProdutoEstoque.setData(row, "vBCCOFINS", 0);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", 0);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", 0);
+    }
+
+    ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
+  }
+}
+
+void CadastrarNFe::preencherTransporte(const QStringList &items) {
+  // TODO: verificar na nota futura qual transportadora preencher
+
+  if (tipo == Tipo::Saida) {
+    // dados da transportadora
+
+    SqlQuery queryTransp;
+    queryTransp.prepare(
+        "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
+        "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
+        "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
+    queryTransp.bindValue(":idVendaProduto2", items.first());
+
+    if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
+
+    const QString endereco = queryTransp.value("logradouro").toString().isEmpty() ? ""
+                                                                                  : queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " +
+                                                                                        queryTransp.value("complemento").toString() + " - " + queryTransp.value("bairro").toString();
+
+    ui->lineEditTransportadorCpfCnpj->setText(queryTransp.value("cnpj").toString());
+    ui->lineEditTransportadorRazaoSocial->setText(queryTransp.value("razaoSocial").toString());
+    ui->lineEditTransportadorInscEst->setText(queryTransp.value("inscEstadual").toString());
+    ui->lineEditTransportadorEndereco->setText(endereco);
+    ui->lineEditTransportadorUf->setText(queryTransp.value("uf").toString());
+    ui->lineEditTransportadorMunicipio->setText(queryTransp.value("cidade").toString());
+
+    ui->lineEditTransportadorPlaca->setText(queryTransp.value("placa").toString());
+    ui->lineEditTransportadorRntc->setText(queryTransp.value("antt").toString());
+    ui->lineEditTransportadorUfPlaca->setText(queryTransp.value("ufPlaca").toString());
+
+    // somar pesos para os campos do transporte
+
+    double caixas = 0;
+    double peso = 0;
+
+    SqlQuery queryProduto;
+    queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
+
+      queryProduto.bindValue(":idProduto", modelViewProdutoEstoque.data(row, "idProduto"));
+
+      if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando peso do produto: " + queryProduto.lastError().text(), this); }
+
+      peso += queryProduto.value("kgcx").toDouble() * modelViewProdutoEstoque.data(row, "caixas").toInt();
+    }
+
+    ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
+    ui->lineEditVolumesEspecie->setText("Caixas");
+    ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
+    ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
+  }
+}
+
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
 // TODO: 3criar logo para nota
 // TODO: 5bloquear edicao direto na tabela
@@ -1910,3 +1963,7 @@ void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
 // TODO: testar a função de pré-gravar nota e consultar
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
+
+// NFe Devolucao
+
+// falta colocar a observacao da recusa/devolucao do cliente nas informacoes complementares

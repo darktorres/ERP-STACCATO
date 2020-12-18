@@ -60,6 +60,7 @@ void WidgetCompraDevolucao::setupTables() {
 
   ui->table->setModel(&modelVendaProduto);
 
+  ui->table->hideColumn("idNFeEntrada");
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idVendaProdutoFK");
   ui->table->hideColumn("idRelacionado");

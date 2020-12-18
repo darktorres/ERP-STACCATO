@@ -103,6 +103,7 @@ void Venda::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
+  ui->treeView->hideColumn("idNFeEntrada");
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("statusOriginal");

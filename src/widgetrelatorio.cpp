@@ -14,9 +14,7 @@
 #include <QFileDialog>
 #include <QSqlError>
 
-WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) {
-  ui->setupUi(this);
-}
+WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
@@ -227,7 +225,11 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
   for (int row = 0; row < modelViewRelatorio.rowCount(); ++row) {
     for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) {
-      if (col == 7) {
+      if (col == 5) { // ajustar data
+        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelViewRelatorio.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
+      } else if (col == 6) { // ajustar data
+        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col).toDate().toString("dd-MM-yyyy"));
+      } else if (col == 9) { // ajustar porcentagem
         xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col).toDouble() / 100);
       } else {
         xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col));
@@ -245,8 +247,10 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
   for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
     for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) {
-      if (col == 5) {
+      if (col == 6) { // ajustar porcentagem
         xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col).toDouble() / 100);
+      } else if (col == 7) { // ajustar data
+        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelViewRelatorioVendedor.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
       } else {
         xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col));
       }

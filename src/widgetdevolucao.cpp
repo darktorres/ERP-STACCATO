@@ -77,7 +77,7 @@ void WidgetDevolucao::setupTables() {
   ui->table->setModel(&model);
 
   ui->table->hideColumn("data");
-  //  ui->table->hideColumn("idVendaProduto2");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idProduto");
 }
 

@@ -1,6 +1,7 @@
 #include "pdf.h"
 
 #include "application.h"
+#include "file.h"
 #include "lrreportengine.h"
 #include "usersession.h"
 
@@ -34,7 +35,9 @@ void PDF::gerarPdf() {
 
   dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
-  if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
+  const QString modelo = QDir::currentPath() + "/modelos/" + ((tipo == Tipo::Orcamento) ? "orcamento" : "venda") + ".lrxml";
+
+  if (not report->loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
 
   dataManager->setReportVariable("Loja", queryLoja.value("descricao"));
   dataManager->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" + queryLojaEnd.value("bairro").toString() + "\n" +
@@ -120,18 +123,12 @@ void PDF::gerarPdf() {
     }
   }
 
-  const QString path = folderKey;
-
-  QDir dir(path);
-
-  if (not dir.exists() and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta escolhida nas configurações!", parent); }
-
   QString fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".pdf";
   fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
 
-  fileName = path + "/" + fileName;
+  fileName = folderKey + "/" + fileName;
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
 

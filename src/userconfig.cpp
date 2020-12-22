@@ -62,7 +62,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 UserConfig::~UserConfig() { delete ui; }
 
 void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -103,7 +103,7 @@ void UserConfig::on_pushButtonAlterarDados_clicked() {
 }
 
 void UserConfig::on_pushButtonVendasFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -111,7 +111,7 @@ void UserConfig::on_pushButtonVendasFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonComprasFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -119,7 +119,7 @@ void UserConfig::on_pushButtonComprasFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta XML", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta XML");
 
   if (path.isEmpty()) { return; }
 
@@ -127,7 +127,7 @@ void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 

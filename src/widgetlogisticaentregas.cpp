@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
+#include "file.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
@@ -501,21 +502,15 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString path = folderKey;
+  const QString arquivoModelo = "modelos/espelho_entrega.xlsx";
 
-  QDir dir(path);
-
-  if (not dir.exists() and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta escolhida nas configurações!", this); }
-
-  const QString arquivoModelo = "espelho_entrega.xlsx";
-
-  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
+  File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!", this); }
 
-  const QString fileName = path + "/" + idEvento + "_" + idVenda + ".xlsx";
+  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
 

@@ -175,7 +175,7 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList &selection) {
 void WidgetGare::on_pushButtonRetornoItau_clicked() {
   // TODO: delete file after saving in SQL?
 
-  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo Retorno", QDir::currentPath() + "/cnab/itau/", "RET (*.RET)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo Retorno", "", "RET (*.RET)");
 
   if (filePath.isEmpty()) { return; }
 

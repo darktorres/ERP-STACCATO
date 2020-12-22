@@ -4,6 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
+#include "file.h"
 #include "searchdialogproxymodel.h"
 #include "sortfilterproxymodel.h"
 #include "usersession.h"
@@ -236,15 +237,15 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   if (dir.isEmpty()) { return; }
 
-  const QString arquivoModelo = "modelo relatorio contabil.xlsx";
+  const QString arquivoModelo = "modelos/relatorio_contabil.xlsx";
 
-  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
+  File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = dir + "/relatorio_contabil_" + data + ".xlsx";
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 

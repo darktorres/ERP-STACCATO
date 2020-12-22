@@ -15,6 +15,7 @@
 
 #include <QMutex>
 
+#include "../../src/file.h"
 #include "download_dialog.h"
 #include "ui_download_dialog.h"
 
@@ -109,7 +110,7 @@ void DownloadDialog::downloadFinished() {
 
   if (not replyData.isEmpty()) {
     const QStringList list = m_reply->url().toString().split("/");
-    QFile file(QDir::currentPath() + "/" + list.at(list.count() - 1));
+    File file(list.at(list.count() - 1));
     QMutex _mutex;
 
     if (file.open(QIODevice::WriteOnly)) {

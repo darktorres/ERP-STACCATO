@@ -1,6 +1,7 @@
 #include "importatabelaibpt.h"
 
 #include "application.h"
+#include "file.h"
 #include "sqlquery.h"
 
 #include <QFileDialog>
@@ -11,7 +12,7 @@
 ImportaTabelaIBPT::ImportaTabelaIBPT(QWidget *parent) : QDialog(parent) { setupTables(); }
 
 void ImportaTabelaIBPT::importar() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Impotar tabela IBPT", QDir::currentPath(), "Excel (*.csv)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Impotar tabela IBPT", "", "Excel (*.csv)");
 
   if (filePath.isEmpty()) { return; }
 
@@ -27,7 +28,7 @@ void ImportaTabelaIBPT::importar() {
 
   if (queryVersao.size() == 1) { return qApp->enqueueInformation("Tabela já cadastrada!", this); }
 
-  QFile file(filePath);
+  File file(filePath);
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro abrindo arquivo para leitura: " + file.errorString(), this); }
 

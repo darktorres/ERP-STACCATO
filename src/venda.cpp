@@ -10,6 +10,7 @@
 #include "editdelegate.h"
 #include "estoque.h"
 #include "excel.h"
+#include "file.h"
 #include "logindialog.h"
 #include "noeditdelegate.h"
 #include "orcamento.h"
@@ -1533,14 +1534,9 @@ void Venda::on_pushButtonModelo3d_clicked() {
       throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
     }
 
-    const QString filename = url.split("/").last();
-    const QString path = QDir::currentPath() + "/arquivos/";
+    const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 
-    QDir dir;
-
-    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
-
-    QFile file(path + filename);
+    File file(filename);
 
     if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
@@ -1548,7 +1544,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
     file.close();
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+    if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Não foi possível abrir o arquivo 3D!"); }
   });
 }
 

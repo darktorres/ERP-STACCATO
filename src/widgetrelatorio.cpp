@@ -2,6 +2,7 @@
 #include "ui_widgetrelatorio.h"
 
 #include "application.h"
+#include "file.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -188,15 +189,15 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   if (dir.isEmpty()) { return; }
 
-  const QString arquivoModelo = "relatorio.xlsx";
+  const QString arquivoModelo = "modelos/relatorio.xlsx";
 
-  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
+  File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = dir + "/relatorio-" + ui->dateEditMes->date().toString("MM-yyyy") + ".xlsx";
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 

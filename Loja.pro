@@ -143,6 +143,7 @@ SOURCES += \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
     src/excel.cpp \
+    src/file.cpp \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
@@ -276,6 +277,7 @@ HEADERS  += \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
     src/excel.h \
+    src/file.h \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \

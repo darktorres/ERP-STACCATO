@@ -2,6 +2,7 @@
 #include "ui_comprovantes.h"
 
 #include "application.h"
+#include "file.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -56,14 +57,9 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   connect(reply, &QNetworkReply::finished, [=] {
     if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }
 
-    const QString filename = url.split("/").last();
-    const QString path = QDir::currentPath() + "/arquivos/";
+    const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 
-    QDir dir;
-
-    if (not dir.exists(path) and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta dos comprovantes!", this); }
-
-    QFile file(path + filename);
+    File file(filename);
 
     if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
@@ -71,6 +67,6 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
     file.close();
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
   });
 }

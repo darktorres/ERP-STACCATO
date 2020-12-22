@@ -2,6 +2,7 @@
 #include "ui_nfedistribuicao.h"
 
 #include "application.h"
+#include "file.h"
 #include "nfeproxymodel.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
@@ -175,7 +176,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //----------------------------------------------------------
 
-  //  QFile file("LOG_DFe.txt");
+  //  File file("LOG_DFe.txt");
 
   //  if (not file.open(QFile::ReadOnly)) { return; }
 

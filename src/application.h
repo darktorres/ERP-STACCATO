@@ -95,6 +95,5 @@ private:
   auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;
-  auto storeSelection() -> void;
   auto userLogin(const QString &user) -> void;
 };

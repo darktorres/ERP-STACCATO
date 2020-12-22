@@ -1,6 +1,7 @@
 #include "excel.h"
 
 #include "application.h"
+#include "file.h"
 #include "usersession.h"
 
 #include <QDesktopServices>
@@ -23,15 +24,9 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString path = folderKey;
+  const QString arquivoModelo = "modelos/pedido.xlsx";
 
-  QDir dir(path);
-
-  if (not dir.exists() and not dir.mkpath(path)) { throw RuntimeException("Erro ao criar a pasta escolhida nas configurações!"); }
-
-  const QString arquivoModelo = "modelo pedido.xlsx";
-
-  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
+  File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
@@ -41,9 +36,9 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                                : id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
 
   fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
-  fileName = path + "/" + fileName;
+  fileName = folderKey + "/" + fileName;
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 

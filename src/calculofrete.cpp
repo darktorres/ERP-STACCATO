@@ -2,6 +2,7 @@
 #include "ui_calculofrete.h"
 
 #include "application.h"
+#include "file.h"
 #include "sqlquery.h"
 
 #include <QFile>
@@ -37,7 +38,7 @@ double CalculoFrete::getDistancia() {
 void CalculoFrete::on_pushButton_clicked() {
   ui->lineEditDistancia->clear();
 
-  QFile apiKeyFile("google_api.txt");
+  File apiKeyFile("google_api.txt");
 
   if (not apiKeyFile.open(QFile::ReadOnly)) { throw RuntimeException("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
 

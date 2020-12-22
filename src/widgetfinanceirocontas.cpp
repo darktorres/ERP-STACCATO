@@ -432,7 +432,7 @@ void WidgetFinanceiroContas::verificaCabecalho(QXlsx::Document &xlsx) {
 }
 
 void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
-  const QString file = QFileDialog::getOpenFileName(this, "Importar arquivo do Excel", QDir::currentPath(), "Excel (*.xlsx)");
+  const QString file = QFileDialog::getOpenFileName(this, "Importar arquivo do Excel", "", "Excel (*.xlsx)");
 
   if (file.isEmpty()) { return; }
 

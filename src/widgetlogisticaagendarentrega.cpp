@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
+#include "file.h"
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
@@ -877,11 +878,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
     if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { throw RuntimeError("Pelo menos uma linha selecionada já possui nota!", this); }
   }
 
-  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", "", "XML (*.xml)");
 
   if (filePath.isEmpty()) { return; }
 
-  QFile file(filePath);
+  File file(filePath);
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 

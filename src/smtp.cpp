@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "smtp.h"
 
 #include "application.h"
+#include "file.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -57,12 +58,8 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
-  // TODO: 5dont hardcode this
-  // TODO:__project public code
-  //
   if (not assinatura.isEmpty()) {
-    // QFile file("://assinatura conrado.png");
-    QFile file(assinatura);
+    File file(assinatura);
 
     if (not file.open(QIODevice::ReadOnly)) { throw RuntimeException("Erro abrindo arquivo: " + file.errorString()); }
 
@@ -73,13 +70,12 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
     message.append(bytes.toBase64());
     message.append("\n");
   }
-  //
 
   if (not files.isEmpty()) {
     // qDebug() << "Files to be sent: " << files.size();
 
     for (const auto &filePath : files) {
-      QFile file(filePath);
+      File file(filePath);
 
       if (file.exists()) {
         if (not file.open(QIODevice::ReadOnly)) { throw RuntimeException("Erro ao abrir o arquivo do anexo: " + file.errorString()); }

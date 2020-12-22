@@ -5,6 +5,7 @@
 #include "application.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
+#include "file.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
 #include "xml_viewer.h"
@@ -255,7 +256,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+    File fileXml("arquivos/" + chaveAcesso + ".xml");
 
     if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
@@ -272,16 +273,16 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = "arquivos/" + chaveAcesso + ".pdf";
 
-    QFile filePdf(pdfDestino);
+    File filePdf(pdfDestino);
 
     if (filePdf.exists()) { filePdf.remove(); }
 
     if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/", this);
 }
 
 // TODO: 5copiar filtros do widgetnfesaida

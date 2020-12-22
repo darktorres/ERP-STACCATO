@@ -2,6 +2,7 @@
 #include "ui_cadastrarnfe.h"
 
 #include "application.h"
+#include "file.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
@@ -1561,7 +1562,7 @@ void CadastrarNFe::enviarEmail(ACBr &acbrRemoto) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
   const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
   const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
-  const QString filePath = QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml";
+  const QString filePath = "temp/" + chaveAcesso + "-nfe.xml";
 
   // TODO: enviar email separado para cliente
   acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
@@ -1572,11 +1573,7 @@ void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
 
   xml = resposta.remove("OK: ");
 
-  QDir dir(QDir::currentPath() + "/temp/");
-
-  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/temp/")) { throw RuntimeException("Erro ao criar pasta para XML!"); }
-
-  QFile file(QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
+  File file("temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 

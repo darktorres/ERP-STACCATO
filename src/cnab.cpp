@@ -1,6 +1,7 @@
 #include "cnab.h"
 
 #include "application.h"
+#include "file.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -199,11 +200,7 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  QDir dir(QDir::currentPath() + "/cnab/itau/");
-
-  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/cnab/itau/")) { throw RuntimeException("Erro ao criar a pasta CNAB Itau!"); }
-
-  QFile file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  File file("cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 
@@ -357,11 +354,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
   writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  QDir dir(QDir::currentPath() + "/cnab/itau/");
-
-  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/cnab/itau/")) { throw RuntimeException("Erro ao criar a pasta CNAB Itau!"); }
-
-  QFile file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  File file("cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 
@@ -384,7 +377,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
 }
 
 void CNAB::retornoGareItau240(const QString &filePath) {
-  QFile file(filePath);
+  File file(filePath);
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), parent); }
 

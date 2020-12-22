@@ -4,6 +4,7 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "file.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -191,10 +192,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   gravarArquivo(resposta, chaveAcesso);
 
-  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
-
   // -------------------------------------------------------------------------
 
+  //  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
   //  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   // TODO: enviar o xml atualizado com o cancelamento
@@ -213,6 +213,14 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   if (not ui->groupBoxMes->isChecked()) { throw RuntimeError("Selecione um mês para gerar o relatório!", this); }
 
+  const QString filename = "arquivos/relatorio_nfe.pdf";
+
+  File file(filename);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + file.errorString()); }
+
+  file.close();
+
   LimeReport::ReportEngine report;
   auto dataManager = report.dataManager();
 
@@ -225,7 +233,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   dataManager->addModel("view", &view, true);
 
-  if (not report.loadFromFile("relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
+  if (not report.loadFromFile("modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
   SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
@@ -248,11 +256,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   dataManager->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
-  if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) { throw RuntimeException("Erro gerando relatório!", this); }
+  if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório!", this); }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "/relatorio.pdf"))) {
-    throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!", this);
-  }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + filename, this); }
 }
 
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {
@@ -283,7 +289,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+    File fileXml("arquivos/" + chaveAcesso + ".xml");
 
     if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
@@ -300,16 +306,16 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = "arquivos/" + chaveAcesso + ".pdf";
 
-    QFile filePdf(pdfDestino);
+    File filePdf(pdfDestino);
 
     if (filePdf.exists()) { filePdf.remove(); }
 
     if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/", this);
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
@@ -395,7 +401,7 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 }
 
 void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
-  QFile arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
+  File arquivo("arquivos/cancelamento_" + chaveAcesso + ".xml");
 
   if (not arquivo.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + arquivo.errorString()); }
 

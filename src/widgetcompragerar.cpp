@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "excel.h"
+#include "file.h"
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
@@ -361,9 +362,9 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
 
-  const QString arquivoModelo = "modelo compras.xlsx";
+  const QString arquivoModelo = "modelos/compras.xlsx";
 
-  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
+  File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
@@ -373,7 +374,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   const QString fileName = folderKey + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
-  QFile file(fileName);
+  File file(fileName);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 

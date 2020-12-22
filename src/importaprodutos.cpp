@@ -140,7 +140,7 @@ void ImportaProdutos::setProgressDialog() {
 }
 
 bool ImportaProdutos::readFile() {
-  file = QFileDialog::getOpenFileName(this, "Importar tabela genérica", QDir::currentPath(), tr("Excel (*.xlsx)"));
+  file = QFileDialog::getOpenFileName(this, "Importar tabela genérica", "", tr("Excel (*.xlsx)"));
 
   if (file.isEmpty()) { return false; }
 

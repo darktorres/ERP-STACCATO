@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include "file.h"
 #include "log.h"
 #include "qsimpleupdater.h"
 #include "usersession.h"
@@ -23,9 +24,9 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setApplicationVersion("0.9.19");
   setStyle("Fusion");
 
-  readSettingsFile();
+  QDir::setCurrent(QCoreApplication::applicationDirPath());
 
-  storeSelection();
+  readSettingsFile();
 
   if (UserSession::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
 
@@ -79,7 +80,7 @@ void Application::enqueueWarning(const QString &warning, QWidget *parent) {
 QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Alphaville"); }
 
 void Application::readSettingsFile() {
-  QFile file("lojas.txt");
+  File file("lojas.txt");
 
   if (not file.open(QFile::ReadOnly)) {
     QMessageBox::critical(nullptr, "Erro!", "Erro lendo configurações: " + file.errorString());
@@ -103,7 +104,7 @@ void Application::userLogin(const QString &user) {
 }
 
 void Application::genericLogin(const QString &hostname) {
-  QFile file("mysql.txt");
+  File file("mysql.txt");
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString()); }
 
@@ -291,18 +292,6 @@ bool Application::getShowingMessages() const { return showingMessages; }
 bool Application::getIsConnected() const { return isConnected; }
 
 QMap<QString, QString> Application::getMapLojas() const { return mapLojas; }
-
-void Application::storeSelection() {
-  if (UserSession::getSetting("Login/hostname").toString().isEmpty()) {
-    const QStringList items = mapLojas.keys();
-
-    const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
-
-    if (loja.isEmpty()) { return; }
-
-    UserSession::setSetting("Login/hostname", mapLojas.value(loja));
-  }
-}
 
 void Application::setUpdating(const bool value) {
   updating = value;

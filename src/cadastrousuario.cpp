@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
+#include "file.h"
 #include "searchdialog.h"
 #include "usersession.h"
 
@@ -224,7 +225,7 @@ void CadastroUsuario::cadastrar() {
 }
 
 void CadastroUsuario::criarUsuarioMySQL() {
-  QFile file("mysql.txt");
+  File file("mysql.txt");
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString(), this); }
 

@@ -5,6 +5,7 @@
 #include "doubledelegate.h"
 #include "editdelegate.h"
 #include "estoqueproxymodel.h"
+#include "file.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -727,7 +728,7 @@ void ImportarXML::usarXMLBaixado() {
 }
 
 bool ImportarXML::lerXML() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", "", "XML (*.xml)");
 
   if (filePath.isEmpty()) { return false; }
 
@@ -735,7 +736,7 @@ bool ImportarXML::lerXML() {
 
   ui->lineEdit->setText(filePath);
 
-  QFile file(filePath);
+  File file(filePath);
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString()); }
 

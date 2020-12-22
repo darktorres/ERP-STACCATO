@@ -1,6 +1,7 @@
 #include "acbr.h"
 
 #include "application.h"
+#include "file.h"
 #include "usersession.h"
 
 #include <QDesktopServices>
@@ -86,7 +87,7 @@ QString ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
 
-  QFile file(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+  File file("arquivos/" + chaveAcesso + ".xml");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString()); }
 

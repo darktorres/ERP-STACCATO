@@ -2,6 +2,7 @@
 #include "ui_inputdialogconfirmacao.h"
 
 #include "application.h"
+#include "file.h"
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
@@ -551,13 +552,13 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", QDir::currentPath(), "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
 
-  QFile *file = new QFile(filePath);
+  File file(filePath);
 
-  if (not file->open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file->errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
   auto *manager = new QNetworkAccessManager(this);
 
@@ -565,13 +566,13 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
   const QString idEvento = modelVeiculo.data(0, "idEvento").toString();
 
-  QFileInfo info(*file);
+  QFileInfo info(file);
 
   const QString extension = info.suffix();
 
   const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
-  auto reply = manager->put(QNetworkRequest(QUrl(url)), file);
+  const auto reply = manager->put(QNetworkRequest(QUrl(url)), file.readAll());
 
   ui->lineEditFoto->setText("Enviando...");
 

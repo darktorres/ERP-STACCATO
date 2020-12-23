@@ -83,6 +83,7 @@ void UserConfig::on_pushButtonSalvar_clicked() {
   UserSession::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
   UserSession::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
 
+  // TODO: caso as pastas estejam vazias usar /arquivos como padrao
   UserSession::setSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
   UserSession::setSetting("User/VendasFolder", ui->lineEditVendasFolder->text());
   UserSession::setSetting("User/ComprasFolder", ui->lineEditComprasFolder->text());

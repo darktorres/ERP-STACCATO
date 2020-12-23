@@ -47,9 +47,7 @@ void ImportaTabelaIBPT::importar() {
 
   const QString line1 = stream.readLine();
 
-  if (line1 != "codigo;ex;tipo;descricao;nacionalfederal;importadosfederal;estadual;municipal;vigenciainicio;vigenciafim;chave;versao;fonte") {
-    throw RuntimeError("Arquivo incompatível!", this);
-  }
+  if (line1 != "codigo;ex;tipo;descricao;nacionalfederal;importadosfederal;estadual;municipal;vigenciainicio;vigenciafim;chave;versao;fonte") { throw RuntimeError("Arquivo incompatível!", this); }
 
   const auto size = file.size();
 

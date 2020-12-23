@@ -47,56 +47,52 @@ The Apache License, Version 2.0 (the "License");
 #include <easy/details/profiler_public_types.h>
 #include <string.h>
 
-namespace profiler
-{
+namespace profiler {
 
-    enum class DataType : uint8_t
-    {
-        Bool = 0,
-        Char,
-        Int8,
-        Uint8,
-        Int16,
-        Uint16,
-        Int32,
-        Uint32,
-        Int64,
-        Uint64,
-        Float,
-        Double,
-        String,
+enum class DataType : uint8_t {
+  Bool = 0,
+  Char,
+  Int8,
+  Uint8,
+  Int16,
+  Uint16,
+  Int32,
+  Uint32,
+  Int64,
+  Uint64,
+  Float,
+  Double,
+  String,
 
-        TypesCount
-    }; // end of enum class DataType.
+  TypesCount
+}; // end of enum class DataType.
 
-    template <DataType dataType> struct StdType;
+template <DataType dataType> struct StdType;
 
-    template <class T> struct StdToDataType EASY_FINAL {
-        EASY_STATIC_CONSTEXPR auto data_type = DataType::TypesCount;
-    };
+template <class T> struct StdToDataType EASY_FINAL { EASY_STATIC_CONSTEXPR auto data_type = DataType::TypesCount; };
 
-# define EASY_DATATYPE_CONVERSION(DataTypeName, StdTypeName)\
-    template <> struct StdType<DataTypeName> EASY_FINAL { using value_type = StdTypeName; };\
-    template <> struct StdToDataType<StdTypeName> EASY_FINAL { EASY_STATIC_CONSTEXPR auto data_type = DataTypeName; }
+#define EASY_DATATYPE_CONVERSION(DataTypeName, StdTypeName)                                                                                                                                            \
+  template <> struct StdType<DataTypeName> EASY_FINAL { using value_type = StdTypeName; };                                                                                                             \
+  template <> struct StdToDataType<StdTypeName> EASY_FINAL { EASY_STATIC_CONSTEXPR auto data_type = DataTypeName; }
 
-    EASY_DATATYPE_CONVERSION(DataType::Bool  , bool    );
-    EASY_DATATYPE_CONVERSION(DataType::Char  , char    );
-    EASY_DATATYPE_CONVERSION(DataType::Int8  , int8_t  );
-    EASY_DATATYPE_CONVERSION(DataType::Uint8 , uint8_t );
-    EASY_DATATYPE_CONVERSION(DataType::Int16 , int16_t );
-    EASY_DATATYPE_CONVERSION(DataType::Uint16, uint16_t);
-    EASY_DATATYPE_CONVERSION(DataType::Int32 , int32_t );
-    EASY_DATATYPE_CONVERSION(DataType::Uint32, uint32_t);
-    EASY_DATATYPE_CONVERSION(DataType::Int64 , int64_t );
-    EASY_DATATYPE_CONVERSION(DataType::Uint64, uint64_t);
-    EASY_DATATYPE_CONVERSION(DataType::Float , float   );
-    EASY_DATATYPE_CONVERSION(DataType::Double, double  );
+EASY_DATATYPE_CONVERSION(DataType::Bool, bool);
+EASY_DATATYPE_CONVERSION(DataType::Char, char);
+EASY_DATATYPE_CONVERSION(DataType::Int8, int8_t);
+EASY_DATATYPE_CONVERSION(DataType::Uint8, uint8_t);
+EASY_DATATYPE_CONVERSION(DataType::Int16, int16_t);
+EASY_DATATYPE_CONVERSION(DataType::Uint16, uint16_t);
+EASY_DATATYPE_CONVERSION(DataType::Int32, int32_t);
+EASY_DATATYPE_CONVERSION(DataType::Uint32, uint32_t);
+EASY_DATATYPE_CONVERSION(DataType::Int64, int64_t);
+EASY_DATATYPE_CONVERSION(DataType::Uint64, uint64_t);
+EASY_DATATYPE_CONVERSION(DataType::Float, float);
+EASY_DATATYPE_CONVERSION(DataType::Double, double);
 
-# undef EASY_DATATYPE_CONVERSION
+#undef EASY_DATATYPE_CONVERSION
 
-    template <> struct StdType<DataType::String> EASY_FINAL { using value_type = char; };
-    template <> struct StdToDataType<const char*> EASY_FINAL { EASY_STATIC_CONSTEXPR auto data_type = DataType::String; };
+template <> struct StdType<DataType::String> EASY_FINAL { using value_type = char; };
+template <> struct StdToDataType<const char *> EASY_FINAL { EASY_STATIC_CONSTEXPR auto data_type = DataType::String; };
 
 } // end of namespace profiler.
 
-#endif //EASY_PROFILER_ARBITRARY_VALUE_PUBLIC_TYPES_H
+#endif // EASY_PROFILER_ARBITRARY_VALUE_PUBLIC_TYPES_H

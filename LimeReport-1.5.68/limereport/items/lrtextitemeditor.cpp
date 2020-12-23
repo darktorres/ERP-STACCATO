@@ -30,172 +30,147 @@
 #include "lrtextitemeditor.h"
 #include "ui_lrtextitemeditor.h"
 
-#include "lrdatasourcemanager.h"
-#include "lrscriptenginemanager.h"
 #include "lrdatadesignintf.h"
+#include "lrdatasourcemanager.h"
 #include "lrscripteditor.h"
+#include "lrscriptenginemanager.h"
 
 #include <QMenu>
 #include <QScrollBar>
 
-namespace LimeReport{
+namespace LimeReport {
 
-TextItemEditor::TextItemEditor(LimeReport::TextItem *item, LimeReport::PageDesignIntf *page, QSettings* settings, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::TextItemEditor), m_textItem(item), m_page(page), m_settings(settings), m_ownedSettings(false), m_isReadingSetting(false)
-{
-    ui->setupUi(this);
-    initUI();
-    setWindowIcon(QIcon(":/items/images/TextItem"));
-    readSetting();
-    connect(ui->codeEditor, SIGNAL(splitterMoved(int,int)), this, SLOT(slotSplitterMoved(int,int)) );
+TextItemEditor::TextItemEditor(LimeReport::TextItem *item, LimeReport::PageDesignIntf *page, QSettings *settings, QWidget *parent)
+    : QWidget(parent), ui(new Ui::TextItemEditor), m_textItem(item), m_page(page), m_settings(settings), m_ownedSettings(false), m_isReadingSetting(false) {
+  ui->setupUi(this);
+  initUI();
+  setWindowIcon(QIcon(":/items/images/TextItem"));
+  readSetting();
+  connect(ui->codeEditor, SIGNAL(splitterMoved(int, int)), this, SLOT(slotSplitterMoved(int, int)));
 }
 
-TextItemEditor::~TextItemEditor()
-{
+TextItemEditor::~TextItemEditor() {
 #ifdef Q_OS_WIN
-    writeSetting();
+  writeSetting();
 #endif
 #ifdef Q_OS_MAC
-    writeSetting();
+  writeSetting();
 #endif
-    delete ui;
+  delete ui;
 }
 
-void TextItemEditor::setSettings(QSettings* value)
-{
-    if (m_ownedSettings)
-        delete m_settings;
-    m_settings=value;
-    m_ownedSettings=false;
-    readSetting();
+void TextItemEditor::setSettings(QSettings *value) {
+  if (m_ownedSettings) delete m_settings;
+  m_settings = value;
+  m_ownedSettings = false;
+  readSetting();
 }
 
-QSettings*TextItemEditor::settings()
-{
-    if (m_settings){
-        return m_settings;
-    } else {
-        m_settings = new QSettings("LimeReport",QCoreApplication::applicationName());
-        m_ownedSettings = true;
-        return m_settings;
-    }
+QSettings *TextItemEditor::settings() {
+  if (m_settings) {
+    return m_settings;
+  } else {
+    m_settings = new QSettings("LimeReport", QCoreApplication::applicationName());
+    m_ownedSettings = true;
+    return m_settings;
+  }
 }
 
-void TextItemEditor::resizeEvent(QResizeEvent*)
-{
+void TextItemEditor::resizeEvent(QResizeEvent *) {
 #ifdef Q_OS_UNIX
-    writeSetting();
+  writeSetting();
 #endif
 }
 
-void TextItemEditor::moveEvent(QMoveEvent*)
-{
+void TextItemEditor::moveEvent(QMoveEvent *) {
 #ifdef Q_OS_UNIX
-    writeSetting();
+  writeSetting();
 #endif
 }
 
-void TextItemEditor::closeEvent(QCloseEvent* event)
-{
-    if (settings()!=0){
-        settings()->beginGroup("TextItemEditor");
-        settings()->setValue("CodeEditorState",ui->codeEditor->saveState());
-        settings()->endGroup();
-    }
-    QWidget::closeEvent(event);
-}
-
-void TextItemEditor::on_pbOk_clicked()
-{
-    if (m_textItem->content()!= ui->codeEditor->toPlainText()){
-        m_textItem->setContent(ui->codeEditor->toPlainText());
-    }
-    close();
-}
-
-void TextItemEditor::initUI()
-{
-    QStringList dataWords;
-
-    LimeReport::DataSourceManager* dm =  m_page->datasourceManager();
-    LimeReport::ScriptEngineManager& se = LimeReport::ScriptEngineManager::instance();
-    se.setDataManager(dm);
-
-    ScriptEditor* scriptEditor = dynamic_cast<ScriptEditor*>(ui->codeEditor);
-    if (scriptEditor){
-        scriptEditor->setReportPage(m_page);
-        scriptEditor->setPageBand(findParentBand());
-        scriptEditor->setPlainText(m_textItem->content());
-    }
-}
-
-void TextItemEditor::on_pbCancel_clicked()
-{
-    close();
-}
-
-void TextItemEditor::readSetting()
-{
-    if (settings()==0) return;
-
-    m_isReadingSetting = true;
-
+void TextItemEditor::closeEvent(QCloseEvent *event) {
+  if (settings() != 0) {
     settings()->beginGroup("TextItemEditor");
-    QVariant v = settings()->value("Geometry");
-    if (v.isValid()){
-        restoreGeometry(v.toByteArray());
-    }
-    v = settings()->value("CodeEditorState");
-    if (v.isValid()){
-        ui->codeEditor->restoreState(v.toByteArray());
-    }
+    settings()->setValue("CodeEditorState", ui->codeEditor->saveState());
     settings()->endGroup();
-    settings()->beginGroup("ScriptEditor");
-    QVariant fontName = settings()->value("DefaultFontName");
-    if (fontName.isValid()){
-        QVariant fontSize = settings()->value("DefaultFontSize");
-        ui->codeEditor->setEditorFont(QFont(fontName.toString(),fontSize.toInt()));
-    }
+  }
+  QWidget::closeEvent(event);
+}
 
-    QVariant tabIndention = settings()->value("TabIndention");
-    if (tabIndention.isValid()){
-        ui->codeEditor->setTabIndention(tabIndention.toInt());
-    } else {
-        ui->codeEditor->setTabIndention(LimeReport::Const::DEFAULT_TAB_INDENTION);
-    }
+void TextItemEditor::on_pbOk_clicked() {
+  if (m_textItem->content() != ui->codeEditor->toPlainText()) { m_textItem->setContent(ui->codeEditor->toPlainText()); }
+  close();
+}
+
+void TextItemEditor::initUI() {
+  QStringList dataWords;
+
+  LimeReport::DataSourceManager *dm = m_page->datasourceManager();
+  LimeReport::ScriptEngineManager &se = LimeReport::ScriptEngineManager::instance();
+  se.setDataManager(dm);
+
+  ScriptEditor *scriptEditor = dynamic_cast<ScriptEditor *>(ui->codeEditor);
+  if (scriptEditor) {
+    scriptEditor->setReportPage(m_page);
+    scriptEditor->setPageBand(findParentBand());
+    scriptEditor->setPlainText(m_textItem->content());
+  }
+}
+
+void TextItemEditor::on_pbCancel_clicked() { close(); }
+
+void TextItemEditor::readSetting() {
+  if (settings() == 0) return;
+
+  m_isReadingSetting = true;
+
+  settings()->beginGroup("TextItemEditor");
+  QVariant v = settings()->value("Geometry");
+  if (v.isValid()) { restoreGeometry(v.toByteArray()); }
+  v = settings()->value("CodeEditorState");
+  if (v.isValid()) { ui->codeEditor->restoreState(v.toByteArray()); }
+  settings()->endGroup();
+  settings()->beginGroup("ScriptEditor");
+  QVariant fontName = settings()->value("DefaultFontName");
+  if (fontName.isValid()) {
+    QVariant fontSize = settings()->value("DefaultFontSize");
+    ui->codeEditor->setEditorFont(QFont(fontName.toString(), fontSize.toInt()));
+  }
+
+  QVariant tabIndention = settings()->value("TabIndention");
+  if (tabIndention.isValid()) {
+    ui->codeEditor->setTabIndention(tabIndention.toInt());
+  } else {
+    ui->codeEditor->setTabIndention(LimeReport::Const::DEFAULT_TAB_INDENTION);
+  }
+  settings()->endGroup();
+
+  m_isReadingSetting = false;
+}
+
+void TextItemEditor::writeSetting() {
+  if (settings() != 0) {
+    settings()->beginGroup("TextItemEditor");
+    settings()->setValue("Geometry", saveGeometry());
+    settings()->setValue("CodeEditorState", ui->codeEditor->saveState());
     settings()->endGroup();
-
-    m_isReadingSetting = false;
+  }
 }
 
-void TextItemEditor::writeSetting()
-{
-    if (settings()!=0){
-        settings()->beginGroup("TextItemEditor");
-        settings()->setValue("Geometry",saveGeometry());
-        settings()->setValue("CodeEditorState",ui->codeEditor->saveState());
-        settings()->endGroup();
-    }
-}
+void TextItemEditor::slotSplitterMoved(int, int) { writeSetting(); }
 
-void TextItemEditor::slotSplitterMoved(int, int)
-{
-    writeSetting();
-}
-
-BandDesignIntf *TextItemEditor::findParentBand()
-{
-    BandDesignIntf* result = 0;
-    BaseDesignIntf* item = m_textItem;
-    while (true){
-        item = dynamic_cast<BaseDesignIntf*>(item->parentItem());
-        if (item){
-            result = dynamic_cast<BandDesignIntf*>(item);
-            if (result) break;
-        } else break;
-    }
-    return result;
+BandDesignIntf *TextItemEditor::findParentBand() {
+  BandDesignIntf *result = 0;
+  BaseDesignIntf *item = m_textItem;
+  while (true) {
+    item = dynamic_cast<BaseDesignIntf *>(item->parentItem());
+    if (item) {
+      result = dynamic_cast<BandDesignIntf *>(item);
+      if (result) break;
+    } else
+      break;
+  }
+  return result;
 }
 
 } // namespace LimeReport

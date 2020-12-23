@@ -31,38 +31,38 @@
 #define LRPROPERTYDELEGATE_H
 
 #include <QItemDelegate>
+#include <QObject>
 #include <QStyledItemDelegate>
 #include <QTreeView>
-#include <QObject>
 
 #include "lrobjectitemmodel.h"
 
-namespace LimeReport{
+namespace LimeReport {
 
 class ObjectInspectorTreeView;
-//class PropertyDelegate : public QItemDelegate
-class PropertyDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
+// class PropertyDelegate : public QItemDelegate
+class PropertyDelegate : public QStyledItemDelegate {
+  Q_OBJECT
 public:
-    PropertyDelegate(QObject *parent=0);
-    void setObjectInspector(ObjectInspectorTreeView* objectInspector);
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    LimeReport::ObjectPropItem* editingItem();
-    bool isEditing(){return m_isEditing;}
+  PropertyDelegate(QObject *parent = 0);
+  void setObjectInspector(ObjectInspectorTreeView *objectInspector);
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+  QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+  LimeReport::ObjectPropItem *editingItem();
+  bool isEditing() { return m_isEditing; }
 private slots:
-    void commitAndCloseEditor();
-    void slotEditorDeleted();
-    void slotItemDeleted(QObject* item);
+  void commitAndCloseEditor();
+  void slotEditorDeleted();
+  void slotItemDeleted(QObject *item);
+
 private:
-    LimeReport::ObjectInspectorTreeView* m_objectInspector;
-    mutable LimeReport::ObjectPropItem* m_editingItem;
-    mutable bool m_isEditing;
+  LimeReport::ObjectInspectorTreeView *m_objectInspector;
+  mutable LimeReport::ObjectPropItem *m_editingItem;
+  mutable bool m_isEditing;
 };
-}
+} // namespace LimeReport
 #endif // LRPROPERTYDELEGATE_H

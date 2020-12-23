@@ -33,16 +33,16 @@
 #include <QtCore/qglobal.h>
 
 #if QT_VERSION < 0x040400
-#  define QT_ADD_NAMESPACE(name) ::name
-#  define QT_USE_NAMESPACE
-#  define QT_BEGIN_NAMESPACE
-#  define QT_END_NAMESPACE
-#  define QT_BEGIN_INCLUDE_NAMESPACE
-#  define QT_END_INCLUDE_NAMESPACE
-#  define QT_BEGIN_MOC_NAMESPACE
-#  define QT_END_MOC_NAMESPACE
-#  define QT_FORWARD_DECLARE_CLASS(name) class name;
-#  define QT_MANGLE_NAMESPACE(name) name
+#define QT_ADD_NAMESPACE(name) ::name
+#define QT_USE_NAMESPACE
+#define QT_BEGIN_NAMESPACE
+#define QT_END_NAMESPACE
+#define QT_BEGIN_INCLUDE_NAMESPACE
+#define QT_END_INCLUDE_NAMESPACE
+#define QT_BEGIN_MOC_NAMESPACE
+#define QT_END_MOC_NAMESPACE
+#define QT_FORWARD_DECLARE_CLASS(name) class name;
+#define QT_MANGLE_NAMESPACE(name) name
 #endif
 
 #endif // NAMESPACE_GLOBAL_H

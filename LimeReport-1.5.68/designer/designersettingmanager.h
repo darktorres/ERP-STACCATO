@@ -1,23 +1,23 @@
 #ifndef DESIGNERSETTINGMANAGER_H
 #define DESIGNERSETTINGMANAGER_H
 
-#include <QObject>
-#include <QLocale>
 #include <QApplication>
+#include <QLocale>
+#include <QObject>
 #include <QSettings>
 
-class DesignerSettingManager : public QObject
-{
-    Q_OBJECT
+class DesignerSettingManager : public QObject {
+  Q_OBJECT
 public:
-    explicit DesignerSettingManager(QObject *parent = 0);
-    ~DesignerSettingManager();
+  explicit DesignerSettingManager(QObject *parent = 0);
+  ~DesignerSettingManager();
 public slots:
-    void getAvailableLanguages(QList<QLocale::Language>* languages);
-    QLocale::Language getCurrentDefaultLanguage();
-    void currentDefaultLanguageChanged(QLocale::Language language);
+  void getAvailableLanguages(QList<QLocale::Language> *languages);
+  QLocale::Language getCurrentDefaultLanguage();
+  void currentDefaultLanguageChanged(QLocale::Language language);
+
 private:
-    QSettings* m_setting;
+  QSettings *m_setting;
 };
 
 #endif // DESIGNERSETTINGMANAGER_H

@@ -31,11 +31,10 @@
 #define WIDGETHOST_CONSTANTS_H
 
 namespace SharedTools {
-   namespace Internal {
-       enum { SELECTION_HANDLE_SIZE = 6, SELECTION_MARGIN = 10 };
-       enum SelectionHandleState { SelectionHandleOff, SelectionHandleInactive, SelectionHandleActive };
-   }
-}
+namespace Internal {
+enum { SELECTION_HANDLE_SIZE = 6, SELECTION_MARGIN = 10 };
+enum SelectionHandleState { SelectionHandleOff, SelectionHandleInactive, SelectionHandleActive };
+} // namespace Internal
+} // namespace SharedTools
 
 #endif // WIDGETHOST_CONSTANTS_H
-

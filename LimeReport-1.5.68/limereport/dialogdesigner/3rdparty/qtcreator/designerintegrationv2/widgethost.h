@@ -39,40 +39,39 @@ QT_FORWARD_DECLARE_CLASS(QDesignerFormWindowInterface)
 namespace SharedTools {
 
 namespace Internal {
-    class FormResizer;
+class FormResizer;
 }
 
 /* A scroll area that embeds a Designer form window */
 
-class WidgetHost : public QScrollArea
-{
-    Q_OBJECT
+class WidgetHost : public QScrollArea {
+  Q_OBJECT
 public:
-    WidgetHost(QWidget *parent = 0, QDesignerFormWindowInterface *formWindow = 0);
-    virtual ~WidgetHost();
-    // Show handles if active and main container is selected.
-    void updateFormWindowSelectionHandles(bool active);
+  WidgetHost(QWidget *parent = 0, QDesignerFormWindowInterface *formWindow = 0);
+  virtual ~WidgetHost();
+  // Show handles if active and main container is selected.
+  void updateFormWindowSelectionHandles(bool active);
 
-    inline QDesignerFormWindowInterface *formWindow() const { return m_formWindow; }
+  inline QDesignerFormWindowInterface *formWindow() const { return m_formWindow; }
 
-    QWidget *integrationContainer() const;
+  QWidget *integrationContainer() const;
 
 protected:
-    void setFormWindow(QDesignerFormWindowInterface *fw);
+  void setFormWindow(QDesignerFormWindowInterface *fw);
 
 signals:
-    void formWindowSizeChanged(int, int);
+  void formWindowSizeChanged(int, int);
 
 private slots:
-    void fwSizeWasChanged(const QRect &, const QRect &);
-    void formWindowDeleted(QObject* object);
+  void fwSizeWasChanged(const QRect &, const QRect &);
+  void formWindowDeleted(QObject *object);
 
 private:
-    QSize formWindowSize() const;
+  QSize formWindowSize() const;
 
-    QDesignerFormWindowInterface *m_formWindow;
-    Internal::FormResizer *m_formResizer;
-    QSize m_oldFakeWidgetSize;
+  QDesignerFormWindowInterface *m_formWindow;
+  Internal::FormResizer *m_formResizer;
+  QSize m_oldFakeWidgetSize;
 };
 
 } // namespace SharedTools

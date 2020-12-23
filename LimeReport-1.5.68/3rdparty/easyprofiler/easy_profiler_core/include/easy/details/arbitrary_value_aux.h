@@ -46,84 +46,65 @@ The Apache License, Version 2.0 (the "License");
 #include <easy/details/easy_compiler_support.h>
 #include <stdint.h>
 
-namespace profiler
-{
+namespace profiler {
 
-    using vin_t = uint64_t;
+using vin_t = uint64_t;
 
-    class ValueId EASY_FINAL
-    {
-        friend ::ThreadStorage;
-        vin_t m_id;
+class ValueId EASY_FINAL {
+  friend ::ThreadStorage;
+  vin_t m_id;
 
-    public:
-
+public:
 #if defined(_MSC_VER) && _MSC_VER <= 1800
-        inline EASY_CONSTEXPR_FCN ValueId(const ValueId& _another) : m_id(_another.m_id) {}
-        inline EASY_CONSTEXPR_FCN ValueId(ValueId&& _another) : m_id(_another.m_id) {}
+  inline EASY_CONSTEXPR_FCN ValueId(const ValueId &_another) : m_id(_another.m_id) {}
+  inline EASY_CONSTEXPR_FCN ValueId(ValueId &&_another) : m_id(_another.m_id) {}
 #else
-        inline EASY_CONSTEXPR_FCN ValueId(const ValueId&) = default;
-        inline EASY_CONSTEXPR_FCN ValueId(ValueId&&) = default;
+  inline EASY_CONSTEXPR_FCN ValueId(const ValueId &) = default;
+  inline EASY_CONSTEXPR_FCN ValueId(ValueId &&) = default;
 #endif
 
-        explicit inline EASY_CONSTEXPR_FCN ValueId() : m_id(0) {}
-        explicit inline EASY_CONSTEXPR_FCN ValueId(const void* _member) : m_id(reinterpret_cast<vin_t>(_member)) {}
+  explicit inline EASY_CONSTEXPR_FCN ValueId() : m_id(0) {}
+  explicit inline EASY_CONSTEXPR_FCN ValueId(const void *_member) : m_id(reinterpret_cast<vin_t>(_member)) {}
 
-        template <class T>
-        explicit inline EASY_CONSTEXPR_FCN ValueId(const T& _member) : m_id(reinterpret_cast<vin_t>(&_member)) {}
+  template <class T> explicit inline EASY_CONSTEXPR_FCN ValueId(const T &_member) : m_id(reinterpret_cast<vin_t>(&_member)) {}
 
-        template <class T, size_t N>
-        explicit inline EASY_CONSTEXPR_FCN ValueId(const T (&_member)[N]) : m_id(reinterpret_cast<vin_t>((void*)_member)) {}
+  template <class T, size_t N> explicit inline EASY_CONSTEXPR_FCN ValueId(const T (&_member)[N]) : m_id(reinterpret_cast<vin_t>((void *)_member)) {}
 
-        ValueId& operator = (const ValueId&) = delete;
-        ValueId& operator = (ValueId&&) = delete;
-    };
+  ValueId &operator=(const ValueId &) = delete;
+  ValueId &operator=(ValueId &&) = delete;
+};
 
-    namespace {
-        template <class ... TArgs>
-        inline EASY_CONSTEXPR_FCN bool subextract_value_id(TArgs...);
+namespace {
+template <class... TArgs> inline EASY_CONSTEXPR_FCN bool subextract_value_id(TArgs...);
 
-        template <>
-        inline EASY_CONSTEXPR_FCN bool subextract_value_id<>() { return false; }
+template <> inline EASY_CONSTEXPR_FCN bool subextract_value_id<>() { return false; }
 
-        template <class T>
-        inline EASY_CONSTEXPR_FCN bool subextract_value_id(T) { return false; }
+template <class T> inline EASY_CONSTEXPR_FCN bool subextract_value_id(T) { return false; }
 
-        inline EASY_CONSTEXPR_FCN ValueId subextract_value_id(ValueId _value) { return _value; }
+inline EASY_CONSTEXPR_FCN ValueId subextract_value_id(ValueId _value) { return _value; }
 
-        template <class ... TArgs>
-        inline EASY_CONSTEXPR_FCN ValueId subextract_value_id(ValueId _value, TArgs...) { return _value; }
+template <class... TArgs> inline EASY_CONSTEXPR_FCN ValueId subextract_value_id(ValueId _value, TArgs...) { return _value; }
 
-        template <class T, class ... TArgs>
-        inline EASY_CONSTEXPR_FCN auto subextract_value_id(T, TArgs... _args) -> decltype(subextract_value_id(_args...)) {
-            return subextract_value_id(_args...);
-        }
+template <class T, class... TArgs> inline EASY_CONSTEXPR_FCN auto subextract_value_id(T, TArgs... _args) -> decltype(subextract_value_id(_args...)) { return subextract_value_id(_args...); }
 
-        struct GetFirst {
-            template <class T, class ... TArgs>
-            static EASY_CONSTEXPR_FCN ValueId get(const T& _first, TArgs...) { return ValueId(_first); }
+struct GetFirst {
+  template <class T, class... TArgs> static EASY_CONSTEXPR_FCN ValueId get(const T &_first, TArgs...) { return ValueId(_first); }
 
-            template <class T, size_t N, class ... TArgs>
-            static EASY_CONSTEXPR_FCN ValueId get(const T (&_first)[N], TArgs...) { return ValueId(_first); }
-        };
+  template <class T, size_t N, class... TArgs> static EASY_CONSTEXPR_FCN ValueId get(const T (&_first)[N], TArgs...) { return ValueId(_first); }
+};
 
-        struct GetRest {
-            template <class T, class ... TArgs>
-            static EASY_CONSTEXPR_FCN ValueId get(const T&, TArgs... _args) { return subextract_value_id(_args...); }
-        };
-    } // end of noname namespace.
+struct GetRest {
+  template <class T, class... TArgs> static EASY_CONSTEXPR_FCN ValueId get(const T &, TArgs... _args) { return subextract_value_id(_args...); }
+};
+} // namespace
 
-    template <class T, class ... TArgs>
-    inline EASY_CONSTEXPR_FCN ValueId extract_value_id(const T& _first, TArgs... _args) {
-        return ::std::conditional<::std::is_same<ValueId, decltype(subextract_value_id(_args...))>::value, GetRest, GetFirst>
-            ::type::get(_first, _args...);
-    }
+template <class T, class... TArgs> inline EASY_CONSTEXPR_FCN ValueId extract_value_id(const T &_first, TArgs... _args) {
+  return ::std::conditional<::std::is_same<ValueId, decltype(subextract_value_id(_args...))>::value, GetRest, GetFirst>::type::get(_first, _args...);
+}
 
-    template <class T, size_t N, class ... TArgs>
-    inline EASY_CONSTEXPR_FCN ValueId extract_value_id(const T (&_first)[N], TArgs... _args) {
-        return ::std::conditional<::std::is_same<ValueId, decltype(subextract_value_id(_args...))>::value, GetRest, GetFirst>
-            ::type::get(_first, _args...);
-    }
+template <class T, size_t N, class... TArgs> inline EASY_CONSTEXPR_FCN ValueId extract_value_id(const T (&_first)[N], TArgs... _args) {
+  return ::std::conditional<::std::is_same<ValueId, decltype(subextract_value_id(_args...))>::value, GetRest, GetFirst>::type::get(_first, _args...);
+}
 
 } // end of namespace profiler.
 

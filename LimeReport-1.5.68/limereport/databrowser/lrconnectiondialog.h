@@ -30,44 +30,44 @@
 #ifndef LRCONNECTIONDIALOG_H
 #define LRCONNECTIONDIALOG_H
 
-#include <QDialog>
 #include "lrdatadesignintf.h"
+#include <QDialog>
 
-namespace LimeReport{
+namespace LimeReport {
 
 namespace Ui {
-    class ConnectionDialog;
+class ConnectionDialog;
 }
 
-class ConnectionDialog : public QDialog
-{
-    Q_OBJECT
+class ConnectionDialog : public QDialog {
+  Q_OBJECT
 public:
-    explicit ConnectionDialog(LimeReport::IConnectionController* conControl, LimeReport::ConnectionDesc* connectionDesc=0, QWidget *parent = 0);
-    ~ConnectionDialog();
-protected:
-    void showEvent(QShowEvent *);
-    void init();
-    void checkFieldsFill();
-    bool checkConnection();
-    ConnectionDesc* uiToConnection(LimeReport::ConnectionDesc *conDesc = 0);
-    void connectionToUI();
-signals:
-    void conectionRegistred(LimeReport::ConnectionDesc* connectionDesc);
-private slots:
-    void slotAccept();
-    void slotCheckConnection();
-    void on_toolButton_clicked();
-    void on_cbbUseDefaultConnection_toggled(bool checked);
+  explicit ConnectionDialog(LimeReport::IConnectionController *conControl, LimeReport::ConnectionDesc *connectionDesc = 0, QWidget *parent = 0);
+  ~ConnectionDialog();
 
-    void on_toolButton_2_toggled(bool checked);
+protected:
+  void showEvent(QShowEvent *);
+  void init();
+  void checkFieldsFill();
+  bool checkConnection();
+  ConnectionDesc *uiToConnection(LimeReport::ConnectionDesc *conDesc = 0);
+  void connectionToUI();
+signals:
+  void conectionRegistred(LimeReport::ConnectionDesc *connectionDesc);
+private slots:
+  void slotAccept();
+  void slotCheckConnection();
+  void on_toolButton_clicked();
+  void on_cbbUseDefaultConnection_toggled(bool checked);
+
+  void on_toolButton_2_toggled(bool checked);
 
 private:
-    Ui::ConnectionDialog *ui;
-    ConnectionDesc* m_connection;
-    bool m_changeMode;
-    IConnectionController* m_controller;
-    QString m_savedConnectionName;
+  Ui::ConnectionDialog *ui;
+  ConnectionDesc *m_connection;
+  bool m_changeMode;
+  IConnectionController *m_controller;
+  QString m_savedConnectionName;
 };
 
 } // namespace LimeReport

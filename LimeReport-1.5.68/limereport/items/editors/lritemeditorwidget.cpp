@@ -29,43 +29,32 @@
  ****************************************************************************/
 #include "lritemeditorwidget.h"
 
-namespace LimeReport{
+namespace LimeReport {
 
-void ItemEditorWidget::setItem(BaseDesignIntf* item)
-{
-    if (m_item!=item){
-        if (m_item) m_item->disconnect(this);
-        m_item=item;
-        connect(m_item,SIGNAL(destroyed(QObject*)),this,SLOT(slotItemDestroyed(QObject*)));
-        connect(m_item,SIGNAL(propertyChanged(QString,QVariant,QVariant)),
-                this,SLOT(slotPropertyChanged(QString,QVariant,QVariant)));
-        setEnabled(false);
-        setItemEvent(item);
-    }
+void ItemEditorWidget::setItem(BaseDesignIntf *item) {
+  if (m_item != item) {
+    if (m_item) m_item->disconnect(this);
+    m_item = item;
+    connect(m_item, SIGNAL(destroyed(QObject *)), this, SLOT(slotItemDestroyed(QObject *)));
+    connect(m_item, SIGNAL(propertyChanged(QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QVariant, QVariant)));
+    setEnabled(false);
+    setItemEvent(item);
+  }
 }
 
-void ItemEditorWidget::properyChangedEvent(const QString& propertName, const QVariant& oldValue, const QVariant& newValue)
-{
-    Q_UNUSED(propertName)
-    Q_UNUSED(oldValue)
-    Q_UNUSED(newValue)
+void ItemEditorWidget::properyChangedEvent(const QString &propertName, const QVariant &oldValue, const QVariant &newValue) {
+  Q_UNUSED(propertName)
+  Q_UNUSED(oldValue)
+  Q_UNUSED(newValue)
 }
 
-void ItemEditorWidget::slotItemDestroyed(QObject* item)
-{
-    if (item==m_item) {
-        m_item = 0;
-        setEnabled(false);
-    }
+void ItemEditorWidget::slotItemDestroyed(QObject *item) {
+  if (item == m_item) {
+    m_item = 0;
+    setEnabled(false);
+  }
 }
 
-void ItemEditorWidget::slotPropertyChanged(const QString& propertName, const QVariant& oldValue, const QVariant& newValue)
-{
-    properyChangedEvent(propertName,oldValue,newValue);
-}
+void ItemEditorWidget::slotPropertyChanged(const QString &propertName, const QVariant &oldValue, const QVariant &newValue) { properyChangedEvent(propertName, oldValue, newValue); }
 
-}
-
-
-
-
+} // namespace LimeReport

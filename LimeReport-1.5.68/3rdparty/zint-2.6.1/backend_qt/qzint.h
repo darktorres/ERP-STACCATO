@@ -23,108 +23,105 @@
 #include "qzint_global.h"
 #include "zint.h"
 
-namespace Zint
-{
+namespace Zint {
 
-class QZINTSHARED_EXPORT QZint
-{
+class QZINTSHARED_EXPORT QZint {
 private:
+public:
+  enum BorderType { NO_BORDER = 0, BIND = 2, BOX = 4 };
+  enum AspectRatioMode { IgnoreAspectRatio = 0, KeepAspectRatio = 1, CenterBarCode = 2 };
 
 public:
-	 enum BorderType{NO_BORDER=0, BIND=2, BOX=4};
-	 enum AspectRatioMode{IgnoreAspectRatio=0, KeepAspectRatio=1, CenterBarCode=2};
+  QZint();
+  ~QZint();
 
-public:
-	QZint();
-	~QZint();
+  int symbol();
+  void setSymbol(int symbol);
 
-	int  symbol();
-	void setSymbol(int symbol);
+  QString text();
+  void setText(const QString &text);
 
-	QString text();
-	void setText(const QString & text);
+  QString primaryMessage();
+  void setPrimaryMessage(const QString &primaryMessage);
 
-	QString primaryMessage();
-	void setPrimaryMessage(const QString & primaryMessage);
+  void setHeight(int height);
+  int height();
 
-	void setHeight(int height);
-	int height();
+  void setWidth(int width);
+  int width();
 
-	void setWidth(int width);
-	int width();
-	
-	void setOption3(int option);
+  void setOption3(int option);
 
-	QColor fgColor();
-	void setFgColor(const QColor & fgColor);
+  QColor fgColor();
+  void setFgColor(const QColor &fgColor);
 
-	QColor bgColor();
-	void setBgColor(const QColor & bgColor);
+  QColor bgColor();
+  void setBgColor(const QColor &bgColor);
 
-	BorderType borderType();
-	void setBorderType(BorderType border);
+  BorderType borderType();
+  void setBorderType(BorderType border);
 
-	int borderWidth();
-	void setBorderWidth(int boderWidth);
+  int borderWidth();
+  void setBorderWidth(int boderWidth);
 
-	int pdf417CodeWords();
-	void setPdf417CodeWords(int pdf417CodeWords);
+  int pdf417CodeWords();
+  void setPdf417CodeWords(int pdf417CodeWords);
 
-	int securityLevel();
-	void setSecurityLevel(int securityLevel);
+  int securityLevel();
+  void setSecurityLevel(int securityLevel);
 
-	float scale();
-	void setScale(float scale);
-        
-        void setDotSize(float dot_size);
+  float scale();
+  void setScale(float scale);
 
-	int mode();
-	void setMode(int securityLevel);
+  void setDotSize(float dot_size);
 
-	void setInputMode(int input_mode);
+  int mode();
+  void setMode(int securityLevel);
 
-	void setWhitespace(int whitespace);
+  void setInputMode(int input_mode);
 
-	QString error_message();
+  void setWhitespace(int whitespace);
 
-	void render(QPainter & painter, const QRectF & paintRect);
+  QString error_message();
 
-	const QString & lastError();
-	bool hasErrors();
+  void render(QPainter &painter, const QRectF &paintRect);
 
-	bool save_to_file(QString filename);
-	
-	void setHideText(bool hide);
-        
-        void setTargetSize(int width, int height);
+  const QString &lastError();
+  bool hasErrors();
+
+  bool save_to_file(QString filename);
+
+  void setHideText(bool hide);
+
+  void setTargetSize(int width, int height);
 
 private:
-	void encode();
-	int module_set(int y_coord, int x_coord);
+  void encode();
+  int module_set(int y_coord, int x_coord);
 
 private:
-	int m_symbol;
-	QString m_text;
-	QString m_primaryMessage;
-	int m_height;
-	BorderType m_border;
-	int m_borderWidth;
-	int m_width;
-	int m_securityLevel;
-	int m_pdf417CodeWords;
-	int m_input_mode;
-	QColor m_fgColor;
-	QColor m_bgColor;
-	QString m_lastError;
-	int m_error;
-	int m_whitespace;
-	zint_symbol * m_zintSymbol;
-	float m_scale;
-	int m_option_3;
-	bool m_hidetext;
-    float m_dot_size;
-    int target_size_horiz;
-    int target_size_vert;
+  int m_symbol;
+  QString m_text;
+  QString m_primaryMessage;
+  int m_height;
+  BorderType m_border;
+  int m_borderWidth;
+  int m_width;
+  int m_securityLevel;
+  int m_pdf417CodeWords;
+  int m_input_mode;
+  QColor m_fgColor;
+  QColor m_bgColor;
+  QString m_lastError;
+  int m_error;
+  int m_whitespace;
+  zint_symbol *m_zintSymbol;
+  float m_scale;
+  int m_option_3;
+  bool m_hidetext;
+  float m_dot_size;
+  int target_size_horiz;
+  int target_size_vert;
 };
-}
+} // namespace Zint
 #endif

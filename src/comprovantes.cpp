@@ -54,7 +54,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   auto reply = manager->get(request);
 
-  connect(reply, &QNetworkReply::finished, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }
 
     const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();

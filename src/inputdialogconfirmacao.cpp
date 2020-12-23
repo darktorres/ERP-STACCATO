@@ -576,7 +576,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   ui->lineEditFoto->setText("Enviando...");
 
-  connect(reply, &QNetworkReply::finished, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
       ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
       ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");

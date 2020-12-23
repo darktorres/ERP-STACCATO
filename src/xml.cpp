@@ -211,7 +211,7 @@ void XML::verificaValido() {
 void XML::verificaNCMs() {
   QStringList ncms;
 
-  for (const auto &produto : produtos) {
+  for (const auto &produto : qAsConst(produtos)) {
     SqlQuery query;
 
     if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }

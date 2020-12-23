@@ -364,7 +364,7 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
 
   QStringList ids;
 
-  for (auto const &m_fornecedor : m_fornecedores) {
+  for (auto const &m_fornecedor : qAsConst(m_fornecedores)) {
     fornecedor = m_fornecedor;
 
     const int idFornecedor = buscarCadastrarFornecedor();
@@ -435,8 +435,6 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   // consistencia dados
 
   if (produto.ui.isEmpty()) { produto.ui = "0"; }
-
-  QString m_ncmEx;
 
   if (produto.ncm.length() == 10) {
     produto.ncmEx = produto.ncm.right(2);

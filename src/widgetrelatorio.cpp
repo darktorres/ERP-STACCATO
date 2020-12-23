@@ -157,8 +157,6 @@ void WidgetRelatorio::setFilterRelatorio() {
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 
 void WidgetRelatorio::updateTables() {
-  const auto tipo = UserSession::tipoUsuario;
-
   if (not isSet) {
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();

@@ -804,7 +804,7 @@ void ImportarXML::perguntarLocal(XML &xml) {
 }
 
 void ImportarXML::percorrerXml(XML &xml) {
-  for (const auto &produto : xml.produtos) {
+  for (const auto &produto : qAsConst(xml.produtos)) {
     const int idEstoque = qApp->reservarIdEstoque();
 
     const int newRow = modelEstoque.insertRowAtEnd();
@@ -1143,8 +1143,6 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
 }
 
 double ImportarXML::calculaGare(XML &xml) {
-  const QString dataEmissao = xml.dataHoraEmissao.left(10);
-
   double total = 0;
 
   if (xml.xNome == "DOCOL METAIS SANITARIOS LTDA") { return 0; }

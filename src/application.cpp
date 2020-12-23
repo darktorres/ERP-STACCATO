@@ -125,7 +125,7 @@ void Application::genericLogin(const QString &hostname) {
   if (not db.open()) {
     bool connected = false;
 
-    for (const auto &loja : mapLojas) {
+    for (const auto &loja : qAsConst(mapLojas)) {
       db.setHostName(loja);
 
       if (db.open()) {

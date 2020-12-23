@@ -133,7 +133,6 @@ void WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
     modelVendaProduto.setData(row, "status", "DEVOLVIDO ESTOQUE");
 
-    const QString status = modelVendaProduto.data(row, "statusOriginal").toString();
     const QString idRelacionado = modelVendaProduto.data(row, "idRelacionado").toString();
 
     // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo idVendaProduto)

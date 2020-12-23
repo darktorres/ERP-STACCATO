@@ -10,19 +10,19 @@ at your option.
 The MIT License
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights 
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-    of the Software, and to permit persons to whom the Software is furnished 
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished
     to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all 
+    The above copyright notice and this permission notice shall be included in all
     copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-    PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
-    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
-    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+    PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
     USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
@@ -45,28 +45,26 @@ The Apache License, Version 2.0 (the "License");
 
 #include <easy/details/profiler_public_types.h>
 
-class NonscopedBlock : public profiler::Block
-{
-    char* m_runtimeName; ///< A copy of _runtimeName to make it safe to begin block in one function and end it in another
+class NonscopedBlock : public profiler::Block {
+  char *m_runtimeName; ///< A copy of _runtimeName to make it safe to begin block in one function and end it in another
 
 public:
+  NonscopedBlock() = delete;
+  NonscopedBlock(const NonscopedBlock &) = delete;
+  NonscopedBlock(NonscopedBlock &&) = delete;
+  NonscopedBlock &operator=(const NonscopedBlock &) = delete;
+  NonscopedBlock &operator=(NonscopedBlock &&) = delete;
 
-    NonscopedBlock()                                   = delete;
-    NonscopedBlock(const NonscopedBlock&)              = delete;
-    NonscopedBlock(NonscopedBlock&&)                   = delete;
-    NonscopedBlock& operator = (const NonscopedBlock&) = delete;
-    NonscopedBlock& operator = (NonscopedBlock&&)      = delete;
+  NonscopedBlock(const profiler::BaseBlockDescriptor *_desc, const char *_runtimeName, bool = false);
+  ~NonscopedBlock();
 
-    NonscopedBlock(const profiler::BaseBlockDescriptor* _desc, const char* _runtimeName, bool = false);
-    ~NonscopedBlock();
+  /** Copy string from m_name to m_runtimeName to make it safe to end block in another function.
 
-    /** Copy string from m_name to m_runtimeName to make it safe to end block in another function.
+  Performs any work if block is ON and m_name != ""
+  */
+  void copyname();
 
-    Performs any work if block is ON and m_name != ""
-    */
-    void copyname();
-
-    void destroy();
+  void destroy();
 
 }; // END of class NonscopedBlock.
 

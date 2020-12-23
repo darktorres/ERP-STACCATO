@@ -30,24 +30,24 @@
 #ifndef LRREPORTHEADER_H
 #define LRREPORTHEADER_H
 
-#include <QObject>
 #include "lrbanddesignintf.h"
 #include "lrbasedesignintf.h"
+#include <QObject>
 
-namespace LimeReport{
-class ReportHeader : public LimeReport::BandDesignIntf
-{
-    Q_OBJECT
-    Q_PROPERTY(bool splittable READ isSplittable WRITE setSplittable )
-    Q_PROPERTY(bool printBeforePageHeader READ printBeforePageHeader WRITE setPrintBeforePageHeader)
+namespace LimeReport {
+class ReportHeader : public LimeReport::BandDesignIntf {
+  Q_OBJECT
+  Q_PROPERTY(bool splittable READ isSplittable WRITE setSplittable)
+  Q_PROPERTY(bool printBeforePageHeader READ printBeforePageHeader WRITE setPrintBeforePageHeader)
 public:
-    ReportHeader(QObject* owner = 0, QGraphicsItem *parent=0);
-    virtual BaseDesignIntf* createSameTypeItem(QObject* owner=0, QGraphicsItem* parent=0);
-    bool printBeforePageHeader() const;
-    void setPrintBeforePageHeader(bool printBeforePageHeader);
+  ReportHeader(QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  bool printBeforePageHeader() const;
+  void setPrintBeforePageHeader(bool printBeforePageHeader);
+
 protected:
-    QColor bandColor() const;
-    bool m_printBeforePageHeader;
+  QColor bandColor() const;
+  bool m_printBeforePageHeader;
 };
-}
+} // namespace LimeReport
 #endif // LRREPORTHEADER_H

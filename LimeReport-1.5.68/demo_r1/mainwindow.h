@@ -30,52 +30,50 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "lrreportengine.h"
 #include <QMainWindow>
 #include <QProgressDialog>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQueryModel>
-#include "lrreportengine.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+  explicit MainWindow(QWidget *parent = 0);
+  ~MainWindow();
 private slots:
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-    void renderStarted();
-    void renderPageFinished(int renderedPageCount);
-    void renderFinished();
-    void slotGetCallbackData(LimeReport::CallbackInfo info, QVariant& data);
-    void slotChangePos(const LimeReport::CallbackInfo::ChangePosType& type, bool& result);
-    void slotGetCallbackChildData(LimeReport::CallbackInfo info, QVariant& data);
-    void slotChangeChildPos(const LimeReport::CallbackInfo::ChangePosType& type, bool& result);
-    void slotOneSlotDS(LimeReport::CallbackInfo info, QVariant& data);
-private:
-    void prepareData(QSqlQuery* ds, LimeReport::CallbackInfo info, QVariant &data);
-private:
-    Ui::MainWindow *ui;
-    LimeReport::ReportEngine *report;
-    QProgressDialog* m_progressDialog;
-    int m_currentPage;
-    QSqlDatabase m_db;
-    int m_currentMasterRecord;
-    QVector<QString> m_childData;
+  void on_pushButton_clicked();
+  void on_pushButton_2_clicked();
+  void renderStarted();
+  void renderPageFinished(int renderedPageCount);
+  void renderFinished();
+  void slotGetCallbackData(LimeReport::CallbackInfo info, QVariant &data);
+  void slotChangePos(const LimeReport::CallbackInfo::ChangePosType &type, bool &result);
+  void slotGetCallbackChildData(LimeReport::CallbackInfo info, QVariant &data);
+  void slotChangeChildPos(const LimeReport::CallbackInfo::ChangePosType &type, bool &result);
+  void slotOneSlotDS(LimeReport::CallbackInfo info, QVariant &data);
 
-    int m_currentCustomerRecord;
-    int m_currentOrderRecord;
-    QSqlQuery* m_customers;
-    QSqlQuery* m_orders;
+private:
+  void prepareData(QSqlQuery *ds, LimeReport::CallbackInfo info, QVariant &data);
 
+private:
+  Ui::MainWindow *ui;
+  LimeReport::ReportEngine *report;
+  QProgressDialog *m_progressDialog;
+  int m_currentPage;
+  QSqlDatabase m_db;
+  int m_currentMasterRecord;
+  QVector<QString> m_childData;
+
+  int m_currentCustomerRecord;
+  int m_currentOrderRecord;
+  QSqlQuery *m_customers;
+  QSqlQuery *m_orders;
 };
-
-
 
 #endif // MAINWINDOW_H

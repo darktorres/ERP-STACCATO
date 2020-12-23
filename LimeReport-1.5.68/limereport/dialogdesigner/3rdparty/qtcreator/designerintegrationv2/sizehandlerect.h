@@ -33,50 +33,47 @@
 
 #include "widgethostconstants.h"
 
-#include <QWidget>
 #include <QPoint>
+#include <QWidget>
 
 namespace SharedTools {
 namespace Internal {
 
-class SizeHandleRect : public QWidget
-{
-    Q_OBJECT
+class SizeHandleRect : public QWidget {
+  Q_OBJECT
 public:
-    enum Direction { LeftTop, Top, RightTop, Right, RightBottom, Bottom, LeftBottom, Left };
+  enum Direction { LeftTop, Top, RightTop, Right, RightBottom, Bottom, LeftBottom, Left };
 
-    SizeHandleRect(QWidget *parent, Direction d, QWidget *resizable);
+  SizeHandleRect(QWidget *parent, Direction d, QWidget *resizable);
 
-    Direction dir() const  { return m_dir; }
-    void updateCursor();
-    void setState(SelectionHandleState st);
+  Direction dir() const { return m_dir; }
+  void updateCursor();
+  void setState(SelectionHandleState st);
 
 signals:
 
-    void mouseButtonReleased(const QRect &, const QRect &);
+  void mouseButtonReleased(const QRect &, const QRect &);
 
 protected:
-    void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
+  void paintEvent(QPaintEvent *e);
+  void mousePressEvent(QMouseEvent *e);
+  void mouseMoveEvent(QMouseEvent *e);
+  void mouseReleaseEvent(QMouseEvent *e);
 
 private:
-    void tryResize(const QSize &delta);
+  void tryResize(const QSize &delta);
 
 private:
-    const Direction m_dir;
-    QPoint m_startPos;
-    QPoint m_curPos;
-    QSize m_startSize;
-    QSize m_curSize;
-    QWidget *m_resizable;
-    SelectionHandleState m_state;
+  const Direction m_dir;
+  QPoint m_startPos;
+  QPoint m_curPos;
+  QSize m_startSize;
+  QSize m_curSize;
+  QWidget *m_resizable;
+  SelectionHandleState m_state;
 };
 
-}
+} // namespace Internal
 } // namespace SharedTools
 
-
 #endif // SIZEHANDLERECT_H
-

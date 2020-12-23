@@ -35,43 +35,43 @@
 #define __COMMON_H
 
 #ifndef FALSE
-#define FALSE		0
+#define FALSE 0
 #endif
 
 #ifndef TRUE
-#define TRUE		1
+#define TRUE 1
 #endif
 
 /* The most commonly used set */
-#define NEON	"0123456789"
+#define NEON "0123456789"
 
 #include "zint.h"
 #include <stdlib.h>
 
-#define ustrcpy(target,source) strcpy((char*)target,(const char*)source)
+#define ustrcpy(target, source) strcpy((char *)target, (const char *)source)
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-    extern size_t ustrlen(const unsigned char source[]);
-    extern int ctoi(const char source);
-    extern char itoc(const int source);
-    extern void to_upper(unsigned char source[]);
-    extern int is_sane(const char test_string[], const unsigned char source[], const size_t length);
-    extern void lookup(const char set_string[], const char *table[], const char data, char dest[]);
-    extern void bin_append(const int arg, const int length, char *binary);
-    extern int posn(const char set_string[], const char data);
-    extern int module_is_set(const struct zint_symbol *symbol, const int y_coord, const int x_coord);
-    extern void set_module(struct zint_symbol *symbol, const int y_coord, const int x_coord);
-    extern int istwodigits(const unsigned char source[], const size_t position);
-    extern int parunmodd(const unsigned char llyth);
-    extern void expand(struct zint_symbol *symbol, const char data[]);
-    extern void unset_module(struct zint_symbol *symbol, const int y_coord, const int x_coord);
-    extern int is_stackable(const int symbology);
-    extern int is_extendable(const int symbology);
-    extern int utf8toutf16(struct zint_symbol *symbol, const unsigned char source[], int vals[], size_t *length);
-    extern void set_minimum_height(struct zint_symbol *symbol, const int min_height);
+extern size_t ustrlen(const unsigned char source[]);
+extern int ctoi(const char source);
+extern char itoc(const int source);
+extern void to_upper(unsigned char source[]);
+extern int is_sane(const char test_string[], const unsigned char source[], const size_t length);
+extern void lookup(const char set_string[], const char *table[], const char data, char dest[]);
+extern void bin_append(const int arg, const int length, char *binary);
+extern int posn(const char set_string[], const char data);
+extern int module_is_set(const struct zint_symbol *symbol, const int y_coord, const int x_coord);
+extern void set_module(struct zint_symbol *symbol, const int y_coord, const int x_coord);
+extern int istwodigits(const unsigned char source[], const size_t position);
+extern int parunmodd(const unsigned char llyth);
+extern void expand(struct zint_symbol *symbol, const char data[]);
+extern void unset_module(struct zint_symbol *symbol, const int y_coord, const int x_coord);
+extern int is_stackable(const int symbology);
+extern int is_extendable(const int symbology);
+extern int utf8toutf16(struct zint_symbol *symbol, const unsigned char source[], int vals[], size_t *length);
+extern void set_minimum_height(struct zint_symbol *symbol, const int min_height);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

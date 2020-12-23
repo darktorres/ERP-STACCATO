@@ -35,181 +35,121 @@ const QString xmlTag = "Data";
 const QString xmlTagHeader = "DataHeader";
 const QString xmlTagFooter = "DataFooter";
 
-namespace{
+namespace {
 
-LimeReport::BaseDesignIntf * createBand(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataBand(owner,parent);
-}
-LimeReport::BaseDesignIntf * createHeader(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataHeaderBand(owner,parent);
-}
-LimeReport::BaseDesignIntf * createFooter(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataFooterBand(owner,parent);
-}
+LimeReport::BaseDesignIntf *createBand(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataBand(owner, parent); }
+LimeReport::BaseDesignIntf *createHeader(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataHeaderBand(owner, parent); }
+LimeReport::BaseDesignIntf *createFooter(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataFooterBand(owner, parent); }
 
-bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(
-        xmlTag,
-        LimeReport::ItemAttribs(QObject::tr("Data"),LimeReport::Const::bandTAG),
-        createBand
-    );
-bool VARIABLE_IS_NOT_USED registredHeader = LimeReport::DesignElementsFactory::instance().registerCreator(
-            xmlTagHeader,
-            LimeReport::ItemAttribs(QObject::tr("DataHeader"),LimeReport::Const::bandTAG),
-            createHeader
-        );
-bool VARIABLE_IS_NOT_USED registredFooter = LimeReport::DesignElementsFactory::instance().registerCreator(
-            xmlTagFooter,
-            LimeReport::ItemAttribs(QObject::tr("DataFooter"),LimeReport::Const::bandTAG),
-            createFooter
-        );
+bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(xmlTag, LimeReport::ItemAttribs(QObject::tr("Data"), LimeReport::Const::bandTAG), createBand);
+bool VARIABLE_IS_NOT_USED registredHeader =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTagHeader, LimeReport::ItemAttribs(QObject::tr("DataHeader"), LimeReport::Const::bandTAG), createHeader);
+bool VARIABLE_IS_NOT_USED registredFooter =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTagFooter, LimeReport::ItemAttribs(QObject::tr("DataFooter"), LimeReport::Const::bandTAG), createFooter);
 
-}
+} // namespace
 
 namespace LimeReport {
 
-DataBand::DataBand(QObject *owner, QGraphicsItem *parent)
-    : DataBandDesignIntf(LimeReport::BandDesignIntf::Data,xmlTag,owner,parent) {
-        setBandTypeText(tr("Data"));
-        setFixedPos(false);
-        setMarkerColor(bandColor());
+DataBand::DataBand(QObject *owner, QGraphicsItem *parent) : DataBandDesignIntf(LimeReport::BandDesignIntf::Data, xmlTag, owner, parent) {
+  setBandTypeText(tr("Data"));
+  setFixedPos(false);
+  setMarkerColor(bandColor());
 }
 
-bool DataBand::isUnique() const
-{
-    return false;
+bool DataBand::isUnique() const { return false; }
+
+QColor DataBand::bandColor() const { return QColor(Qt::darkGreen); }
+
+void DataBand::preparePopUpMenu(QMenu &menu) {
+  BandDesignIntf::preparePopUpMenu(menu);
+
+  QAction *currAction = menu.addAction(tr("Use alternate background color"));
+  currAction->setCheckable(true);
+  currAction->setChecked(useAlternateBackgroundColor());
+
+  currAction = menu.addAction(tr("Keep footer together"));
+  currAction->setCheckable(true);
+  currAction->setChecked(keepFooterTogether());
+
+  currAction = menu.addAction(tr("Keep subdetail together"));
+  currAction->setCheckable(true);
+  currAction->setChecked(tryToKeepTogether());
+
+  currAction = menu.addAction(tr("Slice last row"));
+  currAction->setCheckable(true);
+  currAction->setChecked(sliceLastRow());
+
+  currAction = menu.addAction(tr("Start from new page"));
+  currAction->setCheckable(true);
+  currAction->setChecked(startFromNewPage());
+
+  currAction = menu.addAction(tr("Start new page"));
+  currAction->setCheckable(true);
+  currAction->setChecked(startNewPage());
 }
 
-QColor DataBand::bandColor() const
-{
-    return QColor(Qt::darkGreen);
+void DataBand::processPopUpAction(QAction *action) {
+  BandDesignIntf::processPopUpAction(action);
+  if (action->text().compare(tr("Keep footer together")) == 0) { setProperty("keepFooterTogether", action->isChecked()); }
+
+  if (action->text().compare(tr("Keep subdetail together")) == 0) { setProperty("keepSubdetailTogether", action->isChecked()); }
+
+  if (action->text().compare(tr("Slice last row")) == 0) { setProperty("sliceLastRow", action->isChecked()); }
+
+  if (action->text().compare(tr("Use alternate background color")) == 0) { setProperty("useAlternateBackgroundColor", action->isChecked()); }
+
+  if (action->text().compare(tr("Start new page")) == 0) { setProperty("startNewPage", action->isChecked()); }
+
+  if (action->text().compare(tr("Start from new page")) == 0) { setProperty("startFromNewPage", action->isChecked()); }
 }
 
-void DataBand::preparePopUpMenu(QMenu &menu)
-{
-    BandDesignIntf::preparePopUpMenu(menu);
+BaseDesignIntf *DataBand::createSameTypeItem(QObject *owner, QGraphicsItem *parent) { return new DataBand(owner, parent); }
 
-    QAction* currAction = menu.addAction(tr("Use alternate background color"));
-    currAction->setCheckable(true);
-    currAction->setChecked(useAlternateBackgroundColor());
-
-    currAction = menu.addAction(tr("Keep footer together"));
-    currAction->setCheckable(true);
-    currAction->setChecked(keepFooterTogether());
-
-    currAction = menu.addAction(tr("Keep subdetail together"));
-    currAction->setCheckable(true);
-    currAction->setChecked(tryToKeepTogether());
-
-    currAction = menu.addAction(tr("Slice last row"));
-    currAction->setCheckable(true);
-    currAction->setChecked(sliceLastRow());
-
-    currAction = menu.addAction(tr("Start from new page"));
-    currAction->setCheckable(true);
-    currAction->setChecked(startFromNewPage());
-
-    currAction = menu.addAction(tr("Start new page"));
-    currAction->setCheckable(true);
-    currAction->setChecked(startNewPage());
-
-
-
+DataHeaderBand::DataHeaderBand(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(BandDesignIntf::DataHeader, xmlTagHeader, owner, parent) {
+  setBandTypeText(tr("DataHeader"));
+  setMarkerColor(bandColor());
 }
 
-void DataBand::processPopUpAction(QAction *action)
-{
-    BandDesignIntf::processPopUpAction(action);
-    if (action->text().compare(tr("Keep footer together")) == 0){
-        setProperty("keepFooterTogether",action->isChecked());
-    }
+void DataHeaderBand::preparePopUpMenu(QMenu &menu) {
+  BandDesignIntf::preparePopUpMenu(menu);
+  QAction *currAction = menu.addAction(tr("Reprint on each page"));
+  currAction->setCheckable(true);
+  currAction->setChecked(reprintOnEachPage());
 
-    if (action->text().compare(tr("Keep subdetail together")) == 0){
-        setProperty("keepSubdetailTogether",action->isChecked());
-    }
+  currAction = menu.addAction(tr("Repeat on each row"));
+  currAction->setCheckable(true);
+  currAction->setChecked(repeatOnEachRow());
 
-    if (action->text().compare(tr("Slice last row")) == 0){
-        setProperty("sliceLastRow",action->isChecked());
-    }
-
-    if (action->text().compare(tr("Use alternate background color")) == 0){
-        setProperty("useAlternateBackgroundColor",action->isChecked());
-    }
-
-    if (action->text().compare(tr("Start new page")) == 0){
-        setProperty("startNewPage",action->isChecked());
-    }
-
-    if (action->text().compare(tr("Start from new page")) == 0){
-        setProperty("startFromNewPage",action->isChecked());
-    }
+  currAction = menu.addAction(tr("Print always"));
+  currAction->setCheckable(true);
+  currAction->setChecked(printAlways());
 }
 
-BaseDesignIntf *DataBand::createSameTypeItem(QObject *owner, QGraphicsItem *parent)
-{
-    return new DataBand(owner,parent);
+void DataHeaderBand::processPopUpAction(QAction *action) {
+  BandDesignIntf::processPopUpAction(action);
+  if (action->text().compare(tr("Reprint on each page")) == 0) { setProperty("reprintOnEachPage", action->isChecked()); }
+
+  if (action->text().compare(tr("Repeat on each row")) == 0) { setProperty("repeatOnEachRow", action->isChecked()); }
+
+  if (action->text().compare(tr("Print always")) == 0) { setProperty("printAlways", action->isChecked()); }
 }
 
-DataHeaderBand::DataHeaderBand(QObject *owner, QGraphicsItem *parent)
-    :BandDesignIntf(BandDesignIntf::DataHeader,xmlTagHeader,owner,parent)
-{
-    setBandTypeText(tr("DataHeader"));
-    setMarkerColor(bandColor());
+DataFooterBand::DataFooterBand(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(BandDesignIntf::DataFooter, xmlTagFooter, owner, parent) {
+  setBandTypeText(tr("DataFooter"));
+  setMarkerColor(bandColor());
 }
 
-void DataHeaderBand::preparePopUpMenu(QMenu &menu)
-{
-    BandDesignIntf::preparePopUpMenu(menu);
-    QAction* currAction = menu.addAction(tr("Reprint on each page"));
-    currAction->setCheckable(true);
-    currAction->setChecked(reprintOnEachPage());
-
-    currAction = menu.addAction(tr("Repeat on each row"));
-    currAction->setCheckable(true);
-    currAction->setChecked(repeatOnEachRow());
-
-    currAction = menu.addAction(tr("Print always"));
-    currAction->setCheckable(true);
-    currAction->setChecked(printAlways());
+void DataFooterBand::preparePopUpMenu(QMenu &menu) {
+  BandDesignIntf::preparePopUpMenu(menu);
+  QAction *currAction = menu.addAction(tr("Print always"));
+  currAction->setCheckable(true);
+  currAction->setChecked(printAlways());
 }
 
-void DataHeaderBand::processPopUpAction(QAction *action)
-{
-    BandDesignIntf::processPopUpAction(action);
-    if (action->text().compare(tr("Reprint on each page")) == 0){
-        setProperty("reprintOnEachPage",action->isChecked());
-    }
-
-    if (action->text().compare(tr("Repeat on each row")) == 0){
-        setProperty("repeatOnEachRow",action->isChecked());
-    }
-
-    if (action->text().compare(tr("Print always")) == 0){
-        setProperty("printAlways",action->isChecked());
-    }
+void DataFooterBand::processPopUpAction(QAction *action) {
+  BandDesignIntf::processPopUpAction(action);
+  if (action->text().compare(tr("Print always")) == 0) { setProperty("printAlways", action->isChecked()); }
 }
 
-DataFooterBand::DataFooterBand(QObject *owner, QGraphicsItem *parent)
-    :BandDesignIntf(BandDesignIntf::DataFooter,xmlTagFooter,owner,parent)
-{
-    setBandTypeText(tr("DataFooter"));
-    setMarkerColor(bandColor());
-}
-
-void DataFooterBand::preparePopUpMenu(QMenu &menu)
-{
-    BandDesignIntf::preparePopUpMenu(menu);
-    QAction* currAction = menu.addAction(tr("Print always"));
-    currAction->setCheckable(true);
-    currAction->setChecked(printAlways());
-}
-
-void DataFooterBand::processPopUpAction(QAction *action)
-{
-    BandDesignIntf::processPopUpAction(action);
-    if (action->text().compare(tr("Print always")) == 0){
-        setProperty("printAlways",action->isChecked());
-    }
-}
-
-}
-
+} // namespace LimeReport

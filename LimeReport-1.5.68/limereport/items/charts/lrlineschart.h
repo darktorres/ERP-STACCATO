@@ -4,14 +4,15 @@
 #include "lrchartitem.h"
 
 namespace LimeReport {
-class LinesChart: public AbstractBarChart{
+class LinesChart : public AbstractBarChart {
 public:
-    LinesChart(ChartItem* chartItem):AbstractBarChart(chartItem){}
-    void paintChart(QPainter *painter, QRectF chartRect);
+  LinesChart(ChartItem *chartItem) : AbstractBarChart(chartItem) {}
+  void paintChart(QPainter *painter, QRectF chartRect);
+
 private:
-    void paintSerialLines(QPainter *painter, QRectF barsRect);
-    void drawDesignMode(QPainter *painter, qreal hStep, qreal vStep, qreal topShift, QRectF barsRect);
+  void paintSerialLines(QPainter *painter, QRectF barsRect);
+  void drawDesignMode(QPainter *painter, qreal hStep, qreal vStep, qreal topShift, QRectF barsRect);
 };
-}
+} // namespace LimeReport
 
 #endif // LINESCHART_H

@@ -10,19 +10,19 @@ at your option.
 The MIT License
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights 
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-    of the Software, and to permit persons to whom the Software is furnished 
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished
     to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all 
+    The above copyright notice and this permission notice shall be included in all
     copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-    PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
-    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
-    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+    PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
     USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
@@ -45,9 +45,9 @@ The Apache License, Version 2.0 (the "License");
 
 #include <easy/details/profiler_public_types.h>
 
-#if defined ( __clang__ )
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
 
 //
@@ -65,13 +65,11 @@ The Apache License, Version 2.0 (the "License");
 \defgroup profiler EasyProfiler
 */
 
-
 /** Indicates that EasyProfiler is used.
 
 \ingroup profiler
 */
 #define USING_EASY_PROFILER
-
 
 // EasyProfiler core API:
 
@@ -108,12 +106,12 @@ Block will be automatically completed by destructor.
 
 \ingroup profiler
 */
-# define EASY_BLOCK(name, ...)\
-    EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor*, EASY_UNIQUE_DESC(__LINE__), ::profiler::registerDescription(::profiler::extract_enable_flag(__VA_ARGS__),\
-        EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name), __FILE__, __LINE__, ::profiler::BlockType::Block, ::profiler::extract_color(__VA_ARGS__),\
-        ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));\
-    ::profiler::Block EASY_UNIQUE_BLOCK(__LINE__)(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));\
-    ::profiler::beginBlock(EASY_UNIQUE_BLOCK(__LINE__));
+#define EASY_BLOCK(name, ...)                                                                                                                                                                          \
+  EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor *, EASY_UNIQUE_DESC(__LINE__),                                                                                                           \
+                        ::profiler::registerDescription(::profiler::extract_enable_flag(__VA_ARGS__), EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name), __FILE__, __LINE__,                            \
+                                                        ::profiler::BlockType::Block, ::profiler::extract_color(__VA_ARGS__), ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));   \
+  ::profiler::Block EASY_UNIQUE_BLOCK(__LINE__)(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));                                                                                                  \
+  ::profiler::beginBlock(EASY_UNIQUE_BLOCK(__LINE__));
 
 /** Macro for beginning of a non-scoped block with custom name and color.
 
@@ -146,11 +144,11 @@ Block will be automatically completed by destructor.
 
 \ingroup profiler
 */
-#define EASY_NONSCOPED_BLOCK(name, ...)\
-    EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor*, EASY_UNIQUE_DESC(__LINE__), ::profiler::registerDescription(::profiler::extract_enable_flag(__VA_ARGS__),\
-        EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name), __FILE__, __LINE__, ::profiler::BlockType::Block, ::profiler::extract_color(__VA_ARGS__),\
-        ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));\
-    ::profiler::beginNonScopedBlock(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));
+#define EASY_NONSCOPED_BLOCK(name, ...)                                                                                                                                                                \
+  EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor *, EASY_UNIQUE_DESC(__LINE__),                                                                                                           \
+                        ::profiler::registerDescription(::profiler::extract_enable_flag(__VA_ARGS__), EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name), __FILE__, __LINE__,                            \
+                                                        ::profiler::BlockType::Block, ::profiler::extract_color(__VA_ARGS__), ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));   \
+  ::profiler::beginNonScopedBlock(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));
 
 /** Macro for beginning of a block with function name and custom color.
 
@@ -176,7 +174,7 @@ Name of the block automatically created with function name.
 
 \ingroup profiler
 */
-# define EASY_FUNCTION(...) EASY_BLOCK(EASY_FUNC_NAME, ## __VA_ARGS__)
+#define EASY_FUNCTION(...) EASY_BLOCK(EASY_FUNC_NAME, ##__VA_ARGS__)
 
 /** Macro for completion of last opened block explicitly.
 
@@ -201,7 +199,7 @@ int foo()
 
 \ingroup profiler
 */
-# define EASY_END_BLOCK ::profiler::endBlock();
+#define EASY_END_BLOCK ::profiler::endBlock();
 
 /** Macro for creating event marker with custom name and color.
 
@@ -212,24 +210,23 @@ will end previously opened EASY_BLOCK or EASY_FUNCTION.
 
 \ingroup profiler
 */
-# define EASY_EVENT(name, ...)\
-    EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor*, EASY_UNIQUE_DESC(__LINE__), ::profiler::registerDescription(\
-        ::profiler::extract_enable_flag(__VA_ARGS__), EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name),\
-            __FILE__, __LINE__, ::profiler::BlockType::Event, ::profiler::extract_color(__VA_ARGS__),\
-            ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));\
-    ::profiler::storeEvent(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));
+#define EASY_EVENT(name, ...)                                                                                                                                                                          \
+  EASY_LOCAL_STATIC_PTR(const ::profiler::BaseBlockDescriptor *, EASY_UNIQUE_DESC(__LINE__),                                                                                                           \
+                        ::profiler::registerDescription(::profiler::extract_enable_flag(__VA_ARGS__), EASY_UNIQUE_LINE_ID, EASY_COMPILETIME_NAME(name), __FILE__, __LINE__,                            \
+                                                        ::profiler::BlockType::Event, ::profiler::extract_color(__VA_ARGS__), ::std::is_base_of<::profiler::ForceConstStr, decltype(name)>::value));   \
+  ::profiler::storeEvent(EASY_UNIQUE_DESC(__LINE__), EASY_RUNTIME_NAME(name));
 
 /** Macro for enabling profiler.
 
 \ingroup profiler
 */
-# define EASY_PROFILER_ENABLE ::profiler::setEnabled(true);
+#define EASY_PROFILER_ENABLE ::profiler::setEnabled(true);
 
 /** Macro for disabling profiler.
 
 \ingroup profiler
 */
-# define EASY_PROFILER_DISABLE ::profiler::setEnabled(false);
+#define EASY_PROFILER_DISABLE ::profiler::setEnabled(false);
 
 /** Macro for current thread registration.
 
@@ -237,10 +234,9 @@ will end previously opened EASY_BLOCK or EASY_FUNCTION.
 
 \ingroup profiler
 */
-# define EASY_THREAD(name)\
-    EASY_THREAD_LOCAL static const char* EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = 0;\
-    if (!EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__))\
-        EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = ::profiler::registerThread(name);
+#define EASY_THREAD(name)                                                                                                                                                                              \
+  EASY_THREAD_LOCAL static const char *EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = 0;                                                                                              \
+  if (!EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__)) EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = ::profiler::registerThread(name);
 
 /** Macro for current thread registration and creating a thread guard object.
 
@@ -251,12 +247,11 @@ and creates "ThreadFinished" profiler event.
 
 \ingroup profiler
 */
-# define EASY_THREAD_SCOPE(name)\
-    EASY_THREAD_LOCAL static const char* EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = 0;\
-    ::profiler::ThreadGuard EASY_TOKEN_CONCATENATE(unique_profiler_thread_guard, __LINE__);\
-    if (!EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__))\
-        EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = ::profiler::registerThreadScoped(name,\
-        EASY_TOKEN_CONCATENATE(unique_profiler_thread_guard, __LINE__));
+#define EASY_THREAD_SCOPE(name)                                                                                                                                                                        \
+  EASY_THREAD_LOCAL static const char *EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = 0;                                                                                              \
+  ::profiler::ThreadGuard EASY_TOKEN_CONCATENATE(unique_profiler_thread_guard, __LINE__);                                                                                                              \
+  if (!EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__))                                                                                                                                  \
+    EASY_TOKEN_CONCATENATE(unique_profiler_thread_name, __LINE__) = ::profiler::registerThreadScoped(name, EASY_TOKEN_CONCATENATE(unique_profiler_thread_guard, __LINE__));
 
 /** Macro for main thread registration.
 
@@ -264,7 +259,7 @@ This is just for user's comfort. There is no difference for EasyProfiler GUI bet
 
 \ingroup profiler
 */
-# define EASY_MAIN_THREAD EASY_THREAD("Main")
+#define EASY_MAIN_THREAD EASY_THREAD("Main")
 
 /** Enable or disable event tracing (context switch events).
 
@@ -276,7 +271,7 @@ This is just for user's comfort. There is no difference for EasyProfiler GUI bet
 
 \ingroup profiler
 */
-# define EASY_SET_EVENT_TRACING_ENABLED(isEnabled) ::profiler::setEventTracingEnabled(isEnabled);
+#define EASY_SET_EVENT_TRACING_ENABLED(isEnabled) ::profiler::setEventTracingEnabled(isEnabled);
 
 /** Set event tracing thread priority (low or normal).
 
@@ -293,7 +288,7 @@ breakdown, but if you care about that then you change set event tracing priority
 
 \ingroup profiler
 */
-# define EASY_SET_LOW_PRIORITY_EVENT_TRACING(isLowPriority) ::profiler::setLowPriorityEventTracing(isLowPriority);
+#define EASY_SET_LOW_PRIORITY_EVENT_TRACING(isLowPriority) ::profiler::setLowPriorityEventTracing(isLowPriority);
 
 /** Macro for setting temporary log-file path for Unix event tracing system.
 
@@ -301,13 +296,13 @@ breakdown, but if you care about that then you change set event tracing priority
 
 \ingroup profiler
 */
-# define EASY_EVENT_TRACING_SET_LOG(filename) ::profiler::setContextSwitchLogFilename(filename);
+#define EASY_EVENT_TRACING_SET_LOG(filename) ::profiler::setContextSwitchLogFilename(filename);
 
 /** Macro returning current path to the temporary log-file for Unix event tracing system.
 
 \ingroup profiler
 */
-# define EASY_EVENT_TRACING_LOG ::profiler::getContextSwitchLogFilename();
+#define EASY_EVENT_TRACING_LOG ::profiler::getContextSwitchLogFilename();
 
 // EasyProfiler settings:
 
@@ -319,22 +314,22 @@ These are "EasyProfiler.ExpandStorage" blocks on a diagram.
 
 \ingroup profiler
 */
-# ifndef EASY_OPTION_MEASURE_STORAGE_EXPAND
-#  define EASY_OPTION_MEASURE_STORAGE_EXPAND 0
-# endif
+#ifndef EASY_OPTION_MEASURE_STORAGE_EXPAND
+#define EASY_OPTION_MEASURE_STORAGE_EXPAND 0
+#endif
 
-# if EASY_OPTION_MEASURE_STORAGE_EXPAND != 0
+#if EASY_OPTION_MEASURE_STORAGE_EXPAND != 0
 /** If true then "EasyProfiler.ExpandStorage" blocks are enabled by default and will be
 writed to output file or translated over the net.
 If false then you need to enable these blocks via GUI if you want to see them.
 
 \ingroup profiler
 */
-#  ifndef EASY_OPTION_STORAGE_EXPAND_BLOCKS_ON
-#   define EASY_OPTION_STORAGE_EXPAND_BLOCKS_ON true
-#  endif
+#ifndef EASY_OPTION_STORAGE_EXPAND_BLOCKS_ON
+#define EASY_OPTION_STORAGE_EXPAND_BLOCKS_ON true
+#endif
 
-# endif // EASY_OPTION_MEASURE_STORAGE_EXPAND != 0
+#endif // EASY_OPTION_MEASURE_STORAGE_EXPAND != 0
 
 /** If true then EasyProfiler event tracing is enabled by default
 and will be turned on and off when you call profiler::setEnabled().
@@ -343,9 +338,9 @@ turned on/off with next calls of profiler::setEnabled().
 
 \ingroup profiler
 */
-# ifndef EASY_OPTION_EVENT_TRACING_ENABLED
-#  define EASY_OPTION_EVENT_TRACING_ENABLED true
-# endif
+#ifndef EASY_OPTION_EVENT_TRACING_ENABLED
+#define EASY_OPTION_EVENT_TRACING_ENABLED true
+#endif
 
 /** If true then EasyProfiler.ETW thread (Event tracing for Windows) will have low priority by default.
 
@@ -356,19 +351,18 @@ You don't need to rebuild or restart your application for that.
 
 \ingroup profiler
 */
-# ifndef EASY_OPTION_LOW_PRIORITY_EVENT_TRACING
-#  define EASY_OPTION_LOW_PRIORITY_EVENT_TRACING true
-# endif
-
+#ifndef EASY_OPTION_LOW_PRIORITY_EVENT_TRACING
+#define EASY_OPTION_LOW_PRIORITY_EVENT_TRACING true
+#endif
 
 /** If != 0 then EasyProfiler will print error messages into stderr.
 Otherwise, no log messages will be printed.
 
 \ingroup profiler
 */
-# ifndef EASY_OPTION_LOG_ENABLED
-#  define EASY_OPTION_LOG_ENABLED 0
-# endif
+#ifndef EASY_OPTION_LOG_ENABLED
+#define EASY_OPTION_LOG_ENABLED 0
+#endif
 
 /** If != 0 then EasyProfiler will start listening thread immidiately on ProfileManager initialization.
 
@@ -376,55 +370,55 @@ Otherwise, no log messages will be printed.
 
 \ingroup profiler
 */
-# ifndef EASY_OPTION_START_LISTEN_ON_STARTUP
-#  define EASY_OPTION_START_LISTEN_ON_STARTUP 0
-# endif
+#ifndef EASY_OPTION_START_LISTEN_ON_STARTUP
+#define EASY_OPTION_START_LISTEN_ON_STARTUP 0
+#endif
 
 #else // #ifdef BUILD_WITH_EASY_PROFILER
 
-# define EASY_BLOCK(...)
-# define EASY_NONSCOPED_BLOCK(...)
-# define EASY_FUNCTION(...)
-# define EASY_END_BLOCK 
-# define EASY_PROFILER_ENABLE 
-# define EASY_PROFILER_DISABLE 
-# define EASY_EVENT(...)
-# define EASY_THREAD(...)
-# define EASY_THREAD_SCOPE(...)
-# define EASY_MAIN_THREAD 
-# define EASY_SET_EVENT_TRACING_ENABLED(isEnabled) 
-# define EASY_SET_LOW_PRIORITY_EVENT_TRACING(isLowPriority) 
+#define EASY_BLOCK(...)
+#define EASY_NONSCOPED_BLOCK(...)
+#define EASY_FUNCTION(...)
+#define EASY_END_BLOCK
+#define EASY_PROFILER_ENABLE
+#define EASY_PROFILER_DISABLE
+#define EASY_EVENT(...)
+#define EASY_THREAD(...)
+#define EASY_THREAD_SCOPE(...)
+#define EASY_MAIN_THREAD
+#define EASY_SET_EVENT_TRACING_ENABLED(isEnabled)
+#define EASY_SET_LOW_PRIORITY_EVENT_TRACING(isLowPriority)
 
-# ifndef _WIN32
-#  define EASY_EVENT_TRACING_SET_LOG(filename) 
-#  define EASY_EVENT_TRACING_LOG ""
-# endif
+#ifndef _WIN32
+#define EASY_EVENT_TRACING_SET_LOG(filename)
+#define EASY_EVENT_TRACING_LOG ""
+#endif
 
-# ifndef EASY_OPTION_MEASURE_STORAGE_EXPAND
-#  define EASY_OPTION_MEASURE_STORAGE_EXPAND 0
-# endif
+#ifndef EASY_OPTION_MEASURE_STORAGE_EXPAND
+#define EASY_OPTION_MEASURE_STORAGE_EXPAND 0
+#endif
 
-# ifndef EASY_OPTION_EVENT_TRACING_ENABLED
-#  define EASY_OPTION_EVENT_TRACING_ENABLED false
-# endif
+#ifndef EASY_OPTION_EVENT_TRACING_ENABLED
+#define EASY_OPTION_EVENT_TRACING_ENABLED false
+#endif
 
-# ifndef EASY_OPTION_LOW_PRIORITY_EVENT_TRACING
-#  define EASY_OPTION_LOW_PRIORITY_EVENT_TRACING true
-# endif
+#ifndef EASY_OPTION_LOW_PRIORITY_EVENT_TRACING
+#define EASY_OPTION_LOW_PRIORITY_EVENT_TRACING true
+#endif
 
-# ifndef EASY_OPTION_LOG_ENABLED
-#  define EASY_OPTION_LOG_ENABLED 0
-# endif
+#ifndef EASY_OPTION_LOG_ENABLED
+#define EASY_OPTION_LOG_ENABLED 0
+#endif
 
-# ifndef EASY_OPTION_START_LISTEN_ON_STARTUP
-#  define EASY_OPTION_START_LISTEN_ON_STARTUP 0
-# endif
+#ifndef EASY_OPTION_START_LISTEN_ON_STARTUP
+#define EASY_OPTION_START_LISTEN_ON_STARTUP 0
+#endif
 
 #endif // #ifndef BUILD_WITH_EASY_PROFILER
 
-# ifndef EASY_DEFAULT_PORT
-#  define EASY_DEFAULT_PORT 28077
-# endif
+#ifndef EASY_DEFAULT_PORT
+#define EASY_DEFAULT_PORT 28077
+#endif
 
 /** Alias for EASY_PROFILER_ENABLE.
 
@@ -451,460 +445,441 @@ Added for clarification.
 
 namespace profiler {
 
-    EASY_CONSTEXPR uint16_t DEFAULT_PORT = EASY_DEFAULT_PORT;
+EASY_CONSTEXPR uint16_t DEFAULT_PORT = EASY_DEFAULT_PORT;
 
-    //////////////////////////////////////////////////////////////////////
-    // Core API
-    // Note: It is better to use macros defined above than a direct calls to API.
-    //       But some API functions does not have macro wrappers...
+//////////////////////////////////////////////////////////////////////
+// Core API
+// Note: It is better to use macros defined above than a direct calls to API.
+//       But some API functions does not have macro wrappers...
 
 #ifdef USING_EASY_PROFILER
-    extern "C" {
+extern "C" {
 
-        /** Returns current time in ticks.
+/** Returns current time in ticks.
 
-        You can use it if you want to store block explicitly.
+You can use it if you want to store block explicitly.
 
-        \retval Current CPU time in ticks.
+\retval Current CPU time in ticks.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t currentTime();
+\ingroup profiler
+*/
+PROFILER_API timestamp_t currentTime();
 
-        /** Convert ticks to nanoseconds.
+/** Convert ticks to nanoseconds.
 
-        \retval _ticks converted to nanoseconds.
+\retval _ticks converted to nanoseconds.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t toNanoseconds(timestamp_t _ticks);
+\ingroup profiler
+*/
+PROFILER_API timestamp_t toNanoseconds(timestamp_t _ticks);
 
-        /** Convert ticks to microseconds.
+/** Convert ticks to microseconds.
 
-        \retval _ticks converted to microseconds.
+\retval _ticks converted to microseconds.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t toMicroseconds(timestamp_t _ticks);
+\ingroup profiler
+*/
+PROFILER_API timestamp_t toMicroseconds(timestamp_t _ticks);
 
-        /** Registers static description of a block.
+/** Registers static description of a block.
 
-        It is general information which is common for all such blocks.
-        Includes color, block type (see BlockType), file-name, line-number, compile-time name of a block and enable-flag.
+It is general information which is common for all such blocks.
+Includes color, block type (see BlockType), file-name, line-number, compile-time name of a block and enable-flag.
 
-        \note This API function is used by EASY_EVENT, EASY_BLOCK, EASY_FUNCTION macros.
-        There is no need to invoke this function explicitly.
+\note This API function is used by EASY_EVENT, EASY_BLOCK, EASY_FUNCTION macros.
+There is no need to invoke this function explicitly.
 
-        \retval Pointer to registered block description.
+\retval Pointer to registered block description.
 
-        \ingroup profiler
-        */
-        PROFILER_API const BaseBlockDescriptor* registerDescription(EasyBlockStatus _status, const char* _autogenUniqueId, const char* _compiletimeName, const char* _filename, int _line, block_type_t _block_type, color_t _color, bool _copyName = false);
+\ingroup profiler
+*/
+PROFILER_API const BaseBlockDescriptor *registerDescription(EasyBlockStatus _status, const char *_autogenUniqueId, const char *_compiletimeName, const char *_filename, int _line,
+                                                            block_type_t _block_type, color_t _color, bool _copyName = false);
 
-        /** Stores event in the blocks list.
+/** Stores event in the blocks list.
 
-        An event ends instantly and has zero duration.
+An event ends instantly and has zero duration.
 
-        \note There is no need to invoke this function explicitly - use EASY_EVENT macro instead.
+\note There is no need to invoke this function explicitly - use EASY_EVENT macro instead.
 
-        \param _desc Reference to the previously registered description.
-        \param _runtimeName Standard zero-terminated string which will be copied to the events buffer.
+\param _desc Reference to the previously registered description.
+\param _runtimeName Standard zero-terminated string which will be copied to the events buffer.
 
-        \note _runtimeName must be an empty string ("") if you do not want to set name to the event at run-time.
-        
-        \ingroup profiler
-        */
-        PROFILER_API void storeEvent(const BaseBlockDescriptor* _desc, const char* _runtimeName = "");
+\note _runtimeName must be an empty string ("") if you do not want to set name to the event at run-time.
 
-        /** Stores block explicitly in the blocks list.
+\ingroup profiler
+*/
+PROFILER_API void storeEvent(const BaseBlockDescriptor *_desc, const char *_runtimeName = "");
 
-        Use this function for additional flexibility if you want to set block duration manually.
+/** Stores block explicitly in the blocks list.
 
-        \param _desc Reference to the previously registered description.
-        \param _runtimeName Standard zero-terminated string which will be copied to the events buffer.
-        \param _beginTime begin time of the block
-        \param _endTime end time of the block
+Use this function for additional flexibility if you want to set block duration manually.
 
-        \note _runtimeName must be an empty string ("") if you do not want to set name to the block at run-time.
+\param _desc Reference to the previously registered description.
+\param _runtimeName Standard zero-terminated string which will be copied to the events buffer.
+\param _beginTime begin time of the block
+\param _endTime end time of the block
 
-        \ingroup profiler
-        */
-        PROFILER_API void storeBlock(const BaseBlockDescriptor* _desc, const char* _runtimeName, timestamp_t _beginTime, timestamp_t _endTime);
+\note _runtimeName must be an empty string ("") if you do not want to set name to the block at run-time.
 
-        /** Begins scoped block.
+\ingroup profiler
+*/
+PROFILER_API void storeBlock(const BaseBlockDescriptor *_desc, const char *_runtimeName, timestamp_t _beginTime, timestamp_t _endTime);
 
-        \ingroup profiler
-        */
-        PROFILER_API void beginBlock(Block& _block);
+/** Begins scoped block.
 
-        /** Begins non-scoped block.
+\ingroup profiler
+*/
+PROFILER_API void beginBlock(Block &_block);
 
-        \param _desc Reference to the previously registered description (see registerDescription).
-        \param _runtimeName Standard zero-terminated string which will be copied to the block buffer when block will end.
+/** Begins non-scoped block.
 
-        \note There is no need to invoke this function explicitly - use EASY_NONSCOPED_BLOCK macro instead.
-        EASY_NONSCOPED_BLOCK macro could be used for higher flexibility if you have to begin block in one
-        function and end it in another one.
+\param _desc Reference to the previously registered description (see registerDescription).
+\param _runtimeName Standard zero-terminated string which will be copied to the block buffer when block will end.
 
-        \note _runtimeName must be an empty string ("") if you do not want to set name to the block at run-time.
-        \note _runtimeName is copied only when block ends so you must ensure it's validity until block end.
+\note There is no need to invoke this function explicitly - use EASY_NONSCOPED_BLOCK macro instead.
+EASY_NONSCOPED_BLOCK macro could be used for higher flexibility if you have to begin block in one
+function and end it in another one.
 
-        \warning You have to end this block explicitly.
+\note _runtimeName must be an empty string ("") if you do not want to set name to the block at run-time.
+\note _runtimeName is copied only when block ends so you must ensure it's validity until block end.
 
-        \ingroup profiler
-        */
-        PROFILER_API void beginNonScopedBlock(const BaseBlockDescriptor* _desc, const char* _runtimeName = "");
+\warning You have to end this block explicitly.
 
-        /** Ends last started block.
+\ingroup profiler
+*/
+PROFILER_API void beginNonScopedBlock(const BaseBlockDescriptor *_desc, const char *_runtimeName = "");
 
-        Use this only if you want to finish block explicitly.
+/** Ends last started block.
 
-        \ingroup profiler
-        */
-        PROFILER_API void endBlock();
+Use this only if you want to finish block explicitly.
 
-        /** Enable or disable profiler.
+\ingroup profiler
+*/
+PROFILER_API void endBlock();
 
-        AKA start or stop profiling (capturing blocks).
+/** Enable or disable profiler.
 
-        \ingroup profiler
-        */
-        PROFILER_API void setEnabled(bool _isEnable);
-        PROFILER_API bool isEnabled();
+AKA start or stop profiling (capturing blocks).
 
-        /** Save all gathered blocks into file.
+\ingroup profiler
+*/
+PROFILER_API void setEnabled(bool _isEnable);
+PROFILER_API bool isEnabled();
 
-        \note This also disables profiler.
+/** Save all gathered blocks into file.
 
-        \retval Number of saved blocks. If 0 then nothing was profiled or an error occured.
+\note This also disables profiler.
 
-        \ingroup profiler
-        */
-        PROFILER_API uint32_t dumpBlocksToFile(const char* _filename);
+\retval Number of saved blocks. If 0 then nothing was profiled or an error occured.
 
-        /** Register current thread and give it a name.
+\ingroup profiler
+*/
+PROFILER_API uint32_t dumpBlocksToFile(const char *_filename);
 
-        Also creates a scoped ThreadGuard which would unregister thread on it's destructor.
-        This helps for memory management while using an old compiler whitout thread_local support.
+/** Register current thread and give it a name.
 
-        \note Only first call of registerThread() for the current thread will have an effect.
+Also creates a scoped ThreadGuard which would unregister thread on it's destructor.
+This helps for memory management while using an old compiler whitout thread_local support.
 
-        \note Use this function if you want to build your source code with an old compiler (MSVC < 2013, GCC < 4.8, Clang < 3.3).
-        Otherwise there is no need in this function because a thread_local ThreadGuard created inside.
+\note Only first call of registerThread() for the current thread will have an effect.
 
-        \retval Registered name of the thread. It may differ from _name if the thread was registered before.
+\note Use this function if you want to build your source code with an old compiler (MSVC < 2013, GCC < 4.8, Clang < 3.3).
+Otherwise there is no need in this function because a thread_local ThreadGuard created inside.
 
-        \sa registerThread, ThreadGuard
+\retval Registered name of the thread. It may differ from _name if the thread was registered before.
 
-        \ingroup profiler
-        */
-        PROFILER_API const char* registerThreadScoped(const char* _name, ThreadGuard&);
+\sa registerThread, ThreadGuard
 
-        /** Register current thread and give it a name.
+\ingroup profiler
+*/
+PROFILER_API const char *registerThreadScoped(const char *_name, ThreadGuard &);
 
-        \note Only first call of registerThread() for the current thread will have an effect.
+/** Register current thread and give it a name.
 
-        \retval Registered name of the thread. It may differ from _name if the thread was registered before.
+\note Only first call of registerThread() for the current thread will have an effect.
 
-        \ingroup profiler
-        */
-        PROFILER_API const char* registerThread(const char* _name);
+\retval Registered name of the thread. It may differ from _name if the thread was registered before.
 
-        /** Enable or disable event tracing.
+\ingroup profiler
+*/
+PROFILER_API const char *registerThread(const char *_name);
 
-        \note This change will take an effect on the next call of setEnabled(true);
+/** Enable or disable event tracing.
 
-        \sa setEnabled, EASY_SET_EVENT_TRACING_ENABLED
+\note This change will take an effect on the next call of setEnabled(true);
 
-        \ingroup profiler
-        */
-        PROFILER_API void setEventTracingEnabled(bool _isEnable);
-        PROFILER_API bool isEventTracingEnabled();
+\sa setEnabled, EASY_SET_EVENT_TRACING_ENABLED
 
-        /** Set event tracing thread priority (low or normal).
+\ingroup profiler
+*/
+PROFILER_API void setEventTracingEnabled(bool _isEnable);
+PROFILER_API bool isEventTracingEnabled();
 
-        \note This change will take effect on the next call of setEnabled(true);
+/** Set event tracing thread priority (low or normal).
 
-        \sa setEnabled, EASY_SET_LOW_PRIORITY_EVENT_TRACING
+\note This change will take effect on the next call of setEnabled(true);
 
-        \ingroup profiler
-        */
-        PROFILER_API void setLowPriorityEventTracing(bool _isLowPriority);
-        PROFILER_API bool isLowPriorityEventTracing();
+\sa setEnabled, EASY_SET_LOW_PRIORITY_EVENT_TRACING
 
-        /** Set temporary log-file path for Unix event tracing system.
+\ingroup profiler
+*/
+PROFILER_API void setLowPriorityEventTracing(bool _isLowPriority);
+PROFILER_API bool isLowPriorityEventTracing();
 
-        \note Default value is "/tmp/cs_profiling_info.log".
+/** Set temporary log-file path for Unix event tracing system.
 
-        \ingroup profiler
-        */
-        PROFILER_API void setContextSwitchLogFilename(const char* _name);
+\note Default value is "/tmp/cs_profiling_info.log".
 
-        /** Returns current path to the temporary log-file for Unix event tracing system.
+\ingroup profiler
+*/
+PROFILER_API void setContextSwitchLogFilename(const char *_name);
 
-        \ingroup profiler
-        */
-        PROFILER_API const char* getContextSwitchLogFilename();
+/** Returns current path to the temporary log-file for Unix event tracing system.
 
-        /** Start listening for network commands.
+\ingroup profiler
+*/
+PROFILER_API const char *getContextSwitchLogFilename();
 
-        Launches a separate listening thread which would listen to the network commands (start, stop, etc.).
-        The listening thread sends all profiled blocks via network after receiving network command 'stop'.
+/** Start listening for network commands.
 
-        \ingroup profiler
-        */
-        PROFILER_API void startListen(uint16_t _port = ::profiler::DEFAULT_PORT);
+Launches a separate listening thread which would listen to the network commands (start, stop, etc.).
+The listening thread sends all profiled blocks via network after receiving network command 'stop'.
 
-        /** Stops listening thread.
+\ingroup profiler
+*/
+PROFILER_API void startListen(uint16_t _port = ::profiler::DEFAULT_PORT);
 
-        \note This would be invoked automatically on application exit.
+/** Stops listening thread.
 
-        \note Does not send any messages to the network, just stops thread.
+\note This would be invoked automatically on application exit.
 
-        \ingroup profiler
-        */
-        PROFILER_API void stopListen();
+\note Does not send any messages to the network, just stops thread.
 
-        /** Check if listening thread launched.
+\ingroup profiler
+*/
+PROFILER_API void stopListen();
 
-        \ingroup profiler
-        */
-        PROFILER_API bool isListening();
+/** Check if listening thread launched.
 
-        /** Returns current major version.
-        
-        \ingroup profiler
-        */
-        PROFILER_API uint8_t versionMajor();
+\ingroup profiler
+*/
+PROFILER_API bool isListening();
 
-        /** Returns current minor version.
+/** Returns current major version.
 
-        \ingroup profiler
-        */
-        PROFILER_API uint8_t versionMinor();
+\ingroup profiler
+*/
+PROFILER_API uint8_t versionMajor();
 
-        /** Returns current version patch.
+/** Returns current minor version.
 
-        \ingroup profiler
-        */
-        PROFILER_API uint16_t versionPatch();
+\ingroup profiler
+*/
+PROFILER_API uint8_t versionMinor();
 
-        /** Returns current version in 32-bit integer format.
+/** Returns current version patch.
 
-        \note Format is: 0x MAJ-MAJ MIN-MIN PATCH-PATCH-PATCH-PATCH
-        For example v1.3.0 is: 0x01030000
+\ingroup profiler
+*/
+PROFILER_API uint16_t versionPatch();
 
-        \ingroup profiler
-        */
-        PROFILER_API uint32_t version();
+/** Returns current version in 32-bit integer format.
 
-        /** Returns current version string.
+\note Format is: 0x MAJ-MAJ MIN-MIN PATCH-PATCH-PATCH-PATCH
+For example v1.3.0 is: 0x01030000
 
-        Example: "v1.3.0"
+\ingroup profiler
+*/
+PROFILER_API uint32_t version();
 
-        \ingroup profiler
-        */
-        PROFILER_API const char* versionName();
+/** Returns current version string.
 
-        /** Returns true if current thread has been marked as Main.
-        Otherwise, returns false.
+Example: "v1.3.0"
 
-        \ingroup profiler
-        */
-        PROFILER_API bool isMainThread();
+\ingroup profiler
+*/
+PROFILER_API const char *versionName();
 
-        /** Returns last frame duration for current thread.
+/** Returns true if current thread has been marked as Main.
+Otherwise, returns false.
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+\ingroup profiler
+*/
+PROFILER_API bool isMainThread();
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t this_thread_frameTime(Duration _durationCast = ::profiler::MICROSECONDS);
+/** Returns last frame duration for current thread.
 
-        /** Returns local max of frame duration for current thread.
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
 
-        Local max is maximum frame duration since last frameTimeLocalMax() call.
+\ingroup profiler
+*/
+PROFILER_API timestamp_t this_thread_frameTime(Duration _durationCast = ::profiler::MICROSECONDS);
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+/** Returns local max of frame duration for current thread.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t this_thread_frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS);
+Local max is maximum frame duration since last frameTimeLocalMax() call.
 
-        /** Returns local average of frame duration for current thread.
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
 
-        Local average is average frame duration since last frameTimeLocalAvg() call.
+\ingroup profiler
+*/
+PROFILER_API timestamp_t this_thread_frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS);
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+/** Returns local average of frame duration for current thread.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t this_thread_frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS);
+Local average is average frame duration since last frameTimeLocalAvg() call.
 
-        /** Returns last frame duration for main thread.
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+\ingroup profiler
+*/
+PROFILER_API timestamp_t this_thread_frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS);
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t main_thread_frameTime(Duration _durationCast = ::profiler::MICROSECONDS);
+/** Returns last frame duration for main thread.
 
-        /** Returns local max of frame duration for main thread.
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
 
-        Local max is maximum frame duration since last frameTimeLocalMax() call.
+\ingroup profiler
+*/
+PROFILER_API timestamp_t main_thread_frameTime(Duration _durationCast = ::profiler::MICROSECONDS);
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+/** Returns local max of frame duration for main thread.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t main_thread_frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS);
+Local max is maximum frame duration since last frameTimeLocalMax() call.
 
-        /** Returns local average of frame duration for main thread.
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
 
-        Local average is average frame duration since last frameTimeLocalAvg() call.
+\ingroup profiler
+*/
+PROFILER_API timestamp_t main_thread_frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS);
 
-        \param _durationCast desired duration units (could be cpu-ticks or microseconds)
+/** Returns local average of frame duration for main thread.
 
-        \ingroup profiler
-        */
-        PROFILER_API timestamp_t main_thread_frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS);
+Local average is average frame duration since last frameTimeLocalAvg() call.
 
-    }
+\param _durationCast desired duration units (could be cpu-ticks or microseconds)
+
+\ingroup profiler
+*/
+PROFILER_API timestamp_t main_thread_frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS);
+}
 #else
-    inline timestamp_t currentTime() { return 0; }
-    inline timestamp_t toNanoseconds(timestamp_t) { return 0; }
-    inline timestamp_t toMicroseconds(timestamp_t) { return 0; }
-    inline const BaseBlockDescriptor* registerDescription(EasyBlockStatus, const char*, const char*, const char*, int, block_type_t, color_t, bool = false)
-    { return reinterpret_cast<const BaseBlockDescriptor*>(0xbad); }
-    inline void endBlock() { }
-    inline void setEnabled(bool) { }
-    inline bool isEnabled() { return false; }
-    inline void storeEvent(const BaseBlockDescriptor*, const char* = "") { }
-    inline void storeBlock(const BaseBlockDescriptor*, const char*, timestamp_t, timestamp_t) { }
-    inline void beginBlock(Block&) { }
-    inline void beginNonScopedBlock(const BaseBlockDescriptor*, const char* = "") { }
-    inline uint32_t dumpBlocksToFile(const char*) { return 0; }
-    inline const char* registerThreadScoped(const char*, ThreadGuard&) { return ""; }
-    inline const char* registerThread(const char*) { return ""; }
-    inline void setEventTracingEnabled(bool) { }
-    inline bool isEventTracingEnabled() { return false; }
-    inline void setLowPriorityEventTracing(bool) { }
-    inline bool isLowPriorityEventTracing() { return false; }
-    inline void setContextSwitchLogFilename(const char*) { }
-    inline const char* getContextSwitchLogFilename() { return ""; }
-    inline void startListen(uint16_t = ::profiler::DEFAULT_PORT) { }
-    inline void stopListen() { }
-    inline bool isListening() { return false; }
-    inline uint8_t versionMajor() { return 0; }
-    inline uint8_t versionMinor() { return 0; }
-    inline uint16_t versionPatch() { return 0; }
-    inline uint32_t version() { return 0; }
-    inline const char* versionName() { return "v0.0.0_disabled"; }
-    inline bool isMainThread() { return false; }
-    inline timestamp_t this_thread_frameTime(Duration = ::profiler::MICROSECONDS) { return 0; }
-    inline timestamp_t this_thread_frameTimeLocalMax(Duration = ::profiler::MICROSECONDS) { return 0; }
-    inline timestamp_t this_thread_frameTimeLocalAvg(Duration = ::profiler::MICROSECONDS) { return 0; }
-    inline timestamp_t main_thread_frameTime(Duration = ::profiler::MICROSECONDS) { return 0; }
-    inline timestamp_t main_thread_frameTimeLocalMax(Duration = ::profiler::MICROSECONDS) { return 0; }
-    inline timestamp_t main_thread_frameTimeLocalAvg(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t currentTime() { return 0; }
+inline timestamp_t toNanoseconds(timestamp_t) { return 0; }
+inline timestamp_t toMicroseconds(timestamp_t) { return 0; }
+inline const BaseBlockDescriptor *registerDescription(EasyBlockStatus, const char *, const char *, const char *, int, block_type_t, color_t, bool = false) {
+  return reinterpret_cast<const BaseBlockDescriptor *>(0xbad);
+}
+inline void endBlock() {}
+inline void setEnabled(bool) {}
+inline bool isEnabled() { return false; }
+inline void storeEvent(const BaseBlockDescriptor *, const char * = "") {}
+inline void storeBlock(const BaseBlockDescriptor *, const char *, timestamp_t, timestamp_t) {}
+inline void beginBlock(Block &) {}
+inline void beginNonScopedBlock(const BaseBlockDescriptor *, const char * = "") {}
+inline uint32_t dumpBlocksToFile(const char *) { return 0; }
+inline const char *registerThreadScoped(const char *, ThreadGuard &) { return ""; }
+inline const char *registerThread(const char *) { return ""; }
+inline void setEventTracingEnabled(bool) {}
+inline bool isEventTracingEnabled() { return false; }
+inline void setLowPriorityEventTracing(bool) {}
+inline bool isLowPriorityEventTracing() { return false; }
+inline void setContextSwitchLogFilename(const char *) {}
+inline const char *getContextSwitchLogFilename() { return ""; }
+inline void startListen(uint16_t = ::profiler::DEFAULT_PORT) {}
+inline void stopListen() {}
+inline bool isListening() { return false; }
+inline uint8_t versionMajor() { return 0; }
+inline uint8_t versionMinor() { return 0; }
+inline uint16_t versionPatch() { return 0; }
+inline uint32_t version() { return 0; }
+inline const char *versionName() { return "v0.0.0_disabled"; }
+inline bool isMainThread() { return false; }
+inline timestamp_t this_thread_frameTime(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t this_thread_frameTimeLocalMax(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t this_thread_frameTimeLocalAvg(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t main_thread_frameTime(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t main_thread_frameTimeLocalMax(Duration = ::profiler::MICROSECONDS) { return 0; }
+inline timestamp_t main_thread_frameTimeLocalAvg(Duration = ::profiler::MICROSECONDS) { return 0; }
 #endif
 
-    /** API functions binded to current thread.
+/** API functions binded to current thread.
 
-    \ingroup profiler
-    */
-    namespace this_thread {
+\ingroup profiler
+*/
+namespace this_thread {
 
-        inline const char* registrate(const char* _name) {
-            return ::profiler::registerThread(_name);
-        }
+inline const char *registrate(const char *_name) { return ::profiler::registerThread(_name); }
 
-        inline const char* registrate(const char* _name, ThreadGuard& _threadGuard) {
-            return ::profiler::registerThreadScoped(_name, _threadGuard);
-        }
+inline const char *registrate(const char *_name, ThreadGuard &_threadGuard) { return ::profiler::registerThreadScoped(_name, _threadGuard); }
 
-        inline timestamp_t frameTime(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::this_thread_frameTime(_durationCast);
-        }
+inline timestamp_t frameTime(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::this_thread_frameTime(_durationCast); }
 
-        inline timestamp_t frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::this_thread_frameTimeLocalMax(_durationCast);
-        }
+inline timestamp_t frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::this_thread_frameTimeLocalMax(_durationCast); }
 
-        inline timestamp_t frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::this_thread_frameTimeLocalAvg(_durationCast);
-        }
+inline timestamp_t frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::this_thread_frameTimeLocalAvg(_durationCast); }
 
-        inline bool isMain() {
-            return ::profiler::isMainThread();
-        }
+inline bool isMain() { return ::profiler::isMainThread(); }
 
-    } // END of namespace this_thread.
+} // END of namespace this_thread.
 
-    /** API functions binded to main thread.
+/** API functions binded to main thread.
 
-    Could be called from any thread.
+Could be called from any thread.
 
-    \ingroup profiler
-    */
-    namespace main_thread {
+\ingroup profiler
+*/
+namespace main_thread {
 
-        inline timestamp_t frameTime(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::main_thread_frameTime(_durationCast);
-        }
+inline timestamp_t frameTime(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::main_thread_frameTime(_durationCast); }
 
-        inline timestamp_t frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::main_thread_frameTimeLocalMax(_durationCast);
-        }
+inline timestamp_t frameTimeLocalMax(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::main_thread_frameTimeLocalMax(_durationCast); }
 
-        inline timestamp_t frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS) {
-            return ::profiler::main_thread_frameTimeLocalAvg(_durationCast);
-        }
+inline timestamp_t frameTimeLocalAvg(Duration _durationCast = ::profiler::MICROSECONDS) { return ::profiler::main_thread_frameTimeLocalAvg(_durationCast); }
 
-        /** Always returns true.
-        */
-        inline EASY_CONSTEXPR_FCN bool isMain() {
-            return true;
-        }
+/** Always returns true.
+ */
+inline EASY_CONSTEXPR_FCN bool isMain() { return true; }
 
-    } // END of namespace main_thread.
+} // END of namespace main_thread.
 
-    /** Alias for isEnabled().
+/** Alias for isEnabled().
 
-    Added for clarification.
+Added for clarification.
 
-    \sa isEnabled
+\sa isEnabled
 
-    \ingroup profiler
-    */
-    EASY_FORCE_INLINE bool isCapturing() { return isEnabled(); }
+\ingroup profiler
+*/
+EASY_FORCE_INLINE bool isCapturing() { return isEnabled(); }
 
-    /** Alias for EASY_PROFILER_ENABLE.
+/** Alias for EASY_PROFILER_ENABLE.
 
-    Added for clarification.
+Added for clarification.
 
-    \sa EASY_PROFILER_ENABLE
+\sa EASY_PROFILER_ENABLE
 
-    \ingroup profiler
-    */
-    EASY_FORCE_INLINE void startCapture() { EASY_PROFILER_ENABLE; }
+\ingroup profiler
+*/
+EASY_FORCE_INLINE void startCapture() { EASY_PROFILER_ENABLE; }
 
-    /** Alias for EASY_PROFILER_DISABLE.
+/** Alias for EASY_PROFILER_DISABLE.
 
-    Added for clarification.
+Added for clarification.
 
-    \sa EASY_PROFILER_DISABLE
+\sa EASY_PROFILER_DISABLE
 
-    \ingroup profiler
-    */
-    EASY_FORCE_INLINE void stopCapture() { EASY_PROFILER_DISABLE; }
+\ingroup profiler
+*/
+EASY_FORCE_INLINE void stopCapture() { EASY_PROFILER_DISABLE; }
 
-    //////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 } // END of namespace profiler.
 
-#if defined ( __clang__ )
-# pragma clang diagnostic pop
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif
 
 #endif // EASY_PROFILER_H

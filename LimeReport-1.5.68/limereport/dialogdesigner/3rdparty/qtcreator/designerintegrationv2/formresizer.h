@@ -33,8 +33,8 @@
 
 #include "widgethostconstants.h"
 
-#include <QWidget>
 #include <QVector>
+#include <QWidget>
 
 QT_FORWARD_DECLARE_CLASS(QDesignerFormWindowInterface)
 QT_FORWARD_DECLARE_CLASS(QFrame)
@@ -52,7 +52,7 @@ class SizeHandleRect;
  *          |        |
  *          |        |
  *       Handles   QVBoxLayout [margin: SELECTION_MARGIN]
- *                   | 
+ *                   |
  *                 Frame [margin: lineWidth]
  *                   |
  *                 QVBoxLayout
@@ -61,39 +61,37 @@ class SizeHandleRect;
  *
  * Can be embedded into a QScrollArea. */
 
-class FormResizer : public QWidget
-{
-    Q_OBJECT
+class FormResizer : public QWidget {
+  Q_OBJECT
 public:
+  FormResizer(QWidget *parent = 0);
 
-    FormResizer(QWidget *parent = 0);
+  void updateGeometry();
+  void setState(SelectionHandleState st);
+  void update();
 
-    void updateGeometry();
-    void setState(SelectionHandleState st);
-    void update();
-
-    void setFormWindow(QDesignerFormWindowInterface *fw);
+  void setFormWindow(QDesignerFormWindowInterface *fw);
 
 signals:
-    void formWindowSizeChanged(const QRect &oldGeo, const QRect &newGeo);
+  void formWindowSizeChanged(const QRect &oldGeo, const QRect &newGeo);
 
 protected:
-    virtual void resizeEvent(QResizeEvent *event);
+  virtual void resizeEvent(QResizeEvent *event);
 
 private slots:
-    void mainContainerChanged();
+  void mainContainerChanged();
 
 private:
-    QSize decorationSize() const;
-    QWidget *mainContainer();
+  QSize decorationSize() const;
+  QWidget *mainContainer();
 
-    QFrame *m_frame;
-    typedef QVector<SizeHandleRect*> Handles;
-    Handles m_handles;
-    QDesignerFormWindowInterface * m_formWindow;
+  QFrame *m_frame;
+  typedef QVector<SizeHandleRect *> Handles;
+  Handles m_handles;
+  QDesignerFormWindowInterface *m_formWindow;
 };
 
-}
+} // namespace Internal
 } // namespace SharedTools
 
 #endif // FORMRESIZER_H

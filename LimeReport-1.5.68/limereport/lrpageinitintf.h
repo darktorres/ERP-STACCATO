@@ -1,9 +1,9 @@
 #ifndef LRPAGEINITINTF_H
 #define LRPAGEINITINTF_H
 
-class IPageInit{
+class IPageInit {
 public:
-    virtual void pageObjectHasBeenLoaded() = 0;
+  virtual void pageObjectHasBeenLoaded() = 0;
 };
 
 #endif // LRPAGEINITINTF_H

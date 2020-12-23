@@ -148,9 +148,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 
   if (selection.isEmpty()) { return; }
 
-  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) {
-    throw RuntimeError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
-  }
+  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) { throw RuntimeError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this); }
 
   if (model.tableName() == "view_produto") {
     const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();

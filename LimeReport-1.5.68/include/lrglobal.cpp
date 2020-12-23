@@ -27,62 +27,54 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
-#include <QString>
-#include <QDebug>
 #include "lrglobal.h"
+#include <QDebug>
+#include <QString>
 
 namespace LimeReport {
 
-QString extractClassName(QString className)
-{
-    int startPos=className.lastIndexOf("::");
-    if(startPos==-1) startPos=0;
-    else startPos+=2;
-    return className.right(className.length()-startPos);
+QString extractClassName(QString className) {
+  int startPos = className.lastIndexOf("::");
+  if (startPos == -1)
+    startPos = 0;
+  else
+    startPos += 2;
+  return className.right(className.length() - startPos);
 }
 
-bool ReportSettings::suppressAbsentFieldsAndVarsWarnings() const
-{
-    return m_suppressAbsentFieldsAndVarsWarnings;
+bool ReportSettings::suppressAbsentFieldsAndVarsWarnings() const { return m_suppressAbsentFieldsAndVarsWarnings; }
+
+void ReportSettings::setSuppressAbsentFieldsAndVarsWarnings(bool suppressAbsentFieldsAndVarsWarnings) { m_suppressAbsentFieldsAndVarsWarnings = suppressAbsentFieldsAndVarsWarnings; }
+
+QString escapeSimbols(const QString &value) {
+  QString result = value;
+  result.replace("\"", "\\\"");
+  result.replace('\n', "\\n");
+  return result;
 }
 
-void ReportSettings::setSuppressAbsentFieldsAndVarsWarnings(bool suppressAbsentFieldsAndVarsWarnings)
-{
-    m_suppressAbsentFieldsAndVarsWarnings = suppressAbsentFieldsAndVarsWarnings;
+QString replaceHTMLSymbols(const QString &value) {
+  QString result = value;
+  result.replace("<", "&lt;");
+  result.replace(">", "&gt;");
+  return result;
 }
 
-QString escapeSimbols(const QString &value)
-{
-    QString result = value;
-    result.replace("\"","\\\"");
-    result.replace('\n',"\\n");
-    return result;
+QVector<QString> normalizeCaptures(const QRegExp &reg) {
+  QVector<QString> result;
+  foreach (QString cap, reg.capturedTexts()) {
+    if (!cap.isEmpty()) result.append(cap);
+  }
+  return result;
 }
 
-QString replaceHTMLSymbols(const QString &value)
-{
-    QString result = value;
-    result.replace("<","&lt;");
-    result.replace(">","&gt;");
-    return result;
+bool isColorDark(QColor color) {
+  qreal darkness = 1 - (0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue()) / 255;
+  if (darkness < 0.5) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
-QVector<QString> normalizeCaptures(const QRegExp& reg){
-    QVector<QString> result;
-    foreach (QString cap, reg.capturedTexts()) {
-        if (!cap.isEmpty())
-            result.append(cap);
-    }
-    return result;
-}
-
-bool isColorDark(QColor color){
-    qreal darkness = 1-(0.299*color.red() + 0.587*color.green() + 0.114*color.blue())/255;
-    if(darkness<0.5){
-        return false;
-    } else {
-        return true;
-    }
-}
-
-} //namespace LimeReport
+} // namespace LimeReport

@@ -30,57 +30,56 @@
 #ifndef LRITEMSBORDERSEDITORWIDGET_H
 #define LRITEMSBORDERSEDITORWIDGET_H
 
-#include <QToolBar>
-#include "lrreportdesignwidget.h"
 #include "lritemeditorwidget.h"
+#include "lrreportdesignwidget.h"
+#include <QToolBar>
 
-namespace LimeReport{
+namespace LimeReport {
 
-class ItemsBordersEditorWidget : public ItemEditorWidget
-{
-    Q_OBJECT
+class ItemsBordersEditorWidget : public ItemEditorWidget {
+  Q_OBJECT
 public:
-    explicit ItemsBordersEditorWidget(const QString &title, QWidget *parent = 0)
-        : ItemEditorWidget(title, parent), m_changing(false), m_borders(0){
-        initEditor();
-    }
-    bool changing() const;
+  explicit ItemsBordersEditorWidget(const QString &title, QWidget *parent = 0) : ItemEditorWidget(title, parent), m_changing(false), m_borders(0) { initEditor(); }
+  bool changing() const;
 protected slots:
-    virtual void noBordesClicked();
-    virtual void allBordesClicked();
-    virtual void buttonClicked(bool);
+  virtual void noBordesClicked();
+  virtual void allBordesClicked();
+  virtual void buttonClicked(bool);
+
 protected:
-    void setItemEvent(BaseDesignIntf *item);
-    void properyChangedEvent(const QString &property, const QVariant &oldValue, const QVariant &newValue);
-    BaseDesignIntf::BorderLines createBorders();
+  void setItemEvent(BaseDesignIntf *item);
+  void properyChangedEvent(const QString &property, const QVariant &oldValue, const QVariant &newValue);
+  BaseDesignIntf::BorderLines createBorders();
+
 private:
-    void initEditor();
-    void updateValues(BaseDesignIntf::BorderLines borders);
-    QAction* m_noLines;
-    QAction* m_leftLine;
-    QAction* m_rightLine;
-    QAction* m_topLine;
-    QAction* m_bottomLine;
-    QAction* m_allLines;
-    bool m_changing;
-    int m_borders;
+  void initEditor();
+  void updateValues(BaseDesignIntf::BorderLines borders);
+  QAction *m_noLines;
+  QAction *m_leftLine;
+  QAction *m_rightLine;
+  QAction *m_topLine;
+  QAction *m_bottomLine;
+  QAction *m_allLines;
+  bool m_changing;
+  int m_borders;
 };
 
 #ifdef HAVE_REPORT_DESIGNER
-class ItemsBordersEditorWidgetForDesigner : public ItemsBordersEditorWidget{
-    Q_OBJECT
+class ItemsBordersEditorWidgetForDesigner : public ItemsBordersEditorWidget {
+  Q_OBJECT
 public:
-    explicit ItemsBordersEditorWidgetForDesigner(ReportDesignWidget* reportEditor, const QString &title="", QWidget *parent = 0)
-        : ItemsBordersEditorWidget(title,parent), m_reportEditor(reportEditor){}
+  explicit ItemsBordersEditorWidgetForDesigner(ReportDesignWidget *reportEditor, const QString &title = "", QWidget *parent = 0)
+      : ItemsBordersEditorWidget(title, parent), m_reportEditor(reportEditor) {}
 protected slots:
-    void buttonClicked(bool);
-    void noBordesClicked();
-    void allBordesClicked();
+  void buttonClicked(bool);
+  void noBordesClicked();
+  void allBordesClicked();
+
 private:
-    ReportDesignWidget* m_reportEditor;
+  ReportDesignWidget *m_reportEditor;
 };
 #endif
 
-}//namespace LimeReport
+} // namespace LimeReport
 
 #endif // LRITEMSBORDERSEDITORWIDGET_H

@@ -30,48 +30,47 @@
 #ifndef LRSCRIPTBROWSER_H
 #define LRSCRIPTBROWSER_H
 
-#include <QWidget>
+#include "lrreportdesignwidget.h"
 #include <QMainWindow>
 #include <QTreeWidgetItem>
-#include "lrreportdesignwidget.h"
+#include <QWidget>
 
-namespace LimeReport{
+namespace LimeReport {
 
 namespace Ui {
 class ScriptBrowser;
 }
 
-class ScriptBrowser : public QWidget
-{
-    Q_OBJECT
-    
+class ScriptBrowser : public QWidget {
+  Q_OBJECT
+
 public:
-    explicit ScriptBrowser(QWidget *parent = 0);
-    ~ScriptBrowser();
-    void setReportEditor(LimeReport::ReportDesignWidget* designerWidget);
-    inline ReportDesignWidget* reportEditor(){return m_designerWidget;}
-    void updateFunctionTree();
+  explicit ScriptBrowser(QWidget *parent = 0);
+  ~ScriptBrowser();
+  void setReportEditor(LimeReport::ReportDesignWidget *designerWidget);
+  inline ReportDesignWidget *reportEditor() { return m_designerWidget; }
+  void updateFunctionTree();
 #ifdef HAVE_UI_LOADER
-    void updateDialogsTree();
+  void updateDialogsTree();
 #endif
 protected:
 #ifdef HAVE_UI_LOADER
-    void fillDialog(QTreeWidgetItem *dialogItem, const QString &description);
-    void fillProperties(QTreeWidgetItem *objectItem, QObject *item);
+  void fillDialog(QTreeWidgetItem *dialogItem, const QString &description);
+  void fillProperties(QTreeWidgetItem *objectItem, QObject *item);
 #endif
 private slots:
-    void slotClear();
-    void slotUpdate();
+  void slotClear();
+  void slotUpdate();
 #ifdef HAVE_UI_LOADER
-    void slotDialogAdded(QString);
-    void on_tbAddDialog_clicked();
-    void on_tbRunDialog_clicked();
-    void on_tbDeleteDialog_clicked();
+  void slotDialogAdded(QString);
+  void on_tbAddDialog_clicked();
+  void on_tbRunDialog_clicked();
+  void on_tbDeleteDialog_clicked();
 #endif
 
 private:
-    Ui::ScriptBrowser *ui;
-    ReportDesignWidget*  m_designerWidget;
+  Ui::ScriptBrowser *ui;
+  ReportDesignWidget *m_designerWidget;
 };
 
 } // namespace LimeReport

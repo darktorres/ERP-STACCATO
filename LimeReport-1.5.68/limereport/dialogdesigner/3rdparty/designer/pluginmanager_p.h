@@ -60,48 +60,47 @@ class QDesignerFormEditorInterface;
 class QDesignerCustomWidgetInterface;
 class QDesignerPluginManagerPrivate;
 
-class QDESIGNER_SHARED_EXPORT QDesignerPluginManager: public QObject
-{
-    Q_OBJECT
+class QDESIGNER_SHARED_EXPORT QDesignerPluginManager : public QObject {
+  Q_OBJECT
 public:
-    explicit QDesignerPluginManager(QDesignerFormEditorInterface *core);
-    virtual ~QDesignerPluginManager();
+  explicit QDesignerPluginManager(QDesignerFormEditorInterface *core);
+  virtual ~QDesignerPluginManager();
 
-    QDesignerFormEditorInterface *core() const;
+  QDesignerFormEditorInterface *core() const;
 
-    QObject *instance(const QString &plugin) const;
+  QObject *instance(const QString &plugin) const;
 
-    QStringList registeredPlugins() const;
+  QStringList registeredPlugins() const;
 
-    QStringList findPlugins(const QString &path);
+  QStringList findPlugins(const QString &path);
 
-    QStringList pluginPaths() const;
-    void setPluginPaths(const QStringList &plugin_paths);
+  QStringList pluginPaths() const;
+  void setPluginPaths(const QStringList &plugin_paths);
 
-    QStringList disabledPlugins() const;
-    void setDisabledPlugins(const QStringList &disabled_plugins);
+  QStringList disabledPlugins() const;
+  void setDisabledPlugins(const QStringList &disabled_plugins);
 
-    QStringList failedPlugins() const;
-    QString failureReason(const QString &pluginName) const;
+  QStringList failedPlugins() const;
+  QString failureReason(const QString &pluginName) const;
 
-    QList<QObject*> instances() const;
-    QList<QDesignerCustomWidgetInterface*> registeredCustomWidgets() const;
+  QList<QObject *> instances() const;
+  QList<QDesignerCustomWidgetInterface *> registeredCustomWidgets() const;
 
-    bool registerNewPlugins();
+  bool registerNewPlugins();
 
 public slots:
-    bool syncSettings();
-    void ensureInitialized();
+  bool syncSettings();
+  void ensureInitialized();
 
 private:
-    void updateRegisteredPlugins();
-    void registerPath(const QString &path);
-    void registerPlugin(const QString &plugin);
+  void updateRegisteredPlugins();
+  void registerPath(const QString &path);
+  void registerPlugin(const QString &plugin);
 
 private:
-    static QStringList defaultPluginPaths();
-    
-    QDesignerPluginManagerPrivate *m_d;
+  static QStringList defaultPluginPaths();
+
+  QDesignerPluginManagerPrivate *m_d;
 };
 
 QT_END_NAMESPACE

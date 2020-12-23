@@ -28,17 +28,14 @@ ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
   progressDialog->setMinimum(0);
 }
 
-void ACBr::error() {
-  const QString errorString = socket.errorString();
-
+void ACBr::error(QAbstractSocket::SocketError socketError) {
   progressDialog->cancel();
 
-  if (errorString == "Connection refused" or errorString == "Connection timed out") {
-    throw RuntimeException("Erro conectando ao ACBr! Verifique se ele está aberto!");
-  } else if (errorString == "The remote host closed the connection") {
-    throw RuntimeException("ACBr encerrou a conexão!");
-  } else {
-    throw RuntimeException("Erro socket: " + socket.errorString());
+  switch (socketError) {
+  case QAbstractSocket::ConnectionRefusedError: [[fallthrough]];
+  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao ACBr! Verifique se ele está aberto!");
+  case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com ACBr encerrada!");
+  default: throw RuntimeException("Erro socket: " + socket.errorString());
   }
 }
 
@@ -237,5 +234,3 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
 
   qApp->enqueueInformation(respostaEmail);
 }
-
-// NOTE: se uma nota der erro na consulta o xml armazenado provavelmente está errado, nesses casos baixar o xml pelo DANFE ONLINE e substituir no sistema

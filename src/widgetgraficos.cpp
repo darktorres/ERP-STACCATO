@@ -100,7 +100,7 @@ void WidgetGraficos::updateTables() {
       }
     }
 
-    for (auto serie : series) { serie->clear(); }
+    for (auto serie : qAsConst(series)) { serie->clear(); }
 
     double max = 0;
 

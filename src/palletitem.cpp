@@ -50,7 +50,7 @@ void PalletItem::setText(const QString &value) {
 
   int pos = 15;
 
-  for (auto line : lines) {
+  for (const auto &line : lines) {
     auto estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
     estoque->setVisible(false);
     estoque->setPos(mapFromScene(680, pos));

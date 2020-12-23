@@ -100,7 +100,7 @@ void TableView::redoView() {
   }
 
   for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
-    for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
+    for (const auto &column : qAsConst(persistentColumns)) { openPersistentEditor(row, column); }
   }
 }
 

@@ -491,7 +491,7 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   auto reply = manager->get(request);
 
-  connect(reply, &QNetworkReply::finished, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
 

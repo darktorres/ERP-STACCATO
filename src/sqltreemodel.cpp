@@ -141,7 +141,7 @@ void SqlTreeModel::updateData() {
     beginResetModel();
   }
 
-  for (SqlTreeModelLevel *levelData : d->m_levelData) { levelData->clear(); }
+  for (SqlTreeModelLevel *levelData : qAsConst(d->m_levelData)) { levelData->clear(); }
   d->m_root.m_levels.clear();
   d->m_root.m_rows.clear();
 

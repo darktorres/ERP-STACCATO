@@ -391,7 +391,7 @@ void CNAB::retornoGareItau240(const QString &filePath) {
 
   qApp->startTransaction("CNAB::retornoGareItau240");
 
-  for (auto const &line : lines) {
+  for (auto const &line : qAsConst(lines)) {
     // ocorrencias do header lote
     if (line.at(7) == '1') {
 

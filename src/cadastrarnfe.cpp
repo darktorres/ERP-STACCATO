@@ -1408,6 +1408,16 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
     }
   }
 
+  if (resposta.contains("CStat=259")) { // CNPJ da consulta não cadastrado como contribuinte na UF
+    ui->lineEditDestinatarioInscEst->setText("");
+
+    SqlQuery query;
+    query.prepare("UPDATE cliente SET inscEstadual = NULL WHERE idCliente = :idCliente");
+    query.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
+
+    if (not query.exec()) { throw RuntimeException("Erro atualizando Insc. Est.: " + query.lastError().text(), this); }
+  }
+
   qApp->enqueueInformation(resposta, this);
 }
 

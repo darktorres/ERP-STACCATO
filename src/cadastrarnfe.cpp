@@ -1308,15 +1308,15 @@ bool CadastrarNFe::validar() {
     ok = false;
   }
 
-    if (clearStr(ui->lineEditDestinatarioCPFCNPJ->text()).isEmpty()) {
-      qApp->enqueueError("CPF/CNPJ do destinatário vazio!", this);
-      ok = false;
-    }
+  if (clearStr(ui->lineEditDestinatarioCPFCNPJ->text()).isEmpty()) {
+    qApp->enqueueError("CPF/CNPJ do destinatário vazio!", this);
+    ok = false;
+  }
 
-    if (ui->lineEditDestinatarioCEP->text().isEmpty()) {
-      qApp->enqueueError("CEP do destinatário vazio!", this);
-      ok = false;
-    }
+  if (ui->lineEditDestinatarioCEP->text().isEmpty()) {
+    qApp->enqueueError("CEP do destinatário vazio!", this);
+    ok = false;
+  }
 
   if (ui->lineEditDestinatarioLogradouro->text().isEmpty()) {
     qApp->enqueueError("Logradouro do destinatário vazio!", this);

@@ -7,7 +7,6 @@
 
 #include <QCheckBox>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }

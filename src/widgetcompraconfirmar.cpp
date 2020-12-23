@@ -10,7 +10,6 @@
 
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {

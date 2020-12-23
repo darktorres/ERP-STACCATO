@@ -7,7 +7,6 @@
 #include "sqlquery.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 

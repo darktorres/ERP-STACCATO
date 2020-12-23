@@ -8,7 +8,6 @@
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }

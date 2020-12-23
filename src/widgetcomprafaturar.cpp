@@ -12,7 +12,6 @@
 
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {

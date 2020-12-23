@@ -4,7 +4,6 @@
 #include "doubledelegate.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }

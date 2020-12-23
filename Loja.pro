@@ -4,8 +4,8 @@
 #
 #-------------------------------------------------
 
-!versionAtLeast(QT_VERSION, 5.14.0) {
-    error("Use Qt 5.14 ou mais novo")
+!versionAtLeast(QT_VERSION, 5.15.0) {
+    error("Use Qt 5.15 ou mais novo")
 }
 
 win32-msvc* {

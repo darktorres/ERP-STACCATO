@@ -227,6 +227,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   SqlTableModel view;
   view.setTable("view_relatorio_nfe");
 
+  // TODO: trocar 'Criado em' por 'DataEmissao'
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
   view.select();
@@ -235,6 +236,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   if (not report.loadFromFile("modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
+  // TODO: trocar 'Criado em' por 'DataEmissao'
   SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
                 "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");

@@ -1437,6 +1437,7 @@ void Orcamento::verificaDisponibilidadeEstoque() {
   }
 }
 
+// TODO: esse código está repetido em venda e searchDialog, refatorar
 void Orcamento::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 

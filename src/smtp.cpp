@@ -23,7 +23,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <QFile>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QResource>
 
 Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {

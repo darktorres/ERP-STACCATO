@@ -13,7 +13,6 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
-#include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
 #include <QSqlRecord>

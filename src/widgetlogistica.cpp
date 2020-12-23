@@ -2,7 +2,6 @@
 #include "ui_widgetlogistica.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {

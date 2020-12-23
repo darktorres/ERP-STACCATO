@@ -29,7 +29,7 @@ private:
   QProgressDialog *progressDialog;
   // methods
   auto abrirPdf(const QString &filePath) -> void;
-  auto error() -> void;
+  auto error(QAbstractSocket::SocketError socketError) -> void;
   auto readSocket() -> void;
   auto removerNota(const int idNFe) -> void;
   auto setConnected() -> void;

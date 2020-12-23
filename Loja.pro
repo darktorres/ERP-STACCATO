@@ -26,6 +26,9 @@ DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++17
 
+PRECOMPILED_HEADER = pch.h
+CONFIG *= precompile_header
+
 message($$QMAKESPEC)
 
 win32{
@@ -50,9 +53,6 @@ contains(CONFIG, deploy){
     QMAKE_LFLAGS_DEBUG *= -O0
     QMAKE_LFLAGS_RELEASE *= -O0
 }
-
-    PRECOMPILED_HEADER = pch.h
-    CONFIG *= precompile_header
 
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic

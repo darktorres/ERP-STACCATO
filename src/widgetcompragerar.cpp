@@ -362,7 +362,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
 
-  const QString arquivoModelo = "modelos/compras.xlsx";
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/compras.xlsx";
 
   File modelo(arquivoModelo);
 

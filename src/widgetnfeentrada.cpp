@@ -256,7 +256,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    File fileXml("arquivos/" + chaveAcesso + ".xml");
+    File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
     if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
@@ -273,7 +273,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = "arquivos/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
 
     File filePdf(pdfDestino);
 

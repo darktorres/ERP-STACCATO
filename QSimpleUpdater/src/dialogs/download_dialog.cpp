@@ -110,7 +110,7 @@ void DownloadDialog::downloadFinished() {
 
   if (not replyData.isEmpty()) {
     const QStringList list = m_reply->url().toString().split("/");
-    File file(list.at(list.count() - 1));
+    File file(QDir::currentPath() + "/" + list.at(list.count() - 1));
     QMutex _mutex;
 
     if (file.open(QIODevice::WriteOnly)) {

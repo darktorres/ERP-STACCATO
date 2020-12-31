@@ -502,7 +502,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString arquivoModelo = "modelos/espelho_entrega.xlsx";
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/espelho_entrega.xlsx";
 
   File modelo(arquivoModelo);
 

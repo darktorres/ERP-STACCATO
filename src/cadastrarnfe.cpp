@@ -1572,7 +1572,7 @@ void CadastrarNFe::enviarEmail(ACBr &acbrRemoto) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
   const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
   const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
-  const QString filePath = "temp/" + chaveAcesso + "-nfe.xml";
+  const QString filePath = QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml";
 
   // TODO: enviar email separado para cliente
   acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
@@ -1583,7 +1583,7 @@ void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
 
   xml = resposta.remove("OK: ");
 
-  File file("temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
+  File file(QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
@@ -1809,7 +1809,7 @@ void CadastrarNFe::preencherImpostos() {
       // CFOP 1202 - Devolução de venda de mercadoria adquirida ou recebida de terceiros
       // CFOP 1.411 - Devolução de venda de mercadoria adquirida ou recebida de terceiros em operação com mercadoria sujeita ao regime de substituição tributária
 
-      modelViewProdutoEstoque.setData(row, "cfop", "1202");
+      modelViewProdutoEstoque.setData(row, "cfop", "1411");
 
       modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
       modelViewProdutoEstoque.setData(row, "cstICMS", "60");

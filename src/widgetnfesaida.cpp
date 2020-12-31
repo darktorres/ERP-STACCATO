@@ -213,7 +213,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   if (not ui->groupBoxMes->isChecked()) { throw RuntimeError("Selecione um mês para gerar o relatório!", this); }
 
-  const QString filename = "arquivos/relatorio_nfe.pdf";
+  const QString filename = QDir::currentPath() + "/arquivos/relatorio_nfe.pdf";
 
   File file(filename);
 
@@ -234,7 +234,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   dataManager->addModel("view", &view, true);
 
-  if (not report.loadFromFile("modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
+  if (not report.loadFromFile(QDir::currentPath() + "/modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
   // TODO: trocar 'Criado em' por 'DataEmissao'
   SqlQuery query;
@@ -291,7 +291,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    File fileXml("arquivos/" + chaveAcesso + ".xml");
+    File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
     if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
@@ -403,7 +403,7 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 }
 
 void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
-  File arquivo("arquivos/cancelamento_" + chaveAcesso + ".xml");
+  File arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
 
   if (not arquivo.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + arquivo.errorString()); }
 

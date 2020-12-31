@@ -237,7 +237,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   if (dir.isEmpty()) { return; }
 
-  const QString arquivoModelo = "modelos/relatorio_contabil.xlsx";
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/relatorio_contabil.xlsx";
 
   File modelo(arquivoModelo);
 

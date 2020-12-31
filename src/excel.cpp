@@ -24,7 +24,7 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString arquivoModelo = "modelos/pedido.xlsx";
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/pedido.xlsx";
 
   File modelo(arquivoModelo);
 

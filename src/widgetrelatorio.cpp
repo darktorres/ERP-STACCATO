@@ -187,7 +187,7 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   if (dir.isEmpty()) { return; }
 
-  const QString arquivoModelo = "modelos/relatorio.xlsx";
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/relatorio.xlsx";
 
   File modelo(arquivoModelo);
 

@@ -200,7 +200,7 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  File file("cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  File file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 
@@ -354,7 +354,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
   writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  File file("cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  File file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 

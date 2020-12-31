@@ -82,7 +82,7 @@ QString ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
 
-  File file("arquivos/" + chaveAcesso + ".xml");
+  File file(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString()); }
 

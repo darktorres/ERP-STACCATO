@@ -92,9 +92,13 @@ void WidgetEstoque::setHeaderData() {
   model.setHeaderData("descricao", "Produto");
   model.setHeaderData("restante", "Quant. Rest.");
 
-  if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("contabil", "Quant. Depósito"); }
+  if (ui->radioButtonEstoqueContabil->isChecked()) {
+    model.setHeaderData("contabil", "Contábil");
+    model.setHeaderData("caixasContabil", "Caixas");
+  }
 
   model.setHeaderData("unEst", "Un.");
+  model.setHeaderData("caixas", "Caixas");
   model.setHeaderData("lote", "Lote");
   model.setHeaderData("local", "Local");
   model.setHeaderData("bloco", "Bloco");
@@ -152,7 +156,7 @@ void WidgetEstoque::montaFiltro() {
   const QString having = (ui->radioButtonMaior->isChecked()) ? "restante > 0" : "restante <= 0";
 
   model.setQuery(
-      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.restante AS restante, e.un AS unEst, e.restante / p.quantCaixa AS Caixas, e.lote, e.local, e.bloco, "
+      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.restante AS restante, e.un AS unEst, e.restante / p.quantCaixa AS caixas, e.lote, e.local, e.bloco, "
       "e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, "
       "ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM estoque e LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = "
       "ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
@@ -174,12 +178,13 @@ void WidgetEstoque::montaFiltroContabil() {
   // TODO: trocar o NOW() por uma data escolhida pelo usuario
 
   model.setQuery(
-      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(e.ajuste, 0) AS contabil, e.restante AS restante, e.un AS "
-      "unEst, e.restante / p.quantCaixa AS Caixas, e.lote, e.local, e.bloco, e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, "
-      "ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM estoque e LEFT JOIN (SELECT ehc.idEstoque, "
-      "SUM(ehc.quant) AS contabil FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < NOW()) AND ehc.status != "
-      "'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON "
-      "pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
+      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(e.ajuste, 0) AS contabil,  (e.quant + COALESCE(ehc.contabil, 0) "
+      "+ COALESCE(e.ajuste, 0)) / p.quantCaixa AS caixasContabil, e.restante AS restante, e.restante / p.quantCaixa AS caixas, e.un AS unEst, e.lote, e.local, e.bloco, e.codComercial, "
+      "ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, "
+      "ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON "
+      "ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < NOW()) AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra "
+      "ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = "
+      "p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       getMatch() + " GROUP BY e.idEstoque HAVING contabil > 0");
 
   if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
@@ -220,16 +225,16 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
       "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0) AS contabil, "
-      "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) / p.quantCaixa AS Caixas, e.lote, e.local, e.bloco, e.codComercial, "
-      "e.ncm, e.cstICMS, e.pICMS, e.cstIPI, e.cstPIS, e.cstCOFINS, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, e.valorUnid AS custoUnit, p.precoVenda AS precoVendaUnit, e.valorUnid * "
-      "(e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS precoVenda, ehc.idVenda FROM estoque e LEFT "
-      "JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, GROUP_CONCAT(DISTINCT vp.idVenda) AS idVenda FROM "
-      "estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
+      "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) / p.quantCaixa AS caixasContabil, e.lote, e.local, e.bloco, "
+      "e.codComercial, e.ncm, e.cstICMS, e.pICMS, e.cstIPI, e.cstPIS, e.cstCOFINS, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, e.valorUnid AS custoUnit, p.precoVenda AS precoVendaUnit, "
+      "e.valorUnid * (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS precoVenda, ehc.idVenda FROM "
+      "estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, GROUP_CONCAT(DISTINCT vp.idVenda) AS idVenda "
+      "FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
       data +
       "') AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN "
       "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
       "e.created < '" +
-      data + "' GROUP BY e.idEstoque HAVING contabil > 0");
+      data + "' GROUP BY e.idEstoque HAVING contabil > 0 ORDER BY codComercial, lote");
 
   if (modelContabil.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + modelContabil.lastError().text()); }
 

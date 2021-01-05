@@ -1806,8 +1806,11 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
-      // CFOP 1202 - Devolução de venda de mercadoria adquirida ou recebida de terceiros
-      // CFOP 1.411 - Devolução de venda de mercadoria adquirida ou recebida de terceiros em operação com mercadoria sujeita ao regime de substituição tributária
+      // para CFOP de saída 5101/6101 usar CFOP 1201/2201
+      // para CFOP de saída 5102/6102 usar CFOP 1202/2202
+      // para CFOP de saída 5401/6401 usar CFOP 1410/2410
+      // para CFOP de saída 5403/6403 usar CFOP 1411/2411
+      // para CFOP de saída 5405/6404 usar CFOP 1411/2411
 
       modelViewProdutoEstoque.setData(row, "cfop", "1411");
 
@@ -1974,3 +1977,7 @@ void CadastrarNFe::preencherTransporte(const QStringList &items) {
 // NFe Devolucao
 
 // falta colocar a observacao da recusa/devolucao do cliente nas informacoes complementares
+// http://www.spednews.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
+// https://sigaofisco.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
+// https://cr.inf.br/blog/manual-como-fazer-nota-de-devolucao/
+// https://legislacao.fazenda.sp.gov.br/Paginas/RC20724_2019.aspx

@@ -21,7 +21,7 @@ public:
 
 private:
   // attributes
-  const int tempoTimer = 900;
+  const int tempoTimer = 3600;
   bool isSet = false;
   bool modelIsSet = false;
   ACBr acbrRemoto;

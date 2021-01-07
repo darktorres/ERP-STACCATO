@@ -177,7 +177,7 @@
       <bool>true</bool>
      </property>
      <property name="placeholderText">
-      <string>Código</string>
+      <string>Venda</string>
      </property>
     </widget>
    </item>

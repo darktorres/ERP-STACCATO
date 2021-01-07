@@ -5,6 +5,7 @@
 #include "usersession.h"
 
 #include <QDesktopServices>
+#include <QDir>
 #include <QFileInfo>
 #include <QSqlError>
 #include <QThread>

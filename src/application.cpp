@@ -221,6 +221,8 @@ void Application::startUpdaterPing() {
 }
 
 void Application::darkTheme() {
+  // TODO: replace Fusion style with https://github.com/randrew/phantomstyle
+
   QPalette darkPalette;
   darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
   darkPalette.setColor(QPalette::WindowText, Qt::white);

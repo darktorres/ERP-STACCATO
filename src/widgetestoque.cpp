@@ -15,14 +15,18 @@
 #include <QFileDialog>
 #include <QSqlError>
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
 void WidgetEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::escolheFiltro, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetEstoque::escolheFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::delayFiltro, connectionType);
   connect(ui->lineEditBusca2, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro2, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonEstoque_toggled, connectionType);
@@ -140,6 +144,8 @@ void WidgetEstoque::updateTables() {
 
   if (currentTab == "Produtos") { modelProdutos.select(); }
 }
+
+void WidgetEstoque::delayFiltro() { timer.start(500); }
 
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 

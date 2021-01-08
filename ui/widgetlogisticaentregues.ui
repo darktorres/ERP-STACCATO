@@ -14,6 +14,32 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="2">
+    <widget class="QLineEdit" name="lineEditBusca">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="placeholderText">
+      <string>Venda</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="2">
+    <widget class="QLabel" name="labelEntregasCliente">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Entregas cliente</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" rowspan="5">
     <widget class="QGroupBox" name="groupBoxFiltros">
      <property name="enabled">
@@ -68,22 +94,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QLabel" name="labelEntregasCliente">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Entregas cliente</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
     </widget>
    </item>
    <item row="1" column="1" colspan="2">
@@ -147,16 +157,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QLineEdit" name="lineEditBusca">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="placeholderText">
-      <string>Venda</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -166,6 +166,16 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>radioButtonEntregaLimpar</tabstop>
+  <tabstop>radioButtonTotalEntrega</tabstop>
+  <tabstop>radioButtonParcialEntrega</tabstop>
+  <tabstop>radioButtonSemEntrega</tabstop>
+  <tabstop>tableVendas</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

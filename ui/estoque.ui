@@ -199,6 +199,15 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>tableConsumo</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>lineEdit_7</tabstop>
+  <tabstop>doubleSpinBoxRestante</tabstop>
+  <tabstop>pushButtonExibirNfe</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

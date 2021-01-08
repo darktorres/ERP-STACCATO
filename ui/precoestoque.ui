@@ -81,6 +81,12 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

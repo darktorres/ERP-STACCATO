@@ -252,6 +252,16 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>pushButtonExcel</tabstop>
+  <tabstop>tableRelatorio</tabstop>
+  <tabstop>tableTotalVendedor</tabstop>
+  <tabstop>tableTotalLoja</tabstop>
+  <tabstop>doubleSpinBoxGeral</tabstop>
+  <tabstop>doubleSpinBoxValorComissao</tabstop>
+  <tabstop>doubleSpinBoxPorcentagemComissao</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

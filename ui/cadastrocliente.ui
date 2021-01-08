@@ -1026,6 +1026,7 @@ color: rgb(0, 0, 0);</string>
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
   <tabstop>radioButtonPF</tabstop>
   <tabstop>radioButtonPJ</tabstop>
   <tabstop>lineEditCliente</tabstop>
@@ -1069,7 +1070,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
   <tabstop>pushButtonRemover</tabstop>
-  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

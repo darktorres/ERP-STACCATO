@@ -237,6 +237,21 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>radioButtonPendente</tabstop>
+  <tabstop>radioButtonLiberado</tabstop>
+  <tabstop>radioButtonGerado</tabstop>
+  <tabstop>radioButtonPago</tabstop>
+  <tabstop>groupBoxDia</tabstop>
+  <tabstop>dateEditDia</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>doubleSpinBoxTotal</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>pushButtonDarBaixaItau</tabstop>
+  <tabstop>pushButtonRemessaItau</tabstop>
+  <tabstop>pushButtonRetornoItau</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

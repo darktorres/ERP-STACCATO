@@ -1201,6 +1201,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>itemBoxEndereco</tabstop>
   <tabstop>treeView</tabstop>
   <tabstop>pushButtonAdicionarObservacao</tabstop>
+  <tabstop>pushButtonModelo3d</tabstop>
   <tabstop>lineEditEstoque_2</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>

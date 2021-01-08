@@ -204,6 +204,17 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>tableView</tabstop>
+  <tabstop>tableView_2</tabstop>
+  <tabstop>tableView_3</tabstop>
+  <tabstop>tableView_4</tabstop>
+  <tabstop>tableView_5</tabstop>
+  <tabstop>tableView_6</tabstop>
+  <tabstop>tableView_7</tabstop>
+  <tabstop>tableView_8</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

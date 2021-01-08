@@ -200,6 +200,16 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonGerarNFe</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

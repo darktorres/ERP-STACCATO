@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -461,6 +462,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
+  bool semEstoque = false;
+
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -469,7 +472,21 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
     if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
     if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
+
+    if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { semEstoque = true; }
   }
+
+  // -------------------------------------------------------------------------
+
+  if (semEstoque) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Um ou mais produtos não estão em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Agendar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    if (msgBox.exec() == QMessageBox::No) { return; }
+  }
+
+  // -------------------------------------------------------------------------
 
   adicionarProduto(list);
 
@@ -549,6 +566,16 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   if (modelProdutos.data(row, "caixas").toInt() == 1) { throw RuntimeError("Produto tem apenas uma caixa!", this); }
 
   if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
+
+  // -------------------------------------------------------------------------
+
+  if (modelProdutos.data(row, "status").toString() != "ESTOQUE") {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "O produto não está em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Agendar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    if (msgBox.exec() == QMessageBox::No) { return; }
+  }
 
   // -------------------------------------------------------------------------
 

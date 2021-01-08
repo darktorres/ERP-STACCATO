@@ -1620,6 +1620,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonRemoverItem</tabstop>
   <tabstop>pushButtonLimparSelecao</tabstop>
   <tabstop>tableProdutos</tabstop>
+  <tabstop>pushButtonModelo3d</tabstop>
   <tabstop>lineEditEstoque_4</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>

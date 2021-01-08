@@ -107,6 +107,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>radioButtonCancelado</tabstop>
+  <tabstop>radioButtonPerdido</tabstop>
+  <tabstop>radioButtonPerdido_2</tabstop>
+  <tabstop>radioButtonPerdido_3</tabstop>
+  <tabstop>radioButtonPerdido_4</tabstop>
+  <tabstop>radioButtonPerdido_5</tabstop>
+  <tabstop>radioButtonPerdido_6</tabstop>
+  <tabstop>plainTextEditObservacao</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

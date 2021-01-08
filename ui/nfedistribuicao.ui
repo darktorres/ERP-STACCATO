@@ -283,6 +283,25 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>groupBoxFiltros</tabstop>
+  <tabstop>checkBoxDesconhecido</tabstop>
+  <tabstop>checkBoxCiencia</tabstop>
+  <tabstop>checkBoxConfirmacao</tabstop>
+  <tabstop>checkBoxDesconhecimento</tabstop>
+  <tabstop>checkBoxNaoRealizada</tabstop>
+  <tabstop>checkBoxNaoRealizada_2</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditCNPJ</tabstop>
+  <tabstop>spinBoxUltNSU</tabstop>
+  <tabstop>spinBoxMaxNSU</tabstop>
+  <tabstop>pushButtonPesquisar</tabstop>
+  <tabstop>pushButtonCiencia</tabstop>
+  <tabstop>pushButtonConfirmacao</tabstop>
+  <tabstop>pushButtonDesconhecimento</tabstop>
+  <tabstop>pushButtonNaoRealizada</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

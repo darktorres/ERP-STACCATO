@@ -139,6 +139,14 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tableResumo</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>pushButtonMarcarFaturado</tabstop>
+  <tabstop>pushButtonReagendar</tabstop>
+  <tabstop>pushButtonCancelarCompra</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

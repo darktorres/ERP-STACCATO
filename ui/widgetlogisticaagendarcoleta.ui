@@ -391,6 +391,24 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>checkBoxEstoque</tabstop>
+  <tabstop>pushButtonDanfe</tabstop>
+  <tabstop>pushButtonVenda</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonAgendarColeta</tabstop>
+  <tabstop>pushButtonCancelarCarga</tabstop>
+  <tabstop>pushButtonMontarCarga</tabstop>
+  <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>doubleSpinBoxPeso</tabstop>
+  <tabstop>doubleSpinBoxCapacidade</tabstop>
+  <tabstop>tableTranspAgend</tabstop>
+  <tabstop>tableTranspAtual</tabstop>
+  <tabstop>pushButtonAdicionarProduto</tabstop>
+  <tabstop>pushButtonRemoverProduto</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

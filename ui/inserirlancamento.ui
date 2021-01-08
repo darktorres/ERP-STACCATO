@@ -64,6 +64,12 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>pushButtonCriarLancamento</tabstop>
+  <tabstop>pushButtonDuplicarLancamento</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -215,6 +215,16 @@
    <header>src/graphicsview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>tableTranspAgend</tabstop>
+  <tabstop>groupBoxEdicao</tabstop>
+  <tabstop>pushButtonCriarPallet</tabstop>
+  <tabstop>pushButtonRemoverPallet</tabstop>
+  <tabstop>graphicsGalpao</tabstop>
+  <tabstop>graphicsPallet</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

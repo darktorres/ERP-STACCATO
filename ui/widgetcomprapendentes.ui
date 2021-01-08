@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>846</width>
-    <height>565</height>
+    <height>574</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -356,6 +356,31 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>groupBoxStatus</tabstop>
+  <tabstop>checkBoxFiltroPendentes</tabstop>
+  <tabstop>checkBoxFiltroIniciados</tabstop>
+  <tabstop>checkBoxFiltroCompra</tabstop>
+  <tabstop>checkBoxFiltroFaturamento</tabstop>
+  <tabstop>checkBoxFiltroColeta</tabstop>
+  <tabstop>checkBoxFiltroRecebimento</tabstop>
+  <tabstop>checkBoxFiltroEstoque</tabstop>
+  <tabstop>checkBoxFiltroEntregaAgend</tabstop>
+  <tabstop>checkBoxFiltroEmEntrega</tabstop>
+  <tabstop>checkBoxFiltroEntregue</tabstop>
+  <tabstop>checkBoxFiltroRepoReceb</tabstop>
+  <tabstop>checkBoxFiltroRepoEntrega</tabstop>
+  <tabstop>checkBoxAtelier</tabstop>
+  <tabstop>checkBoxServicos</tabstop>
+  <tabstop>pushButtonExcel</tabstop>
+  <tabstop>pushButtonPDF</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>itemBoxProduto</tabstop>
+  <tabstop>doubleSpinBoxQuantAvulsoCaixas</tabstop>
+  <tabstop>doubleSpinBoxQuantAvulso</tabstop>
+  <tabstop>pushButtonComprarAvulso</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

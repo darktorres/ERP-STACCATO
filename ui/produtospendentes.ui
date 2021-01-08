@@ -261,6 +261,14 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>doubleSpinBoxQuantTotal</tabstop>
+  <tabstop>doubleSpinBoxComprar</tabstop>
+  <tabstop>pushButtonComprar</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>pushButtonConsumirEstoque</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

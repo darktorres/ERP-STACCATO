@@ -158,6 +158,15 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>itemBoxDe</tabstop>
+  <tabstop>itemBoxPara</tabstop>
+  <tabstop>doubleSpinBoxValor</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>lineEditObservacao</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

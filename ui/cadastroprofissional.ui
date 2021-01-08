@@ -1073,11 +1073,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizarEnd</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
-  <tabstop>pushButtonCadastrar</tabstop>
-  <tabstop>pushButtonAtualizar</tabstop>
-  <tabstop>pushButtonBuscar</tabstop>
-  <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
   <tabstop>lineEditNomeBancario</tabstop>
   <tabstop>lineEditCPFBancario</tabstop>
   <tabstop>lineEditCNPJBancario</tabstop>
@@ -1085,6 +1080,11 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditAgencia</tabstop>
   <tabstop>lineEditCC</tabstop>
   <tabstop>checkBoxPoupanca</tabstop>
+  <tabstop>pushButtonCadastrar</tabstop>
+  <tabstop>pushButtonAtualizar</tabstop>
+  <tabstop>pushButtonBuscar</tabstop>
+  <tabstop>pushButtonNovoCad</tabstop>
+  <tabstop>pushButtonRemover</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

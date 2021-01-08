@@ -88,6 +88,12 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>pushButtonSalvarMes</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>tableTotal</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -977,11 +977,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizarEnd</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
-  <tabstop>pushButtonCadastrar</tabstop>
-  <tabstop>pushButtonAtualizar</tabstop>
-  <tabstop>pushButtonBuscar</tabstop>
-  <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>doubleSpinBoxValorMinimoFrete</tabstop>
   <tabstop>doubleSpinBoxPorcFrete</tabstop>
@@ -989,6 +984,11 @@ color: rgb(0, 0, 0);</string>
   <tabstop>doubleSpinBoxCustoTransporte2Ton</tabstop>
   <tabstop>doubleSpinBoxCustoTransporteAcima2Ton</tabstop>
   <tabstop>doubleSpinBoxCustoFuncionario</tabstop>
+  <tabstop>pushButtonCadastrar</tabstop>
+  <tabstop>pushButtonAtualizar</tabstop>
+  <tabstop>pushButtonBuscar</tabstop>
+  <tabstop>pushButtonNovoCad</tabstop>
+  <tabstop>pushButtonRemover</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

@@ -196,6 +196,18 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>table</tabstop>
+  <tabstop>plainTextEdit</tabstop>
+  <tabstop>dateFollowup</tabstop>
+  <tabstop>dateProxFollowup</tabstop>
+  <tabstop>radioButtonFrio</tabstop>
+  <tabstop>radioButtonMorno</tabstop>
+  <tabstop>radioButtonQuente</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

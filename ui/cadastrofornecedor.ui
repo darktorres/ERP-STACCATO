@@ -1155,6 +1155,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditInscEstadual</tabstop>
   <tabstop>comboBoxEspecialidade</tabstop>
   <tabstop>doubleSpinBoxComissao</tabstop>
+  <tabstop>doubleSpinBoxComissaoEspecial</tabstop>
   <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
@@ -1181,6 +1182,18 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizarEnd</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
+  <tabstop>lineEditNomeBancario</tabstop>
+  <tabstop>lineEditCNPJBancario</tabstop>
+  <tabstop>lineEditBanco</tabstop>
+  <tabstop>lineEditAgencia</tabstop>
+  <tabstop>lineEditCC</tabstop>
+  <tabstop>checkBoxPoupanca</tabstop>
+  <tabstop>spinBoxPrazoEspecialidade1</tabstop>
+  <tabstop>spinBoxPrazoEspecialidade2</tabstop>
+  <tabstop>spinBoxPrazoEspecialidade3</tabstop>
+  <tabstop>spinBoxPrazoEspecialidade4</tabstop>
+  <tabstop>spinBoxPrazoEspecialidade5</tabstop>
+  <tabstop>pushButtonSalvarPrazos</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

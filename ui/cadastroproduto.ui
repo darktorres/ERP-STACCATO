@@ -1790,6 +1790,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditFormComer</tabstop>
   <tabstop>lineEditCodComer</tabstop>
   <tabstop>lineEditUI</tabstop>
+  <tabstop>checkBoxEstoque</tabstop>
+  <tabstop>checkBoxPromocao</tabstop>
   <tabstop>lineEditCodBarras</tabstop>
   <tabstop>lineEditNCM</tabstop>
   <tabstop>lineEditICMS</tabstop>

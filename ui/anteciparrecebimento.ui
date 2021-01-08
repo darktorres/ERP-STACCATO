@@ -320,6 +320,23 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>table</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>comboBoxLoja</tabstop>
+  <tabstop>dateEditEvento</tabstop>
+  <tabstop>doubleSpinBoxDescMes</tabstop>
+  <tabstop>doubleSpinBoxDescTotal</tabstop>
+  <tabstop>doubleSpinBoxPrazoMedio</tabstop>
+  <tabstop>doubleSpinBoxValorBruto</tabstop>
+  <tabstop>doubleSpinBoxValorLiquido</tabstop>
+  <tabstop>doubleSpinBoxValorPresente</tabstop>
+  <tabstop>checkBoxIOF</tabstop>
+  <tabstop>doubleSpinBoxIOF</tabstop>
+  <tabstop>doubleSpinBoxLiqIOF</tabstop>
+  <tabstop>itemBoxConta</tabstop>
+  <tabstop>pushButtonGerar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

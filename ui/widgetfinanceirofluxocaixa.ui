@@ -241,6 +241,19 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>groupBoxCaixa1</tabstop>
+  <tabstop>itemBoxCaixa1</tabstop>
+  <tabstop>doubleSpinBoxSaldo1</tabstop>
+  <tabstop>tableCaixa</tabstop>
+  <tabstop>groupBoxCaixa2</tabstop>
+  <tabstop>itemBoxCaixa2</tabstop>
+  <tabstop>doubleSpinBoxSaldo2</tabstop>
+  <tabstop>tableCaixa2</tabstop>
+  <tabstop>tableFuturo</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

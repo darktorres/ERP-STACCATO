@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
+    <width>1256</width>
     <height>524</height>
    </rect>
   </property>
@@ -342,6 +342,29 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>lineEditPagamento</tabstop>
+  <tabstop>spinBoxParcelas</tabstop>
+  <tabstop>itemBoxContaDestino</tabstop>
+  <tabstop>checkBoxDiaUtil</tabstop>
+  <tabstop>checkBoxDMaisUm</tabstop>
+  <tabstop>checkBoxCentavoSobressalente</tabstop>
+  <tabstop>checkBoxPula1Mes</tabstop>
+  <tabstop>checkBoxApenasRepresentacao</tabstop>
+  <tabstop>pushButtonAdicionarPagamento</tabstop>
+  <tabstop>pushButtonAtualizarPagamento</tabstop>
+  <tabstop>tablePagamentos</tabstop>
+  <tabstop>pushButtonRemoverPagamento</tabstop>
+  <tabstop>pushButtonLimparSelecao</tabstop>
+  <tabstop>tableTaxas</tabstop>
+  <tabstop>pushButtonAtualizarTaxas</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
+  <tabstop>tableAssocia1</tabstop>
+  <tabstop>tableAssocia2</tabstop>
+  <tabstop>pushButtonAdicionaAssociacao</tabstop>
+  <tabstop>pushButtonRemoveAssociacao</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

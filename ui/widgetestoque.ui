@@ -319,6 +319,23 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>pushButtonRelatorio</tabstop>
+  <tabstop>radioButtonMaior</tabstop>
+  <tabstop>radioButtonEstoqueZerado</tabstop>
+  <tabstop>radioButtonEstoqueContabil</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>lineEditBusca2</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonStaccatoOFF</tabstop>
+  <tabstop>radioButtonEstoque</tabstop>
+  <tabstop>lineEditEstoque_2</tabstop>
+  <tabstop>lineEditEstoque</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

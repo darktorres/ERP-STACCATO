@@ -231,6 +231,18 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>doubleSpinBoxPrecoUn</tabstop>
+  <tabstop>doubleSpinBoxCaixas</tabstop>
+  <tabstop>doubleSpinBoxQuant</tabstop>
+  <tabstop>doubleSpinBoxPorcentagem</tabstop>
+  <tabstop>doubleSpinBoxCredito</tabstop>
+  <tabstop>pushButtonDevolverItem</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>tableDevolvidos</tabstop>
+  <tabstop>tablePagamentos</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

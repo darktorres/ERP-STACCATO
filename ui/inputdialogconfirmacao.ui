@@ -214,6 +214,18 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dateEditEvento</tabstop>
+  <tabstop>dateEditProximo</tabstop>
+  <tabstop>tableLogistica</tabstop>
+  <tabstop>pushButtonQuebradoReceb</tabstop>
+  <tabstop>pushButtonQuebradoEntrega</tabstop>
+  <tabstop>lineEditFoto</tabstop>
+  <tabstop>pushButtonFoto</tabstop>
+  <tabstop>lineEditRecebeu</tabstop>
+  <tabstop>lineEditEntregou</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -230,6 +230,14 @@ color: rgb(0, 0, 0);</string>
  </customwidgets>
  <tabstops>
   <tabstop>lineEditBusca</tabstop>
+  <tabstop>radioButtonProdAtivos</tabstop>
+  <tabstop>radioButtonProdDesc</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>pushButtonModelo3d</tabstop>
+  <tabstop>lineEditEstoque_2</tabstop>
+  <tabstop>lineEditEstoque</tabstop>
+  <tabstop>lineEditPromocao</tabstop>
   <tabstop>pushButtonSelecionar</tabstop>
  </tabstops>
  <resources/>

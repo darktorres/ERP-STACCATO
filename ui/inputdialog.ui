@@ -111,6 +111,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>dateEditEvento</tabstop>
+  <tabstop>dateEditProximo</tabstop>
+  <tabstop>lineEditObservacao</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

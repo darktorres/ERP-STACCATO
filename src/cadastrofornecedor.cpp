@@ -122,8 +122,9 @@ void CadastroFornecedor::savingProcedures() {
   setData("email", ui->lineEditEmail->text());
   setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value());
   setData("st", ui->comboBoxSt->currentText());
-  setData("comissao1", ui->doubleSpinBoxComissao->value());
+  setData("comissao1", ui->doubleSpinBoxComissaoVendedor->value());
   setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value());
+  setData("comissaoLoja", ui->doubleSpinBoxComissaoLoja->value());
   setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt());
 
   // Dados bancários
@@ -175,8 +176,9 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->checkBoxRepresentacao, "representacao", "checked");
   addMapping(ui->comboBoxSt, "st");
   addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
-  addMapping(ui->doubleSpinBoxComissao, "comissao1");
+  addMapping(ui->doubleSpinBoxComissaoVendedor, "comissao1");
   addMapping(ui->doubleSpinBoxComissaoEspecial, "comissao2");
+  addMapping(ui->doubleSpinBoxComissaoLoja, "comissaoLoja");
 
   addMapping(ui->lineEditNomeBancario, "nomeBanco");
   addMapping(ui->lineEditCNPJBancario, "cnpjBanco");

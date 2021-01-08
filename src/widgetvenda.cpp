@@ -236,7 +236,7 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
-void WidgetVenda::delayFiltro() { timer.start(800); }
+void WidgetVenda::delayFiltro() { timer.start(500); }
 
 void WidgetVenda::updateTables() {
   if (not isSet) {

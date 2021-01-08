@@ -385,28 +385,28 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando produtos: " + query.lastError().text()); }
 
-  SqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  SqlQuery query3;
-  query3.prepare(
+  SqlQuery queryCompra;
+  queryCompra.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   while (query.next()) {
-    query2.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
+    queryVenda.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
 
-    if (not query2.exec()) { throw RuntimeException("Erro voltando status produto: " + query2.lastError().text()); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro voltando status produto: " + queryVenda.lastError().text()); }
 
-    query3.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
+    queryCompra.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
 
-    if (not query3.exec()) { throw RuntimeException("Erro voltando status produto compra: " + query3.lastError().text()); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro voltando status produto compra: " + queryCompra.lastError().text()); }
   }
 
-  SqlQuery query4;
-  query4.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
-  query4.bindValue(":idEvento", idEvento);
+  SqlQuery queryVeiculo;
+  queryVeiculo.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
+  queryVeiculo.bindValue(":idEvento", idEvento);
 
-  if (not query4.exec()) { throw RuntimeException("Erro deletando evento: " + query4.lastError().text()); }
+  if (not queryVeiculo.exec()) { throw RuntimeException("Erro deletando evento: " + queryVeiculo.lastError().text()); }
 }
 
 void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {

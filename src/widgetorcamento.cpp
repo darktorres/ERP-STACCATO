@@ -115,7 +115,7 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
 }
 
-void WidgetOrcamento::delayFiltro() { timer.start(800); }
+void WidgetOrcamento::delayFiltro() { timer.start(500); }
 
 void WidgetOrcamento::updateTables() {
   if (not isSet) {

@@ -147,7 +147,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
-  const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : container) {
     disconnect(child, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -163,7 +163,7 @@ void WidgetCompraPendentes::montaFiltro() {
   QStringList filtros;
   QStringList filtroCheck;
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }

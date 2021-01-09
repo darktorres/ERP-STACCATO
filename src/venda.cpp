@@ -32,7 +32,7 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 

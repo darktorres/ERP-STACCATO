@@ -32,7 +32,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 

@@ -3,6 +3,7 @@
 
 #include "application.h"
 
+#include <QRegularExpression>
 #include <QSqlError>
 
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
@@ -29,7 +30,7 @@ void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { throw RuntimeError("Deve preencher a observação!", this); }
 
-  const auto children = ui->groupBox->findChildren<QRadioButton *>();
+  const auto children = ui->groupBox->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
   QString motivo;
 
   for (const auto &child : children) {

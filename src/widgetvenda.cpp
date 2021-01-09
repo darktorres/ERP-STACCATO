@@ -86,7 +86,7 @@ void WidgetVenda::montaFiltro() {
 
   QStringList filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"))) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
@@ -97,7 +97,7 @@ void WidgetVenda::montaFiltro() {
   if (financeiro) {
     QStringList filtroCheck2;
 
-    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>(QRegularExpression("checkBox"))) {
       if (child->isChecked()) { filtroCheck2 << "'" + child->text().toUpper() + "'"; }
     }
 
@@ -121,7 +121,7 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);
@@ -344,7 +344,7 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>();
+    const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);

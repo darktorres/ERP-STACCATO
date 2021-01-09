@@ -136,7 +136,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     QStringList filtros;
     QString status;
 
-    const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
+    const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
 
     for (const auto &child : children) {
       if (child->isChecked()) {
@@ -196,7 +196,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     QStringList filtros;
     QString status;
 
-    const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
+    const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
 
     for (const auto &child : children) {
       if (child->isChecked()) {
@@ -322,7 +322,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
 }
 
 void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
-  const auto children = ui->groupBoxData->findChildren<QDateEdit *>();
+  const auto children = ui->groupBoxData->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
 
   for (const auto &child : children) { child->setEnabled(enabled); }
 }

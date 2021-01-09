@@ -1,10 +1,15 @@
 #include "registerdialog.h"
 
 #include "application.h"
+#include "itembox.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDebug>
+#include <QDoubleSpinBox>
 #include <QMessageBox>
+#include <QRadioButton>
 #include <QShortcut>
 
 RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : QDialog(parent), primaryKey(primaryKeyStr), parent(parent) {
@@ -58,10 +63,6 @@ bool RegisterDialog::viewRegister() {
   return true;
 }
 
-void RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
-  for (const auto &line : list) { verifyRequiredField(*line); }
-}
-
 void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
   for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) { secondaryModel.setData(row, primaryKey, primaryId); }
 }
@@ -99,7 +100,7 @@ void RegisterDialog::show() {
   adjustSize();
 }
 
-void RegisterDialog::verifyRequiredField(QLineEdit &line) {
+void RegisterDialog::verifyRequiredField(const QLineEdit &line) {
   if (not line.styleSheet().contains(requiredStyle())) { return; }
   if (not line.isVisible()) { return; }
 
@@ -157,10 +158,46 @@ void RegisterDialog::save(const bool silent) {
 }
 
 void RegisterDialog::clearFields() {
-  const auto children = findChildren<QLineEdit *>();
+  const auto lineEdits = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) {
-    if (not line->isReadOnly()) { line->clear(); }
+  for (const auto &lineEdit : lineEdits) {
+    if (lineEdit->objectName().startsWith("lineEdit")) { lineEdit->clear(); }
+  }
+
+  const auto itemBoxes = findChildren<ItemBox *>(QRegularExpression("itemBox"));
+
+  for (const auto &itemBox : itemBoxes) {
+    if (itemBox->objectName().startsWith("itemBox")) { itemBox->clear(); }
+  }
+
+  const auto doubleSpinBoxes = findChildren<QDoubleSpinBox *>(QRegularExpression("doubleSpinBox"));
+
+  for (const auto &doubleSpinBox : doubleSpinBoxes) {
+    if (doubleSpinBox->objectName().startsWith("doubleSpinBox")) { doubleSpinBox->setValue(0); }
+  }
+
+  const auto spinBoxes = findChildren<QSpinBox *>(QRegularExpression("spinBox"));
+
+  for (const auto &spinBox : spinBoxes) {
+    if (spinBox->objectName().startsWith("spinBox")) { spinBox->setValue(0); }
+  }
+
+  const auto radioButtons = findChildren<QRadioButton *>(QRegularExpression("radioButton"));
+
+  for (const auto radioButton : radioButtons) {
+    if (radioButton->objectName().startsWith("radioButton")) { radioButton->setChecked(false); }
+  }
+
+  const auto checkBoxes = findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (const auto checkBox : checkBoxes) {
+    if (checkBox->objectName().startsWith("checkBox")) { checkBox->setChecked(false); }
+  }
+
+  const auto comboBoxes = findChildren<QComboBox *>(QRegularExpression("comboBox"));
+
+  for (const auto comboBox : comboBoxes) {
+    if (comboBox->objectName().startsWith("comboBox")) { comboBox->setCurrentIndex(0); }
   }
 }
 

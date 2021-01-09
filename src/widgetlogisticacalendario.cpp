@@ -81,7 +81,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (not child->isChecked()) { continue; }
@@ -199,7 +199,7 @@ void WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled(const bool enabled) 
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+    const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->blockSignals(true);

@@ -45,7 +45,7 @@ protected:
   virtual auto successMessage() -> void = 0;
   virtual auto updateMode() -> void = 0;
   virtual auto verifyFields() -> void = 0;
-  virtual auto verifyRequiredField(QLineEdit &line) -> void;
+  virtual auto verifyRequiredField(const QLineEdit &line) -> void;
   virtual auto viewRegister() -> bool;
 
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
@@ -60,5 +60,4 @@ protected:
   auto setTextKeys(const QStringList &value) -> void;
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;
-  auto verifyFields(const QList<QLineEdit *> &list) -> void;
 };

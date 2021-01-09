@@ -12,7 +12,7 @@
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -95,7 +95,7 @@ void CadastroLoja::clearFields() {
 }
 
 void CadastroLoja::verifyFields() {
-  const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 }

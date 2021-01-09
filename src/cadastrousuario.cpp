@@ -28,7 +28,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -75,7 +75,7 @@ void CadastroUsuario::modificarUsuario() {
 }
 
 void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
-  const auto children = ui->tab->findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 

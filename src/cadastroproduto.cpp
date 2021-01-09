@@ -19,7 +19,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const QLineEdit *line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -51,18 +51,9 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 CadastroProduto::~CadastroProduto() { delete ui; }
 
 void CadastroProduto::clearFields() {
-  const auto children = findChildren<QLineEdit *>();
 
-  for (const auto &line : children) { line->clear(); }
 
-  const auto children2 = findChildren<QDoubleSpinBox *>();
 
-  for (const auto &spinBox : children2) { spinBox->clear(); }
-
-  ui->itemBoxFornecedor->clear();
-
-  ui->radioButtonDesc->setChecked(false);
-  ui->radioButtonLote->setChecked(false);
 
   ui->dateEditValidade->setDate(QDate(1900, 1, 1));
 
@@ -82,7 +73,7 @@ void CadastroProduto::registerMode() {
 }
 
 void CadastroProduto::verifyFields() {
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 

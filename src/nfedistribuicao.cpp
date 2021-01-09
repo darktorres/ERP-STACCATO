@@ -744,7 +744,9 @@ void NFeDistribuicao::montaFiltro() {
 
   QStringList filtroCheck;
 
-  for (const auto &child : ui->groupBoxFiltros->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
@@ -774,7 +776,7 @@ void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
 
   try {
     [&] {
-      const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>();
+      const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
       for (const auto &child : children) {
         child->setEnabled(true);

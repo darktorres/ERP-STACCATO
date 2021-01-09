@@ -32,7 +32,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -221,7 +221,7 @@ void CadastroProfissional::cadastrar() {
 }
 
 void CadastroProfissional::verifyFields() {
-  const auto children = ui->frame->findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 
@@ -282,11 +282,6 @@ void CadastroProfissional::clearFields() {
 
   ui->radioButtonPF->setChecked(true);
   novoEndereco();
-
-  const auto children = findChildren<ItemBox *>();
-
-  for (const auto &box : children) { box->clear(); }
-
   setupUi();
 
   ui->comboBoxTipo->setCurrentIndex(0);

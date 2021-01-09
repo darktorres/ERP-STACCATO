@@ -32,7 +32,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroTransportadora::on_tableEndereco_clicked);
   connect(ui->tableVeiculo, &TableView::clicked, this, &CadastroTransportadora::on_tableVeiculo_clicked);
 
-  const auto children = findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -91,7 +91,7 @@ void CadastroTransportadora::clearFields() {
 }
 
 void CadastroTransportadora::verifyFields() {
-  const auto children = ui->groupBox_7->findChildren<QLineEdit *>();
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 }

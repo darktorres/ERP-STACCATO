@@ -117,7 +117,7 @@ void WidgetNfeSaida::montaFiltro() {
 
   QStringList filtroCheck;
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
@@ -324,7 +324,7 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);

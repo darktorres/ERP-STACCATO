@@ -234,7 +234,7 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);
@@ -316,7 +316,7 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   QStringList status;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"))) {
     if (child->isChecked()) { status << "'" + child->text().toUpper() + "'"; }
   }
 
@@ -337,7 +337,7 @@ void WidgetLogisticaAgendarEntrega::filtroProdutos() {
   QStringList filtros;
   QStringList filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"))) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 

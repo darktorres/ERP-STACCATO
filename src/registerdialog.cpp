@@ -136,6 +136,7 @@ bool RegisterDialog::newRegister() {
   model.setFilter("0");
 
   currentRow = -1;
+  primaryId.clear();
 
   tipo = Tipo::Cadastrar;
 

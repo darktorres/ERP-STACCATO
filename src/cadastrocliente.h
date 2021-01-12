@@ -33,6 +33,7 @@ private:
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto novoEndereco() -> void;
+  auto on_checkBoxDataNasc_stateChanged(const int state) -> void;
   auto on_checkBoxInscEstIsento_toggled(bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;

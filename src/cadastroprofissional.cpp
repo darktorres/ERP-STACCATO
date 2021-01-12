@@ -280,11 +280,10 @@ void CadastroProfissional::on_pushButtonRemover_clicked() { remove(); }
 void CadastroProfissional::clearFields() {
   RegisterDialog::clearFields();
 
+  ui->comboBoxTipo->setCurrentIndex(0);
   ui->radioButtonPF->setChecked(true);
   novoEndereco();
   setupUi();
-
-  ui->comboBoxTipo->setCurrentIndex(0);
 }
 
 void CadastroProfissional::novoEndereco() {

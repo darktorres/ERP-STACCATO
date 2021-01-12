@@ -42,12 +42,13 @@ CadastroCliente::~CadastroCliente() { delete ui; }
 void CadastroCliente::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxDataNasc, &QCheckBox::stateChanged, this, &CadastroCliente::on_checkBoxDataNasc_stateChanged, connectionType);
   connect(ui->checkBoxInscEstIsento, &QCheckBox::toggled, this, &CadastroCliente::on_checkBoxInscEstIsento_toggled, connectionType);
   connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroCliente::on_checkBoxMostrarInativos_clicked, connectionType);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged, connectionType);
   connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditCNPJ_textEdited, connectionType);
-  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditContatoCPF_textEdited, connectionType);
   connect(ui->lineEditCPF, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditCPF_textEdited, connectionType);
+  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditContatoCPF_textEdited, connectionType);
   connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAdicionarEnd_clicked, connectionType);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizar_clicked, connectionType);
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizarEnd_clicked, connectionType);
@@ -104,8 +105,7 @@ void CadastroCliente::verifyFields() {
 }
 
 void CadastroCliente::savingProcedures() {
-  const QDate aniversario = ui->dateEdit->date();
-  if (aniversario.toString("yyyy-MM-dd") != "1900-01-01") { setData("dataNasc", aniversario); }
+  if (ui->checkBoxDataNasc->isChecked()) { setData("dataNasc", ui->dateEditDataNasc->date()); }
 
   if (not ui->lineEditContatoCPF->text().remove(".").remove("-").isEmpty()) { setData("contatoCPF", ui->lineEditContatoCPF->text()); }
 
@@ -141,18 +141,12 @@ void CadastroCliente::clearFields() {
   RegisterDialog::clearFields();
 
   ui->radioButtonPF->setChecked(true);
-  ui->checkBoxInscEstIsento->setChecked(false);
   novoEndereco();
-
-  const auto children = findChildren<ItemBox *>();
-
-  for (const auto &box : children) { box->clear(); }
-
   setupUi();
 }
 
 void CadastroCliente::setupMapper() {
-  addMapping(ui->dateEdit, "dataNasc");
+  addMapping(ui->dateEditDataNasc, "dataNasc");
   addMapping(ui->doubleSpinBoxCredito, "credito");
   addMapping(ui->itemBoxCliente, "idCadastroRel", "id");
   addMapping(ui->itemBoxProfissional, "idProfissionalRel", "id");
@@ -225,7 +219,10 @@ bool CadastroCliente::viewRegister() {
 
   ui->checkBoxInscEstIsento->setChecked(data("inscEstadual").toString() == "ISENTO");
 
-  if (data("dataNasc").isNull()) { ui->dateEdit->setDate(QDate(1900, 1, 1)); }
+  if (not data("dataNasc").isNull()) {
+    ui->checkBoxDataNasc->setChecked(true);
+    ui->dateEditDataNasc->setEnabled(true);
+  }
 
   const bool existeVinculo = verificaVinculo();
 
@@ -435,34 +432,36 @@ void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
 }
 
 void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
-  tipoPFPJ = checked ? "PF" : "PJ";
+  tipoPFPJ = (checked) ? "PF" : "PJ";
 
   if (checked) {
     ui->lineEditCNPJ->clear();
 
-    ui->lineEditCNPJ->setHidden(checked);
-    ui->labelCNPJ->setHidden(checked);
-    ui->lineEditInscEstadual->setHidden(checked);
-    ui->labelInscricaoEstadual->setHidden(checked);
-    ui->checkBoxInscEstIsento->setHidden(checked);
+    ui->lineEditCNPJ->setHidden(true);
+    ui->labelCNPJ->setHidden(true);
+    ui->lineEditInscEstadual->setHidden(true);
+    ui->labelInscricaoEstadual->setHidden(true);
+    ui->checkBoxInscEstIsento->setHidden(true);
 
-    ui->lineEditCPF->setVisible(checked);
-    ui->labelCPF->setVisible(checked);
-    ui->dateEdit->setVisible(checked);
-    ui->labelDataNasc->setVisible(checked);
+    ui->lineEditCPF->setVisible(true);
+    ui->labelCPF->setVisible(true);
+    ui->dateEditDataNasc->setVisible(true);
+    ui->checkBoxDataNasc->setVisible(true);
   } else {
     ui->lineEditCPF->clear();
 
-    ui->lineEditCPF->setVisible(checked);
-    ui->labelCPF->setVisible(checked);
-    ui->dateEdit->setVisible(checked);
-    ui->labelDataNasc->setVisible(checked);
+    ui->lineEditCPF->setVisible(false);
+    ui->labelCPF->setVisible(false);
+    ui->dateEditDataNasc->setVisible(false);
+    ui->checkBoxDataNasc->setVisible(false);
 
-    ui->lineEditCNPJ->setHidden(checked);
-    ui->labelCNPJ->setHidden(checked);
-    ui->lineEditInscEstadual->setHidden(checked);
-    ui->labelInscricaoEstadual->setHidden(checked);
-    ui->checkBoxInscEstIsento->setHidden(checked);
+    ui->lineEditCNPJ->setHidden(false);
+    ui->labelCNPJ->setHidden(false);
+    ui->lineEditInscEstadual->setHidden(false);
+    ui->labelInscricaoEstadual->setHidden(false);
+    ui->checkBoxInscEstIsento->setHidden(false);
+
+    ui->checkBoxDataNasc->setChecked(false);
   }
 
   adjustSize();
@@ -509,7 +508,8 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
   }
 }
 
+void CadastroCliente::on_checkBoxDataNasc_stateChanged(const int state) { ui->dateEditDataNasc->setEnabled(state); }
+
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: 0nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'
-// TODO: nesta tela e nas outras arrumar a ordem dos tabs
 // TODO: limitar complemento de endereco a 60 caracteres

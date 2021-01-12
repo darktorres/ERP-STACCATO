@@ -377,22 +377,22 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 void WidgetLogisticaAgendarEntrega::processRows() {
   const QDateTime dataPrevEnt = ui->dateTimeEdit->dateTime();
 
-  SqlQuery query;
+  SqlQuery queryEvento;
 
-  if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not query.first()) {
-    throw RuntimeException("Erro comunicando com o banco de dados: " + query.lastError().text());
+  if (not queryEvento.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not queryEvento.first()) {
+    throw RuntimeException("Erro comunicando com o banco de dados: " + queryEvento.lastError().text());
   }
 
-  const int idEvento = query.value(0).toInt();
+  const int idEvento = queryEvento.value(0).toInt();
 
-  SqlQuery query1;
-  query1.prepare("SELECT idVenda, codComercial FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
+  SqlQuery querySelecao;
+  querySelecao.prepare("SELECT idVenda, codComercial FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
 
-  SqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
 
-  SqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('PENDENTE', 'ESTOQUE') AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
     modelTranspAtual.setData(row, "data", dataPrevEnt);
@@ -400,19 +400,19 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 
     const int idVendaProduto2 = modelTranspAtual.data(row, "idVendaProduto2").toInt();
 
-    query1.bindValue(":idVendaProduto2", idVendaProduto2);
+    querySelecao.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query1.exec() or not query1.first()) { throw RuntimeException("Erro buscando dados do produto: " + query1.lastError().text()); }
+    if (not querySelecao.exec() or not querySelecao.first()) { throw RuntimeException("Erro buscando dados do produto: " + querySelecao.lastError().text()); }
 
-    query2.bindValue(":dataPrevEnt", dataPrevEnt);
-    query2.bindValue(":idVendaProduto2", idVendaProduto2);
+    queryCompra.bindValue(":dataPrevEnt", dataPrevEnt);
+    queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query2.exec()) { throw RuntimeException("Erro atualizando status da compra: " + query2.lastError().text()); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 
-    query3.bindValue(":dataPrevEnt", dataPrevEnt);
-    query3.bindValue(":idVendaProduto2", idVendaProduto2);
+    queryVenda.bindValue(":dataPrevEnt", dataPrevEnt);
+    queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query3.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + query3.lastError().text()); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + queryVenda.lastError().text()); }
   }
 
   modelTranspAtual.submitAll();
@@ -473,7 +473,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
     if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
 
-    if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { semEstoque = true; }
+    const QString status = modelProdutos.data(row, "status").toString();
+
+    if (status != "PENDENTE" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE!"); }
+
+    if (status != "ESTOQUE") { semEstoque = true; }
   }
 
   // -------------------------------------------------------------------------
@@ -960,3 +964,4 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?
 // TODO: 5adicionar botao para cancelar agendamento (verificar com Anderson)
 // TODO: 5refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')
+// TODO: permitir agendar sem estoque apenas produtos 'PENDENTE' para evitar problemas

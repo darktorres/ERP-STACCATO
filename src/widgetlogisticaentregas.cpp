@@ -348,7 +348,7 @@ void WidgetLogisticaEntregas::montaFiltro() {
   modelProdutos.setFilter("0");
 }
 
-void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() { // TODO: cancelar entrega não desvincula nfe
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
@@ -379,25 +379,32 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   const int idEvento = modelCarga.data(list.first().row(), "idEvento").toInt();
 
-  SqlQuery query;
-  query.prepare("SELECT `idVendaProduto2` FROM veiculo_has_produto WHERE idEvento = :idEvento");
-  query.bindValue(":idEvento", idEvento);
+  SqlQuery queryEvento;
+  queryEvento.prepare(
+      "SELECT vhp.idVendaProduto2, ehc.idConsumo FROM veiculo_has_produto vhp LEFT JOIN estoque_has_consumo ehc ON vhp.idVendaProduto2 = ehc.idVendaProduto2 WHERE idEvento = :idEvento");
+  queryEvento.bindValue(":idEvento", idEvento);
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando produtos: " + query.lastError().text()); }
+  if (not queryEvento.exec() or queryEvento.size() == 0) { throw RuntimeException("Erro buscando produtos: " + queryEvento.lastError().text()); }
 
   SqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = :status, dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   SqlQuery queryCompra;
   queryCompra.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
-  while (query.next()) {
-    queryVenda.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
+  while (queryEvento.next()) {
+    const QString status = (queryEvento.value("idConsumo").toInt() == 0) ? "PENDENTE" : "ESTOQUE";
+
+    queryVenda.bindValue(":status", status);
+    queryVenda.bindValue(":idVendaProduto2", queryEvento.value("idVendaProduto2"));
 
     if (not queryVenda.exec()) { throw RuntimeException("Erro voltando status produto: " + queryVenda.lastError().text()); }
 
-    queryCompra.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
+    //----------------------------------------
+    // linhas que não possuem consumo não irão ter linha de compra
+
+    queryCompra.bindValue(":idVendaProduto2", queryEvento.value("idVendaProduto2"));
 
     if (not queryCompra.exec()) { throw RuntimeException("Erro voltando status produto compra: " + queryCompra.lastError().text()); }
   }

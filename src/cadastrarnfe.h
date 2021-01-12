@@ -50,7 +50,7 @@ private:
   auto carregarArquivo(ACBr &acbrRemoto, const QString &filePath) -> void;
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> void;
-  auto enviarEmail(ACBr &acbrRemoto) -> void;
+  auto enviarEmail(ACBr &acbrRemoto, const QString &filePath) -> void;
   auto enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) -> void;
   auto gerarNota(ACBr &acbrRemoto) -> QString;
   auto listarCfop() -> void;
@@ -94,7 +94,7 @@ private:
   auto preencherImpostos() -> void;
   auto preencherNumeroNFe() -> void;
   auto preencherTotais() -> void;
-  auto preencherTransporte(const QStringList &items) -> void;
+  auto preencherTransporte() -> void;
   auto prepararNFe(const QStringList &items) -> void;
   auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;

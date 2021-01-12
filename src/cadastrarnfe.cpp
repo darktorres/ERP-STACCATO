@@ -131,6 +131,8 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
+  ui->tableItens->hideColumn("idRelacionado");
+  ui->tableItens->hideColumn("peso");
   ui->tableItens->hideColumn("idProduto");
   ui->tableItens->hideColumn("idVendaProduto2");
   ui->tableItens->hideColumn("numeroPedido");
@@ -184,11 +186,17 @@ int CadastrarNFe::preCadastrarNota() {
 
   qApp->startTransaction("CadastrarNFe::preCadastrarNota");
 
+  QString tipoString;
+
+  if (tipo == Tipo::Entrada) { tipoString = "ENTRADA"; }
+  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) { tipoString = "SAÍDA"; }
+
   SqlQuery queryNota;
   queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
-                    "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'NOTA PENDENTE', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
+                    "VALUES (:idVenda, :numeroNFe, :tipo, :xml, 'NOTA PENDENTE', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
   queryNota.bindValue(":idVenda", idVenda);
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
+  queryNota.bindValue(":tipo", tipoString);
   queryNota.bindValue(":xml", xml);
   queryNota.bindValue(":chaveAcesso", chaveAcesso);
   queryNota.bindValue(":cnpjOrig", clearStr(ui->lineEditEmitenteCNPJ->text()));
@@ -197,64 +205,116 @@ int CadastrarNFe::preCadastrarNota() {
 
   if (not queryNota.exec()) { throw RuntimeException("Erro guardando nota: " + queryNota.lastError().text()); }
 
-  const QVariant id = queryNota.lastInsertId();
+  const QVariant idNFe = queryNota.lastInsertId();
 
   if (queryNota.lastInsertId().isNull()) { throw RuntimeException("Erro lastInsertId"); }
 
-  if (tipo == Tipo::Saida or tipo == Tipo::SaidaAposFutura) {
-    SqlQuery query1;
-    query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
-
-    SqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
-
-    SqlQuery query3;
-    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
+  if (tipo == Tipo::Entrada) {
+    SqlQuery query;
+    query.prepare("UPDATE venda_has_produto2 SET idNFeEntrada = :idNFeEntrada WHERE idVendaProduto2 = :idVendaProduto2");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      query1.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      query.bindValue(":idNFeEntrada", idNFe);
+      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
 
-      if (not query1.exec()) { throw RuntimeException("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text()); }
+      if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
+    }
+  }
 
-      query2.bindValue(":idNFeSaida", id);
-      query2.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+  if (tipo == Tipo::Saida or tipo == Tipo::SaidaAposFutura) {
+    SqlQuery queryCompra;
+    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-      if (not query2.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query2.lastError().text()); }
+    SqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-      query3.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
-      query3.bindValue(":idNFeSaida", id);
+    SqlQuery queryVeiculo;
+    queryVeiculo.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-      if (not query3.exec()) { throw RuntimeException("Erro atualizando carga veiculo: " + query3.lastError().text()); }
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      queryCompra.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+
+      if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status do pedido_fornecedor: " + queryCompra.lastError().text()); }
+
+      //----------------------------------------
+
+      queryVenda.bindValue(":idNFeSaida", idNFe);
+      queryVenda.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+
+      if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text()); }
+
+      //----------------------------------------
+
+      queryVeiculo.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      queryVeiculo.bindValue(":idNFeSaida", idNFe);
+
+      if (not queryVeiculo.exec()) { throw RuntimeException("Erro atualizando carga veiculo: " + queryVeiculo.lastError().text()); }
+    }
+  }
+
+  if (tipo == Tipo::Futura) {
+    SqlQuery query;
+    query.prepare("UPDATE venda_has_produto2 SET idNFeFutura = :idNFeFutura WHERE `idVendaProduto2` = :idVendaProduto2");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      query.bindValue(":idNFeFutura", idNFe);
+      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+
+      if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
     }
   }
 
   qApp->endTransaction();
 
-  return id.toInt();
+  return idNFe.toInt();
 }
 
 void CadastrarNFe::removerNota(const int idNFe) {
   qApp->startTransaction("CadastrarNFe::removerNota");
 
-  SqlQuery query2a;
-  query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
-  query2a.bindValue(":idNFeSaida", idNFe);
+  if (tipo == Tipo::Entrada) {
+    // TODO: verificar o status da devolucao a ser usado
 
-  if (not query2a.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + query2a.lastError().text()); }
+    SqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto2 SET idNFeEntrada = NULL WHERE idNFeEntrada = :idNFeEntrada");
+    queryVenda.bindValue(":idNFeEntrada", idNFe);
 
-  SqlQuery query3a;
-  query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
-  query3a.bindValue(":idNFeSaida", idNFe);
+    if (not queryVenda.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + queryVenda.lastError().text()); }
+  }
 
-  if (not query3a.exec()) { throw RuntimeException("Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+  if (tipo == Tipo::Saida or tipo == Tipo::SaidaAposFutura) {
+    SqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
+    queryVenda.bindValue(":idNFeSaida", idNFe);
 
-  SqlQuery query1a;
-  query1a.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
+    if (not queryVenda.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + queryVenda.lastError().text()); }
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    query1a.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+    //----------------------------------------
 
-    if (not query1a.exec()) { throw RuntimeException("Erro removendo nfe da compra: " + query1a.lastError().text()); }
+    SqlQuery queryVeiculo;
+    queryVeiculo.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
+    queryVeiculo.bindValue(":idNFeSaida", idNFe);
+
+    if (not queryVeiculo.exec()) { throw RuntimeException("Erro removendo nfe do veiculo: " + queryVeiculo.lastError().text()); }
+
+    //----------------------------------------
+
+    SqlQuery queryCompra;
+    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      queryCompra.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+
+      if (not queryCompra.exec()) { throw RuntimeException("Erro removendo nfe da compra: " + queryCompra.lastError().text()); }
+    }
+  }
+
+  if (tipo == Tipo::Futura) { // aqui nunca precisa alterar status
+    SqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto2 SET idNFeFutura = NULL WHERE idNFeFutura = :idNFeFutura");
+    queryVenda.bindValue(":idNFeFutura", idNFe);
+
+    if (not queryVenda.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + queryVenda.lastError().text()); }
   }
 
   SqlQuery queryNota;
@@ -287,7 +347,6 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
 
-  // reread the file now authorized
   if (resposta.contains("Autorizado o uso da NF-e")) { return carregarArquivo(acbrRemoto, filePath); }
 
   throw RuntimeException("Resposta não tratada:\n" + resposta);
@@ -314,7 +373,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   try {
     enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
-    enviarEmail(acbrRemoto);                // close if error
+    enviarEmail(acbrRemoto, filePath);      // close if error
 
     ACBr acbrLocal;
     acbrLocal.gerarDanfe(xml.toLatin1()); // close if error
@@ -334,19 +393,6 @@ void CadastrarNFe::cadastrar(const int &idNFe) {
   queryNFe.bindValue(":idNFe", idNFe);
 
   if (not queryNFe.exec()) { throw RuntimeException("Erro marcando nota como 'AUTORIZADO': " + queryNFe.lastError().text()); }
-
-  // TODO: verificar porque nota futura só é vinculada após enquanto as outras são vinculadas no pré-cadastro
-  if (tipo == Tipo::Futura) {
-    SqlQuery query;
-    query.prepare("UPDATE venda_has_produto2 SET idNFeFutura = :idNFeFutura WHERE `idVendaProduto2` = :idVendaProduto2");
-
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      query.bindValue(":idNFeFutura", idNFe);
-      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
-
-      if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
-    }
-  }
 }
 
 void CadastrarNFe::updateTotais() {
@@ -427,7 +473,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
   preencherDestinatario();
   preencherTotais();
   preencherImpostos();
-  preencherTransporte(items);
+  preencherTransporte();
   buscarAliquotas();
   updateTotais();
   setConnections();
@@ -600,6 +646,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     } else {
       stream << "vFrete = " + QString::number(frete, 'f', 2) + "\n";
     }
+
+    if (tipo == Tipo::Futura) { continue; }
 
     stream << "[ICMS" + numProd + "]\n";
     stream << "CST = " + modelViewProdutoEstoque.data(row, "cstICMS").toString() + "\n";
@@ -1568,28 +1616,21 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
   qApp->enqueueInformation("Autorizado o uso da NF-e", this);
 }
 
-void CadastrarNFe::enviarEmail(ACBr &acbrRemoto) {
+void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
   const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
   const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
-  const QString filePath = QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml";
+
+  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 
   // TODO: enviar email separado para cliente
-  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
 
 void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
+  // TODO: testar se comando deu ok
   QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
   xml = resposta.remove("OK: ");
-
-  File file(QDir::currentPath() + "/temp/" + chaveAcesso + "-nfe.xml"); // write file locally for sending email
-
-  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
-
-  file.write(xml.toLatin1());
-
-  file.close();
 }
 
 void CadastrarNFe::preencherDadosNFe() {
@@ -1644,52 +1685,52 @@ void CadastrarNFe::preencherEmitente() {
 }
 
 void CadastrarNFe::preencherDestinatario() {
-  if (tipo == Tipo::Entrada) { // usar dados da loja
-    ui->itemBoxCliente->setDisabled(true);
+  //  if (tipo == Tipo::Entrada) { // usar dados da loja
+  //    ui->itemBoxCliente->setDisabled(true);
 
-    // dados do destinatario
+  //    // dados do destinatario
 
-    SqlQuery queryDestinatario;
-    queryDestinatario.prepare("SELECT razaoSocial, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
-    queryDestinatario.bindValue(":idLoja", ui->itemBoxLoja->getId());
+  //    SqlQuery queryDestinatario;
+  //    queryDestinatario.prepare("SELECT razaoSocial, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
+  //    queryDestinatario.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
+  //    if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
 
-    ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("razaoSocial").toString());
-    ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value("cnpj").toString());
-    ui->lineEditDestinatarioInscEst->setText(queryDestinatario.value("inscEstadual").toString());
-    ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
-    ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("tel2").toString());
+  //    ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("razaoSocial").toString());
+  //    ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value("cnpj").toString());
+  //    ui->lineEditDestinatarioInscEst->setText(queryDestinatario.value("inscEstadual").toString());
+  //    ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
+  //    ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("tel2").toString());
 
-    // endereco faturamento
+  //    // endereco faturamento
 
-    ui->itemBoxEnderecoFaturamento->setDisabled(true);
+  //    ui->itemBoxEnderecoFaturamento->setDisabled(true);
 
-    ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
-    ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
+  //    ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
+  //    ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
 
-    SqlQuery queryDestinatarioEndereco;
-    queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-    queryDestinatarioEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
+  //    SqlQuery queryDestinatarioEndereco;
+  //    queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  //    queryDestinatarioEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
-    }
+  //    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
+  //      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
+  //    }
 
-    ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
-    ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
-    ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
-    ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
-    ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
-    ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
-    ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+  //    ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
+  //    ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
+  //    ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
+  //    ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
+  //    ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
+  //    ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
+  //    ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
 
-    // endereco entrega
+  //    // endereco entrega
 
-    ui->itemBoxEnderecoEntrega->setDisabled(true);
-  }
+  //    ui->itemBoxEnderecoEntrega->setDisabled(true);
+  //  }
 
-  if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
+  if (tipo == Tipo::Entrada or tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
     // dados do destinatario
 
     SqlQuery queryDestinatario;
@@ -1754,6 +1795,7 @@ void CadastrarNFe::preencherDestinatario() {
   queryIBGEEmit.bindValue(":cidade", ui->lineEditEmitenteCidade->text());
   queryIBGEEmit.bindValue(":uf", ui->lineEditEmitenteUF->text());
 
+  // TODO: ao dar esse erro abrir a tela do cadastro cliente para correção dos dados
   if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
 
   // -------------------------------------------------------------------------
@@ -1762,6 +1804,7 @@ void CadastrarNFe::preencherDestinatario() {
   queryIBGEDest.bindValue(":cidade", ui->lineEditDestinatarioCidade->text());
   queryIBGEDest.bindValue(":uf", ui->lineEditDestinatarioUF->text());
 
+  // TODO: ao dar esse erro abrir a tela do cadastro cliente para correção dos dados
   if (not queryIBGEDest.exec() or not queryIBGEDest.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
 }
 
@@ -1812,7 +1855,7 @@ void CadastrarNFe::preencherImpostos() {
       // para CFOP de saída 5403/6403 usar CFOP 1411/2411
       // para CFOP de saída 5405/6404 usar CFOP 1411/2411
 
-      modelViewProdutoEstoque.setData(row, "cfop", "1411");
+      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "1411" : "2411");
 
       modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
       modelViewProdutoEstoque.setData(row, "cstICMS", "60");
@@ -1859,12 +1902,27 @@ void CadastrarNFe::preencherImpostos() {
   }
 
   if (tipo == Tipo::Futura) {
+    // https://www.econeteditora.com.br/boletim_icms/bo-icms-pa/pa-12/boletim-11/icms_pa_venda_futura.php
+    // não destacar impostos aqui, somente na nota pós-futura
+
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
         modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
       }
 
-      modelViewProdutoEstoque.setData(row, "cfop", "5922");
+      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5117" : "6117");
+    }
+
+    ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
+  }
+
+  if (tipo == Tipo::SaidaAposFutura) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+      }
+
+      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5922" : "6922");
 
       modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
       modelViewProdutoEstoque.setData(row, "cstICMS", "60");
@@ -1882,38 +1940,14 @@ void CadastrarNFe::preencherImpostos() {
       modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
 
-    ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
-  }
-
-  if (tipo == Tipo::SaidaAposFutura) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
-      }
-
-      modelViewProdutoEstoque.setData(row, "cfop", "5117");
-
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS90");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "90");
-
-      modelViewProdutoEstoque.setData(row, "cstPIS", "49");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", 0);
-      modelViewProdutoEstoque.setData(row, "pPIS", 0);
-      modelViewProdutoEstoque.setData(row, "vPIS", 0);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "49");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", 0);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", 0);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", 0);
-    }
-
     ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
   }
 }
 
-void CadastrarNFe::preencherTransporte(const QStringList &items) {
+void CadastrarNFe::preencherTransporte() {
   // TODO: verificar na nota futura qual transportadora preencher
 
-  if (tipo == Tipo::Saida) {
+  if (tipo == Tipo::Entrada or tipo == Tipo::Saida) {
     // dados da transportadora
 
     SqlQuery queryTransp;
@@ -1921,7 +1955,9 @@ void CadastrarNFe::preencherTransporte(const QStringList &items) {
         "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
         "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
         "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
-    queryTransp.bindValue(":idVendaProduto2", items.first());
+
+    const QString coluna = (tipo == Tipo::Entrada) ? "idRelacionado" : "idVendaProduto2";
+    queryTransp.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, coluna).toInt());
 
     if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
@@ -1945,17 +1981,9 @@ void CadastrarNFe::preencherTransporte(const QStringList &items) {
     double caixas = 0;
     double peso = 0;
 
-    SqlQuery queryProduto;
-    queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
-
-      queryProduto.bindValue(":idProduto", modelViewProdutoEstoque.data(row, "idProduto"));
-
-      if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando peso do produto: " + queryProduto.lastError().text(), this); }
-
-      peso += queryProduto.value("kgcx").toDouble() * modelViewProdutoEstoque.data(row, "caixas").toInt();
+      peso += modelViewProdutoEstoque.data(row, "peso").toDouble();
     }
 
     ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
@@ -1973,10 +2001,11 @@ void CadastrarNFe::preencherTransporte(const QStringList &items) {
 // TODO: testar a função de pré-gravar nota e consultar
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
+// TODO: colocar um botao para imprimir uma previa da DANFE? utilizar o xml antes do envio
 
 // NFe Devolucao
 
-// falta colocar a observacao da recusa/devolucao do cliente nas informacoes complementares
+// TODO: falta colocar a observacao da recusa/devolucao do cliente nas informacoes complementares
 // http://www.spednews.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
 // https://sigaofisco.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
 // https://cr.inf.br/blog/manual-como-fazer-nota-de-devolucao/

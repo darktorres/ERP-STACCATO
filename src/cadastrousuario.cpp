@@ -4,13 +4,8 @@
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "file.h"
-#include "searchdialog.h"
 #include "usersession.h"
 
-#include <QCheckBox>
-#include <QDebug>
-#include <QFile>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QTransposeProxyModel>
 
@@ -59,6 +54,19 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
   modelPermissoes.setHeaderData("view_tab_grafico", "Ver Gráfico?");
   modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");
+
+  auto *transposeProxyModel = new QTransposeProxyModel(this);
+  transposeProxyModel->setSourceModel(&modelPermissoes);
+
+  ui->table->setModel(transposeProxyModel);
+
+  ui->table->hideRow(0);                                  // idUsuario
+  ui->table->hideRow(ui->table->model()->rowCount() - 1); // lastUpdated
+  ui->table->hideRow(ui->table->model()->rowCount() - 2); // created
+
+  for (int row = 1; row < 12; ++row) { ui->table->setItemDelegateForRow(row, new CheckBoxDelegate(this)); }
+
+  ui->table->horizontalHeader()->hide();
 }
 
 void CadastroUsuario::modificarUsuario() {
@@ -140,22 +148,7 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.select();
 
-  // TODO: shouldn't this be in setupTables?
-  auto *transpose = new QTransposeProxyModel(this);
-  transpose->setSourceModel(&modelPermissoes);
-  modelPermissoes.proxyModel = transpose;
-
-  ui->table->setModel(&modelPermissoes);
-
-  ui->table->hideRow(0);                                  // idUsuario
-  ui->table->hideRow(ui->table->model()->rowCount() - 1); // created
-  ui->table->hideRow(ui->table->model()->rowCount() - 2); // lastUpdated
-
-  ui->table->setItemDelegate(new CheckBoxDelegate(this));
-
-  ui->table->horizontalHeader()->hide();
-
-  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt()); }
 
@@ -200,15 +193,7 @@ void CadastroUsuario::cadastrar() {
 
     if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
-    if (tipo == Tipo::Cadastrar) {
-      const int row = modelPermissoes.insertRowAtEnd();
-
-      modelPermissoes.setData(row, "idUsuario", primaryId);
-      modelPermissoes.setData(row, "view_tab_orcamento", true);
-      modelPermissoes.setData(row, "view_tab_venda", true);
-      modelPermissoes.setData(row, "view_tab_estoque", true);
-      modelPermissoes.setData(row, "view_tab_relatorio", true);
-    }
+    if (tipo == Tipo::Cadastrar) { modelPermissoes.setData(0, "idUsuario", primaryId); }
 
     modelPermissoes.submitAll();
 
@@ -231,7 +216,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   const QString password = file.readAll();
 
-  // NOTE: those query's below commit transaction so have to be done outside transaction
+  // those query's below commit transaction so have to be done outside transaction
   SqlQuery query;
   query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
@@ -266,6 +251,25 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
     ui->labelEspecialidade->hide();
     ui->comboBoxEspecialidade->hide();
   }
+}
+
+bool CadastroUsuario::newRegister() {
+  if (not RegisterDialog::newRegister()) { return false; }
+
+  modelPermissoes.setFilter("0");
+
+  modelPermissoes.select();
+
+  const int row = modelPermissoes.insertRowAtEnd();
+
+  modelPermissoes.setData(row, "view_tab_orcamento", 1);
+  modelPermissoes.setData(row, "view_tab_venda", 1);
+  modelPermissoes.setData(row, "view_tab_estoque", 1);
+  modelPermissoes.setData(row, "view_tab_relatorio", 1);
+
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
+
+  return true;
 }
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario

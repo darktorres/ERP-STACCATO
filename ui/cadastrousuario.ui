@@ -123,7 +123,7 @@ color: rgb(0, 0, 0);</string>
         </widget>
        </item>
        <item row="8" column="1">
-        <widget class="TableView" name="table"/>
+        <widget class="QTableView" name="table"/>
        </item>
        <item row="6" column="1">
         <widget class="QLineEdit" name="lineEditPasswd_2">
@@ -312,11 +312,6 @@ color: rgb(0, 0, 0);</string>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
   <customwidget>
    <class>ComboBox</class>
    <extends>QComboBox</extends>

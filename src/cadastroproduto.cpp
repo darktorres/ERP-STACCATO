@@ -12,19 +12,11 @@
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 
-  connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
-  connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
-
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const QLineEdit *line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
-  ui->lineEditCodBarras->setInputMask("9999999999999;_");
-  ui->lineEditNCM->setInputMask("99999999;_");
+  setupUi();
 
   ui->comboBoxOrigem->addItem("0 - Nacional", 0);
   ui->comboBoxOrigem->addItem("1 - Imp. Direta", 1);
@@ -43,21 +35,25 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
 
-  ui->groupBox->hide();
-  ui->groupBox_4->hide();
-  ui->groupBox_5->hide();
+  setConnections();
 }
 
 CadastroProduto::~CadastroProduto() { delete ui; }
 
 void CadastroProduto::clearFields() {
+  unsetConnections();
 
+  try {
+    RegisterDialog::clearFields();
 
+    ui->comboBoxCST->setCurrentIndex(7);
+    ui->dateEditValidade->setDate(QDate(1900, 1, 1));
+    ui->textEditObserv->clear();
 
+    setupUi();
+  } catch (std::exception &e) {}
 
-  ui->dateEditValidade->setDate(QDate(1900, 1, 1));
-
-  ui->textEditObserv->clear();
+  setConnections();
 }
 
 void CadastroProduto::updateMode() {
@@ -124,8 +120,6 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->lineEditICMS, "icms");
   addMapping(ui->lineEditNCM, "ncm");
   addMapping(ui->lineEditUI, "ui");
-  addMapping(ui->radioButtonDesc, "descontinuado");
-  addMapping(ui->radioButtonLote, "temLote");
   addMapping(ui->textEditObserv, "observacoes", "plainText");
   addMapping(ui->checkBoxEstoque, "estoque");
   addMapping(ui->checkBoxPromocao, "promocao");
@@ -159,7 +153,6 @@ void CadastroProduto::savingProcedures() {
   setData("precoVenda", ui->doubleSpinBoxVenda->value());
   setData("qtdPallet", ui->doubleSpinBoxQtePallet->value());
   setData("st", ui->doubleSpinBoxST->value());
-  setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO");
   setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text());
 
   const QString un = ui->comboBoxUn->currentText();
@@ -169,7 +162,7 @@ void CadastroProduto::savingProcedures() {
 
   setData("quantCaixa", quantCaixa);
   setData("un", ui->comboBoxUn->currentText());
-  setData("validade", ui->dateEditValidade->date());
+  setData("validade", ui->checkBoxValidade->isChecked() ? ui->dateEditValidade->date() : QVariant());
 
   SqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
@@ -223,6 +216,35 @@ void CadastroProduto::cadastrar() {
   }
 }
 
+void CadastroProduto::on_checkBoxValidade_stateChanged(const int state) { ui->dateEditValidade->setEnabled(state); }
+
+void CadastroProduto::setupUi() {
+  ui->lineEditCodBarras->setInputMask("9999999999999;_");
+  ui->lineEditNCM->setInputMask("99999999;_");
+}
+
+void CadastroProduto::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged, connectionType);
+  connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked, connectionType);
+}
+
+void CadastroProduto::unsetConnections() {
+  disconnect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged);
+  disconnect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
+  disconnect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
+  disconnect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
+  disconnect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
+  disconnect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
+  disconnect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
+}
+
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
 // TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
@@ -231,3 +253,5 @@ void CadastroProduto::cadastrar() {
 // TODO: validar entrada do campo icms para apenas numeros
 // TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto
+
+// TODO: change 'icms' from lineEdit to doubleSpinBox

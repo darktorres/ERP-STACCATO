@@ -36,9 +36,11 @@ private:
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
-  auto on_dateEditDe_dateChanged(const QDate &date) -> void;
+  auto on_dateEditVencimentoDe_dateChanged(const QDate &date) -> void;
+  auto on_dateEditRealizadoDe_dateChanged(const QDate &date) -> void;
   auto on_doubleSpinBoxDe_valueChanged(const double value) -> void;
-  auto on_groupBoxData_toggled(const bool enabled) -> void;
+  auto on_groupBoxRealizado_toggled(const bool enabled) -> void;
+  auto on_groupBoxVencimento_toggled(const bool enabled) -> void;
   auto on_pushButtonAdiantarRecebimento_clicked() -> void;
   auto on_pushButtonExcluirLancamento_clicked() -> void;
   auto on_pushButtonImportarFolhaPag_clicked() -> void;

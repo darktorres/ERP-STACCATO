@@ -5,6 +5,7 @@
 #include "file.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "usersession.h"
 
 #include <QDate>
@@ -250,6 +251,8 @@ int CadastrarNFe::preCadastrarNota() {
 
       if (not queryVeiculo.exec()) { throw RuntimeException("Erro atualizando carga veiculo: " + queryVeiculo.lastError().text()); }
     }
+
+    Sql::updateVendaStatus(idVenda);
   }
 
   if (tipo == Tipo::Futura) {
@@ -307,6 +310,8 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
       if (not queryCompra.exec()) { throw RuntimeException("Erro removendo nfe da compra: " + queryCompra.lastError().text()); }
     }
+
+    Sql::updateVendaStatus(idVenda);
   }
 
   if (tipo == Tipo::Futura) { // aqui nunca precisa alterar status

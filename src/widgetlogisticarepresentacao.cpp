@@ -11,14 +11,18 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
+WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 
 void WidgetLogisticaRepresentacao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::delayFiltro, connectionType);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked, connectionType);
 }
 
@@ -35,6 +39,8 @@ void WidgetLogisticaRepresentacao::updateTables() {
 
   modelViewLogisticaRepresentacao.select();
 }
+
+void WidgetLogisticaRepresentacao::delayFiltro() { timer.start(500); }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
@@ -119,7 +125,11 @@ void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
   }
 }
 
-void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) { modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')"); }
+void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged() {
+  const QString text = ui->lineEditBusca->text();
+
+  modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
+}
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)
 // TODO: colocar botao para cancelar

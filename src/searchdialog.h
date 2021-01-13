@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QTimer>
 
 namespace Ui {
 class SearchDialog;
@@ -49,6 +50,7 @@ private:
   bool showAllProdutos = false;
   bool compraAvulsa = false;
   bool isSet = false;
+  QTimer timer;
   QString filter;
   QString fornecedorRep;
   SqlTableModel model;
@@ -56,8 +58,9 @@ private:
   // methods
   explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent);
 
+  auto delayFiltro() -> void;
   auto hideColumns(const QStringList &columns) -> void;
-  auto on_lineEditBusca_textChanged(const QString &) -> void;
+  auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonSelecionar_clicked() -> void;
   auto on_radioButtonProdAtivos_toggled(const bool) -> void;

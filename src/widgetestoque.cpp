@@ -18,6 +18,7 @@
 WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
   ui->setupUi(this);
   timer.setSingleShot(true);
+  timer2.setSingleShot(true);
 }
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
@@ -26,8 +27,9 @@ void WidgetEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetEstoque::escolheFiltro, connectionType);
+  connect(&timer2, &QTimer::timeout, this, &WidgetEstoque::montaFiltro2, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::delayFiltro, connectionType);
-  connect(ui->lineEditBusca2, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro2, connectionType);
+  connect(ui->lineEditBusca2, &QLineEdit::textChanged, this, &WidgetEstoque::delayFiltro2, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonEstoqueContabil, &QRadioButton::clicked, this, &WidgetEstoque::montaFiltroContabil, connectionType);
@@ -146,6 +148,8 @@ void WidgetEstoque::updateTables() {
 }
 
 void WidgetEstoque::delayFiltro() { timer.start(500); }
+
+void WidgetEstoque::delayFiltro2() { timer2.start(500); }
 
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 
@@ -322,3 +326,4 @@ void WidgetEstoque::on_radioButtonEstoque_toggled(bool checked) {
 // TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido
 // TODO: fix fulltext indexes (put match against inside subquery)
 // TODO: criar um segundo relatorio para os gerentes sem o custo
+// TODO: dividir os 2 widgets em classes separadas

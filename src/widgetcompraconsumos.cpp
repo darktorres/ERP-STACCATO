@@ -11,7 +11,10 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
+WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 
@@ -31,6 +34,8 @@ void WidgetCompraConsumos::updateTables() {
 
   modelProduto.select();
 }
+
+void WidgetCompraConsumos::delayFiltro() { timer.start(500); }
 
 void WidgetCompraConsumos::resetTables() { modelIsSet = false; }
 
@@ -64,7 +69,8 @@ void WidgetCompraConsumos::setupTables() {
 void WidgetCompraConsumos::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::delayFiltro, connectionType);
   connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked, connectionType);
   connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraConsumos::on_tablePedido_clicked, connectionType);
 }
@@ -126,7 +132,7 @@ void WidgetCompraConsumos::desfazerConsumo(const int row) {
   Estoque::desfazerConsumo(idVendaProduto2);
 }
 
-void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());

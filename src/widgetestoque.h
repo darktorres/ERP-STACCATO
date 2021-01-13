@@ -24,11 +24,13 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QTimer timer;
+  QTimer timer2;
   SqlQueryModel model;
   SqlTableModel modelProdutos;
   Ui::WidgetEstoque *ui;
   // methods
   auto delayFiltro() -> void;
+  auto delayFiltro2() -> void;
   auto escolheFiltro() -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> void;
   auto getMatch() const -> QString;

@@ -21,7 +21,10 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
     : QDialog(parent), primaryKey(primaryKey), fullTextIndex(fullTextIndex), textKeys(textKeys), filter(filter), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
+  timer.setSingleShot(true);
+
+  connect(&timer, &QTimer::timeout, this, &SearchDialog::on_lineEditBusca_textChanged);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::delayFiltro);
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &SearchDialog::on_pushButtonModelo3d_clicked);
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
   connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
@@ -51,6 +54,8 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->lineEditBusca->setFocus();
 }
 
+void SearchDialog::delayFiltro() { timer.start(500); }
+
 SearchDialog::~SearchDialog() { delete ui; }
 
 void SearchDialog::setupTables(const QString &table) {
@@ -65,7 +70,7 @@ void SearchDialog::setupTables(const QString &table) {
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
-void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
+void SearchDialog::on_lineEditBusca_textChanged() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   if (text.isEmpty()) { return model.setFilter(filter); }
@@ -469,9 +474,9 @@ QString SearchDialog::getFilter() const { return filter; }
 
 void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepresentacao = isRepresentacao; }
 
-void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(); }
 
-void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(); }
 
 void SearchDialog::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();

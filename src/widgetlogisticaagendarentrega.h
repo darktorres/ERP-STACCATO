@@ -3,6 +3,7 @@
 #include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -22,6 +23,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   QString selectedIdVenda;
   SqlTableModel modelTranspAtual;
   SqlTableModel modelTranspAgend;
@@ -34,6 +36,7 @@ private:
   auto adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
+  auto delayFiltro() -> void;
   auto dividirCompra(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> void;
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;

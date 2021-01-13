@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -22,10 +23,12 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel modelViewLogisticaRepresentacao;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
-  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto delayFiltro() -> void;
+  auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonMarcarEntregue_clicked() -> void;
   auto processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) -> void;
   auto setConnections() -> void;

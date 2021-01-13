@@ -4,6 +4,7 @@
 #include "sqlquerymodel.h"
 #include "xlsxdocument.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -25,12 +26,14 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlQueryModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetFinanceiroContas *ui;
   // methods
+  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
   auto on_dateEditDe_dateChanged(const QDate &date) -> void;

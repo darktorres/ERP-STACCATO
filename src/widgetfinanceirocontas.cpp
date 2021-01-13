@@ -53,13 +53,17 @@ void WidgetFinanceiroContas::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
-  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
-  connect(ui->dateEditDe, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::on_dateEditDe_dateChanged, connectionType);
+  connect(ui->dateEditRealizadoAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->dateEditRealizadoDe, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::on_dateEditRealizadoDe_dateChanged, connectionType);
+  connect(ui->dateEditVencimentoAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->dateEditVencimentoDe, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::on_dateEditVencimentoDe_dateChanged, connectionType);
   connect(ui->doubleSpinBoxAte, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->doubleSpinBoxDe, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged, connectionType);
-  connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
-  connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetFinanceiroContas::on_groupBoxData_toggled, connectionType);
   connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->groupBoxRealizado, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->groupBoxRealizado, &QGroupBox::toggled, this, &WidgetFinanceiroContas::on_groupBoxRealizado_toggled, connectionType);
+  connect(ui->groupBoxVencimento, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->groupBoxVencimento, &QGroupBox::toggled, this, &WidgetFinanceiroContas::on_groupBoxVencimento_toggled, connectionType);
   connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroContas::delayFiltro, connectionType);
   connect(ui->pushButtonAdiantarRecebimento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked, connectionType);
@@ -83,8 +87,10 @@ void WidgetFinanceiroContas::setConnections() {
 void WidgetFinanceiroContas::updateTables() {
   if (not isSet) {
     ui->radioButtonPendente->setChecked(true);
-    ui->dateEditAte->setDate(qApp->serverDate());
-    ui->dateEditDe->setDate(qApp->serverDate());
+    ui->dateEditRealizadoAte->setDate(qApp->serverDate());
+    ui->dateEditRealizadoDe->setDate(qApp->serverDate());
+    ui->dateEditVencimentoAte->setDate(qApp->serverDate());
+    ui->dateEditVencimentoDe->setDate(qApp->serverDate());
 
     ui->itemBoxLojas->setSearchDialog(SearchDialog::loja(this));
 
@@ -168,9 +174,17 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString dataPag =
-        ui->groupBoxData->isChecked() ? "cp.dataPagamento BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'" : "";
-    if (not dataPag.isEmpty()) { filtros << dataPag; }
+    const QString dataPagamento = ui->groupBoxVencimento->isChecked() ? "cp.dataPagamento BETWEEN '" + ui->dateEditVencimentoDe->date().toString("yyyy-MM-dd") + "' AND '" +
+                                                                            ui->dateEditVencimentoAte->date().toString("yyyy-MM-dd") + "'"
+                                                                      : "";
+    if (not dataPagamento.isEmpty()) { filtros << dataPagamento; }
+
+    //-------------------------------------
+
+    const QString dataRealizado = ui->groupBoxRealizado->isChecked() ? "cp.dataRealizado BETWEEN '" + ui->dateEditRealizadoDe->date().toString("yyyy-MM-dd") + "' AND '" +
+                                                                           ui->dateEditRealizadoAte->date().toString("yyyy-MM-dd") + "'"
+                                                                     : "";
+    if (not dataRealizado.isEmpty()) { filtros << dataRealizado; }
 
     //-------------------------------------
 
@@ -229,9 +243,17 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString dataPag =
-        ui->groupBoxData->isChecked() ? "cr.dataPagamento BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'" : "";
-    if (not dataPag.isEmpty()) { filtros << dataPag; }
+    const QString dataPagamento = ui->groupBoxVencimento->isChecked() ? "cr.dataPagamento BETWEEN '" + ui->dateEditVencimentoDe->date().toString("yyyy-MM-dd") + "' AND '" +
+                                                                            ui->dateEditVencimentoAte->date().toString("yyyy-MM-dd") + "'"
+                                                                      : "";
+    if (not dataPagamento.isEmpty()) { filtros << dataPagamento; }
+
+    //-------------------------------------
+
+    const QString dataRealizado = ui->groupBoxRealizado->isChecked() ? "cr.dataRealizado BETWEEN '" + ui->dateEditRealizadoDe->date().toString("yyyy-MM-dd") + "' AND '" +
+                                                                           ui->dateEditRealizadoAte->date().toString("yyyy-MM-dd") + "'"
+                                                                     : "";
+    if (not dataRealizado.isEmpty()) { filtros << dataRealizado; }
 
     //-------------------------------------
 
@@ -308,7 +330,9 @@ void WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked() {
 
 void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value) { ui->doubleSpinBoxAte->setValue(value); }
 
-void WidgetFinanceiroContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
+void WidgetFinanceiroContas::on_dateEditVencimentoDe_dateChanged(const QDate &date) { ui->dateEditVencimentoAte->setDate(date); }
+
+void WidgetFinanceiroContas::on_dateEditRealizadoDe_dateChanged(const QDate &date) { ui->dateEditRealizadoAte->setDate(date); }
 
 void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
   if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
@@ -329,8 +353,14 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
   }
 }
 
-void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
-  const auto children = ui->groupBoxData->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
+void WidgetFinanceiroContas::on_groupBoxVencimento_toggled(const bool enabled) {
+  const auto children = ui->groupBoxVencimento->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
+
+  for (const auto &child : children) { child->setEnabled(enabled); }
+}
+
+void WidgetFinanceiroContas::on_groupBoxRealizado_toggled(const bool enabled) {
+  const auto children = ui->groupBoxRealizado->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
 
   for (const auto &child : children) { child->setEnabled(enabled); }
 }
@@ -338,10 +368,10 @@ void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
 void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  ui->dateEditDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
-  ui->dateEditAte->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoAte->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
 
-  ui->groupBoxData->setChecked(true);
+  ui->groupBoxVencimento->setChecked(true);
 
   ui->tableVencer->clearSelection();
 }
@@ -349,10 +379,10 @@ void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &i
 void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  ui->dateEditDe->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
-  ui->dateEditAte->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoDe->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoAte->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
 
-  ui->groupBoxData->setChecked(true);
+  ui->groupBoxVencimento->setChecked(true);
 
   ui->tableVencidos->clearSelection();
 }
@@ -549,3 +579,4 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes
+// TODO: essa tela mostra apenas o valor previsto, verificar se deve mostrar tambem o valorReal pago/recebido

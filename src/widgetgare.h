@@ -3,6 +3,7 @@
 #include "cnab.h"
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -22,9 +23,11 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel model;
   Ui::WidgetGare *ui;
   // methods
+  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto montarGare(const QModelIndexList &selection) -> QVector<CNAB::Gare>;
   auto on_pushButtonDarBaixaItau_clicked() -> void;

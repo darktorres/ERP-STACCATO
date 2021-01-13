@@ -6,14 +6,18 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
+WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 
 void WidgetFinanceiroCompra::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::delayFiltro, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated, connectionType);
 }
 
@@ -31,6 +35,8 @@ void WidgetFinanceiroCompra::updateTables() {
 
   model.select();
 }
+
+void WidgetFinanceiroCompra::delayFiltro() { timer.start(500); }
 
 void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
 
@@ -52,7 +58,7 @@ void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
   input->show();
 }
 
-void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetFinanceiroCompra::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetFinanceiroCompra::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());

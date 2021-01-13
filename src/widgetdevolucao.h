@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -21,9 +22,11 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel model;
   Ui::WidgetDevolucao *ui;
   // methods
+  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_pushButtonGerarNFe_clicked() -> void;
   auto setConnections() -> void;

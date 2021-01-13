@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -21,6 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel modelCalendario;
   SqlTableModel modelCarga;
   SqlTableModel modelProdutos;
@@ -28,8 +30,9 @@ private:
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> void;
   auto confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
+  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
-  auto on_lineEditBuscar_textChanged(const QString &) -> void;
+  auto on_lineEditBuscar_textChanged() -> void;
   auto on_pushButtonCancelarEntrega_clicked() -> void;
   auto on_pushButtonConfirmarEntrega_clicked() -> void;
   auto on_pushButtonConsultarNFe_clicked() -> void;

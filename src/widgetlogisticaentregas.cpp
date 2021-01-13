@@ -23,6 +23,8 @@
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
 
+  timer.setSingleShot(true);
+
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
@@ -32,7 +34,8 @@ WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
 void WidgetLogisticaEntregas::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBuscar, &QLineEdit::textChanged, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged, connectionType);
+  connect(ui->lineEditBuscar, &QLineEdit::textChanged, this, &WidgetLogisticaEntregas::delayFiltro, connectionType);
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked, connectionType);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked, connectionType);
@@ -297,6 +300,8 @@ void WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const Q
   }
 }
 
+void WidgetLogisticaEntregas::delayFiltro() { timer.start(500); }
+
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
@@ -336,7 +341,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
   acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
 }
 
-void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &) { montaFiltro(); }
+void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged() { montaFiltro(); }
 
 void WidgetLogisticaEntregas::montaFiltro() {
   const QString text = ui->lineEditBuscar->text();

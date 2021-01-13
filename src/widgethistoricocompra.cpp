@@ -10,14 +10,18 @@
 
 #include <QSqlError>
 
-WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
+WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 
 void WidgetHistoricoCompra::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::delayFiltro, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->tablePedidos, &TableView::clicked, this, &WidgetHistoricoCompra::on_tablePedidos_clicked, connectionType);
 }
@@ -36,6 +40,8 @@ void WidgetHistoricoCompra::updateTables() {
 
   modelViewComprasFinanceiro.select();
 }
+
+void WidgetHistoricoCompra::delayFiltro() { timer.start(500); }
 
 void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
 
@@ -151,7 +157,7 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   modelNFe.select();
 }
 
-void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetHistoricoCompra::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetHistoricoCompra::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
@@ -171,3 +177,4 @@ void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
 // TODO: 4verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
+// TODO: renomear essa classe para WidgetCompraHistorico

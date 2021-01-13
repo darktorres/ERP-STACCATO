@@ -14,21 +14,23 @@
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
   ui->setupUi(this);
 
+  timer.setSingleShot(true);
+
   ui->dateEdit->setDate(qApp->serverDate());
   ui->dateEditDia->setDate(qApp->serverDate());
 
+  connect(&timer, &QTimer::timeout, this, &WidgetGare::montaFiltro);
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro);
+  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro);
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
-  connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
-
-  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro);
-  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
+  connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
 }
 
 WidgetGare::~WidgetGare() { delete ui; }
@@ -46,6 +48,8 @@ void WidgetGare::updateTables() {
 
   model.select();
 }
+
+void WidgetGare::delayFiltro() { timer.start(500); }
 
 void WidgetGare::montaFiltro() {
   QStringList filtros;
@@ -208,3 +212,4 @@ void WidgetGare::on_tableSelection_changed() {
 
 // TODO: deve salvar gare/gareData em nfe
 // TODO: quando importar retorno com status de 'agendado' alterar a linha?
+// TODO: renomear classe para WidgetFinanceiroGare

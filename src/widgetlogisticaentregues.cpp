@@ -11,14 +11,18 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
+WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 
 void WidgetLogisticaEntregues::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::delayFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaEntregues::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->radioButtonParcialEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
@@ -47,6 +51,8 @@ void WidgetLogisticaEntregues::updateTables() {
 
   if (modelProdutos.lastError().isValid()) { throw RuntimeException("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
 }
+
+void WidgetLogisticaEntregues::delayFiltro() { timer.start(500); }
 
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
 

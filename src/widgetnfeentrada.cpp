@@ -16,14 +16,18 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
 void WidgetNfeEntrada::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
@@ -43,6 +47,8 @@ void WidgetNfeEntrada::updateTables() {
 
   modelViewNFeEntrada.select();
 }
+
+void WidgetNfeEntrada::delayFiltro() { timer.start(500); }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
@@ -76,7 +82,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetNfeEntrada::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetNfeEntrada::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());

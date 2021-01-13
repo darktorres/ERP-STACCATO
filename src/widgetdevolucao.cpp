@@ -6,7 +6,10 @@
 
 #include <QDebug>
 
-WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) { ui->setupUi(this); }
+WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetDevolucao::~WidgetDevolucao() { delete ui; }
 
@@ -26,6 +29,8 @@ void WidgetDevolucao::updateTables() {
 
   model.select();
 }
+
+void WidgetDevolucao::delayFiltro() { timer.start(500); }
 
 void WidgetDevolucao::montaFiltro() {
   QStringList filtros;
@@ -50,8 +55,9 @@ void WidgetDevolucao::montaFiltro() {
 void WidgetDevolucao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(&timer, &QTimer::timeout, this, &WidgetDevolucao::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::montaFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked, connectionType);
 }
 
@@ -129,3 +135,5 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   nfe->show();
 }
+
+// TODO: renomear classe para WidgetLogisticaDevolucao

@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -21,11 +22,12 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
+  auto delayFiltro() -> void;
   auto insere(const QDate &dataPrevista) -> void;
-  auto setConnections() -> void;
   auto montaFiltro() -> void;
   auto on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) -> void;
   auto on_doubleSpinBoxQuantAvulso_valueChanged(const double value) -> void;
@@ -34,6 +36,7 @@ private:
   auto on_pushButtonExcel_clicked() -> void;
   auto on_pushButtonPDF_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
   auto setarDadosAvulso() -> void;
   auto setupTables() -> void;
 };

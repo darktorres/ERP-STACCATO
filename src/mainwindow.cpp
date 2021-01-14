@@ -163,7 +163,7 @@ void MainWindow::updateTables() {
     if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
     if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
     if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
-    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
+    //    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
     if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
   } catch (std::exception &e) {}
 
@@ -255,6 +255,9 @@ void MainWindow::on_actionConfiguracoes_triggered() {
   auto *config = new UserConfig(this);
   config->setAttribute(Qt::WA_DeleteOnClose);
   config->show();
+
+  // find nfeDistribuicao and connect signal from userconfig
+  //  ui->widgetNfe->findChildren
 }
 
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }

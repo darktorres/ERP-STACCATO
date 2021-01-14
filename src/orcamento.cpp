@@ -556,7 +556,7 @@ void Orcamento::verifyFields() {
 
   if (ui->itemBoxProfissional->text().isEmpty()) { throw RuntimeError("Profissional inválido!", this); }
 
-  if (ui->itemBoxEndereco->text().isEmpty()) { throw RuntimeError(R"(Endereço inválido! Se não possui endereço, escolha "Não há"!")", this); }
+  if (ui->itemBoxEndereco->text().isEmpty()) { throw RuntimeError(R"(Endereço inválido! Se não possui endereço, escolha "Não há"!)", this); }
 
   if (modelItem.rowCount() == 0) { throw RuntimeError("Não pode cadastrar um orçamento sem itens!", this); }
 }

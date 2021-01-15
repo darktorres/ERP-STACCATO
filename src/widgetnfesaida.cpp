@@ -265,7 +265,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   dataManager->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
-  if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório!", this); }
+  if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório: " + report.lastError(), this); }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + filename, this); }
 }

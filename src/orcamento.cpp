@@ -1488,3 +1488,4 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
 //           2. para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
 // FIXME: orçamento permite adicionar o mesmo estoque duas vezes (e provavelmente faz o consumo duas vezes)
+// TODO: antes de gerar excel/pdf salvar o arquivo para não ficar dados divergentes

@@ -126,6 +126,8 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
 }
 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
+  // TODO: se for pedido de representacao voltar status para 'EM ENTREGA' no lugar de 'ESTOQUE', senão não dá para marcar entregue
+
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }

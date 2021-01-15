@@ -891,7 +891,7 @@ bool Document::save() const {
 bool Document::saveAs(const QString &name) const {
   File file(name);
 
-  if (not file.open(QIODevice::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo: " + file.errorString()); }
+  if (not file.open(QIODevice::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + name + "' para escrita: " + file.errorString()); }
 
   return saveAs(&file);
 }

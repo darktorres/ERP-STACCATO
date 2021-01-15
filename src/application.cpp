@@ -259,6 +259,7 @@ void Application::lightTheme() {
 
 void Application::startTransaction(const QString &messageLog) {
   qDebug() << "startTransaction: " << messageLog;
+
   if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
   if (SqlQuery query; not query.exec("START TRANSACTION")) { return; }
@@ -270,6 +271,7 @@ void Application::startTransaction(const QString &messageLog) {
 
 void Application::endTransaction() {
   qDebug() << "endTransaction";
+
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
   if (SqlQuery query; not query.exec("COMMIT")) { return; }
@@ -281,6 +283,7 @@ void Application::endTransaction() {
 
 void Application::rollbackTransaction() {
   qDebug() << "rollbackTransaction";
+
   if (inTransaction) {
     if (SqlQuery query; not query.exec("ROLLBACK")) { return; }
     inTransaction = false;

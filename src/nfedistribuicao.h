@@ -21,9 +21,12 @@ public:
 
 private:
   // attributes
-  const int tempoTimer = 3600;
   bool isSet = false;
   bool modelIsSet = false;
+  int tempoTimer = 1000 * 60 * 15; // msec * 15min
+  int maximoNSU;
+  int ultimoNSU;
+  QString cnpjDest;
   ACBr acbrRemoto;
   QTimer timer;
   SqlTableModel model;
@@ -38,6 +41,7 @@ private:
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
   auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
+  auto houveConsultaEmOutroPc() -> bool;
   auto montaFiltro() -> void;
   auto naoRealizar() -> void;
   auto on_groupBoxFiltros_toggled(const bool enabled) -> void;
@@ -48,6 +52,9 @@ private:
   auto on_pushButtonPesquisar_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> void;
+  auto processarEventoInformacao(const QString &evento) -> void;
+  auto processarEventoPrincipal(const QString &evento, const QString &idLoja) -> void;
+  auto processarEventoResumoNFe(const QString &evento) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

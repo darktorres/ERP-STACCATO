@@ -255,9 +255,6 @@ void MainWindow::on_actionConfiguracoes_triggered() {
   auto *config = new UserConfig(this);
   config->setAttribute(Qt::WA_DeleteOnClose);
   config->show();
-
-  // find nfeDistribuicao and connect signal from userconfig
-  //  ui->widgetNfe->findChildren
 }
 
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }

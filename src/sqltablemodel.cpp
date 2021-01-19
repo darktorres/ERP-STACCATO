@@ -57,6 +57,18 @@ void SqlTableModel::submitAll() {
   if (not QSqlTableModel::submitAll()) { throw RuntimeException("Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 }
 
+void SqlTableModel::removeSelection(const QModelIndexList &selection) {
+  // remove rows from back to front to avoid invalidating indexes
+
+  QList<int> selectedRows;
+
+  for (auto &index : selection) { selectedRows.append(index.row()); }
+
+  std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+
+  for (auto row : selectedRows) { removeRow(row); }
+}
+
 QString SqlTableModel::selectStatement() const { return QSqlTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
 QModelIndexList SqlTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {

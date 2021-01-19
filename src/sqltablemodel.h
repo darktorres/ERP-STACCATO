@@ -31,6 +31,7 @@ public:
   auto insertRowAtEnd() -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
+  auto removeSelection(const QModelIndexList &selection) -> void;
   auto setData(const int row, const QString &column, const QVariant &value) -> void;
   auto setData(const int row, const int column, const QVariant &value) -> void;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;

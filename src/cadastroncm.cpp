@@ -72,7 +72,7 @@ void CadastroNCM::on_pushButtonRemover_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  for (const auto &index : selection) { model.removeRow(index.row()); }
+  model.removeSelection(selection);
 
   model.submitAll();
 }

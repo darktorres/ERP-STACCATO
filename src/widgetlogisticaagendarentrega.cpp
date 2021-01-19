@@ -507,11 +507,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
-  const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
+  const auto selection = ui->tableTranspAtual->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
+  modelTranspAtual.removeSelection(selection);
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {

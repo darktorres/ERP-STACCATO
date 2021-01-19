@@ -353,11 +353,11 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
-  const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
+  const auto selection = ui->tableTranspAtual->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
+  modelTranspAtual.removeSelection(selection);
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {

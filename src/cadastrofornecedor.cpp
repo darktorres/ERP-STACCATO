@@ -103,7 +103,7 @@ void CadastroFornecedor::verifyFields() {
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CNPJ inválido!"); }
+  validaCNPJ(ui->lineEditCNPJ->text());
 }
 
 void CadastroFornecedor::savingProcedures() {
@@ -265,13 +265,10 @@ void CadastroFornecedor::on_pushButtonNovoCad_clicked() { newRegister(); }
 void CadastroFornecedor::on_pushButtonRemover_clicked() { remove(); }
 
 void CadastroFornecedor::on_lineEditCNPJ_textEdited(const QString &text) {
-  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)"
-                                                                                                : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
+  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(text) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)" : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
-void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
-  ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
-}
+void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) { ui->lineEditContatoCPF->setStyleSheet(validaCPF(text) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)"); }
 
 void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
   if (cadastrarEndereco()) { novoEndereco(); }
@@ -410,9 +407,7 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
   modelEnd.select();
 }
 
-void CadastroFornecedor::on_lineEditCNPJBancario_textEdited(const QString &text) {
-  ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
-}
+void CadastroFornecedor::on_lineEditCNPJBancario_textEdited(const QString &text) { ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(text) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)"); }
 
 void CadastroFornecedor::on_pushButtonSalvarPrazos_clicked() {
   const QString especialidade1 = QString::number(0) + ", '" + ui->labelEspecialidade1->text() + "', " + QString::number(ui->spinBoxPrazoEspecialidade1->value());

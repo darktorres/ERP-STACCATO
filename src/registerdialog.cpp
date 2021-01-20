@@ -223,9 +223,11 @@ void RegisterDialog::remove() {
 }
 
 bool RegisterDialog::validaCNPJ(const QString &text) {
-  if (text.size() != 14) { return false; }
+  const QString cnpj = QString(text).remove(".").remove("/").remove("-");
 
-  const QString sub = text.left(12);
+  if (cnpj.size() != 14) { return false; }
+
+  const QString sub = cnpj.left(12);
 
   QVector<int> sub2;
 
@@ -253,20 +255,22 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) { throw RuntimeError("CNPJ inválido!", this); }
+  if (digito1 != cnpj.at(12).digitValue() or digito2 != cnpj.at(13).digitValue()) { throw RuntimeError("CNPJ inválido!", this); }
 
   return true;
 }
 
 bool RegisterDialog::validaCPF(const QString &text) {
-  if (text.size() != 11) { return false; }
+  const QString cpf = QString(text).remove(".").remove("-");
 
-  if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
-      text == "77777777777" or text == "88888888888" or text == "99999999999") {
+  if (cpf.size() != 11) { return false; }
+
+  if (cpf == "00000000000" or cpf == "11111111111" or cpf == "22222222222" or cpf == "33333333333" or cpf == "44444444444" or cpf == "55555555555" or cpf == "66666666666" or cpf == "77777777777" or
+      cpf == "88888888888" or cpf == "99999999999") {
     throw RuntimeError("CPF inválido!", this);
   }
 
-  const QString sub = text.left(9);
+  const QString sub = cpf.left(9);
 
   QVector<int> sub2;
 
@@ -294,7 +298,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) { throw RuntimeError("CPF inválido!", this); }
+  if (digito1 != cpf.at(9).digitValue() or digito2 != cpf.at(10).digitValue()) { throw RuntimeError("CPF inválido!", this); }
 
   return true;
 }

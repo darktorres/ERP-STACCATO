@@ -88,9 +88,11 @@ void CadastroCliente::verifyFields() {
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CPF inválido!"); }
+  if (ui->radioButtonPF->isChecked()) { validaCPF(ui->lineEditCPF->text()); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CNPJ inválido!"); }
+  if (ui->radioButtonPJ->isChecked()) { validaCNPJ(ui->lineEditCNPJ->text()); }
+
+  if (not ui->lineEditContatoCPF->text().isEmpty()) { validaCPF(ui->lineEditContatoCPF->text()); }
 
   if (tipo == Tipo::Cadastrar) {
     SqlQuery query;
@@ -272,9 +274,11 @@ void CadastroCliente::on_pushButtonBuscar_clicked() {
 }
 
 void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
-  ui->lineEditCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+  const bool valido = validaCPF(text);
 
-  if (not ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) {
+  ui->lineEditCPF->setStyleSheet(valido ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+
+  if (valido) {
     SqlQuery query;
     query.prepare("SELECT idCliente FROM cliente WHERE cpf = :cpf");
     query.bindValue(":cpf", text);
@@ -289,9 +293,11 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
 }
 
 void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
-  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+  const bool valido = validaCNPJ(text);
 
-  if (not ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
+  ui->lineEditCNPJ->setStyleSheet(valido ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+
+  if (valido) {
     SqlQuery query;
     query.prepare("SELECT idCliente FROM cliente WHERE cnpj = :cnpj");
     query.bindValue(":cnpj", text);
@@ -467,9 +473,7 @@ void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
   adjustSize();
 }
 
-void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) {
-  ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
-}
+void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) { ui->lineEditContatoCPF->setStyleSheet(validaCPF(text) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)"); }
 
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   // TODO: clicar nesse botao faz com que enderecos nao salvos sumam

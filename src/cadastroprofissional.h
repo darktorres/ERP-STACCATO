@@ -52,5 +52,6 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto setupTables() -> void;
   auto setupUi() -> void;
+  auto verificaEndereco() -> void;
   auto verificaVinculo() -> bool;
 };

@@ -212,11 +212,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
 }
 
 bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
-  if (not ui->lineEditCEP->isValid()) {
-    throw RuntimeError("CEP inválido!", this);
-    ui->lineEditCEP->setFocus();
-    return false;
-  }
+  verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
@@ -431,4 +427,14 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   modelConta.select();
+}
+
+void CadastroLoja::verificaEndereco() {
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
+
+  if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
+
+  if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }

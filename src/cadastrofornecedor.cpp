@@ -275,11 +275,7 @@ void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
 }
 
 bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
-  if (not ui->lineEditCEP->isValid()) {
-    throw RuntimeError("CEP inválido!", this);
-    ui->lineEditCEP->setFocus();
-    return false;
-  }
+  verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
@@ -452,6 +448,16 @@ void CadastroFornecedor::on_tabWidget_currentChanged(int index) {
       ui->spinBoxPrazoEspecialidade5->setValue(query.value("prazo").toInt());
     }
   }
+}
+
+void CadastroFornecedor::verificaEndereco() {
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
+
+  if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
+
+  if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }
 
 // TODO: 5poder alterar na tela 'comissao'

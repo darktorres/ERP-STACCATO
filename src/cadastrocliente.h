@@ -53,5 +53,6 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto setupUi() -> void;
+  auto verificaEndereco() -> void;
   auto verificaVinculo() -> bool;
 };

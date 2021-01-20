@@ -2,6 +2,7 @@
 #include "ui_cadastrarnfe.h"
 
 #include "application.h"
+#include "cadastrocliente.h"
 #include "file.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
@@ -1800,8 +1801,14 @@ void CadastrarNFe::preencherDestinatario() {
   queryIBGEEmit.bindValue(":cidade", ui->lineEditEmitenteCidade->text());
   queryIBGEEmit.bindValue(":uf", ui->lineEditEmitenteUF->text());
 
-  // TODO: ao dar esse erro abrir a tela do cadastro cliente para correção dos dados
-  if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+  if (not queryIBGEEmit.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
+
+  if (not queryIBGEEmit.first()) {
+    CadastroCliente *cliente = new CadastroCliente(nullptr);
+    cliente->viewRegisterById(ui->itemBoxCliente->getId());
+    cliente->show();
+    throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!");
+  }
 
   // -------------------------------------------------------------------------
 
@@ -1809,8 +1816,14 @@ void CadastrarNFe::preencherDestinatario() {
   queryIBGEDest.bindValue(":cidade", ui->lineEditDestinatarioCidade->text());
   queryIBGEDest.bindValue(":uf", ui->lineEditDestinatarioUF->text());
 
-  // TODO: ao dar esse erro abrir a tela do cadastro cliente para correção dos dados
-  if (not queryIBGEDest.exec() or not queryIBGEDest.first()) { throw RuntimeException("Erro buscando código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+  if (not queryIBGEDest.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
+
+  if (not queryIBGEDest.first()) {
+    CadastroCliente *cliente = new CadastroCliente(nullptr);
+    cliente->viewRegisterById(ui->itemBoxCliente->getId());
+    cliente->show();
+    throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!");
+  }
 }
 
 void CadastrarNFe::preencherTotais() {

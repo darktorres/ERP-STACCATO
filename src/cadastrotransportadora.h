@@ -56,6 +56,7 @@ private:
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verificaEndereco() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

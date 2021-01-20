@@ -286,8 +286,8 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
     if (not query.exec()) { throw RuntimeException("Erro buscando CPF: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      throw RuntimeError("CPF já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
+      throw RuntimeError("CPF já cadastrado!", this);
     }
   }
 }
@@ -305,8 +305,8 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
     if (not query.exec()) { throw RuntimeException("Erro buscando CNPJ: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      throw RuntimeError("CNPJ já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
+      throw RuntimeError("CNPJ já cadastrado!", this);
     }
   }
 }

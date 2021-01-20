@@ -94,8 +94,8 @@ void Contas::preencher(const QModelIndex &index) {
         const double newValor = modelPendentes.data(row, "valor").toDouble();
 
         if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-          throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
           modelPendentes.setData(row, "valor", oldValor);
+          throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
         }
       }
 

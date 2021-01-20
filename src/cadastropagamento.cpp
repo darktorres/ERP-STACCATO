@@ -154,11 +154,7 @@ void CadastroPagamento::limparSelecao() {
 void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
   // TODO: nao deixar cadastrar pagamento com nome já existente pois dá erro depois no montarFluxo()
 
-  if (ui->lineEditPagamento->text().isEmpty()) {
-    throw RuntimeError("Digite um nome para o pagamento!", this);
-    ui->lineEditPagamento->setFocus();
-    return;
-  }
+  if (ui->lineEditPagamento->text().isEmpty()) { throw RuntimeError("Digite um nome para o pagamento!", this); }
 
   qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento");
 

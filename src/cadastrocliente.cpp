@@ -312,17 +312,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
-  if (not ui->lineEditCEP->isValid()) {
-    throw RuntimeError("CEP inválido!", this);
-    ui->lineEditCEP->setFocus();
-    return false;
-  }
-
-  if (ui->lineEditNro->text().isEmpty()) {
-    throw RuntimeError("Número vazio!", this);
-    ui->lineEditNro->setFocus();
-    return false;
-  }
+  verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
@@ -513,6 +503,18 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
 }
 
 void CadastroCliente::on_checkBoxDataNasc_stateChanged(const int state) { ui->dateEditDataNasc->setEnabled(state); }
+
+void CadastroCliente::verificaEndereco() {
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
+
+  if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditNro->text().isEmpty()) { throw RuntimeError("Número vazio!", this); }
+
+  if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
+
+  if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
+}
 
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: 0nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'

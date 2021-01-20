@@ -315,11 +315,7 @@ void CadastroProfissional::on_lineEditCPF_textEdited(const QString &text) { ui->
 void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) { ui->lineEditCNPJ->setStyleSheet(validaCNPJ(text) ? "" : "color: rgb(255, 0, 0)"); }
 
 bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
-  if (not ui->lineEditCEP->isValid()) {
-    throw RuntimeError("CEP inválido!", this);
-    ui->lineEditCEP->setFocus();
-    return false;
-  }
+  verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
@@ -416,4 +412,14 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
 void CadastroProfissional::successMessage() {
   qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!", this);
   emit registerUpdated(primaryId);
+}
+
+void CadastroProfissional::verificaEndereco() {
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
+
+  if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
+
+  if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }

@@ -15,6 +15,7 @@ class WidgetLogisticaColeta final : public QWidget {
 public:
   explicit WidgetLogisticaColeta(QWidget *parent);
   ~WidgetLogisticaColeta();
+
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;

@@ -17,6 +17,7 @@ public:
 
   explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent);
   ~InputDialogFinanceiro();
+
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
   auto setFilter(const QString &idCompra) -> void;
@@ -24,11 +25,11 @@ public:
 private:
   // attributes
   bool representacao;
-  const Tipo tipo;
-  SqlTableModel modelPedidoFornecedor;
-  SqlTableModel modelPedidoFornecedor2;
   SqlTableModel modelFluxoCaixa;
+  SqlTableModel modelPedidoFornecedor2;
+  SqlTableModel modelPedidoFornecedor;
   SqlTreeModel modelTree;
+  Tipo const tipo;
   Ui::InputDialogFinanceiro *ui;
   // methods
   auto cadastrar() -> void;

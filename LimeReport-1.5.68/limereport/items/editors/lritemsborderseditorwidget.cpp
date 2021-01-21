@@ -49,7 +49,7 @@ void ItemsBordersEditorWidget::properyChangedEvent(const QString &property, cons
   }
 }
 
-void ItemsBordersEditorWidget::noBordesClicked() { updateValues(0); }
+void ItemsBordersEditorWidget::noBordesClicked() { updateValues({}); }
 
 void ItemsBordersEditorWidget::allBordesClicked() {
   int borders = BaseDesignIntf::LeftLine | BaseDesignIntf::RightLine | BaseDesignIntf::TopLine | BaseDesignIntf::BottomLine;
@@ -126,7 +126,7 @@ void ItemsBordersEditorWidgetForDesigner::buttonClicked(bool) {
 }
 
 void ItemsBordersEditorWidgetForDesigner::noBordesClicked() {
-  m_reportEditor->setBorders(0);
+  m_reportEditor->setBorders({});
   ItemsBordersEditorWidget::noBordesClicked();
 }
 

@@ -15,6 +15,7 @@ class WidgetRelatorio final : public QWidget {
 public:
   explicit WidgetRelatorio(QWidget *parent);
   ~WidgetRelatorio();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

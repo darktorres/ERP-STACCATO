@@ -549,9 +549,9 @@ QSizeF PageItemDesignIntf::getRectByPageSize(const PageSize &size) {
   if (size != Custom) {
     QPrinter printer;
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOrientation((QPrinter::Orientation)pageOrientation());
-    printer.setPaperSize((QPrinter::PageSize)size);
-    return QSizeF(printer.paperSize(QPrinter::Millimeter).width() * 10, printer.paperSize(QPrinter::Millimeter).height() * 10);
+    printer.setPageOrientation((QPageLayout::Orientation)pageOrientation());
+    printer.setPageSize(QPageSize((QPageSize::PageSizeId)size));
+    return QSizeF(printer.pageLayout().pageSize().size(QPageSize::Unit::Millimeter).width() * 10, printer.pageLayout().pageSize().size(QPageSize::Unit::Millimeter).height() * 10);
   }
 
   else {

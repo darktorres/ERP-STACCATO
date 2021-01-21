@@ -24,6 +24,7 @@ private:
   auto cadastrar() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
   auto verifyFields() -> void;
 };

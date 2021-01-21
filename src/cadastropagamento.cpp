@@ -24,18 +24,24 @@ CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new 
 
   ui->pushButtonAtualizarPagamento->hide();
 
-  connect(ui->itemBoxLoja, &ItemBox::idChanged, this, &CadastroPagamento::on_itemBoxLoja_idChanged);
-  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked);
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionarPagamento_clicked);
-  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarPagamento_clicked);
-  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarTaxas_clicked);
-  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonLimparSelecao_clicked);
-  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoveAssociacao_clicked);
-  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoverPagamento_clicked);
-  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroPagamento::on_tablePagamentos_clicked);
+  setConnections();
 }
 
 CadastroPagamento::~CadastroPagamento() { delete ui; }
+
+void CadastroPagamento::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->itemBoxLoja, &ItemBox::idChanged, this, &CadastroPagamento::on_itemBoxLoja_idChanged, connectionType);
+  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked, connectionType);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionarPagamento_clicked, connectionType);
+  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarPagamento_clicked, connectionType);
+  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarTaxas_clicked, connectionType);
+  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonLimparSelecao_clicked, connectionType);
+  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoveAssociacao_clicked, connectionType);
+  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoverPagamento_clicked, connectionType);
+  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroPagamento::on_tablePagamentos_clicked, connectionType);
+}
 
 void CadastroPagamento::setupTables() {
   modelPagamentos.setTable("forma_pagamento");

@@ -33,6 +33,7 @@ private:
   auto on_pushButtonConsumirEstoque_clicked() -> void;
   auto recalcularQuantidade() -> void;
   auto recarregarTabelas() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
   auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 };

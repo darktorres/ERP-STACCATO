@@ -14,9 +14,6 @@
 InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
 
-  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialog::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
 
   ui->dateEditEvento->setDate(qApp->serverDate());
@@ -93,12 +90,21 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista:");
   }
 
+  setConnections();
+
   adjustSize();
 
   show();
 }
 
 InputDialog::~InputDialog() { delete ui; }
+
+void InputDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialog::on_pushButtonSalvar_clicked, connectionType);
+}
 
 QDate InputDialog::getDate() const { return ui->dateEditEvento->date(); }
 

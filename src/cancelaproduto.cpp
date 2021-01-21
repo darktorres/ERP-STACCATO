@@ -11,18 +11,24 @@
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked);
-
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
   setupTables();
 
+  setConnections();
+
   show();
 }
 
 CancelaProduto::~CancelaProduto() { delete ui; }
+
+void CancelaProduto::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void CancelaProduto::setFilter(const QString &ordemCompra) {
   if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }

@@ -12,6 +12,7 @@ class WidgetLogisticaCalendario final : public QWidget {
 public:
   explicit WidgetLogisticaCalendario(QWidget *parent);
   ~WidgetLogisticaCalendario();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

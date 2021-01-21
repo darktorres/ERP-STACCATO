@@ -22,15 +22,21 @@ CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(
 
   setupTables();
 
-  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked);
-  connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled);
-  connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled);
-  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled);
+  setConnections();
 }
 
 CadastroStaccatoOff::~CadastroStaccatoOff() { delete ui; }
+
+void CadastroStaccatoOff::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked, connectionType);
+  connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled, connectionType);
+  connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled, connectionType);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled, connectionType);
+}
 
 void CadastroStaccatoOff::setupTables() {
   model.setTable("view_produto");

@@ -9,6 +9,7 @@ class UserSession final {
 
 public:
   UserSession() = delete;
+
   static auto fromLoja(const QString &parameter, const QString &user = nome) -> QVariant;
   static auto getSetting(const QString &key) -> QVariant;
   static auto login(const QString &user, const QString &password) -> void;

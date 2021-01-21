@@ -74,7 +74,7 @@ public:
 
   QVector<Produto> produtos;
 
-  const QByteArray fileContent;
+  QByteArray const fileContent;
   QStandardItemModel model;
   QString local;
 
@@ -112,7 +112,7 @@ public:
 private:
   // attributes
   Produto produto;
-  const Tipo tipo;
+  Tipo const tipo;
   QWidget *parent;
   // methods
   auto lerCOFINSProduto(const QStandardItem *child) -> void;

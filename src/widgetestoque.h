@@ -16,6 +16,7 @@ class WidgetEstoque final : public QWidget {
 public:
   explicit WidgetEstoque(QWidget *parent);
   ~WidgetEstoque();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

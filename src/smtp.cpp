@@ -25,14 +25,20 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <QFileInfo>
 #include <QResource>
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
+Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), port(port), host(host), pass(pass), user(user) {
   socket = new QSslSocket(this);
 
-  connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
-  connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, &QAbstractSocket::errorOccurred, this, &Smtp::errorReceived);
-  connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
-  connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
+  setConnections();
+}
+
+void Smtp::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead, connectionType);
+  connect(socket, &QAbstractSocket::connected, this, &Smtp::connected, connectionType);
+  connect(socket, &QAbstractSocket::errorOccurred, this, &Smtp::errorReceived, connectionType);
+  connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged, connectionType);
+  connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected, connectionType);
 }
 
 void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {

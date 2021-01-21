@@ -25,10 +25,10 @@ bool registred = LimeReport::DesignElementsFactory::instance().registerCreator(x
 namespace LimeReport {
 
 QColor generateColor() {
-  int red = (qrand() % (256 - 1)) + 1;
-  int green = (qrand() % (256 - 1)) + 1;
-  int blue = (qrand() % (256 - 1)) + 1;
-  ;
+  int red = QRandomGenerator::global()->bounded(256);
+  int green = QRandomGenerator::global()->bounded(256);
+  int blue = QRandomGenerator::global()->bounded(256);
+
   return QColor(red, green, blue);
 }
 

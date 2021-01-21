@@ -6,8 +6,8 @@
 #include <QSqlRecord>
 
 VendaProxyModel::VendaProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("Dias restantes")), statusIndex(model->record().indexOf("Status")),
-      financeiroIndex(model->record().indexOf("statusFinanceiro")) {
+    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("Dias restantes")), financeiroIndex(model->record().indexOf("statusFinanceiro")),
+      statusIndex(model->record().indexOf("Status")) {
   setSourceModel(model);
 }
 

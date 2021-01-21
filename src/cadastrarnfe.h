@@ -17,26 +17,28 @@ class CadastrarNFe final : public QDialog {
 
 public:
   enum class Tipo { Entrada, Saida, Futura, SaidaAposFutura };
+
   explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
+
   auto show() -> void;
 
 private:
   // attributes
-  const Tipo tipo;
-  const QString idVenda;
   bool manterAberto = false;
   QDataWidgetMapper mapper;
+  QString arquivo;
+  QString chaveAcesso;
+  QString const idVenda;
+  QString xml;
   SqlQuery queryIBGEDest;
   SqlQuery queryIBGEEmit;
   SqlQuery queryPartilhaInter;
   SqlQuery queryPartilhaIntra;
-  QString arquivo;
-  QString chaveAcesso;
-  QString xml;
   SqlTableModel modelLoja;
-  SqlTableModel modelViewProdutoEstoque;
   SqlTableModel modelVenda;
+  SqlTableModel modelViewProdutoEstoque;
+  Tipo const tipo;
   Ui::CadastrarNFe *ui;
   // methods
   auto alterarCertificado(const QString &text) -> void;

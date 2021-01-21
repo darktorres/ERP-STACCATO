@@ -16,12 +16,18 @@ CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::Calcul
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
 
-  connect(&networkManager, &QNetworkAccessManager::finished, this, &CalculoFrete::handleNetworkData);
-  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxCliente_textChanged);
-  connect(ui->pushButton, &QPushButton::clicked, this, &CalculoFrete::on_pushButton_clicked);
+  setConnections();
 }
 
 CalculoFrete::~CalculoFrete() { delete ui; }
+
+void CalculoFrete::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(&networkManager, &QNetworkAccessManager::finished, this, &CalculoFrete::handleNetworkData, connectionType);
+  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxCliente_textChanged, connectionType);
+  connect(ui->pushButton, &QPushButton::clicked, this, &CalculoFrete::on_pushButton_clicked, connectionType);
+}
 
 void CalculoFrete::setCliente(const QVariant &idCliente) {
   ui->itemBoxCliente->setId(idCliente);

@@ -15,8 +15,10 @@ class WidgetPagamentos final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Compra, Venda };
+
   explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
+
   auto getCredito() const -> double;
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
@@ -72,4 +74,5 @@ private:
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
   auto prepararPagamentosRep() -> void;
+  auto setConnections() -> void;
 };

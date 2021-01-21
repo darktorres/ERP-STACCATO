@@ -17,9 +17,10 @@ public:
 
 private:
   // attributes
-  const QByteArray fileContent;
+  QByteArray const fileContent;
   XML xml;
   Ui::XML_Viewer *ui;
   // methods
   auto on_pushButtonDanfe_clicked() -> void;
+  auto setConnections() -> void;
 };

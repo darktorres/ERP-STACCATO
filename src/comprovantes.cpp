@@ -10,9 +10,9 @@
 #include <QNetworkReply>
 #include <QSqlError>
 
-Comprovantes::CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
-QString Comprovantes::CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
+QString CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
 
 // --------------------------------------------------------------------------
 
@@ -23,10 +23,16 @@ Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(pa
 
   setFilter(idVenda);
 
-  connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked);
+  setConnections();
 }
 
 Comprovantes::~Comprovantes() { delete ui; }
+
+void Comprovantes::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked, connectionType);
+}
 
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE idVenda = '" + idVenda + "'");

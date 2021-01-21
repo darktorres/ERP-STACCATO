@@ -15,6 +15,7 @@ class WidgetDevolucao final : public QWidget {
 public:
   explicit WidgetDevolucao(QWidget *parent = nullptr);
   ~WidgetDevolucao() final;
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

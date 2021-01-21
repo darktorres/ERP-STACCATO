@@ -29,22 +29,8 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->setupUi(this);
 
   setupTables();
-
-  connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
-
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
-  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
-  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
-  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
-  ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, false, this));
-  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
-  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
-
+  connectLineEditsToDirty();
+  setItemBoxes();
   setupMapper();
   newRegister();
 
@@ -59,6 +45,17 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 }
 
 Orcamento::~Orcamento() { delete ui; }
+
+void Orcamento::setItemBoxes() {
+  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
+  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
+  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
+  ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, false, this));
+  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
+  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
+}
 
 void Orcamento::show() {
   RegisterDialog::show();
@@ -107,6 +104,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked, connectionType);
   connect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked, connectionType);
+  connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked, connectionType);
   connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
@@ -138,6 +136,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked);
   disconnect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked);
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
+  disconnect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
   disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);

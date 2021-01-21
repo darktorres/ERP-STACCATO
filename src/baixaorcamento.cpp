@@ -11,11 +11,17 @@ BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QD
 
   setupTables(idOrcamento);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked);
+  setConnections();
 }
 
 BaixaOrcamento::~BaixaOrcamento() { delete ui; }
+
+void BaixaOrcamento::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void BaixaOrcamento::setupTables(const QString &idOrcamento) {
   modelOrcamento.setTable("orcamento");

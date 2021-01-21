@@ -9,18 +9,24 @@
 CadastroNCM::CadastroNCM(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroNCM) {
   ui->setupUi(this);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &CadastroNCM::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonAdicionar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonAdicionar_clicked);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonRemover_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
 
   setupTables();
+
+  setConnections();
 }
 
 CadastroNCM::~CadastroNCM() { delete ui; }
+
+void CadastroNCM::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &CadastroNCM::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonAdicionar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonAdicionar_clicked, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonRemover_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void CadastroNCM::setupTables() {
   model.setTable("ncm");

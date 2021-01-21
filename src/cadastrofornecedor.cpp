@@ -14,43 +14,44 @@
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
+  connectLineEditsToDirty();
   setupUi();
   setupTables();
   setupMapper();
   newRegister();
-
-  sdFornecedor = SearchDialog::fornecedor(this);
-  connect(sdFornecedor, &SearchDialog::itemSelected, this, &CadastroFornecedor::viewRegisterById);
 
   if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
 
-  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroFornecedor::on_checkBoxMostrarInativos_clicked);
-  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
-  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJ_textEdited);
-  connect(ui->lineEditCNPJBancario, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJBancario_textEdited);
-  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditContatoCPF_textEdited);
-  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAdicionarEnd_clicked);
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizar_clicked);
-  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizarEnd_clicked);
-  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonBuscar_clicked);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked);
-  connect(ui->pushButtonSalvarPrazos, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonSalvarPrazos_clicked);
-  connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastroFornecedor::on_tabWidget_currentChanged);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked);
+  setConnections();
 }
 
 CadastroFornecedor::~CadastroFornecedor() { delete ui; }
+
+void CadastroFornecedor::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(sdFornecedor, &SearchDialog::itemSelected, this, &CadastroFornecedor::viewRegisterById, connectionType);
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroFornecedor::on_checkBoxMostrarInativos_clicked, connectionType);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged, connectionType);
+  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJ_textEdited, connectionType);
+  connect(ui->lineEditCNPJBancario, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJBancario_textEdited, connectionType);
+  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditContatoCPF_textEdited, connectionType);
+  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAdicionarEnd_clicked, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizarEnd_clicked, connectionType);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked, connectionType);
+  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked, connectionType);
+  connect(ui->pushButtonSalvarPrazos, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonSalvarPrazos_clicked, connectionType);
+  connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastroFornecedor::on_tabWidget_currentChanged, connectionType);
+  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked, connectionType);
+}
 
 void CadastroFornecedor::setupTables() {
   ui->tableEndereco->setModel(&modelEnd);

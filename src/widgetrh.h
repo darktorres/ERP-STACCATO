@@ -14,6 +14,7 @@ class WidgetRh : public QWidget {
 public:
   explicit WidgetRh(QWidget *parent);
   ~WidgetRh();
+
   //  auto resetTables() -> void;
   //  auto updateTables() -> void;
 

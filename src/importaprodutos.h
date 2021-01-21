@@ -65,7 +65,6 @@ private:
   int itensUpdated = 0;
   int validade;
   Produto produto;
-  QVector<int> vectorProdutosImportados;
   QHash<QString, int> hashModel;
   QMap<QString, int> fornecedores;
   QProgressDialog *progressDialog;
@@ -73,10 +72,11 @@ private:
   QString fornecedor;
   QString idsFornecedor;
   QString validadeString;
-  SqlTableModel modelProduto;
+  QVector<int> vectorProdutosImportados;
   SqlTableModel modelErro;
   SqlTableModel modelEstoque;
-  const Tipo tipo;
+  SqlTableModel modelProduto;
+  Tipo const tipo;
   Ui::ImportaProdutos *ui;
   // methods
   auto atualizaCamposProduto(const int row) -> void;
@@ -98,6 +98,7 @@ private:
   auto readFile() -> bool;
   auto readValidade() -> bool;
   auto salvar() -> void;
+  auto setConnections() -> void;
   auto setProgressDialog() -> void;
   auto setupModels() -> void;
   auto setupTables() -> void;

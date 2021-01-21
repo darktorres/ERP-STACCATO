@@ -16,7 +16,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), idVenda(idVenda), tipo(tipo), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);

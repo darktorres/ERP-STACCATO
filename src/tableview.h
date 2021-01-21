@@ -9,6 +9,7 @@ class TableView final : public QTableView {
 public:
   explicit TableView(QWidget *parent);
   ~TableView() final = default;
+
   auto columnCount() const -> int;
   auto columnIndex(const QString &column) const -> int;
   auto columnIndex(const QString &column, const bool silent) const -> int;
@@ -37,5 +38,6 @@ private:
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
   auto resizeColumnsToContents() -> void;
+  auto setConnections() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
 };

@@ -12,25 +12,16 @@
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const QLineEdit *line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
+  connectLineEditsToDirty();
   setupUi();
+  setupMapper();
+  newRegister();
 
   ui->comboBoxOrigem->addItem("0 - Nacional", 0);
   ui->comboBoxOrigem->addItem("1 - Imp. Direta", 1);
   ui->comboBoxOrigem->addItem("2 - Merc. Interno", 2);
 
-  setupMapper();
-  newRegister();
-
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
-
-  sdProduto = SearchDialog::produto(true, true, true, false, this);
-  connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
-  connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
-
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
   if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
@@ -226,20 +217,24 @@ void CadastroProduto::setupUi() {
 void CadastroProduto::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById, connectionType);
   connect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged, connectionType);
   connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged, connectionType);
   connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged, connectionType);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked, connectionType);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked, connectionType);
 }
 
 void CadastroProduto::unsetConnections() {
+  disconnect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   disconnect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged);
   disconnect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
   disconnect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
   disconnect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
+  disconnect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
   disconnect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
   disconnect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
   disconnect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);

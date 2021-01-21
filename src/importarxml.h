@@ -33,16 +33,16 @@ public:
 
 private:
   // attributes
-  const QDate dataFaturamento;
-  const QStringList idsCompra;
+  QDate const dataFaturamento;
   QMap<QString, double> mapNFes;
+  QStringList const idsCompra;
   SqlTableModel modelCompra;
   SqlTableModel modelConsumo;
   SqlTableModel modelEstoque;
-  SqlTableModel modelVenda;
   SqlTableModel modelEstoque_compra;
   SqlTableModel modelNFe;
   SqlTableModel modelPagamento;
+  SqlTableModel modelVenda;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {

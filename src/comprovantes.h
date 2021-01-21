@@ -9,20 +9,18 @@ namespace Ui {
 class Comprovantes;
 }
 
+class CustomDelegate final : public QStyledItemDelegate {
+
+public:
+  explicit CustomDelegate(QObject *parent);
+  ~CustomDelegate() = default;
+
+private:
+  auto displayText(const QVariant &value, const QLocale &) const -> QString final;
+};
+
 class Comprovantes : public QDialog {
   Q_OBJECT
-
-  class CustomDelegate final : public QStyledItemDelegate {
-
-  public:
-    explicit CustomDelegate(QObject *parent);
-    ~CustomDelegate() = default;
-
-  private:
-    auto displayText(const QVariant &value, const QLocale &) const -> QString final;
-  };
-
-  // --------------------------------------------------------------------------
 
 public:
   explicit Comprovantes(const QString &idVenda, QWidget *parent);
@@ -30,10 +28,11 @@ public:
 
 private:
   // attributes
+  QString const idVenda;
   SqlQueryModel model;
-  const QString idVenda;
   Ui::Comprovantes *ui;
   // methods
   auto on_pushButtonAbrir_clicked() -> void;
+  auto setConnections() -> void;
   auto setFilter(const QString &idVenda) -> void;
 };

@@ -17,6 +17,7 @@ class WidgetGraficos : public QWidget {
 public:
   explicit WidgetGraficos(QWidget *parent);
   ~WidgetGraficos();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -32,5 +33,6 @@ private:
   auto on_checkBox_toggled() -> void;
   auto on_comboBox_currentIndexChanged(int index) -> void;
   auto on_pushButtonCleanTooltips_clicked() -> void;
+  auto setConnections() -> void;
   auto toggleMarker(QLegendMarker *marker) -> void;
 };

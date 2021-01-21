@@ -13,16 +13,18 @@ class CalculoFrete : public QDialog {
 public:
   explicit CalculoFrete(QWidget *parent);
   ~CalculoFrete();
+
   auto setCliente(const QVariant &idCliente) -> void;
   auto getDistancia() -> double;
 
 private:
   // attributes
-  Ui::CalculoFrete *ui;
   QNetworkAccessManager networkManager;
-  const QString searchUrl = "https://maps.googleapis.com/maps/api/distancematrix/xml?origins=%1&destinations=%2&key=%3";
+  QString const searchUrl = "https://maps.googleapis.com/maps/api/distancematrix/xml?origins=%1&destinations=%2&key=%3";
+  Ui::CalculoFrete *ui;
   // methods
-  void handleNetworkData(QNetworkReply *networkReply);
-  void on_itemBoxCliente_textChanged(const QString &);
-  void on_pushButton_clicked();
+  auto handleNetworkData(QNetworkReply *networkReply) -> void;
+  auto on_itemBoxCliente_textChanged(const QString &) -> void;
+  auto on_pushButton_clicked() -> void;
+  auto setConnections() -> void;
 };

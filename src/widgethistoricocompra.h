@@ -16,6 +16,7 @@ class WidgetHistoricoCompra final : public QWidget {
 public:
   explicit WidgetHistoricoCompra(QWidget *parent);
   ~WidgetHistoricoCompra();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

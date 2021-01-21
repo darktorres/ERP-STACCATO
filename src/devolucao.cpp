@@ -13,7 +13,7 @@
 #include <QSqlRecord>
 #include <cmath>
 
-Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), idVenda(idVenda), isRepresentacao(isRepresentacao), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   setConnections();
@@ -578,6 +578,7 @@ void Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
   const double caixas = quantDevolvida / stepQuant * -1;
   const double quantDevolvidaInvertida = quantDevolvida * -1;
+  // TODO: isso não é o mesmo que pegar descUnitario * -1?
   const double prcUnitario = modelProdutos2.data(currentRow, "total").toDouble() / modelProdutos2.data(currentRow, "quant").toDouble() * -1;
   const double total = prcUnitario * quantDevolvida;
 
@@ -595,7 +596,7 @@ void Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
   modelDevolvidos1.setData(newRow, "descGlobal", 0);
   modelDevolvidos1.setData(newRow, "total", total);
 
-  modelDevolvidos1.submitAll(); // trigger copies into venda_has_produto2
+  modelDevolvidos1.submitAll(); // SQL trigger copies into venda_has_produto2
 
   //--------------------------------------------------------------
 

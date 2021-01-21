@@ -15,30 +15,30 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
-  connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged);
-  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited);
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked);
-  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked);
-
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
   if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->table->hide(); }
 
+  connectLineEditsToDirty();
   setupTables();
   fillCombobox();
   setupMapper();
   newRegister();
-
-  sdUsuario = SearchDialog::usuario(this);
-  connect(sdUsuario, &SearchDialog::itemSelected, this, &CadastroUsuario::viewRegisterById);
+  setConnections();
 }
 
 CadastroUsuario::~CadastroUsuario() { delete ui; }
+
+void CadastroUsuario::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(sdUsuario, &SearchDialog::itemSelected, this, &CadastroUsuario::viewRegisterById, connectionType);
+  connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged, connectionType);
+  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked, connectionType);
+}
 
 void CadastroUsuario::setupTables() {
   modelPermissoes.setTable("usuario_has_permissao");

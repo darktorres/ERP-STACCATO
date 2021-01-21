@@ -17,16 +17,16 @@ public:
 
 private:
   // attributes
-  const QString idVenda;
-  const bool isRepresentacao;
+  bool const isRepresentacao;
+  QString const idVenda;
   QString idDevolucao;
   SqlTableModel modelCliente;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumos;
   SqlTableModel modelDevolvidos1;
   SqlTableModel modelPagamentos;
   SqlTableModel modelProdutos2;
   SqlTableModel modelVenda;
-  SqlTableModel modelCompra;
-  SqlTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
   auto alterarLinhaOriginal(const int currentRow) -> void;

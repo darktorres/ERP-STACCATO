@@ -12,8 +12,9 @@ class CollapsibleWidget : public QWidget {
 public:
   explicit CollapsibleWidget(QWidget *parent);
   ~CollapsibleWidget();
-  auto setHtml(const QString text) -> void;
+
   auto getHtml() -> QString;
+  auto setHtml(const QString text) -> void;
 
 signals:
   void toggled();
@@ -22,5 +23,6 @@ private:
   // attributes
   Ui::CollapsibleWidget *ui;
   // methods
-  void on_pushButton_clicked();
+  auto on_pushButton_clicked() -> void;
+  auto setConnections() -> void;
 };

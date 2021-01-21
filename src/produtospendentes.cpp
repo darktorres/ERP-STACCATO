@@ -22,21 +22,23 @@ ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString 
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
-
-  setupTables();
-
-  connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked);
-  connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked);
-  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
-
   setWindowTitle("Venda " + idVenda);
-
+  setupTables();
   viewProduto(codComercial, idVenda);
+  setConnections();
 
   show();
 }
 
 ProdutosPendentes::~ProdutosPendentes() { delete ui; }
+
+void ProdutosPendentes::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked, connectionType);
+  connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked, connectionType);
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade, connectionType);
+}
 
 void ProdutosPendentes::recalcularQuantidade() {
   const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();

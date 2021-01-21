@@ -19,16 +19,22 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   setupTables();
 
-  connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked);
-
   viewRegisterById(showWindow);
 
   const QString tipoUsuario = UserSession::tipoUsuario;
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
+
+  setConnections();
 }
 
 Estoque::~Estoque() { delete ui; }
+
+void Estoque::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked, connectionType);
+}
 
 void Estoque::setupTables() {
   modelEstoque.setTable("estoque");

@@ -16,6 +16,7 @@ class NFeDistribuicao : public QWidget {
 public:
   explicit NFeDistribuicao(QWidget *parent);
   ~NFeDistribuicao();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -26,8 +27,8 @@ private:
   int tempoTimer = 1000 * 60 * 15; // msec * 15min
   int maximoNSU;
   int ultimoNSU;
-  QString cnpjDest;
   ACBr acbrRemoto;
+  QString cnpjDest;
   QTimer timer;
   SqlTableModel model;
   Ui::NFeDistribuicao *ui;

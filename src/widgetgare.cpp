@@ -19,21 +19,27 @@ WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare
   ui->dateEdit->setDate(qApp->serverDate());
   ui->dateEditDia->setDate(qApp->serverDate());
 
-  connect(&timer, &QTimer::timeout, this, &WidgetGare::montaFiltro);
-  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro);
-  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro);
-  connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
-  connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
-  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
-  connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
+  setConnections();
 }
 
 WidgetGare::~WidgetGare() { delete ui; }
+
+void WidgetGare::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(&timer, &QTimer::timeout, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro, connectionType);
+  connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked, connectionType);
+  connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked, connectionType);
+  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked, connectionType);
+  connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated, connectionType);
+}
 
 void WidgetGare::resetTables() { modelIsSet = false; }
 

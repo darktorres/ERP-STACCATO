@@ -16,7 +16,7 @@ public:
 
 private:
   // attributes
-  SearchDialog *sdProduto;
+  SearchDialog *const sdProduto = SearchDialog::produto(true, true, true, false, this);
   Ui::CadastroProduto *ui;
   // methods
   auto cadastrar() -> void final;

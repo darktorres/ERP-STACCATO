@@ -1443,13 +1443,14 @@ bool PrintProcessor::printPage(PageItemDesignIntf::Ptr page) {
     m_firstPage = false;
   }
 
-  qreal leftMargin, topMargin, rightMargin, bottomMargin;
-  m_printer->getPageMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin, QPrinter::Millimeter);
+  auto margins = m_printer->pageLayout().margins(QPageLayout::Millimeter);
 
   QRectF printerPageRect = m_printer->pageRect(QPrinter::Millimeter);
-  printerPageRect = QRectF(0, 0, (printerPageRect.size().width() + rightMargin + leftMargin) * page->unitFactor(), (printerPageRect.size().height() + bottomMargin + topMargin) * page->unitFactor());
+  printerPageRect =
+      QRectF(0, 0, (printerPageRect.size().width() + margins.right() + margins.left()) * page->unitFactor(), (printerPageRect.size().height() + margins.bottom() + margins.top()) * page->unitFactor());
 
-  if (page->printBehavior() == PageItemDesignIntf::Split && m_printer->pageSize() != static_cast<QPrinter::PageSize>(page->pageSize()) && printerPageRect.width() < page->geometry().width()) {
+  if (page->printBehavior() == PageItemDesignIntf::Split && m_printer->pageLayout().pageSize().id() != static_cast<QPageSize::PageSizeId>(page->pageSize()) &&
+      printerPageRect.width() < page->geometry().width()) {
     qreal pageWidth = page->geometry().width();
     qreal pageHeight = page->geometry().height();
     QRectF currentPrintingRect = printerPageRect;
@@ -1462,7 +1463,7 @@ bool PrintProcessor::printPage(PageItemDesignIntf::Ptr page) {
           m_printer->newPage();
         else
           first = false;
-        m_renderPage.render(m_painter, m_printer->pageRect(), currentPrintingRect);
+        m_renderPage.render(m_painter, m_printer->pageLayout().paintRectPixels(m_printer->resolution()), currentPrintingRect);
         currentPrintingRect.adjust(printerPageRect.size().width(), 0, printerPageRect.size().width(), 0);
         curWidth += printerPageRect.size().width();
       }
@@ -1491,19 +1492,19 @@ bool PrintProcessor::printPage(PageItemDesignIntf::Ptr page) {
 
 void PrintProcessor::initPrinter(PageItemDesignIntf *page) {
   if (page->oldPrintMode()) {
-    m_printer->setPageMargins(page->leftMargin(), page->topMargin(), page->rightMargin(), page->bottomMargin(), QPrinter::Millimeter);
-    m_printer->setOrientation(static_cast<QPrinter::Orientation>(page->pageOrientation()));
+    m_printer->setPageMargins(QMarginsF(page->leftMargin(), page->topMargin(), page->rightMargin(), page->bottomMargin()), QPageLayout::Millimeter);
+    m_printer->setPageOrientation((QPageLayout::Orientation)page->pageOrientation());
     QSizeF pageSize = (page->pageOrientation() == PageItemDesignIntf::Landscape) ? QSizeF(page->sizeMM().height(), page->sizeMM().width()) : page->sizeMM();
-    m_printer->setPaperSize(pageSize, QPrinter::Millimeter);
+    m_printer->setPageSize(QPageSize(pageSize, QPageSize::Millimeter));
   } else {
     m_printer->setFullPage(page->fullPage());
-    if (page->dropPrinterMargins()) m_printer->setPageMargins(0, 0, 0, 0, QPrinter::Point);
-    m_printer->setOrientation(static_cast<QPrinter::Orientation>(page->pageOrientation()));
+    if (page->dropPrinterMargins()) { m_printer->setPageMargins(QMarginsF(0, 0, 0, 0), QPageLayout::Point); }
+    m_printer->setPageOrientation((QPageLayout::Orientation)page->pageOrientation());
     if (page->pageSize() == PageItemDesignIntf::Custom) {
       QSizeF pageSize = (page->pageOrientation() == PageItemDesignIntf::Landscape) ? QSizeF(page->sizeMM().height(), page->sizeMM().width()) : page->sizeMM();
-      if (page->getSetPageSizeToPrinter() || m_printer->outputFormat() == QPrinter::PdfFormat) m_printer->setPaperSize(pageSize, QPrinter::Millimeter);
+      if (page->getSetPageSizeToPrinter() || m_printer->outputFormat() == QPrinter::PdfFormat) m_printer->setPageSize(QPageSize(pageSize, QPageSize::Millimeter));
     } else {
-      if (page->getSetPageSizeToPrinter() || m_printer->outputFormat() == QPrinter::PdfFormat) m_printer->setPaperSize(static_cast<QPrinter::PageSize>(page->pageSize()));
+      if (page->getSetPageSizeToPrinter() || m_printer->outputFormat() == QPrinter::PdfFormat) m_printer->setPageSize(QPageSize((QPageSize::PageSizeId)page->pageSize()));
     }
   }
 }

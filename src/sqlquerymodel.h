@@ -9,6 +9,7 @@ class SqlQueryModel final : public QSqlQueryModel {
 public:
   explicit SqlQueryModel(QObject *parent);
   explicit SqlQueryModel();
+
   auto data(const QModelIndex &index, const QString &column) const -> QVariant;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;

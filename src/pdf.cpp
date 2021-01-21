@@ -12,7 +12,7 @@
 #include <QSqlError>
 #include <QUrl>
 
-PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : tipo(tipo), id(id), parent(parent) {
+PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(parent), tipo(tipo) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");

@@ -12,9 +12,6 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
   ui->setupUi(this);
 
-  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &SendMail::on_pushButtonBuscar_clicked);
-  connect(ui->pushButtonEnviar, &QPushButton::clicked, this, &SendMail::on_pushButtonEnviar_clicked);
-
   setWindowFlags(Qt::Window);
 
   files.append(arquivo);
@@ -70,6 +67,15 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
   progress->setCancelButton(nullptr);
   progress->reset();
+
+  setConnections();
+}
+
+void SendMail::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &SendMail::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonEnviar, &QPushButton::clicked, this, &SendMail::on_pushButtonEnviar_clicked, connectionType);
 }
 
 SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {

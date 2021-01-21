@@ -10,6 +10,7 @@ class TreeView final : public QTreeView {
 public:
   explicit TreeView(QWidget *parent);
   ~TreeView() final = default;
+
   auto hideColumn(const QString &column) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;

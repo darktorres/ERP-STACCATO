@@ -16,6 +16,7 @@ class WidgetLogisticaAgendarEntrega final : public QWidget {
 public:
   explicit WidgetLogisticaAgendarEntrega(QWidget *parent);
   ~WidgetLogisticaAgendarEntrega();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

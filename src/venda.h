@@ -20,34 +20,26 @@ public:
 
 private:
   // attributes
-  QList<QSqlRecord> backupItem;
-  bool financeiro = false;
-  bool correcao = false;
-  int idLoja;
-  bool representacao;
   bool canChangeFrete = false;
+  bool correcao = false;
+  bool financeiro = false;
+  bool representacao;
   double minimoFrete;
   double porcFrete;
-  SqlTableModel modelFluxoCaixa;
+  int idLoja;
+  QList<QSqlRecord> backupItem;
   SqlTableModel modelFluxoCaixa2;
-  SqlTableModel modelItem;
+  SqlTableModel modelFluxoCaixa;
   SqlTableModel modelItem2;
+  SqlTableModel modelItem;
   SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
-  auto cadastrar() -> void final;
-  auto clearFields() -> void final;
-  auto registerMode() -> void final;
-  auto savingProcedures() -> void final;
-  auto setupMapper() -> void final;
-  auto successMessage() -> void final;
-  auto updateMode() -> void final;
-  auto verifyFields() -> void final;
-  auto viewRegister() -> bool final;
-
   auto atualizarCredito() -> void;
+  auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
   auto cancelamento() -> void;
+  auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;
@@ -75,9 +67,17 @@ private:
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
+  auto registerMode() -> void final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setItemBoxes() -> void;
   auto setTreeView() -> void;
+  auto setupMapper() -> void final;
   auto setupTables() -> void;
+  auto successMessage() -> void final;
   auto unsetConnections() -> void;
+  auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;
+  auto verifyFields() -> void final;
+  auto viewRegister() -> bool final;
 };

@@ -16,6 +16,7 @@ class WidgetGare : public QWidget {
 public:
   explicit WidgetGare(QWidget *parent);
   ~WidgetGare();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -35,5 +36,6 @@ private:
   auto on_pushButtonRetornoItau_clicked() -> void;
   auto on_tableSelection_changed() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };

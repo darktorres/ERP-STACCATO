@@ -17,20 +17,26 @@ Galpao::~Galpao() { delete ui; }
 
 void Galpao::resetTables() { modelIsSet = false; }
 
+void Galpao::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged, connectionType);
+  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled, connectionType);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged, connectionType);
+  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked, connectionType);
+  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked, connectionType);
+}
+
 void Galpao::updateTables() {
   if (not isSet) {
-    scene = new GraphicsScene(this);
+    scene = new QGraphicsScene(this);
     ui->graphicsGalpao->setScene(scene);
     ui->graphicsPallet->setScene(scene);
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
-    connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
-    connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
-    connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
-    connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
-    connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
+    setConnections();
 
     ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

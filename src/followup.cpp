@@ -12,10 +12,6 @@
 FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
 
-  connect(ui->dateFollowup, &QDateTimeEdit::dateChanged, this, &FollowUp::on_dateFollowup_dateChanged);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &FollowUp::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &FollowUp::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
 
   setupTables();
@@ -26,9 +22,19 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
   ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
   if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
+
+  setConnections();
 }
 
 FollowUp::~FollowUp() { delete ui; }
+
+void FollowUp::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateFollowup, &QDateTimeEdit::dateChanged, this, &FollowUp::on_dateFollowup_dateChanged, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &FollowUp::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &FollowUp::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void FollowUp::on_pushButtonCancelar_clicked() { close(); }
 

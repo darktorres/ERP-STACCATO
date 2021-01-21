@@ -10,10 +10,16 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
+  setConnections();
 }
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
+
+void WidgetFinanceiro::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables, connectionType);
+}
 
 void WidgetFinanceiro::updateTables() {
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());

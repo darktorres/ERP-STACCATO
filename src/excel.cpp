@@ -9,7 +9,7 @@
 #include <QSqlError>
 #include <QUrl>
 
-Excel::Excel(const QString &id, const Tipo tipo, QWidget *parent) : tipo(tipo), id(id), parent(parent) {}
+Excel::Excel(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(parent), tipo(tipo) {}
 
 void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
   for (int row = queryProduto.size() + 12; row < 398; ++row) { xlsx.setRowHidden(row, true); }

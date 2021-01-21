@@ -16,6 +16,7 @@ public:
 
   explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent);
   ~InputDialogConfirmacao() final;
+
   auto getDate() const -> QDate;
   auto getEntregou() const -> QString;
   auto getNextDateTime() const -> QDate;
@@ -25,9 +26,9 @@ public:
 
 private:
   // attributes
-  const Tipo tipo;
   SqlTableModel modelEstoque;
   SqlTableModel modelVeiculo;
+  Tipo const tipo;
   Ui::InputDialogConfirmacao *ui;
   // methods
   auto cadastrar() -> void;
@@ -47,5 +48,6 @@ private:
   auto on_pushButtonQuebradoEntrega_clicked() -> void;
   auto on_pushButtonQuebradoReceb_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };

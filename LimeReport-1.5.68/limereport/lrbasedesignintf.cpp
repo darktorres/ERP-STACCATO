@@ -52,7 +52,7 @@ namespace LimeReport {
 BaseDesignIntf::BaseDesignIntf(const QString &storageTypeName, QObject *owner, QGraphicsItem *parent)
     : QObject(owner), QGraphicsItem(parent), m_resizeHandleSize(Const::RESIZE_HANDLE_SIZE * 2), m_selectionPenSize(Const::SELECTION_PEN_SIZE),
       m_possibleResizeDirectionFlags(ResizeTop | ResizeBottom | ResizeLeft | ResizeRight), m_possibleMoveDirectionFlags(All), m_resizeDirectionFlags(0), m_width(200), m_height(50),
-      m_fontColor(Qt::black), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(0), m_storageTypeName(storageTypeName), m_itemMode(DesignMode),
+      m_fontColor(Qt::black), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(), m_storageTypeName(storageTypeName), m_itemMode(DesignMode),
       m_objectState(ObjectCreated), m_backgroundBrushStyle(SolidPattern), m_backgroundColor(Qt::white), m_margin(4), m_itemAlign(DesignedItemAlign), m_changingItemAlign(false),
       m_borderColor(Qt::black), m_reportSettings(0), m_patternName(""), m_patternItem(0), m_fillInSecondPass(false), m_watermark(false), m_hovered(false), m_joinMarkerOn(false), m_selectionMarker(0),
       m_fillTransparentInDesignMode(true), m_unitType(Millimeters), m_itemGeometryLocked(false), m_isChangingPos(false) {

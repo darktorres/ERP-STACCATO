@@ -148,7 +148,6 @@ SOURCES += \
     src/followup.cpp \
     src/followupproxymodel.cpp \
     src/galpao.cpp \
-    src/graphicsscene.cpp \
     src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
@@ -282,7 +281,6 @@ HEADERS  += \
     src/followup.h \
     src/followupproxymodel.h \
     src/galpao.h \
-    src/graphicsscene.h \
     src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \

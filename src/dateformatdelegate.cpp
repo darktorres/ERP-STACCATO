@@ -5,7 +5,7 @@
 #include <QDateEdit>
 
 DateFormatDelegate::DateFormatDelegate(const int vencimentoColumn, const int tipoColumn, const bool recebimento, QObject *parent)
-    : QStyledItemDelegate(parent), vencimentoColumn(vencimentoColumn), tipoColumn(tipoColumn), recebimento(recebimento) {}
+    : QStyledItemDelegate(parent), recebimento(recebimento), tipoColumn(tipoColumn), vencimentoColumn(vencimentoColumn) {}
 
 DateFormatDelegate::DateFormatDelegate(QObject *parent) : DateFormatDelegate(-1, -1, false, parent) {}
 

@@ -3,8 +3,10 @@
 #include <QString>
 
 class Sql {
+
 public:
   Sql() = delete;
+
   static auto updateVendaStatus(const QString &idVendas) -> void;
   static auto updateVendaStatus(const QStringList &idVendas) -> void;
   static auto view_a_pagar_vencer() -> QString;

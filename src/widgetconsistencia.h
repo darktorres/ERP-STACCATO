@@ -14,6 +14,7 @@ class WidgetConsistencia : public QWidget {
 public:
   explicit WidgetConsistencia(QWidget *parent);
   ~WidgetConsistencia();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -32,5 +33,6 @@ private:
   // attributes
   Ui::WidgetConsistencia *ui;
   // methods
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };

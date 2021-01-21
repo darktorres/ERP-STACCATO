@@ -14,6 +14,7 @@ class WidgetCompraFaturar final : public QWidget {
 public:
   explicit WidgetCompraFaturar(QWidget *parent);
   ~WidgetCompraFaturar();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

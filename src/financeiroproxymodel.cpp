@@ -8,8 +8,8 @@
 #include <QSqlRecord>
 
 FinanceiroProxyModel::FinanceiroProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), statusFinanceiro(model->record().indexOf("statusFinanceiro")), prazoEntrega(model->record().indexOf("prazoEntrega")),
-      novoPrazoEntrega(model->record().indexOf("novoPrazoEntrega")) {
+    : QIdentityProxyModel(parent), novoPrazoEntrega(model->record().indexOf("novoPrazoEntrega")), prazoEntrega(model->record().indexOf("prazoEntrega")),
+      statusFinanceiro(model->record().indexOf("statusFinanceiro")) {
   setSourceModel(model);
 }
 

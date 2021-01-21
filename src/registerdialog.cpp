@@ -21,8 +21,21 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeySt
   mapper.setModel(&model);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
 
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, [&]() { save(); });
+  setConnections();
+}
+
+void RegisterDialog::connectLineEditsToDirty() {
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+}
+
+void RegisterDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close, connectionType);
+  connect(
+      new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, [&]() { save(); }, connectionType);
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {

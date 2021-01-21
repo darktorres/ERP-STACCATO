@@ -9,18 +9,24 @@
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked);
-
   setupTables();
 
   ui->itemBoxDe->setSearchDialog(SearchDialog::conta(this));
   ui->itemBoxPara->setSearchDialog(SearchDialog::conta(this));
 
   ui->dateEdit->setDate(qApp->serverDate());
+
+  setConnections();
 }
 
 InserirTransferencia::~InserirTransferencia() { delete ui; }
+
+void InserirTransferencia::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   verifyFields();

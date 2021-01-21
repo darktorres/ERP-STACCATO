@@ -14,6 +14,7 @@ class WidgetCompraConfirmar final : public QWidget {
 public:
   explicit WidgetCompraConfirmar(QWidget *parent);
   ~WidgetCompraConfirmar();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

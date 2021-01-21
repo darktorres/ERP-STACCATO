@@ -12,6 +12,7 @@ class ValidadeDialog final : public QDialog {
 public:
   explicit ValidadeDialog(QWidget *parent);
   ~ValidadeDialog();
+
   auto getValidade() -> int;
 
 private:
@@ -22,4 +23,5 @@ private:
   auto on_dateEdit_dateChanged(const QDate &date) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_spinBox_valueChanged(const int dias) -> void;
+  auto setConnections() -> void;
 };

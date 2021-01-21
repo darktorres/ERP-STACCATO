@@ -14,6 +14,7 @@ class WidgetFinanceiroFluxoCaixa final : public QWidget {
 public:
   explicit WidgetFinanceiroFluxoCaixa(QWidget *parent);
   ~WidgetFinanceiroFluxoCaixa();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

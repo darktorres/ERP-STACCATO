@@ -26,8 +26,6 @@ class Application : public QApplication {
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
 
-  virtual auto notify(QObject *receiver, QEvent *event) -> bool override;
-
   auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
@@ -61,6 +59,7 @@ public:
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;
+  virtual auto notify(QObject *receiver, QEvent *event) -> bool override;
 
 signals:
   void verifyDb(const bool conectado);
@@ -72,21 +71,21 @@ private:
   };
 
   // attributes
-  QMap<QString, QString> mapLojas;
-  QSqlDatabase db; // TODO: doc says not to store database as class member
-  QVector<Message> exceptionQueue;
-  QVector<Message> errorQueue;
-  QVector<Message> informationQueue;
-  QVector<Message> warningQueue;
-  bool silent = false;
-  bool updaterOpen = false;
   bool inTransaction = false;
   bool isConnected = false;
   bool showingMessages = false;
+  bool silent = false;
+  bool updaterOpen = false;
   bool updating = false;
-  const QPalette defaultPalette = palette();
-  QDateTime serverDateCache;
   QDate systemDate = QDate::currentDate();
+  QDateTime serverDateCache;
+  QMap<QString, QString> mapLojas;
+  QPalette const defaultPalette = palette();
+  QSqlDatabase db; // TODO: doc says not to store database as class member
+  QVector<Message> errorQueue;
+  QVector<Message> exceptionQueue;
+  QVector<Message> informationQueue;
+  QVector<Message> warningQueue;
   // methods
   auto genericLogin(const QString &hostname) -> void;
   auto loginError() -> void;

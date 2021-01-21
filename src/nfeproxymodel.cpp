@@ -7,7 +7,7 @@
 #include <QSqlRecord>
 
 NFeProxyModel::NFeProxyModel(QSqlQueryModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), statusColumn(model->record().indexOf("statusDistribuicao")), dataColumn(model->record().indexOf("dataDistribuicao")) {}
+    : SortFilterProxyModel(model, parent), dataColumn(model->record().indexOf("dataDistribuicao")), statusColumn(model->record().indexOf("statusDistribuicao")) {}
 
 QVariant NFeProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

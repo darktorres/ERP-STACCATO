@@ -21,8 +21,14 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setDefaultSectionSize(20);
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
-  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
+  setConnections();
+}
+
+void TableView::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu, connectionType);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents, connectionType);
 }
 
 void TableView::resizeColumnsToContents() {

@@ -9,6 +9,7 @@ class PalletItem final : public QGraphicsObject {
 
 public:
   explicit PalletItem(const QRectF size, QGraphicsItem *parent = nullptr);
+
   auto boundingRect() const -> QRectF override;
   auto getFlagHighlight() const -> bool;
   auto getLabel() const -> QString;
@@ -26,12 +27,12 @@ signals:
 
 private:
   // attributes
-  QRectF size;
-  QString label;
-  QString text;
   bool flagTooltip = false;
   bool flagHighlight = false;
   bool selected = false;
+  QRectF size;
+  QString label;
+  QString text;
   // methods
   auto select() -> void;
 

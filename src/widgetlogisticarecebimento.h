@@ -15,6 +15,7 @@ class WidgetLogisticaRecebimento final : public QWidget {
 public:
   explicit WidgetLogisticaRecebimento(QWidget *parent);
   ~WidgetLogisticaRecebimento();
+
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;

@@ -15,6 +15,7 @@ class WidgetNfeEntrada final : public QWidget {
 public:
   explicit WidgetNfeEntrada(QWidget *parent);
   ~WidgetNfeEntrada();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

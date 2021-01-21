@@ -14,34 +14,32 @@
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
-  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
-  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
-  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
-
+  connectLineEditsToDirty();
+  setItemBoxes();
   setupTables();
   setupMapper();
   newRegister();
 
-  sdCliente = SearchDialog::cliente(this);
-  connect(sdCliente, &SearchDialog::itemSelected, this, &CadastroCliente::viewRegisterById);
-
   ui->lineEditCliente->setFocus();
 
-  setConnections();
-
   on_radioButtonPF_toggled(true);
+
+  setConnections();
 }
 
 CadastroCliente::~CadastroCliente() { delete ui; }
 
+void CadastroCliente::setItemBoxes() {
+  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
+  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
+  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
+}
+
 void CadastroCliente::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(sdCliente, &SearchDialog::itemSelected, this, &CadastroCliente::viewRegisterById, connectionType);
   connect(ui->checkBoxDataNasc, &QCheckBox::stateChanged, this, &CadastroCliente::on_checkBoxDataNasc_stateChanged, connectionType);
   connect(ui->checkBoxInscEstIsento, &QCheckBox::toggled, this, &CadastroCliente::on_checkBoxInscEstIsento_toggled, connectionType);
   connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroCliente::on_checkBoxMostrarInativos_clicked, connectionType);

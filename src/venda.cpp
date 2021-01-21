@@ -32,26 +32,13 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
+  connectLineEditsToDirty();
   setupTables();
-
-  ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
-
-  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa);
-
-  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
-  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
-  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
-  ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxEnderecoFat->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
-  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
-
+  setItemBoxes();
   setupMapper();
   newRegister();
+
+  ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
 
   if (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO") {
     ui->dateTimeEdit->setReadOnly(false);
@@ -63,6 +50,16 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 }
 
 Venda::~Venda() { delete ui; }
+
+void Venda::setItemBoxes() {
+  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
+  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
+  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
+  ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
+  ui->itemBoxEnderecoFat->setSearchDialog(SearchDialog::enderecoCliente(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
+  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
+}
 
 void Venda::setTreeView() {
   modelTree.appendModel(&modelItem);
@@ -158,6 +155,7 @@ void Venda::setConnections() {
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa, connectionType);
 }
 
 void Venda::unsetConnections() {
@@ -182,6 +180,7 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
+  disconnect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa);
 }
 
 void Venda::setupTables() {

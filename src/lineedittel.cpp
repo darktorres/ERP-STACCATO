@@ -2,7 +2,13 @@
 
 LineEditTel::LineEditTel(QWidget *parent) : QLineEdit(parent) {
   setPlaceholderText("(99)99999-9999");
-  connect(this, &QLineEdit::textEdited, this, &LineEditTel::processTel);
+  setConnections();
+}
+
+void LineEditTel::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(this, &QLineEdit::textEdited, this, &LineEditTel::processTel, connectionType);
 }
 
 void LineEditTel::processTel(const QString &value) {

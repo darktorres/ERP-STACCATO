@@ -10,6 +10,7 @@ QT_CHARTS_USE_NAMESPACE
 class ChartView : public QGraphicsView {
 public:
   explicit ChartView(QChart *chart, QWidget *parent);
+
   auto keepTooltip() -> void;
   auto removeTooltips() -> void;
   auto tooltip(const QPointF point, const bool state) -> void;
@@ -19,9 +20,10 @@ protected:
   auto resizeEvent(QResizeEvent *event) -> void override;
 
 private:
-  QChart *m_chart;
+  // attributes
+  ChartTooltip *m_tooltip = nullptr;
+  QChart *m_chart = nullptr;
   QGraphicsSimpleTextItem *m_coordX = nullptr;
   QGraphicsSimpleTextItem *m_coordY = nullptr;
-  ChartTooltip *m_tooltip = nullptr;
   QList<ChartTooltip *> m_tooltips;
 };

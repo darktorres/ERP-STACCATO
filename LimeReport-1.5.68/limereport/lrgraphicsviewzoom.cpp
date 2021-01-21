@@ -45,12 +45,10 @@ bool GraphicsViewZoomer::eventFilter(QObject *object, QEvent *event) {
   } else if (event->type() == QEvent::Wheel) {
     QWheelEvent *wheel_event = static_cast<QWheelEvent *>(event);
     if (QApplication::keyboardModifiers() == m_modifiers) {
-      if (wheel_event->orientation() == Qt::Vertical) {
-        double angle = wheel_event->delta();
-        double factor = qPow(m_zoomFactorBase, angle);
-        gentleZoom(factor);
-        return true;
-      }
+      double angle = wheel_event->angleDelta().y();
+      double factor = qPow(m_zoomFactorBase, angle);
+      gentleZoom(factor);
+      return true;
     }
   }
   Q_UNUSED(object)

@@ -38,12 +38,12 @@ signals:
 private:
   // attributes
   enum class States { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close } state;
-  const int timeout;
-  const QString host;
-  const QString pass;
-  const QString user;
-  const quint16 port;
+  int const timeout;
+  quint16 const port;
   QSslSocket *socket;
+  QString const host;
+  QString const pass;
+  QString const user;
   QString from;
   QString message;
   QString response;
@@ -54,5 +54,6 @@ private:
   auto disconnected() -> void;
   auto errorReceived(QAbstractSocket::SocketError socketError) -> void;
   auto readyRead() -> void;
+  auto setConnections() -> void;
   auto stateChanged(QAbstractSocket::SocketState socketState) -> void;
 };

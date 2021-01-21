@@ -11,8 +11,8 @@ public:
 
 protected:
   // attributes
-  QList<QSqlRecord> backupEndereco;
   int currentRowEnd = -1;
+  QList<QSqlRecord> backupEndereco;
   QDataWidgetMapper mapperEnd;
   SqlTableModel modelEnd;
   // methods
@@ -22,5 +22,6 @@ protected:
   virtual auto newRegister() -> bool override;
 
 private:
+  // methods
   auto setupTables(const QString &table) -> void;
 };

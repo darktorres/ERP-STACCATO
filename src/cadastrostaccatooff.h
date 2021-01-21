@@ -17,8 +17,8 @@ public:
 
 private:
   // attributes
-  Ui::CadastroStaccatoOff *ui;
   SqlTableModel model;
+  Ui::CadastroStaccatoOff *ui;
   // methods
   auto on_itemBoxFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
@@ -26,5 +26,6 @@ private:
   auto on_radioButtonEstoque_toggled(bool checked) -> void;
   auto on_radioButtonStaccatoOFF_toggled(bool checked) -> void;
   auto on_radioButtonTodos_toggled(bool checked) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };

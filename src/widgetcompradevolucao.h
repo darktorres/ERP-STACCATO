@@ -14,6 +14,7 @@ class WidgetCompraDevolucao final : public QWidget {
 public:
   explicit WidgetCompraDevolucao(QWidget *parent);
   ~WidgetCompraDevolucao();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

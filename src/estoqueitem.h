@@ -7,7 +7,8 @@ class EstoqueItem : public QObject, public QGraphicsSimpleTextItem {
 
 public:
   explicit EstoqueItem(const QString &text, const int idVendaProduto2, QGraphicsItem *parent = nullptr);
-  const int idVendaProduto2;
+
+  int const idVendaProduto2;
 
 signals:
   void startDragSignal();
@@ -15,6 +16,4 @@ signals:
 protected:
   auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void override;
   auto startDrag(QPointF pos) -> void;
-
-private:
 };

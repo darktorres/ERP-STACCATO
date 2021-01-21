@@ -14,6 +14,18 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
+  getSettings();
+
+  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") { hideWidgets(); }
+
+  setConnections();
+
+  adjustSize();
+}
+
+UserConfig::~UserConfig() { delete ui; }
+
+void UserConfig::getSettings() {
   ui->lineEditACBrServidor->setText(UserSession::getSetting("User/servidorACBr").toString());
   ui->lineEditACBrPorta->setText(UserSession::getSetting("User/portaACBr").toString());
   ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
@@ -32,34 +44,34 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
   ui->lineEditComprasFolder->setText(UserSession::getSetting("User/ComprasFolder").toString());
   ui->lineEditEntregasXmlFolder->setText(UserSession::getSetting("User/EntregasXmlFolder").toString());
   ui->lineEditEntregasPdfFolder->setText(UserSession::getSetting("User/EntregasPdfFolder").toString());
-
-  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") {
-    ui->groupBoxAcbr->hide();
-    ui->groupBoxEmail->hide();
-    ui->labelCompras->hide();
-    ui->lineEditComprasFolder->hide();
-    ui->pushButtonComprasFolder->hide();
-    ui->labelEntregas->hide();
-    ui->lineEditEntregasPdfFolder->hide();
-    ui->pushButtonEntregasPdfFolder->hide();
-    ui->labelEntregas_2->hide();
-    ui->lineEditEntregasXmlFolder->hide();
-    ui->pushButtonEntregasXmlFolder->hide();
-  }
-
-  connect(ui->pushButtonAlterarDados, &QPushButton::clicked, this, &UserConfig::on_pushButtonAlterarDados_clicked);
-  connect(ui->pushButtonComprasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonComprasFolder_clicked);
-  connect(ui->pushButtonEmailTeste, &QPushButton::clicked, this, &UserConfig::on_pushButtonEmailTeste_clicked);
-  connect(ui->pushButtonEntregasPdfFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasPdfFolder_clicked);
-  connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked);
-  connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &UserConfig::on_pushButtonSalvar_clicked);
-  connect(ui->pushButtonVendasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonVendasFolder_clicked);
-
-  adjustSize();
 }
 
-UserConfig::~UserConfig() { delete ui; }
+void UserConfig::hideWidgets() {
+  ui->groupBoxAcbr->hide();
+  ui->groupBoxEmail->hide();
+  ui->labelCompras->hide();
+  ui->labelEntregas->hide();
+  ui->labelEntregas_2->hide();
+  ui->lineEditComprasFolder->hide();
+  ui->lineEditEntregasPdfFolder->hide();
+  ui->lineEditEntregasXmlFolder->hide();
+  ui->pushButtonComprasFolder->hide();
+  ui->pushButtonEntregasPdfFolder->hide();
+  ui->pushButtonEntregasXmlFolder->hide();
+}
+
+void UserConfig::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonAlterarDados, &QPushButton::clicked, this, &UserConfig::on_pushButtonAlterarDados_clicked, connectionType);
+  connect(ui->pushButtonComprasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonComprasFolder_clicked, connectionType);
+  connect(ui->pushButtonEmailTeste, &QPushButton::clicked, this, &UserConfig::on_pushButtonEmailTeste_clicked, connectionType);
+  connect(ui->pushButtonEntregasPdfFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasPdfFolder_clicked, connectionType);
+  connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked, connectionType);
+  connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &UserConfig::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->pushButtonVendasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonVendasFolder_clicked, connectionType);
+}
 
 void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");

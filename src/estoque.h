@@ -12,17 +12,17 @@ class Estoque final : public QDialog {
   Q_OBJECT
 
 public:
-  // TODO: turn showWindow into a enum
   explicit Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent);
   ~Estoque();
+
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> void;
   static auto desfazerConsumo(const int idVendaProduto2) -> void;
 
 private:
   // attributes
-  const QString idEstoque; // TODO: change this to int?
-  SqlTableModel modelEstoque;
+  QString const idEstoque;
   SqlTableModel modelConsumo;
+  SqlTableModel modelEstoque;
   SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
 
@@ -40,6 +40,7 @@ private:
   auto dividirCompra(const int idVendaProduto2, const double quant) -> void;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
 };

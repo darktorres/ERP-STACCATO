@@ -16,6 +16,7 @@ class WidgetLogisticaEntregues final : public QWidget {
 public:
   explicit WidgetLogisticaEntregues(QWidget *parent);
   ~WidgetLogisticaEntregues();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

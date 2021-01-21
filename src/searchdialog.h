@@ -14,6 +14,7 @@ class SearchDialog final : public QDialog {
 
 public:
   ~SearchDialog() final;
+
   auto getFilter() const -> QString;
   auto getText(const QVariant &id) -> QString;
   auto setFilter(const QString &newFilter) -> void;
@@ -41,18 +42,18 @@ signals:
 
 private:
   // attributes
-  const QString primaryKey;
-  const QString fullTextIndex;
-  const QStringList textKeys;
   bool permitirDescontinuados = false;
   bool silent = false;
   bool isRepresentacao = false;
   bool showAllProdutos = false;
   bool compraAvulsa = false;
   bool isSet = false;
-  QTimer timer;
+  QString const fullTextIndex;
+  QString const primaryKey;
   QString filter;
   QString fornecedorRep;
+  QStringList const textKeys;
+  QTimer timer;
   SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
@@ -69,6 +70,7 @@ private:
   auto on_table_doubleClicked(const QModelIndex &) -> void;
   auto prepare_show() -> void;
   auto sendUpdateMessage(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table) -> void;
 };

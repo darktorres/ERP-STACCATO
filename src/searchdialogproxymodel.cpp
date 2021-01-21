@@ -9,8 +9,8 @@
 #include <QSqlRecord>
 
 SearchDialogProxyModel::SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), estoqueColumn(model->record().indexOf("estoque")), promocaoColumn(model->record().indexOf("promocao")),
-      descontinuadoColumn(model->record().indexOf("descontinuado")), validadeColumn(model->record().indexOf("validadeProdutos")) {}
+    : SortFilterProxyModel(model, parent), descontinuadoColumn(model->record().indexOf("descontinuado")), estoqueColumn(model->record().indexOf("estoque")),
+      promocaoColumn(model->record().indexOf("promocao")), validadeColumn(model->record().indexOf("validadeProdutos")) {}
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")) {}

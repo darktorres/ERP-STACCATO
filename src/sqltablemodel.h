@@ -20,11 +20,6 @@ public:
   explicit SqlTableModel(const int limit);
   explicit SqlTableModel();
 
-  auto select() -> bool;
-  auto setFilter(const QString &filter) -> void final;
-  auto setTable(const QString &tableName) -> void final;
-  auto supportedDropActions() const -> Qt::DropActions final;
-
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
@@ -32,11 +27,15 @@ public:
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
   auto removeSelection(const QModelIndexList &selection) -> void;
+  auto select() -> bool;
   auto setData(const int row, const QString &column, const QVariant &value) -> void;
   auto setData(const int row, const int column, const QVariant &value) -> void;
+  auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
+  auto setTable(const QString &tableName) -> void final;
   auto submitAll() -> void;
+  auto supportedDropActions() const -> Qt::DropActions final;
 
   QAbstractProxyModel *proxyModel = nullptr;
 
@@ -49,7 +48,7 @@ private:
 
 protected:
   // attributes
-  const int limit = 0;
+  int const limit = 0;
   // methods
   auto selectStatement() const -> QString final;
 };

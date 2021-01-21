@@ -12,6 +12,7 @@ class ItemBox final : public QLineEdit {
 public:
   explicit ItemBox(QWidget *parent);
   ~ItemBox() = default;
+
   auto changeItem(const QVariant &newId) -> void;
   auto clear() -> void;
   auto getId() const -> QVariant;
@@ -41,5 +42,6 @@ private:
   auto resetCursor() -> void;
   auto resizeEvent(QResizeEvent *event) -> void final;
   auto search() -> void;
+  auto setConnections() -> void;
   auto setIcons() -> void;
 };

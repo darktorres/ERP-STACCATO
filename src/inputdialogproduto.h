@@ -16,14 +16,15 @@ public:
 
   explicit InputDialogProduto(const Tipo &tipo, QWidget *parent);
   ~InputDialogProduto();
+
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
   auto setFilter(const QStringList &ids) -> void;
 
 private:
   // attributes
-  const Tipo tipo;
   SqlTableModel modelPedidoFornecedor;
+  Tipo const tipo;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> void;

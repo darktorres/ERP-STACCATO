@@ -15,6 +15,7 @@ class WidgetFinanceiroCompra final : public QWidget {
 public:
   explicit WidgetFinanceiroCompra(QWidget *parent);
   ~WidgetFinanceiroCompra();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

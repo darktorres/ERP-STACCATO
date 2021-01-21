@@ -7,11 +7,19 @@
 
 WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetConsistencia) {
   ui->setupUi(this);
+
   ui->dateEditMes->setDate(qApp->serverDate());
-  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetConsistencia::setupTables);
+
+  setConnections();
 }
 
 WidgetConsistencia::~WidgetConsistencia() { delete ui; }
+
+void WidgetConsistencia::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetConsistencia::setupTables, connectionType);
+}
 
 void WidgetConsistencia::resetTables() { modelIsSet = false; }
 

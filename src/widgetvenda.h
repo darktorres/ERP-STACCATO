@@ -15,6 +15,7 @@ class WidgetVenda final : public QWidget {
 public:
   explicit WidgetVenda(QWidget *parent);
   ~WidgetVenda() final;
+
   auto resetTables() -> void;
   auto setFinanceiro() -> void;
   auto updateTables() -> void;

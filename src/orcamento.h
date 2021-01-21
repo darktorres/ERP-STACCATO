@@ -17,36 +17,28 @@ public:
 
 private:
   // attributes
-  QList<QSqlRecord> backupItem;
-  int currentRowItem = -1;
-  bool isReadOnly = false;
-  bool currentItemIsEstoque = false;
-  int currentItemIsPromocao = 0;
   bool canChangeFrete = false;
+  bool currentItemIsEstoque = false;
+  bool isReadOnly = false;
   double minimoFrete = 0;
   double porcFrete = 0;
+  int currentItemIsPromocao = 0;
+  int currentRowItem = -1;
+  QList<QSqlRecord> backupItem;
   QDataWidgetMapper mapperItem;
   SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  auto cadastrar() -> void final;
-  auto clearFields() -> void final;
-  auto newRegister() -> bool final;
-  auto registerMode() -> void final;
-  auto savingProcedures() -> void final;
-  auto setupMapper() -> void final;
-  auto successMessage() -> void final;
-  auto updateMode() -> void final;
-  auto verifyFields() -> void final;
-  auto viewRegister() -> bool final;
-
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
   auto buscarCadastrarConsultor() -> void;
   auto buscarParametrosFrete() -> void;
+  auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
+  auto clearFields() -> void final;
   auto generateId() -> void;
+  auto newRegister() -> bool final;
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
@@ -77,10 +69,18 @@ private:
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
   auto recalcularTotais() -> void;
+  auto registerMode() -> void final;
   auto removeItem() -> void;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setItemBoxes() -> void;
+  auto setupMapper() -> void final;
   auto setupTables() -> void;
+  auto successMessage() -> void final;
   auto unsetConnections() -> void;
+  auto updateMode() -> void final;
   auto verificaCadastroCliente() -> void;
   auto verificaDisponibilidadeEstoque() -> void;
+  auto verifyFields() -> void final;
+  auto viewRegister() -> bool final;
 };

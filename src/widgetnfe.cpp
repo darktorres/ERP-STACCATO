@@ -3,11 +3,16 @@
 
 WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);
-
-  connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged);
+  setConnections();
 }
 
 WidgetNfe::~WidgetNfe() { delete ui; }
+
+void WidgetNfe::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged, connectionType);
+}
 
 void WidgetNfe::updateTables() {
   const QString currentTab = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());

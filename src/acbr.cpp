@@ -12,12 +12,6 @@
 #include <QUrl>
 
 ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
-  connect(&socket, &QAbstractSocket::errorOccurred, this, &ACBr::error);
-  connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
-  connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
-  connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);
-  connect(&socket, &QTcpSocket::bytesWritten, this, &ACBr::write);
-
   progressDialog->reset();
   progressDialog->setCancelButton(nullptr);
   progressDialog->setLabelText("Esperando ACBr...");
@@ -25,6 +19,18 @@ ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
   progressDialog->setWindowModality(Qt::WindowModal);
   progressDialog->setMaximum(0);
   progressDialog->setMinimum(0);
+
+  setConnections();
+}
+
+void ACBr::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(&socket, &QAbstractSocket::errorOccurred, this, &ACBr::error, connectionType);
+  connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected, connectionType);
+  connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected, connectionType);
+  connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket, connectionType);
+  connect(&socket, &QTcpSocket::bytesWritten, this, &ACBr::write, connectionType);
 }
 
 void ACBr::error(QAbstractSocket::SocketError socketError) {

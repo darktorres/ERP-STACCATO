@@ -16,10 +16,10 @@ public:
 
 private:
   // attributes
-  QList<QSqlRecord> backupVeiculo;
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
-  SearchDialog *sdTransportadora;
+  QList<QSqlRecord> backupVeiculo;
+  SearchDialog *const sdTransportadora = SearchDialog::transportadora(this);
   SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
@@ -51,6 +51,7 @@ private:
   auto on_tableVeiculo_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;

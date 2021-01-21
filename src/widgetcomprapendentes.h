@@ -15,6 +15,7 @@ class WidgetCompraPendentes final : public QWidget {
 public:
   explicit WidgetCompraPendentes(QWidget *parent);
   ~WidgetCompraPendentes();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

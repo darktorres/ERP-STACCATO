@@ -12,27 +12,20 @@ class CadastroFornecedor final : public RegisterAddressDialog {
 
 public:
   enum class Especialidade { Revestimentos = 1, Loucas_Metais = 2, Acessorios = 3, Insumos = 4, Servicos = 5 };
+
   explicit CadastroFornecedor(QWidget *parent);
   ~CadastroFornecedor() final;
 
 private:
   // attributes
-  SearchDialog *sdFornecedor;
+  SearchDialog *const sdFornecedor = SearchDialog::fornecedor(this);
   Ui::CadastroFornecedor *ui;
   // methods
-  auto cadastrar() -> void final;
-  auto clearFields() -> void final;
-  auto registerMode() -> void final;
-  auto savingProcedures() -> void final;
-  auto setupMapper() -> void final;
-  auto successMessage() -> void final;
-  auto updateMode() -> void final;
-  auto verifyFields() -> void final;
-  auto viewRegister() -> bool final;
-
   auto ajustarValidade(const int novaValidade) -> void;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
+  auto clearFields() -> void final;
   auto novoEndereco() -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
@@ -51,7 +44,15 @@ private:
   auto on_pushButtonValidade_clicked() -> void;
   auto on_tabWidget_currentChanged(int index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
+  auto registerMode() -> void final;
+  auto savingProcedures() -> void final;
+  auto setConnections() -> void;
+  auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
   auto verificaEndereco() -> void;
+  auto verifyFields() -> void final;
+  auto viewRegister() -> bool final;
 };

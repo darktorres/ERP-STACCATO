@@ -12,8 +12,8 @@ public:
 
 private:
   // attributes
-  const int statusColumn = -1;
-  const int dataColumn = -1;
+  int const dataColumn = -1;
+  int const statusColumn = -1;
   // methods
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 };

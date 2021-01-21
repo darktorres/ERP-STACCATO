@@ -19,16 +19,22 @@
 ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 
-  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &ImportaProdutos::on_checkBoxRepresentacao_toggled);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ImportaProdutos::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
 
   setProgressDialog();
   setupModels();
+
+  setConnections();
 }
 
 ImportaProdutos::~ImportaProdutos() { delete ui; }
+
+void ImportaProdutos::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &ImportaProdutos::on_checkBoxRepresentacao_toggled, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ImportaProdutos::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void ImportaProdutos::importarTabela() {
   try {

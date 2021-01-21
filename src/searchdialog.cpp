@@ -18,19 +18,10 @@
 #include <QSqlRecord>
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent)
-    : QDialog(parent), primaryKey(primaryKey), fullTextIndex(fullTextIndex), textKeys(textKeys), filter(filter), model(1000), ui(new Ui::SearchDialog) {
+    : QDialog(parent), fullTextIndex(fullTextIndex), primaryKey(primaryKey), filter(filter), textKeys(textKeys), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   timer.setSingleShot(true);
-
-  connect(&timer, &QTimer::timeout, this, &SearchDialog::on_lineEditBusca_textChanged);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::delayFiltro);
-  connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &SearchDialog::on_pushButtonModelo3d_clicked);
-  connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
-  connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
-  connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled);
-  connect(ui->table, &TableView::clicked, this, &SearchDialog::on_table_clicked);
-  connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);
@@ -52,11 +43,26 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->pushButtonModelo3d->hide();
 
   ui->lineEditBusca->setFocus();
+
+  setConnections();
+}
+
+SearchDialog::~SearchDialog() { delete ui; }
+
+void SearchDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(&timer, &QTimer::timeout, this, &SearchDialog::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::delayFiltro, connectionType);
+  connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &SearchDialog::on_pushButtonModelo3d_clicked, connectionType);
+  connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked, connectionType);
+  connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled, connectionType);
+  connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled, connectionType);
+  connect(ui->table, &TableView::clicked, this, &SearchDialog::on_table_clicked, connectionType);
+  connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked, connectionType);
 }
 
 void SearchDialog::delayFiltro() { timer.start(500); }
-
-SearchDialog::~SearchDialog() { delete ui; }
 
 void SearchDialog::setupTables(const QString &table) {
   model.setTable(table);

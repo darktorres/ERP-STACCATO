@@ -13,20 +13,22 @@ class FollowUp final : public QDialog {
 
 public:
   enum class Tipo { Orcamento, Venda };
+
   explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent);
   ~FollowUp();
 
 private:
   // attributes
-  const QString id;
-  const Tipo tipo;
-  SqlTableModel modelViewFollowup;
+  QString const id;
   SqlTableModel modelOrcamento;
+  SqlTableModel modelViewFollowup;
+  Tipo const tipo;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };

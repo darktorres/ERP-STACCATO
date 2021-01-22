@@ -23,9 +23,11 @@ ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString 
 
   setWindowFlags(Qt::Window);
   setWindowTitle("Venda " + idVenda);
+
   setupTables();
-  viewProduto(codComercial, idVenda);
   setConnections();
+
+  viewProduto(codComercial, idVenda);
 
   show();
 }

@@ -15,11 +15,6 @@ WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare
   ui->setupUi(this);
 
   timer.setSingleShot(true);
-
-  ui->dateEdit->setDate(qApp->serverDate());
-  ui->dateEditDia->setDate(qApp->serverDate());
-
-  setConnections();
 }
 
 WidgetGare::~WidgetGare() { delete ui; }
@@ -44,7 +39,14 @@ void WidgetGare::setConnections() {
 void WidgetGare::resetTables() { modelIsSet = false; }
 
 void WidgetGare::updateTables() {
-  if (not isSet) { isSet = true; }
+  if (not isSet) {
+    ui->dateEdit->setDate(qApp->serverDate());
+    ui->dateEditDia->setDate(qApp->serverDate());
+
+    setConnections();
+
+    isSet = true;
+  }
 
   if (not modelIsSet) {
     setupTables();

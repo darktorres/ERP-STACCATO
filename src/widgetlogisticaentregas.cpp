@@ -498,9 +498,10 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   SqlQueryModel modelProdutosAgrupado;
 
-  modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un "
-                                 "FROM view_calendario_produto WHERE idVenda = '" +
-                                 idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
+  modelProdutosAgrupado.setQuery(
+      "SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un "
+      "FROM view_calendario_produto WHERE idVenda = '" +
+      idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
   if (modelProdutosAgrupado.lastError().isValid()) { throw RuntimeException("Erro buscando dados: " + modelProdutosAgrupado.lastError().text(), this); }
 
@@ -574,9 +575,10 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row += 2, ++index) {
     xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));
-    xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto").toString() + " - " + modelProdutosAgrupado.data(index, "codComercial").toString()); // produto
-    xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
-    xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                                   // caixas
+    xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto").toString() + " - " + modelProdutosAgrupado.data(index, "codComercial").toString() + " - " +
+                                               modelProdutosAgrupado.data(index, "lote").toString());                                                         // produto
+    xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString()); // quant
+    xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                     // caixas
   }
 
   for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }

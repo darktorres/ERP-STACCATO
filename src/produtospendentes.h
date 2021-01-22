@@ -13,8 +13,10 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent);
+  explicit ProdutosPendentes(QWidget *parent);
   ~ProdutosPendentes();
+
+  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 
 private:
   // attributes
@@ -35,5 +37,4 @@ private:
   auto recarregarTabelas() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 };

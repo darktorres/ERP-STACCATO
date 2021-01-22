@@ -14,8 +14,6 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
 
-  setConnections();
-
   setComboBox();
 
   ui->lineEditUser->setFocus();
@@ -53,6 +51,10 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     ui->lineEditUser->setFocus();
     setWindowTitle("Autorização");
   }
+
+  qApp->updater();
+
+  setConnections();
 
   adjustSize();
 }

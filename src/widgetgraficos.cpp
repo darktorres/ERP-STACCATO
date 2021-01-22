@@ -6,11 +6,7 @@
 
 #include <QSqlError>
 
-WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) {
-  ui->setupUi(this);
-
-  setConnections();
-}
+WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) { ui->setupUi(this); }
 
 WidgetGraficos::~WidgetGraficos() { delete ui; }
 
@@ -26,6 +22,8 @@ void WidgetGraficos::resetTables() {}
 
 void WidgetGraficos::updateTables() {
   if (not isSet) {
+    setConnections();
+
     if (UserSession::tipoUsuario == "GERENTE LOJA") {
       const QString nomeLoja = UserSession::fromLoja("descricao").toString();
 

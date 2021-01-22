@@ -148,8 +148,10 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
-  auto *produtos = new ProdutosPendentes(codComercial, idVenda, this);
+  auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
+  produtos->viewProduto(codComercial, idVenda);
+  produtos->show();
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {

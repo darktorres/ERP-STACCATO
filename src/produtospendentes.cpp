@@ -18,18 +18,12 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
+ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
-  setWindowTitle("Venda " + idVenda);
-
   setupTables();
   setConnections();
-
-  viewProduto(codComercial, idVenda);
-
-  show();
 }
 
 ProdutosPendentes::~ProdutosPendentes() { delete ui; }
@@ -39,7 +33,6 @@ void ProdutosPendentes::setConnections() {
 
   connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked, connectionType);
   connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked, connectionType);
-  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade, connectionType);
 }
 
 void ProdutosPendentes::recalcularQuantidade() {
@@ -53,6 +46,8 @@ void ProdutosPendentes::recalcularQuantidade() {
 }
 
 void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
+  setWindowTitle("Venda " + idVenda);
+
   modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
   modelProdutos.select();
@@ -146,6 +141,8 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("st");
+
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
 }
 
 void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {

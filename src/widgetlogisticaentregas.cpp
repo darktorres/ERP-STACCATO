@@ -499,7 +499,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   SqlQueryModel modelProdutosAgrupado;
 
   modelProdutosAgrupado.setQuery(
-      "SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un "
+      "SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un, isEstoque "
       "FROM view_calendario_produto WHERE idVenda = '" +
       idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
@@ -577,15 +577,18 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
     const QString produto = modelProdutosAgrupado.data(index, "produto").toString().left(20);
     const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
-    const QString lote = (fornecedor == "PORTINARI") ? " - " + modelProdutosAgrupado.data(index, "lote").toString() : "";
+    const QString lote = (fornecedor == "PORTINARI") ? modelProdutosAgrupado.data(index, "lote").toString() : "";
     const QString quant = modelProdutosAgrupado.data(index, "quant").toString();
     const QString un = modelProdutosAgrupado.data(index, "un").toString();
     const QString caixas = modelProdutosAgrupado.data(index, "caixas").toString();
+    const QString isEstoque = modelProdutosAgrupado.data(index, "isEstoque").toString();
 
     xlsx.write("D" + QString::number(row), fornecedor);
-    xlsx.write("I" + QString::number(row), produto + " - " + codComercial + lote); // produto
-    xlsx.write("Y" + QString::number(row), quant + " " + un);                      // quant
-    xlsx.write("AC" + QString::number(row), caixas);                               // caixas
+    xlsx.write("I" + QString::number(row), produto + " - " + codComercial);
+    xlsx.write("W" + QString::number(row), lote);
+    xlsx.write("Y" + QString::number(row), quant + " " + un);
+    xlsx.write("AC" + QString::number(row), isEstoque);
+    xlsx.write("AD" + QString::number(row), caixas.toDouble());
   }
 
   for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }

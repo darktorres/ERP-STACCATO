@@ -383,7 +383,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
     ACBr acbrLocal;
     acbrLocal.gerarDanfe(xml.toLatin1()); // close if error
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     if (not manterAberto) { close(); }
     manterAberto = false;
     throw;
@@ -811,7 +811,7 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
         modelViewProdutoEstoque.setData(row, "descUnitario", preco);
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -889,7 +889,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
       mapper.setCurrentModelIndex(index);
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -913,7 +913,7 @@ void CadastrarNFe::calculaSt() {
 
       updateTotais();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -943,7 +943,7 @@ void CadastrarNFe::calculaIcms() {
 
       updateTotais();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -973,7 +973,7 @@ void CadastrarNFe::calculaPis() {
 
       updateTotais();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -1003,7 +1003,7 @@ void CadastrarNFe::calculaCofins() {
 
       updateTotais();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -1198,7 +1198,7 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
         // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }

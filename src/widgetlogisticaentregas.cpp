@@ -446,7 +446,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
     const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
 
     qApp->enqueueInformation(xMotivo, this);
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     updateTables();
     throw;
   }

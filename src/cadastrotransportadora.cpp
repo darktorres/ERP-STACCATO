@@ -375,7 +375,7 @@ void CadastroTransportadora::cadastrar() {
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelVeiculo.setFilter(primaryKey + " = '" + primaryId + "'");
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();

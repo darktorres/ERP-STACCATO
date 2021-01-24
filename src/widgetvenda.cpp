@@ -131,7 +131,7 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -160,7 +160,7 @@ void WidgetVenda::setPermissions() {
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -272,7 +272,7 @@ void WidgetVenda::setComboBoxFornecedores() {
     ui->comboBoxFornecedores->addItem("");
 
     while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -320,7 +320,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
       montaFiltro();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -354,7 +354,7 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 

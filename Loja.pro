@@ -8,10 +8,6 @@
     error("Use Qt 5.15 ou mais novo")
 }
 
-win32-msvc* {
-    error("Não compatível com VisualStudio, use MinGW")
-}
-
 TARGET = Loja
 TEMPLATE = app
 
@@ -38,20 +34,42 @@ win32{
     QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
     RC_ICONS = Staccato.ico
-
-    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
 }
+
+win32-msvc{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
+
+win32-g++{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
 
 contains(CONFIG, deploy){
     message(deploy)
     DEFINES *= DEPLOY
+
+ *-msvc*{
+    QMAKE_CXXFLAGS_RELEASE *= /O2
+        }
+
+ *-g++{
     QMAKE_CXXFLAGS_RELEASE *= -O3
     QMAKE_LFLAGS_RELEASE *= -O3
+      }
 } else{
+ *-msvc*{
+    QMAKE_CXXFLAGS_DEBUG -= -O2
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_DEBUG *= /Od
+    QMAKE_CXXFLAGS_RELEASE *= /Od
+        }
+
+ *-g++{
     QMAKE_CXXFLAGS_DEBUG *= -O0
     QMAKE_CXXFLAGS_RELEASE *= -O0
     QMAKE_LFLAGS_DEBUG *= -O0
     QMAKE_LFLAGS_RELEASE *= -O0
+      }
+}
+
+win32-msvc* {
+   QMAKE_CXXFLAGS += /std:c++17 /permissive-
 }
 
 *-g++{

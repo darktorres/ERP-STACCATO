@@ -207,7 +207,7 @@ void WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled(const bool enabled) 
       child->setChecked(enabled);
       child->blockSignals(false);
     }
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 

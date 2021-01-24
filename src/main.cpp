@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 #else
     window->show();
 #endif
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     app.rollbackTransaction();
     exit(1);
   }

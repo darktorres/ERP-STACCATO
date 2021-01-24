@@ -247,7 +247,7 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 

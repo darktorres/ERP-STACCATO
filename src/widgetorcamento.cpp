@@ -48,7 +48,7 @@ void WidgetOrcamento::setPermissions() {
 
       ui->dateEdit->setDate(qApp->serverDate());
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -234,7 +234,7 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
         child->setChecked(enabled);
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -275,7 +275,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
       montaFiltro();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }

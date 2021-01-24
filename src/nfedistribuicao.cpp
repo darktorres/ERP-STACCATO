@@ -585,7 +585,7 @@ void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
         child->setChecked(enabled);
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 

@@ -42,7 +42,7 @@ void CadastroProduto::clearFields() {
     ui->textEditObserv->clear();
 
     setupUi();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -199,7 +199,7 @@ void CadastroProduto::cadastrar() {
     if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     qApp->endTransaction();
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     qApp->rollbackTransaction();
     model.select();
 

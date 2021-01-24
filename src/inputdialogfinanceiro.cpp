@@ -129,7 +129,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
       // TODO: adicionar frete/adicionais
       ui->doubleSpinBoxTotal->setValue(total);
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -448,7 +448,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         }
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -467,7 +467,7 @@ void InputDialogFinanceiro::calcularTotal() {
       ui->doubleSpinBoxTotal->setValue(total);
       ui->widgetPgts->setTotal(total);
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -508,7 +508,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
         modelPedidoFornecedor.setData(rowMae, "preco", preco);
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -657,7 +657,7 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
       QDialog::accept();
       close();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -759,7 +759,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
       ui->doubleSpinBoxTotal->setValue(total);
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -798,7 +798,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
         modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
       }
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 

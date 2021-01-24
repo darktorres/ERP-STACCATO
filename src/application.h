@@ -5,6 +5,8 @@
 #include <QPalette>
 #include <QSqlDatabase>
 
+#include <stdexcept>
+
 #if defined(qApp)
 #undef qApp
 #endif

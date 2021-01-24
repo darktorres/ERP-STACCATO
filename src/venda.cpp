@@ -913,7 +913,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
       ui->widgetPgts->setTotal(total);
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -952,7 +952,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -980,7 +980,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -1008,7 +1008,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &e) {}
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -1109,7 +1109,7 @@ void Venda::cadastrar() {
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     qApp->rollbackTransaction();
     model.select();
     modelItem.select();

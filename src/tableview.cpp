@@ -200,7 +200,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
       currentRow = cell.row();
 
-      text += (cell.data().userType() == QVariant::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
+      text += (cell.data().userType() == QMetaType::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
     }
 
     QApplication::clipboard()->setText(headers + text);

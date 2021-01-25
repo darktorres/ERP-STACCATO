@@ -27,8 +27,8 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
 
   QVariant adjustedValue = value;
 
-  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
-  if (adjustedValue.type() == QVariant::String) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
+  if (adjustedValue.userType() == QMetaType::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+  if (adjustedValue.userType() == QMetaType::QString) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
 
   if (proxyModel) {
     proxyModel->setData(proxyModel->index(row, column), adjustedValue);

@@ -415,32 +415,91 @@ void ImportaProdutos::marcaTodosProdutosDescontinuados() {
 void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   produto = {};
 
-  produto.idFornecedor = fornecedores.value(xlsx.read(row, 1).toString());
-  produto.fornecedor = xlsx.read(row, 1).toString().toUpper();
-  produto.descricao = xlsx.read(row, 2).toString().remove("*").toUpper();
-  produto.un = xlsx.read(row, 3).toString().remove("*").toUpper().toUpper();
-  produto.colecao = xlsx.read(row, 4).toString().remove("*").toUpper();
-  produto.m2cx = qApp->roundDouble(xlsx.read(row, 5).toDouble());
-  produto.pccx = qApp->roundDouble(xlsx.read(row, 6).toDouble());
-  produto.kgcx = qApp->roundDouble(xlsx.read(row, 7).toDouble());
-  produto.formComercial = xlsx.read(row, 8).toString().remove("*").toUpper();
-  produto.codComercial = xlsx.read(row, 9).toString().remove("*").remove(".").remove(",").toUpper();
-  produto.codBarras = xlsx.read(row, 10).toString().remove("*").remove(".").remove(",").toUpper();
-  produto.ncm = xlsx.read(row, 11).toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper();
-  produto.qtdPallet = qApp->roundDouble(xlsx.read(row, 12).toDouble());
-  produto.custo = qApp->roundDouble(xlsx.read(row, 13).toDouble());
-  produto.precoVenda = qApp->roundDouble(xlsx.read(row, 14).toDouble());
-  produto.ui = xlsx.read(row, 15).toString().remove("*").toUpper();
-  produto.un2 = xlsx.read(row, 16).toString().remove("*").toUpper();
-  produto.minimo = qApp->roundDouble(xlsx.read(row, 17).toDouble());
-  produto.mva = qApp->roundDouble(xlsx.read(row, 18).toDouble());
-  produto.st = qApp->roundDouble(xlsx.read(row, 19).toDouble());
-  produto.sticms = qApp->roundDouble(xlsx.read(row, 20).toDouble());
+  const QLocale locale(QLocale::Portuguese);
+
+  QVariant fornecedor = xlsx.read(row, 1);
+  QVariant descricao = xlsx.read(row, 2);
+  QVariant un = xlsx.read(row, 3);
+  QVariant colecao = xlsx.read(row, 4);
+
+  QVariant m2cx = xlsx.read(row, 5);
+  if (m2cx.userType() == QMetaType::QString) { m2cx = locale.toDouble(m2cx.toString()); }
+  m2cx = qApp->roundDouble(m2cx.toDouble());
+
+  QVariant pccx = xlsx.read(row, 6);
+  if (pccx.userType() == QMetaType::QString) { pccx = locale.toDouble(pccx.toString()); }
+  pccx = qApp->roundDouble(pccx.toDouble());
+
+  QVariant kgcx = xlsx.read(row, 7);
+  if (kgcx.userType() == QMetaType::QString) { kgcx = locale.toDouble(kgcx.toString()); }
+  kgcx = qApp->roundDouble(kgcx.toDouble());
+
+  QVariant formComercial = xlsx.read(row, 8);
+  QVariant codComercial = xlsx.read(row, 9);
+  QVariant codBarras = xlsx.read(row, 10);
+  QVariant ncm = xlsx.read(row, 11);
+
+  QVariant qtdPallet = xlsx.read(row, 12);
+  if (qtdPallet.userType() == QMetaType::QString) { qtdPallet = locale.toDouble(qtdPallet.toString()); }
+  qtdPallet = qApp->roundDouble(qtdPallet.toDouble());
+
+  QVariant custo = xlsx.read(row, 13);
+  if (custo.userType() == QMetaType::QString) { custo = locale.toDouble(custo.toString()); }
+  custo = qApp->roundDouble(custo.toDouble());
+
+  QVariant precoVenda = xlsx.read(row, 14);
+  if (precoVenda.userType() == QMetaType::QString) { precoVenda = locale.toDouble(precoVenda.toString()); }
+  precoVenda = qApp->roundDouble(precoVenda.toDouble());
+
+  QVariant ui = xlsx.read(row, 15);
+  QVariant un2 = xlsx.read(row, 16);
+
+  QVariant minimo = xlsx.read(row, 17);
+  if (minimo.userType() == QMetaType::QString) { minimo = locale.toDouble(minimo.toString()); }
+  minimo = qApp->roundDouble(minimo.toDouble());
+
+  QVariant mva = xlsx.read(row, 18);
+  if (mva.userType() == QMetaType::QString) { mva = locale.toDouble(mva.toString()); }
+  mva = qApp->roundDouble(mva.toDouble());
+
+  QVariant st = xlsx.read(row, 19);
+  if (st.userType() == QMetaType::QString) { st = locale.toDouble(st.toString()); }
+  st = qApp->roundDouble(st.toDouble());
+
+  QVariant sticms = xlsx.read(row, 20);
+  if (sticms.userType() == QMetaType::QString) { sticms = locale.toDouble(sticms.toString()); }
+  sticms = qApp->roundDouble(sticms.toDouble());
+
+  produto.idFornecedor = fornecedores.value(fornecedor.toString());
+  produto.fornecedor = fornecedor.toString().toUpper();
+  produto.descricao = descricao.toString().remove("*").toUpper();
+  produto.un = un.toString().remove("*").toUpper();
+  produto.colecao = colecao.toString().remove("*").toUpper();
+  produto.m2cx = m2cx.toDouble();
+  produto.pccx = pccx.toDouble();
+  produto.kgcx = kgcx.toDouble();
+  produto.formComercial = formComercial.toString().remove("*").toUpper();
+  produto.codComercial = codComercial.toString().remove("*").remove(".").remove(",").toUpper();
+  produto.codBarras = codBarras.toString().remove("*").remove(".").remove(",").toUpper();
+  produto.ncm = ncm.toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper();
+  produto.qtdPallet = qtdPallet.toDouble();
+  produto.custo = custo.toDouble();
+  produto.precoVenda = precoVenda.toDouble();
+  produto.ui = ui.toString().remove("*").toUpper();
+  produto.un2 = un2.toString().remove("*").toUpper();
+  produto.minimo = minimo.toDouble();
+  produto.mva = mva.toDouble();
+  produto.st = st.toDouble();
+  produto.sticms = sticms.toDouble();
   produto.markup = qApp->roundDouble(((produto.precoVenda / produto.custo) - 1.) * 100);
 
   // consistencia dados
 
   if (produto.ui.isEmpty()) { produto.ui = "0"; }
+
+  if (produto.codBarras == "0") { produto.codBarras = QString(); }
+
+  if (produto.ncm == "0") { produto.ncm = QString(); }
 
   if (produto.ncm.length() == 10) {
     produto.ncmEx = produto.ncm.right(2);

@@ -21,7 +21,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.9.33");
+  setApplicationVersion("0.9.34");
   setStyle("Fusion");
 
   QDir::setCurrent(QCoreApplication::applicationDirPath());

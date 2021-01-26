@@ -26,5 +26,6 @@ private:
   auto on_pushButtonLogin_clicked() -> void;
   auto setComboBox() -> void;
   auto setConnections() -> void;
+  auto verificaManutencao() -> void;
   auto verificaVersao() -> void;
 };

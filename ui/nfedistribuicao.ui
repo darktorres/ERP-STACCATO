@@ -96,7 +96,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxNaoRealizada_2">
+          <widget class="QCheckBox" name="checkBoxCancelada">
            <property name="text">
             <string>Cancelada</string>
            </property>
@@ -219,7 +219,7 @@
   <tabstop>checkBoxConfirmacao</tabstop>
   <tabstop>checkBoxDesconhecimento</tabstop>
   <tabstop>checkBoxNaoRealizada</tabstop>
-  <tabstop>checkBoxNaoRealizada_2</tabstop>
+  <tabstop>checkBoxCancelada</tabstop>
   <tabstop>itemBoxLoja</tabstop>
   <tabstop>table</tabstop>
   <tabstop>pushButtonPesquisar</tabstop>

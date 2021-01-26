@@ -93,6 +93,7 @@ void NFeDistribuicao::setConnections() {
   connect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU, connectionType);
@@ -110,6 +111,7 @@ void NFeDistribuicao::unsetConnections() {
   disconnect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro);

@@ -27,16 +27,16 @@ CONFIG += no_zint
     DEFINES += HAVE_SVG
 }
 
-INCLUDEPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
-DEPENDPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
+#INCLUDEPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
+#DEPENDPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
 
-contains(CONFIG, easy_profiler){
-    message(EasyProfiler)
-    unix|win32: LIBS += -L$$PWD/3rdparty/easyprofiler/build/bin/ -leasy_profiler
-    greaterThan(QT_MAJOR_VERSION, 4){
-        DEFINES += BUILD_WITH_EASY_PROFILER
-    }
-}
+#contains(CONFIG, easy_profiler){
+#    message(EasyProfiler)
+#    unix|win32: LIBS += -L$$PWD/3rdparty/easyprofiler/build/bin/ -leasy_profiler
+#    greaterThan(QT_MAJOR_VERSION, 4){
+#        DEFINES += BUILD_WITH_EASY_PROFILER
+#    }
+#}
 
 !contains(CONFIG, qtscriptengine){
 greaterThan(QT_MAJOR_VERSION, 4){
@@ -59,19 +59,19 @@ contains(CONFIG, qtscriptengine){
     message(qtscriptengine)
 }
 
-!contains(CONFIG, no_formdesigner){
-    CONFIG *= dialogdesigner
-}
+#!contains(CONFIG, no_formdesigner){
+#    CONFIG *= dialogdesigner
+#}
 
-!contains(CONFIG, no_embedded_designer){
-    CONFIG *= embedded_designer
-    DEFINES += HAVE_REPORT_DESIGNER
-}
+#!contains(CONFIG, no_embedded_designer){
+#    CONFIG *= embedded_designer
+#    DEFINES += HAVE_REPORT_DESIGNER
+#}
 
-ZINT_PATH = $$PWD/3rdparty/zint-2.6.1
-contains(CONFIG,zint){
-    DEFINES *= HAVE_ZINT
-}
+#ZINT_PATH = $$PWD/3rdparty/zint-2.6.1
+#contains(CONFIG,zint){
+#    DEFINES *= HAVE_ZINT
+#}
 
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT *= uitools

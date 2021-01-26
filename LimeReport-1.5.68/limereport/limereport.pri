@@ -1,8 +1,8 @@
 include(../common.pri)
 
-contains(CONFIG, embedded_designer){
-    include(designer.pri)
-}
+#contains(CONFIG, embedded_designer){
+#    include(designer.pri)
+#}
 
 DEFINES += INSPECT_BASEDESIGN
 

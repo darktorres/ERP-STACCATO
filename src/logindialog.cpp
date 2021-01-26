@@ -95,11 +95,20 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
     verificaVersao();
+    verificaManutencao();
   }
 
   if (tipo == Tipo::Autorizacao) { UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text()); }
 
   accept();
+}
+
+void LoginDialog::verificaManutencao() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT emManutencao FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando se em manutenção: " + query.lastError().text()); }
+
+  if (query.value("emManutencao").toBool()) { throw RuntimeException("Sistema em manutenção!"); }
 }
 
 void LoginDialog::verificaVersao() {

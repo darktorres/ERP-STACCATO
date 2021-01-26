@@ -39,8 +39,11 @@ void WidgetLogisticaCalendario::listarVeiculos() {
     throw RuntimeException("Erro buscando veiculos: " + query.lastError().text(), this);
   }
 
+  int index = 1;
+
   while (query.next()) {
     auto *checkbox = new QCheckBox(this);
+    checkbox->setObjectName("checkBox" + QString::number(index++));
     checkbox->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
     checkbox->setChecked(true);
     connect(checkbox, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);

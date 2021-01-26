@@ -575,7 +575,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row += 2, ++index) {
     const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
-    const QString produto = modelProdutosAgrupado.data(index, "produto").toString().left(20);
+    const QString produto = modelProdutosAgrupado.data(index, "produto").toString();
     const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
     const QString lote = (fornecedor == "PORTINARI") ? modelProdutosAgrupado.data(index, "lote").toString() : "";
     const QString quant = modelProdutosAgrupado.data(index, "quant").toString();

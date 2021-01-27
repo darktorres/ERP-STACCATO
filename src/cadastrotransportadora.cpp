@@ -259,7 +259,7 @@ void CadastroTransportadora::on_tableEndereco_clicked(const QModelIndex &index) 
 void CadastroTransportadora::setupUi() {
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
   ui->lineEditANTT->setInputMask("99999999;_");
-  ui->lineEditPlaca->setInputMask("AAA-9999;_");
+  ui->lineEditPlaca->setInputMask("AAA-9N99;_");
   ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
   ui->lineEditUfPlaca->setInputMask(">AA;_");
@@ -289,7 +289,10 @@ bool CadastroTransportadora::viewRegister() {
 
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
-bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
+void CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
+  if (ui->lineEditModelo->text().isEmpty()) { throw RuntimeError("Um campo obrigatório não foi preenchido:\nModelo"); }
+  if (ui->lineEditCarga->text().isEmpty()) { throw RuntimeError("Um campo obrigatório não foi preenchido:\nCarga (Kg)"); }
+
   if (tipoVeiculo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
 
   modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text());
@@ -302,16 +305,16 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
   if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
   isDirty = true;
-
-  return true;
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
-  if (cadastrarVeiculo()) { novoVeiculo(); }
+  cadastrarVeiculo();
+  novoVeiculo();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
-  if (cadastrarVeiculo(Tipo::Atualizar)) { novoVeiculo(); }
+  cadastrarVeiculo(Tipo::Atualizar);
+  novoVeiculo();
 }
 
 void CadastroTransportadora::novoVeiculo() {

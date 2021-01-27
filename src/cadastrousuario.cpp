@@ -126,11 +126,10 @@ void CadastroUsuario::savingProcedures() {
   setData("email", ui->lineEditEmail->text());
   setData("user", ui->lineEditUser->text());
 
-  // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
     SqlQuery query;
 
-    if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
+    if (not query.exec("SELECT SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
 
     setData("passwd", query.value(0));
   }

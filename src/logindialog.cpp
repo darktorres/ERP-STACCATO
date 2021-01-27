@@ -94,7 +94,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
     if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
-    verificaVersao();
+    verificaVersao(); // TODO: usar o webserver para indicar se está em manutencao
     verificaManutencao();
   }
 

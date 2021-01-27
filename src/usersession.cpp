@@ -11,7 +11,7 @@ void UserSession::setSetting(const QString &key, const QVariant &value) { settin
 void UserSession::login(const QString &user, const QString &password) {
   if (not query) { query = new SqlQuery(); }
 
-  query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
+  query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = SHA1_PASSWORD(:password) AND desativado = FALSE");
   query->bindValue(":user", user);
   query->bindValue(":password", password);
 
@@ -27,7 +27,7 @@ void UserSession::login(const QString &user, const QString &password) {
 
 void UserSession::autorizacao(const QString &user, const QString &password) {
   SqlQuery queryAutorizar;
-  queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
+  queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = SHA1_PASSWORD(:password) AND desativado = FALSE AND "
                          "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
   queryAutorizar.bindValue(":user", user);
   queryAutorizar.bindValue(":password", password);

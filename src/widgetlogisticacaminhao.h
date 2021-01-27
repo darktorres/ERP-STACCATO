@@ -26,6 +26,7 @@ private:
   SqlTableModel modelCarga;
   Ui::WidgetLogisticaCaminhao *ui;
   // methods
+  auto on_checkBoxDesativados_toggled(const bool checked) -> void;
   auto on_table_clicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

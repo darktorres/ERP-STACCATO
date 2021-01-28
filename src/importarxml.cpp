@@ -1148,10 +1148,6 @@ double ImportarXML::calculaGare(XML &xml) {
   if (xml.xNome == "DOCOL METAIS SANITARIOS LTDA") { return 0; }
 
   for (auto &produto : xml.produtos) {
-    qDebug() << "tipoICMS: " << produto.tipoICMS;
-    if (produto.tipoICMS != "ICMS00") { continue; }
-    // TODO: tratar quando for simples nacional
-
     const ImportarXML::NCM ncm = buscaNCM(produto.ncm);
 
     if (qFuzzyIsNull(ncm.aliq)) { continue; }

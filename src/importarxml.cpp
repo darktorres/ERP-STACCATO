@@ -1179,7 +1179,9 @@ double ImportarXML::calculaGare(XML &xml) {
 ImportarXML::NCM ImportarXML::buscaNCM(const QString &ncm) {
   SqlQuery query;
 
-  if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'") or not query.first()) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
+  if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'")) { throw RuntimeException("Erro buscando ncm " + ncm + ": " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeError("NCM " + ncm + " não cadastrado!"); }
 
   return NCM{query.value("mva4").toDouble() / 100, query.value("mva12").toDouble() / 100, query.value("aliq").toDouble() / 100};
 }

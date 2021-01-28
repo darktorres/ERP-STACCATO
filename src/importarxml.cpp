@@ -1145,8 +1145,6 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
 double ImportarXML::calculaGare(XML &xml) {
   double total = 0;
 
-  if (xml.xNome == "DOCOL METAIS SANITARIOS LTDA") { return 0; }
-
   for (auto &produto : xml.produtos) {
     const ImportarXML::NCM ncm = buscaNCM(produto.ncm);
 

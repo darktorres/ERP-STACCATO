@@ -217,7 +217,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   // those query's below commit transaction so have to be done outside transaction
   SqlQuery query;
-  query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
+  query.prepare("CREATE USER :user@'%' IDENTIFIED WITH mysql_native_password BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
   if (not query.exec()) { throw RuntimeException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }

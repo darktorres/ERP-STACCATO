@@ -153,6 +153,7 @@ void CadastroTransportadora::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 
+// TODO: antes de remover verificar se existem agendamentos em aberto e avisar usuario
 // TODO: ao desativar uma transportadora desativar cada um de seus veiculos senao eles continuam a aparecer no SearchDialog/Calendario
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 

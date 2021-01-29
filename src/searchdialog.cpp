@@ -17,8 +17,9 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent)
-    : QDialog(parent), fullTextIndex(fullTextIndex), primaryKey(primaryKey), filter(filter), textKeys(textKeys), model(1000), ui(new Ui::SearchDialog) {
+SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
+                           const bool naoListar, QWidget *parent)
+    : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndex(fullTextIndex), primaryKey(primaryKey), filter(filter), textKeys(textKeys), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   timer.setSingleShot(true);
@@ -29,14 +30,18 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
 
   setupTables(table);
 
+  if (naoListarBuscaVazia) { model.setFilter("0"); }
+
+  model.select();
+
   if (fullTextIndex.isEmpty()) {
     ui->lineEditBusca->hide();
     ui->labelBusca->hide();
   }
 
-  ui->lineEditEstoque->hide();
-  ui->lineEditEstoque_2->hide();
-  ui->lineEditPromocao->hide();
+  ui->legendaEstoque->hide();
+  ui->legendaStaccatoOFF->hide();
+  ui->legendaPromocao->hide();
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
   ui->treeView->hide();
@@ -79,7 +84,7 @@ void SearchDialog::setupTables(const QString &table) {
 void SearchDialog::on_lineEditBusca_textChanged() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  if (text.isEmpty()) { return model.setFilter(filter); }
+  if (text.isEmpty()) { return model.setFilter(naoListarBuscaVazia ? "0" : filter); }
 
   if (model.tableName() == "view_nfe_baixada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
 
@@ -103,34 +108,6 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 }
 
 void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(model.data(index.row(), primaryKey)); }
-
-void SearchDialog::prepare_show() {
-  model.setFilter(filter);
-
-  if (not isSet) {
-    model.select();
-    isSet = true;
-  }
-
-  ui->lineEditBusca->setFocus();
-  ui->lineEditBusca->clear();
-
-  ui->lineEditEstoque_2->setText("STACCATO OFF");
-  ui->lineEditEstoque->setText("Estoque");
-  ui->lineEditPromocao->setText("Promoção");
-}
-
-void SearchDialog::show() {
-  prepare_show();
-
-  QDialog::show();
-}
-
-void SearchDialog::showMaximized() {
-  prepare_show();
-
-  QDialog::showMaximized();
-}
 
 void SearchDialog::on_table_clicked(const QModelIndex &index) {
   if (model.tableName() == "view_nfe_baixada" and index.isValid()) {
@@ -168,6 +145,9 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 
   close();
   sendUpdateMessage(selection.first());
+
+  ui->lineEditBusca->setFocus();
+  ui->lineEditBusca->clear();
 }
 
 QString SearchDialog::getText(const QVariant &id) {
@@ -196,7 +176,7 @@ QString SearchDialog::getText(const QVariant &id) {
 void SearchDialog::setHeaderData(const QString &column, const QString &newHeader) { model.setHeaderData(column, newHeader); }
 
 SearchDialog *SearchDialog::cliente(QWidget *parent) {
-  SearchDialog *sdCliente = new SearchDialog("Buscar Cliente", "cliente", "idCliente", {"nome_razao"}, "nome_razao, nomeFantasia, cpf, cnpj", "desativado = FALSE", parent);
+  SearchDialog *sdCliente = new SearchDialog("Buscar Cliente", "cliente", "idCliente", {"nome_razao"}, "nome_razao, nomeFantasia, cpf, cnpj", "desativado = FALSE", true, parent);
 
   sdCliente->hideColumns({"idCliente", "inscEstadual", "credito", "idUsuarioRel", "idCadastroRel", "idProfissionalRel", "incompleto", "desativado"});
 
@@ -223,7 +203,7 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::loja(QWidget *parent) {
-  SearchDialog *sdLoja = new SearchDialog("Buscar Loja", "loja", "idLoja", {"nomeFantasia"}, "descricao, nomeFantasia, razaoSocial", "desativado = FALSE", parent);
+  SearchDialog *sdLoja = new SearchDialog("Buscar Loja", "loja", "idLoja", {"nomeFantasia"}, "descricao, nomeFantasia, razaoSocial", "desativado = FALSE", false, parent);
 
   sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(false, parent));
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
@@ -248,7 +228,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "", "", parent);
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "", "", true, parent);
 
   sdNFe->ui->lineEditBusca->show();
 
@@ -275,7 +255,7 @@ SearchDialog *SearchDialog::nfe(QWidget *parent) {
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
-  SearchDialog *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, "fornecedor, descricao, colecao, codcomercial", "idProduto = 0", parent);
+  SearchDialog *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, "fornecedor, descricao, colecao, codcomercial", "idProduto = 0", true, parent);
 
   sdProd->permitirDescontinuados = permitirDescontinuados;
   sdProd->silent = silent;
@@ -313,9 +293,9 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
 
   sdProd->ui->radioButtonProdAtivos->show();
   sdProd->ui->radioButtonProdDesc->show();
-  sdProd->ui->lineEditEstoque->show();
-  sdProd->ui->lineEditEstoque_2->show();
-  sdProd->ui->lineEditPromocao->show();
+  sdProd->ui->legendaEstoque->show();
+  sdProd->ui->legendaStaccatoOFF->show();
+  sdProd->ui->legendaPromocao->show();
   sdProd->ui->pushButtonModelo3d->show();
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 
@@ -326,7 +306,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
 
 SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
   SearchDialog *sdFornecedor =
-      new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE", parent);
+      new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE", false, parent);
 
   sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2", "comissaoLoja",  "desativado",    "email", "idFornecedor", "idNextel", "inscEstadual", "nextel",    "representacao", "st",
                              "tel",        "telCel",    "telCom",    "especialidade", "fretePagoLoja", "banco", "agencia",      "cc",       "poupanca",     "nomeBanco", "cnpjBanco"});
@@ -346,7 +326,7 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::transportadora(QWidget *parent) {
-  SearchDialog *sdTransportadora = new SearchDialog("Buscar Transportadora", "transportadora", "idTransportadora", {"nomeFantasia"}, "razaoSocial, nomeFantasia", "desativado = FALSE", parent);
+  SearchDialog *sdTransportadora = new SearchDialog("Buscar Transportadora", "transportadora", "idTransportadora", {"nomeFantasia"}, "razaoSocial, nomeFantasia", "desativado = FALSE", false, parent);
 
   sdTransportadora->hideColumns({"idTransportadora", "desativado"});
 
@@ -363,7 +343,7 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::veiculo(QWidget *parent) {
-  SearchDialog *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", parent);
+  SearchDialog *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", false, parent);
 
   sdVeiculo->hideColumns({"idVeiculo", "desativado"});
 
@@ -378,7 +358,7 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::usuario(QWidget *parent) {
-  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", parent);
+  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", false, parent);
 
   sdUsuario->hideColumns({"idLoja", "idUsuario", "user", "passwd", "especialidade", "desativado"});
 
@@ -401,7 +381,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   const QString tipoUsuario = UserSession::tipoUsuario;
   const QString filtroAdmin = (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO") ? "" : " AND nome != 'REPOSIÇÂO'";
 
-  SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, parent);
+  SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, false, parent);
 
   sdVendedor->model.setSort("nome");
 
@@ -417,7 +397,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::conta(QWidget *parent) {
-  SearchDialog *sdConta = new SearchDialog("Buscar Conta", "loja_has_conta", "idConta", {"banco", "agencia", "conta"}, {}, "", parent);
+  SearchDialog *sdConta = new SearchDialog("Buscar Conta", "loja_has_conta", "idConta", {"banco", "agencia", "conta"}, {}, "", false, parent);
 
   sdConta->hideColumns({"idConta", "idLoja", "desativado"});
 
@@ -429,7 +409,7 @@ SearchDialog *SearchDialog::conta(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
-  SearchDialog *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", parent);
+  SearchDialog *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", false, parent);
 
   sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "desativado"});
 
@@ -448,7 +428,7 @@ SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
 SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *parent) {
   const QString filtroNaoHa = mostrarNaoHa ? "" : " AND idProfissional NOT IN (1)";
 
-  SearchDialog *sdProfissional = new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, parent);
+  SearchDialog *sdProfissional = new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, true, parent);
 
   sdProfissional->hideColumns({"idLoja", "idUsuarioRel", "idProfissional", "inscEstadual", "contatoNome", "contatoCPF", "contatoApelido", "contatoRG", "banco", "agencia", "cc", "nomeBanco",
                                "cpfBanco", "desativado", "comissao", "poupanca", "cnpjBanco"});

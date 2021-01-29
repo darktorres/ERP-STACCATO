@@ -20,8 +20,6 @@ public:
   auto setFilter(const QString &newFilter) -> void;
   auto setFornecedorRep(const QString &newFornecedorRep) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
-  auto show() -> void;
-  auto showMaximized() -> void;
 
   // Factory Methods
   static auto cliente(QWidget *parent) -> SearchDialog *;
@@ -42,12 +40,12 @@ signals:
 
 private:
   // attributes
-  bool permitirDescontinuados = false;
-  bool silent = false;
-  bool isRepresentacao = false;
-  bool showAllProdutos = false;
   bool compraAvulsa = false;
-  bool isSet = false;
+  bool isRepresentacao = false;
+  bool naoListarBuscaVazia = true;
+  bool permitirDescontinuados = false;
+  bool showAllProdutos = false;
+  bool silent = false;
   QString const fullTextIndex;
   QString const primaryKey;
   QString filter;
@@ -57,7 +55,8 @@ private:
   SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent);
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, const bool naoListar,
+                        QWidget *parent);
 
   auto delayFiltro() -> void;
   auto hideColumns(const QStringList &columns) -> void;
@@ -68,7 +67,6 @@ private:
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
   auto on_table_clicked(const QModelIndex &index) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
-  auto prepare_show() -> void;
   auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;

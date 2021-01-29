@@ -268,7 +268,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditEstoque_4">
+              <widget class="QLineEdit" name="legendaStaccatoOFF">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -288,7 +288,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditEstoque_3">
+              <widget class="QLineEdit" name="legendaEstoque">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -308,7 +308,7 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditPromocao_2">
+              <widget class="QLineEdit" name="legendaPromocao">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1621,9 +1621,9 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonLimparSelecao</tabstop>
   <tabstop>tableProdutos</tabstop>
   <tabstop>pushButtonModelo3d</tabstop>
-  <tabstop>lineEditEstoque_4</tabstop>
-  <tabstop>lineEditEstoque_3</tabstop>
-  <tabstop>lineEditPromocao_2</tabstop>
+  <tabstop>legendaStaccatoOFF</tabstop>
+  <tabstop>legendaEstoque</tabstop>
+  <tabstop>legendaPromocao</tabstop>
   <tabstop>spinBoxPrazoEntrega</tabstop>
   <tabstop>plainTextEditObs</tabstop>
   <tabstop>plainTextEditBaixa</tabstop>

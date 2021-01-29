@@ -263,7 +263,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     //-------------------------------------
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
+    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
     if (not text.isEmpty()) { filtros << busca; }
 
     //-------------------------------------
@@ -352,7 +352,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
     ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
     ui->radioButtonAgendado->hide();
-    ui->lineEditBusca->setPlaceholderText("Venda/Contraparte");
+    ui->lineEditBusca->setPlaceholderText("Venda/OC Rep./Contraparte");
   }
 }
 

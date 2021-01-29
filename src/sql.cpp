@@ -247,14 +247,14 @@ QString Sql::view_a_pagar_vencer() {
 
 QString Sql::view_relatorio_loja(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
   QStringList filtros;
-  filtros << mes;
+  if (not mes.isEmpty()) { filtros << mes; }
   if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
   if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
   if (not loja.isEmpty()) { filtros << "v.loja = '" + loja + "'"; }
   QString filtro;
   if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
 
-  return "SELECT"
+  return "SELECT "
          "`v`.`Loja` AS `Loja`,"
          "SUM(`v`.`Faturamento`) AS `Faturamento`,"
          "SUM(`v`.`Comissão`) AS `Comissão`,"
@@ -268,22 +268,22 @@ QString Sql::view_relatorio_loja(const QString& mes, const QString &idUsuario, c
          "view_relatorio_reposicao r ON `r`.`loja` = `v`.`Loja` "
          "AND r.data = v.Mês " +
          filtro +
-         " GROUP BY `v`.`Loja` "
+         " GROUP BY `v`.`Loja`, Mês "
          "ORDER BY `v`.`Loja`";
 }
 
 QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
   QStringList filtros;
-  filtros << mes;
+  if (not mes.isEmpty()) { filtros << mes; }
   if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
   if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
   if (not loja.isEmpty()) { filtros << "loja = '" + loja + "'"; }
   QString filtro;
   if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
 
-  return "SELECT"
+  return "SELECT "
          "`c`.`Loja` AS `Loja`,"
-         "`c`.`Vendedor` AS `Vendedor`,"
+         "GROUP_CONCAT(DISTINCT `c`.`Vendedor`) AS `Vendedor`,"
          "`c`.`idUsuario` AS `idUsuario`,"
          "GROUP_CONCAT(DISTINCT `c`.`idUsuarioConsultor`"
          "SEPARATOR ',') AS `idUsuarioConsultor`,"
@@ -294,8 +294,8 @@ QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuari
          "FROM "
          "`comissao` `c` " +
          filtro +
-         " GROUP BY `c`.`idUsuario` , `c`.`Loja` , `c`.`Mês` "
-         "ORDER BY `c`.`Loja`, c.`Vendedor`";
+         " GROUP BY `idUsuario` , `Loja` , `Mês` "
+         "ORDER BY `Loja`, `Vendedor`";
 }
 
 // clang-format on

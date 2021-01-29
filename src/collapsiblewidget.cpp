@@ -10,6 +10,8 @@ CollapsibleWidget::CollapsibleWidget(QWidget *parent) : QWidget(parent), ui(new 
   setConnections();
 }
 
+CollapsibleWidget::~CollapsibleWidget() { delete ui; }
+
 void CollapsibleWidget::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
@@ -23,8 +25,6 @@ QString CollapsibleWidget::getHtml() {
 
   return ui->textBrowser->toHtml();
 }
-
-CollapsibleWidget::~CollapsibleWidget() { delete ui; }
 
 void CollapsibleWidget::on_pushButton_clicked() {
   ui->textBrowser->setVisible(not ui->textBrowser->isVisible());

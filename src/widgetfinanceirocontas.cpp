@@ -271,17 +271,20 @@ void WidgetFinanceiroContas::montaFiltro() {
     filtros << "cr.desativado = FALSE";
     filtros << "cr.representacao = FALSE";
 
-    model.setQuery(
-        "SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, "
-        "`cr`.`dataEmissao` AS `dataEmissao`, `cr`.`dataPagamento` AS `dataPagamento`, cr.dataRealizado AS dataRealizado, `cr`.`idVenda` AS `idVenda`, `cr`.`valor` AS `valor`, `cr`.`tipo` AS `tipo`, "
-        "`cr`.`parcela` AS `parcela`, `cr`.`observacao` AS `observacao`, `cr`.`status` AS `status`, `v`.`statusFinanceiro` AS `statusFinanceiro` FROM (`conta_a_receber_has_pagamento` `cr` "
-        "LEFT JOIN `venda` `v` ON ((`cr`.`idVenda` = `v`.`idVenda`))) WHERE " +
-        filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
+    model.setQuery("SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, "
+                   "`cr`.`dataEmissao` AS `dataEmissao`, `cr`.`dataPagamento` AS `dataPagamento`, cr.dataRealizado AS dataRealizado, `cr`.`idVenda` AS `idVenda`, GROUP_CONCAT(DISTINCT "
+                   "pf2.ordemRepresentacao) AS ordemRepresentacao, `cr`.`valor` AS `valor`, `cr`.`tipo` AS `tipo`, `cr`.`parcela` AS `parcela`, `cr`.`observacao` AS `observacao`, `cr`.`status` AS "
+                   "`status`, `v`.`statusFinanceiro` AS `statusFinanceiro` FROM `conta_a_receber_has_pagamento` `cr` LEFT JOIN `venda` `v` ON `cr`.`idVenda` = `v`.`idVenda` LEFT JOIN "
+                   "pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda WHERE " +
+                   filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
   if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + model.lastError().text(), this); }
 
-  if (tipo == Tipo::Receber) { model.setHeaderData("idVenda", "Venda"); }
+  if (tipo == Tipo::Receber) {
+    model.setHeaderData("idVenda", "Venda");
+    model.setHeaderData("ordemRepresentacao", "OC Rep.");
+  }
 
   if (tipo == Tipo::Pagar) {
     model.setHeaderData("cp_idVenda", "Venda");

@@ -19,20 +19,11 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   ui->itemBoxConta->setSearchDialog(SearchDialog::conta(this));
   ui->itemBoxConta->setId(3);
 
-  ui->comboBox->clear();
-  ui->comboBox->addItem("");
+  ui->comboBoxPagamento->clear();
+  ui->comboBoxPagamento->addItem("");
 
-  ui->comboBoxLoja->clear();
-  ui->comboBoxLoja->addItem("");
-  ui->comboBoxLoja->addItem("ALPH");
-  ui->comboBoxLoja->addItem("GABR");
-  ui->comboBoxLoja->addItem("GRAN");
-
-  SqlQuery query;
-
-  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { throw RuntimeException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
-
-  while (query.next()) { ui->comboBox->addItem(query.value("tipo").toString()); }
+  fillComboBoxLoja();
+  fillComboBoxPagamento();
 
   ui->dateEditEvento->setDate(qApp->serverDate());
 
@@ -45,8 +36,8 @@ void AnteciparRecebimento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais, connectionType);
-  connect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged, connectionType);
   connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged, connectionType);
+  connect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged, connectionType);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged, connectionType);
@@ -55,8 +46,8 @@ void AnteciparRecebimento::setConnections() {
 
 void AnteciparRecebimento::unsetConnections() {
   disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
-  disconnect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
   disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  disconnect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
@@ -149,7 +140,7 @@ void AnteciparRecebimento::setupTables() {
 }
 
 void AnteciparRecebimento::montaFiltro() {
-  const QString textTipo = ui->comboBox->currentText();
+  const QString textTipo = ui->comboBoxPagamento->currentText();
   const QString textLoja = ui->comboBoxLoja->currentText();
 
   if (textTipo == "Cartão de crédito" or textTipo == "Cartão de débito") {
@@ -285,6 +276,30 @@ void AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
 
     if (modelContaReceber.data(row, "grupo").isNull()) { throw RuntimeError("Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
   }
+}
+
+void AnteciparRecebimento::fillComboBoxLoja() {
+  ui->comboBoxLoja->clear();
+
+  ui->comboBoxLoja->addItem("");
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { return; }
+
+  while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
+}
+
+void AnteciparRecebimento::fillComboBoxPagamento() {
+  ui->comboBoxPagamento->clear();
+
+  ui->comboBoxPagamento->addItem("");
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { throw RuntimeException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
+
+  while (query.next()) { ui->comboBoxPagamento->addItem(query.value("tipo").toString()); }
 }
 
 // TODO: 0implementar antecipacao

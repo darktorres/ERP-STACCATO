@@ -22,6 +22,8 @@ private:
   // methods
   auto cadastrar(const QModelIndexList &list) -> void;
   auto calcularTotais() -> void;
+  auto fillComboBoxLoja() -> void;
+  auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
   auto on_comboBox_currentTextChanged(const QString &) -> void;

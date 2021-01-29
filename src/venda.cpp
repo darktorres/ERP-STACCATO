@@ -20,6 +20,7 @@
 #include "searchdialogproxymodel.h"
 #include "sql.h"
 #include "usersession.h"
+#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -155,6 +156,7 @@ void Venda::setConnections() {
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->treeView, &QTreeView::doubleClicked, this, &Venda::on_treeView_doubleClicked, connectionType);
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa, connectionType);
 }
 
@@ -180,6 +182,7 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Venda::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
+  disconnect(ui->treeView, &QTreeView::doubleClicked, this, &Venda::on_treeView_doubleClicked);
   disconnect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa);
 }
 
@@ -1545,6 +1548,25 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
     if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Não foi possível abrir o arquivo 3D!"); }
   });
+}
+
+void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
+  if (not index.parent().isValid()) { return; }
+
+  const auto index2 = modelTree.proxyModel->mapToSource(index);
+  const auto row = modelTree.mappedRow(index2);
+  const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = " + idVendaProduto2 + "))")) {
+    throw RuntimeException("Erro buscando NFe: " + query.lastError().text());
+  }
+
+  if (not query.first()) { throw RuntimeError("Linha não possui NFe!"); }
+
+  XML_Viewer viewer(query.value("xml").toByteArray(), this);
+  viewer.on_pushButtonDanfe_clicked();
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

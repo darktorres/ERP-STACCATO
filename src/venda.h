@@ -67,6 +67,7 @@ private:
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
+  auto on_treeView_doubleClicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;

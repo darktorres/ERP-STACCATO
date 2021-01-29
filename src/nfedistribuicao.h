@@ -35,16 +35,16 @@ private:
   // methods
   auto agendarOperacao() -> void;
   auto buscarNSU() -> void;
-  auto confirmar() -> void;
-  auto darCiencia() -> void;
-  auto desconhecer() -> void;
+  auto confirmar(const bool silent) -> void;
+  auto darCiencia(const bool silent) -> void;
+  auto desconhecer(const bool silent) -> void;
   auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
   auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
   auto houveConsultaEmOutroPc() -> bool;
   auto montaFiltro() -> void;
-  auto naoRealizar() -> void;
+  auto naoRealizar(const bool silent) -> void;
   auto on_groupBoxFiltros_toggled(const bool enabled) -> void;
   auto on_pushButtonCiencia_clicked() -> void;
   auto on_pushButtonConfirmacao_clicked() -> void;

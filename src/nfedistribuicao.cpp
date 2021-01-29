@@ -218,13 +218,13 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   }
 
   qDebug() << "darCiencia";
-  darCiencia();
+  darCiencia(true);
   qDebug() << "confirmar";
-  confirmar();
+  confirmar(true);
   qDebug() << "desconhecer";
-  desconhecer();
+  desconhecer(true);
   qDebug() << "naoRealizar";
-  naoRealizar();
+  naoRealizar(true);
 
   qDebug() << "maintenance";
   SqlQuery queryMaintenance;
@@ -235,7 +235,11 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   qDebug() << "end pesquisa";
 }
 
-void NFeDistribuicao::confirmar() {
+void NFeDistribuicao::confirmar(const bool silent) {
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
+
   auto match = model.multiMatch({{"confirmar", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -246,9 +250,15 @@ void NFeDistribuicao::confirmar() {
 
     match = model.multiMatch({{"confirmar", true}});
   }
+
+  if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::desconhecer() {
+void NFeDistribuicao::desconhecer(const bool silent) {
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
+
   auto match = model.multiMatch({{"desconhecer", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -259,9 +269,15 @@ void NFeDistribuicao::desconhecer() {
 
     match = model.multiMatch({{"desconhecer", true}});
   }
+
+  if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::naoRealizar() {
+void NFeDistribuicao::naoRealizar(const bool silent) {
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
+
   auto match = model.multiMatch({{"naoRealizar", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -272,9 +288,15 @@ void NFeDistribuicao::naoRealizar() {
 
     match = model.multiMatch({{"naoRealizar", true}});
   }
+
+  if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::darCiencia() {
+void NFeDistribuicao::darCiencia(const bool silent) {
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
+
   auto match = model.multiMatch({{"ciencia", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -285,6 +307,8 @@ void NFeDistribuicao::darCiencia() {
 
     match = model.multiMatch({{"ciencia", true}});
   }
+
+  if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
 void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
@@ -302,6 +326,8 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
+  //----------------------------------------------------------
+
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
 
@@ -312,13 +338,17 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? darCiencia() : agendarOperacao();
+  monitorar ? darCiencia(false) : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -330,13 +360,17 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? confirmar() : agendarOperacao();
+  monitorar ? confirmar(false) : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  //----------------------------------------------------------
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -348,13 +382,15 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? desconhecer() : agendarOperacao();
+  monitorar ? desconhecer(false) : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  //----------------------------------------------------------
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -366,7 +402,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? naoRealizar() : agendarOperacao();
+  monitorar ? naoRealizar(false) : agendarOperacao();
 }
 
 void NFeDistribuicao::agendarOperacao() {
@@ -499,8 +535,6 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
   model.submitAll();
 
   qApp->endTransaction();
-
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
 
   return true;
 }

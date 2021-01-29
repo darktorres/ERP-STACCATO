@@ -11,4 +11,5 @@ public:
 
 private:
   auto processTel(const QString &value) -> void;
+  auto setConnections() -> void;
 };

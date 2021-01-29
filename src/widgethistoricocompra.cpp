@@ -8,17 +8,20 @@
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 
-#include <QMessageBox>
 #include <QSqlError>
 
-WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
+WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 
 void WidgetHistoricoCompra::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::delayFiltro, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->tablePedidos, &TableView::clicked, this, &WidgetHistoricoCompra::on_tablePedidos_clicked, connectionType);
 }
@@ -35,8 +38,10 @@ void WidgetHistoricoCompra::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewComprasFinanceiro.select()) { return; }
+  modelViewComprasFinanceiro.select();
 }
+
+void WidgetHistoricoCompra::delayFiltro() { timer.start(500); }
 
 void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
 
@@ -79,20 +84,17 @@ void WidgetHistoricoCompra::setTreeView() {
 
   modelTree.setHeaderData("status", "Status");
   modelTree.setHeaderData("statusFinanceiro", "Financeiro");
-  modelTree.setHeaderData("ordemRepresentacao", "OC Rep");
+  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelTree.setHeaderData("idVenda", "Venda");
   modelTree.setHeaderData("descricao", "Produto");
   modelTree.setHeaderData("colecao", "Coleção");
   modelTree.setHeaderData("codComercial", "Cód. Com.");
   modelTree.setHeaderData("quant", "Quant.");
   modelTree.setHeaderData("un", "Un.");
-  modelTree.setHeaderData("un2", "Un2.");
   modelTree.setHeaderData("caixas", "Cx.");
   modelTree.setHeaderData("prcUnitario", "R$ Unit.");
   modelTree.setHeaderData("preco", "R$");
-  modelTree.setHeaderData("kgcx", "Kg./Cx.");
   modelTree.setHeaderData("formComercial", "Form. Com.");
-  modelTree.setHeaderData("codBarras", "Cód. Barras");
   modelTree.setHeaderData("obs", "Obs.");
   modelTree.setHeaderData("dataPrevCompra", "Prev. Compra");
   modelTree.setHeaderData("dataRealCompra", "Compra");
@@ -123,6 +125,9 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("fornecedor");
   ui->treeView->hideColumn("idProduto");
   ui->treeView->hideColumn("quantUpd");
+  ui->treeView->hideColumn("un2");
+  ui->treeView->hideColumn("kgcx");
+  ui->treeView->hideColumn("codBarras");
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
@@ -139,20 +144,20 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
 
   modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
+  modelProdutos.select();
 
   modelProdutos2.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelProdutos2.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos2.lastError().text(), this); }
+  modelProdutos2.select();
 
   setTreeView();
 
   modelNFe.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelNFe.select()) { return qApp->enqueueException("Erro buscando NFe: " + modelNFe.lastError().text(), this); }
+  modelNFe.select();
 }
 
-void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetHistoricoCompra::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetHistoricoCompra::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
@@ -164,10 +169,12 @@ void WidgetHistoricoCompra::montaFiltro() {
 void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
-  if (ACBr acbrLocal(this); not acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
+  ACBr acbrLocal;
+  acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt());
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
 // TODO: 4verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
+// TODO: renomear essa classe para WidgetCompraHistorico

@@ -1,5 +1,9 @@
 #include "registeraddressdialog.h"
 
+#include "application.h"
+
+#include <QSqlQuery>
+
 RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : RegisterDialog(table, primaryKeyStr, parent) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
@@ -26,7 +30,18 @@ void RegisterAddressDialog::setupTables(const QString &table) {
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
-bool RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) { return modelEnd.setData(currentRowEnd, key, value); }
+void RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) { modelEnd.setData(currentRowEnd, key, value); }
+
+void RegisterAddressDialog::verificaEndereco(const QString &cidade, const QString &uf) {
+  QSqlQuery query;
+  query.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
+  query.bindValue(":cidade", cidade);
+  query.bindValue(":uf", uf);
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
+
+  if (not query.first()) { throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+}
 
 bool RegisterAddressDialog::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }

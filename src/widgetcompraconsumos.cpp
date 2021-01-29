@@ -10,9 +10,11 @@
 
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
-WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
+WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 
@@ -28,10 +30,12 @@ void WidgetCompraConsumos::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelPedido.select()) { return; }
+  modelPedido.select();
 
-  if (not modelProduto.select()) { return; }
+  modelProduto.select();
 }
+
+void WidgetCompraConsumos::delayFiltro() { timer.start(500); }
 
 void WidgetCompraConsumos::resetTables() { modelIsSet = false; }
 
@@ -65,7 +69,8 @@ void WidgetCompraConsumos::setupTables() {
 void WidgetCompraConsumos::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::delayFiltro, connectionType);
   connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked, connectionType);
   connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraConsumos::on_tablePedido_clicked, connectionType);
 }
@@ -81,7 +86,7 @@ void WidgetCompraConsumos::on_tablePedido_clicked(const QModelIndex &index) {
 void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //------------------------------------
 
@@ -89,11 +94,11 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString status = modelProduto.data(row, "status").toString();
 
-  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { return qApp->enqueueError("Produto ainda não foi comprado!", this); }
+  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { throw RuntimeError("Produto ainda não foi comprado!", this); }
 
-  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
+  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
 
-  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { return qApp->enqueueError("Não permitido!", this); }
+  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { throw RuntimeError("Não permitido!", this); }
   //------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
@@ -106,13 +111,13 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
-  if (not qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo")) { return; }
+  qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo");
 
-  if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
+  desfazerConsumo(row);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   //------------------------------------
 
@@ -121,15 +126,13 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool WidgetCompraConsumos::desfazerConsumo(const int row) {
+void WidgetCompraConsumos::desfazerConsumo(const int row) {
   const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
 
-  if (not Estoque::desfazerConsumo(idVendaProduto2, this)) { return false; }
-
-  return true;
+  Estoque::desfazerConsumo(idVendaProduto2);
 }
 
-void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());

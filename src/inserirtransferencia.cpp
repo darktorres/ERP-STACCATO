@@ -5,13 +5,9 @@
 
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
-
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked);
 
   setupTables();
 
@@ -19,83 +15,89 @@ InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), u
   ui->itemBoxPara->setSearchDialog(SearchDialog::conta(this));
 
   ui->dateEdit->setDate(qApp->serverDate());
+
+  setConnections();
 }
 
 InserirTransferencia::~InserirTransferencia() { delete ui; }
 
+void InserirTransferencia::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked, connectionType);
+}
+
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
-  if (not qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar")) { return; }
+  qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar");
 
-  if (not cadastrar()) { return qApp->rollbackTransaction(); }
+  cadastrar();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Transferência registrada com sucesso!", this);
+
   close();
 }
 
-bool InserirTransferencia::cadastrar() {
+void InserirTransferencia::cadastrar() {
   // lancamento 'de'
 
   const int rowDe = modelDe.insertRowAtEnd();
 
-  if (not modelDe.setData(rowDe, "status", "PAGO")) { return false; }
-  if (not modelDe.setData(rowDe, "dataEmissao", ui->dateEdit->date())) { return false; }
-  if (not modelDe.setData(rowDe, "idLoja", "1")) { return false; } // Geral
-  if (not modelDe.setData(rowDe, "contraParte", "TRANSFERÊNCIA PARA " + ui->itemBoxPara->text())) { return false; }
-  if (not modelDe.setData(rowDe, "valor", ui->doubleSpinBoxValor->value())) { return false; }
-  if (not modelDe.setData(rowDe, "tipo", "1. Transf. Banc.")) { return false; }
-  if (not modelDe.setData(rowDe, "dataPagamento", ui->dateEdit->date())) { return false; }
-  if (not modelDe.setData(rowDe, "dataRealizado", ui->dateEdit->date())) { return false; }
-  if (not modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
-  if (not modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.")) { return false; }
-  if (not modelDe.setData(rowDe, "parcelaReal", "1")) { return false; }
-  if (not modelDe.setData(rowDe, "idConta", ui->itemBoxDe->getId())) { return false; }
-  if (not modelDe.setData(rowDe, "centroCusto", 1)) { return false; } // Geral
-  if (not modelDe.setData(rowDe, "grupo", "Transferência")) { return false; }
-  if (not modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text())) { return false; }
+  modelDe.setData(rowDe, "status", "PAGO");
+  modelDe.setData(rowDe, "dataEmissao", ui->dateEdit->date());
+  modelDe.setData(rowDe, "idLoja", "1"); // Geral
+  modelDe.setData(rowDe, "contraParte", "TRANSFERÊNCIA PARA " + ui->itemBoxPara->text());
+  modelDe.setData(rowDe, "valor", ui->doubleSpinBoxValor->value());
+  modelDe.setData(rowDe, "tipo", "1. Transf. Banc.");
+  modelDe.setData(rowDe, "dataPagamento", ui->dateEdit->date());
+  modelDe.setData(rowDe, "dataRealizado", ui->dateEdit->date());
+  modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value());
+  modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.");
+  modelDe.setData(rowDe, "parcelaReal", "1");
+  modelDe.setData(rowDe, "idConta", ui->itemBoxDe->getId());
+  modelDe.setData(rowDe, "centroCusto", 1); // Geral
+  modelDe.setData(rowDe, "grupo", "Transferência");
+  modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text());
 
   // lancamento 'para'
 
   const int rowPara = modelPara.insertRowAtEnd();
 
-  if (not modelPara.setData(rowPara, "status", "RECEBIDO")) { return false; }
-  if (not modelPara.setData(rowPara, "dataEmissao", ui->dateEdit->date())) { return false; }
-  if (not modelPara.setData(rowPara, "idLoja", "1")) { return false; } // Geral
-  if (not modelPara.setData(rowPara, "contraParte", "TRANSFERÊNCIA DE " + ui->itemBoxDe->text())) { return false; }
-  if (not modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value())) { return false; }
-  if (not modelPara.setData(rowPara, "tipo", "1. Transf. Banc.")) { return false; }
-  if (not modelPara.setData(rowPara, "dataPagamento", ui->dateEdit->date())) { return false; }
-  if (not modelPara.setData(rowPara, "dataRealizado", ui->dateEdit->date())) { return false; }
-  if (not modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
-  if (not modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.")) { return false; }
-  if (not modelPara.setData(rowPara, "parcelaReal", "1")) { return false; }
-  if (not modelPara.setData(rowPara, "idConta", ui->itemBoxPara->getId())) { return false; }
-  if (not modelPara.setData(rowPara, "centroCusto", 1)) { return false; } // Geral
-  if (not modelPara.setData(rowPara, "grupo", "Transferência")) { return false; }
-  if (not modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text())) { return false; }
+  modelPara.setData(rowPara, "status", "RECEBIDO");
+  modelPara.setData(rowPara, "dataEmissao", ui->dateEdit->date());
+  modelPara.setData(rowPara, "idLoja", "1"); // Geral
+  modelPara.setData(rowPara, "contraParte", "TRANSFERÊNCIA DE " + ui->itemBoxDe->text());
+  modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value());
+  modelPara.setData(rowPara, "tipo", "1. Transf. Banc.");
+  modelPara.setData(rowPara, "dataPagamento", ui->dateEdit->date());
+  modelPara.setData(rowPara, "dataRealizado", ui->dateEdit->date());
+  modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value());
+  modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.");
+  modelPara.setData(rowPara, "parcelaReal", "1");
+  modelPara.setData(rowPara, "idConta", ui->itemBoxPara->getId());
+  modelPara.setData(rowPara, "centroCusto", 1); // Geral
+  modelPara.setData(rowPara, "grupo", "Transferência");
+  modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
-  if (not modelDe.submitAll()) { return false; }
+  modelDe.submitAll();
 
-  if (not modelPara.submitAll()) { return false; }
-
-  return true;
+  modelPara.submitAll();
 }
 
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
-bool InserirTransferencia::verifyFields() {
-  if (ui->itemBoxDe->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'De' não preenchido!", this); }
+void InserirTransferencia::verifyFields() {
+  if (ui->itemBoxDe->text().isEmpty()) { throw RuntimeError("Conta 'De' não preenchido!", this); }
 
-  if (ui->itemBoxPara->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'Para' não preenchido!", this); }
+  if (ui->itemBoxPara->text().isEmpty()) { throw RuntimeError("Conta 'Para' não preenchido!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { return qApp->enqueueError(false, "Valor não preenchido!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { throw RuntimeError("Valor não preenchido!", this); }
 
-  if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError(false, "Preencha a observação!", this); }
-
-  return true;
+  if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Preencha a observação!", this); }
 }
 
 void InserirTransferencia::setupTables() {

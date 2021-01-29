@@ -27,48 +27,23 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
-  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb);
-
-  connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered);
-  connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered);
-  connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered);
-  connect(ui->actionCadastrarProfissional, &QAction::triggered, this, &MainWindow::on_actionCadastrarProfissional_triggered);
-  connect(ui->actionCadastrarUsuario, &QAction::triggered, this, &MainWindow::on_actionCadastrarUsuario_triggered);
-  connect(ui->actionCalculadora, &QAction::triggered, this, &MainWindow::on_actionCalculadora_triggered);
-  connect(ui->actionCalcular_frete, &QAction::triggered, this, &MainWindow::on_actionCalcular_frete_triggered);
-  connect(ui->actionClaro, &QAction::triggered, this, &MainWindow::on_actionClaro_triggered);
-  connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered);
-  connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
-  connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
-  connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
-  connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered);
-  connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
-  connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered);
-  connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
-  connect(ui->actionGerenciar_staccatoOff, &QAction::triggered, this, &MainWindow::on_actionGerenciar_staccatoOff_triggered);
-  connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
-  connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
-  connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
-  connect(ui->actionSobre, &QAction::triggered, this, &MainWindow::on_actionSobre_triggered);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::on_tabWidget_currentChanged);
-
   setWindowIcon(QIcon("Staccato.ico"));
   setWindowTitle("ERP Staccato");
 
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  if (const auto hostname = UserSession::getSetting("Login/hostname")) {
-    const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
+  const QString hostname = UserSession::getSetting("Login/hostname").toString();
 
-    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
-  } else {
-    qApp->enqueueException("A chave 'hostname' não está configurada!", this);
-  }
+  if (hostname.isEmpty()) { throw RuntimeException("A chave 'hostname não está configurada!'"); }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+  const QString hostnameText = qApp->getMapLojas().key(hostname);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+  setWindowTitle(windowTitle() + " - " + UserSession::nome + " - " + UserSession::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
+
+  if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_pagamentos->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
@@ -86,9 +61,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
-  query.bindValue(":idUsuario", UserSession::idUsuario());
+  query.bindValue(":idUsuario", UserSession::idUsuario);
 
   if (query.exec() and query.first()) {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
@@ -100,16 +75,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGalpao), query.value("view_tab_galpao").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), query.value("view_tab_grafico").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
-    qApp->enqueueException("Erro lendo permissões: " + query.lastError().text(), this);
+    throw RuntimeException("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
-  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname")->toString());
+  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").toString());
   pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
@@ -118,21 +94,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   //---------------------------------------------------------------------------
 
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), false);
-
-  const QString nomeUsuario = UserSession::nome();
-
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or nomeUsuario == "RODRIGO TORRES" or UserSession::tipoUsuario() == "GERENTE LOJA") {
-    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
-  }
-
-  //---------------------------------------------------------------------------
-
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
+
+  const QString nomeUsuario = UserSession::nome;
 
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "RODRIGO TORRES") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 
   //---------------------------------------------------------------------------
+
+  setConnections();
 
   return;
 
@@ -227,6 +197,34 @@ MainWindow::MainWindow() : MainWindow(nullptr) {}
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb, connectionType);
+  connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered, connectionType);
+  connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered, connectionType);
+  connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered, connectionType);
+  connect(ui->actionCadastrarProfissional, &QAction::triggered, this, &MainWindow::on_actionCadastrarProfissional_triggered, connectionType);
+  connect(ui->actionCadastrarUsuario, &QAction::triggered, this, &MainWindow::on_actionCadastrarUsuario_triggered, connectionType);
+  connect(ui->actionCalculadora, &QAction::triggered, this, &MainWindow::on_actionCalculadora_triggered, connectionType);
+  connect(ui->actionCalcular_frete, &QAction::triggered, this, &MainWindow::on_actionCalcular_frete_triggered, connectionType);
+  connect(ui->actionClaro, &QAction::triggered, this, &MainWindow::on_actionClaro_triggered, connectionType);
+  connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered, connectionType);
+  connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered, connectionType);
+  connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered, connectionType);
+  connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered, connectionType);
+  connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered, connectionType);
+  connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered, connectionType);
+  connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered, connectionType);
+  connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered, connectionType);
+  connect(ui->actionGerenciar_staccatoOff, &QAction::triggered, this, &MainWindow::on_actionGerenciar_staccatoOff_triggered, connectionType);
+  connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered, connectionType);
+  connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered, connectionType);
+  connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered, connectionType);
+  connect(ui->actionSobre, &QAction::triggered, this, &MainWindow::on_actionSobre_triggered, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::on_tabWidget_currentChanged, connectionType);
+}
+
 void MainWindow::resetTables() {
   ui->widgetOrcamento->resetTables();
   ui->widgetVenda->resetTables();
@@ -245,24 +243,26 @@ void MainWindow::resetTables() {
 void MainWindow::updateTables() {
   if (qApp->getUpdating()) { return; }
   if (not qApp->getIsConnected()) { return; }
-  if (qApp->getShowingErrors()) { return; }
+  if (qApp->getShowingMessages()) { return; }
 
   qApp->setUpdating(true);
 
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+  try {
+    const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentText == "Galpão") { ui->widgetGalpao->updateTables(); }
-  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentText == "RH") { ui->widgetRh->updateTables(); }
-  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
+    if (currentTab == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+    if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
+    if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
+    if (currentTab == "Logística") { ui->widgetLogistica->updateTables(); }
+    if (currentTab == "NFe") { ui->widgetNfe->updateTables(); }
+    if (currentTab == "Estoque") { ui->widgetEstoque->updateTables(); }
+    if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
+    if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+    if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+    if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
+    //    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
+    if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
+  } catch (std::exception &) {}
 
   qApp->setUpdating(false);
 }
@@ -274,7 +274,7 @@ void MainWindow::reconnectDb() {
 }
 
 void MainWindow::verifyDb(const bool conectado) {
-  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname")->toString() : "Desconectado");
+  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }

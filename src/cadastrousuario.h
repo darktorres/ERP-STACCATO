@@ -13,19 +13,21 @@ class CadastroUsuario final : public RegisterDialog {
 public:
   explicit CadastroUsuario(QWidget *parent);
   ~CadastroUsuario();
+
   auto modificarUsuario() -> void;
 
 private:
   // attributes
   bool limitado = false;
-  SearchDialog *sdUsuario;
+  SearchDialog *const sdUsuario = SearchDialog::usuario(this);
   SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto clearFields() -> void final;
   auto criarUsuarioMySQL() -> void;
-  auto fillCombobox() -> void;
+  auto fillComboBoxLoja() -> void;
+  auto newRegister() -> bool final;
   auto on_comboBoxTipo_currentTextChanged(const QString &text) -> void;
   auto on_lineEditUser_textEdited(const QString &text) -> void;
   auto on_pushButtonAtualizar_clicked() -> void;
@@ -34,11 +36,12 @@ private:
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemover_clicked() -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verifyFields() -> bool final;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

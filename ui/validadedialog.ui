@@ -16,6 +16,12 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>Dias:</string>
      </property>
@@ -23,6 +29,12 @@
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>Validade:</string>
      </property>
@@ -61,6 +73,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>spinBoxDias</tabstop>
+  <tabstop>checkBoxSemValidade</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

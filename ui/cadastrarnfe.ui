@@ -123,7 +123,7 @@
           <item row="7" column="0">
            <widget class="QLabel" name="labelSaida">
             <property name="text">
-             <string>Saída</string>
+             <string>Entrada/Saída</string>
             </property>
            </widget>
           </item>
@@ -264,6 +264,11 @@
             <item>
              <property name="text">
               <string>2 Complementar</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 Ajuste</string>
              </property>
             </item>
             <item>
@@ -598,6 +603,9 @@
        </item>
        <item row="3" column="0">
         <widget class="QGroupBox" name="groupBox_20">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="title">
           <string>Endereço Entrega</string>
          </property>
@@ -892,6 +900,24 @@
           <string>Cliente</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_75">
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioTel1">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_9">
             <item row="0" column="0">
@@ -903,6 +929,52 @@
             </item>
             <item row="0" column="1">
              <widget class="ItemBox" name="itemBoxCliente"/>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>Insc. Est.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonConsultarCadastro">
+              <property name="text">
+               <string>Consultar cadastro</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <widget class="QLabel" name="label_54">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDestinatarioTel2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -935,67 +1007,6 @@
             </item>
             <item>
              <widget class="QLineEdit" name="lineEditDestinatarioCPFCNPJ">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="2">
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <item>
-             <widget class="QLabel" name="label_55">
-              <property name="text">
-               <string>Insc. Est.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonConsultarCadastro">
-              <property name="text">
-               <string>Consultar cadastro</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_14">
-            <item>
-             <widget class="QLabel" name="label_42">
-              <property name="text">
-               <string>Tel.:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioTel1">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_24">
-            <item>
-             <widget class="QLabel" name="label_54">
-              <property name="text">
-               <string>Tel.:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDestinatarioTel2">
               <property name="readOnly">
                <bool>true</bool>
               </property>
@@ -1061,8 +1072,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1041</width>
-                   <height>337</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1540,8 +1551,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1690,8 +1701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -2010,8 +2021,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2329,13 +2340,16 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>965</width>
-                   <height>339</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
                   <item row="0" column="0">
                    <widget class="QFrame" name="frameInterEstadual">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="frameShape">
                      <enum>QFrame::StyledPanel</enum>
                     </property>
@@ -3078,19 +3092,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <string>Transporte</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_60">
-       <item row="2" column="0">
-        <spacer name="verticalSpacer_6">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout_53">
          <item row="0" column="0">
@@ -3151,13 +3152,52 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <item row="1" column="0">
         <widget class="QTabWidget" name="tabWidget_3">
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_11">
           <attribute name="title">
            <string>Transportador</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_54">
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="groupBox_16">
+             <property name="title">
+              <string>Endereço</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_40">
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEditTransportadorUf"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_79">
+                <property name="text">
+                 <string>UF:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEditTransportadorEndereco"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_71">
+                <property name="text">
+                 <string>Endereço:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_80">
+                <property name="text">
+                 <string>Município:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEditTransportadorMunicipio"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="QGroupBox" name="groupBox_15">
              <property name="title">
@@ -3197,44 +3237,18 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </layout>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QGroupBox" name="groupBox_16">
-             <property name="title">
-              <string>Endereço</string>
+           <item row="2" column="0">
+            <spacer name="verticalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-             <layout class="QGridLayout" name="gridLayout_40">
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEditTransportadorEndereco"/>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="lineEditTransportadorMunicipio"/>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEditTransportadorUf"/>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_80">
-                <property name="text">
-                 <string>Município:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_79">
-                <property name="text">
-                 <string>UF:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_71">
-                <property name="text">
-                 <string>Endereço:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -3349,6 +3363,19 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </layout>
             </widget>
            </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="tab_14">
@@ -3406,21 +3433,21 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer_12">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -3522,6 +3549,19 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </layout>
             </widget>
            </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer_13">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -3585,7 +3625,127 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
+  <tabstop>comboBoxNatureza</tabstop>
+  <tabstop>lineEditModelo</tabstop>
+  <tabstop>lineEditSerie</tabstop>
+  <tabstop>lineEditCodigo</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditEmissao</tabstop>
+  <tabstop>lineEditSaida</tabstop>
+  <tabstop>comboBoxTipo</tabstop>
+  <tabstop>lineEditFormatoPagina</tabstop>
+  <tabstop>comboBoxDestinoOperacao</tabstop>
+  <tabstop>comboBoxFinalidade</tabstop>
+  <tabstop>lineEditEmitenteNomeRazao</tabstop>
+  <tabstop>lineEditEmitenteFantasia</tabstop>
+  <tabstop>lineEditEmitenteTel1</tabstop>
+  <tabstop>lineEditEmitenteCNPJ</tabstop>
+  <tabstop>lineEditEmitenteInscEstadual</tabstop>
+  <tabstop>lineEditEmitenteTel2</tabstop>
+  <tabstop>lineEditEmitenteLogradouro</tabstop>
+  <tabstop>lineEditEmitenteNumero</tabstop>
+  <tabstop>lineEditEmitenteComplemento</tabstop>
+  <tabstop>lineEditEmitenteBairro</tabstop>
+  <tabstop>lineEditEmitenteCidade</tabstop>
+  <tabstop>lineEditEmitenteUF</tabstop>
+  <tabstop>lineEditEmitenteCEP</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>lineEditDestinatarioNomeRazao</tabstop>
+  <tabstop>lineEditDestinatarioCPFCNPJ</tabstop>
+  <tabstop>lineEditDestinatarioInscEst</tabstop>
+  <tabstop>pushButtonConsultarCadastro</tabstop>
+  <tabstop>lineEditDestinatarioTel1</tabstop>
+  <tabstop>lineEditDestinatarioTel2</tabstop>
+  <tabstop>itemBoxEnderecoFaturamento</tabstop>
+  <tabstop>lineEditDestinatarioLogradouro</tabstop>
+  <tabstop>lineEditDestinatarioNumero</tabstop>
+  <tabstop>lineEditDestinatarioComplemento</tabstop>
+  <tabstop>lineEditDestinatarioBairro</tabstop>
+  <tabstop>lineEditDestinatarioCidade</tabstop>
+  <tabstop>lineEditDestinatarioUF</tabstop>
+  <tabstop>lineEditDestinatarioCEP</tabstop>
+  <tabstop>itemBoxEnderecoEntrega</tabstop>
+  <tabstop>lineEditDestinatarioLogradouro_2</tabstop>
+  <tabstop>lineEditDestinatarioNumero_2</tabstop>
+  <tabstop>lineEditDestinatarioComplemento_2</tabstop>
+  <tabstop>lineEditDestinatarioBairro_2</tabstop>
+  <tabstop>lineEditDestinatarioCidade_2</tabstop>
+  <tabstop>lineEditDestinatarioUF_2</tabstop>
+  <tabstop>lineEditDestinatarioCEP_2</tabstop>
   <tabstop>tableItens</tabstop>
+  <tabstop>tabWidget_4</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>comboBoxCfop</tabstop>
+  <tabstop>comboBoxRegime</tabstop>
+  <tabstop>comboBoxSituacaoTributaria</tabstop>
+  <tabstop>comboBoxICMSOrig</tabstop>
+  <tabstop>comboBoxICMSModBc</tabstop>
+  <tabstop>doubleSpinBoxICMSvbc</tabstop>
+  <tabstop>doubleSpinBoxICMSpicms</tabstop>
+  <tabstop>doubleSpinBoxICMSvicms</tabstop>
+  <tabstop>comboBoxICMSModBcSt</tabstop>
+  <tabstop>doubleSpinBoxICMSpmvast</tabstop>
+  <tabstop>doubleSpinBoxICMSvbcst</tabstop>
+  <tabstop>doubleSpinBoxICMSpicmsst</tabstop>
+  <tabstop>doubleSpinBoxICMSvicmsst</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>comboBoxIPIcst</tabstop>
+  <tabstop>lineEditIPIcEnq</tabstop>
+  <tabstop>scrollArea_3</tabstop>
+  <tabstop>comboBoxPIScst</tabstop>
+  <tabstop>doubleSpinBoxPISvbc</tabstop>
+  <tabstop>doubleSpinBoxPISppis</tabstop>
+  <tabstop>doubleSpinBoxPISvpis</tabstop>
+  <tabstop>scrollArea_4</tabstop>
+  <tabstop>comboBoxCOFINScst</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvbc</tabstop>
+  <tabstop>doubleSpinBoxCOFINSpcofins</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvcofins</tabstop>
+  <tabstop>scrollArea_5</tabstop>
+  <tabstop>doubleSpinBoxPercentualFcpDestino</tabstop>
+  <tabstop>doubleSpinBoxBaseCalculoDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInternaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInter</tabstop>
+  <tabstop>doubleSpinBoxPercentualPartilha</tabstop>
+  <tabstop>doubleSpinBoxPartilhaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxPartilhaRemetente</tabstop>
+  <tabstop>doubleSpinBoxFcpDestino</tabstop>
+  <tabstop>doubleSpinBoxBaseICMS</tabstop>
+  <tabstop>doubleSpinBoxValorICMS</tabstop>
+  <tabstop>doubleSpinBoxValorPIS</tabstop>
+  <tabstop>doubleSpinBoxValorIPI</tabstop>
+  <tabstop>doubleSpinBoxValorCOFINS</tabstop>
+  <tabstop>doubleSpinBoxValorProdutos</tabstop>
+  <tabstop>doubleSpinBoxValorFrete</tabstop>
+  <tabstop>checkBoxFrete</tabstop>
+  <tabstop>doubleSpinBoxValorNota</tabstop>
+  <tabstop>comboBoxFreteConta</tabstop>
+  <tabstop>tabWidget_3</tabstop>
+  <tabstop>lineEditTransportadorCpfCnpj</tabstop>
+  <tabstop>lineEditTransportadorRazaoSocial</tabstop>
+  <tabstop>lineEditTransportadorInscEst</tabstop>
+  <tabstop>lineEditTransportadorEndereco</tabstop>
+  <tabstop>lineEditTransportadorUf</tabstop>
+  <tabstop>doubleSpinBoxTransportadorBaseCalculo</tabstop>
+  <tabstop>spinBoxTransportadorAliquota</tabstop>
+  <tabstop>doubleSpinBoxTransportadorValorServico</tabstop>
+  <tabstop>lineEditTransportadorIcmsCodMun</tabstop>
+  <tabstop>lineEditTransportadorCfop</tabstop>
+  <tabstop>doubleSpinBoxTransportadorIcmsRetido</tabstop>
+  <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>lineEditTransportadorPlaca</tabstop>
+  <tabstop>lineEditTransportadorRntc</tabstop>
+  <tabstop>lineEditTransportadorUfPlaca</tabstop>
+  <tabstop>spinBoxVolumesQuant</tabstop>
+  <tabstop>lineEditVolumesEspecie</tabstop>
+  <tabstop>lineEditVolumesMarca</tabstop>
+  <tabstop>lineEditVolumesNumeracao</tabstop>
+  <tabstop>doubleSpinBoxVolumesPesoLiq</tabstop>
+  <tabstop>doubleSpinBoxVolumesPesoBruto</tabstop>
+  <tabstop>infCompUsuario</tabstop>
+  <tabstop>infCompSistema</tabstop>
   <tabstop>pushButtonEnviarNFE</tabstop>
  </tabstops>
  <resources/>

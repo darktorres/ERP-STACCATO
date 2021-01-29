@@ -7,9 +7,10 @@ class LineEditDecimal final : public QLineEdit {
 
 public:
   explicit LineEditDecimal(QWidget *parent);
+
   auto getValue() const -> double;
   auto setValue(const double value) -> void;
 
 private:
-  const int decimais = 2;
+  int const decimais = 2;
 };

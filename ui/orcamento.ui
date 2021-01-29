@@ -52,6 +52,12 @@
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
                 <widget class="QLabel" name="labelOrcamento">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>Orçamento:</string>
                  </property>
@@ -85,6 +91,12 @@
                </item>
                <item>
                 <widget class="QLabel" name="labelCliente">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>Cliente:</string>
                  </property>
@@ -123,6 +135,12 @@
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
                 <widget class="QLabel" name="labelDateTime">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>Data emissão:</string>
                  </property>
@@ -193,6 +211,12 @@
                </item>
                <item row="0" column="0">
                 <widget class="QDateTimeEdit" name="dataEmissao">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data/hora em que o orçamento foi criado pela primeira vez&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -237,7 +261,14 @@
            <item row="4" column="0" colspan="2">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QLineEdit" name="lineEditEstoque_4">
+              <widget class="QPushButton" name="pushButtonModelo3d">
+               <property name="text">
+                <string>Modelo 3D</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="legendaStaccatoOFF">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -257,7 +288,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditEstoque_3">
+              <widget class="QLineEdit" name="legendaEstoque">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -277,7 +308,7 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditPromocao_2">
+              <widget class="QLineEdit" name="legendaPromocao">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -635,7 +666,7 @@ color: rgb(0, 0, 0);</string>
                  <widget class="LineEditDecimal" name="lineEditPrecoUn">
                   <property name="maximumSize">
                    <size>
-                    <width>60</width>
+                    <width>80</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -777,6 +808,12 @@ color: rgb(0, 0, 0);</string>
                <layout class="QVBoxLayout" name="verticalLayout_3">
                 <item>
                  <widget class="QPushButton" name="pushButtonAtualizarItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Atualizar item atual&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -790,6 +827,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonAdicionarItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adicionar item atual&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -803,6 +846,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonRemoverItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remover item selecionado&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -816,6 +865,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonLimparSelecao">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remover item selecionado&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -860,6 +915,12 @@ color: rgb(0, 0, 0);</string>
           <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_9">
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLineEdit" name="lineEditReplicaDe"/>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="labelPrazoEntrega">
                <property name="sizePolicy">
@@ -870,6 +931,19 @@ color: rgb(0, 0, 0);</string>
                </property>
                <property name="text">
                 <string>Prazo de entrega:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelEndereco_9">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Observação:</string>
                </property>
               </widget>
              </item>
@@ -889,8 +963,8 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="labelEndereco_9">
+             <item row="6" column="0">
+              <widget class="QLabel" name="labelReplicadoEm">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -898,27 +972,24 @@ color: rgb(0, 0, 0);</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Observação:</string>
+                <string>Replicado em:</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QPlainTextEdit" name="plainTextEditObs">
+             <item row="5" column="0">
+              <widget class="QLabel" name="labelReplicaDe">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>120</height>
-                </size>
+               <property name="text">
+                <string>Replica de:</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="labelBaixa">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -931,7 +1002,7 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="4" column="0" colspan="2">
               <widget class="QPlainTextEdit" name="plainTextEditBaixa">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -947,37 +1018,21 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="labelReplicaDe">
+             <item row="2" column="0" colspan="2">
+              <widget class="QPlainTextEdit" name="plainTextEditObs">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>Replica de:</string>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>120</height>
+                </size>
                </property>
               </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QLineEdit" name="lineEditReplicaDe"/>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="labelReplicadoEm">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Replicado em:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
              </item>
             </layout>
            </item>
@@ -1541,9 +1596,10 @@ color: rgb(0, 0, 0);</string>
   <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxCliente</tabstop>
   <tabstop>dataEmissao</tabstop>
+  <tabstop>spinBoxValidade</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
-  <tabstop>spinBoxValidade</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>itemBoxProduto</tabstop>
   <tabstop>lineEditPrecoUn</tabstop>
   <tabstop>doubleSpinBoxCaixas</tabstop>
@@ -1562,16 +1618,23 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizarItem</tabstop>
   <tabstop>pushButtonAdicionarItem</tabstop>
   <tabstop>pushButtonRemoverItem</tabstop>
+  <tabstop>pushButtonLimparSelecao</tabstop>
   <tabstop>tableProdutos</tabstop>
-  <tabstop>lineEditEstoque_4</tabstop>
-  <tabstop>lineEditEstoque_3</tabstop>
-  <tabstop>lineEditPromocao_2</tabstop>
-  <tabstop>pushButtonCalcularFrete</tabstop>
-  <tabstop>checkBoxFreteManual</tabstop>
+  <tabstop>pushButtonModelo3d</tabstop>
+  <tabstop>legendaStaccatoOFF</tabstop>
+  <tabstop>legendaEstoque</tabstop>
+  <tabstop>legendaPromocao</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>plainTextEditObs</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
+  <tabstop>lineEditReplicaDe</tabstop>
+  <tabstop>lineEditReplicadoEm</tabstop>
   <tabstop>doubleSpinBoxSubTotalBruto</tabstop>
   <tabstop>doubleSpinBoxSubTotalLiq</tabstop>
   <tabstop>doubleSpinBoxDescontoGlobalReais</tabstop>
   <tabstop>doubleSpinBoxDescontoGlobal</tabstop>
+  <tabstop>pushButtonCalcularFrete</tabstop>
+  <tabstop>checkBoxFreteManual</tabstop>
   <tabstop>doubleSpinBoxFrete</tabstop>
   <tabstop>doubleSpinBoxTotal</tabstop>
   <tabstop>pushButtonGerarVenda</tabstop>

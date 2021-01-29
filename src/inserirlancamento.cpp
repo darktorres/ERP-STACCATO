@@ -10,12 +10,12 @@
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QtMath>
 
 InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
@@ -93,43 +93,44 @@ void InserirLancamento::setupTables() {
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   unsetConnections();
 
-  [&] {
-    const int newRow = modelContaPagamento.insertRowAtEnd();
+  try {
+    [&] {
+      const int newRow = modelContaPagamento.insertRowAtEnd();
 
-    if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
-    if (not modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate())) { return; }
-  }();
+      modelContaPagamento.setData(newRow, "status", "PENDENTE");
+      modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
+    }();
+  } catch (std::exception &) {}
 
   setConnections();
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
-  if (not modelContaPagamento.submitAll()) { return; }
+  modelContaPagamento.submitAll();
 
   qApp->enqueueInformation("Lançamento salvo com sucesso!", this);
+
   close();
 }
 
-bool InserirLancamento::verifyFields() {
+void InserirLancamento::verifyFields() {
   for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { throw RuntimeError("Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { throw RuntimeError("Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
 
-    if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
+    if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { throw RuntimeError("Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "dataPagamento").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataPagamento").toDate().isNull()) { throw RuntimeError("Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
   }
-
-  return true;
 }
 
 void InserirLancamento::setConnections() {
@@ -151,7 +152,7 @@ void InserirLancamento::unsetConnections() {
 void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
 
   const int row = list.first().row();
   const int newRow = modelContaPagamento.insertRowAtEnd();
@@ -167,41 +168,41 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
     if (value.isNull()) { continue; }
 
-    if (not modelContaPagamento.setData(newRow, col, value)) { return; }
+    modelContaPagamento.setData(newRow, col, value);
   }
 }
 
 void InserirLancamento::preencher(const QModelIndex &index) {
   unsetConnections();
 
-  [&] {
-    const int row = index.row();
+  try {
+    [&] {
+      const int row = index.row();
 
-    if (index.column() == ui->table->columnIndex("dataRealizado")) {
-      const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
-      const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
+      if (index.column() == ui->table->columnIndex("dataRealizado")) {
+        const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
+        const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
 
-      QSqlQuery queryConta;
+        SqlQuery queryConta;
 
-      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
-      }
-
-      if (queryConta.first()) {
-        const int idConta = queryConta.value("idConta").toInt();
-
-        if (idContaExistente == 0 and idConta != 0) {
-          if (not modelContaPagamento.setData(row, "idConta", idConta)) { return; }
+        if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+          throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
         }
-      }
 
-      if (not modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
-      if (not modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"))) { return; }
-      if (not modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"))) { return; }
-      if (not modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"))) { return; }
-      if (not modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"))) { return; }
-    }
-  }();
+        if (queryConta.first()) {
+          const int idConta = queryConta.value("idConta").toInt();
+
+          if (idContaExistente == 0 and idConta != 0) { modelContaPagamento.setData(row, "idConta", idConta); }
+        }
+
+        modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+        modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"));
+        modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"));
+        modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
+        modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
+      }
+    }();
+  } catch (std::exception &) {}
 
   setConnections();
 }

@@ -16,15 +16,15 @@ public:
 
 private:
   // attributes
-  QList<QSqlRecord> backupConta;
-  // TODO: make backup for Pagamentos/Taxas records
   int currentRowConta = -1;
+  // TODO: make backup for Pagamentos/Taxas records
   QDataWidgetMapper mapperConta;
-  SearchDialog *sdLoja;
+  QList<QSqlRecord> backupConta;
+  SearchDialog *const sdLoja = SearchDialog::loja(this);
   SqlTableModel modelConta;
   Ui::CadastroLoja *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> bool;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearConta() -> void;
@@ -51,12 +51,14 @@ private:
   auto on_tableConta_clicked(const QModelIndex &index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verifyFields() -> bool final;
+  auto verificaEndereco() -> void;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

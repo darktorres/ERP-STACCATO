@@ -34,6 +34,8 @@
 #include "xlsxworksheet.h"
 #include "xlsxworksheet_p.h"
 
+#include "src/application.h"
+
 #include <QBuffer>
 #include <QDir>
 #include <QFile>
@@ -247,7 +249,7 @@ bool Workbook::setActiveSheet(int index) {
   Q_D(Workbook);
   if (index < 0 or index >= d->sheets.size()) {
     // warning
-    return false;
+    throw RuntimeException("Erro selecionando planilha do Excel!");
   }
   d->activesheetIndex = index;
   return true;

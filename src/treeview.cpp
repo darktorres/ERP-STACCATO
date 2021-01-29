@@ -88,7 +88,7 @@ void TreeView::setModel(QAbstractItemModel *model) {
 
   baseModel = qobject_cast<SqlTreeModel *>(model);
 
-  if (not baseModel) { qApp->enqueueException("Sem baseModel!"); }
+  if (not baseModel) { throw RuntimeException("Sem baseModel!"); }
 
   resizeAllColumns();
 }
@@ -104,7 +104,7 @@ int TreeView::columnIndex(const QString &column) const {
 
   if (baseModel) { columnIndex = baseModel->fieldIndex(column); }
 
-  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { throw RuntimeException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
@@ -123,9 +123,9 @@ void TreeView::mousePressEvent(QMouseEvent *event) {
 void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const {
   QTreeView::drawRow(painter, options, index);
 
-  const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+  const QString tema = UserSession::getSetting("User/tema").toString();
 
-  const QColor color = (tema == "claro") ? QColor(200, 200, 200) : QColor(44, 44, 44);
+  const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
   painter->setPen(color);
   int top = options.rect.top();
 

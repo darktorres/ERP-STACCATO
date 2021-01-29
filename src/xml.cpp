@@ -1,28 +1,22 @@
 #include "xml.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 XML::XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent) : fileContent(fileContent), tipo(tipo), parent(parent) { montarArvore(); }
 
 XML::XML(const QByteArray &fileContent) : XML(fileContent, XML::Tipo::Nulo, nullptr) {}
 
 void XML::montarArvore() {
-  if (fileContent.isEmpty()) {
-    error = true;
-    return qApp->enqueueException("XML vazio!", parent);
-  }
+  if (fileContent.isEmpty()) { throw RuntimeException("XML vazio!"); }
 
   QDomDocument document;
   QString errorText;
 
-  if (not document.setContent(fileContent, &errorText)) {
-    error = true;
-    return qApp->enqueueException("Erro lendo arquivo: " + errorText, parent);
-  }
+  if (not document.setContent(fileContent, &errorText)) { throw RuntimeException("Erro lendo arquivo: " + errorText); }
 
   QDomElement root = document.firstChildElement();
   QDomNamedNodeMap map = root.attributes();
@@ -40,7 +34,7 @@ void XML::montarArvore() {
 
   lerValores(model.item(0, 0));
 
-  if (produtos.isEmpty()) { error = true; }
+  if (produtos.isEmpty()) { throw RuntimeException("Produtos vazio!"); }
 }
 
 void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
@@ -200,43 +194,32 @@ void XML::lerTotais(const QStandardItem *child) {
   if (text.contains("vNF -")) { vNF_Total = text.remove("vNF - ").toDouble(); }
 }
 
-bool XML::validar() {
-  if (not verificaCNPJ() or not verificaValido()) { return false; }
-
-  return true;
+void XML::validar() {
+  verificaCNPJ();
+  verificaValido();
 }
 
-bool XML::verificaCNPJ() {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
-
-  return true;
+void XML::verificaCNPJ() {
+  if (tipo == Tipo::Entrada and cnpjDest.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
 }
 
-bool XML::verificaValido() {
-  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", parent); }
-
-  return true;
+void XML::verificaValido() {
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { throw RuntimeError("NFe não está autorizada pela SEFAZ!", parent); }
 }
 
-bool XML::verificaNCMs() {
+void XML::verificaNCMs() {
   QStringList ncms;
-  bool erro = false;
 
-  for (const auto &produto : produtos) {
-    QSqlQuery query;
+  for (const auto &produto : qAsConst(produtos)) {
+    SqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text(), parent); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
 
-    if (not query.first()) {
-      ncms << produto.ncm;
-      erro = true;
-    }
+    if (not query.first()) { ncms << produto.ncm; }
   }
 
   ncms.removeDuplicates();
 
-  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
-
-  return true;
+  if (not ncms.isEmpty()) { throw RuntimeError("Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
 }

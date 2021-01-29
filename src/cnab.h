@@ -14,11 +14,23 @@ public:
     QString cnpjOrig;
   };
 
+  struct Pagamento {
+    int codBanco;
+    ulong valor;
+    QString data;
+    QString cnpjDest;
+    QString agenciaConta;
+    QString nome;
+    QString codFornecedor;
+  };
+
   explicit CNAB(QWidget *parent);
-  auto remessaGareItau240(QVector<Gare> gares) -> std::optional<QString>;
+  ~CNAB() = default;
+
+  auto remessaGareItau240(QVector<Gare> gares) -> QString;
+  auto remessaPagamentoItau240(QVector<Pagamento> pagamentos) -> QString;
   auto retornoGareItau240(const QString &filePath) -> void;
   // TODO: adicionar funcoes para boleto e outros pagamentos
-  ~CNAB() = default;
 
 private:
   // attributes

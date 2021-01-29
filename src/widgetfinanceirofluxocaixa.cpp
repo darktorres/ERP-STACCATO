@@ -4,14 +4,19 @@
 #include "application.h"
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QSqlRecord>
 
-WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
+WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) {
+  ui->setupUi(this);
+
+  ui->tableCaixa->setDisabled(true);
+  ui->tableCaixa2->setDisabled(true);
+  ui->tableFuturo->setDisabled(true);
+}
 
 WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 
@@ -24,6 +29,7 @@ void WidgetFinanceiroFluxoCaixa::setConnections() {
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
   connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
   connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
   connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated, connectionType);
   connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated, connectionType);
 }
@@ -36,6 +42,7 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
     // TODO: 0dont hardcode magic numbers
+    // TODO: colocar um icone de engrenagem para o usuario mudar as contas padrao. salvar os ids no banco de dados
     const int contaSantander = 3;
     const int contaItau = 33;
 
@@ -51,19 +58,24 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
   }
 
   if (not modelIsSet) { modelIsSet = true; }
-
-  montaFiltro();
 }
 
 void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroFluxoCaixa::montaFiltro() {
+  ui->tableCaixa->setDisabled(true);
+  ui->tableCaixa2->setDisabled(true);
+  ui->tableFuturo->setDisabled(true);
+
+  repaint();
+
+  // ----------------------------------------------------------------------------------------------------------
+
   const QString filtroData =
       ui->groupBoxMes->isChecked() ? "`dataRealizado` IS NOT NULL AND DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`dataRealizado` IS NOT NULL";
 
   const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa1->getId().toString() + " AND " : "";
 
-  // TODO: see if the outer select can be removed
   modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
                       "WHERE " +
                       filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
@@ -83,9 +95,9 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  QSqlQuery query;
+  SqlQuery query;
 
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueException("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
@@ -112,7 +124,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueException("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 
@@ -120,7 +132,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_pendente v JOIN (SELECT @running_total := 0) r");
 
-  if (modelFuturo.lastError().isValid()) { return qApp->enqueueException("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
+  if (modelFuturo.lastError().isValid()) { throw RuntimeException("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
 
   modelFuturo.setHeaderData("dataPagamento", "Data Pag.");
 
@@ -130,6 +142,12 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
+
+  // ----------------------------------------------------------------------------------------------------------
+
+  ui->tableCaixa->setEnabled(true);
+  ui->tableCaixa2->setEnabled(true);
+  ui->tableFuturo->setEnabled(true);
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
@@ -171,4 +189,3 @@ void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
 // TODO: 0nao agrupar contas no view_fluxo_resumo (apenas quando filtrado)
 // TODO: 0fazer delegate para reduzir tamanho da fonte
 // TODO: separar a tabela 'Futuro' em duas telas, uma 'vencidos' e a outra mantem igual a atual
-// TODO: as querys dessa tela são pesadas, alterar a conta recarrega todas as tabelas, talvez alterar apenas quando o usuario clicar para atualizar

@@ -6,12 +6,11 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);
@@ -64,9 +63,9 @@ void WidgetCompraConfirmar::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 
-  if (not modelViewCompras.select()) { return; }
+  modelViewCompras.select();
 }
 
 void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }
@@ -76,7 +75,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
@@ -84,53 +83,50 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
   InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
-  if (not inputDlg.setFilter(idCompra)) { return; }
+  inputDlg.setFilter(idCompra);
 
-  if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }
+  if (inputDlg.exec() != QDialog::Accepted) { return; }
 
   const QDate dataPrevista = inputDlg.getDate();
   const QDate dataConf = inputDlg.getNextDate();
 
-  if (not qApp->startTransaction("WidgetCompraConfirmar::on_pushButtonConfirmarCompra")) { return; }
+  qApp->startTransaction("WidgetCompraConfirmar::on_pushButtonConfirmarCompra");
 
-  if (not confirmarCompra(idCompra, dataPrevista, dataConf)) { return qApp->rollbackTransaction(); }
+  confirmarCompra(idCompra, dataPrevista, dataConf);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
-  qApp->enqueueInformation("Compra confirmada!", this);
 }
 
-bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
-  QSqlQuery queryVenda;
+void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 IN (SELECT "
                      "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE)");
   queryVenda.bindValue(":dataRealConf", dataConf);
   queryVenda.bindValue(":dataPrevFat", dataPrevista);
   queryVenda.bindValue(":idCompra", idCompra);
 
-  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
+  if (not queryVenda.exec()) { throw RuntimeException("Erro salvando status da venda: " + queryVenda.lastError().text()); }
 
   //------------------------------------------------
 
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
                       "AND idCompra = :idCompra AND selecionado = TRUE");
   queryCompra.bindValue(":dataRealConf", dataConf);
   queryCompra.bindValue(":dataPrevFat", dataPrevista);
   queryCompra.bindValue(":idCompra", idCompra);
 
-  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
-
-  return true;
+  if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 }
 
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);

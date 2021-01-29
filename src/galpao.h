@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphicsscene.h"
 #include "sqltablemodel.h"
 
+#include <QGraphicsScene>
 #include <QWidget>
 
 namespace Ui {
@@ -15,6 +15,7 @@ class Galpao : public QWidget {
 public:
   explicit Galpao(QWidget *parent = nullptr);
   ~Galpao();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -22,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  GraphicsScene *scene;
+  QGraphicsScene *scene;
   SqlTableModel modelTranspAgend;
   Ui::Galpao *ui;
   // methods
@@ -35,6 +36,7 @@ private:
   auto on_table_selectionChanged() -> void;
   auto resizeEvent(QResizeEvent *event) -> void override;
   auto salvarPallets() -> void;
+  auto setConnections() -> void;
   auto setFilter() -> void;
   auto setupTables() -> void;
   auto unselectOthers() -> void;

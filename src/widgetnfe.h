@@ -12,6 +12,7 @@ class WidgetNfe final : public QWidget {
 public:
   explicit WidgetNfe(QWidget *parent);
   ~WidgetNfe();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -20,4 +21,5 @@ private:
   Ui::WidgetNfe *ui;
   // methods
   auto on_tabWidgetNfe_currentChanged(const int) -> void;
+  auto setConnections() -> void;
 };

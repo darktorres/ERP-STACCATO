@@ -4,7 +4,6 @@
 #include "doubledelegate.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
@@ -14,17 +13,19 @@ WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 void WidgetLogisticaCaminhao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxDesativados, &QCheckBox::toggled, this, &WidgetLogisticaCaminhao::on_checkBoxDesativados_toggled, connectionType);
   connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked, connectionType);
 }
 
 void WidgetLogisticaCaminhao::setupTables() {
   modelCaminhao.setTable("view_caminhao");
 
-  modelCaminhao.setFilter("");
+  modelCaminhao.setFilter("desativado = FALSE");
 
   ui->table->setModel(&modelCaminhao);
 
   ui->table->hideColumn("idVeiculo");
+  ui->table->hideColumn("desativado");
 
   // -----------------------------------------------------------------
 
@@ -50,9 +51,9 @@ void WidgetLogisticaCaminhao::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelCaminhao.select()) { return; }
+  modelCaminhao.select();
 
-  if (not modelCarga.select()) { return; }
+  modelCarga.select();
 }
 
 void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
@@ -62,3 +63,5 @@ void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
 
   modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 }
+
+void WidgetLogisticaCaminhao::on_checkBoxDesativados_toggled(const bool checked) { modelCaminhao.setFilter(checked ? "" : "desativado = FALSE"); }

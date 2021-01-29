@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include "file.h"
 #include "log.h"
 #include "qsimpleupdater.h"
 #include "usersession.h"
@@ -12,18 +13,22 @@
 #include <QSqlError>
 #include <QTimer>
 
+RuntimeException::RuntimeException(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message, parent); }
+
+RuntimeError::RuntimeError(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message, parent); }
+
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.8.154");
+  setApplicationVersion("0.9.42");
   setStyle("Fusion");
+
+  QDir::setCurrent(QCoreApplication::applicationDirPath());
 
   readSettingsFile();
 
-  storeSelection();
-
-  if (UserSession::getSetting("User/tema").value_or("claro").toString() == "escuro") { darkTheme(); }
+  if (UserSession::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
 
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
     QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
@@ -32,17 +37,17 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 }
 
 // for system errors
-void Application::enqueueException(const QString &error, QWidget *parent) {
+void Application::enqueueException(const QString &exception, QWidget *parent) {
   // TODO: guardar o arquivo/linha que chamou essa funcao
-  exceptionQueue << Message{error, parent};
+  exceptionQueue << Message{exception, parent};
 
-  Log::createLog("Exceção", error, true);
+  Log::createLog("Exceção", exception);
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
-bool Application::enqueueException(const bool boolean, const QString &error, QWidget *parent) {
-  enqueueException(error, parent);
+bool Application::enqueueException(const bool boolean, const QString &exception, QWidget *parent) {
+  enqueueException(exception, parent);
   return boolean;
 }
 
@@ -50,9 +55,9 @@ bool Application::enqueueException(const bool boolean, const QString &error, QWi
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
-  Log::createLog("Erro", error, true);
+  Log::createLog("Erro", error);
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 bool Application::enqueueError(const bool boolean, const QString &error, QWidget *parent) {
@@ -63,19 +68,19 @@ bool Application::enqueueError(const bool boolean, const QString &error, QWidget
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
   informationQueue << Message{information, parent};
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 void Application::enqueueWarning(const QString &warning, QWidget *parent) {
   warningQueue << Message{warning, parent};
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Alphaville"); }
 
 void Application::readSettingsFile() {
-  QFile file("lojas.txt");
+  File file("lojas.txt");
 
   if (not file.open(QFile::ReadOnly)) {
     QMessageBox::critical(nullptr, "Erro!", "Erro lendo configurações: " + file.errorString());
@@ -87,7 +92,7 @@ void Application::readSettingsFile() {
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
-bool Application::userLogin(const QString &user) {
+void Application::userLogin(const QString &user) {
   db.close();
 
   db.setUserName(user);
@@ -95,22 +100,13 @@ bool Application::userLogin(const QString &user) {
   db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
   //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 
-  if (not db.open()) {
-    loginError();
-
-    return false;
-  }
-
-  return true;
+  if (not db.open()) { loginError(); }
 }
 
-bool Application::genericLogin(const QString &hostname) {
-  QFile file("mysql.txt");
+void Application::genericLogin(const QString &hostname) {
+  File file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro lendo mysql.txt: " + file.errorString());
-    return false;
-  }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString()); }
 
   const QString systemPassword = file.readAll();
 
@@ -129,26 +125,20 @@ bool Application::genericLogin(const QString &hostname) {
   if (not db.open()) {
     bool connected = false;
 
-    for (const auto &loja : mapLojas) {
+    for (const auto &loja : qAsConst(mapLojas)) {
       db.setHostName(loja);
 
       if (db.open()) {
         UserSession::setSetting("Login/hostname", loja);
         UserSession::setSetting("Login/loja", mapLojas.key(loja));
-        qApp->updater();
+        updater();
         connected = true;
         break;
       }
     }
 
-    if (not connected) {
-      loginError();
-
-      return false;
-    }
+    if (not connected) { loginError(); }
   }
-
-  return true;
 }
 
 void Application::loginError() {
@@ -161,7 +151,7 @@ void Application::loginError() {
   if (error.contains("Access denied for user")) { message = "Login inválido!"; }
   if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
 
-  QMessageBox::critical(nullptr, "Erro!", message);
+  throw RuntimeException(message);
 }
 
 bool Application::dbReconnect(const bool silent) {
@@ -179,20 +169,17 @@ bool Application::dbReconnect(const bool silent) {
 }
 
 bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
-  if (not genericLogin(hostname)) { return false; }
+  genericLogin(hostname);
 
-  if (not UserSession::login(user, userPassword)) {
-    QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
-    return false;
-  }
+  UserSession::login(user, userPassword);
 
-  if (not userLogin(user)) { return false; }
+  userLogin(user);
 
   // ------------------------------------------------------------
 
   isConnected = true;
 
-  if (not runSqlJobs()) { return false; }
+  runSqlJobs();
 
   startSqlPing();
   startUpdaterPing();
@@ -200,46 +187,29 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
   return true;
 }
 
-bool Application::runSqlJobs() {
-  QSqlQuery query;
+void Application::runSqlJobs() {
+  SqlQuery query;
 
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro verificando lastInvalidated: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
 
   if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_produtos_expirados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { throw RuntimeException("Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_staccatoOff()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_staccatoOff: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec("CALL invalidar_staccatoOff()")) { throw RuntimeException("Erro executando invalidar_staccatoOff: " + query.lastError().text()); }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
     query.bindValue(":lastInvalidated", serverDateTime().toString("yyyy-MM-dd"));
 
-    if (not query.exec()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro atualizando lastInvalidated: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { throw RuntimeException("Erro atualizando lastInvalidated: " + query.lastError().text()); }
   }
-
-  return true;
 }
 
 void Application::startSqlPing() {
   auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
-  timer->start(60000);
+  timer->start(60000); // 1min
 
   // TODO: se ping falhar marcar 'desconectado'?
 }
@@ -247,10 +217,12 @@ void Application::startSqlPing() {
 void Application::startUpdaterPing() {
   auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
-  timer->start(600000);
+  timer->start(600000); // 10min
 }
 
 void Application::darkTheme() {
+  // TODO: replace Fusion style with https://github.com/randrew/phantomstyle
+
   QPalette darkPalette;
   darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
   darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -285,82 +257,61 @@ void Application::lightTheme() {
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction(const QString &messageLog, const bool delayMessages) {
-  if (inTransaction) {
-    // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
-    return qApp->enqueueException(false, "Transação já em execução!");
-  }
+void Application::startTransaction(const QString &messageLog) {
+  qDebug() << "startTransaction: " << messageLog;
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueException(false, "Erro iniciando transaction: " + query.lastError().text()); }
+  if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
-  if (not Log::createLog("Transação", messageLog)) { return rollbackTransaction(false); }
+  if (SqlQuery query; not query.exec("START TRANSACTION")) { return; }
+
+  Log::createLog("Transação", messageLog);
 
   inTransaction = true;
-  this->delayMessages = delayMessages;
-
-  return true;
 }
 
-bool Application::endTransaction() {
-  if (not inTransaction) { return enqueueException(false, "Não está em transação"); }
+void Application::endTransaction() {
+  qDebug() << "endTransaction";
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueException(false, "Erro no commit: " + query.lastError().text()); }
+  if (not inTransaction) { throw RuntimeException("Não está em transação"); }
+
+  if (SqlQuery query; not query.exec("COMMIT")) { return; }
 
   inTransaction = false;
-  delayMessages = false;
 
   showMessages();
-
-  return true;
 }
 
 void Application::rollbackTransaction() {
-  if (not inTransaction) { return enqueueException("Não está em transação!"); }
+  qDebug() << "rollbackTransaction";
 
-  if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueException("Erro rollback: " + query.lastError().text()); }
-
-  inTransaction = false;
-  delayMessages = false;
+  if (inTransaction) {
+    if (SqlQuery query; not query.exec("ROLLBACK")) { return; }
+    inTransaction = false;
+  }
 
   showMessages();
 }
 
-bool Application::rollbackTransaction(const bool boolean) {
-  rollbackTransaction();
-  return boolean;
-}
-
-bool Application::getShowingErrors() const { return showingErrors; }
+bool Application::getShowingMessages() const { return showingMessages; }
 
 bool Application::getIsConnected() const { return isConnected; }
 
 QMap<QString, QString> Application::getMapLojas() const { return mapLojas; }
 
-void Application::storeSelection() {
-  if (not UserSession::getSetting("Login/hostname")) {
-    const QStringList items = mapLojas.keys();
-
-    const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
-
-    if (loja.isEmpty()) { return; }
-
-    UserSession::setSetting("Login/hostname", mapLojas.value(loja));
-  }
-}
-
 void Application::setUpdating(const bool value) {
   updating = value;
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
-  if (delayMessages and (inTransaction or updating)) { return; }
-  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty() and exceptionQueue.isEmpty()) { return; }
+  if (inTransaction) { return; }
+  if (updating) { return; }
+  if (exceptionQueue.isEmpty() and errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
 
-  showingErrors = true;
+  showingMessages = true;
 
   for (const auto &exception : std::as_const(exceptionQueue)) {
     const QString error1 = "MySQL server has gone away";
@@ -394,26 +345,23 @@ void Application::showMessages() {
   warningQueue.clear();
   informationQueue.clear();
 
-  showingErrors = false;
+  showingMessages = false;
 }
 
 void Application::updater() {
   if (updaterOpen) { return; }
 
-  const auto hostname = UserSession::getSetting("Login/hostname");
+  const QString hostname = UserSession::getSetting("Login/hostname").toString();
 
-  if (not hostname) { return; }
+  if (hostname.isEmpty()) { return; }
 
   updaterOpen = true;
-
-  // TODO: add timeout in Qt 5.15 to avoid waiting for non available hosts
-  // (quickly changing hosts dont work as updater is still waiting for the first one to respond)
 
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(applicationVersion());
-  updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + hostname + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
@@ -421,29 +369,26 @@ void Application::updater() {
 
 bool Application::getSilent() const { return silent; }
 
-void Application::setSilent(bool value) { silent = value; }
+void Application::setSilent(bool value) {
+  qDebug() << "setSilent: " << value;
+  silent = value;
+}
 
 bool Application::getInTransaction() const { return inTransaction; }
 
 QDateTime Application::serverDateTime() {
-  QSqlQuery query;
+  SqlQuery query;
 
-  if (not query.exec("SELECT NOW()") or not query.first()) {
-    enqueueException("Erro buscando data/hora: " + query.lastError().text());
-    return QDateTime();
-  }
+  if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
 
   return query.value("NOW()").toDateTime();
 }
 
 QDate Application::serverDate() {
   if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
-    QSqlQuery query;
+    SqlQuery query;
 
-    if (not query.exec("SELECT NOW()") or not query.first()) {
-      enqueueException("Erro buscando data/hora: " + query.lastError().text());
-      return QDate();
-    }
+    if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
 
     systemDate = QDate::currentDate();
     serverDateCache = query.value("NOW()").toDateTime();
@@ -468,94 +413,66 @@ QString Application::sanitizeSQL(const QString &string) {
   return sanitized;
 }
 
-std::optional<int> Application::reservarIdEstoque() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdEstoque() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
-    enqueueException("Erro reservar id estoque: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id estoque: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id estoque: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id estoque: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdVendaProduto2() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdVendaProduto2() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    enqueueException("Erro reservar id venda: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id venda: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id venda: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id venda: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdNFe() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdNFe() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
-    enqueueException("Erro reservar id nfe: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id nfe: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id nfe: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id nfe: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdPedido2() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdPedido2() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
-    enqueueException("Erro reservar id compra: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id compra: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id compra: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id compra: " + query.lastError().text()); }
 
   return id;
 }
@@ -568,4 +485,17 @@ QDate Application::ajustarDiaUtil(const QDate &date) {
   while (newDate.dayOfWeek() > 5) { newDate = newDate.addDays(1); }
 
   return newDate;
+}
+
+bool Application::notify(QObject *receiver, QEvent *event) {
+  bool done = true;
+
+  try {
+    done = QApplication::notify(receiver, event);
+  } catch (const std::exception &e) {
+    qDebug() << "catch all: " << e.what();
+    rollbackTransaction();
+  }
+
+  return done;
 }

@@ -13,7 +13,6 @@ public:
   explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
   ~RegisterDialog() override = default;
 
-  auto marcarDirty() -> void;
   auto show() -> void;
   virtual auto viewRegisterById(const QVariant &id) -> bool;
 
@@ -22,41 +21,47 @@ signals:
 
 protected:
   // attributes
-  enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
   bool isDirty = false;
   int currentRow = -1;
   QString primaryId;
   QString primaryKey;
-  QStringList textKeys;
   SqlTableModel model;
+  enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
+  // methods
+  auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
+  auto confirmationMessage() -> bool;
+  auto connectLineEditsToDirty() -> void;
+  auto data(const QString &key) -> QVariant;
+  auto marcarDirty() -> void;
+  auto remove() -> void;
+  auto removeBox() -> int;
+  auto setConnections() -> void;
+  auto setData(const QString &key, const QVariant &value) -> void;
+  auto setForeignKey(SqlTableModel &secondaryModel) -> void;
+  auto validaCNPJ(const QString &text) -> bool;
+  auto validaCPF(const QString &text) -> bool;
+  virtual auto clearFields() -> void = 0;
+  virtual auto newRegister() -> bool;
+  virtual auto save(const bool silent = false) -> void final;
+  virtual auto verifyRequiredField(const QLineEdit &line) -> void;
+  virtual auto viewRegister() -> bool;
+
+private:
+  // attributes
+  QStringList textKeys;
   QDataWidgetMapper mapper;
   QWidget *parent;
   // methods
-  auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
-  auto closeEvent(QCloseEvent *event) -> void final;
-  auto confirmationMessage() -> bool;
-  auto data(const QString &key) -> QVariant;
   auto getTextKeys() const -> QStringList;
-  auto keyPressEvent(QKeyEvent *event) -> void final;
-  auto remove() -> void;
-  auto removeBox() -> int;
   auto requiredStyle() -> QString;
-  auto setData(const QString &key, const QVariant &value) -> bool;
-  auto setForeignKey(SqlTableModel &secondaryModel) -> bool;
   auto setTextKeys(const QStringList &value) -> void;
-  auto validaCNPJ(const QString &text) -> bool;
-  auto validaCPF(const QString &text) -> bool;
-  auto verifyFields(const QList<QLineEdit *> &list) -> bool;
-  virtual auto cadastrar() -> bool = 0;
-  virtual auto clearFields() -> void = 0;
-  virtual auto newRegister() -> bool;
+  virtual auto cadastrar() -> void = 0;
+  virtual auto closeEvent(QCloseEvent *event) -> void final;
+  virtual auto keyPressEvent(QKeyEvent *event) -> void final;
   virtual auto registerMode() -> void = 0;
-  virtual auto save(const bool silent = false) -> bool final;
-  virtual auto savingProcedures() -> bool = 0;
+  virtual auto savingProcedures() -> void = 0;
   virtual auto setupMapper() -> void = 0;
   virtual auto successMessage() -> void = 0;
   virtual auto updateMode() -> void = 0;
-  virtual auto verifyFields() -> bool = 0;
-  virtual auto verifyRequiredField(QLineEdit &line, const bool silent = false) -> bool;
-  virtual auto viewRegister() -> bool;
+  virtual auto verifyFields() -> void = 0;
 };

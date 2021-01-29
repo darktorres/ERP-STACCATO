@@ -9,18 +9,24 @@
 CadastroNCM::CadastroNCM(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroNCM) {
   ui->setupUi(this);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &CadastroNCM::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonAdicionar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonAdicionar_clicked);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonRemover_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
 
   setupTables();
+
+  setConnections();
 }
 
 CadastroNCM::~CadastroNCM() { delete ui; }
+
+void CadastroNCM::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &CadastroNCM::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonAdicionar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonAdicionar_clicked, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonRemover_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void CadastroNCM::setupTables() {
   model.setTable("ncm");
@@ -35,7 +41,7 @@ void CadastroNCM::setupTables() {
 
   model.setFilter("");
 
-  if (not model.select()) { return; }
+  model.select();
 
   ui->table->setModel(&model);
 
@@ -48,11 +54,11 @@ void CadastroNCM::setupTables() {
 
 void CadastroNCM::on_pushButtonSalvar_clicked() {
   for (int row = 0; row < model.rowCount(); ++row) {
-    if (model.data(row, "ncm").toString().length() != 8) { return qApp->enqueueError("NCM deve ter 8 dígitos!", this); }
+    if (model.data(row, "ncm").toString().length() != 8) { throw RuntimeError("NCM deve ter 8 dígitos!", this); }
     // TODO: se houver algum dado em CEST verificar se o tamanho é 7
   }
 
-  if (not model.submitAll()) { return; }
+  model.submitAll();
 
   qApp->enqueueInformation("Dados atualizados!", this);
   close();
@@ -70,11 +76,11 @@ void CadastroNCM::on_pushButtonAdicionar_clicked() {
 void CadastroNCM::on_pushButtonRemover_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  for (const auto &index : selection) { model.removeRow(index.row()); }
+  model.removeSelection(selection);
 
-  if (not model.submitAll()) { return; }
+  model.submitAll();
 }
 
 // TODO: avisar após digitar NCM se ele já estiver cadastrado (o banco de dados não vai permitir cadastrar duplicado mas a mensagem de

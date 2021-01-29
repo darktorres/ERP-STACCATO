@@ -17,21 +17,22 @@ public:
 
   explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent);
   ~InputDialogFinanceiro();
+
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
-  auto setFilter(const QString &idCompra) -> bool;
+  auto setFilter(const QString &idCompra) -> void;
 
 private:
   // attributes
   bool representacao;
-  const Tipo tipo;
-  SqlTableModel modelPedidoFornecedor;
-  SqlTableModel modelPedidoFornecedor2;
   SqlTableModel modelFluxoCaixa;
+  SqlTableModel modelPedidoFornecedor2;
+  SqlTableModel modelPedidoFornecedor;
   SqlTreeModel modelTree;
+  Tipo const tipo;
   Ui::InputDialogFinanceiro *ui;
   // methods
-  auto cadastrar() -> bool;
+  auto cadastrar() -> void;
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
@@ -50,5 +51,5 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

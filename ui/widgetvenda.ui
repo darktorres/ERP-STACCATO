@@ -92,7 +92,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-178</y>
           <width>208</width>
           <height>1107</height>
          </rect>
@@ -522,6 +522,41 @@
    <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonProprios</tabstop>
+  <tabstop>groupBoxStatusFinanceiro</tabstop>
+  <tabstop>checkBoxPendente2</tabstop>
+  <tabstop>checkBoxLiberado</tabstop>
+  <tabstop>checkBoxConferido</tabstop>
+  <tabstop>checkBoxCancelado2</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
+  <tabstop>checkBoxPendente</tabstop>
+  <tabstop>checkBoxIniciado</tabstop>
+  <tabstop>checkBoxEmCompra</tabstop>
+  <tabstop>checkBoxEmFaturamento</tabstop>
+  <tabstop>checkBoxEmColeta</tabstop>
+  <tabstop>checkBoxEmRecebimento</tabstop>
+  <tabstop>checkBoxEstoque</tabstop>
+  <tabstop>checkBoxEntregaAgend</tabstop>
+  <tabstop>checkBoxEmEntrega</tabstop>
+  <tabstop>checkBoxEntregue</tabstop>
+  <tabstop>checkBoxRepoReceb</tabstop>
+  <tabstop>checkBoxRepoEntrega</tabstop>
+  <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>checkBoxDevolvido</tabstop>
+  <tabstop>comboBoxLojas</tabstop>
+  <tabstop>comboBoxVendedores</tabstop>
+  <tabstop>comboBoxFornecedores</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>groupBoxDia</tabstop>
+  <tabstop>dateEditDia</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -16,16 +16,16 @@ public:
 
 private:
   // attributes
-  QList<QSqlRecord> backupVeiculo;
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
-  SearchDialog *sdTransportadora;
+  QList<QSqlRecord> backupVeiculo;
+  SearchDialog *const sdTransportadora = SearchDialog::transportadora(this);
   SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
-  auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> bool;
+  auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto clearVeiculo() -> void;
@@ -50,12 +50,14 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto on_tableVeiculo_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verifyFields() -> bool final;
+  auto verificaEndereco() -> void;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

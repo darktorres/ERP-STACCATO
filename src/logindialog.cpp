@@ -4,18 +4,12 @@
 #include "application.h"
 #include "usersession.h"
 
-#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QVersionNumber>
 
 LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
-
-  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
-  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged);
-  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked);
-  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked);
 
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
@@ -24,14 +18,14 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   ui->lineEditUser->setFocus();
 
-  if (const auto key = UserSession::getSetting("User/lastuser")) {
-    ui->lineEditUser->setText(key->toString());
+  if (not UserSession::getSetting("User/lastuser").toString().isEmpty()) {
+    ui->lineEditUser->setText(UserSession::getSetting("User/lastuser").toString());
     ui->lineEditPass->setFocus();
   }
 
-  if (const auto key = UserSession::getSetting("Login/hostname")) { ui->lineEditHostname->setText(key->toString()); }
+  if (not UserSession::getSetting("Login/hostname").toString().isEmpty()) { ui->lineEditHostname->setText(UserSession::getSetting("Login/hostname").toString()); }
 
-  if (const auto key = UserSession::getSetting("Login/loja")) { ui->comboBoxLoja->setCurrentText(key->toString()); }
+  if (not UserSession::getSetting("Login/loja").toString().isEmpty()) { ui->comboBoxLoja->setCurrentText(UserSession::getSetting("Login/loja").toString()); }
 
   ui->checkBoxSalvarSenha->hide();
   ui->labelHostname->hide();
@@ -39,17 +33,14 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->comboBoxLoja->hide();
 
   if (tipo == Tipo::Login) {
-    if (const auto key = UserSession::getSetting("User/savePasswd")) {
-      const bool salvarSenha = key->toBool();
+    const bool salvarSenha = UserSession::getSetting("User/savePasswd").toBool();
 
-      ui->checkBoxSalvarSenha->setChecked(salvarSenha);
+    ui->checkBoxSalvarSenha->setChecked(salvarSenha);
 
-      if (salvarSenha) {
-        if (const auto key2 = UserSession::getSetting("User/passwd")) {
-          ui->lineEditPass->setText(key2->toString());
-          ui->pushButtonLogin->setFocus();
-        }
-      }
+    if (salvarSenha) {
+      const QString passwd = UserSession::getSetting("User/passwd").toString();
+      ui->lineEditPass->setText(passwd);
+      ui->pushButtonLogin->setFocus();
     }
   }
 
@@ -61,7 +52,20 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     setWindowTitle("Autorização");
   }
 
+  qApp->updater();
+
+  setConnections();
+
   adjustSize();
+}
+
+void LoginDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged, connectionType);
+  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged, connectionType);
+  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked, connectionType);
+  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked, connectionType);
 }
 
 void LoginDialog::setComboBox() {
@@ -90,33 +94,34 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
     if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
-    if (not verificaVersao()) { return; }
+    verificaVersao(); // TODO: usar o webserver para indicar se está em manutencao
+    verificaManutencao();
   }
 
-  if (tipo == Tipo::Autorizacao) {
-    if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
-      ui->lineEditPass->setFocus();
-      QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
-      return;
-    }
-  }
+  if (tipo == Tipo::Autorizacao) { UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text()); }
 
   accept();
 }
 
-bool LoginDialog::verificaVersao() {
-  QSqlQuery query;
+void LoginDialog::verificaManutencao() {
+  SqlQuery query;
 
-  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueException(false, "Erro verificando versão atual: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT emManutencao FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando se em manutenção: " + query.lastError().text()); }
+
+  if (query.value("emManutencao").toBool()) { throw RuntimeException("Sistema em manutenção!"); }
+}
+
+void LoginDialog::verificaVersao() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
 
   QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());
 
   if (currentVersion < serverVersion) {
-    return qApp->enqueueError(false, "Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString(), this);
+    throw RuntimeError("Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString());
   }
-
-  return true;
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {

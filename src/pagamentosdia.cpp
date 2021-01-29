@@ -35,14 +35,12 @@ void PagamentosDia::setupTables() {
   ui->tableView->setItemDelegateForColumn("R$", new ReaisDelegate(this));
 }
 
-bool PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
+void PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
   const QString filtroConta = idConta.isEmpty() ? "" : "AND idConta = " + idConta;
 
   modelViewFluxoCaixa.setFilter("`dataRealizado` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'PAGO GARE', 'RECEBIDO') " + filtroConta);
 
-  if (not modelViewFluxoCaixa.select()) { return false; }
+  modelViewFluxoCaixa.select();
 
   setWindowTitle(date.toString("dd/MM/yyyy"));
-
-  return true;
 }

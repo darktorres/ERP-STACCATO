@@ -10,25 +10,19 @@ class CollapsibleWidget : public QWidget {
   Q_OBJECT
 
 public:
-  explicit CollapsibleWidget(const QString &data, QWidget *parent = nullptr);
+  explicit CollapsibleWidget(QWidget *parent);
   ~CollapsibleWidget();
-  //  auto setHtml(const QString text) -> void;
-  //  auto getHtml() -> QString;
-  void setDestinos(const QString &value);
-  void addButton();
+
+  auto getHtml() -> QString;
+  auto setHtml(const QString text) -> void;
 
 signals:
   void toggled();
-  void resized(QSize size);
 
 private:
   // attributes
   Ui::CollapsibleWidget *ui;
-  QString destinos;
   // methods
-  void on_pushButton_clicked();
-
-  // QWidget interface
-protected:
-  virtual void resizeEvent(QResizeEvent *event) override;
+  auto on_pushButton_clicked() -> void;
+  auto setConnections() -> void;
 };

@@ -21,8 +21,14 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setDefaultSectionSize(20);
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
-  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
+  setConnections();
+}
+
+void TableView::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu, connectionType);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents, connectionType);
 }
 
 void TableView::resizeColumnsToContents() {
@@ -56,7 +62,7 @@ int TableView::columnIndex(const QString &column, const bool silent) const {
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
-  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { throw RuntimeException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
@@ -100,7 +106,7 @@ void TableView::redoView() {
   }
 
   for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
-    for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
+    for (const auto &column : qAsConst(persistentColumns)) { openPersistentEditor(row, column); }
   }
 }
 
@@ -115,9 +121,17 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
-  if (not baseModel) { return qApp->enqueueException("TableView model não implementado!", this); }
+  if (not baseModel) { throw RuntimeException("TableView model não implementado!", this); }
 
   //---------------------------------------
+
+  // TODO: reativar
+  //  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, [=] {
+  //    setDisabled(true);
+  //    repaint();
+  //  });
+
+  //  connect(baseModel, &QSqlQueryModel::modelReset, this, [=] { setEnabled(true); });
 
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
@@ -157,8 +171,22 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     QModelIndexList cells = selectedIndexes();
     std::sort(cells.begin(), cells.end()); // Necessary, otherwise they are in column order
 
+    QString headers;
+
+    if (selectionBehavior() == QTableView::SelectRows) {
+      for (int col = 0; col < model()->columnCount(); ++col) {
+        if (isColumnHidden(col)) { continue; }
+
+        headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
+        headers += '\t';
+      }
+
+      headers += '\n';
+    }
+
     QString text;
     int currentRow = 0; // To determine when to insert newlines
+
     for (const QModelIndex &cell : cells) {
       if (text.length() == 0) {
         // First item
@@ -172,10 +200,10 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
       currentRow = cell.row();
 
-      text += (cell.data().userType() == QVariant::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
+      text += (cell.data().userType() == QMetaType::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
     }
 
-    QApplication::clipboard()->setText(text);
+    QApplication::clipboard()->setText(headers + text);
     return;
   }
 

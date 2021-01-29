@@ -20,9 +20,15 @@ ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
 
   ensurePolished();
 
-  connect(searchButton, &QAbstractButton::clicked, this, &ItemBox::search);
-  connect(plusButton, &QAbstractButton::clicked, this, &ItemBox::edit);
-  connect(this, &QLineEdit::cursorPositionChanged, this, &ItemBox::resetCursor);
+  setConnections();
+}
+
+void ItemBox::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(searchButton, &QAbstractButton::clicked, this, &ItemBox::search, connectionType);
+  connect(plusButton, &QAbstractButton::clicked, this, &ItemBox::edit, connectionType);
+  connect(this, &QLineEdit::cursorPositionChanged, this, &ItemBox::resetCursor, connectionType);
 }
 
 void ItemBox::resizeEvent(QResizeEvent *event) {

@@ -15,6 +15,7 @@ public:
   explicit MainWindow(QWidget *parent);
   explicit MainWindow();
   ~MainWindow();
+
   auto updateTables() -> void;
 
 private:
@@ -47,5 +48,6 @@ private:
   auto on_tabWidget_currentChanged(const int) -> void;
   auto reconnectDb() -> void;
   auto resetTables() -> void;
+  auto setConnections() -> void;
   auto verifyDb(const bool conectado) -> void;
 };

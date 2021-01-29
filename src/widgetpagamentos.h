@@ -15,8 +15,10 @@ class WidgetPagamentos final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Compra, Venda };
+
   explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
+
   auto getCredito() const -> double;
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
@@ -27,7 +29,7 @@ public:
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setTipo(const Tipo &novoTipo) -> void;
   auto setTotal(double value) -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 
   // attributes
   int pagamentos = 0; // TODO: rename this to count
@@ -59,8 +61,8 @@ private:
   auto checkBoxRep(QFrame *frame, QHBoxLayout *layout) -> void;
   auto comboBoxData(QHBoxLayout *layout) -> QComboBox *;
   auto comboBoxParc(QHBoxLayout *layout) -> void;
-  auto comboBoxPgtCompra(QHBoxLayout *layout) -> bool;
-  auto comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) -> bool;
+  auto comboBoxPgtCompra(QHBoxLayout *layout) -> void;
+  auto comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) -> void;
   auto dateEditPgt(QHBoxLayout *layout) -> QDateEdit *;
   auto doubleSpinBoxPgt(QHBoxLayout *layout) -> void;
   auto labelPagamento(QHBoxLayout *layout) -> void;
@@ -72,4 +74,5 @@ private:
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
   auto prepararPagamentosRep() -> void;
+  auto setConnections() -> void;
 };

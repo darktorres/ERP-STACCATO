@@ -13,7 +13,7 @@ public:
 private:
   enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
   // attributes
-  const int quantUpdColumn = -1;
+  int const quantUpdColumn = -1;
   // methods
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 };

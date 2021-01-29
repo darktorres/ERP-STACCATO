@@ -20,8 +20,10 @@ private:
   SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
-  auto cadastrar(const QModelIndexList &list) -> bool;
+  auto cadastrar(const QModelIndexList &list) -> void;
   auto calcularTotais() -> void;
+  auto fillComboBoxLoja() -> void;
+  auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
   auto on_comboBox_currentTextChanged(const QString &) -> void;
@@ -30,5 +32,5 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
-  auto verifyFields(const QModelIndexList &list) -> bool;
+  auto verifyFields(const QModelIndexList &list) -> void;
 };

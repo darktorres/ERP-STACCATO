@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1521</width>
-    <height>690</height>
+    <width>1604</width>
+    <height>774</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,7 +45,7 @@
           <property name="lineWidth">
            <number>0</number>
           </property>
-          <layout class="QGridLayout" name="gridLayout_5">
+          <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
             <widget class="QSplitter" name="splitter_3">
              <property name="orientation">
@@ -55,174 +55,191 @@
               <property name="title">
                <string>Info. Pedido</string>
               </property>
-              <layout class="QGridLayout" name="gridLayout_8">
+              <layout class="QGridLayout" name="gridLayout_13">
                <item row="0" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_6">
-                   <item>
-                    <widget class="QLabel" name="labelOrcamento">
-                     <property name="text">
-                      <string>Venda:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelVendedor">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Vendedor:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelConsultor">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Consultor:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelCliente">
-                     <property name="text">
-                      <string>Cliente:</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                <layout class="QGridLayout" name="gridLayout_12">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="labelOrcamento">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Venda:</string>
+                   </property>
+                  </widget>
                  </item>
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_4">
-                   <item>
-                    <widget class="QLineEdit" name="lineEditVenda">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código de Venda:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;O código de venda é composto de:&lt;/p&gt;&lt;p&gt;* Sigla da loja &lt;/p&gt;&lt;p&gt;* Data (AA)&lt;/p&gt;&lt;p&gt;* Id da loja&lt;/p&gt;&lt;p&gt;* Sequência de 3 dígitos&lt;/p&gt;&lt;p&gt;* 'R' se representação&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="ItemBox" name="itemBoxVendedor"/>
-                   </item>
-                   <item>
-                    <widget class="ItemBox" name="itemBoxConsultor"/>
-                   </item>
-                   <item>
-                    <widget class="ItemBox" name="itemBoxCliente">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEditVenda">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código de Venda:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;O código de venda é composto de:&lt;/p&gt;&lt;p&gt;* Sigla da loja &lt;/p&gt;&lt;p&gt;* Data (AA)&lt;/p&gt;&lt;p&gt;* Id da loja&lt;/p&gt;&lt;p&gt;* Sequência de 3 dígitos&lt;/p&gt;&lt;p&gt;* 'R' se representação&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="labelVendedor">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Vendedor:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="ItemBox" name="itemBoxVendedor"/>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="labelConsultor">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Consultor:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="ItemBox" name="itemBoxConsultor"/>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="labelCliente">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Cliente:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ItemBox" name="itemBoxCliente">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
                <item row="0" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_2">
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_7">
-                   <item>
-                    <widget class="QLabel" name="labelDateTime">
-                     <property name="text">
-                      <string>Data venda:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelProfissional">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Profissional:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelEndereco_3">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>End. de entrega:</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                <layout class="QGridLayout" name="gridLayout_8">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="labelDateTime">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Data venda:</string>
+                   </property>
+                  </widget>
                  </item>
-                 <item>
-                  <layout class="QGridLayout" name="gridLayout_18">
-                   <item row="0" column="0">
-                    <widget class="QDateTimeEdit" name="dateTimeEdit">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="buttonSymbols">
-                      <enum>QAbstractSpinBox::NoButtons</enum>
-                     </property>
-                     <property name="displayFormat">
-                      <string>dd/MM/yy hh:mm</string>
-                     </property>
-                     <property name="calendarPopup">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="ItemBox" name="itemBoxProfissional">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="ItemBox" name="itemBoxEndereco"/>
-                   </item>
-                  </layout>
+                 <item row="0" column="1">
+                  <widget class="QDateTimeEdit" name="dateTimeEdit">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                   <property name="buttonSymbols">
+                    <enum>QAbstractSpinBox::NoButtons</enum>
+                   </property>
+                   <property name="displayFormat">
+                    <string>dd/MM/yy hh:mm</string>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="labelProfissional">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Profissional:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="ItemBox" name="itemBoxProfissional">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="labelEndereco_3">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>End. de entrega:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="ItemBox" name="itemBoxEndereco"/>
                  </item>
                 </layout>
                </item>
               </layout>
              </widget>
-             <widget class="TreeView" name="treeView">
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+             <widget class="QFrame" name="frame">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
               </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::MultiSelection</enum>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
               </property>
-             </widget>
-             <widget class="QGroupBox" name="groupBoxDados">
-              <property name="title">
-               <string/>
-              </property>
-              <layout class="QGridLayout" name="gridLayout_10">
-               <item row="0" column="0" colspan="2">
+              <layout class="QGridLayout" name="gridLayout_5">
+               <item row="0" column="0">
+                <widget class="TreeView" name="treeView">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::MultiSelection</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_5">
                  <item>
                   <widget class="QPushButton" name="pushButtonAdicionarObservacao">
                    <property name="text">
                     <string>Adicionar observação</string>
+                   </property>
+                   <property name="autoDefault">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButtonModelo3d">
+                   <property name="text">
+                    <string>Modelo 3D</string>
                    </property>
                    <property name="autoDefault">
                     <bool>false</bool>
@@ -304,8 +321,22 @@ color: rgb(0, 0, 0);</string>
                  </item>
                 </layout>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="labelPrazoEntrega">
+              </layout>
+             </widget>
+             <widget class="QGroupBox" name="groupBoxDados">
+              <property name="title">
+               <string/>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_10">
+               <item row="6" column="1">
+                <widget class="QLineEdit" name="lineEditIdOrcamento">
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="labelIdOrcamento">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                    <horstretch>0</horstretch>
@@ -313,7 +344,7 @@ color: rgb(0, 0, 0);</string>
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Prazo de entrega:</string>
+                  <string>Orçamento:</string>
                  </property>
                 </widget>
                </item>
@@ -327,35 +358,6 @@ color: rgb(0, 0, 0);</string>
                  </property>
                  <property name="singleStep">
                   <number>1</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="labelPrazoEntrega_2">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>End. de faturamento:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="ItemBox" name="itemBoxEnderecoFat"/>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="labelEndereco_9">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Observação:</string>
                  </property>
                 </widget>
                </item>
@@ -375,10 +377,36 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="labelEndereco_9">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Observação:</string>
+                 </property>
+                </widget>
+               </item>
                <item row="5" column="0">
                 <widget class="QLabel" name="labelDateTimeOrc">
                  <property name="text">
                   <string>Data orçamento:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="labelPrazoEntrega">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Prazo de entrega:</string>
                  </property>
                 </widget>
                </item>
@@ -401,25 +429,8 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="labelIdOrcamento">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Orçamento:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <widget class="QLineEdit" name="lineEditIdOrcamento">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
+               <item row="2" column="1">
+                <widget class="ItemBox" name="itemBoxEnderecoFat"/>
                </item>
                <item row="7" column="0" colspan="2">
                 <layout class="QGridLayout" name="gridLayout_4">
@@ -499,6 +510,19 @@ color: rgb(0, 0, 0);</string>
                   </widget>
                  </item>
                 </layout>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="labelPrazoEntrega_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>End. de faturamento:</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -1175,9 +1199,17 @@ color: rgb(0, 0, 0);</string>
   <tabstop>dateTimeEdit</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>pushButtonAdicionarObservacao</tabstop>
+  <tabstop>pushButtonModelo3d</tabstop>
   <tabstop>lineEditEstoque_2</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>itemBoxEnderecoFat</tabstop>
+  <tabstop>plainTextEdit</tabstop>
+  <tabstop>dateTimeEditOrc</tabstop>
+  <tabstop>lineEditIdOrcamento</tabstop>
   <tabstop>checkBoxRT</tabstop>
   <tabstop>checkBoxPontuacaoIsento</tabstop>
   <tabstop>checkBoxPontuacaoPadrao</tabstop>
@@ -1194,6 +1226,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonCadastrarPedido</tabstop>
   <tabstop>pushButtonGerarExcel</tabstop>
   <tabstop>pushButtonGerarPdf</tabstop>
+  <tabstop>pushButtonComprovantes</tabstop>
   <tabstop>pushButtonDevolucao</tabstop>
   <tabstop>pushButtonCancelamento</tabstop>
   <tabstop>pushButtonVoltar</tabstop>

@@ -13,16 +13,20 @@
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked);
-
   setWindowFlags(Qt::Window);
-
   setupTables();
+  setConnections();
 }
 
 PrecoEstoque::~PrecoEstoque() { delete ui; }
+
+void PrecoEstoque::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void PrecoEstoque::setupTables() {
   modelProduto.setTable("produto");
@@ -41,7 +45,7 @@ void PrecoEstoque::setupTables() {
 
   modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
 
-  if (not modelProduto.select()) { return; }
+  modelProduto.select();
 
   modelProduto.proxyModel = new SortFilterProxyModel(&modelProduto, this);
 
@@ -93,7 +97,7 @@ void PrecoEstoque::setupTables() {
 }
 
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
-  if (not modelProduto.submitAll()) { return; }
+  modelProduto.submitAll();
 
   qApp->enqueueInformation("Dados atualizados!", this);
   close();

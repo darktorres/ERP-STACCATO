@@ -1,11 +1,11 @@
 #pragma once
 
 #include "acbr.h"
+#include "sqlquery.h"
 #include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
-#include <QSqlQuery>
 #include <QTextStream>
 
 namespace Ui {
@@ -16,42 +16,47 @@ class CadastrarNFe final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Futura, Normal, NormalAposFutura };
+  enum class Tipo { Entrada, Saida, Futura, SaidaAposFutura };
+
   explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
 
+  auto show() -> void;
+
 private:
   // attributes
-  const Tipo tipo;
-  const QString idVenda;
+  bool manterAberto = false;
   QDataWidgetMapper mapper;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndereco;
-  QSqlQuery queryIBGEDest;
-  QSqlQuery queryIBGEEmit;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery queryPartilhaInter;
-  QSqlQuery queryPartilhaIntra;
   QString arquivo;
-  QString chaveNum;
+  QString chaveAcesso;
+  QString const idVenda;
   QString xml;
+  SqlQuery queryIBGEDest;
+  SqlQuery queryIBGEEmit;
+  SqlQuery queryPartilhaInter;
+  SqlQuery queryPartilhaIntra;
   SqlTableModel modelLoja;
-  SqlTableModel modelViewProdutoEstoque;
   SqlTableModel modelVenda;
+  SqlTableModel modelViewProdutoEstoque;
+  Tipo const tipo;
   Ui::CadastrarNFe *ui;
   // methods
   auto alterarCertificado(const QString &text) -> void;
-  auto buscarAliquotas() -> bool;
-  auto cadastrar(const int &idNFe) -> bool;
+  auto buscarAliquotas() -> void;
+  auto cadastrar(const int &idNFe) -> void;
   auto calculaCofins() -> void;
-  auto calculaDigitoVerificador(QString &chave) -> bool;
+  auto calculaDigitoVerificador(QString &chave) -> void;
   auto calculaIcms() -> void;
   auto calculaPis() -> void;
   auto calculaSt() -> void;
+  auto carregarArquivo(ACBr &acbrRemoto, const QString &filePath) -> void;
   auto clearStr(const QString &str) const -> QString;
-  auto criarChaveAcesso() -> bool;
-  auto gerarNota() -> QString;
-  auto listarCfop() -> bool;
+  auto criarChaveAcesso() -> void;
+  auto enviarEmail(ACBr &acbrRemoto, const QString &filePath) -> void;
+  auto enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) -> void;
+  auto gerarNota(ACBr &acbrRemoto) -> QString;
+  auto listarCfop() -> void;
+  auto montarXML() -> QString;
   auto on_checkBoxFrete_toggled(bool checked) -> void;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
@@ -84,10 +89,16 @@ private:
   auto on_pushButtonEnviarNFE_clicked() -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
-  auto preCadastrarNota() -> std::optional<int>;
-  auto preencherNumeroNFe() -> bool;
+  auto preCadastrarNota() -> int;
+  auto preencherDadosNFe() -> void;
+  auto preencherDestinatario() -> void;
+  auto preencherEmitente() -> void;
+  auto preencherImpostos() -> void;
+  auto preencherNumeroNFe() -> void;
+  auto preencherTotais() -> void;
+  auto preencherTransporte() -> void;
   auto prepararNFe(const QStringList &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> bool;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
@@ -95,6 +106,7 @@ private:
   auto updateComplemento() -> void;
   auto updateTotais() -> void;
   auto validar() -> bool;
+  auto writeComplemento(QTextStream &stream) const -> void;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;
   auto writeIdentificacao(QTextStream &stream) -> void;

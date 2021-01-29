@@ -6,10 +6,10 @@
 #include "editdelegate.h"
 #include "itemboxdelegate.h"
 #include "porcentagemdelegate.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroPagamento) {
   ui->setupUi(this);
@@ -24,18 +24,24 @@ CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new 
 
   ui->pushButtonAtualizarPagamento->hide();
 
-  connect(ui->itemBoxLoja, &ItemBox::idChanged, this, &CadastroPagamento::on_itemBoxLoja_idChanged);
-  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked);
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionarPagamento_clicked);
-  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarPagamento_clicked);
-  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarTaxas_clicked);
-  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonLimparSelecao_clicked);
-  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoveAssociacao_clicked);
-  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoverPagamento_clicked);
-  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroPagamento::on_tablePagamentos_clicked);
+  setConnections();
 }
 
 CadastroPagamento::~CadastroPagamento() { delete ui; }
+
+void CadastroPagamento::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->itemBoxLoja, &ItemBox::idChanged, this, &CadastroPagamento::on_itemBoxLoja_idChanged, connectionType);
+  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked, connectionType);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionarPagamento_clicked, connectionType);
+  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarPagamento_clicked, connectionType);
+  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAtualizarTaxas_clicked, connectionType);
+  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonLimparSelecao_clicked, connectionType);
+  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoveAssociacao_clicked, connectionType);
+  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoverPagamento_clicked, connectionType);
+  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroPagamento::on_tablePagamentos_clicked, connectionType);
+}
 
 void CadastroPagamento::setupTables() {
   modelPagamentos.setTable("forma_pagamento");
@@ -51,7 +57,7 @@ void CadastroPagamento::setupTables() {
   modelPagamentos.setHeaderData("centavoSobressalente", "Centavo 1ª parcela");
   modelPagamentos.setHeaderData("apenasRepresentacao", "Apenas Representação");
 
-  if (not modelPagamentos.select()) { return; }
+  modelPagamentos.select();
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
@@ -111,9 +117,9 @@ void CadastroPagamento::setupTables() {
 }
 
 void CadastroPagamento::updateTables() {
-  if (not modelAssocia1.select()) { return; }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { return; }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::setupMapper() {
@@ -154,73 +160,69 @@ void CadastroPagamento::limparSelecao() {
 void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
   // TODO: nao deixar cadastrar pagamento com nome já existente pois dá erro depois no montarFluxo()
 
-  if (ui->lineEditPagamento->text().isEmpty()) {
-    qApp->enqueueError("Digite um nome para o pagamento!", this);
-    ui->lineEditPagamento->setFocus();
-    return;
-  }
+  if (ui->lineEditPagamento->text().isEmpty()) { throw RuntimeError("Digite um nome para o pagamento!", this); }
 
-  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento")) { return; }
+  qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento");
 
-  if (not adicionarPagamento()) { return qApp->rollbackTransaction(); }
+  adicionarPagamento();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
 }
 
-bool CadastroPagamento::adicionarPagamento() {
+void CadastroPagamento::adicionarPagamento() {
   const int row = modelPagamentos.insertRowAtEnd();
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-  if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
+  modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
+  modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value());
+  modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId());
+  modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked());
+  modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked());
+  modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
+  modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
+  modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
 
-  if (not modelPagamentos.submitAll()) { return false; }
+  modelPagamentos.submitAll();
 
   const int id = modelPagamentos.query().lastInsertId().toInt();
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
     const int rowTaxas = modelTaxas.insertRowAtEnd();
 
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
+    modelTaxas.setData(rowTaxas, "idPagamento", id);
+    modelTaxas.setData(rowTaxas, "parcela", i + 1);
+    modelTaxas.setData(rowTaxas, "taxa", 0);
   }
 
-  if (not modelTaxas.submitAll()) { return false; }
+  modelTaxas.submitAll();
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  return modelTaxas.select();
+  modelTaxas.select();
 }
 
 void CadastroPagamento::on_pushButtonAtualizarPagamento_clicked() {
-  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAtualizarPagamento")) { return; }
+  qApp->startTransaction("CadastroLoja::on_pushButtonAtualizarPagamento");
 
-  if (not atualizarPagamento()) { return qApp->rollbackTransaction(); }
+  atualizarPagamento();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
 }
 
-bool CadastroPagamento::atualizarPagamento() {
+void CadastroPagamento::atualizarPagamento() {
   const int row = mapperPagamento.currentIndex();
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-  if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
+  modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
+  modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value());
+  modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId());
+  modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked());
+  modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked());
+  modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
+  modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
+  modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
 
   //--------------------------------------
 
@@ -230,7 +232,7 @@ bool CadastroPagamento::atualizarPagamento() {
 
   if (novaParcelas < antigoParcelas) { // remove linhas
     for (int i = 0; i < diferenca; ++i) {
-      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueException(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
+      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { throw RuntimeException("Erro removendo linha: " + modelTaxas.lastError().text()); }
     }
   }
 
@@ -238,36 +240,34 @@ bool CadastroPagamento::atualizarPagamento() {
     for (int i = 0; i < diferenca; ++i) {
       const int rowTaxas = modelTaxas.insertRowAtEnd();
 
-      if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(row, "idPagamento"))) { return false; }
-      if (not modelTaxas.setData(rowTaxas, "parcela", modelTaxas.rowCount())) { return false; }
-      if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
+      modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(row, "idPagamento"));
+      modelTaxas.setData(rowTaxas, "parcela", modelTaxas.rowCount());
+      modelTaxas.setData(rowTaxas, "taxa", 0);
     }
   }
 
   //--------------------------------------
 
-  if (not modelPagamentos.submitAll()) { return false; }
+  modelPagamentos.submitAll();
 
-  if (not modelTaxas.submitAll()) { return false; }
+  modelTaxas.submitAll();
 
   // submitAll resets currentIndex to -1, set it again
   mapperPagamento.setCurrentIndex(row);
-
-  return true;
 }
 
 void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
   const auto list = ui->tablePagamentos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //--------------------------------------
 
   for (const auto &index : list) { modelPagamentos.removeRow(index.row()); }
 
-  if (not modelPagamentos.submitAll()) { return qApp->enqueueException("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
+  modelPagamentos.submitAll();
 
-  if (not modelTaxas.select()) { return; }
+  modelTaxas.select();
 
   //--------------------------------------
 
@@ -278,53 +278,53 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
   const auto list = ui->tableAssocia1->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("INSERT INTO loja_has_forma_pagamento (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
 
   for (const auto &index : list) {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not query.exec()) { qApp->enqueueException("Erro cadastrando associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro cadastrando associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
   const auto list = ui->tableAssocia2->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("DELETE FROM loja_has_forma_pagamento WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
 
   for (const auto &index : list) {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) { qApp->enqueueException("Erro removendo associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro removendo associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {
-  if (not modelTaxas.submitAll()) { return; }
+  modelTaxas.submitAll();
 
   qApp->enqueueInformation("Taxas atualizadas!", this);
 }
@@ -338,7 +338,7 @@ void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  if (not modelTaxas.select()) { return; }
+  modelTaxas.select();
 
   mapperPagamento.setCurrentModelIndex(index);
 
@@ -351,13 +351,13 @@ void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
 void CadastroPagamento::on_itemBoxLoja_idChanged(const QVariant &id) {
   modelAssocia1.setFilter("idPagamento NOT IN (SELECT idPagamento FROM view_pagamento_loja WHERE idLoja = " + id.toString() + ")");
 
-  if (not modelAssocia1.select()) { return; }
+  modelAssocia1.select();
 
   // -------------------------------------------------------------------------
 
   modelAssocia2.setFilter("idLoja = " + id.toString());
 
-  if (not modelAssocia2.select()) { return; }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonLimparSelecao_clicked() { limparSelecao(); }

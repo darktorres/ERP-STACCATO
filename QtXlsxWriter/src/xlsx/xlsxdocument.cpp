@@ -25,6 +25,7 @@
 
 #include "xlsxdocument.h"
 #include "../../src/application.h"
+#include "../../src/file.h"
 #include "xlsxchart.h"
 #include "xlsxcontenttypes_p.h"
 #include "xlsxdocpropsapp_p.h"
@@ -355,7 +356,7 @@ Document::Document(QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate
 Document::Document(const QString &name, QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)), parent(parent) {
   d_ptr->packageName = name;
   if (QFile::exists(name)) {
-    QFile xlsx(name);
+    File xlsx(name);
     if (xlsx.open(QFile::ReadOnly)) d_ptr->loadPackage(&xlsx);
   }
   d_ptr->init();
@@ -888,9 +889,9 @@ bool Document::save() const {
  * Returns true if saved successfully.
  */
 bool Document::saveAs(const QString &name) const {
-  QFile file(name);
+  File file(name);
 
-  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo: " + file.errorString(), parent); }
+  if (not file.open(QIODevice::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + name + "' para escrita: " + file.errorString()); }
 
   return saveAs(&file);
 }

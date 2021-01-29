@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -14,6 +15,7 @@ class WidgetVenda final : public QWidget {
 public:
   explicit WidgetVenda(QWidget *parent);
   ~WidgetVenda() final;
+
   auto resetTables() -> void;
   auto setFinanceiro() -> void;
   auto updateTables() -> void;
@@ -23,10 +25,12 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   bool financeiro = false;
+  QTimer timer;
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
-  auto listarLojas() -> bool;
+  auto delayFiltro() -> void;
+  auto listarLojas() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;

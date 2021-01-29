@@ -12,14 +12,14 @@ public:
   explicit SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent);
   explicit SearchDialogProxyModel(SqlTreeModel *model, QObject *parent);
   ~SearchDialogProxyModel() final = default;
-  // TODO: copy the helper 'data' function with 'row, column'
+
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:
-  const int estoqueColumn = -1;
-  const int promocaoColumn = -1;
-  const int descontinuadoColumn = -1;
-  const int validadeColumn = -1;
+  int const descontinuadoColumn = -1;
+  int const estoqueColumn = -1;
+  int const promocaoColumn = -1;
+  int const validadeColumn = -1;
 
   // QSortFilterProxyModel interface
 protected:

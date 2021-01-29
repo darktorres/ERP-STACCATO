@@ -141,7 +141,7 @@ void SqlTreeModel::updateData() {
     beginResetModel();
   }
 
-  for (SqlTreeModelLevel *levelData : d->m_levelData) { levelData->clear(); }
+  for (SqlTreeModelLevel *levelData : qAsConst(d->m_levelData)) { levelData->clear(); }
   d->m_root.m_levels.clear();
   d->m_root.m_rows.clear();
 
@@ -424,7 +424,7 @@ Qt::ItemFlags SqlTreeModel::flags(const QModelIndex &index) const {
 int SqlTreeModel::fieldIndex(const QString &fieldName) const {
   const int field = modelAt(0)->record().indexOf(fieldName) - 1;
 
-  if (field == -1) { qApp->enqueueException(fieldName + " não encontrado na arvore!"); }
+  if (field == -1) { throw RuntimeException(fieldName + " não encontrado na arvore!"); }
 
   return field;
 }

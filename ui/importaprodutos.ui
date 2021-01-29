@@ -280,7 +280,17 @@ color: rgb(0, 0, 0);</string>
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>lineEdit_2</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>tableErro</tabstop>
   <tabstop>pushButtonSalvar</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
  </tabstops>
  <resources/>
  <connections/>

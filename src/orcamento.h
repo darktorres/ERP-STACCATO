@@ -12,31 +12,32 @@ class Orcamento final : public RegisterDialog {
 public:
   explicit Orcamento(QWidget *parent);
   ~Orcamento();
+
   auto show() -> void;
 
 private:
   // attributes
-  QList<QSqlRecord> backupItem;
-  int currentRowItem = -1;
-  bool isReadOnly = false;
-  bool currentItemIsEstoque = false;
-  int currentItemIsPromocao = 0;
   bool canChangeFrete = false;
+  bool currentItemIsEstoque = false;
+  bool isReadOnly = false;
   double minimoFrete = 0;
   double porcFrete = 0;
+  int currentItemIsPromocao = 0;
+  int currentRowItem = -1;
+  QList<QSqlRecord> backupItem;
   QDataWidgetMapper mapperItem;
   SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
-  auto atualizaReplica() -> bool;
+  auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
-  auto buscarCadastrarConsultor() -> bool;
-  auto buscarParametrosFrete() -> bool;
-  auto cadastrar() -> bool final;
+  auto buscarCadastrarConsultor() -> void;
+  auto buscarParametrosFrete() -> void;
+  auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
   auto clearFields() -> void final;
-  auto generateId() -> bool;
+  auto generateId() -> void;
   auto newRegister() -> bool final;
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
@@ -61,23 +62,25 @@ private:
   auto on_pushButtonCalculadora_clicked() -> void;
   auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
-  auto on_pushButtonGerarVenda_clicked() -> void;
   auto on_pushButtonGerarPdf_clicked() -> void;
+  auto on_pushButtonGerarVenda_clicked() -> void;
+  auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto recalcularTotais() -> bool;
+  auto recalcularTotais() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setItemBoxes() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
-  auto verificaCadastroCliente() -> bool;
-  auto verificaDisponibilidadeEstoque() -> bool;
-  auto verifyFields() -> bool final;
+  auto verificaCadastroCliente() -> void;
+  auto verificaDisponibilidadeEstoque() -> void;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

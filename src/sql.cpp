@@ -1,28 +1,31 @@
 #include "sql.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QStringList>
 
-bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
+void Sql::updateVendaStatus(const QStringList &idVendas) { updateVendaStatus(idVendas.join(", ")); }
 
-bool Sql::updateVendaStatus(const QString &idVendas) {
+void Sql::updateVendaStatus(const QString &idVendas) {
   QStringList list = idVendas.split(", ", Qt::SkipEmptyParts);
   list.removeDuplicates();
 
   for (auto const &idVenda : list) {
-    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueException(false, "Erro atualizando status: " + query.lastError().text()); }
+    if (SqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { throw RuntimeException("Erro atualizando status: " + query.lastError().text()); }
   }
-
-  return true;
 }
 
 // clang-format off
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus) {
   return "SELECT "
+         "SUM(p.kgcx * vp2.caixas) AS kg,"
+         "`che`.`bairro` AS `Bairro`,"
+         "`che`.`logradouro` AS `Logradouro`,"
+         "`che`.`numero` AS `Número`,"
+         "`che`.`cidade` AS `Cidade`,"
          "`v`.`data` AS `data`,"
          "CAST(`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY AS DATE) AS `prazoEntrega`,"
          "CAST(`v`.`data` + INTERVAL `v`.`novoPrazoEntrega` DAY AS DATE) AS `novoPrazoEntrega`,"
@@ -31,15 +34,12 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          "`vp2`.`idVenda` AS `idVenda`,"
          "SUM(`vp2`.`status` = 'ESTOQUE') AS `Estoque`,"
          "SUM(`vp2`.`status` IN ('ENTREGUE' , 'EM ENTREGA', 'ENTREGA AGEND.')) AS `Agend/Entregue`,"
-         "SUM(`vp2`.`status` NOT IN ('ESTOQUE' , 'ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.', 'DEVOLVIDO', 'QUEBRADO')) AS `Outros`,"
-         "`che`.`bairro` AS `Bairro`,"
-         "`che`.`logradouro` AS `Logradouro`,"
-         "`che`.`numero` AS `Número`,"
-         "`che`.`cidade` AS `Cidade` "
+         "SUM(`vp2`.`status` NOT IN ('ESTOQUE' , 'ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.', 'DEVOLVIDO', 'QUEBRADO')) AS `Outros` "
          "FROM "
          "`venda_has_produto2` `vp2` "
          "LEFT JOIN `venda` `v` ON `vp2`.`idVenda` = `v`.`idVenda` "
          "LEFT JOIN `cliente_has_endereco` `che` ON `v`.`idEnderecoEntrega` = `che`.`idEndereco` "
+         "LEFT JOIN `produto` `p` ON `vp2`.`idProduto` = `p`.`idProduto` "
          "WHERE "
          "(`vp2`.`idVenda` NOT LIKE '%D') "
          "AND (`v`.`status` NOT IN ('ENTREGUE' , 'CANCELADO', 'DEVOLVIDO')) "
@@ -87,6 +87,215 @@ QString Sql::view_agendar_entrega(const QString &idVenda, const QString &status)
          "LEFT JOIN `nfe` `n2` ON `vp2`.`idNFeFutura` = `n2`.`idNFe` " +
          filtro +
          " GROUP BY `vp2`.`idVendaProduto2`";
+}
+
+QString Sql::view_a_receber_vencidos() {
+    return "SELECT "
+           "v.*, "
+           "@running_total:=@running_total + v.Total AS Acumulado "
+           "FROM "
+           "(SELECT "
+           "`cr`.`dataPagamento` AS `Data Pagamento`, "
+           "`cr`.`status` AS `Status`, "
+           "SUM(IF((((`cr`.`tipo` LIKE '%CARTÃO%')"
+           "      OR (`cr`.`tipo` LIKE '%CRÉDITO%')"
+           "      OR (`cr`.`tipo` LIKE '%DÉBITO%'))"
+           "      AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Cartão`, "
+           "SUM(IF(((`cr`.`tipo` LIKE '%CHEQUE%')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Cheque`, "
+           "SUM(IF(((`cr`.`tipo` LIKE '%BOLETO%')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Boleto`, "
+           "SUM(IF(((NOT ((`cr`.`tipo` LIKE '%CARTÃO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%CRÉDITO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%DÉBITO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%CHEQUE%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%BOLETO%')))"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Outros`, "
+           "SUM(`cr`.`valor`) AS `Total` "
+           "FROM "
+           "`conta_a_receber_has_pagamento` `cr` "
+           "WHERE "
+           "`cr`.`desativado` = FALSE "
+           "GROUP BY `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
+           "HAVING `cr`.`dataPagamento` < CURDATE() "
+           "AND `cr`.`representacao` = 0 "
+           "AND cr.status IN ('PENDENTE' , 'CONFERIDO')) v "
+           "JOIN "
+           "(SELECT @running_total:=0) r";
+}
+
+QString Sql::view_a_receber_vencer() {
+    return "SELECT "
+           "v.*, "
+           "@running_total:=@running_total + v.Total AS Acumulado "
+           "FROM "
+           "(SELECT "
+           "`cr`.`dataPagamento` AS `Data Pagamento`, "
+           "`cr`.`status` AS `Status`, "
+           "SUM(IF((((`cr`.`tipo` LIKE '%CARTÃO%')"
+           "      OR (`cr`.`tipo` LIKE '%CRÉDITO%')"
+           "      OR (`cr`.`tipo` LIKE '%DÉBITO%'))"
+           "      AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Cartão`, "
+           "SUM(IF(((`cr`.`tipo` LIKE '%CHEQUE%')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Cheque`, "
+           "SUM(IF(((`cr`.`tipo` LIKE '%BOLETO%')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Boleto`, "
+           "SUM(IF(((NOT ((`cr`.`tipo` LIKE '%CARTÃO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%CRÉDITO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%DÉBITO%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%CHEQUE%')))"
+           "    AND (NOT ((`cr`.`tipo` LIKE '%BOLETO%')))"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `Outros`, "
+           "SUM(`cr`.`valor`) AS `Total` "
+           "FROM "
+           "`conta_a_receber_has_pagamento` `cr` "
+           "WHERE "
+           "`cr`.`desativado` = FALSE "
+           "GROUP BY `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
+           "HAVING `cr`.`dataPagamento` >= CURDATE() "
+           "AND `cr`.`representacao` = 0 "
+           "AND cr.status IN ('PENDENTE' , 'CONFERIDO')) v "
+           "JOIN "
+           "(SELECT @running_total:=0) r";
+}
+
+QString Sql::view_a_pagar_vencidos() {
+    return "SELECT "
+           "v.*, "
+           "@running_total:=@running_total + v.Total AS Acumulado "
+           "FROM "
+           "(SELECT "
+           "`cr`.`dataPagamento` AS `Data Pagamento`, "
+           "SUM(IF(((`cr`.`status` = 'PENDENTE')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `PENDENTE`, "
+           "SUM(IF(((`cr`.`status` = 'CONFERIDO')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `CONFERIDO`, "
+           "SUM(IF(((`cr`.`status` = 'AGENDADO')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `AGENDADO`, "
+           "SUM(IF(((`cr`.`status` IN ('PENDENTE GARE' , 'LIBERADO GARE', 'GERADO GARE'))"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `GARE`, "
+           "SUM(`cr`.`valor`) AS `Total` "
+           "FROM "
+           "`conta_a_pagar_has_pagamento` `cr` "
+           "WHERE "
+           "`cr`.`desativado` = FALSE "
+           "AND `cr`.`dataPagamento` < CURDATE() "
+           "AND `cr`.`status` IN ('PENDENTE' , 'CONFERIDO', 'AGENDADO', 'PENDENTE GARE', 'LIBERADO GARE', 'GERADO GARE') "
+           "GROUP BY `cr`.`dataPagamento`) v "
+           "JOIN "
+           "(SELECT @running_total:=0) r";
+}
+
+QString Sql::view_a_pagar_vencer() {
+    return "SELECT "
+           "v.*, "
+           "@running_total:=@running_total + v.Total AS Acumulado "
+           "FROM "
+           "(SELECT "
+           "`cr`.`dataPagamento` AS `Data Pagamento`, "
+           "SUM(IF(((`cr`.`status` = 'PENDENTE')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `PENDENTE`, "
+           "SUM(IF(((`cr`.`status` = 'CONFERIDO')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `CONFERIDO`, "
+           "SUM(IF(((`cr`.`status` = 'AGENDADO')"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `AGENDADO`, "
+           "SUM(IF(((`cr`.`status` IN ('PENDENTE GARE' , 'LIBERADO GARE', 'GERADO GARE'))"
+           "    AND (`cr`.`desativado` = FALSE)), "
+           " `cr`.`valor`, "
+           " 0)) AS `GARE`, "
+           "SUM(`cr`.`valor`) AS `Total` "
+           "FROM "
+           "`conta_a_pagar_has_pagamento` `cr` "
+           "WHERE "
+           "`cr`.`desativado` = FALSE "
+           "AND `cr`.`dataPagamento` >= CURDATE() "
+           "AND `cr`.`status` IN ('PENDENTE' , 'CONFERIDO', 'AGENDADO', 'PENDENTE GARE', 'LIBERADO GARE', 'GERADO GARE') "
+           "GROUP BY `cr`.`dataPagamento`) v "
+           "JOIN "
+           "(SELECT @running_total:=0) r";
+}
+
+QString Sql::view_relatorio_loja(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
+  QStringList filtros;
+  if (not mes.isEmpty()) { filtros << mes; }
+  if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
+  if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
+  if (not loja.isEmpty()) { filtros << "v.loja = '" + loja + "'"; }
+  QString filtro;
+  if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
+
+  return "SELECT "
+         "`v`.`Loja` AS `Loja`,"
+         "SUM(`v`.`Faturamento`) AS `Faturamento`,"
+         "SUM(`v`.`Comissão`) AS `Comissão`,"
+         "((SUM(`v`.`Comissão`) / SUM(`v`.`Faturamento`)) * 100) AS `%`,"
+         "`v`.`Mês` AS `Mês`,"
+         "(GROUP_CONCAT(DISTINCT `r`.`custoReposicao`"
+         "SEPARATOR ',') + 0.0) AS `Reposição` "
+         "FROM "
+         "`view_relatorio` `v` "
+         "LEFT JOIN "
+         "view_relatorio_reposicao r ON `r`.`loja` = `v`.`Loja` "
+         "AND r.data = v.Mês " +
+         filtro +
+         " GROUP BY `v`.`Loja`, Mês "
+         "ORDER BY `v`.`Loja`";
+}
+
+QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
+  QStringList filtros;
+  if (not mes.isEmpty()) { filtros << mes; }
+  if (not idUsuario.isEmpty()) { filtros << "idUsuario = " + idUsuario; }
+  if (not idUsuarioConsultor.isEmpty()) { filtros << "idUsuarioConsultor = " + idUsuarioConsultor; }
+  if (not loja.isEmpty()) { filtros << "loja = '" + loja + "'"; }
+  QString filtro;
+  if (not filtros.isEmpty()) { filtro = "WHERE " + filtros.join(" AND "); }
+
+  return "SELECT "
+         "`c`.`Loja` AS `Loja`,"
+         "GROUP_CONCAT(DISTINCT `c`.`Vendedor`) AS `Vendedor`,"
+         "`c`.`idUsuario` AS `idUsuario`,"
+         "GROUP_CONCAT(DISTINCT `c`.`idUsuarioConsultor`"
+         "SEPARATOR ',') AS `idUsuarioConsultor`,"
+         "SUM(`c`.`Faturamento`) AS `Faturamento`,"
+         "SUM(`c`.`Comissão`) AS `Comissão`,"
+         "((SUM(`c`.`Comissão`) / SUM(`c`.`Faturamento`)) * 100) AS `%`,"
+         "`c`.`Mês` AS `Mês` "
+         "FROM "
+         "`comissao` `c` " +
+         filtro +
+         " GROUP BY `idUsuario` , `Loja` , `Mês` "
+         "ORDER BY `Loja`, `Vendedor`";
 }
 
 // clang-format on

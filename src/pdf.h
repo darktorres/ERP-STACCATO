@@ -1,33 +1,34 @@
 #pragma once
 
+#include "sqlquery.h"
 #include "sqltablemodel.h"
 
-#include <QSqlQuery>
 #include <QWidget>
 
 class PDF final {
 
 public:
   enum class Tipo { Orcamento, Venda };
+
   explicit PDF(const QString &id, const Tipo tipo, QWidget *parent);
   ~PDF() = default;
-  PDF(const PDF &) = delete;
+
   auto gerarPdf() -> void;
 
 private:
   // attributes
-  const Tipo tipo;
-  const QString id;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndEnt;
-  QSqlQuery queryEndFat;
-  QSqlQuery queryLoja;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery query;
-  QSqlQuery queryProfissional;
-  QSqlQuery queryVendedor;
-  SqlTableModel modelItem;
+  QString const id;
   QWidget *parent;
+  SqlQuery query;
+  SqlQuery queryCliente;
+  SqlQuery queryEndEnt;
+  SqlQuery queryEndFat;
+  SqlQuery queryLoja;
+  SqlQuery queryLojaEnd;
+  SqlQuery queryProfissional;
+  SqlQuery queryVendedor;
+  SqlTableModel modelItem;
+  Tipo const tipo;
   // methods
-  auto setQuerys() -> bool;
+  auto setQuerys() -> void;
 };

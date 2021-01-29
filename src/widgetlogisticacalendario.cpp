@@ -3,12 +3,11 @@
 
 #include "application.h"
 #include "collapsiblewidget.h"
+#include "sqlquery.h"
 
 #include <QCheckBox>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 
@@ -33,15 +32,18 @@ void WidgetLogisticaCalendario::unsetConnections() {
 }
 
 void WidgetLogisticaCalendario::listarVeiculos() {
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora WHERE t.desativado = FALSE AND "
                      "tv.desativado = FALSE ORDER BY razaoSocial, modelo")) {
-    return qApp->enqueueException("Erro buscando veiculos: " + query.lastError().text(), this);
+    throw RuntimeException("Erro buscando veiculos: " + query.lastError().text(), this);
   }
+
+  int index = 1;
 
   while (query.next()) {
     auto *checkbox = new QCheckBox(this);
+    checkbox->setObjectName("checkBox" + QString::number(index++));
     checkbox->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
     checkbox->setChecked(true);
     connect(checkbox, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
@@ -82,7 +84,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (not child->isChecked()) { continue; }
@@ -115,15 +117,12 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     if (dia > diasMes) { dia = 1; }
   }
 
-  for (int col = 0; col < ui->tableWidget->columnCount(); ++col) { ui->tableWidget->setColumnHidden(col, true); }
-  for (int row = 0; row < ui->tableWidget->rowCount(); ++row) { ui->tableWidget->setRowHidden(row, true); }
-
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT * FROM view_calendario WHERE DATE(data) BETWEEN :start AND :end");
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 
-  if (not query.exec()) { return qApp->enqueueException("Erro query: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro query: " + query.lastError().text(), this); }
 
   while (query.next()) {
     const QString transportadora = query.value("razaoSocial").toString().left(15) + "\n" + query.value("modelo").toString().left(15);
@@ -235,8 +234,8 @@ void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() { updateFil
 void WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
-    const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+  try {
+    const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->blockSignals(true);
@@ -244,7 +243,7 @@ void WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled(const bool enabled) 
       child->setChecked(enabled);
       child->blockSignals(false);
     }
-  }();
+  } catch (std::exception &) {}
 
   setConnections();
 

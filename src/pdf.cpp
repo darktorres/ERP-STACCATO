@@ -1,6 +1,7 @@
 #include "pdf.h"
 
 #include "application.h"
+#include "file.h"
 #include "lrreportengine.h"
 #include "usersession.h"
 
@@ -11,22 +12,22 @@
 #include <QSqlError>
 #include <QUrl>
 
-PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : tipo(tipo), id(id), parent(parent) {
+PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(parent), tipo(tipo) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
-  if (not modelItem.select()) { return; }
+  modelItem.select();
 }
 
 void PDF::gerarPdf() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  const auto folderKey = UserSession::getSetting(folder);
+  const QString folderKey = UserSession::getSetting(folder).toString();
 
-  if (not folderKey) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
+  if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
 
-  if (not setQuerys()) { return; }
+  setQuerys();
 
   auto *report = new LimeReport::ReportEngine(parent);
 
@@ -34,7 +35,9 @@ void PDF::gerarPdf() {
 
   dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
-  if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) { return qApp->enqueueException("Não encontrou o modelo de impressão!", parent); }
+  const QString modelo = QDir::currentPath() + "/modelos/" + ((tipo == Tipo::Orcamento) ? "orcamento" : "venda") + ".lrxml";
+
+  if (not report->loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
 
   dataManager->setReportVariable("Loja", queryLoja.value("descricao"));
   dataManager->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" + queryLojaEnd.value("bairro").toString() + "\n" +
@@ -102,11 +105,11 @@ void PDF::gerarPdf() {
                              id + "' AND tipo LIKE '%1%' AND tipo NOT IN ('%1. Comissão', '%1. Taxa Cartão') AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')";
 
     for (int i = 1; i <= 5; ++i) {
-      QSqlQuery queryPgt;
+      SqlQuery queryPgt;
 
       const QString current = QString::number(i);
 
-      if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { return qApp->enqueueException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text(), parent); }
+      if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text(), parent); }
 
       if (queryPgt.value("valor") == 0) { continue; }
 
@@ -120,29 +123,25 @@ void PDF::gerarPdf() {
     }
   }
 
-  const QString path = folderKey->toString();
-
-  QDir dir(path);
-
-  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!", parent); }
-
   QString fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".pdf";
   fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
 
-  fileName = path + "/" + fileName;
+  fileName = folderKey + "/" + fileName;
 
-  QFile file(fileName);
+  File file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
 
   file.close();
 
-  report->printToPDF(fileName);
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  if (not report->printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report->lastError()); }
+
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
+
   qApp->enqueueInformation("Arquivo salvo como " + fileName, parent);
 }
 
-bool PDF::setQuerys() {
+void PDF::setQuerys() {
   if (tipo == Tipo::Orcamento) {
     query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, "
                   "prazoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");
@@ -155,21 +154,21 @@ bool PDF::setQuerys() {
     query.bindValue(":idVenda", id);
   }
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dados da venda/orçamento: " + query.lastError().text(), parent); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryCliente.prepare("SELECT nome_razao, pfpj, cpf, cnpj, email, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueException(false, "Erro buscando cliente: " + queryCliente.lastError().text(), parent); }
+  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro buscando cliente: " + queryCliente.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
-  if (not queryEndEnt.exec() or not queryEndEnt.first()) { return qApp->enqueueException(false, "Erro buscando endereço: " + queryEndEnt.lastError().text(), parent); }
+  if (not queryEndEnt.exec() or not queryEndEnt.first()) { throw RuntimeException("Erro buscando endereço: " + queryEndEnt.lastError().text()); }
 
   //------------------------------------------------------------------------
 
@@ -177,7 +176,7 @@ bool PDF::setQuerys() {
     queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
     queryEndFat.bindValue(":idEndereco", query.value("idEnderecoFaturamento"));
 
-    if (not queryEndFat.exec() or not queryEndFat.first()) { return qApp->enqueueException(false, "Erro buscando dados do endereço: " + queryEndFat.lastError().text(), parent); }
+    if (not queryEndFat.exec() or not queryEndFat.first()) { throw RuntimeException("Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
   }
 
   //------------------------------------------------------------------------
@@ -185,28 +184,26 @@ bool PDF::setQuerys() {
   queryProfissional.prepare("SELECT nome_razao, tel, email FROM profissional WHERE idProfissional = :idProfissional");
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
-  if (not queryProfissional.exec() or not queryProfissional.first()) { return qApp->enqueueException(false, "Erro buscando profissional: " + queryProfissional.lastError().text(), parent); }
+  if (not queryProfissional.exec() or not queryProfissional.first()) { throw RuntimeException("Erro buscando profissional: " + queryProfissional.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryVendedor.prepare("SELECT nome, email FROM usuario WHERE idUsuario = :idUsuario");
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
-  if (not queryVendedor.exec() or not queryVendedor.first()) { return qApp->enqueueException(false, "Erro buscando vendedor: " + queryVendedor.lastError().text(), parent); }
+  if (not queryVendedor.exec() or not queryVendedor.first()) { throw RuntimeException("Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryLoja.prepare("SELECT descricao, tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLoja.exec() or not queryLoja.first()) { return qApp->enqueueException(false, "Erro buscando loja: " + queryLoja.lastError().text(), parent); }
+  if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryLojaEnd.prepare("SELECT logradouro, numero, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { return qApp->enqueueException(false, "Erro buscando loja endereço: " + queryLojaEnd.lastError().text(), parent); }
-
-  return true;
+  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { throw RuntimeException("Erro buscando loja endereço: " + queryLojaEnd.lastError().text()); }
 }

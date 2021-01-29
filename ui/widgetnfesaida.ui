@@ -82,7 +82,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Cancelado</string>
+            <string>Cancelada</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -204,6 +204,20 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
+  <tabstop>checkBoxAutorizado</tabstop>
+  <tabstop>checkBoxPendente</tabstop>
+  <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>pushButtonCancelarNFe</tabstop>
+  <tabstop>pushButtonConsultarNFe</tabstop>
+  <tabstop>pushButtonRelatorio</tabstop>
+  <tabstop>pushButtonExportar</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

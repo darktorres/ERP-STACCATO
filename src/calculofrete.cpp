@@ -2,12 +2,13 @@
 #include "ui_calculofrete.h"
 
 #include "application.h"
+#include "file.h"
+#include "sqlquery.h"
 
 #include <QFile>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QXmlStreamReader>
 
 CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::CalculoFrete) {
@@ -15,12 +16,18 @@ CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::Calcul
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
 
-  connect(&networkManager, &QNetworkAccessManager::finished, this, &CalculoFrete::handleNetworkData);
-  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxCliente_textChanged);
-  connect(ui->pushButton, &QPushButton::clicked, this, &CalculoFrete::on_pushButton_clicked);
+  setConnections();
 }
 
 CalculoFrete::~CalculoFrete() { delete ui; }
+
+void CalculoFrete::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(&networkManager, &QNetworkAccessManager::finished, this, &CalculoFrete::handleNetworkData, connectionType);
+  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxCliente_textChanged, connectionType);
+  connect(ui->pushButton, &QPushButton::clicked, this, &CalculoFrete::on_pushButton_clicked, connectionType);
+}
 
 void CalculoFrete::setCliente(const QVariant &idCliente) {
   ui->itemBoxCliente->setId(idCliente);
@@ -37,9 +44,9 @@ double CalculoFrete::getDistancia() {
 void CalculoFrete::on_pushButton_clicked() {
   ui->lineEditDistancia->clear();
 
-  QFile apiKeyFile("google_api.txt");
+  File apiKeyFile("google_api.txt");
 
-  if (not apiKeyFile.open(QFile::ReadOnly)) { return qApp->enqueueException("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
+  if (not apiKeyFile.open(QFile::ReadOnly)) { throw RuntimeException("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
 
   const QString url = searchUrl.arg(ui->comboBoxOrigem->currentText().replace(" ", "+"), ui->comboBoxDestino->currentText().replace(" ", "+"), apiKeyFile.readAll());
   qDebug() << "url: " << url;
@@ -96,11 +103,11 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   ui->comboBoxDestino->clear();
   ui->lineEditDistancia->clear();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not query.exec()) { return qApp->enqueueException("Erro buscando endereço do cliente: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando endereço do cliente: " + query.lastError().text(), this); }
 
   while (query.next()) {
     ui->comboBoxDestino->addItem(query.value("logradouro").toString() + ", " + query.value("numero").toString() + ", " + query.value("cidade").toString() + ", " + query.value("uf").toString());

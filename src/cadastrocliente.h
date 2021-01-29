@@ -17,14 +17,15 @@ public:
 private:
   // attributes
   QString tipoPFPJ;
-  SearchDialog *sdCliente;
+  SearchDialog *const sdCliente = SearchDialog::cliente(this);
   Ui::CadastroCliente *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
+  auto on_checkBoxDataNasc_stateChanged(const int state) -> void;
   auto on_checkBoxInscEstIsento_toggled(bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
@@ -42,14 +43,16 @@ private:
   auto on_radioButtonPF_toggled(const bool checked) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setItemBoxes() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verificaVinculo() -> std::optional<bool>;
-  auto verifyFields() -> bool final;
+  auto verificaEndereco() -> void;
+  auto verificaVinculo() -> bool;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

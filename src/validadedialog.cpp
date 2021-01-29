@@ -6,15 +6,21 @@
 ValidadeDialog::ValidadeDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ValidadeDialog) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ValidadeDialog::on_pushButtonSalvar_clicked);
-  connect(ui->spinBoxDias, qOverload<int>(&QSpinBox::valueChanged), this, &ValidadeDialog::on_spinBox_valueChanged);
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &ValidadeDialog::on_dateEdit_dateChanged);
-  connect(ui->checkBoxSemValidade, &QCheckBox::toggled, this, &ValidadeDialog::on_checkBoxSemValidade_toggled);
-
   ui->dateEdit->setDate(qApp->serverDate());
+
+  setConnections();
 }
 
 ValidadeDialog::~ValidadeDialog() { delete ui; }
+
+void ValidadeDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ValidadeDialog::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->spinBoxDias, qOverload<int>(&QSpinBox::valueChanged), this, &ValidadeDialog::on_spinBox_valueChanged, connectionType);
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &ValidadeDialog::on_dateEdit_dateChanged, connectionType);
+  connect(ui->checkBoxSemValidade, &QCheckBox::toggled, this, &ValidadeDialog::on_checkBoxSemValidade_toggled, connectionType);
+}
 
 void ValidadeDialog::on_pushButtonSalvar_clicked() {
   QDialog::accept();

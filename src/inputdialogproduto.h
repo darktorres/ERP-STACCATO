@@ -16,17 +16,18 @@ public:
 
   explicit InputDialogProduto(const Tipo &tipo, QWidget *parent);
   ~InputDialogProduto();
+
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
-  auto setFilter(const QStringList &ids) -> bool;
+  auto setFilter(const QStringList &ids) -> void;
 
 private:
   // attributes
-  const Tipo tipo;
   SqlTableModel modelPedidoFornecedor;
+  Tipo const tipo;
   Ui::InputDialogProduto *ui;
   // methods
-  auto cadastrar() -> bool;
+  auto cadastrar() -> void;
   auto calcularTotal() -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;

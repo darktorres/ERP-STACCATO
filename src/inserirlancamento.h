@@ -13,13 +13,14 @@ class InserirLancamento final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
+
   explicit InserirLancamento(const Tipo tipo, QWidget *parent);
   ~InserirLancamento();
 
 private:
   // attributes
-  const Tipo tipo;
   SqlTableModel modelContaPagamento;
+  Tipo const tipo;
   Ui::InserirLancamento *ui;
   // methods
   auto on_pushButtonCriarLancamento_clicked() -> void;
@@ -29,5 +30,5 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

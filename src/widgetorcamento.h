@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -14,6 +15,7 @@ class WidgetOrcamento final : public QWidget {
 public:
   explicit WidgetOrcamento(QWidget *parent);
   ~WidgetOrcamento();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -21,10 +23,12 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QTimer timer;
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
-  auto listarLojas() -> bool;
+  auto delayFiltro() -> void;
+  auto listarLojas() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

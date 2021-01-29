@@ -12,6 +12,7 @@ class WidgetCompra final : public QWidget {
 public:
   explicit WidgetCompra(QWidget *parent);
   ~WidgetCompra();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 

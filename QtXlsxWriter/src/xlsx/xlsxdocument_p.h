@@ -55,7 +55,7 @@ public:
   bool savePackage(QIODevice *device) const;
 
   Document *q_ptr;
-  const QString defaultPackageName; // default name when package name not specified
+  QString const defaultPackageName; // default name when package name not specified
   QString packageName;              // name of the .xlsx file
 
   QMap<QString, QString> documentProperties; // core, app and custom properties

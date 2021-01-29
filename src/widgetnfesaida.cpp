@@ -4,36 +4,38 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "file.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
-#include "sendmail.h"
+#include "sqlquery.h"
 #include "usersession.h"
 #include "xml_viewer.h"
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
-#include <QUrl>
 
-WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
+WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 
 void WidgetNfeSaida::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::delayFiltro, connectionType);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked, connectionType);
@@ -42,6 +44,7 @@ void WidgetNfeSaida::setConnections() {
 }
 
 void WidgetNfeSaida::unsetConnections() {
+  disconnect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
@@ -69,8 +72,10 @@ void WidgetNfeSaida::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewNFeSaida.select()) { return; }
+  modelViewNFeSaida.select();
 }
+
+void WidgetNfeSaida::delayFiltro() { timer.start(500); }
 
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
@@ -92,11 +97,11 @@ void WidgetNfeSaida::setupTables() {
 }
 
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -119,7 +124,7 @@ void WidgetNfeSaida::montaFiltro() {
 
   QStringList filtroCheck;
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
@@ -137,17 +142,17 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // -------------------------------------------------------------------------
 
-  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
 
-  if (not emailContabilidade) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
 
-  if (not emailLogistica) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   // -------------------------------------------------------------------------
 
@@ -161,7 +166,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 200 caracteres: ");
 
-  if (justificativa.size() < 15 or justificativa.size() > 200) { return qApp->enqueueError("Justificativa fora do tamanho!", this); }
+  if (justificativa.size() < 15 or justificativa.size() > 200) { throw RuntimeError("Justificativa fora do tamanho!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -169,36 +174,40 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  ACBr acbrRemoto(this);
+  ACBr acbrRemoto;
 
-  const auto resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
-
-  if (not resposta) { return; }
+  const QString resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
-  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueException("Resposta: " + resposta.value(), this); }
+  if (not resposta.contains("xEvento=Cancelamento registrado")) { throw RuntimeException("Resposta: " + resposta); }
 
-  if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe")) { return; }
+  qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe");
 
-  if (not cancelarNFe(chaveAcesso, row)) { return qApp->rollbackTransaction(); }
+  cancelarNFe(chaveAcesso, row);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
-  qApp->enqueueInformation(resposta.value(), this);
 
-  if (not gravarArquivo(resposta.value(), chaveAcesso)) { return; }
+  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
 
-  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
+  if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'xMotivo': " + resposta); }
+
+  const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+  qApp->enqueueInformation(xMotivo, this);
+
+  gravarArquivo(resposta, chaveAcesso);
 
   // -------------------------------------------------------------------------
 
-  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  //  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
+  //  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  ACBr acbrLocal(this);
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
-  acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
+  //  ACBr acbrLocal;
+  //  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -209,7 +218,15 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   // TODO: 3perguntar um intervalo de tempo para filtrar as notas
   // TODO: 3verificar quais as tags na nota dos campos que faltam preencher
 
-  if (not ui->groupBoxMes->isChecked()) { return qApp->enqueueError("Selecione um mês para gerar o relatório!", this); }
+  if (not ui->groupBoxMes->isChecked()) { throw RuntimeError("Selecione um mês para gerar o relatório!", this); }
+
+  const QString filename = QDir::currentPath() + "/arquivos/relatorio_nfe.pdf";
+
+  File file(filename);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + file.errorString()); }
+
+  file.close();
 
   LimeReport::ReportEngine report;
   auto dataManager = report.dataManager();
@@ -217,20 +234,22 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   SqlTableModel view;
   view.setTable("view_relatorio_nfe");
 
+  // TODO: trocar 'Criado em' por 'DataEmissao'
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
-  if (not view.select()) { return; }
+  view.select();
 
   dataManager->addModel("view", &view, true);
 
-  if (not report.loadFromFile("relatorio_nfe.lrxml")) { return qApp->enqueueException("Não encontrou o modelo de impressão!", this); }
+  if (not report.loadFromFile(QDir::currentPath() + "/modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
-  QSqlQuery query;
+  // TODO: trocar 'Criado em' por 'DataEmissao'
+  SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
                 "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
   dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
@@ -246,11 +265,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   dataManager->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
-  if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) { return qApp->enqueueException("Erro gerando relatório!", this); }
+  if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório: " + report.lastError(), this); }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "/relatorio.pdf"))) {
-    return qApp->enqueueException("Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!", this);
-  }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + filename, this); }
 }
 
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {
@@ -258,12 +275,12 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal(this);
+  ACBr acbrLocal;
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
@@ -279,11 +296,11 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+    File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
-    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
+    if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
     fileXml.write(query.value("xml").toByteArray());
 
@@ -292,37 +309,35 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
+    const QString pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
 
-    if (not pdfOrigem) { return; }
-
-    if (pdfOrigem->isEmpty()) { return qApp->enqueueException("Resposta vazia!", this); }
+    if (pdfOrigem.isEmpty()) { throw RuntimeException("Resposta vazia!"); }
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = "arquivos/" + chaveAcesso + ".pdf";
 
-    QFile filePdf(pdfDestino);
+    File filePdf(pdfDestino);
 
     if (filePdf.exists()) { filePdf.remove(); }
 
-    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
+    if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/", this);
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  [&] {
-    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  try {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  }();
+  } catch (std::exception &) {}
 
   setConnections();
 
@@ -332,79 +347,78 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
 void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbrRemoto(this);
+  ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
-    const auto [xml, resposta] = tuple.value();
+  const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
 
-    if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe")) { return; }
+  qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe");
 
-    if (not atualizarNFe(resposta, idNFe, xml)) { return qApp->rollbackTransaction(); }
+  atualizarNFe(resposta, idNFe, xml);
 
-    if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
-    updateTables();
-    qApp->enqueueInformation(resposta, this);
-  }
+  updateTables();
+
+  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+
+  if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo':\n" + resposta); }
+
+  const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+  qApp->enqueueInformation(xMotivo, this);
 }
 
-bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
+void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
   QString status;
 
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
-  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CAMCELADO"; }
+  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CANCELADA"; }
 
-  if (status.isEmpty()) { return false; }
+  if (status.isEmpty()) { throw RuntimeException("Erro status vazio"); }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":status", status);
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
-
-  return true;
+  if (not query.exec()) { throw RuntimeException("Erro atualizando xml da nota: " + query.lastError().text()); }
 }
 
-bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
+void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
+  SqlQuery query;
+  query.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro marcando nota como cancelada: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro marcando nota como cancelada: " + query.lastError().text()); }
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro removendo NFe da venda_produto: " + query.lastError().text()); }
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe do veiculo_produto: " + query.lastError().text(), this); }
-
-  return true;
+  if (not query.exec()) { throw RuntimeException("Erro removendo NFe do veiculo_produto: " + query.lastError().text()); }
 }
 
-bool WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
-  QFile arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
+void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
+  File arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
 
-  if (not arquivo.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo para escrita: " + arquivo.errorString(), this); }
+  if (not arquivo.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + arquivo.errorString()); }
 
   QTextStream stream(&arquivo);
 
   stream << resposta;
 
   arquivo.close();
-
-  return true;
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)

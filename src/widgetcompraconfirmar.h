@@ -14,6 +14,7 @@ class WidgetCompraConfirmar final : public QWidget {
 public:
   explicit WidgetCompraConfirmar(QWidget *parent);
   ~WidgetCompraConfirmar();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -25,7 +26,7 @@ private:
   SqlTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  auto confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) -> bool;
+  auto confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;
   auto setupTables() -> void;

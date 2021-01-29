@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1530</width>
+    <width>1697</width>
     <height>596</height>
    </rect>
   </property>
@@ -264,7 +264,7 @@
                <item row="0" column="3">
                 <widget class="QGroupBox" name="groupBoxCodPortinari">
                  <property name="title">
-                  <string>Código Portinari</string>
+                  <string>Código Fornecedor</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_10">
                   <item row="0" column="0">
@@ -519,6 +519,26 @@
    <header>src/treeview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dateEditEvento</tabstop>
+  <tabstop>dateEditProximo</tabstop>
+  <tabstop>checkBoxMarcarTodos</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>comboBoxST</tabstop>
+  <tabstop>doubleSpinBoxAliquota</tabstop>
+  <tabstop>doubleSpinBoxSt</tabstop>
+  <tabstop>dateEditPgtSt</tabstop>
+  <tabstop>checkBoxParcelarSt</tabstop>
+  <tabstop>doubleSpinBoxFrete</tabstop>
+  <tabstop>dateEditFrete</tabstop>
+  <tabstop>lineEditCodFornecedor</tabstop>
+  <tabstop>tableFluxoCaixa</tabstop>
+  <tabstop>doubleSpinBoxTotal</tabstop>
+  <tabstop>comboBoxFinanceiro</tabstop>
+  <tabstop>pushButtonCorrigirFluxo</tabstop>
+  <tabstop>pushButtonSalvar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

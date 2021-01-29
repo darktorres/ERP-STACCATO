@@ -14,9 +14,11 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
-WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) { ui->setupUi(this); }
+WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
+  ui->setupUi(this);
+  timer.setSingleShot(true);
+}
 
 WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }
 
@@ -29,11 +31,11 @@ void WidgetCompraPendentes::setarDadosAvulso() {
     return;
   }
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
 
   // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
@@ -50,6 +52,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 void WidgetCompraPendentes::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -67,7 +70,7 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->doubleSpinBoxQuantAvulso, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged, connectionType);
   connect(ui->doubleSpinBoxQuantAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro, connectionType);
   connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked, connectionType);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked, connectionType);
   connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked, connectionType);
@@ -92,8 +95,10 @@ void WidgetCompraPendentes::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewVendaProduto.select()) { return; }
+  modelViewVendaProduto.select();
 }
+
+void WidgetCompraPendentes::delayFiltro() { timer.start(500); }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
 
@@ -129,7 +134,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 
   const QString status = modelViewVendaProduto.data(row, "status").toString();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { throw RuntimeError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
   const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
   const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
@@ -143,12 +148,14 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
-  auto *produtos = new ProdutosPendentes(codComercial, idVenda, this);
+  auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
+  produtos->viewProduto(codComercial, idVenda);
+  produtos->show();
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
-  const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : container) {
     disconnect(child, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -164,7 +171,7 @@ void WidgetCompraPendentes::montaFiltro() {
   QStringList filtros;
   QStringList filtroCheck;
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
@@ -199,9 +206,9 @@ void WidgetCompraPendentes::montaFiltro() {
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
-  if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
+  if (ui->itemBoxProduto->text().isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { throw RuntimeError("Deve escolher uma quantidade!", this); }
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
 
@@ -209,42 +216,42 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   const QDate dataPrevista = inputDlg.getNextDate();
 
-  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!", this) : qApp->enqueueException("Erro ao enviar produto para compras!", this);
+  insere(dataPrevista);
+
+  qApp->enqueueInformation("Produto enviado para compras com sucesso!", this);
 
   ui->itemBoxProduto->clear();
 }
 
-bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
+void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   SqlTableModel model;
   model.setTable("pedido_fornecedor_has_produto");
 
   const int newRow = model.insertRowAtEnd();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
 
-  if (not model.setData(newRow, "fornecedor", query.value("fornecedor"))) { return false; }
-  if (not model.setData(newRow, "idProduto", query.value("idProduto"))) { return false; }
-  if (not model.setData(newRow, "descricao", query.value("descricao"))) { return false; }
-  if (not model.setData(newRow, "colecao", query.value("colecao"))) { return false; }
-  if (not model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value())) { return false; }
-  if (not model.setData(newRow, "un", query.value("un"))) { return false; }
-  if (not model.setData(newRow, "un2", query.value("un2"))) { return false; }
-  if (not model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value())) { return false; }
-  if (not model.setData(newRow, "prcUnitario", query.value("custo").toDouble())) { return false; }
-  if (not model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value())) { return false; }
-  if (not model.setData(newRow, "kgcx", query.value("kgcx"))) { return false; }
-  if (not model.setData(newRow, "formComercial", query.value("formComercial"))) { return false; }
-  if (not model.setData(newRow, "codComercial", query.value("codComercial"))) { return false; }
-  if (not model.setData(newRow, "codBarras", query.value("codBarras"))) { return false; }
-  if (not model.setData(newRow, "dataPrevCompra", dataPrevista)) { return false; }
+  model.setData(newRow, "fornecedor", query.value("fornecedor"));
+  model.setData(newRow, "idProduto", query.value("idProduto"));
+  model.setData(newRow, "descricao", query.value("descricao"));
+  model.setData(newRow, "colecao", query.value("colecao"));
+  model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "un", query.value("un"));
+  model.setData(newRow, "un2", query.value("un2"));
+  model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value());
+  model.setData(newRow, "prcUnitario", query.value("custo").toDouble());
+  model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "kgcx", query.value("kgcx"));
+  model.setData(newRow, "formComercial", query.value("formComercial"));
+  model.setData(newRow, "codComercial", query.value("codComercial"));
+  model.setData(newRow, "codBarras", query.value("codBarras"));
+  model.setData(newRow, "dataPrevCompra", dataPrevista);
 
-  if (not model.submitAll()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
-
-  return true;
+  model.submitAll();
 }
 
 void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulso->setValue(value * ui->doubleSpinBoxQuantAvulso->singleStep()); }
@@ -254,7 +261,7 @@ void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged(const doubl
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
@@ -265,7 +272,7 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 

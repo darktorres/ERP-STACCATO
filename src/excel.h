@@ -1,33 +1,34 @@
 #pragma once
 
+#include "sqlquery.h"
 #include "xlsxdocument.h"
-
-#include <QSqlQuery>
 
 class Excel final {
 
 public:
   enum class Tipo { Orcamento, Venda };
+
   Excel(const QString &id, const Tipo tipo, QWidget *parent);
-  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
+
+  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> void;
   auto getFileName() const -> QString;
 
 private:
   // attributes
-  const Tipo tipo;
-  const QString id;
-  QSqlQuery query;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndEnt;
-  QSqlQuery queryEndFat;
-  QSqlQuery queryLoja;
-  QSqlQuery queryLojaEnd;
-  QSqlQuery queryProduto;
-  QSqlQuery queryProfissional;
-  QSqlQuery queryVendedor;
+  QString const id;
   QString fileName;
   QWidget *parent;
+  SqlQuery query;
+  SqlQuery queryCliente;
+  SqlQuery queryEndEnt;
+  SqlQuery queryEndFat;
+  SqlQuery queryLoja;
+  SqlQuery queryLojaEnd;
+  SqlQuery queryProduto;
+  SqlQuery queryProfissional;
+  SqlQuery queryVendedor;
+  Tipo const tipo;
   // methods
   auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
-  auto setQuerys() -> bool;
+  auto setQuerys() -> void;
 };

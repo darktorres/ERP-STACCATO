@@ -8,12 +8,11 @@
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);
@@ -68,40 +67,38 @@ void WidgetCompraFaturar::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 
   //--------------------------------------
 
-  if (not modelViewFaturamento.select()) { return; }
+  modelViewFaturamento.select();
 }
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
-  QSqlQuery queryCompra;
+void WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
     queryCompra.bindValue(":dataRealFat", dataReal);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando status do produto da venda: " + queryVenda.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma compra!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma compra!", this); }
 
   QStringList idsCompra;
   QStringList fornecedores;
@@ -115,10 +112,11 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const int size = fornecedores.size();
 
-  if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
+  if (fornecedores.removeDuplicates() != size - 1) { throw RuntimeError("Fornecedores diferentes!", this); }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
-  if (not inputDlg.setFilter(idsCompra)) { return; }
+  inputDlg.setFilter(idsCompra);
+
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
   const QDate dataFaturamento = inputDlg.getDate();
@@ -126,9 +124,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER STACCATO";
 
   if (pularNota) {
-    if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }
-    if (not faturarRepresentacao(dataFaturamento, idsCompra)) { return qApp->rollbackTransaction(); }
-    if (not qApp->endTransaction()) { return; }
+    qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota");
+    faturarRepresentacao(dataFaturamento, idsCompra);
+    qApp->endTransaction();
   } else {
     auto *import = new ImportarXML(idsCompra, dataFaturamento, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
@@ -137,9 +135,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return; }
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
-  if (not qApp->endTransaction()) { return; }
+  qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado");
+  Sql::updateVendaStatus(idVendas);
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Confirmado faturamento!", this);
@@ -154,9 +152,9 @@ void WidgetCompraFaturar::montaFiltro() {
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
+  if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
@@ -166,17 +164,17 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::Faturamento, this);
   if (input.exec() != InputDialog::Accepted) { return; }
 
   const QDate dataPrevista = input.getNextDate();
 
-  QSqlQuery queryCompra;
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   for (const auto &index : list) {
@@ -185,12 +183,12 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueException("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueException("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

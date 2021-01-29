@@ -4,12 +4,8 @@
 #
 #-------------------------------------------------
 
-!versionAtLeast(QT_VERSION, 5.14.0) {
-    error("Use Qt 5.14 ou mais novo")
-}
-
-win32-msvc* {
-    error("Não compatível com VisualStudio, use MinGW")
+!versionAtLeast(QT_VERSION, 5.15.0) {
+    error("Use Qt 5.15 ou mais novo")
 }
 
 TARGET = Loja
@@ -17,7 +13,7 @@ TEMPLATE = app
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.4.51/limereport/limereport.pri)
+include(LimeReport-1.5.68/limereport/limereport.pri)
 
 QT *= core gui sql network xml charts widgets
 
@@ -25,6 +21,9 @@ DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++17
+
+PRECOMPILED_HEADER = pch.h
+CONFIG *= precompile_header
 
 message($$QMAKESPEC)
 
@@ -35,28 +34,47 @@ win32{
     QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
     RC_ICONS = Staccato.ico
-
-    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
 }
+
+win32-msvc{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
+
+win32-g++{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
 
 contains(CONFIG, deploy){
     message(deploy)
     DEFINES *= DEPLOY
+
+ *-msvc*{
+    QMAKE_CXXFLAGS_RELEASE *= /O2
+        }
+
+ *-g++{
     QMAKE_CXXFLAGS_RELEASE *= -O3
     QMAKE_LFLAGS_RELEASE *= -O3
+      }
 } else{
+ *-msvc*{
+    QMAKE_CXXFLAGS_DEBUG -= -O2
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_DEBUG *= /Od
+    QMAKE_CXXFLAGS_RELEASE *= /Od
+        }
+
+ *-g++{
     QMAKE_CXXFLAGS_DEBUG *= -O0
     QMAKE_CXXFLAGS_RELEASE *= -O0
     QMAKE_LFLAGS_DEBUG *= -O0
     QMAKE_LFLAGS_RELEASE *= -O0
+      }
 }
 
-    PRECOMPILED_HEADER = pch.h
-    CONFIG *= precompile_header
+win32-msvc* {
+   QMAKE_CXXFLAGS += /std:c++17 /permissive-
+}
 
 *-g++{
-    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-    QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic
+#    QMAKE_CXXFLAGS *= -Wfloat-equal -Wnarrowing -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 }
 
 *-clang{
@@ -67,25 +85,16 @@ contains(CONFIG, deploy){
 }
 
 linux-g++{
-    QMAKE_CC = gcc-10
-    QMAKE_CXX = g++-10
-
     QMAKE_LFLAGS *= -fuse-ld=gold
 
     QMAKE_CXXFLAGS *= -Wno-deprecated-copy
-
-#    QMAKE_CXXFLAGS *= -flto
-#    QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
-    QMAKE_CC = clang-9
-    QMAKE_CXX = clang++-9
+    QMAKE_CC = clang-10
+    QMAKE_CXX = clang++-10
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-9
-
-#    QMAKE_CXXFLAGS *= -flto=thin
-#    QMAKE_LFLAGS *= -flto=thin
+    QMAKE_LFLAGS *= -fuse-ld=lld-10
 }
 
 win32{
@@ -152,11 +161,11 @@ SOURCES += \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
     src/excel.cpp \
+    src/file.cpp \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
     src/galpao.cpp \
-    src/graphicsscene.cpp \
     src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
@@ -198,6 +207,7 @@ SOURCES += \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
+    src/sqlquery.cpp \
     src/sqlquerymodel.cpp \
     src/sqltablemodel.cpp \
     src/sqltreemodel.cpp \
@@ -217,6 +227,7 @@ SOURCES += \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
     src/widgetconsistencia.cpp \
+    src/widgetdevolucao.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
@@ -284,11 +295,11 @@ HEADERS  += \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
     src/excel.h \
+    src/file.h \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
     src/galpao.h \
-    src/graphicsscene.h \
     src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
@@ -329,6 +340,7 @@ HEADERS  += \
     src/smtp.h \
     src/sortfilterproxymodel.h \
     src/sql.h \
+    src/sqlquery.h \
     src/sqlquerymodel.h \
     src/sqltablemodel.h \
     src/sqltreemodel.h \
@@ -348,6 +360,7 @@ HEADERS  += \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
     src/widgetconsistencia.h \
+    src/widgetdevolucao.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h \
@@ -430,6 +443,7 @@ FORMS += \
     ui/widgetcomprapendentes.ui \
     ui/widgetcompraresumo.ui \
     ui/widgetconsistencia.ui \
+    ui/widgetdevolucao.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \

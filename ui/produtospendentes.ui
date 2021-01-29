@@ -137,9 +137,6 @@
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::AdjustToContents</enum>
         </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::MultiSelection</enum>
         </property>
@@ -264,6 +261,14 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>doubleSpinBoxQuantTotal</tabstop>
+  <tabstop>doubleSpinBoxComprar</tabstop>
+  <tabstop>pushButtonComprar</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>pushButtonConsumirEstoque</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -6,8 +6,8 @@
 #include <QSqlRecord>
 
 OrcamentoProxyModel::OrcamentoProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("Dias restantes")), statusIndex(model->record().indexOf("Status")), followupIndex(model->record().indexOf("Observação")),
-      semaforoIndex(model->record().indexOf("semaforo")) {
+    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("Dias restantes")), followupIndex(model->record().indexOf("Observação")),
+      semaforoIndex(model->record().indexOf("semaforo")), statusIndex(model->record().indexOf("Status")) {
   setSourceModel(model);
 }
 
@@ -72,9 +72,9 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+      const QString tema = UserSession::getSetting("User/tema").toString();
 
-      return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white);
+      return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }
   }
 

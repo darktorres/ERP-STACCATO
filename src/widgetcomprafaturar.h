@@ -14,6 +14,7 @@ class WidgetCompraFaturar final : public QWidget {
 public:
   explicit WidgetCompraFaturar(QWidget *parent);
   ~WidgetCompraFaturar();
+
   auto resetTables() -> void;
   auto updateTables() -> void;
 
@@ -25,7 +26,7 @@ private:
   SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
-  auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> bool;
+  auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxRepresentacao_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;

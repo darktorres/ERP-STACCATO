@@ -3,15 +3,10 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
-#include "searchdialog.h"
+#include "file.h"
 #include "usersession.h"
 
-#include <QCheckBox>
-#include <QDebug>
-#include <QFile>
-#include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QTransposeProxyModel>
 
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
@@ -20,30 +15,30 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
-  connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged);
-  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited);
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked);
-  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked);
+  if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->table->hide(); }
 
-  const auto children = findChildren<QLineEdit *>();
-
-  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->table->hide(); }
-
+  connectLineEditsToDirty();
   setupTables();
-  fillCombobox();
+  fillComboBoxLoja();
   setupMapper();
   newRegister();
-
-  sdUsuario = SearchDialog::usuario(this);
-  connect(sdUsuario, &SearchDialog::itemSelected, this, &CadastroUsuario::viewRegisterById);
+  setConnections();
 }
 
 CadastroUsuario::~CadastroUsuario() { delete ui; }
+
+void CadastroUsuario::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(sdUsuario, &SearchDialog::itemSelected, this, &CadastroUsuario::viewRegisterById, connectionType);
+  connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged, connectionType);
+  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked, connectionType);
+}
 
 void CadastroUsuario::setupTables() {
   modelPermissoes.setTable("usuario_has_permissao");
@@ -57,7 +52,21 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_galpao", "Ver Galpão?");
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
+  modelPermissoes.setHeaderData("view_tab_grafico", "Ver Gráfico?");
   modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");
+
+  auto *transposeProxyModel = new QTransposeProxyModel(this);
+  transposeProxyModel->setSourceModel(&modelPermissoes);
+
+  ui->table->setModel(transposeProxyModel);
+
+  ui->table->hideRow(0);                                  // idUsuario
+  ui->table->hideRow(ui->table->model()->rowCount() - 1); // lastUpdated
+  ui->table->hideRow(ui->table->model()->rowCount() - 2); // created
+
+  for (int row = 1; row < 12; ++row) { ui->table->setItemDelegateForRow(row, new CheckBoxDelegate(this)); }
+
+  ui->table->horizontalHeader()->hide();
 }
 
 void CadastroUsuario::modificarUsuario() {
@@ -73,20 +82,12 @@ void CadastroUsuario::modificarUsuario() {
   ui->comboBoxTipo->setDisabled(true);
 }
 
-bool CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
-  const auto children = ui->tab->findChildren<QLineEdit *>();
+void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
-    qApp->enqueueError("As senhas não batem!", this);
-    ui->lineEditPasswd->setFocus();
-    return false;
-  }
-
-  return true;
+  if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
 }
 
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }
@@ -117,26 +118,23 @@ void CadastroUsuario::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-bool CadastroUsuario::savingProcedures() {
-  if (not setData("nome", ui->lineEditNome->text())) { return false; }
-  if (not setData("idLoja", ui->comboBoxLoja->getCurrentValue())) { return false; }
-  if (not setData("tipo", ui->comboBoxTipo->currentText())) { return false; }
-  if (not setData("user", ui->lineEditUser->text())) { return false; }
-  if (not setData("email", ui->lineEditEmail->text())) { return false; }
-  if (not setData("user", ui->lineEditUser->text())) { return false; }
+void CadastroUsuario::savingProcedures() {
+  setData("nome", ui->lineEditNome->text());
+  setData("idLoja", ui->comboBoxLoja->getCurrentValue());
+  setData("tipo", ui->comboBoxTipo->currentText());
+  setData("user", ui->lineEditUser->text());
+  setData("email", ui->lineEditEmail->text());
+  setData("user", ui->lineEditUser->text());
 
-  // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
-    QSqlQuery query;
+    SqlQuery query;
 
-    if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { return false; }
+    if (not query.exec("SELECT SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
 
-    if (not setData("passwd", query.value(0))) { return false; }
+    setData("passwd", query.value(0));
   }
 
-  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL" and not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
-
-  return true;
+  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }
 }
 
 bool CadastroUsuario::viewRegister() {
@@ -147,38 +145,23 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
 
-  if (not modelPermissoes.select()) { return false; }
+  modelPermissoes.select();
 
-  // TODO: shouldn't this be in setupTables?
-  auto *transpose = new QTransposeProxyModel(this);
-  transpose->setSourceModel(&modelPermissoes);
-  modelPermissoes.proxyModel = transpose;
-
-  ui->table->setModel(&modelPermissoes);
-
-  ui->table->hideRow(0);                                  // idUsuario
-  ui->table->hideRow(ui->table->model()->rowCount() - 1); // created
-  ui->table->hideRow(ui->table->model()->rowCount() - 2); // lastUpdated
-
-  ui->table->setItemDelegate(new CheckBoxDelegate(this));
-
-  ui->table->horizontalHeader()->hide();
-
-  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt()); }
 
   return true;
 }
 
-void CadastroUsuario::fillCombobox() {
-  QSqlQuery query;
+void CadastroUsuario::fillComboBoxLoja() {
+  SqlQuery query;
 
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
-  ui->comboBoxLoja->setCurrentValue(UserSession::idLoja());
+  ui->comboBoxLoja->setCurrentValue(UserSession::idLoja);
 }
 
 void CadastroUsuario::on_pushButtonCadastrar_clicked() { save(); }
@@ -195,66 +178,54 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
   sdUsuario->show();
 }
 
-bool CadastroUsuario::cadastrar() {
-  if (not qApp->startTransaction("CadastroUsuario::cadastrar")) { return false; }
+void CadastroUsuario::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroUsuario::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
-    if (tipo == Tipo::Cadastrar) {
-      const int row = modelPermissoes.insertRowAtEnd();
+    if (tipo == Tipo::Cadastrar) { modelPermissoes.setData(0, "idUsuario", primaryId); }
 
-      if (not modelPermissoes.setData(row, "idUsuario", primaryId)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_orcamento", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_venda", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_estoque", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_relatorio", true)) { return false; }
-    }
+    modelPermissoes.submitAll();
 
-    if (not modelPermissoes.submitAll()) { return false; }
-
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
-  } else {
+  } catch (std::exception &) {
     qApp->rollbackTransaction();
-    void(model.select());
-    void(modelPermissoes.select());
-  }
+    model.select();
+    modelPermissoes.select();
 
-  return success;
+    throw;
+  }
 }
 
 void CadastroUsuario::criarUsuarioMySQL() {
-  QFile file("mysql.txt");
+  File file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString(), this); }
 
   const QString password = file.readAll();
 
-  // NOTE: those query's below commit transaction so have to be done outside transaction
-  QSqlQuery query;
-  query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
+  // those query's below commit transaction so have to be done outside transaction
+  SqlQuery query;
+  query.prepare("CREATE USER :user@'%' IDENTIFIED WITH mysql_native_password BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
 
   query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
   if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
 }
@@ -262,13 +233,13 @@ void CadastroUsuario::criarUsuarioMySQL() {
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) { return qApp->enqueueException("Erro buscando usuário: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando usuário: " + query.lastError().text(), this); }
 
-  if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!", this); }
+  if (query.first()) { throw RuntimeError("Nome de usuário já existe!", this); }
 }
 
 void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
@@ -279,6 +250,25 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
     ui->labelEspecialidade->hide();
     ui->comboBoxEspecialidade->hide();
   }
+}
+
+bool CadastroUsuario::newRegister() {
+  if (not RegisterDialog::newRegister()) { return false; }
+
+  modelPermissoes.setFilter("0");
+
+  modelPermissoes.select();
+
+  const int row = modelPermissoes.insertRowAtEnd();
+
+  modelPermissoes.setData(row, "view_tab_orcamento", 1);
+  modelPermissoes.setData(row, "view_tab_venda", 1);
+  modelPermissoes.setData(row, "view_tab_estoque", 1);
+  modelPermissoes.setData(row, "view_tab_relatorio", 1);
+
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
+
+  return true;
 }
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario

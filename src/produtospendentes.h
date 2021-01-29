@@ -13,8 +13,10 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent);
+  explicit ProdutosPendentes(QWidget *parent);
   ~ProdutosPendentes();
+
+  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 
 private:
   // attributes
@@ -23,16 +25,16 @@ private:
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
-  auto atualizarVenda(const int rowProduto) -> bool;
-  auto comprar(const QModelIndexList &list, const QDate &dataPrevista) -> bool;
-  auto consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) -> bool;
-  auto dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) -> bool;
-  auto enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) -> bool;
-  auto enviarProdutoParaCompra(const int row, const QDate &dataPrevista) -> bool;
+  auto atualizarVenda(const int rowProduto) -> void;
+  auto comprar(const QModelIndexList &list, const QDate &dataPrevista) -> void;
+  auto consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) -> void;
+  auto dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) -> void;
+  auto enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) -> void;
+  auto enviarProdutoParaCompra(const int row, const QDate &dataPrevista) -> void;
   auto on_pushButtonComprar_clicked() -> void;
   auto on_pushButtonConsumirEstoque_clicked() -> void;
   auto recalcularQuantidade() -> void;
   auto recarregarTabelas() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
-  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 };

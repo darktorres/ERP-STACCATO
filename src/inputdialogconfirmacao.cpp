@@ -2,8 +2,10 @@
 #include "ui_inputdialogconfirmacao.h"
 
 #include "application.h"
+#include "file.h"
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -12,16 +14,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
-
-  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogConfirmacao::on_dateEditEvento_dateChanged);
-  connect(ui->pushButtonQuebradoReceb, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked);
-  connect(ui->pushButtonQuebradoEntrega, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked);
-  connect(ui->pushButtonFoto, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFoto_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -75,10 +70,22 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
     adjustSize();
   }
 
+  setConnections();
+
   show();
 }
 
 InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
+
+void InputDialogConfirmacao::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogConfirmacao::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->pushButtonQuebradoReceb, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked, connectionType);
+  connect(ui->pushButtonQuebradoEntrega, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->pushButtonFoto, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFoto_clicked, connectionType);
+}
 
 QDate InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->date(); }
 
@@ -88,33 +95,27 @@ QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu-
 
 QString InputDialogConfirmacao::getEntregou() const { return ui->lineEditEntregou->text(); }
 
-bool InputDialogConfirmacao::cadastrar() {
-  if (tipo == Tipo::Recebimento) {
-    if (not modelEstoque.submitAll()) { return false; }
-  }
+void InputDialogConfirmacao::cadastrar() {
+  if (tipo == Tipo::Recebimento) { modelEstoque.submitAll(); }
 
-  if (tipo == Tipo::Entrega) {
-    if (not modelVeiculo.submitAll()) { return false; }
-  }
-
-  return true;
+  if (tipo == Tipo::Entrega) { modelVeiculo.submitAll(); }
 }
 
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega)) {
-    if (ui->lineEditRecebeu->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem recebeu!", this); }
+    if (ui->lineEditRecebeu->text().isEmpty()) { throw RuntimeError("Faltou preencher quem recebeu!", this); }
   }
 
   if (tipo == Tipo::Entrega) {
-    if (ui->lineEditEntregou->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem entregou!", this); }
+    if (ui->lineEditEntregou->text().isEmpty()) { throw RuntimeError("Faltou preencher quem entregou!", this); }
   }
 
   if (tipo != Tipo::Representacao) {
-    if (not qApp->startTransaction("InputDialogConfirmacao::on_pushButtonSalvar")) { return; }
+    qApp->startTransaction("InputDialogConfirmacao::on_pushButtonSalvar");
 
-    if (not cadastrar()) { return qApp->rollbackTransaction(); }
+    cadastrar();
 
-    if (not qApp->endTransaction()) { return; }
+    qApp->endTransaction();
   }
 
   QDialog::accept();
@@ -234,36 +235,32 @@ void InputDialogConfirmacao::setupTables() {
   }
 }
 
-bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &idEvento) { // entrega
-  if (id.isEmpty()) { return qApp->enqueueException(false, "IdsCompra vazio!", this); }
+void InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &idEvento) { // entrega
+  if (id.isEmpty()) { throw RuntimeException("IdsCompra vazio!"); }
 
   const QString filter = "idVenda = '" + id + "' AND idEvento = " + idEvento;
 
   modelVeiculo.setFilter(filter);
 
-  if (not modelVeiculo.select()) { return false; }
+  modelVeiculo.select();
 
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
   setWindowTitle("Venda: " + id);
-
-  return true;
 }
 
-bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebimento
-  if (ids.isEmpty()) { return qApp->enqueueException(false, "IdsCompra vazio!", this); }
+void InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebimento
+  if (ids.isEmpty()) { throw RuntimeException("IdsCompra vazio!"); }
 
   const QString filter = "idEstoque = " + ids.join(" OR idEstoque = ");
 
   modelEstoque.setFilter(filter);
 
-  if (not modelEstoque.select()) { return false; }
+  modelEstoque.select();
 
   setWindowTitle("Estoque: " + ids.join(", "));
 
   ui->pushButtonQuebradoReceb->setDisabled(true); // TODO: remove this after it's fixed
-
-  return true;
 }
 
 void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
@@ -274,31 +271,29 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
 
   const auto list = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
   // -------------------------------------------------------------------------
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
 
-  const auto caixasDefeito = getCaixasDefeito(row);
-
-  if (not caixasDefeito) { return; }
+  const double caixasDefeito = getCaixasDefeito(row);
 
   // -------------------------------------------------------------------------
 
-  if (not qApp->startTransaction("InputDialogConfirmacao::on_pushButtonQuebrado")) { return; }
+  qApp->startTransaction("InputDialogConfirmacao::on_pushButtonQuebrado");
 
-  if (not dividirRecebimento(row, *caixasDefeito, quantCaixa)) { return qApp->rollbackTransaction(); }
+  dividirRecebimento(row, caixasDefeito, quantCaixa);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
@@ -311,7 +306,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
 
   const auto list = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -328,38 +323,32 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
   if (choice == QMessageBox::Cancel) { return; }
   if (choice == QMessageBox::Yes) { obs = QInputDialog::getText(this, "Observacao", "Observacao: "); }
 
-  const auto novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
+  const int novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
 
-  if (not novoIdVendaProduto2) { return; }
-
-  const auto caixasDefeito = getCaixasDefeito(row);
-
-  if (not caixasDefeito) { return; }
+  const double caixasDefeito = getCaixasDefeito(row);
 
   // -------------------------------------------------------------------------
 
-  if (not qApp->startTransaction("InputDialogConfirmacao::on_pushButtonQuebrado")) { return; }
+  qApp->startTransaction("InputDialogConfirmacao::on_pushButtonQuebrado");
 
-  if (not dividirEntrega(row, choice, *caixasDefeito, obs, *novoIdVendaProduto2)) { return qApp->rollbackTransaction(); }
+  dividirEntrega(row, choice, caixasDefeito, obs, novoIdVendaProduto2);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool InputDialogConfirmacao::criarConsumoQuebrado(const int idEstoque, const double caixasDefeito, const double quantCaixa) {
-  QSqlQuery query;
+void InputDialogConfirmacao::criarConsumoQuebrado(const int idEstoque, const double caixasDefeito, const double quantCaixa) {
+  SqlQuery query;
   query.prepare("INSERT INTO estoque_has_consumo (idEstoque, status, local, quant, caixas) VALUES (:idEstoque, 'QUEBRADO', 'TEMP', :quant, :caixas)");
   query.bindValue(":idEstoque", idEstoque);
   query.bindValue(":quant", caixasDefeito * quantCaixa);
   query.bindValue(":caixas", caixasDefeito);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro criando consumo quebrado: " + query.lastError().text(), this); }
-
-  return true;
+  if (not query.exec()) { throw RuntimeException("Erro criando consumo quebrado: " + query.lastError().text()); }
 }
 
-bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caixasDefeito, const double quantCaixa) {
+void InputDialogConfirmacao::dividirRecebimento(const int row, const double caixasDefeito, const double quantCaixa) {
   // TODO: fazer no recebimento o mesmo fluxo da entrega (criar nova linha, etc)
   // TODO: ao dividir linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
   // TODO: nao dividir linha do estoque, apenas criar um consumo 'quebrado' para inutilizar a parte que foi quebrada (a mesma coisa para faltando)
@@ -371,8 +360,8 @@ bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caix
   Q_UNUSED(caixas)
   Q_UNUSED(quantCaixa)
 
-  if (not desfazerConsumo(idEstoque, caixasDefeito)) { return false; }
-  if (not criarConsumoQuebrado(idEstoque, caixasDefeito, quantCaixa)) { return false; }
+  desfazerConsumo(idEstoque, caixasDefeito);
+  criarConsumoQuebrado(idEstoque, caixasDefeito, quantCaixa);
 
   // ****
 
@@ -396,11 +385,9 @@ bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caix
   //  pendentes_compra)
   // -
   // recalcular valores
-
-  return true;
 }
 
-bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, const double caixasDefeito, const QString obs, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, const double caixasDefeito, const QString obs, const int novoIdVendaProduto2) {
   // NOTE: na tabela veiculo_has_produto é separado a linha em 2:
   // -linha original mantem a quant. entregue
   // -linha nova mostra a quant. quebrada
@@ -419,36 +406,34 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   modelVendaProduto.setFilter("idVendaProduto2 = " + modelVeiculo.data(row, "idVendaProduto2").toString());
 
-  if (not modelVendaProduto.select() or modelVendaProduto.rowCount() == 0) { return false; }
+  modelVendaProduto.select();
+
+  if (modelVendaProduto.rowCount() == 0) { return; }
 
   // -------------------------------------------------------------------------
 
-  if (not dividirVenda(modelVendaProduto, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2)) { return false; }
+  dividirVenda(modelVendaProduto, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2);
 
   // -------------------------------------------------------------------------
 
-  choice == (QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
+  (choice == QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
 
-  if (not modelVendaProduto.submitAll()) { return false; }
-
-  // -------------------------------------------------------------------------
-
-  if (not dividirVeiculo(row, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2)) { return false; }
+  modelVendaProduto.submitAll();
 
   // -------------------------------------------------------------------------
 
-  if (not dividirConsumo(caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2, idVendaProduto2)) { return false; }
+  dividirVeiculo(row, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2);
 
   // -------------------------------------------------------------------------
 
-  if (not dividirCompra(caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2, idVendaProduto2)) { return false; }
+  dividirConsumo(caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2, idVendaProduto2);
 
   // -------------------------------------------------------------------------
 
-  return true;
+  dividirCompra(caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2, idVendaProduto2);
 }
 
-bool InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) {
+void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) {
   const QString idVenda = modelVendaProduto.data(0, "idVenda").toString();
   const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
 
@@ -460,26 +445,24 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   modelCliente.setTable("cliente");
 
   // TODO: since this is inside a transaction simplify using a UPDATE query: credito = credito + novoCredito
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT idCliente FROM venda WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idVenda);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando cliente: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando cliente: " + query.lastError().text()); }
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
-  if (not modelCliente.select()) { return false; }
+  modelCliente.select();
 
   const double creditoAntigo = modelCliente.data(0, "credito").toDouble();
 
-  if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) { return false; }
+  modelCliente.setData(0, "credito", credito + creditoAntigo);
 
-  if (not modelCliente.submitAll()) { return false; }
-
-  return true;
+  modelCliente.submitAll();
 }
 
-bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString obs, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString obs, const int novoIdVendaProduto2) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto2
 
@@ -507,53 +490,53 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
 
     if (value.isNull()) { continue; }
 
-    if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
+    modelVendaProduto.setData(newRow, col, value);
   }
 
-  if (not modelVendaProduto.setData(newRow, "idRelacionado", novoIdVendaProduto2)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "prcUnitario", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "descUnitario", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "parcial", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "desconto", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "total", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) { return false; }
-  if (not modelVendaProduto.setData(newRow, "reposicaoEntrega", true)) { return false; }
+  modelVendaProduto.setData(newRow, "idRelacionado", novoIdVendaProduto2);
+  modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa);
+  modelVendaProduto.setData(newRow, "caixas", caixasDefeito);
+  modelVendaProduto.setData(newRow, "prcUnitario", 0);
+  modelVendaProduto.setData(newRow, "descUnitario", 0);
+  modelVendaProduto.setData(newRow, "parcial", 0);
+  modelVendaProduto.setData(newRow, "desconto", 0);
+  modelVendaProduto.setData(newRow, "parcialDesc", 0);
+  modelVendaProduto.setData(newRow, "descGlobal", 0);
+  modelVendaProduto.setData(newRow, "total", 0);
+  modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA");
+  modelVendaProduto.setData(newRow, "reposicaoEntrega", true);
 
-  return modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
+  modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
 }
 
-bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
+void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
   // TODO: pass this responsability to Estoque class
   // NOTE: verificar WidgetCompraConsumos::desfazerConsumo
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT restante FROM estoque WHERE idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando sobra estoque: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando sobra estoque: " + query.lastError().text()); }
 
   double restante = query.value("restante").toDouble(); // TODO: divide this by quantCaixa
   qDebug() << "sobra: " << restante;
   qDebug() << "caixasDefeito: " << caixasDefeito;
 
   if (restante < 0) { // faltando pecas para consumo, desfazer os consumos com prazo maior
-    QSqlQuery querySelect;
+    SqlQuery querySelect;
     querySelect.prepare(
         "SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp2 ON ehc.idVendaProduto2 = "
         "vp2.idVendaProduto2 LEFT JOIN venda v ON vp2.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
     querySelect.bindValue(":idEstoque", idEstoque);
 
-    if (not querySelect.exec()) { return qApp->enqueueException(false, "Erro buscando consumo estoque: " + querySelect.lastError().text(), this); }
+    if (not querySelect.exec()) { throw RuntimeException("Erro buscando consumo estoque: " + querySelect.lastError().text()); }
 
-    QSqlQuery queryDelete;
+    SqlQuery queryDelete;
     // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
     queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
-    QSqlQuery queryVenda;
+    SqlQuery queryVenda;
     // TODO: should set flag 'reposicao' (where is this flag unset?)
     queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
@@ -562,28 +545,26 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
       queryDelete.bindValue(":idConsumo", querySelect.value("idConsumo"));
 
-      if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo: " + queryDelete.lastError().text(), this); }
+      if (not queryDelete.exec()) { throw RuntimeException("Erro removendo consumo: " + queryDelete.lastError().text()); }
 
       queryVenda.bindValue(":idVendaProduto2", querySelect.value("idVendaProduto2"));
 
-      if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro voltando produto para pendente: " + queryVenda.lastError().text(), this); }
+      if (not queryVenda.exec()) { throw RuntimeException("Erro voltando produto para pendente: " + queryVenda.lastError().text()); }
 
       restante += caixas;
       if (restante >= 0) { break; }
     }
   }
-
-  return true;
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", QDir::currentPath(), "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
 
-  QFile *file = new QFile(filePath);
+  File file(filePath);
 
-  if (not file->open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file->errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
   auto *manager = new QNetworkAccessManager(this);
 
@@ -591,17 +572,17 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
   const QString idEvento = modelVeiculo.data(0, "idEvento").toString();
 
-  QFileInfo info(*file);
+  QFileInfo info(file);
 
   const QString extension = info.suffix();
 
   const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
-  auto reply = manager->put(QNetworkRequest(QUrl(url)), file);
+  const auto reply = manager->put(QNetworkRequest(QUrl(url)), file.readAll());
 
   ui->lineEditFoto->setText("Enviando...");
 
-  connect(reply, &QNetworkReply::finished, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
       ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
       ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
@@ -611,13 +592,11 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
     ui->lineEditFoto->setText(url);
     ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 
-    for (int row = 0; row < modelVeiculo.rowCount(); ++row) {
-      if (not modelVeiculo.setData(row, "fotoEntrega", url)) { return; }
-    }
+    for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", url); }
   });
 }
 
-std::optional<double> InputDialogConfirmacao::getCaixasDefeito(const int row) {
+double InputDialogConfirmacao::getCaixasDefeito(const int row) {
   QString produto;
   double caixas = 0;
 
@@ -635,25 +614,25 @@ std::optional<double> InputDialogConfirmacao::getCaixasDefeito(const int row) {
 
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
-  if (not ok or qFuzzyIsNull(caixasDefeito)) { return {}; }
+  if (not ok or qFuzzyIsNull(caixasDefeito)) { throw std::exception(); }
 
   return caixasDefeito;
 }
 
-bool InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
 
-  if (not modelVendaProduto.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelVendaProduto.setData(0, "quant", quantRestante)) { return false; }
+  modelVendaProduto.setData(0, "caixas", caixasRestante);
+  modelVendaProduto.setData(0, "quant", quantRestante);
 
   const double prcUnitario = modelVendaProduto.data(0, "prcUnitario").toDouble();
   const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
   const double descGlobal = modelVendaProduto.data(0, "descGlobal").toDouble() / 100;
 
-  if (not modelVendaProduto.setData(0, "parcial", quantRestante * prcUnitario)) { return false; }
-  if (not modelVendaProduto.setData(0, "parcialDesc", quantRestante * descUnitario)) { return false; }
-  if (not modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal))) { return false; }
+  modelVendaProduto.setData(0, "parcial", quantRestante * prcUnitario);
+  modelVendaProduto.setData(0, "parcialDesc", quantRestante * descUnitario);
+  modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal));
 
   // -------------------------------------------------------------------------
 
@@ -683,30 +662,28 @@ bool InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
 
     if (value.isNull()) { continue; }
 
-    if (not modelVendaProduto.setData(rowQuebrado2, col, value)) { return false; }
+    modelVendaProduto.setData(rowQuebrado2, col, value);
   }
 
   const double quantDefeito = caixasDefeito * quantCaixa;
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"))) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
+  modelVendaProduto.setData(rowQuebrado2, "idVendaProduto2", novoIdVendaProduto2);
+  modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"));
+  modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito);
+  modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito);
+  modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO");
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal))) { return false; }
-
-  return true;
+  modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario);
+  modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario);
+  modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal));
 }
 
-bool InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
   // diminuir quantidade da linha selecionada
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(row, "caixas", caixas - caixasDefeito)) { return false; }
-  if (not modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * quantCaixa)) { return false; }
+  modelVeiculo.setData(row, "caixas", caixas - caixasDefeito);
+  modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * quantCaixa);
 
   // copiar linha com quantDefeito
 
@@ -721,37 +698,36 @@ bool InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
 
     if (value.isNull()) { continue; }
 
-    if (not modelVeiculo.setData(rowQuebrado, col, value)) { return false; }
+    modelVeiculo.setData(rowQuebrado, col, value);
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
+  modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2);
+  modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito);
+  modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * quantCaixa);
+  modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO");
 
-  if (not modelVeiculo.submitAll()) { return false; }
-
-  return true;
+  modelVeiculo.submitAll();
 }
 
-bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
+void InputDialogConfirmacao::dividirConsumo(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
   SqlTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
 
   modelConsumo.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
-  if (not modelConsumo.select()) { return false; }
+  modelConsumo.select();
 
-  if (modelConsumo.rowCount() == 0) { return true; }
+  if (modelConsumo.rowCount() == 0) { return; }
 
   // -------------------------------------------------------------------------
-  // NOTE: *quebralinha estoque_has_consumo
+  // NOTE: *quebralinha estoque_consumo
 
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble();
 
+  const double quantTrib = modelConsumo.data(0, "quantTrib").toDouble();
   const double desconto = modelConsumo.data(0, "desconto").toDouble();
   const double vBC = modelConsumo.data(0, "vBC").toDouble();
   const double vICMS = modelConsumo.data(0, "vICMS").toDouble();
@@ -764,18 +740,21 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   const double proporcao = caixasRestante / caixas;
 
-  if (not modelConsumo.setData(0, "quant", quantRestante * -1)) { return false; }
-  if (not modelConsumo.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelConsumo.setData(0, "valor", valorConsumo * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "desconto", desconto * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBC", vBC * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vICMS", vICMS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCST", vBCST * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vICMSST", vICMSST * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCPIS", vBCPIS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vPIS", vPIS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vCOFINS", vCOFINS * proporcao)) { return false; }
+  modelConsumo.setData(0, "quant", quantRestante * -1);
+  modelConsumo.setData(0, "caixas", caixasRestante);
+  modelConsumo.setData(0, "valor", valorConsumo * proporcao);
+
+  // impostos
+  modelConsumo.setData(0, "quantTrib", quantTrib * proporcao);
+  modelConsumo.setData(0, "desconto", desconto * proporcao);
+  modelConsumo.setData(0, "vBC", vBC * proporcao);
+  modelConsumo.setData(0, "vICMS", vICMS * proporcao);
+  modelConsumo.setData(0, "vBCST", vBCST * proporcao);
+  modelConsumo.setData(0, "vICMSST", vICMSST * proporcao);
+  modelConsumo.setData(0, "vBCPIS", vBCPIS * proporcao);
+  modelConsumo.setData(0, "vPIS", vPIS * proporcao);
+  modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS * proporcao);
+  modelConsumo.setData(0, "vCOFINS", vCOFINS * proporcao);
 
   // -------------------------------------------------------------------------
 
@@ -792,44 +771,45 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
     if (value.isNull()) { continue; }
 
-    if (not modelConsumo.setData(newRow, column, value)) { return false; }
+    modelConsumo.setData(newRow, column, value);
   }
 
   // -------------------------------------------------------------------------
 
   const double proporcaoNovo = caixasDefeito / caixas;
 
-  if (not modelConsumo.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelConsumo.setData(newRow, "status", "QUEBRADO")) { return false; }
-  if (not modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1)) { return false; }
-  if (not modelConsumo.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBC", vBC * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vICMS", vICMS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCST", vBCST * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vPIS", vPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
+  modelConsumo.setData(newRow, "idVendaProduto2", novoIdVendaProduto2);
+  modelConsumo.setData(newRow, "status", "QUEBRADO");
+  modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1);
+  modelConsumo.setData(newRow, "caixas", caixasDefeito);
+  modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo);
+
+  // impostos
+  modelConsumo.setData(newRow, "quantTrib", quantTrib * proporcaoNovo);
+  modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBC", vBC * proporcaoNovo);
+  modelConsumo.setData(newRow, "vICMS", vICMS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCST", vBCST * proporcaoNovo);
+  modelConsumo.setData(newRow, "vICMSST", vICMSST * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vPIS", vPIS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo);
 
   // -------------------------------------------------------------------------
 
-  if (not modelConsumo.submitAll()) { return false; }
-
-  return true;
+  modelConsumo.submitAll();
 }
 
-bool InputDialogConfirmacao::dividirCompra(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
+void InputDialogConfirmacao::dividirCompra(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
   SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
   modelCompra.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
-  if (not modelCompra.select()) { return false; }
+  modelCompra.select();
 
-  if (modelCompra.rowCount() == 0) { return true; }
+  if (modelCompra.rowCount() == 0) { return; }
 
   // -------------------------------------------------------------------------
 
@@ -837,9 +817,9 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
 
-  if (not modelCompra.setData(0, "quant", quantRestante)) { return false; }
-  if (not modelCompra.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelCompra.setData(0, "preco", quantRestante * prcUnitario)) { return false; }
+  modelCompra.setData(0, "quant", quantRestante);
+  modelCompra.setData(0, "caixas", caixasRestante);
+  modelCompra.setData(0, "preco", quantRestante * prcUnitario);
 
   // -------------------------------------------------------------------------
 
@@ -855,20 +835,18 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
 
     if (value.isNull()) { continue; }
 
-    if (not modelCompra.setData(newRow, column, value)) { return false; }
+    modelCompra.setData(newRow, column, value);
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
-  if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelCompra.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelCompra.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelCompra.setData(newRow, "preco", caixasDefeito * quantCaixa * prcUnitario)) { return false; }
+  modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"));
+  modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2);
+  modelCompra.setData(newRow, "quant", caixasDefeito * quantCaixa);
+  modelCompra.setData(newRow, "caixas", caixasDefeito);
+  modelCompra.setData(newRow, "preco", caixasDefeito * quantCaixa * prcUnitario);
 
   // -------------------------------------------------------------------------
 
-  if (not modelCompra.submitAll()) { return false; }
-
-  return true;
+  modelCompra.submitAll();
 }

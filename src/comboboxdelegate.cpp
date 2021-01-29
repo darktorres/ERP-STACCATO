@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
@@ -18,24 +17,25 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   if (tipo == Tipo::Receber) {
     list << "PENDENTE"
+         << "CONFERIDO"
          << "RECEBIDO"
-         << "CANCELADO"
-         << "CONFERIDO";
+         << "CANCELADO";
   }
 
   if (tipo == Tipo::Pagar) {
     list << "PENDENTE"
+         << "CONFERIDO"
+         << "AGENDADO"
          << "PAGO"
-         << "CANCELADO"
-         << "CONFERIDO";
+         << "CANCELADO";
   }
 
   if (tipo == Tipo::Pagamento) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-    query.bindValue(":idLoja", UserSession::idLoja());
+    query.bindValue(":idLoja", UserSession::idLoja);
 
-    if (not query.exec()) { qApp->enqueueException("Erro lendo formas de pagamentos: " + query.lastError().text(), parent); }
+    if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), parent); }
 
     list << "";
 
@@ -45,9 +45,9 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::Conta) {
-    QSqlQuery query;
+    SqlQuery query;
 
-    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { qApp->enqueueException("Erro lendo contas da loja: " + query.lastError().text(), parent); }
+    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { throw RuntimeException("Erro lendo contas da loja: " + query.lastError().text(), parent); }
 
     list << "";
 
@@ -55,9 +55,9 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::Grupo) {
-    QSqlQuery query;
+    SqlQuery query;
 
-    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { qApp->enqueueException("Erro lendo grupos de despesa: " + query.lastError().text(), parent); }
+    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { throw RuntimeException("Erro lendo grupos de despesa: " + query.lastError().text(), parent); }
 
     list << "";
 
@@ -65,9 +65,9 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::ST) {
-    list << "Sem ST"
-         << "ST Fornecedor"
-         << "ST Loja";
+    list << "SEM ST"
+         << "ST FORNECEDOR"
+         << "ST LOJA";
   }
 
   editor->addItems(list);

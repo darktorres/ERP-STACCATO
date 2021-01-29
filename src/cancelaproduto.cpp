@@ -2,32 +2,39 @@
 #include "ui_cancelaproduto.h"
 
 #include "application.h"
+#include "reaisdelegate.h"
 #include "sql.h"
+#include "sqlquery.h"
 
 #include <QSqlError>
-#include <QSqlQuery>
 
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
-
-  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked);
 
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
   setupTables();
 
+  setConnections();
+
   show();
 }
 
 CancelaProduto::~CancelaProduto() { delete ui; }
 
+void CancelaProduto::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked, connectionType);
+}
+
 void CancelaProduto::setFilter(const QString &ordemCompra) {
   if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::CompraFaturamento) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'"); }
 
-  if (not model.select()) { return qApp->enqueueException("Erro carregando tabela: " + model.lastError().text(), this); }
+  model.select();
 }
 
 void CancelaProduto::setupTables() {
@@ -79,20 +86,23 @@ void CancelaProduto::setupTables() {
   ui->table->hideColumn("dataRealEnt");
   ui->table->hideColumn("aliquotaSt");
   ui->table->hideColumn("st");
+
+  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {
-  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueException("Não implementado!", this); }
+  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { throw RuntimeException("Não implementado!", this); }
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhum produto!", this); }
 
-  if (not qApp->startTransaction("CancelaProduto::on_pushButtonSalvar")) { return; }
+  qApp->startTransaction("CancelaProduto::on_pushButtonSalvar");
 
-  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
+  cancelar(list);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Itens cancelados!", this);
 
@@ -101,13 +111,13 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
 void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
-bool CancelaProduto::cancelar(const QModelIndexList &list) {
-  QSqlQuery queryCompra;
+void CancelaProduto::cancelar(const QModelIndexList &list) {
+  SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE `idPedido2` = :idPedido2");
 
   const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 
-  QSqlQuery queryVenda;
+  SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
                      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
@@ -120,18 +130,22 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 
     queryCompra.bindValue(":idPedido2", model.data(row, "idPedido2"));
 
-    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando compra: " + queryCompra.lastError().text()); }
 
     queryVenda.bindValue(":idVendaProduto2", model.data(row, "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando venda: " + queryVenda.lastError().text()); }
 
     idVendas << model.data(row, "idVenda").toString();
+
+    SqlQuery query;
+
+    if (not query.exec("CALL update_pedido_fornecedor_status(" + model.data(row, "idPedidoFK").toString() + ")")) {
+      throw RuntimeException("Erro atualizando status compra: " + query.lastError().text());
+    }
   }
 
-  if (not Sql::updateVendaStatus(idVendas)) { return false; }
-
-  return true;
+  Sql::updateVendaStatus(idVendas);
 }
 
 // TODO: 5verificar como tratar conta_a_pagar_has_pagamento

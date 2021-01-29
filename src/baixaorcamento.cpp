@@ -3,6 +3,7 @@
 
 #include "application.h"
 
+#include <QRegularExpression>
 #include <QSqlError>
 
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
@@ -10,39 +11,45 @@ BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QD
 
   setupTables(idOrcamento);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked);
+  setConnections();
 }
 
 BaixaOrcamento::~BaixaOrcamento() { delete ui; }
+
+void BaixaOrcamento::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked, connectionType);
+}
 
 void BaixaOrcamento::setupTables(const QString &idOrcamento) {
   modelOrcamento.setTable("orcamento");
 
   modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
 
-  if (not modelOrcamento.select()) { return; }
+  modelOrcamento.select();
 }
 
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
-  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!", this); }
+  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { throw RuntimeError("Deve preencher a observação!", this); }
 
-  const auto children = ui->groupBox->findChildren<QRadioButton *>();
+  const auto children = ui->groupBox->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
   QString motivo;
 
   for (const auto &child : children) {
     if (child->isChecked()) { motivo = child->text(); }
   }
 
-  if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!", this); }
+  if (motivo.isEmpty()) { throw RuntimeError("Deve escolher um motivo!", this); }
 
-  if (not modelOrcamento.setData(0, "status", "PERDIDO")) { return; }
-  if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }
-  if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) { return; }
+  modelOrcamento.setData(0, "status", "PERDIDO");
+  modelOrcamento.setData(0, "motivoCancelamento", motivo);
+  modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText());
 
-  if (not modelOrcamento.submitAll()) { return; }
+  modelOrcamento.submitAll();
 
   qApp->enqueueInformation("Baixa salva!", this);
 

@@ -14,55 +14,67 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (const auto key = UserSession::getSetting("User/servidorACBr")) { ui->lineEditACBrServidor->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/portaACBr")) { ui->lineEditACBrPorta->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/lojaACBr")) { ui->itemBoxLoja->setId(key->toInt()); }
-  if (const auto key = UserSession::getSetting("User/emailContabilidade")) { ui->lineEditEmailContabilidade->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailLogistica")) { ui->lineEditEmailLogistica->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/monitorarNFe")) { ui->checkBoxMonitorarNFes->setChecked(key->toBool()); }
+  getSettings();
 
-  if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidorSMTP->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPortaSMTP->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCompra")) { ui->lineEditEmail->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailSenha")) { ui->lineEditEmailSenha->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCopia")) { ui->lineEditEmailCopia->setText(key->toString()); }
+  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") { hideWidgets(); }
 
-  if (const auto key = UserSession::getSetting("User/OrcamentosFolder")) { ui->lineEditOrcamentosFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/VendasFolder")) { ui->lineEditVendasFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/ComprasFolder")) { ui->lineEditComprasFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder")) { ui->lineEditEntregasXmlFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder")) { ui->lineEditEntregasPdfFolder->setText(key->toString()); }
-
-  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-    ui->groupBoxAcbr->hide();
-    ui->groupBoxEmail->hide();
-    ui->labelCompras->hide();
-    ui->lineEditComprasFolder->hide();
-    ui->pushButtonComprasFolder->hide();
-    ui->labelEntregas->hide();
-    ui->lineEditEntregasPdfFolder->hide();
-    ui->pushButtonEntregasPdfFolder->hide();
-    ui->labelEntregas_2->hide();
-    ui->lineEditEntregasXmlFolder->hide();
-    ui->pushButtonEntregasXmlFolder->hide();
-  }
-
-  connect(ui->pushButtonAlterarDados, &QPushButton::clicked, this, &UserConfig::on_pushButtonAlterarDados_clicked);
-  connect(ui->pushButtonComprasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonComprasFolder_clicked);
-  connect(ui->pushButtonEmailTeste, &QPushButton::clicked, this, &UserConfig::on_pushButtonEmailTeste_clicked);
-  connect(ui->pushButtonEntregasPdfFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasPdfFolder_clicked);
-  connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked);
-  connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &UserConfig::on_pushButtonSalvar_clicked);
-  connect(ui->pushButtonVendasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonVendasFolder_clicked);
+  setConnections();
 
   adjustSize();
 }
 
 UserConfig::~UserConfig() { delete ui; }
 
+void UserConfig::getSettings() {
+  ui->lineEditACBrServidor->setText(UserSession::getSetting("User/servidorACBr").toString());
+  ui->lineEditACBrPorta->setText(UserSession::getSetting("User/portaACBr").toString());
+  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
+  ui->lineEditEmailContabilidade->setText(UserSession::getSetting("User/emailContabilidade").toString());
+  ui->lineEditEmailLogistica->setText(UserSession::getSetting("User/emailLogistica").toString());
+  ui->checkBoxMonitorarNFes->setChecked(UserSession::getSetting("User/monitorarNFe").toBool());
+
+  ui->lineEditServidorSMTP->setText(UserSession::getSetting("User/servidorSMTP").toString());
+  ui->lineEditPortaSMTP->setText(UserSession::getSetting("User/portaSMTP").toString());
+  ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
+  ui->lineEditEmailSenha->setText(UserSession::getSetting("User/emailSenha").toString());
+  ui->lineEditEmailCopia->setText(UserSession::getSetting("User/emailCopia").toString());
+
+  ui->lineEditOrcamentosFolder->setText(UserSession::getSetting("User/OrcamentosFolder").toString());
+  ui->lineEditVendasFolder->setText(UserSession::getSetting("User/VendasFolder").toString());
+  ui->lineEditComprasFolder->setText(UserSession::getSetting("User/ComprasFolder").toString());
+  ui->lineEditEntregasXmlFolder->setText(UserSession::getSetting("User/EntregasXmlFolder").toString());
+  ui->lineEditEntregasPdfFolder->setText(UserSession::getSetting("User/EntregasPdfFolder").toString());
+}
+
+void UserConfig::hideWidgets() {
+  ui->groupBoxAcbr->hide();
+  ui->groupBoxEmail->hide();
+  ui->labelCompras->hide();
+  ui->labelEntregas->hide();
+  ui->labelEntregas_2->hide();
+  ui->lineEditComprasFolder->hide();
+  ui->lineEditEntregasPdfFolder->hide();
+  ui->lineEditEntregasXmlFolder->hide();
+  ui->pushButtonComprasFolder->hide();
+  ui->pushButtonEntregasPdfFolder->hide();
+  ui->pushButtonEntregasXmlFolder->hide();
+}
+
+void UserConfig::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonAlterarDados, &QPushButton::clicked, this, &UserConfig::on_pushButtonAlterarDados_clicked, connectionType);
+  connect(ui->pushButtonComprasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonComprasFolder_clicked, connectionType);
+  connect(ui->pushButtonEmailTeste, &QPushButton::clicked, this, &UserConfig::on_pushButtonEmailTeste_clicked, connectionType);
+  connect(ui->pushButtonEntregasPdfFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasPdfFolder_clicked, connectionType);
+  connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked, connectionType);
+  connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &UserConfig::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->pushButtonVendasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonVendasFolder_clicked, connectionType);
+}
+
 void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -83,6 +95,7 @@ void UserConfig::on_pushButtonSalvar_clicked() {
   UserSession::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
   UserSession::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
 
+  // TODO: caso as pastas estejam vazias usar /arquivos como padrao
   UserSession::setSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
   UserSession::setSetting("User/VendasFolder", ui->lineEditVendasFolder->text());
   UserSession::setSetting("User/ComprasFolder", ui->lineEditComprasFolder->text());
@@ -96,14 +109,14 @@ void UserConfig::on_pushButtonSalvar_clicked() {
 
 void UserConfig::on_pushButtonAlterarDados_clicked() {
   auto *usuario = new CadastroUsuario(this);
-  usuario->viewRegisterById(UserSession::idUsuario());
+  usuario->viewRegisterById(UserSession::idUsuario);
   usuario->modificarUsuario();
 
   usuario->show();
 }
 
 void UserConfig::on_pushButtonVendasFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -111,7 +124,7 @@ void UserConfig::on_pushButtonVendasFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonComprasFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -119,7 +132,7 @@ void UserConfig::on_pushButtonComprasFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta XML", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta XML");
 
   if (path.isEmpty()) { return; }
 
@@ -127,7 +140,7 @@ void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
-  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
+  const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel");
 
   if (path.isEmpty()) { return; }
 
@@ -136,7 +149,7 @@ void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
 
 void UserConfig::on_pushButtonEmailTeste_clicked() {
   if (ui->lineEditServidorSMTP->text().isEmpty() or ui->lineEditPortaSMTP->text().isEmpty() or ui->lineEditEmail->text().isEmpty() or ui->lineEditEmailSenha->text().isEmpty()) {
-    return qApp->enqueueError("Preencha os dados do email!", this);
+    throw RuntimeError("Preencha os dados do email!", this);
   }
 
   UserSession::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());

@@ -19,20 +19,26 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "smtp.h"
 
 #include "application.h"
+#include "file.h"
 
 #include <QFile>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QResource>
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
+Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), port(port), host(host), pass(pass), user(user) {
   socket = new QSslSocket(this);
 
-  connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
-  connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived); // TODO: change in 5.15 to errorOcurred
-  connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
-  connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
+  setConnections();
+}
+
+void Smtp::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead, connectionType);
+  connect(socket, &QAbstractSocket::connected, this, &Smtp::connected, connectionType);
+  connect(socket, &QAbstractSocket::errorOccurred, this, &Smtp::errorReceived, connectionType);
+  connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged, connectionType);
+  connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected, connectionType);
 }
 
 void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
@@ -57,14 +63,10 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
-  // TODO: 5dont hardcode this
-  // TODO:__project public code
-  //
   if (not assinatura.isEmpty()) {
-    // QFile file("://assinatura conrado.png");
-    QFile file(assinatura);
+    File file(assinatura);
 
-    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro abrindo arquivo: " + file.errorString()); }
+    if (not file.open(QIODevice::ReadOnly)) { throw RuntimeException("Erro abrindo arquivo: " + file.errorString()); }
 
     const QByteArray bytes = file.readAll();
     message.append("--frontier\n");
@@ -73,16 +75,15 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
     message.append(bytes.toBase64());
     message.append("\n");
   }
-  //
 
   if (not files.isEmpty()) {
     // qDebug() << "Files to be sent: " << files.size();
 
     for (const auto &filePath : files) {
-      QFile file(filePath);
+      File file(filePath);
 
       if (file.exists()) {
-        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
+        if (not file.open(QIODevice::ReadOnly)) { throw RuntimeException("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
 
         const QByteArray bytes = file.readAll();
         message.append("--frontier\n");
@@ -214,14 +215,14 @@ void Smtp::readyRead() {
     // qDebug() << "Username";
     // GMAIL is using XOAUTH2 protocol, which basically means that password and username has to be sent in base64 coding
     // https://developers.google.com/gmail/xoauth2_protocol
-    *t << QByteArray().append(user).toBase64() << "\r\n";
+    *t << QByteArray().append(user.toUtf8()).toBase64() << "\r\n";
     t->flush();
 
     state = States::Pass;
   } else if (state == States::Pass and responseLine == "334") {
     // Trying pass
     // qDebug() << "Pass";
-    *t << QByteArray().append(pass).toBase64() << "\r\n";
+    *t << QByteArray().append(pass.toUtf8()).toBase64() << "\r\n";
     t->flush();
 
     state = States::Mail;
@@ -257,15 +258,14 @@ void Smtp::readyRead() {
     t->flush();
     // here, we just close.
     state = States::Close;
-    emit status(tr("Message sent"));
+    emit status("Message sent");
   } else if (state == States::Close) {
     deleteLater();
     return;
   } else {
     // something broke.
-    qApp->enqueueException(tr("Unexpected reply from SMTP server:\n\n") + response);
     state = States::Close;
-    emit status(tr("Failed to send message"));
+    emit status("Falhou ao enviar mensagem: " + response);
   }
 
   response = "";

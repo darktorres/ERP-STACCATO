@@ -8,8 +8,8 @@
 #include <QSqlRecord>
 
 FinanceiroProxyModel::FinanceiroProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), statusFinanceiro(model->record().indexOf("statusFinanceiro")), prazoEntrega(model->record().indexOf("prazoEntrega")),
-      novoPrazoEntrega(model->record().indexOf("novoPrazoEntrega")) {
+    : QIdentityProxyModel(parent), novoPrazoEntrega(model->record().indexOf("novoPrazoEntrega")), prazoEntrega(model->record().indexOf("prazoEntrega")),
+      statusFinanceiro(model->record().indexOf("statusFinanceiro")) {
   setSourceModel(model);
 }
 
@@ -69,9 +69,9 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+      const QString tema = UserSession::getSetting("User/tema").toString();
 
-      return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white);
+      return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }
   }
 

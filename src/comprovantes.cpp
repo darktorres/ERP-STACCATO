@@ -2,6 +2,7 @@
 #include "ui_comprovantes.h"
 
 #include "application.h"
+#include "file.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -9,9 +10,9 @@
 #include <QNetworkReply>
 #include <QSqlError>
 
-Comprovantes::CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
-QString Comprovantes::CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
+QString CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
 
 // --------------------------------------------------------------------------
 
@@ -22,15 +23,21 @@ Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(pa
 
   setFilter(idVenda);
 
-  connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked);
+  setConnections();
 }
 
 Comprovantes::~Comprovantes() { delete ui; }
 
+void Comprovantes::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked, connectionType);
+}
+
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE idVenda = '" + idVenda + "'");
 
-  if (model.lastError().isValid()) { return qApp->enqueueException("Erro procurando comprovantes: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro procurando comprovantes: " + model.lastError().text(), this); }
 
   model.setHeaderData("fotoEntrega", "Arquivo");
 
@@ -42,7 +49,7 @@ void Comprovantes::setFilter(const QString &idVenda) {
 void Comprovantes::on_pushButtonAbrir_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // --------------------------------------------------------------------------
 
@@ -53,24 +60,19 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   auto reply = manager->get(request);
 
-  connect(reply, &QNetworkReply::finished, [=] {
-    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString(), this); }
+  connect(reply, &QNetworkReply::finished, this, [=] {
+    if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }
 
-    const QString filename = url.split("/").last();
-    const QString path = QDir::currentPath() + "/arquivos/";
+    const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 
-    QDir dir;
+    File file(filename);
 
-    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!", this); }
-
-    QFile file(path + filename);
-
-    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
     file.write(reply->readAll());
 
     file.close();
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(path + filename));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
   });
 }

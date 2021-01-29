@@ -1,6 +1,7 @@
 #include "palletitem.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QGraphicsProxyWidget>
@@ -10,7 +11,6 @@
 #include <QPainter>
 #include <QScrollArea>
 #include <QSqlError>
-#include <QSqlQuery>
 #include <QToolTip>
 
 PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsObject(parent), size(size) {
@@ -46,11 +46,11 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 }
 
 void PalletItem::setText(const QString &value) {
-  auto lines = value.split("\n", QString::SkipEmptyParts);
+  auto lines = value.split("\n", Qt::SkipEmptyParts);
 
   int pos = 15;
 
-  for (auto line : lines) {
+  for (const auto &line : lines) {
     auto estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
     estoque->setVisible(false);
     estoque->setPos(mapFromScene(680, pos));
@@ -136,7 +136,7 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
 
-  QStringList text = event->mimeData()->text().split(" - ", QString::SkipEmptyParts);
+  QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
 
   if (text.isEmpty()) { return; }
 
@@ -144,11 +144,11 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
   const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
     event->ignore();
-    return qApp->enqueueError("Erro movendo estoque: " + query.lastError().text());
+    throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
   }
 
   EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());

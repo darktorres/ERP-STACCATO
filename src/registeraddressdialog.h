@@ -11,15 +11,17 @@ public:
 
 protected:
   // attributes
-  QList<QSqlRecord> backupEndereco;
   int currentRowEnd = -1;
+  QList<QSqlRecord> backupEndereco;
   QDataWidgetMapper mapperEnd;
   SqlTableModel modelEnd;
   // methods
-  auto setDataEnd(const QString &key, const QVariant &value) -> bool;
   auto getCodigoUF(const QString &uf) const -> int;
+  auto setDataEnd(const QString &key, const QVariant &value) -> void;
+  auto verificaEndereco(const QString &cidade, const QString &uf) -> void;
   virtual auto newRegister() -> bool override;
 
 private:
+  // methods
   auto setupTables(const QString &table) -> void;
 };

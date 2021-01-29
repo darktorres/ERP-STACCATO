@@ -10,20 +10,26 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
+  setConnections();
 }
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
 
-void WidgetFinanceiro::updateTables() {
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+void WidgetFinanceiro::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  if (currentText == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
-  if (currentText == "Contas a Pagar") { ui->widgetPagar->updateTables(); }
-  if (currentText == "Contas a Receber") { ui->widgetReceber->updateTables(); }
-  if (currentText == "GARE") { ui->widgetGare->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables, connectionType);
+}
+
+void WidgetFinanceiro::updateTables() {
+  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+
+  if (currentTab == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
+  if (currentTab == "Contas a Pagar") { ui->widgetPagar->updateTables(); }
+  if (currentTab == "Contas a Receber") { ui->widgetReceber->updateTables(); }
+  if (currentTab == "GARE") { ui->widgetGare->updateTables(); }
+  if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
 }
 
 void WidgetFinanceiro::resetTables() {

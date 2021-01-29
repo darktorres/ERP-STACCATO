@@ -17,31 +17,30 @@ public:
 
 private:
   // attributes
-  const QString idVenda;
-  const bool isRepresentacao;
+  bool const isRepresentacao;
+  QString const idVenda;
   QString idDevolucao;
   SqlTableModel modelCliente;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumos;
   SqlTableModel modelDevolvidos1;
   SqlTableModel modelPagamentos;
   SqlTableModel modelProdutos2;
   SqlTableModel modelVenda;
-  SqlTableModel modelCompra;
-  SqlTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
-  auto alterarLinhaOriginal(const int currentRow) -> bool;
-  auto atualizarDevolucao() -> bool;
-  auto atualizarIdRelacionado(const int currentRow) -> bool;
-  auto dividirConsumo(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto copiarProdutoParaDevolucao(const int currentRow) -> bool;
-  auto criarContas() -> bool;
-  auto criarDevolucao() -> bool;
-  auto determinarIdDevolucao() -> bool;
-  auto devolverItem(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto dividirVenda(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto inserirItens(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto lerConsumos(const int currentRow) -> bool;
+  auto alterarLinhaOriginal(const int currentRow) -> void;
+  auto atualizarDevolucao() -> void;
+  auto atualizarIdRelacionado(const int currentRow) -> void;
+  auto copiarProdutoParaDevolucao(const int currentRow) -> void;
+  auto criarContas() -> void;
+  auto criarDevolucao() -> void;
+  auto determinarIdDevolucao() -> void;
+  auto devolverItem(const int currentRow, const int novoIdVendaProduto2) -> void;
+  auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> void;
+  auto dividirConsumo(const int currentRow, const int novoIdVendaProduto2) -> void;
+  auto dividirVenda(const int currentRow, const int novoIdVendaProduto2) -> void;
+  auto inserirItens(const int currentRow, const int novoIdVendaProduto2) -> void;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxCredito_valueChanged(const double credito) -> void;
@@ -49,7 +48,7 @@ private:
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto salvarCredito() -> bool;
+  auto salvarCredito() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

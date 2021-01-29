@@ -1,10 +1,15 @@
 #include "registerdialog.h"
 
 #include "application.h"
+#include "itembox.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDebug>
+#include <QDoubleSpinBox>
 #include <QMessageBox>
+#include <QRadioButton>
 #include <QShortcut>
 
 RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : QDialog(parent), primaryKey(primaryKeyStr), parent(parent) {
@@ -16,8 +21,21 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeySt
   mapper.setModel(&model);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
 
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, [&]() { save(); });
+  setConnections();
+}
+
+void RegisterDialog::connectLineEditsToDirty() {
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+}
+
+void RegisterDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close, connectionType);
+  connect(
+      new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, [&]() { save(); }, connectionType);
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
@@ -28,15 +46,15 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   primaryId = id.toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueException(false, "primaryId vazio!", this); }
+  if (primaryId.isEmpty()) { throw RuntimeException("primaryId vazio!", this); }
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
-  if (not model.select()) { return false; }
+  model.select();
 
   if (model.rowCount() == 0) {
     close();
-    return qApp->enqueueException(false, "Item não encontrado!", this);
+    throw RuntimeException("Item não encontrado!", this);
   }
 
   isDirty = false;
@@ -58,28 +76,16 @@ bool RegisterDialog::viewRegister() {
   return true;
 }
 
-bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
-  for (const auto &line : list) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
-
-  return true;
+void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
+  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) { secondaryModel.setData(row, primaryKey, primaryId); }
 }
 
-bool RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
-  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) {
-    if (not secondaryModel.setData(row, primaryKey, primaryId)) { return false; }
-  }
-
-  return true;
-}
-
-bool RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
+void RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
 
 QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
-  if (model.fieldIndex(key) == -1) { return qApp->enqueueException("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
+  if (model.fieldIndex(key) == -1) { throw RuntimeException("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
 
   propertyName.isNull() ? mapper.addMapping(widget, model.fieldIndex(key)) : mapper.addMapping(widget, model.fieldIndex(key), propertyName);
 }
@@ -107,9 +113,9 @@ void RegisterDialog::show() {
   adjustSize();
 }
 
-bool RegisterDialog::verifyRequiredField(QLineEdit &line, const bool silent) {
-  if (not line.styleSheet().contains(requiredStyle())) { return true; }
-  if (not line.isVisible()) { return true; }
+void RegisterDialog::verifyRequiredField(const QLineEdit &line) {
+  if (not line.styleSheet().contains(requiredStyle())) { return; }
+  if (not line.isVisible()) { return; }
 
   const bool isEmpty = (line.text().isEmpty());
   const bool isZero = (line.text() == "0,00");
@@ -117,16 +123,7 @@ bool RegisterDialog::verifyRequiredField(QLineEdit &line, const bool silent) {
   const bool isLessMask = (line.text().size() < line.inputMask().remove(";").remove(">").remove("_").size());
   const bool isLessPlaceHolder = (line.text().size() < line.placeholderText().size() - 1);
 
-  if (isEmpty or isZero or isSymbols or isLessMask or isLessPlaceHolder) {
-    if (not silent) {
-      qApp->enqueueError("Um campo obrigatório não foi preenchido: " + line.accessibleName(), this);
-      line.setFocus();
-    }
-
-    return false;
-  }
-
-  return true;
+  if (isEmpty or isZero or isSymbols or isLessMask or isLessPlaceHolder) { throw RuntimeError("Um campo obrigatório não foi preenchido:\n" + line.accessibleName()); }
 }
 
 bool RegisterDialog::confirmationMessage() {
@@ -138,8 +135,8 @@ bool RegisterDialog::confirmationMessage() {
 
     const int escolha = msgBox.exec();
 
-    if (escolha == QMessageBox::Yes) { return save(); }
-    if (escolha == QMessageBox::No) { return true; }
+    if (escolha == QMessageBox::Yes) { save(); }
+    if (escolha == QMessageBox::No) {}
     if (escolha == QMessageBox::Cancel) { return false; }
   }
 
@@ -152,6 +149,7 @@ bool RegisterDialog::newRegister() {
   model.setFilter("0");
 
   currentRow = -1;
+  primaryId.clear();
 
   tipo = Tipo::Cadastrar;
 
@@ -161,25 +159,59 @@ bool RegisterDialog::newRegister() {
   return true;
 }
 
-bool RegisterDialog::save(const bool silent) {
-  if (not verifyFields()) { return false; }
+void RegisterDialog::save(const bool silent) {
+  verifyFields();
 
-  if (not cadastrar()) { return false; }
+  cadastrar();
 
   isDirty = false;
 
   if (not silent) { successMessage(); }
 
   viewRegisterById(primaryId);
-
-  return true;
 }
 
 void RegisterDialog::clearFields() {
-  const auto children = findChildren<QLineEdit *>();
+  const auto lineEdits = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) {
-    if (not line->isReadOnly()) { line->clear(); }
+  for (const auto &lineEdit : lineEdits) {
+    if (lineEdit->objectName().startsWith("lineEdit")) { lineEdit->clear(); }
+  }
+
+  const auto itemBoxes = findChildren<ItemBox *>(QRegularExpression("itemBox"));
+
+  for (const auto &itemBox : itemBoxes) {
+    if (itemBox->objectName().startsWith("itemBox")) { itemBox->clear(); }
+  }
+
+  const auto doubleSpinBoxes = findChildren<QDoubleSpinBox *>(QRegularExpression("doubleSpinBox"));
+
+  for (const auto &doubleSpinBox : doubleSpinBoxes) {
+    if (doubleSpinBox->objectName().startsWith("doubleSpinBox")) { doubleSpinBox->setValue(0); }
+  }
+
+  const auto spinBoxes = findChildren<QSpinBox *>(QRegularExpression("spinBox"));
+
+  for (const auto &spinBox : spinBoxes) {
+    if (spinBox->objectName().startsWith("spinBox")) { spinBox->setValue(0); }
+  }
+
+  const auto radioButtons = findChildren<QRadioButton *>(QRegularExpression("radioButton"));
+
+  for (const auto radioButton : radioButtons) {
+    if (radioButton->objectName().startsWith("radioButton")) { radioButton->setChecked(false); }
+  }
+
+  const auto checkBoxes = findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (const auto checkBox : checkBoxes) {
+    if (checkBox->objectName().startsWith("checkBox")) { checkBox->setChecked(false); }
+  }
+
+  const auto comboBoxes = findChildren<QComboBox *>(QRegularExpression("comboBox"));
+
+  for (const auto comboBox : comboBoxes) {
+    if (comboBox->objectName().startsWith("comboBox")) { comboBox->setCurrentIndex(0); }
   }
 }
 
@@ -193,9 +225,9 @@ int RegisterDialog::removeBox() {
 
 void RegisterDialog::remove() {
   if (removeBox() == QMessageBox::Yes) {
-    if (not setData("desativado", true)) { return; }
+    setData("desativado", true);
 
-    if (not model.submitAll()) { return; }
+    model.submitAll();
 
     isDirty = false;
 
@@ -204,9 +236,11 @@ void RegisterDialog::remove() {
 }
 
 bool RegisterDialog::validaCNPJ(const QString &text) {
-  if (text.size() != 14) { return false; }
+  const QString cnpj = QString(text).remove(".").remove("/").remove("-");
 
-  const QString sub = text.left(12);
+  if (cnpj.size() != 14) { return false; }
+
+  const QString sub = cnpj.left(12);
 
   QVector<int> sub2;
 
@@ -234,20 +268,22 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
+  if (digito1 != cnpj.at(12).digitValue() or digito2 != cnpj.at(13).digitValue()) { throw RuntimeError("CNPJ inválido!", this); }
 
   return true;
 }
 
 bool RegisterDialog::validaCPF(const QString &text) {
-  if (text.size() != 11) { return false; }
+  const QString cpf = QString(text).remove(".").remove("-");
 
-  if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
-      text == "77777777777" or text == "88888888888" or text == "99999999999") {
-    return qApp->enqueueError(false, "CPF inválido!", this);
+  if (cpf.size() != 11) { return false; }
+
+  if (cpf == "00000000000" or cpf == "11111111111" or cpf == "22222222222" or cpf == "33333333333" or cpf == "44444444444" or cpf == "55555555555" or cpf == "66666666666" or cpf == "77777777777" or
+      cpf == "88888888888" or cpf == "99999999999") {
+    throw RuntimeError("CPF inválido!", this);
   }
 
-  const QString sub = text.left(9);
+  const QString sub = cpf.left(9);
 
   QVector<int> sub2;
 
@@ -275,7 +311,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) { return qApp->enqueueError(false, "CPF inválido!", this); }
+  if (digito1 != cpf.at(9).digitValue() or digito2 != cpf.at(10).digitValue()) { throw RuntimeError("CPF inválido!", this); }
 
   return true;
 }

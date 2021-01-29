@@ -89,6 +89,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>checkBoxMostrarFiltros</tabstop>
+  <tabstop>lineEditRange</tabstop>
+  <tabstop>pushButtonAnterior</tabstop>
+  <tabstop>pushButtonProximo</tabstop>
+  <tabstop>calendarWidget</tabstop>
+  <tabstop>groupBoxVeiculos</tabstop>
+  <tabstop>tableWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

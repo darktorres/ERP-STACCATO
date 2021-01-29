@@ -3,13 +3,13 @@
 
 #include "application.h"
 #include "palletitem.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QDrag>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsRectItem>
 #include <QSqlError>
-#include <QSqlQuery>
 
 Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) { ui->setupUi(this); }
 
@@ -17,20 +17,26 @@ Galpao::~Galpao() { delete ui; }
 
 void Galpao::resetTables() { modelIsSet = false; }
 
+void Galpao::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged, connectionType);
+  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled, connectionType);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged, connectionType);
+  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked, connectionType);
+  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked, connectionType);
+}
+
 void Galpao::updateTables() {
   if (not isSet) {
-    scene = new GraphicsScene(this);
+    scene = new QGraphicsScene(this);
     ui->graphicsGalpao->setScene(scene);
     ui->graphicsPallet->setScene(scene);
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
-    connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
-    connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
-    connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
-    connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
-    connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
+    setConnections();
 
     ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -49,7 +55,7 @@ void Galpao::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelTranspAgend.select()) { return; }
+  modelTranspAgend.select();
 
   carregarPallets();
 }
@@ -93,11 +99,11 @@ void Galpao::carregarPallets() {
 
   scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
 
-  QSqlQuery query;
+  SqlQuery query;
 
   if (not query.exec("SELECT g.*, v.id, v.tipo, CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, REPLACE(v.descricao, '-', '') AS descricao, v.idVendaProduto2 FROM galpao g LEFT JOIN view_galpao v ON "
                      "g.bloco = v.bloco ORDER BY CAST(g.bloco AS UNSIGNED) ASC, id ASC")) {
-    return qApp->enqueueError("Erro buscando dados do galpão: " + query.lastError().text(), this);
+    throw RuntimeError("Erro buscando dados do galpão: " + query.lastError().text(), this);
   }
 
   QHash<QString, QString> blocos;
@@ -119,7 +125,7 @@ void Galpao::carregarPallets() {
       existente += tamanho;
     }
 
-    if (query.value("id") > 0) {
+    if (query.value("id").toInt() > 0) {
       if (not existente.isEmpty()) { existente += "\n"; }
 
       existente += item;
@@ -160,10 +166,10 @@ void Galpao::salvarPallets() {
     if (auto pallet = dynamic_cast<PalletItem *>(item)) {
       QString pos = QString::number(pallet->scenePos().x()) + "," + QString::number(pallet->scenePos().y());
 
-      QSqlQuery query;
+      SqlQuery query;
 
       if (not query.exec("UPDATE galpao SET posicao = '" + pos + "' WHERE bloco = '" + pallet->getLabel() + "'")) {
-        return qApp->enqueueError("Erro salvando dados do galpão: " + query.lastError().text(), this);
+        throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
       }
     }
   }
@@ -180,7 +186,7 @@ void Galpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
 void Galpao::setFilter() {
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
-  if (not modelTranspAgend.select()) { qApp->enqueueError("Erro: " + modelTranspAgend.lastError().text(), this); }
+  modelTranspAgend.select();
 
   on_table_selectionChanged();
 }

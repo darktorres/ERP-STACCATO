@@ -7,11 +7,11 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
@@ -91,9 +91,6 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor.setHeaderData("preco", "Total");
   modelPedidoFornecedor.setHeaderData("un", "Un.");
-  modelPedidoFornecedor.setHeaderData("un2", "Un.2");
-  modelPedidoFornecedor.setHeaderData("kgcx", "Kg./Cx.");
-  modelPedidoFornecedor.setHeaderData("formComercial", "Formato");
   modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
   modelPedidoFornecedor.setHeaderData("obs", "Obs.");
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
@@ -111,11 +108,17 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
+
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
+
   if (tipo == Tipo::Faturamento) {
     ui->table->hideColumn("idPedido2");
     ui->table->hideColumn("idPedidoFK");
   }
+
+  ui->table->hideColumn("un2");
+  ui->table->hideColumn("kgcx");
+
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
@@ -132,8 +135,11 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+  ui->table->hideColumn("formComercial");
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
+
+  ui->table->setItemDelegateForColumn("obs", new EditDelegate(this));
 
   if (tipo == Tipo::GerarCompra) {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
@@ -144,29 +150,32 @@ void InputDialogProduto::setupTables() {
   }
 
   if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
+
+  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 }
 
-bool InputDialogProduto::setFilter(const QStringList &ids) {
-  if (ids.isEmpty()) { return qApp->enqueueException(false, "Ids vazio!", this); }
+void InputDialogProduto::setFilter(const QStringList &ids) {
+  if (ids.isEmpty()) { throw RuntimeException("Ids vazio!"); }
 
   QString filter;
 
   if (tipo == Tipo::GerarCompra) { filter = "`idPedido1` IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
   if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
-  if (filter.isEmpty()) { return qApp->enqueueException(false, "Filtro vazio!", this); }
+  if (filter.isEmpty()) { throw RuntimeException("Filtro vazio!"); }
 
   modelPedidoFornecedor.setFilter(filter);
 
-  if (not modelPedidoFornecedor.select()) { return false; }
+  modelPedidoFornecedor.select();
 
   calcularTotal();
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT aliquotaSt, st, representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text()); }
 
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
@@ -174,8 +183,6 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }
 
   if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário!", this); }
-
-  return true;
 }
 
 QDate InputDialogProduto::getDate() const { return ui->dateEditEvento->date(); }
@@ -185,7 +192,7 @@ QDate InputDialogProduto::getNextDate() const { return ui->dateEditProximo->date
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
-  [&] {
+  try {
     const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
@@ -193,14 +200,14 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 
     if (header == "Quant." or header == "$ Unit.") {
       const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
+      modelPedidoFornecedor.setData(row, "preco", preco);
     }
 
     if (header == "Total") {
       const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
+      modelPedidoFornecedor.setData(row, "prcUnitario", preco);
     }
-  }();
+  } catch (std::exception &) {}
 
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
@@ -226,52 +233,42 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
-  if (not cadastrar()) { return; }
+  cadastrar();
 
   QDialog::accept();
   close();
 }
 
-bool InputDialogProduto::cadastrar() {
-  if (not qApp->startTransaction("InputDialog::cadastrar")) { return false; }
+void InputDialogProduto::cadastrar() {
+  qApp->startTransaction("InputDialog::cadastrar");
 
-  const bool success = [&] {
-    if (tipo == Tipo::GerarCompra) {
-      QSqlQuery queryUpdate;
-      queryUpdate.prepare(
-          "UPDATE pedido_fornecedor_has_produto2 SET aliquotaSt = :aliquotaSt, st = :st, quant = :quant, caixas = :caixas, prcUnitario = :prcUnitario, preco = :preco WHERE idPedidoFK = :idPedido1");
+  if (tipo == Tipo::GerarCompra) {
+    SqlQuery queryUpdate;
+    queryUpdate.prepare(
+        "UPDATE pedido_fornecedor_has_produto2 SET aliquotaSt = :aliquotaSt, st = :st, quant = :quant, caixas = :caixas, prcUnitario = :prcUnitario, preco = :preco WHERE idPedidoFK = :idPedido1");
 
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-        queryUpdate.bindValue(":aliquotaSt", modelPedidoFornecedor.data(row, "aliquotaSt"));
-        queryUpdate.bindValue(":st", modelPedidoFornecedor.data(row, "st"));
-        queryUpdate.bindValue(":quant", modelPedidoFornecedor.data(row, "quant"));
-        queryUpdate.bindValue(":caixas", modelPedidoFornecedor.data(row, "caixas"));
-        queryUpdate.bindValue(":prcUnitario", modelPedidoFornecedor.data(row, "prcUnitario"));
-        queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
-        queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+      queryUpdate.bindValue(":aliquotaSt", modelPedidoFornecedor.data(row, "aliquotaSt"));
+      queryUpdate.bindValue(":st", modelPedidoFornecedor.data(row, "st"));
+      queryUpdate.bindValue(":quant", modelPedidoFornecedor.data(row, "quant"));
+      queryUpdate.bindValue(":caixas", modelPedidoFornecedor.data(row, "caixas"));
+      queryUpdate.bindValue(":prcUnitario", modelPedidoFornecedor.data(row, "prcUnitario"));
+      queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
+      queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
 
-        if (not queryUpdate.exec()) { return qApp->enqueueException(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
-      }
+      if (not queryUpdate.exec()) { throw RuntimeException("Erro copiando dados para tabela 2: " + queryUpdate.lastError().text()); }
     }
-
-    if (tipo == Tipo::Faturamento) {
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-        if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") {
-          if (not modelPedidoFornecedor.setData(row, "status", "ENTREGUE")) { return false; }
-        }
-      }
-    }
-
-    return modelPedidoFornecedor.submitAll();
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
-  } else {
-    qApp->rollbackTransaction();
   }
 
-  return true;
+  if (tipo == Tipo::Faturamento) {
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+      if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") { modelPedidoFornecedor.setData(row, "status", "ENTREGUE"); }
+    }
+  }
+
+  modelPedidoFornecedor.submitAll();
+
+  qApp->endTransaction();
 }
 
 void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
@@ -281,21 +278,21 @@ void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
   unsetConnections();
 
-  [&] {
-    double total = 0;
+  try {
+    [&] {
+      double total = 0;
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-    const double valueSt = total * aliquota / 100;
+      const double valueSt = total * aliquota / 100;
 
-    ui->doubleSpinBoxST->setValue(valueSt);
+      ui->doubleSpinBoxST->setValue(valueSt);
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-    }
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
-    ui->doubleSpinBoxTotal->setValue(total + valueSt);
-  }();
+      ui->doubleSpinBoxTotal->setValue(total + valueSt);
+    }();
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -303,21 +300,21 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
 void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
   unsetConnections();
 
-  [&] {
-    double total = 0;
+  try {
+    [&] {
+      double total = 0;
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-    const double aliquota = valueSt * 100 / total;
+      const double aliquota = valueSt * 100 / total;
 
-    ui->doubleSpinBoxAliquota->setValue(aliquota);
+      ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-    }
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
-    ui->doubleSpinBoxTotal->setValue(total + valueSt);
-  }();
+      ui->doubleSpinBoxTotal->setValue(total + valueSt);
+    }();
+  } catch (std::exception &) {}
 
   setConnections();
 }
@@ -341,13 +338,9 @@ void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
     ui->doubleSpinBoxAliquota->setValue(4.68);
   }
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
-  }
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "st", text); }
 }
 
 void InputDialogProduto::on_lineEditCodRep_textEdited(const QString &text) {
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "ordemRepresentacao", text)) { return; }
-  }
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "ordemRepresentacao", text); }
 }

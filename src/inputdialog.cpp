@@ -10,13 +10,9 @@
 
 #include <QDebug>
 #include <QSqlError>
-#include <QSqlQuery>
 
 InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
-
-  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialog::on_pushButtonSalvar_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -94,12 +90,21 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista:");
   }
 
+  setConnections();
+
   adjustSize();
 
   show();
 }
 
 InputDialog::~InputDialog() { delete ui; }
+
+void InputDialog::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialog::on_pushButtonSalvar_clicked, connectionType);
+}
 
 QDate InputDialog::getDate() const { return ui->dateEditEvento->date(); }
 
@@ -113,7 +118,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
-    if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError("Observação não pode estar vazio!", this); }
+    if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Observação não pode estar vazio!", this); }
   }
 
   QDialog::accept();

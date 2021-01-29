@@ -92,8 +92,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>141</width>
-        <height>689</height>
+        <width>162</width>
+        <height>685</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_7">
@@ -353,6 +353,27 @@
    <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>pushButtonCriarOrc</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonProprios</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
+  <tabstop>checkBoxValido</tabstop>
+  <tabstop>checkBoxExpirado</tabstop>
+  <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>checkBoxFechado</tabstop>
+  <tabstop>checkBoxReplicado</tabstop>
+  <tabstop>checkBoxPerdido</tabstop>
+  <tabstop>comboBoxLojas</tabstop>
+  <tabstop>comboBoxVendedores</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>comboBoxFollowup</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

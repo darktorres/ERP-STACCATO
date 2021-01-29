@@ -153,6 +153,9 @@
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -168,6 +171,19 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tableCalendario</tabstop>
+  <tabstop>tableCarga</tabstop>
+  <tabstop>pushButtonProtocoloEntrega</tabstop>
+  <tabstop>pushButtonGerarNFe</tabstop>
+  <tabstop>pushButtonConsultarNFe</tabstop>
+  <tabstop>pushButtonConfirmarEntrega</tabstop>
+  <tabstop>pushButtonImprimirDanfe</tabstop>
+  <tabstop>pushButtonReagendar</tabstop>
+  <tabstop>pushButtonCancelarEntrega</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>lineEditBuscar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

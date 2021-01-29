@@ -12,61 +12,39 @@
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 
-  connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
-  connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
-
-  const auto children = findChildren<QLineEdit *>();
-
-  for (const QLineEdit *line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
-
-  ui->lineEditCodBarras->setInputMask("9999999999999;_");
-  ui->lineEditNCM->setInputMask("99999999;_");
+  connectLineEditsToDirty();
+  setupUi();
+  setupMapper();
+  newRegister();
 
   ui->comboBoxOrigem->addItem("0 - Nacional", 0);
   ui->comboBoxOrigem->addItem("1 - Imp. Direta", 1);
   ui->comboBoxOrigem->addItem("2 - Merc. Interno", 2);
 
-  setupMapper();
-  newRegister();
-
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
-
-  sdProduto = SearchDialog::produto(true, true, true, false, this);
-  connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
-  connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
-
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
 
-  ui->groupBox->hide();
-  ui->groupBox_4->hide();
-  ui->groupBox_5->hide();
+  setConnections();
 }
 
 CadastroProduto::~CadastroProduto() { delete ui; }
 
 void CadastroProduto::clearFields() {
-  const auto children = findChildren<QLineEdit *>();
+  unsetConnections();
 
-  for (const auto &line : children) { line->clear(); }
+  try {
+    RegisterDialog::clearFields();
 
-  const auto children2 = findChildren<QDoubleSpinBox *>();
+    ui->comboBoxCST->setCurrentIndex(7);
+    ui->dateEditValidade->setDate(QDate(1900, 1, 1));
+    ui->textEditObserv->clear();
 
-  for (const auto &spinBox : children2) { spinBox->clear(); }
+    setupUi();
+  } catch (std::exception &) {}
 
-  ui->itemBoxFornecedor->clear();
-
-  ui->radioButtonDesc->setChecked(false);
-  ui->radioButtonLote->setChecked(false);
-
-  ui->dateEditValidade->setDate(QDate(1900, 1, 1));
-
-  ui->textEditObserv->clear();
+  setConnections();
 }
 
 void CadastroProduto::updateMode() {
@@ -81,55 +59,31 @@ void CadastroProduto::registerMode() {
   ui->pushButtonRemover->hide();
 }
 
-bool CadastroProduto::verifyFields() {
-  const auto children = findChildren<QLineEdit *>();
+void CadastroProduto::verifyFields() {
+  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->comboBoxUn->currentText().isEmpty()) {
-    qApp->enqueueError("Faltou preencher unidade!", this);
-    ui->comboBoxUn->setFocus();
-    return false;
-  }
+  if (ui->comboBoxUn->currentText().isEmpty()) { throw RuntimeError("Faltou preencher unidade!"); }
 
-  if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") {
-    qApp->enqueueError("Faltou preencher validade!", this);
-    ui->dateEditValidade->setFocus();
-    return false;
-  }
+  if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") { throw RuntimeError("Faltou preencher validade!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) {
-    qApp->enqueueError("Custo inválido!", this);
-    ui->doubleSpinBoxCusto->setFocus();
-    return false;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) { throw RuntimeError("Custo inválido!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) {
-    qApp->enqueueError("Preço inválido!", this);
-    ui->doubleSpinBoxVenda->setFocus();
-    return false;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) { throw RuntimeError("Preço inválido!"); }
 
-  if (ui->itemBoxFornecedor->getId().isNull()) {
-    qApp->enqueueError("Faltou preencher fornecedor!", this);
-    ui->itemBoxFornecedor->setFocus();
-    return false;
-  }
+  if (ui->itemBoxFornecedor->getId().isNull()) { throw RuntimeError("Faltou preencher fornecedor!"); }
 
   if (tipo == Tipo::Cadastrar) {
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial");
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se produto já cadastrado!", this); }
+    if (not query.exec()) { throw RuntimeException("Erro verificando se produto já cadastrado!"); }
 
-    if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!", this); }
+    if (query.first()) { throw RuntimeError("Código comercial já cadastrado!"); }
   }
-
-  return true;
 }
 
 void CadastroProduto::setupMapper() {
@@ -157,8 +111,6 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->lineEditICMS, "icms");
   addMapping(ui->lineEditNCM, "ncm");
   addMapping(ui->lineEditUI, "ui");
-  addMapping(ui->radioButtonDesc, "descontinuado");
-  addMapping(ui->radioButtonLote, "temLote");
   addMapping(ui->textEditObserv, "observacoes", "plainText");
   addMapping(ui->checkBoxEstoque, "estoque");
   addMapping(ui->checkBoxPromocao, "promocao");
@@ -166,56 +118,53 @@ void CadastroProduto::setupMapper() {
 
 void CadastroProduto::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!", this); }
 
-bool CadastroProduto::savingProcedures() {
+void CadastroProduto::savingProcedures() {
   // TODO: verificar aonde estou salvando 'estoque'/'promocao' e não deixar marcar os 2
 
-  if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
-  if (not setData("codComercial", ui->lineEditCodComer->text())) { return false; }
-  if (not setData("colecao", ui->lineEditColecao->text())) { return false; }
-  if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
-  if (not setData("cst", ui->comboBoxCST->currentText())) { return false; }
-  if (not setData("custo", ui->doubleSpinBoxCusto->value())) { return false; }
-  if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
-  if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
-  if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first())) { return false; }
-  if (not setData("icms", ui->lineEditICMS->text())) { return false; }
-  if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
-  if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
-  if (not setData("kgcx", ui->doubleSpinBoxKgCx->value())) { return false; }
-  if (not setData("m2cx", ui->doubleSpinBoxM2Cx->value())) { return false; }
-  if (not setData("markup", ui->doubleSpinBoxMarkup->value())) { return false; }
-  if (not setData("ncm", ui->lineEditNCM->text())) { return false; }
-  if (not setData("observacoes", ui->textEditObserv->toPlainText())) { return false; }
-  if (not setData("origem", ui->comboBoxOrigem->currentData())) { return false; }
-  if (not setData("pccx", ui->doubleSpinBoxPcCx->value())) { return false; }
-  if (not setData("precoVenda", ui->doubleSpinBoxVenda->value())) { return false; }
-  if (not setData("qtdPallet", ui->doubleSpinBoxQtePallet->value())) { return false; }
-  if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
-  if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
-  if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+  setData("codBarras", ui->lineEditCodBarras->text());
+  setData("codComercial", ui->lineEditCodComer->text());
+  setData("colecao", ui->lineEditColecao->text());
+  setData("comissao", ui->doubleSpinBoxComissao->value());
+  setData("cst", ui->comboBoxCST->currentText());
+  setData("custo", ui->doubleSpinBoxCusto->value());
+  setData("descricao", ui->lineEditDescricao->text());
+  setData("estoqueRestante", ui->doubleSpinBoxEstoque->value());
+  setData("formComercial", ui->lineEditFormComer->text());
+  setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first());
+  setData("icms", ui->lineEditICMS->text());
+  setData("idFornecedor", ui->itemBoxFornecedor->getId());
+  setData("ipi", ui->doubleSpinBoxIPI->value());
+  setData("kgcx", ui->doubleSpinBoxKgCx->value());
+  setData("m2cx", ui->doubleSpinBoxM2Cx->value());
+  setData("markup", ui->doubleSpinBoxMarkup->value());
+  setData("ncm", ui->lineEditNCM->text());
+  setData("observacoes", ui->textEditObserv->toPlainText());
+  setData("origem", ui->comboBoxOrigem->currentData());
+  setData("pccx", ui->doubleSpinBoxPcCx->value());
+  setData("precoVenda", ui->doubleSpinBoxVenda->value());
+  setData("qtdPallet", ui->doubleSpinBoxQtePallet->value());
+  setData("st", ui->doubleSpinBoxST->value());
+  setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text());
 
   const QString un = ui->comboBoxUn->currentText();
   const double m2cx = ui->doubleSpinBoxM2Cx->value();
   const double pccx = ui->doubleSpinBoxPcCx->value();
   const double quantCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
 
-  if (not setData("quantCaixa", quantCaixa)) { return false; }
-  if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
-  if (not setData("validade", ui->dateEditValidade->date())) { return false; }
+  setData("quantCaixa", quantCaixa);
+  setData("un", ui->comboBoxUn->currentText());
+  setData("validade", ui->checkBoxValidade->isChecked() ? ui->dateEditValidade->date() : QVariant());
 
-  QSqlQuery query;
+  SqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
 
   const bool representacao = query.value("representacao").toBool();
 
-  if (not setData("representacao", representacao)) { return false; }
-  if (not setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate())) { return false; }
-
-  return true;
+  setData("representacao", representacao);
+  setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate());
 }
 
 void CadastroProduto::on_pushButtonCadastrar_clicked() { save(); }
@@ -235,31 +184,60 @@ void CadastroProduto::calcularMarkup() {
   ui->doubleSpinBoxMarkup->setValue(markup);
 }
 
-bool CadastroProduto::cadastrar() {
-  if (not qApp->startTransaction("CadastroProduto::cadastrar")) { return false; }
+void CadastroProduto::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroProduto::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
-  } else {
+    qApp->endTransaction();
+  } catch (std::exception &) {
     qApp->rollbackTransaction();
-    void(model.select());
-  }
+    model.select();
 
-  return success;
+    throw;
+  }
+}
+
+void CadastroProduto::on_checkBoxValidade_stateChanged(const int state) { ui->dateEditValidade->setEnabled(state); }
+
+void CadastroProduto::setupUi() {
+  ui->lineEditCodBarras->setInputMask("9999999999999;_");
+  ui->lineEditNCM->setInputMask("99999999;_");
+}
+
+void CadastroProduto::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById, connectionType);
+  connect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged, connectionType);
+  connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show, connectionType);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked, connectionType);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked, connectionType);
+}
+
+void CadastroProduto::unsetConnections() {
+  disconnect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
+  disconnect(ui->checkBoxValidade, &QCheckBox::stateChanged, this, &CadastroProduto::on_checkBoxValidade_stateChanged);
+  disconnect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
+  disconnect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
+  disconnect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
+  disconnect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
+  disconnect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
+  disconnect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
+  disconnect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
@@ -270,3 +248,5 @@ bool CadastroProduto::cadastrar() {
 // TODO: validar entrada do campo icms para apenas numeros
 // TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto
+
+// TODO: change 'icms' from lineEdit to doubleSpinBox

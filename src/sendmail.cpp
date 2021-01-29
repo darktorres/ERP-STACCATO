@@ -12,9 +12,6 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
   ui->setupUi(this);
 
-  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &SendMail::on_pushButtonBuscar_clicked);
-  connect(ui->pushButtonEnviar, &QPushButton::clicked, this, &SendMail::on_pushButtonEnviar_clicked);
-
   setWindowFlags(Qt::Window);
 
   files.append(arquivo);
@@ -26,11 +23,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
     ui->lineEditTitulo->setText("PEDIDO " + info.baseName());
 
-    QSqlQuery query;
+    SqlQuery query;
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) { qApp->enqueueException("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
 
     QString representante;
 
@@ -60,16 +57,25 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    if (const auto key = UserSession::getSetting("User/emailCompra")) { ui->lineEditEmail->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/emailCopia")) { ui->lineEditCopia->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidor->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPorta->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/emailSenha")) { ui->lineEditPasswd->setText(key->toString()); }
+    ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
+    ui->lineEditCopia->setText(UserSession::getSetting("User/emailCopia").toString());
+    ui->lineEditServidor->setText(UserSession::getSetting("User/servidorSMTP").toString());
+    ui->lineEditPorta->setText(UserSession::getSetting("User/portaSMTP").toString());
+    ui->lineEditPasswd->setText(UserSession::getSetting("User/emailSenha").toString());
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
   progress->setCancelButton(nullptr);
   progress->reset();
+
+  setConnections();
+}
+
+void SendMail::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &SendMail::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonEnviar, &QPushButton::clicked, this, &SendMail::on_pushButtonEnviar_clicked, connectionType);
 }
 
 SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {
@@ -122,4 +128,4 @@ void SendMail::successStatus() {
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { qApp->enqueueException("Ocorreu erro: " + status, this); }
+void SendMail::failureStatus(const QString &status) { throw RuntimeException("Ocorreu erro: " + status, this); }

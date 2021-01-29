@@ -42,8 +42,10 @@ class ImportaProdutos final : public QDialog {
 
 public:
   enum class Tipo { Normal = 0, Promocao = 1 };
+
   explicit ImportaProdutos(const Tipo tipo, QWidget *parent);
   ~ImportaProdutos();
+
   auto importarTabela() -> void;
 
 private:
@@ -63,44 +65,43 @@ private:
   int itensUpdated = 0;
   int validade;
   Produto produto;
-  QVector<int> vectorProdutosImportados;
   QHash<QString, int> hashModel;
   QMap<QString, int> fornecedores;
   QProgressDialog *progressDialog;
-  QSqlDatabase db;
   QString file;
   QString fornecedor;
   QString idsFornecedor;
   QString validadeString;
-  SqlTableModel modelProduto;
+  QVector<int> vectorProdutosImportados;
   SqlTableModel modelErro;
   SqlTableModel modelEstoque;
-  const Tipo tipo;
+  SqlTableModel modelProduto;
+  Tipo const tipo;
   Ui::ImportaProdutos *ui;
   // methods
-  auto atualizaCamposProduto(const int row) -> bool;
-  auto atualizaProduto() -> bool;
-  auto buscarCadastrarFornecedor() -> std::optional<int>;
-  auto cadastraFornecedores(QXlsx::Document &xlsx) -> bool;
+  auto atualizaCamposProduto(const int row) -> void;
+  auto atualizaProduto() -> void;
+  auto buscarCadastrarFornecedor() -> int;
+  auto cadastraFornecedores(QXlsx::Document &xlsx) -> void;
   auto camposForaDoPadrao() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
-  auto contaProdutos() -> void;
-  auto importar() -> bool;
-  auto insereEmErro() -> bool;
-  auto insereEmOk() -> bool;
+  auto importar() -> void;
+  auto insereEmErro() -> void;
+  auto insereEmOk() -> void;
   auto leituraProduto(QXlsx::Document &xlsx, const int row) -> void;
-  auto marcaProdutoNaoDescontinuado(const int row) -> bool;
-  auto marcaTodosProdutosDescontinuados() -> bool;
-  auto mostraApenasEstesFornecedores() -> bool;
+  auto marcaProdutoNaoDescontinuado(const int row) -> void;
+  auto marcaTodosProdutosDescontinuados() -> void;
+  auto mostraApenasEstesFornecedores() -> void;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto pintarCamposForaDoPadrao(const int row) -> bool;
+  auto pintarCamposForaDoPadrao(const int row) -> void;
   auto readFile() -> bool;
   auto readValidade() -> bool;
-  auto salvar() -> bool;
+  auto salvar() -> void;
+  auto setConnections() -> void;
   auto setProgressDialog() -> void;
   auto setupModels() -> void;
   auto setupTables() -> void;
-  auto verificaSeRepresentacao() -> bool;
-  auto verificaTabela(QXlsx::Document &xlsx) -> bool;
+  auto verificaSeRepresentacao() -> void;
+  auto verificaTabela(QXlsx::Document &xlsx) -> void;
 };

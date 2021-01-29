@@ -19,7 +19,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
 
   connectLineEditsToDirty();
   setupTables();
-  fillCombobox();
+  fillComboBoxLoja();
   setupMapper();
   newRegister();
   setConnections();
@@ -154,7 +154,7 @@ bool CadastroUsuario::viewRegister() {
   return true;
 }
 
-void CadastroUsuario::fillCombobox() {
+void CadastroUsuario::fillComboBoxLoja() {
   SqlQuery query;
 
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }

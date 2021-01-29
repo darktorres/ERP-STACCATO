@@ -26,7 +26,7 @@ private:
   auto cadastrar() -> void final;
   auto clearFields() -> void final;
   auto criarUsuarioMySQL() -> void;
-  auto fillCombobox() -> void;
+  auto fillComboBoxLoja() -> void;
   auto newRegister() -> bool final;
   auto on_comboBoxTipo_currentTextChanged(const QString &text) -> void;
   auto on_lineEditUser_textEdited(const QString &text) -> void;

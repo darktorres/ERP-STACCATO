@@ -10,7 +10,12 @@ public:
 
   Excel(const QString &id, const Tipo tipo, QWidget *parent);
 
-  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> void;
+  bool mostrarRT = false;
+  bool isRepresentacao = false;
+  int ordemCompra;
+  QString representacao;
+
+  auto gerarExcel() -> void;
   auto getFileName() const -> QString;
 
 private:

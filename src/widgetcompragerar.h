@@ -33,7 +33,7 @@ private:
   auto cancelar(const QModelIndexList &list) -> void;
   auto enviarEmail(const QString &razaoSocial, const QString &anexo) -> void;
   auto gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) -> void;
-  auto gerarExcel(const QList<QModelIndex> &list, const int oc, const bool isRepresentacao) -> QString;
+  auto gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) -> QString;
   auto getDates(const QList<QModelIndex> &list) -> std::tuple<QDate, QDate>;
   auto getOrdemCompra() -> int;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;

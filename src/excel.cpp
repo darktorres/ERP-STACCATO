@@ -15,7 +15,7 @@ void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
   for (int row = queryProduto.size() + 12; row < 398; ++row) { xlsx.setRowHidden(row, true); }
 }
 
-void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
+void Excel::gerarExcel() {
   // TODO: dear god, divide this into smaller funcs
 
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
@@ -71,7 +71,7 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   if (tipo == Tipo::Venda) {
     if (isRepresentacao) {
       xlsx.write("C2", "Pedido:");
-      xlsx.write("D2", "OC " + QString::number(oc) + " " + id);
+      xlsx.write("D2", "OC " + QString::number(ordemCompra) + " " + id);
       QXlsx::Format format;
       format.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
       format.setFontBold(true);
@@ -93,6 +93,7 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   xlsx.write("D5", endFat);
   xlsx.write("D6", endEntrega);
   xlsx.write("D7", queryProfissional.value("nome_razao"));
+  if (mostrarRT) { xlsx.write("G7", query.value("RT").toDouble() / 100); }
   xlsx.write("D8", queryVendedor.value("nome"));
   xlsx.write("F8", queryVendedor.value("email"));
   xlsx.write("M2", query.value("data").toDateTime().toString("dd/MM/yyyy hh:mm"));
@@ -101,8 +102,8 @@ void Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   xlsx.write("J4", queryCliente.value("telCel"));
   xlsx.write("M5", queryEndFat.value("cep"));
   xlsx.write("M6", queryEndEnt.value("cep"));
-  xlsx.write("H7", queryProfissional.value("tel"));
-  xlsx.write("K7", queryProfissional.value("email"));
+  xlsx.write("I7", queryProfissional.value("tel"));
+  xlsx.write("L7", queryProfissional.value("email"));
 
   const double subLiq = query.value("subTotalLiq").toDouble();
   const double subBru = query.value("subTotalBru").toDouble();
@@ -201,7 +202,7 @@ void Excel::setQuerys() {
 
   if (tipo == Tipo::Venda) {
     query.prepare("SELECT idLoja, idUsuario, idProfissional, idEnderecoFaturamento, idEnderecoEntrega, idCliente, idOrcamento, data, subTotalLiq, subTotalBru, descontoPorc, frete, total, "
-                  "prazoEntrega, observacao FROM venda WHERE idVenda = :idVenda");
+                  "prazoEntrega, observacao, rt FROM venda WHERE idVenda = :idVenda");
     query.bindValue(":idVenda", id);
 
     queryProduto.prepare(

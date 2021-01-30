@@ -266,7 +266,7 @@
            </widget>
           </item>
           <item row="1" column="3">
-           <widget class="QLineEdit" name="lineEditNro">
+           <widget class="QLineEdit" name="lineEditNumero">
             <property name="minimumSize">
              <size>
               <width>50</width>
@@ -285,7 +285,7 @@
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QLineEdit" name="lineEditComp">
+           <widget class="QLineEdit" name="lineEditComplemento">
             <property name="minimumSize">
              <size>
               <width>75</width>
@@ -765,8 +765,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>comboBoxTipoEnd</tabstop>
   <tabstop>lineEditCEP</tabstop>
   <tabstop>lineEditLogradouro</tabstop>
-  <tabstop>lineEditNro</tabstop>
-  <tabstop>lineEditComp</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditComplemento</tabstop>
   <tabstop>lineEditBairro</tabstop>
   <tabstop>lineEditCidade</tabstop>
   <tabstop>lineEditUF</tabstop>

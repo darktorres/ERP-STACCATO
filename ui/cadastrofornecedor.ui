@@ -773,7 +773,7 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item row="1" column="2">
-              <widget class="QLineEdit" name="lineEditEndereco">
+              <widget class="QLineEdit" name="lineEditLogradouro">
                <property name="minimumSize">
                 <size>
                  <width>150</width>
@@ -786,7 +786,7 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item row="1" column="3">
-              <widget class="QLineEdit" name="lineEditNro">
+              <widget class="QLineEdit" name="lineEditNumero">
                <property name="minimumSize">
                 <size>
                  <width>50</width>
@@ -805,7 +805,7 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item row="1" column="4">
-              <widget class="QLineEdit" name="lineEditComp">
+              <widget class="QLineEdit" name="lineEditComplemento">
                <property name="minimumSize">
                 <size>
                  <width>75</width>
@@ -1194,9 +1194,9 @@ color: rgb(0, 0, 0);</string>
   <tabstop>doubleSpinBoxAliquotaSt</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
   <tabstop>lineEditCEP</tabstop>
-  <tabstop>lineEditEndereco</tabstop>
-  <tabstop>lineEditNro</tabstop>
-  <tabstop>lineEditComp</tabstop>
+  <tabstop>lineEditLogradouro</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditComplemento</tabstop>
   <tabstop>lineEditBairro</tabstop>
   <tabstop>lineEditCidade</tabstop>
   <tabstop>lineEditUF</tabstop>

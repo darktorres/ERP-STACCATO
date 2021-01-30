@@ -13,6 +13,8 @@ public:
   explicit PDF(const QString &id, const Tipo tipo, QWidget *parent);
   ~PDF() = default;
 
+  bool mostrarRT = false;
+
   auto gerarPdf() -> void;
 
 private:

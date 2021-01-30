@@ -75,7 +75,9 @@ void PDF::gerarPdf() {
     if (tipo == Tipo::Orcamento) { dataManager->setReportVariable("EndFiscal", endereco); }
   }
 
-  dataManager->setReportVariable("Profissional", queryProfissional.value("nome_razao").toString().isEmpty() ? "Não há" : queryProfissional.value("nome_razao"));
+  QString profissional = queryProfissional.value("nome_razao").toString();
+  if (not profissional.isEmpty() and mostrarRT) { profissional += " <span style=\"color: red\"><strong>" + query.value("rt").toString() + "%</strong>"; }
+  dataManager->setReportVariable("Profissional", profissional.isEmpty() ? "Não há" : profissional);
   dataManager->setReportVariable("EmailProfissional", queryProfissional.value("email"));
   dataManager->setReportVariable("Vendedor", queryVendedor.value("nome"));
   dataManager->setReportVariable("EmailVendedor", queryVendedor.value("email"));
@@ -150,7 +152,7 @@ void PDF::setQuerys() {
 
   if (tipo == Tipo::Venda) {
     query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, "
-                  "observacao, prazoEntrega FROM venda WHERE idVenda = :idVenda");
+                  "observacao, prazoEntrega, rt FROM venda WHERE idVenda = :idVenda");
     query.bindValue(":idVenda", id);
   }
 

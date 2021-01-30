@@ -278,6 +278,7 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
   PDF impressao(idVenda, PDF::Tipo::Venda, this);
+  impressao.mostrarRT = true;
   impressao.gerarPdf();
 }
 

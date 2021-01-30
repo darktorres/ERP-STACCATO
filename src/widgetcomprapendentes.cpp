@@ -266,6 +266,7 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
   Excel excel(idVenda, Excel::Tipo::Venda, this);
+  excel.mostrarRT = true;
   excel.gerarExcel();
 }
 

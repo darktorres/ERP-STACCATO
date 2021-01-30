@@ -205,7 +205,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   // oc
 
-  const int oc = getOrdemCompra();
+  const int ordemCompra = getOrdemCompra();
 
   const auto [dataCompra, dataPrevista] = getDates(list);
 
@@ -216,7 +216,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
 
-  const QString anexo = gerarExcel(list, oc, isRepresentacao);
+  const QString anexo = gerarExcel(list, ordemCompra, isRepresentacao);
 
   // -------------------------------------------------------------------------
 
@@ -226,7 +226,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   qApp->startTransaction("WidgetCompraGerar::on_pushButtonGerarCompra");
 
-  gerarCompra(list, dataCompra, dataPrevista, oc);
+  gerarCompra(list, dataCompra, dataPrevista, ordemCompra);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -340,16 +340,19 @@ bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
   return isRepresentacao;
 }
 
-QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int oc, const bool isRepresentacao) {
+QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) {
   const int firstRow = list.first().row();
   const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
-    Excel excel(idVenda, Excel::Tipo::Venda, this);
-    const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
+    const QString representacao = "OC " + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor;
 
-    excel.gerarExcel(oc, true, representacao);
+    Excel excel(idVenda, Excel::Tipo::Venda, this);
+    excel.ordemCompra = ordemCompra;
+    excel.isRepresentacao = true;
+    excel.representacao = representacao;
+    excel.gerarExcel();
 
     return excel.getFileName();
   }
@@ -372,7 +375,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString fileName = folderKey + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   File file(fileName);
 
@@ -392,7 +395,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
   //  xlsx.currentWorksheet()->setFitToHeight(true);
   //  xlsx.currentWorksheet()->setOrientationVertical(false);
 
-  xlsx.write("E4", oc);
+  xlsx.write("E4", ordemCompra);
   xlsx.write("E5", idVenda);
   xlsx.write("E6", fornecedor);
   xlsx.write("E7", queryFornecedor.first() ? queryFornecedor.value("contatoNome").toString() : "");

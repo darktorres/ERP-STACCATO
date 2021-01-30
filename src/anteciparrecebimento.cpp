@@ -142,14 +142,9 @@ void AnteciparRecebimento::setupTables() {
 void AnteciparRecebimento::montaFiltro() {
   const QString textTipo = ui->comboBoxPagamento->currentText();
   const QString textLoja = ui->comboBoxLoja->currentText();
+  const QString filtroLoja = (textLoja.isEmpty()) ? "" : " AND idLoja = " + ui->comboBoxLoja->getCurrentValue().toString();
 
-  if (textTipo == "Cartão de crédito" or textTipo == "Cartão de débito") {
-    modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" + textLoja +
-                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE ORDER BY dataPagamento");
-  } else {
-    modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
-                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
-  }
+  modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%'" + filtroLoja + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
 }
 
 void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }
@@ -281,11 +276,9 @@ void AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
 void AnteciparRecebimento::fillComboBoxLoja() {
   ui->comboBoxLoja->clear();
 
-  ui->comboBoxLoja->addItem("");
-
   SqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { return; }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 }

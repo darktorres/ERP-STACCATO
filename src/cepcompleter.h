@@ -12,13 +12,15 @@ public:
   auto buscaCEP(const QString &cep, QWidget *parent) -> void;
   auto getBairro() const -> QString;
   auto getCidade() const -> QString;
+  auto getComplemento() const -> QString;
   auto getEndereco() const -> QString;
   auto getUf() const -> QString;
 
 private:
   // attributes
-  QString cidade;
-  QString endereco;
   QString bairro;
+  QString cidade;
+  QString complemento;
+  QString logradouro;
   QString uf;
 };

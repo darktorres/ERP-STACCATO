@@ -85,9 +85,9 @@ void CadastroFornecedor::clearEndereco() {
   ui->lineEditBairro->clear();
   ui->lineEditCEP->clear();
   ui->lineEditCidade->clear();
-  ui->lineEditComp->clear();
-  ui->lineEditEndereco->clear();
-  ui->lineEditNro->clear();
+  ui->lineEditComplemento->clear();
+  ui->lineEditLogradouro->clear();
+  ui->lineEditNumero->clear();
   ui->lineEditUF->clear();
 }
 
@@ -190,9 +190,9 @@ void CadastroFornecedor::setupMapper() {
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));
-  mapperEnd.addMapping(ui->lineEditEndereco, modelEnd.fieldIndex("logradouro"));
-  mapperEnd.addMapping(ui->lineEditNro, modelEnd.fieldIndex("numero"));
-  mapperEnd.addMapping(ui->lineEditComp, modelEnd.fieldIndex("complemento"));
+  mapperEnd.addMapping(ui->lineEditLogradouro, modelEnd.fieldIndex("logradouro"));
+  mapperEnd.addMapping(ui->lineEditNumero, modelEnd.fieldIndex("numero"));
+  mapperEnd.addMapping(ui->lineEditComplemento, modelEnd.fieldIndex("complemento"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
   mapperEnd.addMapping(ui->lineEditCidade, modelEnd.fieldIndex("cidade"));
   mapperEnd.addMapping(ui->lineEditUF, modelEnd.fieldIndex("uf"));
@@ -282,9 +282,9 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
 
   setDataEnd("descricao", ui->comboBoxTipoEnd->currentText());
   setDataEnd("cep", ui->lineEditCEP->text());
-  setDataEnd("logradouro", ui->lineEditEndereco->text());
-  setDataEnd("numero", ui->lineEditNro->text());
-  setDataEnd("complemento", ui->lineEditComp->text());
+  setDataEnd("logradouro", ui->lineEditLogradouro->text());
+  setDataEnd("numero", ui->lineEditNumero->text());
+  setDataEnd("complemento", ui->lineEditComplemento->text());
   setDataEnd("bairro", ui->lineEditBairro->text());
   setDataEnd("cidade", ui->lineEditCidade->text());
   setDataEnd("uf", ui->lineEditUF->text());
@@ -301,16 +301,17 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
 void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) { return; }
 
-  ui->lineEditNro->clear();
-  ui->lineEditComp->clear();
+  ui->lineEditNumero->clear();
+  ui->lineEditComplemento->clear();
 
   CepCompleter cc;
   cc.buscaCEP(cep, this);
 
-  ui->lineEditUF->setText(cc.getUf());
-  ui->lineEditCidade->setText(cc.getCidade());
-  ui->lineEditEndereco->setText(cc.getEndereco());
+  ui->lineEditLogradouro->setText(cc.getEndereco());
+  ui->lineEditComplemento->setText(cc.getComplemento());
   ui->lineEditBairro->setText(cc.getBairro());
+  ui->lineEditCidade->setText(cc.getCidade());
+  ui->lineEditUF->setText(cc.getUf());
 }
 
 void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {

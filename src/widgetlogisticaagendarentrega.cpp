@@ -401,7 +401,8 @@ void WidgetLogisticaAgendarEntrega::processRows() {
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
 
   SqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('PENDENTE', 'ESTOQUE') AND idVendaProduto2 = :idVendaProduto2");
+  queryVenda.prepare(
+      "UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('PENDENTE', 'REPO. ENTREGA', 'ESTOQUE') AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
     modelTranspAtual.setData(row, "data", dataPrevEnt);
@@ -428,9 +429,6 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 }
 
 void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) {
-  SqlQuery query;
-  query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
   for (const auto &index : list) { adicionaProdutoNoModel(index.row(), modelProdutos.data(index.row(), "caixas").toDouble()); }
 }
 
@@ -484,7 +482,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
     const QString status = modelProdutos.data(row, "status").toString();
 
-    if (status != "PENDENTE" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE!"); }
+    if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/REPO. ENTREGA!"); }
 
     if (status != "ESTOQUE") { semEstoque = true; }
   }
@@ -582,7 +580,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (modelProdutos.data(row, "status").toString() != "ESTOQUE") {
+  const QString status = modelProdutos.data(row, "status").toString();
+
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/REPO. ENTREGA!"); }
+
+  if (status != "ESTOQUE") {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "O produto não está em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
     msgBox.setButtonText(QMessageBox::Yes, "Agendar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");

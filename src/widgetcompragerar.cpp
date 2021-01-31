@@ -363,7 +363,7 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
 
   idVendas.removeDuplicates();
 
-  const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
+  const QString idVenda = (fornecedor == "QUARTZOBRAS" or fornecedor == "MC BAUCHEMIE") ? "" : idVendas.join(", ");
 
   const QString arquivoModelo = QDir::currentPath() + "/modelos/compras.xlsx";
 

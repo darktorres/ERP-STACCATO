@@ -8,7 +8,6 @@
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
-#include "sqlquerymodel.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
 
@@ -493,6 +492,8 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
+  // -------------------------------------------------------------------------
+
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
   const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
 
@@ -515,25 +516,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString arquivoModelo = QDir::currentPath() + "/modelos/espelho_entrega.xlsx";
-
-  File modelo(arquivoModelo);
-
-  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!", this); }
-
-  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
-
-  File file(fileName);
-
-  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
-
-  file.close();
-
-  QXlsx::Document xlsx(arquivoModelo, this);
-
-  xlsx.currentWorksheet()->setFitToPage(true);
-  xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
+  // -------------------------------------------------------------------------
 
   SqlQuery queryCliente;
   queryCliente.prepare("SELECT v.idProfissional, c.nome_razao, c.tel AS clienteTel, c.telCel AS clienteCel, p.tel AS profissionalTel, p.telCel AS profissionalCel FROM venda v LEFT JOIN cliente c ON "
@@ -541,6 +524,8 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   queryCliente.bindValue(":idVenda", idVenda);
 
   if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
+
+  const QString cliente = queryCliente.value("nome_razao").toString();
 
   QString telefones;
 
@@ -557,23 +542,64 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     }
   }
 
-  xlsx.write("AA5", idVenda);
-  xlsx.write("G11", queryCliente.value("nome_razao"));
-  xlsx.write("Y11", telefones);
-
   SqlQuery queryEndereco;
   queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
   queryEndereco.bindValue(":idVenda", idVenda);
 
   if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço: " + queryEndereco.lastError().text(), this); }
 
+  QString endereco;
+  QString cep;
+
   if (queryEndereco.first()) {
-    xlsx.write("J19", queryEndereco.value("logradouro").toString() + " " + queryEndereco.value("numero").toString() + " " + queryEndereco.value("complemento").toString() + " - " +
-                          queryEndereco.value("bairro").toString() + ", " + queryEndereco.value("cidade").toString());
-    xlsx.write("I17", queryEndereco.value("cep"));
+    endereco = queryEndereco.value("logradouro").toString() + " " + queryEndereco.value("numero").toString() + " " + queryEndereco.value("complemento").toString() + " - " +
+               queryEndereco.value("bairro").toString() + ", " + queryEndereco.value("cidade").toString();
+    cep = queryEndereco.value("cep").toString();
   }
 
-  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row += 2, ++index) {
+  // -------------------------------------------------------------------------
+
+  const QString fileName = gerarProtocolo(folderKey, idEvento, idVenda, cliente, telefones, endereco, cep, modelProdutosAgrupado);
+  const QString fileName2 = gerarChecklist(folderKey, idEvento, idVenda, cliente, endereco, cep, modelProdutosAgrupado);
+
+  // -------------------------------------------------------------------------
+
+  qApp->enqueueInformation("Protocolo/checklist salvo como:\n" + fileName + "\n" + fileName2, this);
+}
+
+QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco,
+                                                const QString &cep, const SqlQueryModel &modelProdutosAgrupado) {
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/espelho_entrega.xlsx";
+
+  File modelo(arquivoModelo);
+
+  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do protocolo!", this); }
+
+  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
+
+  File file(fileName);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
+
+  file.close();
+
+  QXlsx::Document xlsx(arquivoModelo, this);
+
+  xlsx.currentWorksheet()->setFitToPage(true);
+  xlsx.currentWorksheet()->setFitToHeight(true);
+  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
+
+  xlsx.write("AA5", idVenda);
+  xlsx.write("G11", cliente);
+  xlsx.write("Y11", telefones);
+  xlsx.write("J19", endereco);
+  xlsx.write("I17", cep);
+
+  const int itens = modelProdutosAgrupado.rowCount();
+
+  for (int row = 27; row < itens * 2 + 35; ++row) { xlsx.setRowHidden(row, false); }
+
+  for (int row = 27, index = 0; index < itens; row += 2, ++index) {
     const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
     const QString produto = modelProdutosAgrupado.data(index, "produto").toString();
     const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
@@ -591,12 +617,67 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("AD" + QString::number(row), caixas.toDouble());
   }
 
-  for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
-
-  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!", this); }
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o protocolo!", this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
+
+  return fileName;
+}
+
+QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
+                                                const SqlQueryModel &modelProdutosAgrupado) {
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/modelo_checklist.xlsx";
+
+  File modelo(arquivoModelo);
+
+  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do checklist!", this); }
+
+  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + "_checklist.xlsx";
+
+  File file(fileName);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
+
+  file.close();
+
+  QXlsx::Document xlsx(arquivoModelo, this);
+
+  xlsx.currentWorksheet()->setFitToPage(true);
+  xlsx.currentWorksheet()->setFitToHeight(true);
+  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
+
+  xlsx.write("AA5", idVenda);
+  xlsx.write("G11", cliente);
+  xlsx.write("J19", endereco);
+  xlsx.write("I17", cep);
+
+  const int itens = modelProdutosAgrupado.rowCount();
+
+  for (int row = 28; row < itens * 2 + 35; ++row) { xlsx.setRowHidden(row, false); }
+
+  for (int row = 28, index = 0; index < itens; row += 2, ++index) {
+    const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
+    const QString produto = modelProdutosAgrupado.data(index, "produto").toString();
+    const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
+    const QString lote = (fornecedor == "PORTINARI") ? modelProdutosAgrupado.data(index, "lote").toString() : "";
+    const QString quant = modelProdutosAgrupado.data(index, "quant").toString();
+    const QString un = modelProdutosAgrupado.data(index, "un").toString();
+    const QString caixas = modelProdutosAgrupado.data(index, "caixas").toString();
+    const QString isEstoque = modelProdutosAgrupado.data(index, "isEstoque").toString();
+
+    xlsx.write("D" + QString::number(row), fornecedor);
+    xlsx.write("I" + QString::number(row), produto + " - " + codComercial);
+    xlsx.write("W" + QString::number(row), lote);
+    xlsx.write("Y" + QString::number(row), quant + " " + un);
+    xlsx.write("AC" + QString::number(row), isEstoque);
+    xlsx.write("AD" + QString::number(row), caixas.toDouble());
+  }
+
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o checklist!", this); }
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+
+  return fileName;
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto

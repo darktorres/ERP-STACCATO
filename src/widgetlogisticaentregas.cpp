@@ -499,10 +499,10 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   SqlQueryModel modelProdutosAgrupado;
 
-  modelProdutosAgrupado.setQuery(
-      "SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un, isEstoque "
-      "FROM view_calendario_produto WHERE idVenda = '" +
-      idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
+  modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, ANY_VALUE(lote) AS lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS "
+                                 "quant, ANY_VALUE(un) AS un, ANY_VALUE(isEstoque) AS isEstoque "
+                                 "FROM view_calendario_produto WHERE idVenda = '" +
+                                 idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
   if (modelProdutosAgrupado.lastError().isValid()) { throw RuntimeException("Erro buscando dados: " + modelProdutosAgrupado.lastError().text(), this); }
 

@@ -3,6 +3,7 @@
 
 #include "acbr.h"
 #include "application.h"
+#include "checkboxdelegate.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "file.h"
@@ -29,7 +30,7 @@ void WidgetNfeEntrada::setConnections() {
   connect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
-  connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked, connectionType);
+  connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
 
@@ -56,19 +57,22 @@ void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
 
   modelViewNFeEntrada.setHeaderData("created", "Importado em");
+  modelViewNFeEntrada.setHeaderData("utilizada", "Utilizada");
 
   ui->table->setModel(&modelViewNFeEntrada);
+
+  ui->table->setPersistentColumns({"utilizada"});
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
   ui->table->hideColumn("nsu");
-  ui->table->hideColumn("utilizada");
 
   ui->table->showColumn("created");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("GARE Pago Em", new DateFormatDelegate(this));
+  ui->table->setItemDelegateForColumn("utilizada", new CheckBoxDelegate(true, this));
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
@@ -90,7 +94,7 @@ void WidgetNfeEntrada::montaFiltro() {
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 }
 
-void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
+void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
@@ -98,21 +102,6 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
   const int row = list.first().row();
-
-  //--------------------------------------------------------------
-
-  SqlQuery queryGare;
-  queryGare.prepare("SELECT status, valor FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
-  queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-  if (not queryGare.exec()) { throw RuntimeError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
-
-  if (queryGare.first()) {
-    const QString status = queryGare.value("status").toString();
-    const double valor = queryGare.value("valor").toDouble();
-
-    if ((status == "GERADO GARE" or status == "PAGO GARE") and valor > 0) { throw RuntimeError("GARE 'em pagamento/pago'!", this); }
-  }
 
   //--------------------------------------------------------------
 
@@ -131,23 +120,23 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  QMessageBox msgBox(QMessageBox::Question, "Remover?", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
+  QMessageBox msgBox(QMessageBox::Question, "Inutilizar?", "Tem certeza que deseja inutilizar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Inutilizar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  qApp->startTransaction("WidgetNfeEntrada::on_pushButtonRemoverNFe");
+  qApp->startTransaction("WidgetNfeEntrada::on_pushButtonInutilizarNFe");
 
-  remover(row);
+  inutilizar(row);
 
   qApp->endTransaction();
 
   updateTables();
-  qApp->enqueueInformation("Removido com sucesso!", this);
+  qApp->enqueueInformation("Inutilizado com sucesso!", this);
 }
 
-void WidgetNfeEntrada::remover(const int row) {
+void WidgetNfeEntrada::inutilizar(const int row) {
   SqlQuery queryPedidoFornecedor;
   queryPedidoFornecedor.prepare(
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
@@ -211,27 +200,11 @@ void WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  SqlQuery queryGare;
-  queryGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
-  queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  SqlQuery queryUpdateNFe;
+  queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE WHERE idNFe = :idNFe");
+  queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not queryGare.exec()) { throw RuntimeException("Erro removendo pagamento da GARE: " + queryGare.lastError().text()); }
-
-  //-----------------------------------------------------------------------------
-
-  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0) {
-    SqlQuery queryUpdateNFe;
-    queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
-    queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-    if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NFe como não utilizada: " + queryUpdateNFe.lastError().text()); }
-  } else {
-    SqlQuery queryDeleteNFe;
-    queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-    queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-    if (not queryDeleteNFe.exec()) { throw RuntimeException("Erro removendo NFe: " + queryDeleteNFe.lastError().text()); }
-  }
+  if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NFe como não utilizada: " + queryUpdateNFe.lastError().text()); }
 }
 
 void WidgetNfeEntrada::on_pushButtonExportar_clicked() {

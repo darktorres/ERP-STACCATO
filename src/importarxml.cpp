@@ -387,7 +387,7 @@ void ImportarXML::atualizarNFes() {
   while (iterator != mapNFes.constEnd()) {
     SqlQuery query;
 
-    if (not query.exec("UPDATE nfe SET gare = " + QString::number(iterator.value()) + ", utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
+    if (not query.exec("UPDATE nfe SET gare = IF(gare IS NULL, " + QString::number(iterator.value()) + ", gare), utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
       throw RuntimeException("Erro atualizando dados da NFe: " + query.lastError().text());
     }
 
@@ -507,7 +507,7 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
 
   try {
     [&] {
-      usarXMLBaixado();
+      usarXMLInutilizado();
       parear();
 
       const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
@@ -688,7 +688,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   modelNFe.setData(row, "utilizada", 1);
 }
 
-void ImportarXML::usarXMLBaixado() {
+void ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
   if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
@@ -1185,6 +1185,15 @@ ImportarXML::NCM ImportarXML::buscaNCM(const QString &ncm) {
 }
 
 void ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
+  SqlQuery query;
+
+  if (not query.exec("SELECT idPagamento FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = " + QString::number(xml.idNFe) +
+                     " AND status <> 'CANCELADO' AND desativado = FALSE")) {
+    throw RuntimeException("Erro buscando pagamento GARE: " + query.lastError().text());
+  }
+
+  if (query.first()) { return; }
+
   const int row = modelPagamento.insertRowAtEnd();
 
   const int lojaGeral = 1;

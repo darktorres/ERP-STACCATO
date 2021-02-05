@@ -86,7 +86,7 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
   if (text.isEmpty()) { return model.setFilter(naoListarBuscaVazia ? "0" : filter); }
 
-  if (model.tableName() == "view_nfe_baixada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
+  if (model.tableName() == "view_nfe_inutilizada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
@@ -110,7 +110,7 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(model.data(index.row(), primaryKey)); }
 
 void SearchDialog::on_table_clicked(const QModelIndex &index) {
-  if (model.tableName() == "view_nfe_baixada" and index.isValid()) {
+  if (model.tableName() == "view_nfe_inutilizada" and index.isValid()) {
     XML *xml = new XML(model.data(index.row(), "xml").toByteArray(), XML::Tipo::Nulo, this);
     ui->treeView->setModel(&xml->model);
     ui->treeView->expandAll();
@@ -228,7 +228,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "", "", true, parent);
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, "", "", true, parent);
 
   sdNFe->ui->lineEditBusca->show();
 

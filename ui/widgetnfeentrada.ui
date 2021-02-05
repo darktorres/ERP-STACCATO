@@ -36,12 +36,12 @@
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
-      <widget class="QPushButton" name="pushButtonRemoverNFe">
+      <widget class="QPushButton" name="pushButtonInutilizarNFe">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Remover NFe</string>
+        <string>Inutilizar NFe</string>
        </property>
       </widget>
      </item>

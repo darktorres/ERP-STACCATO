@@ -19,7 +19,7 @@
      <item row="0" column="3">
       <widget class="ItemBox" name="itemBoxNFe">
        <property name="placeholderText">
-        <string>Buscar NFe baixada</string>
+        <string>Buscar NFe</string>
        </property>
       </widget>
      </item>

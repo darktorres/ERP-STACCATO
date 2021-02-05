@@ -71,7 +71,6 @@ void WidgetHistoricoCompra::setupTables() {
 
   ui->tableNFe->setModel(&modelNFe);
 
-  ui->tableNFe->hideColumn("idCompra");
   ui->tableNFe->hideColumn("ordemCompra");
   ui->tableNFe->hideColumn("idNFe");
 }

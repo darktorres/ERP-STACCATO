@@ -321,7 +321,7 @@ void ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
       "p.multiploUpd, p.m2cx, p.m2cxUpd, p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, "
       "p.ncmEx, p.ncmExUpd, p.cfop, p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, :custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, "
       "p.mvaUpd, p.oldPrecoVenda, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, "
-      "p.ui, p.uiUpd, NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = "
+      "p.ui, p.uiUpd, NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NOW(), NULL FROM produto p WHERE p.idProduto = "
       ":idProduto");
 
   for (const auto &tuple : tuples) {

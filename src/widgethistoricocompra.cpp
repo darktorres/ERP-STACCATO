@@ -84,6 +84,7 @@ void WidgetHistoricoCompra::setTreeView() {
   modelTree.setHeaderData("status", "Status");
   modelTree.setHeaderData("statusFinanceiro", "Financeiro");
   modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+  modelTree.setHeaderData("codFornecedor", "Cód. Forn.");
   modelTree.setHeaderData("idVenda", "Venda");
   modelTree.setHeaderData("descricao", "Produto");
   modelTree.setHeaderData("colecao", "Coleção");
@@ -112,7 +113,6 @@ void WidgetHistoricoCompra::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
-  ui->treeView->hideColumn("codFornecedor");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("aliquotaSt");

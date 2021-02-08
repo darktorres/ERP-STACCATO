@@ -664,23 +664,15 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
 
   try {
     [&] {
-      if (currentItemIsEstoque) {
-        const double caixas = quant / step;
-        ui->doubleSpinBoxCaixas->setValue(caixas);
+      const double resto = fmod(quant, step);
+      const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
+      ui->doubleSpinBoxQuant->setValue(quant2);
 
-        const double itemBruto = quant * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-      } else {
-        const double resto = fmod(quant, step);
-        const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
-        ui->doubleSpinBoxQuant->setValue(quant2);
+      const double caixas2 = quant2 / step;
+      ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-        const double caixas2 = quant2 / step;
-        ui->doubleSpinBoxCaixas->setValue(caixas2);
-
-        const double itemBruto2 = quant2 * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-      }
+      const double itemBruto2 = quant2 * prcUn;
+      ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
     }();
   } catch (std::exception &) {}
 
@@ -861,24 +853,16 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   try {
     [&] {
-      if (currentItemIsEstoque) {
-        const double quant = caixas * ui->spinBoxQuantCx->value();
-        ui->doubleSpinBoxQuant->setValue(quant);
+      const double step = ui->doubleSpinBoxCaixas->singleStep();
+      const double resto = fmod(caixas, step);
+      const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+      ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-        const double itemBruto = quant * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-      } else {
-        const double step = ui->doubleSpinBoxCaixas->singleStep();
-        const double resto = fmod(caixas, step);
-        const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
-        ui->doubleSpinBoxCaixas->setValue(caixas2);
+      const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
+      ui->doubleSpinBoxQuant->setValue(quant2);
 
-        const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
-        ui->doubleSpinBoxQuant->setValue(quant2);
-
-        const double itemBruto2 = quant2 * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-      }
+      const double itemBruto2 = quant2 * prcUn;
+      ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
     }();
   } catch (std::exception &) {}
 

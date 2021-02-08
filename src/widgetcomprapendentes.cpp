@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QtMath>
 
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
   ui->setupUi(this);
@@ -32,16 +33,15 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   }
 
   SqlQuery query;
-  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  query.prepare("SELECT UPPER(un) AS un, quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
 
-  // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
-  const QString un2 = (un == "M2") or (un == "M²") or (un == "ML") ? "m2cx" : "pccx";
+  const double quantCaixa = query.value("quantCaixa").toDouble();
 
-  ui->doubleSpinBoxAvulsoQuant->setSingleStep(query.value(un2).toDouble());
+  ui->doubleSpinBoxAvulsoQuant->setSingleStep(quantCaixa);
 
   ui->doubleSpinBoxAvulsoQuant->setValue(0);
   ui->doubleSpinBoxAvulsoCaixas->setValue(0);
@@ -75,6 +75,32 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked, connectionType);
   connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated, connectionType);
+}
+
+void WidgetCompraPendentes::unsetConnections() {
+  disconnect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroEntregaAgend, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroEntregue, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroEstoque, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroFaturamento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroIniciados, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroPendentes, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  disconnect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged);
+  disconnect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro);
+  disconnect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
+  disconnect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
+  disconnect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
+  disconnect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
 }
 
 void WidgetCompraPendentes::updateTables() {
@@ -254,9 +280,40 @@ void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   model.submitAll();
 }
 
-void WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxAvulsoQuant->setValue(value * ui->doubleSpinBoxAvulsoQuant->singleStep()); }
+void WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged(const double caixas) {
+  const double stepQt = ui->doubleSpinBoxAvulsoQuant->singleStep();
+  const double stepCx = ui->doubleSpinBoxAvulsoCaixas->singleStep();
 
-void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const double value) { ui->doubleSpinBoxAvulsoCaixas->setValue(value / ui->doubleSpinBoxAvulsoQuant->singleStep()); }
+  unsetConnections();
+
+  try {
+    const double resto = fmod(caixas, stepCx);
+    const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+    ui->doubleSpinBoxAvulsoCaixas->setValue(caixas2);
+
+    const double quant2 = caixas2 * stepQt;
+    ui->doubleSpinBoxAvulsoQuant->setValue(quant2);
+  } catch (std::exception &) {}
+
+  setConnections();
+}
+
+void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const double quant) {
+  const double stepQt = ui->doubleSpinBoxAvulsoQuant->singleStep();
+
+  unsetConnections();
+
+  try {
+    const double resto = fmod(quant, stepQt);
+    const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / stepQt) * stepQt : quant;
+    ui->doubleSpinBoxAvulsoQuant->setValue(quant2);
+
+    const double caixas2 = quant2 / stepQt;
+    ui->doubleSpinBoxAvulsoCaixas->setValue(caixas2);
+  } catch (std::exception &) {}
+
+  setConnections();
+}
 
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

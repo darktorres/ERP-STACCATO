@@ -254,7 +254,7 @@
        <widget class="ItemBox" name="itemBoxProduto"/>
       </item>
       <item row="1" column="3">
-       <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantAvulso">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxAvulsoQuant">
         <property name="decimals">
          <number>3</number>
         </property>
@@ -264,7 +264,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantAvulsoCaixas">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxAvulsoCaixas">
         <property name="maximum">
          <double>99999.990000000005239</double>
         </property>
@@ -377,8 +377,8 @@
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
   <tabstop>itemBoxProduto</tabstop>
-  <tabstop>doubleSpinBoxQuantAvulsoCaixas</tabstop>
-  <tabstop>doubleSpinBoxQuantAvulso</tabstop>
+  <tabstop>doubleSpinBoxAvulsoCaixas</tabstop>
+  <tabstop>doubleSpinBoxAvulsoQuant</tabstop>
   <tabstop>pushButtonComprarAvulso</tabstop>
  </tabstops>
  <resources/>

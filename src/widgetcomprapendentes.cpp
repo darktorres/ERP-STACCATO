@@ -24,9 +24,9 @@ WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }
 
 void WidgetCompraPendentes::setarDadosAvulso() {
   if (ui->itemBoxProduto->getId().isNull()) {
-    ui->doubleSpinBoxQuantAvulso->setValue(0);
-    ui->doubleSpinBoxQuantAvulsoCaixas->setValue(0);
-    ui->doubleSpinBoxQuantAvulso->setSuffix("");
+    ui->doubleSpinBoxAvulsoQuant->setValue(0);
+    ui->doubleSpinBoxAvulsoCaixas->setValue(0);
+    ui->doubleSpinBoxAvulsoQuant->setSuffix("");
 
     return;
   }
@@ -41,12 +41,12 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   const QString un = query.value("un").toString();
   const QString un2 = (un == "M2") or (un == "M²") or (un == "ML") ? "m2cx" : "pccx";
 
-  ui->doubleSpinBoxQuantAvulso->setSingleStep(query.value(un2).toDouble());
+  ui->doubleSpinBoxAvulsoQuant->setSingleStep(query.value(un2).toDouble());
 
-  ui->doubleSpinBoxQuantAvulso->setValue(0);
-  ui->doubleSpinBoxQuantAvulsoCaixas->setValue(0);
+  ui->doubleSpinBoxAvulsoQuant->setValue(0);
+  ui->doubleSpinBoxAvulsoCaixas->setValue(0);
 
-  ui->doubleSpinBoxQuantAvulso->setSuffix(" " + un);
+  ui->doubleSpinBoxAvulsoQuant->setSuffix(" " + un);
 }
 
 void WidgetCompraPendentes::setConnections() {
@@ -67,8 +67,8 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
-  connect(ui->doubleSpinBoxQuantAvulso, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged, connectionType);
-  connect(ui->doubleSpinBoxQuantAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro, connectionType);
   connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked, connectionType);
@@ -208,7 +208,7 @@ void WidgetCompraPendentes::montaFiltro() {
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
   if (ui->itemBoxProduto->text().isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { throw RuntimeError("Deve escolher uma quantidade!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxAvulsoQuant->value())) { throw RuntimeError("Deve escolher uma quantidade!", this); }
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
 
@@ -239,12 +239,12 @@ void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   model.setData(newRow, "idProduto", query.value("idProduto"));
   model.setData(newRow, "descricao", query.value("descricao"));
   model.setData(newRow, "colecao", query.value("colecao"));
-  model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "quant", ui->doubleSpinBoxAvulsoQuant->value());
   model.setData(newRow, "un", query.value("un"));
   model.setData(newRow, "un2", query.value("un2"));
-  model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value());
+  model.setData(newRow, "caixas", ui->doubleSpinBoxAvulsoCaixas->value());
   model.setData(newRow, "prcUnitario", query.value("custo").toDouble());
-  model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxAvulsoQuant->value());
   model.setData(newRow, "kgcx", query.value("kgcx"));
   model.setData(newRow, "formComercial", query.value("formComercial"));
   model.setData(newRow, "codComercial", query.value("codComercial"));
@@ -254,9 +254,9 @@ void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   model.submitAll();
 }
 
-void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulso->setValue(value * ui->doubleSpinBoxQuantAvulso->singleStep()); }
+void WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxAvulsoQuant->setValue(value * ui->doubleSpinBoxAvulsoQuant->singleStep()); }
 
-void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulsoCaixas->setValue(value / ui->doubleSpinBoxQuantAvulso->singleStep()); }
+void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const double value) { ui->doubleSpinBoxAvulsoCaixas->setValue(value / ui->doubleSpinBoxAvulsoQuant->singleStep()); }
 
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

@@ -30,8 +30,8 @@ private:
   auto delayFiltro() -> void;
   auto insere(const QDate &dataPrevista) -> void;
   auto montaFiltro() -> void;
-  auto on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) -> void;
-  auto on_doubleSpinBoxQuantAvulso_valueChanged(const double value) -> void;
+  auto on_doubleSpinBoxAvulsoCaixas_valueChanged(const double value) -> void;
+  auto on_doubleSpinBoxAvulsoQuant_valueChanged(const double value) -> void;
   auto on_groupBoxStatus_toggled(bool enabled) -> void;
   auto on_pushButtonComprarAvulso_clicked() -> void;
   auto on_pushButtonExcel_clicked() -> void;

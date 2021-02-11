@@ -25,8 +25,6 @@ private:
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;
-  auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
-  auto on_comboBox_currentTextChanged(const QString &) -> void;
   auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
   auto on_pushButtonGerar_clicked() -> void;
   auto setConnections() -> void;

@@ -810,12 +810,8 @@ void ImportarXML::percorrerXml(XML &xml) {
     const int newRow = modelEstoque.insertRowAtEnd();
 
     double desconto = produto.desconto;
-    QString codigo = produto.codProd;
 
-    if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A.") {
-      if (codigo.endsWith("A")) { codigo = codigo.left(codigo.size() - 1); }
-      desconto = 0;
-    }
+    if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A.") { desconto = 0; }
 
     modelEstoque.setData(newRow, "idEstoque", idEstoque);
     modelEstoque.setData(newRow, "idNFe", xml.idNFe);
@@ -826,7 +822,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "restante", produto.quant);
     modelEstoque.setData(newRow, "un", produto.un);
     modelEstoque.setData(newRow, "codBarras", produto.codBarras);
-    modelEstoque.setData(newRow, "codComercial", codigo);
+    modelEstoque.setData(newRow, "codComercial", produto.codProd);
     modelEstoque.setData(newRow, "ncm", produto.ncm);
     modelEstoque.setData(newRow, "nve", produto.nve);
     modelEstoque.setData(newRow, "extipi", produto.extipi);

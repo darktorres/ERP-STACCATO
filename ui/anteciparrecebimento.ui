@@ -17,7 +17,7 @@
    <item row="1" column="3">
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="0">
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="labelEvento">
        <property name="text">
         <string>Data do evento:</string>
        </property>
@@ -50,7 +50,7 @@
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="labelValorLiquido">
        <property name="text">
         <string>Valor líquido de mdr:</string>
        </property>
@@ -70,21 +70,21 @@
       </spacer>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="labelPrazoMedio">
        <property name="text">
         <string>Prazo médio:</string>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelDescTotal">
        <property name="text">
         <string>Taxa desc. total:</string>
        </property>
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="labelValorBruto">
        <property name="text">
         <string>Valor bruto:</string>
        </property>
@@ -98,14 +98,14 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="labelDescMes">
        <property name="text">
         <string>Taxa desc/mês:</string>
        </property>
       </widget>
      </item>
      <item row="9" column="0">
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="labelLiqIOF">
        <property name="text">
         <string>Valor Líquido de IOF</string>
        </property>
@@ -197,18 +197,34 @@
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="0">
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="labelLoja">
+          <property name="text">
+           <string>Loja:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="lineEditVenda"/>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QComboBox" name="comboBoxPagamento"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelVenda">
+          <property name="text">
+           <string>Venda:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelTipo">
           <property name="text">
            <string>Tipo:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Loja:</string>
-          </property>
-         </widget>
+        <item row="1" column="1" colspan="2">
+         <widget class="ComboBox" name="comboBoxLoja"/>
         </item>
         <item row="3" column="0" colspan="3">
          <widget class="QGroupBox" name="groupBoxData">
@@ -228,7 +244,7 @@
            <item row="0" column="1">
             <widget class="QDateEdit" name="dateEditDe">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="calendarPopup">
               <bool>true</bool>
@@ -238,7 +254,7 @@
            <item row="2" column="1">
             <widget class="QDateEdit" name="dateEditAte">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="calendarPopup">
               <bool>true</bool>
@@ -248,7 +264,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_12">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -264,7 +280,7 @@
            <item row="2" column="0">
             <widget class="QLabel" name="label_13">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -280,17 +296,11 @@
           </layout>
          </widget>
         </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QComboBox" name="comboBoxPagamento"/>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="ComboBox" name="comboBoxLoja"/>
-        </item>
        </layout>
       </widget>
      </item>
      <item row="7" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="labelValorPresente">
        <property name="text">
         <string>Valor presente líquido:</string>
        </property>
@@ -373,6 +383,9 @@
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

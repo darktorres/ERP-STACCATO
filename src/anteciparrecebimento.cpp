@@ -161,7 +161,7 @@ void AnteciparRecebimento::montaFiltro() {
   const QString textTipo = ui->comboBoxPagamento->currentText();
 
   if (not textTipo.isEmpty()) { filtroTipo = "tipo LIKE '%" + textTipo + "%'"; }
-  if (textTipo == "CRÉDITO") {
+  if (textTipo != "COMISSÃO") {
     filtroTipo.prepend("(");
     filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
   }
@@ -343,6 +343,13 @@ void AnteciparRecebimento::fillComboBoxPagamento() {
 
   ui->comboBoxPagamento->addItem("COMISSÃO");
   ui->comboBoxPagamento->addItem("CRÉDITO");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO MASTER/VISA");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO ELO");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO AMEX");
+  //  ui->comboBoxPagamento->addItem("SAFRA CRÉDITO MASTER/VISA");
+  //  ui->comboBoxPagamento->addItem("SAFRA CRÉDITO ELO/AMEX");
+
+  // TODO: depois de separado o numero do tipo de pagamento, pegar todos os tipos de pagamento usando distinct e desses selecionar os que contem 'crédito' no nome
 }
 
 void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString &text) {

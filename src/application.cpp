@@ -144,14 +144,7 @@ void Application::genericLogin(const QString &hostname) {
 void Application::loginError() {
   isConnected = false;
 
-  const QString error = db.lastError().text();
-
-  QString message = "Erro conectando no banco de dados: " + error;
-
-  if (error.contains("Access denied for user")) { message = "Login inválido!"; }
-  if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
-
-  throw RuntimeException(message);
+  throw RuntimeException(db.lastError().text());
 }
 
 bool Application::dbReconnect(const bool silent) {
@@ -313,23 +306,36 @@ void Application::showMessages() {
 
   showingMessages = true;
 
-  for (const auto &exception : std::as_const(exceptionQueue)) {
-    const QString error1 = "MySQL server has gone away";
-    const QString error2 = "Lost connection to MySQL server during query";
+  for (auto &exception : exceptionQueue) {
+    if (exception.message.contains("Access denied for user")) { exception.message = "Login inválido!"; }
+    if (exception.message.contains("Can't connect to MySQL server")) { exception.message = "Não foi possível conectar ao servidor!"; }
+    if (exception.message.contains("MySQL server has gone away")) { exception.message = "Conexão com o servidor perdida!"; }
+    if (exception.message.contains("Lost connection to MySQL server during query")) { exception.message = "Conexão com o servidor perdida!"; }
+    if (exception.message.contains("WSREP has not yet prepared node for application use")) { exception.message = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!"; }
 
-    const QString message = exception.message;
+    //    const QString error1 = "MySQL server has gone away";
+    //    const QString error2 = "Lost connection to MySQL server during query";
+    //    const QString error3 = "WSREP has not yet prepared node for application use QMYSQL3";
 
-    if (message.contains(error1) or message.contains(error2)) {
-      const bool conectado = dbReconnect(true);
+    //    const QString message = exception.message;
 
-      emit verifyDb(conectado);
+    //    if (message.contains(error1) or message.contains(error2)) {
+    //      const bool conectado = dbReconnect(true);
 
-      if (conectado) {
-        continue;
-      } else {
-        QMessageBox::critical(exception.widget, "Erro!", "Conexão com o servidor perdida!");
-      }
-    }
+    //      emit verifyDb(conectado);
+
+    //      if (conectado) {
+    //        continue;
+    //      } else {
+    //        QMessageBox::critical(exception.widget, "Erro!", "Conexão com o servidor perdida!");
+    //      }
+    //    }
+
+    //    if (message.contains(error3)) {
+    //      // TODO: connect to another server?
+
+    //      QMessageBox::critical(exception.widget, "Erro!", "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!");
+    //    }
 
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }
@@ -369,10 +375,7 @@ void Application::updater() {
 
 bool Application::getSilent() const { return silent; }
 
-void Application::setSilent(bool value) {
-  qDebug() << "setSilent: " << value;
-  silent = value;
-}
+void Application::setSilent(bool value) { silent = value; }
 
 bool Application::getInTransaction() const { return inTransaction; }
 

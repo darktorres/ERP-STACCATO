@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QTimer>
 
 namespace Ui {
 class AnteciparRecebimento;
@@ -17,16 +18,20 @@ public:
 
 private:
   // attributes
+  QTimer timer;
   SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto cadastrar(const QModelIndexList &list) -> void;
   auto calcularTotais() -> void;
+  auto delayFiltro() -> void;
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;
+  auto on_comboBoxPagamento_currentTextChanged(const QString &text) -> void;
   auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
   auto on_pushButtonGerar_clicked() -> void;
+  auto selecionarTaxa() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

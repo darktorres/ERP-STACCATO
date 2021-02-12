@@ -394,7 +394,7 @@ void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString
 void AnteciparRecebimento::delayFiltro() { timer.start(500); }
 
 void AnteciparRecebimento::selecionarTaxa() {
-  if (ui->comboBoxPagamento->currentText() != "CRÉDITO") { return; }
+  if (ui->comboBoxPagamento->currentText() == "COMISSÃO") { return calcularTotais(); }
 
   unsetConnections();
 

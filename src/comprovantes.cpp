@@ -4,6 +4,7 @@
 #include "application.h"
 #include "file.h"
 
+#include <QAuthenticator>
 #include <QDesktopServices>
 #include <QDir>
 #include <QNetworkAccessManager>
@@ -56,6 +57,21 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   const QString url = selection.first().data().toString().replace("WEBDAV", "webdav");
 
   auto *manager = new QNetworkAccessManager(this);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    File file("webdav.txt");
+
+    if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + file.errorString()); }
+
+    const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
+
+    authenticator->setRealm(lines.at(0));
+    authenticator->setUser(lines.at(1));
+    authenticator->setPassword(lines.at(2));
+  });
+
   auto request = QNetworkRequest(QUrl(url));
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   auto reply = manager->get(request);

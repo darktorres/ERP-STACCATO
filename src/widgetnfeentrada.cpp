@@ -200,6 +200,14 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   //-----------------------------------------------------------------------------
 
+  SqlQuery queryCancelaGare;
+  queryCancelaGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE idNFe = :idNFe AND status IN ('PENDENTE GARE', 'LIBERADO GARE')");
+  queryCancelaGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not queryCancelaGare.exec()) { throw RuntimeException("Erro removendo GARE: " + queryCancelaGare.lastError().text()); }
+
+  //-----------------------------------------------------------------------------
+
   SqlQuery queryUpdateNFe;
   queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE WHERE idNFe = :idNFe");
   queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));

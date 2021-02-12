@@ -17,7 +17,8 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   setupTables();
 
   ui->itemBoxConta->setSearchDialog(SearchDialog::conta(this));
-  ui->itemBoxConta->setId(3);
+  const int contaItau = 33;
+  ui->itemBoxConta->setId(contaItau);
 
   ui->comboBoxPagamento->clear();
   ui->comboBoxPagamento->addItem("");

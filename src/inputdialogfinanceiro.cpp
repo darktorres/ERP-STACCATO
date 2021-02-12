@@ -66,7 +66,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });
 
-  show();
+  showMaximized();
 }
 
 InputDialogFinanceiro::~InputDialogFinanceiro() { delete ui; }
@@ -74,10 +74,12 @@ InputDialogFinanceiro::~InputDialogFinanceiro() { delete ui; }
 void InputDialogFinanceiro::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxDataFrete, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxDataFrete_toggled, connectionType);
   connect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled, connectionType);
   connect(ui->checkBoxParcelarSt, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxParcelarSt_toggled, connectionType);
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged, connectionType);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->dateEditFrete, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditFrete_dateChanged, connectionType);
   connect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged, connectionType);
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged, connectionType);
@@ -89,10 +91,12 @@ void InputDialogFinanceiro::setConnections() {
 }
 
 void InputDialogFinanceiro::unsetConnections() {
+  disconnect(ui->checkBoxDataFrete, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxDataFrete_toggled);
   disconnect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled);
   disconnect(ui->checkBoxParcelarSt, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxParcelarSt_toggled);
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged);
+  disconnect(ui->dateEditFrete, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditFrete_dateChanged);
   disconnect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged);
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
@@ -341,7 +345,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
         modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
         modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-        modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditFrete->date()));
+        QDate dataFrete = ui->checkBoxDataFrete->isChecked() ? qApp->ajustarDiaUtil(ui->dateEditFrete->date()) : modelFluxoCaixa.data(0, "dataPagamento").toDate();
+        modelFluxoCaixa.setData(row, "dataPagamento", dataFrete);
         modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
         modelFluxoCaixa.setData(row, "tipo", "Frete");
         modelFluxoCaixa.setData(row, "parcela", 1);
@@ -598,7 +603,7 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   //  setTreeView();
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
-    modelFluxoCaixa.setFilter((tipo == Tipo::ConfirmarCompra) ? "0" : "idCompra IN (" + idCompra + ") AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
+    modelFluxoCaixa.setFilter((tipo == Tipo::ConfirmarCompra) ? "0" : "idCompra IN (" + idCompra + ") AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
 
     modelFluxoCaixa.select();
 
@@ -812,6 +817,16 @@ void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &
 
   for (auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
 }
+
+void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate &) {
+  const auto match = modelFluxoCaixa.match("tipo", "FRETE", 1, Qt::MatchExactly);
+
+  if (match.isEmpty()) { return; }
+
+  modelFluxoCaixa.setData(match.first().row(), "dataPagamento", ui->dateEditFrete->date());
+}
+
+void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(bool checked) { ui->dateEditFrete->setEnabled(checked); }
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
 // TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo

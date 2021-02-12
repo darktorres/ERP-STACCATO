@@ -7,6 +7,7 @@
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 
+#include <QAuthenticator>
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -567,6 +568,20 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
   auto *manager = new QNetworkAccessManager(this);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    File file("webdav.txt");
+
+    if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + file.errorString()); }
+
+    const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
+
+    authenticator->setRealm(lines.at(0));
+    authenticator->setUser(lines.at(1));
+    authenticator->setPassword(lines.at(2));
+  });
 
   const QString ip = qApp->getWebDavIp();
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();

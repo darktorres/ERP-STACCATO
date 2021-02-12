@@ -17,7 +17,8 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   setupTables();
 
   ui->itemBoxConta->setSearchDialog(SearchDialog::conta(this));
-  ui->itemBoxConta->setId(3);
+  const int contaItau = 33;
+  ui->itemBoxConta->setId(contaItau);
 
   ui->comboBoxPagamento->clear();
   ui->comboBoxPagamento->addItem("");
@@ -26,6 +27,10 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   fillComboBoxPagamento();
 
   ui->dateEditEvento->setDate(qApp->serverDate());
+  ui->dateEditDe->setDate(qApp->serverDate());
+  ui->dateEditAte->setDate(qApp->serverDate());
+
+  timer.setSingleShot(true);
 
   setConnections();
 }
@@ -35,27 +40,38 @@ AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
 void AnteciparRecebimento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro, connectionType);
   connect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais, connectionType);
-  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged, connectionType);
-  connect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged, connectionType);
+  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro, connectionType);
+  connect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged, connectionType);
+  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &AnteciparRecebimento::montaFiltro, connectionType);
+  connect(ui->dateEditDe, &QDateEdit::dateChanged, this, &AnteciparRecebimento::montaFiltro, connectionType);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged, connectionType);
+  connect(ui->groupBoxData, &QGroupBox::toggled, this, &AnteciparRecebimento::montaFiltro, connectionType);
+  connect(ui->lineEditVenda, &QLineEdit::textChanged, this, &AnteciparRecebimento::delayFiltro, connectionType);
   connect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::selecionarTaxa, connectionType);
 }
 
 void AnteciparRecebimento::unsetConnections() {
+  connect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
-  disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
-  disconnect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro);
+  disconnect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged);
+  disconnect(ui->dateEditAte, &QDateEdit::dateChanged, this, &AnteciparRecebimento::montaFiltro);
+  disconnect(ui->dateEditDe, &QDateEdit::dateChanged, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
+  disconnect(ui->groupBoxData, &QGroupBox::toggled, this, &AnteciparRecebimento::montaFiltro);
+  disconnect(ui->lineEditVenda, &QLineEdit::textChanged, this, &AnteciparRecebimento::delayFiltro);
   disconnect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked);
+  disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::selecionarTaxa);
 }
 
 void AnteciparRecebimento::calcularTotais() {
-  // TODO: 1ao selecionar parcelas de cartao somar a taxa tambem
   const auto list = ui->table->selectionModel()->selectedRows();
 
   double bruto = 0;
@@ -69,7 +85,7 @@ void AnteciparRecebimento::calcularTotais() {
     const double valor = modelContaReceber.data(row, "valor").toDouble();
     const QDate dataPagamento = modelContaReceber.data(row, "dataPagamento").toDate();
 
-    if (not tipo.contains("Taxa Cartão")) { bruto += valor; }
+    if (not tipo.contains("TAXA CARTÃO")) { bruto += valor; }
 
     liquido += valor;
 
@@ -110,8 +126,6 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("status", "Status");
   modelContaReceber.setHeaderData("grupo", "Grupo");
 
-  modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
-
   modelContaReceber.select();
 
   ui->table->setModel(&modelContaReceber);
@@ -135,26 +149,63 @@ void AnteciparRecebimento::setupTables() {
   ui->table->setItemDelegate(new DoubleDelegate(this));
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-
-  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
 }
 
 void AnteciparRecebimento::montaFiltro() {
+  QStringList filtros;
+
+  //-------------------------------------
+
+  QString filtroTipo;
+
   const QString textTipo = ui->comboBoxPagamento->currentText();
+
+  if (not textTipo.isEmpty()) { filtroTipo = "tipo LIKE '%" + textTipo + "%'"; }
+  if (textTipo != "COMISSÃO") {
+    filtroTipo.prepend("(");
+    filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
+  }
+
+  if (not filtroTipo.isEmpty()) { filtros << filtroTipo; }
+
+  //-------------------------------------
+
+  QString filtroLoja;
+
   const QString textLoja = ui->comboBoxLoja->currentText();
 
-  if (textTipo == "Cartão de crédito" or textTipo == "Cartão de débito") {
-    modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" + textLoja +
-                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE ORDER BY dataPagamento");
-  } else {
-    modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
-                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
-  }
+  if (not textLoja.isEmpty()) { filtroLoja = "idLoja = " + ui->comboBoxLoja->getCurrentValue().toString(); }
+
+  if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
+
+  //-------------------------------------
+
+  QString filtroData;
+
+  if (ui->groupBoxData->isChecked()) { filtroData = "dataPagamento BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"; }
+
+  if (not filtroData.isEmpty()) { filtros << filtroData; }
+
+  //-------------------------------------
+
+  const QString filtroFixo = "status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE";
+
+  filtros << filtroFixo;
+
+  //-------------------------------------
+
+  QString filtroVenda;
+
+  const QString textVenda = ui->lineEditVenda->text();
+
+  if (not textVenda.isEmpty()) { filtroVenda = "idVenda LIKE '%" + textVenda + "%'"; }
+
+  if (not filtroVenda.isEmpty()) { filtros << filtroVenda; }
+
+  //-------------------------------------
+
+  modelContaReceber.setFilter(filtros.join(" AND "));
 }
-
-void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }
-
-void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &) { montaFiltro(); }
 
 void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
   const double presente = ui->doubleSpinBoxValorPresente->value();
@@ -188,7 +239,7 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"));
     modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"));
     modelContaReceber.setData(row, "idConta", ui->itemBoxConta->getId());
-    modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação");
+    modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + " Antecipação");
   }
 
   modelContaReceber.submitAll();
@@ -250,9 +301,6 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {
-  // TODO: 1para gerar a antecipacao: dar baixa nas linhas selecionadas (colocar RECEBIDO e marcar em qual data) e criar
-  // uma unica linha dizendo quanto foi pago de juros
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
@@ -281,11 +329,9 @@ void AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
 void AnteciparRecebimento::fillComboBoxLoja() {
   ui->comboBoxLoja->clear();
 
-  ui->comboBoxLoja->addItem("");
-
   SqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { return; }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 }
@@ -295,14 +341,82 @@ void AnteciparRecebimento::fillComboBoxPagamento() {
 
   ui->comboBoxPagamento->addItem("");
 
-  SqlQuery query;
+  ui->comboBoxPagamento->addItem("COMISSÃO");
+  ui->comboBoxPagamento->addItem("CRÉDITO");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO MASTER/VISA");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO ELO");
+  //  ui->comboBoxPagamento->addItem("REDE CRÉDITO AMEX");
+  //  ui->comboBoxPagamento->addItem("SAFRA CRÉDITO MASTER/VISA");
+  //  ui->comboBoxPagamento->addItem("SAFRA CRÉDITO ELO/AMEX");
 
-  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { throw RuntimeException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
-
-  while (query.next()) { ui->comboBoxPagamento->addItem(query.value("tipo").toString()); }
+  // TODO: depois de separado o numero do tipo de pagamento, pegar todos os tipos de pagamento usando distinct e desses selecionar os que contem 'crédito' no nome
 }
 
-// TODO: 0implementar antecipacao
+void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString &text) {
+  if (text == "COMISSÃO") {
+    ui->labelDescMes->setVisible(false);
+    ui->labelDescTotal->setVisible(false);
+    ui->labelPrazoMedio->setVisible(false);
+    ui->labelValorBruto->setVisible(false);
+    ui->labelValorLiquido->setVisible(false);
+    ui->labelLiqIOF->setVisible(false);
+
+    ui->doubleSpinBoxDescMes->setVisible(false);
+    ui->doubleSpinBoxDescTotal->setVisible(false);
+    ui->doubleSpinBoxPrazoMedio->setVisible(false);
+    ui->doubleSpinBoxValorBruto->setVisible(false);
+    ui->doubleSpinBoxValorLiquido->setVisible(false);
+    ui->doubleSpinBoxIOF->setVisible(false);
+    ui->doubleSpinBoxLiqIOF->setVisible(false);
+
+    ui->checkBoxIOF->setVisible(false);
+  }
+
+  if (text == "CRÉDITO") {
+    ui->labelDescMes->setVisible(true);
+    ui->labelDescTotal->setVisible(true);
+    ui->labelPrazoMedio->setVisible(true);
+    ui->labelValorBruto->setVisible(true);
+    ui->labelValorLiquido->setVisible(true);
+    ui->labelLiqIOF->setVisible(true);
+
+    ui->doubleSpinBoxDescMes->setVisible(true);
+    ui->doubleSpinBoxDescTotal->setVisible(true);
+    ui->doubleSpinBoxPrazoMedio->setVisible(true);
+    ui->doubleSpinBoxValorBruto->setVisible(true);
+    ui->doubleSpinBoxValorLiquido->setVisible(true);
+    ui->doubleSpinBoxIOF->setVisible(true);
+    ui->doubleSpinBoxLiqIOF->setVisible(true);
+
+    ui->checkBoxIOF->setVisible(true);
+  }
+
+  montaFiltro();
+}
+
+void AnteciparRecebimento::delayFiltro() { timer.start(500); }
+
+void AnteciparRecebimento::selecionarTaxa() {
+  if (ui->comboBoxPagamento->currentText() == "COMISSÃO") { return calcularTotais(); }
+
+  unsetConnections();
+
+  try {
+    const auto listSelection = ui->table->selectionModel()->selectedRows();
+
+    for (const auto &index : listSelection) {
+      const auto listMatch = modelContaReceber.multiMatch({{"idVenda", modelContaReceber.data(index.row(), "idVenda").toString()},
+                                                           {"tipo", modelContaReceber.data(index.row(), "tipo").toString().left(1) + ". TAXA CARTÃO"},
+                                                           {"parcela", modelContaReceber.data(index.row(), "parcela")}});
+
+      for (const auto &rowMatch : listMatch) { ui->table->selectRow(rowMatch); }
+    }
+
+    calcularTotais();
+  } catch (std::exception &) {}
+
+  setConnections();
+}
 
 // O Cálculo do prazo médio de vencimento das duplicatas é feito da seguinte forma:
 
@@ -341,5 +455,6 @@ void AnteciparRecebimento::fillComboBoxPagamento() {
 // valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
 
 // TODO: 1para recebiveis diferentes de cartao calcular IOF
-
 // TODO: fazer uma tela igual para dar baixa em lote nos recebimentos
+// TODO: os tipos de pagamento mudam com o tempo, no lugar de pegar os tipos de pagamentos atuais pegar 'DISTINCT tipos' da tabela contas_receber
+// TODO: para poder usar o distinct acima separar o número do tipo em colunas diferentes? "1. Cartão" -> "1" + "Cartão"

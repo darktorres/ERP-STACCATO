@@ -656,7 +656,7 @@ void Orcamento::clearFields() {
 void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
-  const double step = ui->doubleSpinBoxQuant->singleStep();
+  const double stepQt = ui->doubleSpinBoxQuant->singleStep();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
 
@@ -664,23 +664,15 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
 
   try {
     [&] {
-      if (currentItemIsEstoque) {
-        const double caixas = quant / step;
-        ui->doubleSpinBoxCaixas->setValue(caixas);
+      const double resto = fmod(quant, stepQt);
+      const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / stepQt) * stepQt : quant;
+      ui->doubleSpinBoxQuant->setValue(quant2);
 
-        const double itemBruto = quant * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-      } else {
-        const double resto = fmod(quant, step);
-        const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
-        ui->doubleSpinBoxQuant->setValue(quant2);
+      const double caixas2 = quant2 / stepQt;
+      ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-        const double caixas2 = quant2 / step;
-        ui->doubleSpinBoxCaixas->setValue(caixas2);
-
-        const double itemBruto2 = quant2 * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-      }
+      const double itemBruto2 = quant2 * prcUn;
+      ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
     }();
   } catch (std::exception &) {}
 
@@ -854,6 +846,8 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 }
 
 void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
+  const double stepQt = ui->doubleSpinBoxQuant->singleStep();
+  const double stepCx = ui->doubleSpinBoxCaixas->singleStep();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
 
@@ -861,24 +855,15 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   try {
     [&] {
-      if (currentItemIsEstoque) {
-        const double quant = caixas * ui->spinBoxQuantCx->value();
-        ui->doubleSpinBoxQuant->setValue(quant);
+      const double resto = fmod(caixas, stepCx);
+      const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+      ui->doubleSpinBoxCaixas->setValue(caixas2);
 
-        const double itemBruto = quant * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-      } else {
-        const double step = ui->doubleSpinBoxCaixas->singleStep();
-        const double resto = fmod(caixas, step);
-        const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
-        ui->doubleSpinBoxCaixas->setValue(caixas2);
+      const double quant2 = caixas2 * stepQt;
+      ui->doubleSpinBoxQuant->setValue(quant2);
 
-        const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
-        ui->doubleSpinBoxQuant->setValue(quant2);
-
-        const double itemBruto2 = quant2 * prcUn;
-        ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-      }
+      const double itemBruto2 = quant2 * prcUn;
+      ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
     }();
   } catch (std::exception &) {}
 

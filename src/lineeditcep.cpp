@@ -2,7 +2,7 @@
 
 LineEditCEP::LineEditCEP(QWidget *parent) : QLineEdit(parent) { setProperty("value", ""); }
 
-bool LineEditCEP::isValid() const { return (text().size() == 9); }
+bool LineEditCEP::isValid() const { return (text().size() == 9 and text() != "00000-000"); }
 
 QString LineEditCEP::getValue() const { return isValid() ? text() : QString(); }
 

@@ -321,7 +321,7 @@ void ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
       "p.multiploUpd, p.m2cx, p.m2cxUpd, p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, "
       "p.ncmEx, p.ncmExUpd, p.cfop, p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, :custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, "
       "p.mvaUpd, p.oldPrecoVenda, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, "
-      "p.ui, p.uiUpd, NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = "
+      "p.ui, p.uiUpd, NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NOW(), NULL FROM produto p WHERE p.idProduto = "
       ":idProduto");
 
   for (const auto &tuple : tuples) {
@@ -387,7 +387,7 @@ void ImportarXML::atualizarNFes() {
   while (iterator != mapNFes.constEnd()) {
     SqlQuery query;
 
-    if (not query.exec("UPDATE nfe SET gare = " + QString::number(iterator.value()) + ", utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
+    if (not query.exec("UPDATE nfe SET gare = IF(gare IS NULL, " + QString::number(iterator.value()) + ", gare), utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
       throw RuntimeException("Erro atualizando dados da NFe: " + query.lastError().text());
     }
 
@@ -507,7 +507,7 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
 
   try {
     [&] {
-      usarXMLBaixado();
+      usarXMLInutilizado();
       parear();
 
       const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
@@ -688,7 +688,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   modelNFe.setData(row, "utilizada", 1);
 }
 
-void ImportarXML::usarXMLBaixado() {
+void ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
   if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
@@ -810,12 +810,8 @@ void ImportarXML::percorrerXml(XML &xml) {
     const int newRow = modelEstoque.insertRowAtEnd();
 
     double desconto = produto.desconto;
-    QString codigo = produto.codProd;
 
-    if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A.") {
-      if (codigo.endsWith("A")) { codigo = codigo.left(codigo.size() - 1); }
-      desconto = 0;
-    }
+    if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A.") { desconto = 0; }
 
     modelEstoque.setData(newRow, "idEstoque", idEstoque);
     modelEstoque.setData(newRow, "idNFe", xml.idNFe);
@@ -826,7 +822,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "restante", produto.quant);
     modelEstoque.setData(newRow, "un", produto.un);
     modelEstoque.setData(newRow, "codBarras", produto.codBarras);
-    modelEstoque.setData(newRow, "codComercial", codigo);
+    modelEstoque.setData(newRow, "codComercial", produto.codProd);
     modelEstoque.setData(newRow, "ncm", produto.ncm);
     modelEstoque.setData(newRow, "nve", produto.nve);
     modelEstoque.setData(newRow, "extipi", produto.extipi);
@@ -1185,6 +1181,15 @@ ImportarXML::NCM ImportarXML::buscaNCM(const QString &ncm) {
 }
 
 void ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
+  SqlQuery query;
+
+  if (not query.exec("SELECT idPagamento FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = " + QString::number(xml.idNFe) +
+                     " AND status <> 'CANCELADO' AND desativado = FALSE")) {
+    throw RuntimeException("Erro buscando pagamento GARE: " + query.lastError().text());
+  }
+
+  if (query.first()) { return; }
+
   const int row = modelPagamento.insertRowAtEnd();
 
   const int lojaGeral = 1;

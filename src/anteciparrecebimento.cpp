@@ -72,7 +72,6 @@ void AnteciparRecebimento::unsetConnections() {
 }
 
 void AnteciparRecebimento::calcularTotais() {
-  // TODO: 1ao selecionar parcelas de cartao somar a taxa tambem
   const auto list = ui->table->selectionModel()->selectedRows();
 
   double bruto = 0;
@@ -302,9 +301,6 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {
-  // TODO: 1para gerar a antecipacao: dar baixa nas linhas selecionadas (colocar RECEBIDO e marcar em qual data) e criar
-  // uma unica linha dizendo quanto foi pago de juros
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
@@ -454,3 +450,4 @@ void AnteciparRecebimento::selecionarTaxa() {
 // TODO: 1para recebiveis diferentes de cartao calcular IOF
 // TODO: fazer uma tela igual para dar baixa em lote nos recebimentos
 // TODO: os tipos de pagamento mudam com o tempo, no lugar de pegar os tipos de pagamentos atuais pegar 'DISTINCT tipos' da tabela contas_receber
+// TODO: para poder usar o distinct acima separar o número do tipo em colunas diferentes? "1. Cartão" -> "1" + "Cartão"

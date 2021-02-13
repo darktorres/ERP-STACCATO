@@ -146,6 +146,8 @@ void WidgetVenda::setPermissions() {
 
     const QString tipoUsuario = UserSession::tipoUsuario;
 
+    // TODO: habilitar groupBoxMes para não carregar a tabela inteira de venda, vendedores porem não deve ser filtrado para que ao virar o mes ele continue vendo os pedidos
+
     if (tipoUsuario == "GERENTE LOJA") { ui->groupBoxLojas->hide(); }
 
     if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->groupBoxVendedores->hide(); }

@@ -38,6 +38,7 @@ private:
   auto atualizarCredito() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
+  auto calcularPesoTotal() -> void;
   auto cancelamento() -> void;
   auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> void;

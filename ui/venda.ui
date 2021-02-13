@@ -329,88 +329,6 @@ color: rgb(0, 0, 0);</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
                <item row="6" column="1">
-                <widget class="QLineEdit" name="lineEditIdOrcamento">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="labelIdOrcamento">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Orçamento:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QSpinBox" name="spinBoxPrazoEntrega">
-                 <property name="suffix">
-                  <string> dias</string>
-                 </property>
-                 <property name="maximum">
-                  <number>365</number>
-                 </property>
-                 <property name="singleStep">
-                  <number>1</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0" colspan="2">
-                <widget class="QPlainTextEdit" name="plainTextEdit">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>100</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="labelEndereco_9">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Observação:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="labelDateTimeOrc">
-                 <property name="text">
-                  <string>Data orçamento:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="labelPrazoEntrega">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Prazo de entrega:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
                 <widget class="QDateTimeEdit" name="dateTimeEditOrc">
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data/hora em que o orçamento foi criado pela primeira vez&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -429,10 +347,7 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
-                <widget class="ItemBox" name="itemBoxEnderecoFat"/>
-               </item>
-               <item row="7" column="0" colspan="2">
+               <item row="8" column="0" colspan="2">
                 <layout class="QGridLayout" name="gridLayout_4">
                  <item row="0" column="3">
                   <widget class="QFrame" name="frameRT">
@@ -511,7 +426,92 @@ color: rgb(0, 0, 0);</string>
                  </item>
                 </layout>
                </item>
-               <item row="2" column="0">
+               <item row="7" column="1">
+                <widget class="QLineEdit" name="lineEditIdOrcamento">
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="labelEndereco_9">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Observação:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0" colspan="2">
+                <widget class="QPlainTextEdit" name="plainTextEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="labelDateTimeOrc">
+                 <property name="text">
+                  <string>Data orçamento:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="spinBoxPrazoEntrega">
+                 <property name="suffix">
+                  <string> dias</string>
+                 </property>
+                 <property name="maximum">
+                  <number>365</number>
+                 </property>
+                 <property name="singleStep">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="ItemBox" name="itemBoxEnderecoFat"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="labelPrazoEntrega">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Prazo de entrega:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QLabel" name="labelIdOrcamento">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Orçamento:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
                 <widget class="QLabel" name="labelPrazoEntrega_2">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -521,6 +521,35 @@ color: rgb(0, 0, 0);</string>
                  </property>
                  <property name="text">
                   <string>End. de faturamento:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="labelPesoTotal">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Peso total:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QSpinBox" name="spinBoxPesoTotal">
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="buttonSymbols">
+                  <enum>QAbstractSpinBox::NoButtons</enum>
+                 </property>
+                 <property name="suffix">
+                  <string> kg</string>
+                 </property>
+                 <property name="maximum">
+                  <number>99999999</number>
                  </property>
                 </widget>
                </item>

@@ -160,10 +160,13 @@ void AnteciparRecebimento::montaFiltro() {
 
   const QString textTipo = ui->comboBoxPagamento->currentText();
 
-  if (not textTipo.isEmpty()) { filtroTipo = "tipo LIKE '%" + textTipo + "%'"; }
-  if (textTipo != "COMISSÃO") {
-    filtroTipo.prepend("(");
-    filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
+  if (not textTipo.isEmpty()) {
+    filtroTipo = "tipo LIKE '%" + textTipo + "%'";
+
+    if (textTipo != "COMISSÃO") {
+      filtroTipo.prepend("(");
+      filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
+    }
   }
 
   if (not filtroTipo.isEmpty()) { filtros << filtroTipo; }
@@ -372,7 +375,7 @@ void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString
     ui->checkBoxIOF->setVisible(false);
   }
 
-  if (text == "CRÉDITO") {
+  if (text == "CRÉDITO" or text == "") {
     ui->labelDescMes->setVisible(true);
     ui->labelDescTotal->setVisible(true);
     ui->labelPrazoMedio->setVisible(true);

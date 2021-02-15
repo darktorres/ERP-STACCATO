@@ -43,10 +43,10 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 
     // TODO: 0dont hardcode magic numbers
     // TODO: colocar um icone de engrenagem para o usuario mudar as contas padrao. salvar os ids no banco de dados
-    const int contaSantander = 3;
+    const int contaSafra = 41;
     const int contaItau = 33;
 
-    ui->itemBoxCaixa1->setId(contaSantander);
+    ui->itemBoxCaixa1->setId(contaSafra);
     ui->itemBoxCaixa2->setId(contaItau);
 
     ui->groupBoxCaixa1->setChecked(true);

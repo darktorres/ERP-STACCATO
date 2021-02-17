@@ -36,6 +36,8 @@ private:
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
+  auto calcularPeso() -> double;
+  auto calcularPesoTotal() -> void;
   auto clearFields() -> void final;
   auto generateId() -> void;
   auto newRegister() -> bool final;

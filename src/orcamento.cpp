@@ -261,6 +261,8 @@ bool Orcamento::viewRegister() {
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
+    calcularPesoTotal();
+
     return true;
   }();
 
@@ -425,6 +427,8 @@ void Orcamento::removeItem() {
       }
 
       novoItem();
+
+      calcularPesoTotal();
     }();
   } catch (std::exception &) {}
 
@@ -737,6 +741,7 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("fornecedor", "Fornecedor");
   modelItem.setHeaderData("obs", "Obs.");
   modelItem.setHeaderData("prcUnitario", "Preço/Un.");
+  modelItem.setHeaderData("kg", "Kg.");
   modelItem.setHeaderData("caixas", "Caixas");
   modelItem.setHeaderData("quant", "Quant.");
   modelItem.setHeaderData("un", "Un.");
@@ -790,6 +795,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
       modelItem.setData(currentRowItem, "produto", ui->itemBoxProduto->text());
       modelItem.setData(currentRowItem, "obs", ui->lineEditObs->text());
       modelItem.setData(currentRowItem, "prcUnitario", ui->lineEditPrecoUn->getValue());
+      modelItem.setData(currentRowItem, "kg", calcularPeso());
       modelItem.setData(currentRowItem, "caixas", ui->doubleSpinBoxCaixas->value());
       modelItem.setData(currentRowItem, "quant", ui->doubleSpinBoxQuant->value());
       modelItem.setData(currentRowItem, "quantCaixa", ui->doubleSpinBoxQuant->singleStep());
@@ -816,6 +822,8 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
   novoItem();
 
   calcPrecoGlobalTotal();
+
+  calcularPesoTotal();
 
   setConnections();
 }
@@ -1459,6 +1467,33 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
 
     if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Não foi possível abrir o arquivo 3D!"); }
   });
+}
+
+double Orcamento::calcularPeso() {
+  SqlQuery queryProduto;
+
+  if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + ui->itemBoxProduto->getId().toString()) or not queryProduto.first()) {
+    throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
+  }
+
+  return ui->doubleSpinBoxCaixas->value() * queryProduto.value("kgcx").toDouble();
+}
+
+void Orcamento::calcularPesoTotal() {
+  int total = 0;
+
+  SqlQuery queryProduto;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString()) or not queryProduto.first()) {
+      throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
+    }
+
+    const double kgcx = queryProduto.value("kgcx").toDouble();
+    total += modelItem.data(row, "caixas").toInt() * kgcx;
+  }
+
+  ui->spinBoxPesoTotal->setValue(total);
 }
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)

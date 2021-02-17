@@ -7,6 +7,7 @@
 #include "sqlquery.h"
 
 #include <QDebug>
+#include <QScrollBar>
 #include <QSqlError>
 
 AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
@@ -152,6 +153,10 @@ void AnteciparRecebimento::setupTables() {
 }
 
 void AnteciparRecebimento::montaFiltro() {
+  if (ui->comboBoxPagamento->currentText().isEmpty() and ui->comboBoxLoja->currentText().isEmpty() and ui->lineEditVenda->text().isEmpty() and not ui->groupBoxData->isChecked()) {
+    return modelContaReceber.setFilter("0");
+  }
+
   QStringList filtros;
 
   //-------------------------------------
@@ -160,10 +165,13 @@ void AnteciparRecebimento::montaFiltro() {
 
   const QString textTipo = ui->comboBoxPagamento->currentText();
 
-  if (not textTipo.isEmpty()) { filtroTipo = "tipo LIKE '%" + textTipo + "%'"; }
-  if (textTipo != "COMISSÃO") {
-    filtroTipo.prepend("(");
-    filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
+  if (not textTipo.isEmpty()) {
+    filtroTipo = "tipo LIKE '%" + textTipo + "%'";
+
+    if (textTipo != "COMISSÃO") {
+      filtroTipo.prepend("(");
+      filtroTipo.append(" OR tipo LIKE '%TAXA CARTÃO%')");
+    }
   }
 
   if (not filtroTipo.isEmpty()) { filtros << filtroTipo; }
@@ -372,7 +380,7 @@ void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString
     ui->checkBoxIOF->setVisible(false);
   }
 
-  if (text == "CRÉDITO") {
+  if (text == "CRÉDITO" or text == "") {
     ui->labelDescMes->setVisible(true);
     ui->labelDescTotal->setVisible(true);
     ui->labelPrazoMedio->setVisible(true);
@@ -402,6 +410,9 @@ void AnteciparRecebimento::selecionarTaxa() {
   unsetConnections();
 
   try {
+    const int vpos = ui->table->verticalScrollBar()->sliderPosition();
+    const int hpos = ui->table->horizontalScrollBar()->sliderPosition();
+
     const auto listSelection = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : listSelection) {
@@ -411,6 +422,9 @@ void AnteciparRecebimento::selecionarTaxa() {
 
       for (const auto &rowMatch : listMatch) { ui->table->selectRow(rowMatch); }
     }
+
+    ui->table->verticalScrollBar()->setSliderPosition(vpos);
+    ui->table->horizontalScrollBar()->setSliderPosition(hpos);
 
     calcularTotais();
   } catch (std::exception &) {}

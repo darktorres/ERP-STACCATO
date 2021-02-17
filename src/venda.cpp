@@ -74,6 +74,7 @@ void Venda::setTreeView() {
   modelTree.setHeaderData("obs", "Obs.");
   modelTree.setHeaderData("lote", "Lote");
   modelTree.setHeaderData("prcUnitario", "Preço/Un");
+  modelTree.setHeaderData("kg", "Kg.");
   modelTree.setHeaderData("caixas", "Caixas");
   modelTree.setHeaderData("quant", "Quant.");
   modelTree.setHeaderData("un", "Un.");
@@ -372,6 +373,10 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
+  calcularPesoTotal();
+
+  // -------------------------------------------------------------------------
+
   setConnections();
 }
 
@@ -595,6 +600,8 @@ bool Venda::viewRegister() {
       // -------------------------------------------------------------------------
 
       if (representacao) {
+        // TODO: a razaoSocial do fornecedor pode mudar, usar idProduto para buscar
+
         SqlQuery queryFornecedor;
         queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
         queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
@@ -632,6 +639,8 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setRepresentacao(representacao);
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+
+    calcularPesoTotal();
 
     return true;
   }();
@@ -1567,6 +1576,23 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   XML_Viewer viewer(query.value("xml").toByteArray(), this);
   viewer.on_pushButtonDanfe_clicked();
+}
+
+void Venda::calcularPesoTotal() {
+  int total = 0;
+
+  SqlQuery queryProduto;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString()) or not queryProduto.first()) {
+      throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
+    }
+
+    const double kgcx = queryProduto.value("kgcx").toDouble();
+    total += modelItem.data(row, "caixas").toInt() * kgcx;
+  }
+
+  ui->spinBoxPesoTotal->setValue(total);
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

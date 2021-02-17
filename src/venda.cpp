@@ -600,6 +600,8 @@ bool Venda::viewRegister() {
       // -------------------------------------------------------------------------
 
       if (representacao) {
+        // TODO: a razaoSocial do fornecedor pode mudar, usar idProduto para buscar
+
         SqlQuery queryFornecedor;
         queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
         queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));

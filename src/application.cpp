@@ -314,29 +314,20 @@ void Application::showMessages() {
     if (exception.message.contains("WSREP has not yet prepared node for application use")) { exception.message = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!"; }
     if (exception.message.contains("WSREP detected deadlock/conflict and aborted the transaction")) { exception.message = "Conflito detectado no banco de dados! Tente novamente!"; }
 
-    //    const QString error1 = "MySQL server has gone away";
-    //    const QString error2 = "Lost connection to MySQL server during query";
-    //    const QString error3 = "WSREP has not yet prepared node for application use QMYSQL3";
+    const QString error1 = "Conexão com o servidor perdida!";
+    const QString error2 = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!";
 
-    //    const QString message = exception.message;
+    if (exception.message.contains(error1) or exception.message.contains(error2)) {
+      const bool conectado = dbReconnect(true);
 
-    //    if (message.contains(error1) or message.contains(error2)) {
-    //      const bool conectado = dbReconnect(true);
+      emit verifyDb(conectado);
 
-    //      emit verifyDb(conectado);
-
-    //      if (conectado) {
-    //        continue;
-    //      } else {
-    //        QMessageBox::critical(exception.widget, "Erro!", "Conexão com o servidor perdida!");
-    //      }
-    //    }
-
-    //    if (message.contains(error3)) {
-    //      // TODO: connect to another server?
-
-    //      QMessageBox::critical(exception.widget, "Erro!", "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!");
-    //    }
+      if (conectado) {
+        continue;
+      } else {
+        QMessageBox::critical(exception.widget, "Erro!", exception.message);
+      }
+    }
 
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }

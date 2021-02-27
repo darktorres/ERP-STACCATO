@@ -26,7 +26,6 @@ class ImportaProdutos final : public QDialog {
     QString codComercial;
     QString codBarras;
     QString ncm;
-    QString ncmEx;
     double qtdPallet;
     double custo;
     double precoVenda;

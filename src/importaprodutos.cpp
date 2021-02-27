@@ -185,7 +185,6 @@ void ImportaProdutos::setupModels() {
   modelProduto.setHeaderData("codComercial", "Cód. Com.");
   modelProduto.setHeaderData("codBarras", "Cód. Barras");
   modelProduto.setHeaderData("ncm", "NCM");
-  modelProduto.setHeaderData("ncmEx", "NCM EX");
   modelProduto.setHeaderData("icms", "ICMS");
   modelProduto.setHeaderData("cst", "CST");
   modelProduto.setHeaderData("qtdPallet", "Qt. Pallet");
@@ -223,7 +222,6 @@ void ImportaProdutos::setupModels() {
   modelErro.setHeaderData("codComercial", "Cód. Com.");
   modelErro.setHeaderData("codBarras", "Cód. Barras");
   modelErro.setHeaderData("ncm", "NCM");
-  modelErro.setHeaderData("ncmEx", "NCM EX");
   modelErro.setHeaderData("icms", "ICMS");
   modelErro.setHeaderData("cst", "CST");
   modelErro.setHeaderData("qtdPallet", "Qt. Pallet");
@@ -501,10 +499,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   if (produto.ncm == "0") { produto.ncm = QString(); }
 
-  if (produto.ncm.length() == 10) {
-    produto.ncmEx = produto.ncm.right(2);
-    produto.ncm = produto.ncm.left(8);
-  }
+  if (produto.ncm.length() == 6) { produto.ncm.append("00"); }
 
   if (produto.un == "M²") { produto.un = "M2"; }
 
@@ -613,14 +608,6 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     changed = true;
   } else {
     modelProduto.setData(row, "ncmUpd", white);
-  }
-
-  if (modelProduto.data(row, "ncmEx") != produto.ncmEx) {
-    modelProduto.setData(row, "ncmEx", produto.ncmEx);
-    modelProduto.setData(row, "ncmExUpd", yellow);
-    changed = true;
-  } else {
-    modelProduto.setData(row, "ncmExUpd", white);
   }
 
   if (modelProduto.data(row, "qtdPallet") != produto.qtdPallet) {
@@ -774,6 +761,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
   if (produto.custo <= 0.) { return true; }
   if (produto.precoVenda <= 0.) { return true; }
   if (produto.precoVenda < produto.custo) { return true; }
+  if (produto.ncm.length() > 8) { return true; }
 
   return false;
 }
@@ -795,7 +783,6 @@ void ImportaProdutos::insereEmErro() {
   modelErro.setData(row, "codComercial", produto.codComercial);
   modelErro.setData(row, "codBarras", produto.codBarras);
   modelErro.setData(row, "ncm", produto.ncm);
-  modelErro.setData(row, "ncmEx", produto.ncmEx);
   modelErro.setData(row, "qtdPallet", produto.qtdPallet);
   modelErro.setData(row, "custo", produto.custo);
   modelErro.setData(row, "precoVenda", produto.precoVenda);
@@ -823,7 +810,6 @@ void ImportaProdutos::insereEmErro() {
   modelErro.setData(row, "codComercialUpd", green);
   modelErro.setData(row, "codBarrasUpd", green);
   modelErro.setData(row, "ncmUpd", green);
-  modelErro.setData(row, "ncmExUpd", green);
   modelErro.setData(row, "qtdPalletUpd", green);
   modelErro.setData(row, "custoUpd", green);
   modelErro.setData(row, "precoVendaUpd", green);
@@ -862,7 +848,6 @@ void ImportaProdutos::insereEmOk() {
   modelProduto.setData(row, "codComercial", produto.codComercial);
   modelProduto.setData(row, "codBarras", produto.codBarras);
   modelProduto.setData(row, "ncm", produto.ncm);
-  modelProduto.setData(row, "ncmEx", produto.ncmEx);
   modelProduto.setData(row, "qtdPallet", produto.qtdPallet);
   modelProduto.setData(row, "custo", produto.custo);
   modelProduto.setData(row, "precoVenda", produto.precoVenda);
@@ -890,7 +875,6 @@ void ImportaProdutos::insereEmOk() {
   modelProduto.setData(row, "codComercialUpd", green);
   modelProduto.setData(row, "codBarrasUpd", green);
   modelProduto.setData(row, "ncmUpd", green);
-  modelProduto.setData(row, "ncmExUpd", green);
   modelProduto.setData(row, "qtdPalletUpd", green);
   modelProduto.setData(row, "custoUpd", green);
   modelProduto.setData(row, "precoVendaUpd", green);

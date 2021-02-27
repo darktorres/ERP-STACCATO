@@ -62,7 +62,6 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("kgcx");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("ncm");
-  ui->table->hideColumn("ncmEx");
   ui->table->hideColumn("cfop");
   ui->table->hideColumn("icms");
   ui->table->hideColumn("cst");

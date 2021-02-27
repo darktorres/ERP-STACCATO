@@ -254,58 +254,60 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   //----------------------------------
 
-  SqlTableModel modelContaPagar;
-  modelContaPagar.setTable("conta_a_pagar_has_pagamento");
+  if (ui->comboBoxPagamento->currentText() == "CRÉDITO") {
+    SqlTableModel modelContaPagar;
+    modelContaPagar.setTable("conta_a_pagar_has_pagamento");
 
-  SqlQuery query;
-  query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
-  query.bindValue(":idConta", ui->itemBoxConta->getId());
+    SqlQuery query;
+    query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
+    query.bindValue(":idConta", ui->itemBoxConta->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando 'banco': " + query.lastError().text()); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando 'banco': " + query.lastError().text()); }
 
-  if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
-    const int rowPagar1 = modelContaPagar.insertRowAtEnd();
+    if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
+      const int rowPagar1 = modelContaPagar.insertRowAtEnd();
 
-    modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar1, "idLoja", 1);
-    modelContaPagar.setData(rowPagar1, "contraParte", query.value("banco"));
-    modelContaPagar.setData(rowPagar1, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
-    modelContaPagar.setData(rowPagar1, "tipo", "DÉBITO EM CONTA");
-    modelContaPagar.setData(rowPagar1, "dataPagamento", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar1, "observacao", "Juros da antecipação de recebíveis");
-    modelContaPagar.setData(rowPagar1, "status", "PAGO");
-    modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
-    modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA");
-    modelContaPagar.setData(rowPagar1, "idConta", ui->itemBoxConta->getId());
-    modelContaPagar.setData(rowPagar1, "centroCusto", "1");
-    modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras");
-    modelContaPagar.setData(rowPagar1, "subGrupo", "Juros");
+      modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar1, "idLoja", 1);
+      modelContaPagar.setData(rowPagar1, "contraParte", query.value("banco"));
+      modelContaPagar.setData(rowPagar1, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
+      modelContaPagar.setData(rowPagar1, "tipo", "DÉBITO EM CONTA");
+      modelContaPagar.setData(rowPagar1, "dataPagamento", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar1, "observacao", "Juros da antecipação de recebíveis");
+      modelContaPagar.setData(rowPagar1, "status", "PAGO");
+      modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
+      modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA");
+      modelContaPagar.setData(rowPagar1, "idConta", ui->itemBoxConta->getId());
+      modelContaPagar.setData(rowPagar1, "centroCusto", "1");
+      modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras");
+      modelContaPagar.setData(rowPagar1, "subGrupo", "Juros");
+    }
+
+    //
+
+    if (not qFuzzyIsNull(ui->doubleSpinBoxIOF->value())) {
+      const int rowPagar2 = modelContaPagar.insertRowAtEnd();
+
+      modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar2, "idLoja", 1);
+      modelContaPagar.setData(rowPagar2, "contraParte", query.value("banco"));
+      modelContaPagar.setData(rowPagar2, "valor", ui->doubleSpinBoxIOF->value());
+      modelContaPagar.setData(rowPagar2, "tipo", "DÉBITO EM CONTA");
+      modelContaPagar.setData(rowPagar2, "dataPagamento", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar2, "observacao", "IOF da antecipação de recebíveis");
+      modelContaPagar.setData(rowPagar2, "status", "PAGO");
+      modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date());
+      modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value());
+      modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA");
+      modelContaPagar.setData(rowPagar2, "idConta", ui->itemBoxConta->getId());
+      modelContaPagar.setData(rowPagar2, "centroCusto", "1");
+      modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras");
+      modelContaPagar.setData(rowPagar2, "subGrupo", "IOF");
+    }
+
+    modelContaPagar.submitAll();
   }
-
-  //
-
-  if (not qFuzzyIsNull(ui->doubleSpinBoxIOF->value())) {
-    const int rowPagar2 = modelContaPagar.insertRowAtEnd();
-
-    modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar2, "idLoja", 1);
-    modelContaPagar.setData(rowPagar2, "contraParte", query.value("banco"));
-    modelContaPagar.setData(rowPagar2, "valor", ui->doubleSpinBoxIOF->value());
-    modelContaPagar.setData(rowPagar2, "tipo", "DÉBITO EM CONTA");
-    modelContaPagar.setData(rowPagar2, "dataPagamento", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar2, "observacao", "IOF da antecipação de recebíveis");
-    modelContaPagar.setData(rowPagar2, "status", "PAGO");
-    modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date());
-    modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value());
-    modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA");
-    modelContaPagar.setData(rowPagar2, "idConta", ui->itemBoxConta->getId());
-    modelContaPagar.setData(rowPagar2, "centroCusto", "1");
-    modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras");
-    modelContaPagar.setData(rowPagar2, "subGrupo", "IOF");
-  }
-
-  modelContaPagar.submitAll();
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {

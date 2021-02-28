@@ -518,7 +518,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
     modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"));
     modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9));
 
-    if (xlsx.read(rowExcel, 7).toString().toUpper() == "SANTANDER") { // marcar direto como pago
+    if (xlsx.read(rowExcel, 7).toString().toUpper() == "ITAÚ") { // marcar direto como pago
       modelImportar.setData(rowModel, "dataRealizado", xlsx.read(rowExcel, 6));
       modelImportar.setData(rowModel, "status", "PAGO");
       modelImportar.setData(rowModel, "valorReal", xlsx.read(rowExcel, 4));

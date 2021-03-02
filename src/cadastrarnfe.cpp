@@ -736,7 +736,7 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
 
   const QString razaoSocial = ui->lineEditTransportadorRazaoSocial->text();
 
-  if (razaoSocial == "RETIRA" or razaoSocial == "CARRO EXTRA") { return; }
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") or razaoSocial == "RETIRA" or razaoSocial == "CARRO EXTRA") { return; }
 
   stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() + "\n";
   stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() + "\n";

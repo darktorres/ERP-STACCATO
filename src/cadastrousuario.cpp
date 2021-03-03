@@ -88,6 +88,8 @@ void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
   for (const auto &line : children) { verifyRequiredField(*line); }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
+
+  if(ui->comboBoxTipo->currentText().isEmpty()){throw RuntimeError("Não escolheu o tipo de usuário!");}
 }
 
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }
@@ -98,6 +100,14 @@ void CadastroUsuario::setupMapper() {
   addMapping(ui->lineEditEmail, "email");
   addMapping(ui->lineEditNome, "nome");
   addMapping(ui->lineEditUser, "user");
+
+  addMapping(ui->lineEditNomeBancario, "nomeBanco");
+  addMapping(ui->lineEditCPFBancario, "cpfBanco");
+  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
+  addMapping(ui->lineEditBanco, "banco");
+  addMapping(ui->lineEditAgencia, "agencia");
+  addMapping(ui->lineEditCC, "cc");
+  addMapping(ui->checkBoxPoupanca, "poupanca");
 }
 
 void CadastroUsuario::registerMode() {
@@ -135,6 +145,20 @@ void CadastroUsuario::savingProcedures() {
   }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }
+
+  // Dados bancários
+
+  setData("nomeBanco", ui->lineEditNomeBancario->text());
+
+  if (not ui->lineEditCPFBancario->text().remove(".").remove("-").isEmpty()) { setData("cpfBanco", ui->lineEditCPFBancario->text()); }
+  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) { setData("cnpjBanco", ui->lineEditCNPJBancario->text()); }
+
+  setData("banco", ui->lineEditBanco->text());
+
+  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) { setData("agencia", ui->lineEditAgencia->text()); }
+
+  setData("cc", ui->lineEditCC->text());
+  setData("poupanca", ui->checkBoxPoupanca->isChecked());
 }
 
 bool CadastroUsuario::viewRegister() {

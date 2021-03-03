@@ -210,7 +210,7 @@ color: rgb(0, 0, 0);</string>
          </property>
          <item>
           <property name="text">
-           <string>VENDEDOR</string>
+           <string/>
           </property>
          </item>
          <item>
@@ -220,22 +220,7 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item>
           <property name="text">
-           <string>GERENTE FINANCEIRO</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>VENDEDOR ESPECIAL</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>GERENTE LOJA</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>GERENTE DEPARTAMENTO</string>
+           <string>ADMINISTRATIVO</string>
           </property>
          </item>
          <item>
@@ -245,7 +230,32 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item>
           <property name="text">
-           <string>ADMINISTRATIVO</string>
+           <string>GERENTE DEPARTAMENTO</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>GERENTE FINANCEIRO</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>GERENTE LOJA</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>OPERACIONAL</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>VENDEDOR</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>VENDEDOR ESPECIAL</string>
           </property>
          </item>
         </widget>
@@ -303,6 +313,119 @@ color: rgb(0, 0, 0);</string>
          <property name="text">
           <string>Especialidade:</string>
          </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Dados bancários</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Dados bancários:</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="2" column="0">
+             <widget class="QLabel" name="labelBanco_4">
+              <property name="text">
+               <string>CNPJ:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelBanco_3">
+              <property name="text">
+               <string>CPF:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="labelBanco">
+              <property name="text">
+               <string>Banco:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="labelAgencia">
+              <property name="text">
+               <string>Agência:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="labelCC">
+              <property name="text">
+               <string>C/C:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="lineEditCC"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelBanco_2">
+              <property name="text">
+               <string>Nome:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
+             <widget class="QCheckBox" name="checkBoxPoupanca">
+              <property name="text">
+               <string>Poupança</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditAgencia"/>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditBanco"/>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditCNPJBancario"/>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditCPFBancario"/>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditNomeBancario"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>

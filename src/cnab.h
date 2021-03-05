@@ -15,6 +15,7 @@ public:
   };
 
   struct Pagamento {
+    enum class Tipo { Salario, Fornecedor } tipo;
     int codBanco;
     ulong valor;
     QString data;

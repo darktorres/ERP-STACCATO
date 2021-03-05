@@ -229,7 +229,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
+  if (not query.exec("SELECT MAX(sequencial) + 1 AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
     throw RuntimeException("Erro buscando sequencial CNAB: " + query.lastError().text());
   }
 
@@ -363,17 +363,13 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
 
   SqlQuery query2;
 
-  if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
-    throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
-  }
-
-  if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
+  if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial, conteudo) VALUES ('REMESSA', 'ITAU', " + QString::number(query.value("sequencial").toInt()) + ", '" + arquivo.toUtf8() + "')")) {
     throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
   }
 
   qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parent);
 
-  return query.value("idCnab").toString();
+  return query2.lastInsertId().toString();
 }
 
 void CNAB::retornoGareItau240(const QString &filePath) {

@@ -206,8 +206,8 @@ void WidgetFinanceiroContas::montaFiltro() {
         "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, cp.idVenda AS `cp_idVenda`, `cp`.`contraParte` AS `contraparte`, "
         "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`dataPagamento` AS `dataPagamento`, cp.dataRealizado AS dataRealizado, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT "
         "`pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, "
-        "`cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT `pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') "
-        "AS `pf2_idVenda`, GROUP_CONCAT(DISTINCT pf2.codFornecedor SEPARATOR ', ') AS codFornecedor FROM `conta_a_pagar_has_pagamento` `cp` LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON "
+        "`cp`.`observacao` AS `observacao`, cp.grupo AS grupo, GROUP_CONCAT(DISTINCT `pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', "
+        "') AS `pf2_idVenda`, GROUP_CONCAT(DISTINCT pf2.codFornecedor SEPARATOR ', ') AS codFornecedor FROM `conta_a_pagar_has_pagamento` `cp` LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON "
         "`cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` `e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN "
         "`nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
@@ -313,6 +313,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
   if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
+  if (tipo == Tipo::Pagar) { ui->table->hideColumn("grupo"); }
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
 }
@@ -540,7 +541,6 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
 
   for (const auto index : selection) {
     if (model.data(index.row(), "status").toString() == "PAGO") { throw RuntimeError("Linha selecionada já paga!", this); }
-    if (model.data(index.row(), "ContraParte").toString() != "PORTINARI") { throw RuntimeError("Linha selecionada não é da PORTINARI!", this); }
     if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { throw RuntimeError("Pagamento selecionado não é transferência ITAÚ!", this); }
     // TODO: se linha já estiver como agendado confirmar com usuario antes de gerar outro arquivo
   }
@@ -555,7 +555,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   SqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    throw RuntimeException("Erro alterando GARE: " + query.lastError().text(), this);
+    throw RuntimeException("Erro alterando pagamento: " + query.lastError().text(), this);
   }
 
   updateTables();
@@ -565,17 +565,41 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
   QVector<CNAB::Pagamento> pagamentos;
 
   for (const auto index : selection) {
+    const QString grupo = model.data(index.row(), "grupo").toString();
+    const QString contraParte = model.data(index.row(), "contraParte").toString();
+
     CNAB::Pagamento pagamento;
 
-    pagamento.codBanco = 341;
-    pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
-    pagamento.data = QDate::currentDate().toString("ddMMyyyy");
-    pagamento.cnpjDest = "10633753000198";
-    pagamento.agenciaConta = "00628 000000042175 2";
-    pagamento.nome = "CECRISA REV CERAMICOS S";
-    pagamento.codFornecedor = model.data(index.row(), "codFornecedor").toString() + " " + model.data(index.row(), "pf2_idVenda").toString();
+    if (grupo == "RH - SALÁRIOS") {
+      pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
+      //
+    }
 
-    pagamentos << pagamento;
+    if (grupo == "PRODUTOS - VENDA") {
+      SqlQuery queryFornecedor;
+
+      if (not queryFornecedor.exec("SELECT banco, agencia, cc, nomeBanco, cnpjBanco FROM fornecedor WHERE razaoSocial = '" + contraParte + "'") or not queryFornecedor.first()) {
+        throw RuntimeException("Erro buscando dados báncarios do fornecedor: " + queryFornecedor.lastError().text());
+      }
+
+      const int codBanco = queryFornecedor.value("banco").toString().left(3).toInt();
+      const QString cnpjDest = queryFornecedor.value("cnpjBanco").toString().remove(".").remove("/").remove("-");
+      const QString agenciaConta = queryFornecedor.value("agencia").toString().remove("-") + " " + queryFornecedor.value("cc").toString().replace("-", " ");
+      const QString nome = queryFornecedor.value("nomeBanco").toString();
+
+      if (codBanco == 0 or cnpjDest.isEmpty() or agenciaConta.isEmpty() or nome.isEmpty()) { throw RuntimeError("Dados bancários do fornecedor incompletos!"); }
+
+      pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
+      pagamento.codBanco = codBanco;
+      pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
+      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.cnpjDest = cnpjDest;
+      pagamento.agenciaConta = agenciaConta;
+      pagamento.nome = nome;
+      pagamento.codFornecedor = model.data(index.row(), "codFornecedor").toString() + " " + model.data(index.row(), "pf2_idVenda").toString();
+
+      pagamentos << pagamento;
+    }
   }
 
   return pagamentos;

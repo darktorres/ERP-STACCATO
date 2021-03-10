@@ -261,6 +261,9 @@ bool Orcamento::viewRegister() {
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
+    const QString idCliente = QString::number(ui->itemBoxCliente->getId().toInt());
+    ui->itemBoxEndereco->setFilter("(idCliente = " + idCliente + " OR idEndereco = 1) AND desativado = FALSE");
+
     calcularPesoTotal();
 
     return true;

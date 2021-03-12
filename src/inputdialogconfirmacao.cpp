@@ -599,6 +599,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
+      // TODO: log error in SQL
       ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
       ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
       return;

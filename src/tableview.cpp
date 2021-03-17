@@ -200,7 +200,12 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
       currentRow = cell.row();
 
-      text += (cell.data().userType() == QMetaType::Double) ? QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2) : cell.data().toString();
+      QVariant currentText = cell.data();
+
+      if (currentText.userType() == QMetaType::QDateTime) { currentText = cell.data().toString().replace("T", " ").replace(".000", ""); }
+      if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2); }
+
+      text += currentText.toString();
     }
 
     QApplication::clipboard()->setText(headers + text);

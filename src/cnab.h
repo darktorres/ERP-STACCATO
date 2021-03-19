@@ -19,8 +19,11 @@ public:
     int codBanco;
     ulong valor;
     QString data;
+    QString cpfDest;
     QString cnpjDest;
-    QString agenciaConta;
+    ulong agencia;
+    ulong conta;
+    ulong dac;
     QString nome;
     QString codFornecedor;
   };

@@ -571,34 +571,72 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
     CNAB::Pagamento pagamento;
 
     if (grupo == "RH - SALÁRIOS") {
-      pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
-      //
-    }
+      SqlQuery queryFuncionario;
 
-    if (grupo == "PRODUTOS - VENDA") {
+      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nome = '" + contraParte + "'")) {
+        throw RuntimeException("Erro buscando dados báncarios do funcionário: " + queryFuncionario.lastError().text());
+      }
+
+      if (not queryFuncionario.first()) { throw RuntimeException("Não encontrou o funcionário: " + contraParte); }
+
+      const int codBanco = queryFuncionario.value("banco").toString().left(3).toInt();
+      const QString cpfDest = queryFuncionario.value("cpfBanco").toString().remove(".").remove("/").remove("-");
+      const QString agencia = queryFuncionario.value("agencia").toString().remove("-");
+      const QStringList contaDac = queryFuncionario.value("cc").toString().split("-");
+      const QString conta = contaDac.at(0);
+      const QString dac = contaDac.at(1);
+      const QString nome = queryFuncionario.value("nomeBanco").toString();
+
+      if (codBanco == 0 or cpfDest.isEmpty() or agencia.isEmpty() or conta.isEmpty() or dac.isEmpty() or nome.isEmpty()) {
+        throw RuntimeError("Dados bancários do funcionário incompletos: " + contraParte);
+      }
+
+      pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
+      pagamento.codBanco = codBanco;
+      pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
+      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.cpfDest = cpfDest;
+      pagamento.agencia = agencia.toULong();
+      pagamento.conta = conta.toULong();
+      pagamento.dac = dac.toULong();
+      pagamento.nome = nome;
+
+      pagamentos << pagamento;
+    } else if (grupo == "PRODUTOS - VENDA") {
       SqlQuery queryFornecedor;
 
-      if (not queryFornecedor.exec("SELECT banco, agencia, cc, nomeBanco, cnpjBanco FROM fornecedor WHERE razaoSocial = '" + contraParte + "'") or not queryFornecedor.first()) {
+      if (not queryFornecedor.exec("SELECT banco, agencia, cc, nomeBanco, cnpjBanco FROM fornecedor WHERE razaoSocial = '" + contraParte + "'")) {
         throw RuntimeException("Erro buscando dados báncarios do fornecedor: " + queryFornecedor.lastError().text());
       }
 
+      if (not queryFornecedor.first()) { throw RuntimeException("Não encontrou o fornecedor: " + contraParte); }
+
       const int codBanco = queryFornecedor.value("banco").toString().left(3).toInt();
       const QString cnpjDest = queryFornecedor.value("cnpjBanco").toString().remove(".").remove("/").remove("-");
-      const QString agenciaConta = queryFornecedor.value("agencia").toString().remove("-") + " " + queryFornecedor.value("cc").toString().replace("-", " ");
+      const QString agencia = queryFornecedor.value("agencia").toString().remove("-");
+      const QStringList contaDac = queryFornecedor.value("cc").toString().split("-");
+      const QString conta = contaDac.at(0);
+      const QString dac = contaDac.at(1);
       const QString nome = queryFornecedor.value("nomeBanco").toString();
 
-      if (codBanco == 0 or cnpjDest.isEmpty() or agenciaConta.isEmpty() or nome.isEmpty()) { throw RuntimeError("Dados bancários do fornecedor incompletos!"); }
+      if (codBanco == 0 or cnpjDest.isEmpty() or agencia.isEmpty() or conta.isEmpty() or dac.isEmpty() or nome.isEmpty()) {
+        throw RuntimeError("Dados bancários do fornecedor incompletos: " + contraParte);
+      }
 
       pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
       pagamento.codBanco = codBanco;
       pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
       pagamento.data = QDate::currentDate().toString("ddMMyyyy");
       pagamento.cnpjDest = cnpjDest;
-      pagamento.agenciaConta = agenciaConta;
+      pagamento.agencia = agencia.toULong();
+      pagamento.conta = conta.toULong();
+      pagamento.dac = dac.toULong();
       pagamento.nome = nome;
       pagamento.codFornecedor = model.data(index.row(), "codFornecedor").toString() + " " + model.data(index.row(), "pf2_idVenda").toString();
 
       pagamentos << pagamento;
+    } else {
+      throw RuntimeError("Grupo não permitido: " + grupo);
     }
   }
 

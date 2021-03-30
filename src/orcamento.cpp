@@ -98,6 +98,7 @@ void Orcamento::setConnections() {
   connect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged, connectionType);
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &Orcamento::on_itemBoxCliente_textChanged, connectionType);
   connect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged, connectionType);
+  connect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged, connectionType);
   connect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged, connectionType);
   connect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked, connectionType);
   connect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked, connectionType);
@@ -130,6 +131,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged);
   disconnect(ui->itemBoxCliente, &ItemBox::textChanged, this, &Orcamento::on_itemBoxCliente_textChanged);
   disconnect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged);
+  disconnect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged);
   disconnect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged);
   disconnect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked);
   disconnect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked);
@@ -968,6 +970,18 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->doubleSpinBoxDesconto->setValue(0.);
 
   on_doubleSpinBoxCaixas_valueChanged(ui->doubleSpinBoxCaixas->value());
+}
+
+void Orcamento::on_itemBoxProfissional_idChanged(const QVariant &) {
+  const auto idProfissional = ui->itemBoxProfissional->getId();
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT comissao FROM profissional WHERE idProfissional = " + idProfissional.toString()) or not query.first()) {
+    throw RuntimeException("Erro buscando dados do profissional: " + query.lastError().text());
+  }
+
+  ui->itemBoxProfissional->setStyleSheet(query.value("comissao").toDouble() > 5 ? "background-color: rgb(255, 255, 127); color: rgb(0, 0, 0);" : "");
 }
 
 void Orcamento::on_itemBoxCliente_textChanged(const QString &) {

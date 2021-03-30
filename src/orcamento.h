@@ -55,6 +55,7 @@ private:
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxCliente_textChanged(const QString &) -> void;
   auto on_itemBoxProduto_idChanged(const QVariant &) -> void;
+  auto on_itemBoxProfissional_idChanged(const QVariant &) -> void;
   auto on_itemBoxVendedor_textChanged(const QString &) -> void;
   auto on_pushButtonAdicionarItem_clicked() -> void;
   auto on_pushButtonApagarOrc_clicked() -> void;

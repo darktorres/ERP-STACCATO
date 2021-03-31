@@ -31,6 +31,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   setupTables(table);
 
   if (naoListarBuscaVazia) { model.setFilter("0"); }
+  if (table == "profissional") { model.setFilter("idProfissional = 1"); }
 
   model.select();
 
@@ -84,7 +85,12 @@ void SearchDialog::setupTables(const QString &table) {
 void SearchDialog::on_lineEditBusca_textChanged() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  if (text.isEmpty()) { return model.setFilter(naoListarBuscaVazia ? "0" : filter); }
+  if (text.isEmpty()) {
+    model.setFilter(naoListarBuscaVazia ? "0" : filter);
+    if (model.tableName() == "profissional") { model.setFilter("idProfissional = 1"); }
+
+    return;
+  }
 
   if (model.tableName() == "view_nfe_inutilizada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
 
@@ -385,7 +391,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   sdVendedor->model.setSort("nome");
 
-  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "especialidade", "desativado"});
+  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "especialidade", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
@@ -415,7 +421,7 @@ SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
 
   sdEndereco->setHeaderData("descricao", "Descrição");
   sdEndereco->setHeaderData("cep", "CEP");
-  sdEndereco->setHeaderData("logradouro", "End.");
+  sdEndereco->setHeaderData("logradouro", "Logradouro");
   sdEndereco->setHeaderData("numero", "Número");
   sdEndereco->setHeaderData("complemento", "Comp.");
   sdEndereco->setHeaderData("bairro", "Bairro");

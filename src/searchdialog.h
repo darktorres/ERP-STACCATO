@@ -55,8 +55,8 @@ private:
   SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, const bool naoListar,
-                        QWidget *parent);
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
+                        const QString &sortColumn, const bool naoListar, QWidget *parent);
 
   auto delayFiltro() -> void;
   auto hideColumns(const QStringList &columns) -> void;

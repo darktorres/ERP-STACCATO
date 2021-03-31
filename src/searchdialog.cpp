@@ -461,7 +461,10 @@ void SearchDialog::setFornecedorRep(const QString &newFornecedorRep) { fornecedo
 
 QString SearchDialog::getFilter() const { return filter; }
 
-void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepresentacao = isRepresentacao; }
+void SearchDialog::setRepresentacao(const bool isRepresentacao) {
+  this->isRepresentacao = isRepresentacao;
+  on_lineEditBusca_textChanged();
+}
 
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(); }
 

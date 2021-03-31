@@ -2,6 +2,7 @@
 #include "ui_inserirtransferencia.h"
 
 #include "application.h"
+#include "sqlquery.h"
 
 #include <QMessageBox>
 #include <QSqlError>
@@ -13,6 +14,9 @@ InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), u
 
   ui->itemBoxDe->setSearchDialog(SearchDialog::conta(this));
   ui->itemBoxPara->setSearchDialog(SearchDialog::conta(this));
+  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
+
+  ui->frameCliente->hide();
 
   ui->dateEdit->setDate(qApp->serverDate());
 
@@ -24,6 +28,8 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->itemBoxPara, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
+  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxCliente_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked, connectionType);
 }
@@ -63,6 +69,8 @@ void InserirTransferencia::cadastrar() {
   modelDe.setData(rowDe, "grupo", "Transferência");
   modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text());
 
+  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") { modelDe.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
+
   // lancamento 'para'
 
   const int rowPara = modelPara.insertRowAtEnd();
@@ -83,9 +91,19 @@ void InserirTransferencia::cadastrar() {
   modelPara.setData(rowPara, "grupo", "Transferência");
   modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
+  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") { modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
+
   modelDe.submitAll();
 
   modelPara.submitAll();
+
+  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") {
+    SqlQuery query;
+
+    if (not query.exec("UPDATE cliente SET credito = credito - " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
+      throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text());
+    }
+  }
 }
 
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
@@ -94,6 +112,8 @@ void InserirTransferencia::verifyFields() {
   if (ui->itemBoxDe->text().isEmpty()) { throw RuntimeError("Conta 'De' não preenchido!", this); }
 
   if (ui->itemBoxPara->text().isEmpty()) { throw RuntimeError("Conta 'Para' não preenchido!", this); }
+
+  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES" and ui->itemBoxCliente->text().isEmpty()) { throw RuntimeError("Não selecionou cliente!"); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { throw RuntimeError("Valor não preenchido!", this); }
 
@@ -108,4 +128,23 @@ void InserirTransferencia::setupTables() {
   modelPara.setTable("conta_a_receber_has_pagamento");
 }
 
-// TODO: 5fazer transferencia especial para conta cliente, fazendo a operacao no credito tambem
+void InserirTransferencia::on_itemBoxPara_textChanged(const QString &text) { ui->frameCliente->setVisible(text == "CRÉDITO DE CLIENTES"); }
+
+void InserirTransferencia::on_itemBoxCliente_textChanged(const QString &text) {
+  if (text.isEmpty()) {
+    ui->doubleSpinBoxValor->setMaximum(999999.990000);
+    ui->doubleSpinBoxValor->setValue(0);
+    return;
+  }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT credito FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString()) or not query.first()) {
+    throw RuntimeException("Erro buscando crédito do cliente: " + query.lastError().text());
+  }
+
+  ui->doubleSpinBoxValor->setMaximum(query.value("credito").toDouble());
+  ui->doubleSpinBoxValor->setValue(query.value("credito").toDouble());
+
+  if (qFuzzyIsNull(query.value("credito").toDouble())) { throw RuntimeError("Cliente selecionado não possui crédito!"); }
+}

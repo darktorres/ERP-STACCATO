@@ -163,6 +163,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { throw RuntimeError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
   const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
+  const QString fornecedor = modelViewVendaProduto.data(row, "fornecedor").toString();
   const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
   const QString idVenda = modelViewVendaProduto.data(row, "idVenda").toString();
 
@@ -176,7 +177,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 
   auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
-  produtos->viewProduto(codComercial, idVenda);
+  produtos->viewProduto(fornecedor, codComercial, idVenda);
   produtos->show();
 }
 

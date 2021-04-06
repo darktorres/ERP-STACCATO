@@ -32,6 +32,7 @@ void ProdutosPendentes::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked, connectionType);
+  connect(ui->pushButtonConsumirCompra, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirCompra_clicked, connectionType);
   connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked, connectionType);
 }
 
@@ -45,19 +46,34 @@ void ProdutosPendentes::recalcularQuantidade() {
   ui->doubleSpinBoxComprar->setValue(quant);
 }
 
-void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
+void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &codComercial, const QString &idVenda) {
   setWindowTitle("Venda " + idVenda);
 
-  modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
+  //-----------------------------------------------
+
+  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
   modelProdutos.select();
 
-  modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
+  //-----------------------------------------------
+
+  modelViewProdutos.setFilter("fornecedor = '" + fornecedor + "' AND codComercial = '" + codComercial + "' AND idVenda = '" + idVenda +
+                              "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
   modelViewProdutos.select();
 
+  //-----------------------------------------------
+
+  modelCompra.setFilter("fornecedor = '" + fornecedor + "' AND codComercial = '" + codComercial + "' AND idVendaProduto2 IS NULL AND status IN ('PENDENTE', 'EM COMPRA', 'EM FATURAMENTO')");
+
+  modelCompra.select();
+
+  //-----------------------------------------------
+
   ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
+
+  //-----------------------------------------------
 
   SqlQuery query;
   query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
@@ -70,7 +86,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->doubleSpinBoxQuantTotal->setSingleStep(step);
   ui->doubleSpinBoxComprar->setSingleStep(step);
 
-  const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
+  //-----------------------------------------------
 
   modelEstoque.setQuery(
       "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, e.restante / p.quantCaixa AS `Caixas`, `e`.`lote` AS `lote`, "
@@ -92,6 +108,8 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(3, this));
+
+  //-----------------------------------------------
 
   const bool representacao = (idVenda.at(11) == "R");
 
@@ -143,6 +161,59 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("st");
 
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
+
+  //--------------------------------------------------------------------
+
+  modelCompra.setTable("pedido_fornecedor_has_produto2");
+
+  modelCompra.setHeaderData("status", "Status");
+  modelCompra.setHeaderData("ordemCompra", "OC");
+  modelCompra.setHeaderData("descricao", "Descrição");
+  modelCompra.setHeaderData("obs", "Obs.");
+  modelCompra.setHeaderData("quant", "Quant.");
+  modelCompra.setHeaderData("un", "Un.");
+  modelCompra.setHeaderData("caixas", "Caixas");
+  modelCompra.setHeaderData("dataPrevCompra", "Prev. Compra");
+  modelCompra.setHeaderData("dataRealCompra", "Data Compra");
+  modelCompra.setHeaderData("dataPrevConf", "Prev. Confirm.");
+  modelCompra.setHeaderData("dataRealConf", "Data Confirm.");
+  modelCompra.setHeaderData("dataPrevFat", "Prev. Fat.");
+
+  ui->tableCompra->setModel(&modelCompra);
+
+  ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
+
+  ui->tableCompra->hideColumn("idPedido2");
+  ui->tableCompra->hideColumn("idPedidoFK");
+  ui->tableCompra->hideColumn("idRelacionado");
+  ui->tableCompra->hideColumn("selecionado");
+  ui->tableCompra->hideColumn("aliquotaSt");
+  ui->tableCompra->hideColumn("st");
+  ui->tableCompra->hideColumn("statusFinanceiro");
+  ui->tableCompra->hideColumn("ordemRepresentacao");
+  ui->tableCompra->hideColumn("codFornecedor");
+  ui->tableCompra->hideColumn("idVenda");
+  ui->tableCompra->hideColumn("idVendaProduto1");
+  ui->tableCompra->hideColumn("idVendaProduto2");
+  ui->tableCompra->hideColumn("idCompra");
+  ui->tableCompra->hideColumn("fornecedor");
+  ui->tableCompra->hideColumn("idProduto");
+  ui->tableCompra->hideColumn("colecao");
+  ui->tableCompra->hideColumn("codComercial");
+  ui->tableCompra->hideColumn("quantUpd");
+  ui->tableCompra->hideColumn("un2");
+  ui->tableCompra->hideColumn("prcUnitario");
+  ui->tableCompra->hideColumn("preco");
+  ui->tableCompra->hideColumn("kgcx");
+  ui->tableCompra->hideColumn("formComercial");
+  ui->tableCompra->hideColumn("codBarras");
+  ui->tableCompra->hideColumn("dataRealFat");
+  ui->tableCompra->hideColumn("dataPrevColeta");
+  ui->tableCompra->hideColumn("dataRealColeta");
+  ui->tableCompra->hideColumn("dataPrevReceb");
+  ui->tableCompra->hideColumn("dataRealReceb");
+  ui->tableCompra->hideColumn("dataPrevEnt");
+  ui->tableCompra->hideColumn("dataRealEnt");
 }
 
 void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
@@ -198,13 +269,88 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
   recarregarTabelas();
 }
 
-void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
-  // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda
+void ProdutosPendentes::consumirCompra(const int rowProduto, const int rowCompra, const double quantConsumir, const double quantVenda) {
+  const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
 
+  if (quantConsumir < quantVenda) { dividirVenda(quantConsumir, quantVenda, rowProduto); }
+  if (quantConsumir < quantCompra) { dividirCompra(quantConsumir, quantCompra, rowCompra); }
+
+  //--------------------------------------------------------------------
+
+  const QString statusCompra = modelCompra.data(rowCompra, "status").toString();
+
+  modelProdutos.setData(rowProduto, "status", (statusCompra == "PENDENTE" ? "INICIADO" : statusCompra));
+  modelProdutos.setData(rowProduto, "dataPrevCompra", modelCompra.data(rowCompra, "dataPrevCompra"));
+  modelProdutos.setData(rowProduto, "dataRealCompra", modelCompra.data(rowCompra, "dataRealCompra"));
+  modelProdutos.setData(rowProduto, "dataPrevConf", modelCompra.data(rowCompra, "dataPrevConf"));
+  modelProdutos.setData(rowProduto, "dataRealConf", modelCompra.data(rowCompra, "dataRealConf"));
+  modelProdutos.setData(rowProduto, "dataPrevFat", modelCompra.data(rowCompra, "dataPrevFat"));
+
+  //--------------------------------------------------------------------
+
+  modelCompra.setData(rowCompra, "idVenda", modelProdutos.data(rowProduto, "idVenda"));
+  modelCompra.setData(rowCompra, "idVendaProduto2", modelProdutos.data(rowProduto, "idVendaProduto2"));
+
+  //--------------------------------------------------------------------
+
+  modelProdutos.submitAll();
+  modelCompra.submitAll();
+}
+
+void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
+  const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (listProduto.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
+
+  if (listProduto.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
+
+  const auto listCompra = ui->tableCompra->selectionModel()->selectedRows();
+
+  if (listCompra.isEmpty()) { throw RuntimeError("Nenhuma compra selecionada!", this); }
+
+  //--------------------------------------------------------------------
+
+  const int rowProduto = listProduto.first().row();
+  const int rowCompra = listCompra.first().row();
+
+  const double quantVenda = modelViewProdutos.data(rowProduto, "quant").toDouble();
+  const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
+
+  bool ok;
+
+  const double quantConsumir =
+      QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantCompra), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
+
+  if (not ok) { return; }
+
+  const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
+
+  //--------------------------------------------------------------------
+
+  qApp->startTransaction("ProdutosPendentes::on_pushButtonConsumirCompra");
+
+  consumirCompra(rowProduto, rowCompra, quantConsumir, quantVenda);
+
+  Sql::updateVendaStatus(idVenda);
+
+  qApp->endTransaction();
+
+  //--------------------------------------------------------------------
+
+  qApp->enqueueInformation("Consumo criado com sucesso!", this);
+
+  recarregarTabelas();
+}
+
+void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
   auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
   estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt(), quantConsumir);
 
+  //--------------------------------------------------------------------
+
   if (quantConsumir < quantVenda) { dividirVenda(quantConsumir, quantVenda, rowProduto); }
+
+  //--------------------------------------------------------------------
 
   modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status"));
 
@@ -325,6 +471,48 @@ void ProdutosPendentes::atualizarVenda(const int rowProduto) {
   modelProdutos.setData(rowProduto, "status", "INICIADO");
 }
 
+void ProdutosPendentes::dividirCompra(const double quantSeparar, const double quantCompra, const int rowCompra) {
+  // NOTE: *quuebralinha pedido_fornecedor2
+
+  const double quantCaixa = modelCompra.data(rowCompra, "quant").toDouble() / modelCompra.data(rowCompra, "caixas").toDouble();
+  const double proporcao = quantSeparar / quantCompra;
+  const double preco = modelCompra.data(rowCompra, "preco").toDouble();
+
+  // -------------------------------------------------------------------------
+
+  const int newRow = modelCompra.insertRowAtEnd();
+
+  // copiar colunas
+  for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
+    if (column == modelCompra.fieldIndex("idPedido2")) { continue; }
+    if (column == modelCompra.fieldIndex("created")) { continue; }
+    if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
+
+    const QVariant value = modelCompra.data(rowCompra, column);
+
+    if (value.isNull()) { continue; }
+
+    modelCompra.setData(newRow, column, value);
+  }
+
+  // -------------------------------------------------------------------------
+  // alterar linha original
+
+  modelCompra.setData(rowCompra, "quant", quantSeparar);
+  modelCompra.setData(rowCompra, "caixas", (quantSeparar / quantCaixa));
+  modelCompra.setData(rowCompra, "preco", preco * proporcao);
+
+  // -------------------------------------------------------------------------
+  // alterar linha nova
+
+  const double proporcaoNovo = (quantCompra - quantSeparar) / quantCompra;
+
+  modelCompra.setData(newRow, "idRelacionado", modelCompra.data(rowCompra, "idVendaProduto2"));
+  modelCompra.setData(newRow, "quant", (quantCompra - quantSeparar));
+  modelCompra.setData(newRow, "caixas", (quantCompra - quantSeparar) / quantCaixa);
+  modelCompra.setData(newRow, "preco", preco * proporcaoNovo);
+}
+
 void ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
   // NOTE: *quebralinha venda_produto2
 
@@ -370,4 +558,4 @@ void ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   modelProdutos.setData(newRow, "total", total * proporcaoNovo);
 }
 
-// NOTE: se o estoque for consumido gerar comissao 2% senao gerar comissao padrao
+// TODO: se o estoque for consumido gerar comissao 2% senao gerar comissao padrao

@@ -77,6 +77,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->radioButtonConferido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonRecebido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated, connectionType);
@@ -159,11 +160,7 @@ void WidgetFinanceiroContas::montaFiltro() {
       }
     }
 
-    if (ui->radioButtonPendente->isChecked()) {
-      filtros << "cp.status IN ('PENDENTE', 'CONFERIDO')";
-    } else {
-      if (not status.isEmpty()) { filtros << "cp.status = '" + status + "'"; }
-    }
+    if (not status.isEmpty()) { filtros << "cp.status = '" + status + "'"; }
 
     //-------------------------------------
 
@@ -228,11 +225,7 @@ void WidgetFinanceiroContas::montaFiltro() {
       }
     }
 
-    if (ui->radioButtonPendente->isChecked()) {
-      filtros << "cr.status IN ('PENDENTE', 'CONFERIDO')";
-    } else {
-      if (not status.isEmpty()) { filtros << "cr.status = '" + status + "'"; }
-    }
+    if (not status.isEmpty()) { filtros << "cr.status = '" + status + "'"; }
 
     //-------------------------------------
 

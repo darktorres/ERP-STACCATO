@@ -353,7 +353,7 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
 
 SearchDialog *SearchDialog::veiculo(QWidget *parent) {
   SearchDialog *sdVeiculo =
-      new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", "transportadora", false, parent);
+      new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", "razaoSocial", false, parent);
 
   sdVeiculo->hideColumns({"idVeiculo", "desativado"});
 

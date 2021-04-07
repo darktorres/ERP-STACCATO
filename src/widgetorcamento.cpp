@@ -252,7 +252,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
       SqlQuery query;
 
-      if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+      if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
         throw RuntimeException("Erro: " + query.lastError().text());
       }
 

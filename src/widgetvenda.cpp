@@ -158,7 +158,7 @@ void WidgetVenda::setPermissions() {
 
     ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
 
-    on_comboBoxLojas_currentIndexChanged();
+    fillComboBoxVendedor();
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
@@ -244,6 +244,22 @@ void WidgetVenda::unsetConnections() {
 
 void WidgetVenda::delayFiltro() { timer.start(500); }
 
+void WidgetVenda::fillComboBoxVendedor() {
+  ui->comboBoxVendedores->clear();
+
+  const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+    throw RuntimeException("Erro: " + query.lastError().text(), this);
+  }
+
+  ui->comboBoxVendedores->addItem("");
+
+  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+}
+
 void WidgetVenda::updateTables() {
   if (not isSet) {
     setComboBoxFornecedores();
@@ -293,25 +309,11 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
   try {
     [&] {
-      ui->comboBoxVendedores->clear();
-
-      const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
-
-      SqlQuery query;
-
-      if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-        throw RuntimeException("Erro: " + query.lastError().text(), this);
-      }
-
-      ui->comboBoxVendedores->addItem("");
-
-      while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+      fillComboBoxVendedor();
 
       // -------------------------------------------------------------------------
 
-      const QString tipoUsuario = UserSession::tipoUsuario;
-
-      if (tipoUsuario == "VENDEDOR") {
+      if (UserSession::tipoUsuario == "VENDEDOR") {
         if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
           ui->radioButtonTodos->setDisabled(true);
           ui->radioButtonProprios->setChecked(true);

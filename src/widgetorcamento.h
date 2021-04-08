@@ -28,6 +28,7 @@ private:
   Ui::WidgetOrcamento *ui;
   // methods
   auto delayFiltro() -> void;
+  auto fillComboBoxVendedor() -> void;
   auto listarLojas() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;

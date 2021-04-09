@@ -18,8 +18,7 @@ void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
 void Excel::gerarExcel() {
   // TODO: dear god, divide this into smaller funcs
 
-  const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
-
+  const QString folder = (tipo == Tipo::Orcamento) ? "User/OrcamentosFolder" : "User/VendasFolder";
   const QString folderKey = UserSession::getSetting(folder).toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
@@ -32,11 +31,13 @@ void Excel::gerarExcel() {
 
   setQuerys();
 
-  fileName = (isRepresentacao) ? representacao + ".xlsx"
-                               : id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
-
-  fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
-  fileName = folderKey + "/" + fileName;
+  if (anexoCompra) {
+    fileName = customFileName;
+  } else {
+    fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
+    fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
+    fileName = folderKey + "/" + fileName;
+  }
 
   File file(fileName);
 
@@ -69,7 +70,7 @@ void Excel::gerarExcel() {
   xlsx.write("A5", endLoja);
 
   if (tipo == Tipo::Venda) {
-    if (isRepresentacao) {
+    if (anexoCompra) {
       xlsx.write("C2", "Pedido:");
       xlsx.write("D2", "OC " + QString::number(ordemCompra) + " " + id);
       QXlsx::Format format;

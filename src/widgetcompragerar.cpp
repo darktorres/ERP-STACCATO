@@ -343,18 +343,21 @@ bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
 QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) {
   const int firstRow = list.first().row();
   const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
+  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
+
+  if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
-    const QString representacao = "OC " + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor;
+    const QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
 
     Excel excel(idVenda, Excel::Tipo::Venda, this);
     excel.ordemCompra = ordemCompra;
-    excel.isRepresentacao = true;
-    excel.representacao = representacao;
+    excel.anexoCompra = true;
+    excel.customFileName = fileName;
     excel.gerarExcel();
 
-    return excel.getFileName();
+    return fileName;
   }
 
   QStringList idVendas;
@@ -370,10 +373,6 @@ QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int 
   File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
-
-  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
-
-  if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
   const QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
 

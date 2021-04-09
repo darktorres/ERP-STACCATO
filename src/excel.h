@@ -11,9 +11,9 @@ public:
   Excel(const QString &id, const Tipo tipo, QWidget *parent);
 
   bool mostrarRT = false;
-  bool isRepresentacao = false;
+  bool anexoCompra = false;
   int ordemCompra;
-  QString representacao;
+  QString customFileName;
 
   auto gerarExcel() -> void;
   auto getFileName() const -> QString;

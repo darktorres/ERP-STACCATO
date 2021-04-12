@@ -76,6 +76,8 @@ void ItemBox::clear() {
   id.clear();
 
   QLineEdit::clear();
+
+  QLineEdit::setToolTip(QString());
 }
 
 void ItemBox::setSearchDialog(SearchDialog *dialog) {

@@ -193,7 +193,7 @@ void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   if (modelEstoque.filter().isEmpty()) { throw RuntimeException("Não setou idEstoque!"); }
 
-  if (quant > ui->doubleSpinBoxRestante->value()) { throw RuntimeException("Quantidade insuficiente!"); }
+  if (quant > ui->doubleSpinBoxRestante->value()) { throw RuntimeException("Quantidade insuficiente do estoque " + idEstoque + "!"); }
 
   // -------------------------------------------------------------------------
 

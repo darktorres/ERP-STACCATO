@@ -90,15 +90,18 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   //------------------------------------
 
-  const int row = list.first().row();
+  for (auto &index : list) {
+    const int row = index.row();
 
-  const QString status = modelProduto.data(row, "status").toString();
+    const QString status = modelProduto.data(row, "status").toString();
 
-  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { throw RuntimeError("Produto ainda não foi comprado!", this); }
+    if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { throw RuntimeError("Produto ainda não foi comprado!", this); }
 
-  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
+    if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
 
-  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { throw RuntimeError("Não permitido!", this); }
+    if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { throw RuntimeError("Não permitido!", this); }
+  }
+
   //------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
@@ -109,11 +112,11 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   //------------------------------------
 
-  const QString idVenda = modelProduto.data(row, "idVenda").toString();
+  const QString idVenda = modelProduto.data(list.first().row(), "idVenda").toString();
 
   qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo");
 
-  desfazerConsumo(row);
+  desfazerConsumo(list);
 
   Sql::updateVendaStatus(idVenda);
 
@@ -126,10 +129,12 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-void WidgetCompraConsumos::desfazerConsumo(const int row) {
-  const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
+void WidgetCompraConsumos::desfazerConsumo(const QList<QModelIndex> &list) {
+  for (auto &index : list) {
+    const int idVendaProduto2 = modelProduto.data(index.row(), "idVendaProduto2").toInt();
 
-  Estoque::desfazerConsumo(idVendaProduto2);
+    Estoque::desfazerConsumo(idVendaProduto2);
+  }
 }
 
 void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
@@ -137,7 +142,11 @@ void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
 void WidgetCompraConsumos::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
+  if (text.isEmpty()) {
+    modelPedido.setFilter("0");
+  } else {
+    modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
+  }
 }
 
 // TODO: converter tabela inferior para arvore e permitir o desconsumo apenas das sublinhas (vp2)

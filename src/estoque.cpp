@@ -369,26 +369,28 @@ void Estoque::desfazerConsumo(const int idVendaProduto2) {
 
   // NOTE: estoque_has_consumo may have the same idVendaProduto2 in more than one row (only until the field is made UNIQUE)
   SqlQuery queryDelete;
-  queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
-  queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryDelete.exec()) { throw RuntimeException("Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
+  if (not queryDelete.exec("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = " + QString::number(idVendaProduto2))) {
+    throw RuntimeException("Erro removendo consumo estoque: " + queryDelete.lastError().text());
+  }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
   SqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
+  if (not queryCompra.exec("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = " + QString::number(idVendaProduto2) +
+                           " AND status NOT IN ('CANCELADO', 'DEVOLVIDO')")) {
+    throw RuntimeException("Erro atualizando pedido compra: " + queryCompra.lastError().text());
+  }
 
   SqlQuery queryVenda;
-  queryVenda.prepare(
-      "UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, lote = NULL, "
-      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
-      "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
+  if (not queryVenda.exec(
+          "UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, lote = NULL, "
+          "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+          "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = " +
+          QString::number(idVendaProduto2) + " AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')")) {
+    throw RuntimeException("Erro atualizando pedido venda: " + queryVenda.lastError().text());
+  }
 }
 
 // TODO: 1colocar o botao de desvincular consumo nesta tela

@@ -55,16 +55,21 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_grafico", "Ver Gráfico?");
   modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");
 
+  modelPermissoes.setHeaderData("webdav_documentos", "Rede - Documentos");
+  modelPermissoes.setHeaderData("webdav_compras", "Rede - Compras");
+  modelPermissoes.setHeaderData("webdav_financeiro", "Rede - Financeiro");
+  modelPermissoes.setHeaderData("webdav_obras", "Rede - Obras");
+
   auto *transposeProxyModel = new QTransposeProxyModel(this);
   transposeProxyModel->setSourceModel(&modelPermissoes);
 
   ui->table->setModel(transposeProxyModel);
 
   ui->table->hideRow(0);                                  // idUsuario
-  ui->table->hideRow(ui->table->model()->rowCount() - 1); // lastUpdated
   ui->table->hideRow(ui->table->model()->rowCount() - 2); // created
+  ui->table->hideRow(ui->table->model()->rowCount() - 1); // lastUpdated
 
-  for (int row = 1; row < 12; ++row) { ui->table->setItemDelegateForRow(row, new CheckBoxDelegate(this)); }
+  for (int row = 1; row < modelPermissoes.columnCount() - 2; ++row) { ui->table->setItemDelegateForRow(row, new CheckBoxDelegate(this)); }
 
   ui->table->horizontalHeader()->hide();
 }
@@ -89,7 +94,7 @@ void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
 
-  if(ui->comboBoxTipo->currentText().isEmpty()){throw RuntimeError("Não escolheu o tipo de usuário!");}
+  if (ui->comboBoxTipo->currentText().isEmpty()) { throw RuntimeError("Não escolheu o tipo de usuário!"); }
 }
 
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }

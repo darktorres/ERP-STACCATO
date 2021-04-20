@@ -468,23 +468,23 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   if (sticms.userType() == QMetaType::QString) { sticms = locale.toDouble(sticms.toString()); }
   sticms = qApp->roundDouble(sticms.toDouble());
 
-  produto.idFornecedor = fornecedores.value(fornecedor.toString());
-  produto.fornecedor = fornecedor.toString().toUpper();
-  produto.descricao = descricao.toString().remove("*").toUpper();
-  produto.un = un.toString().remove("*").toUpper();
-  produto.colecao = colecao.toString().remove("*").toUpper();
+  produto.idFornecedor = fornecedores.value(fornecedor.toString().trimmed());
+  produto.fornecedor = fornecedor.toString().toUpper().trimmed();
+  produto.descricao = descricao.toString().remove("*").toUpper().trimmed();
+  produto.un = un.toString().remove("*").toUpper().trimmed();
+  produto.colecao = colecao.toString().remove("*").toUpper().trimmed();
   produto.m2cx = m2cx.toDouble();
   produto.pccx = pccx.toDouble();
   produto.kgcx = kgcx.toDouble();
-  produto.formComercial = formComercial.toString().remove("*").toUpper();
-  produto.codComercial = codComercial.toString().remove("*").remove(".").remove(",").toUpper();
-  produto.codBarras = codBarras.toString().remove("*").remove(".").remove(",").toUpper();
-  produto.ncm = ncm.toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper();
+  produto.formComercial = formComercial.toString().remove("*").toUpper().trimmed();
+  produto.codComercial = codComercial.toString().remove("*").remove(".").remove(",").toUpper().trimmed();
+  produto.codBarras = codBarras.toString().remove("*").remove(".").remove(",").toUpper().trimmed();
+  produto.ncm = ncm.toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper().trimmed();
   produto.qtdPallet = qtdPallet.toDouble();
   produto.custo = custo.toDouble();
   produto.precoVenda = precoVenda.toDouble();
-  produto.ui = ui.toString().remove("*").toUpper();
-  produto.un2 = un2.toString().remove("*").toUpper();
+  produto.ui = ui.toString().remove("*").toUpper().trimmed();
+  produto.un2 = un2.toString().remove("*").toUpper().trimmed();
   produto.minimo = minimo.toDouble();
   produto.mva = mva.toDouble();
   produto.st = st.toDouble();
@@ -733,7 +733,7 @@ void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
 
   // Fora do padrão
 
-  if (ncm == "0" or ncm.isEmpty() or (ncm.length() != 8 and ncm.length() != 10)) { modelErro.setData(row, "ncmUpd", gray); }
+  if (ncm == "0" or ncm.isEmpty()) { modelErro.setData(row, "ncmUpd", gray); }
 
   if (codBarras == "0" or codBarras.isEmpty()) { modelErro.setData(row, "codBarrasUpd", gray); }
 
@@ -752,6 +752,8 @@ void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   if (precoVenda <= 0.) { modelErro.setData(row, "precoVendaUpd", red); }
 
   if (precoVenda < custo) { modelErro.setData(row, "precoVendaUpd", red); }
+
+  if (ncm.length() != 8) { modelErro.setData(row, "ncmUpd", red); }
 }
 
 bool ImportaProdutos::camposForaDoPadrao() {
@@ -761,7 +763,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
   if (produto.custo <= 0.) { return true; }
   if (produto.precoVenda <= 0.) { return true; }
   if (produto.precoVenda < produto.custo) { return true; }
-  if (produto.ncm.length() > 8) { return true; }
+  if (produto.ncm.length() != 8) { return true; }
 
   return false;
 }

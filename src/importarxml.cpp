@@ -890,7 +890,7 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const double quantConsumo = qApp->roundDouble(qMin(quantVenda, restanteEstoque));
 
   if (qFuzzyIsNull(quantConsumo)) { throw RuntimeException("quantConsumo = 0!", this); }
-  if (quantConsumo < quantVenda) { throw RuntimeException("quantConsumo < quantVenda", this); }
+  if (quantConsumo < quantVenda) { throw RuntimeException("quantConsumo < quantVenda: " + QString::number(idVendaProduto2), this); }
 
   modelVenda.setData(rowVenda, "status", "EM COLETA");
   modelVenda.setData(rowVenda, "dataRealFat", dataFaturamento);

@@ -293,7 +293,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("ipi", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("markup", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("st", new PorcentagemDelegate(true, this));
-  ui->tableProdutos->setItemDelegateForColumn("sticms", porcDelegate);
+  ui->tableProdutos->setItemDelegateForColumn("sticms", new PorcentagemDelegate(true, this));
   ui->tableProdutos->setItemDelegateForColumn("mva", porcDelegate);
 
   //-------------------------------------------------------------//
@@ -341,8 +341,8 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->setItemDelegateForColumn("icms", porcDelegate);
   ui->tableErro->setItemDelegateForColumn("ipi", porcDelegate);
   ui->tableErro->setItemDelegateForColumn("markup", porcDelegate);
-  ui->tableErro->setItemDelegateForColumn("st", porcDelegate);
-  ui->tableErro->setItemDelegateForColumn("sticms", porcDelegate);
+  ui->tableErro->setItemDelegateForColumn("st", new PorcentagemDelegate(true, this));
+  ui->tableErro->setItemDelegateForColumn("sticms", new PorcentagemDelegate(true, this));
   ui->tableErro->setItemDelegateForColumn("mva", porcDelegate);
 }
 

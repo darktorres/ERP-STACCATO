@@ -487,9 +487,9 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
   const QString url = "http://" + ip + "/webdav/METAIS_VIVIANE/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
 
   auto *manager = new QNetworkAccessManager(this);
-  auto request = QNetworkRequest(QUrl(url));
-  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-  auto reply = manager->get(request);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  auto reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {

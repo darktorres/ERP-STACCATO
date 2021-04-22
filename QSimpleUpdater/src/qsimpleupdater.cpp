@@ -55,6 +55,8 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
   m_downloadDialog = new DownloadDialog();
 
   m_manager = new QNetworkAccessManager(this);
+  m_manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
   connect(m_manager, &QNetworkAccessManager::finished, this, &QSimpleUpdater::checkDownloadedVersion);
 
   connect(m_progressDialog, &ProgressDialog::cancelClicked, this, &QSimpleUpdater::cancel);
@@ -354,6 +356,7 @@ void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
 
   if (not m_changelog_url.isEmpty() and newerVersionAvailable()) {
     auto *_manager = new QNetworkAccessManager(this);
+    _manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
     connect(_manager, &QNetworkAccessManager::finished, this, &QSimpleUpdater::processDownloadedChangelog);
 

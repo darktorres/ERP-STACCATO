@@ -40,6 +40,7 @@ DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::Do
 
   // Initialize the network access manager
   m_manager = new QNetworkAccessManager(this);
+  m_manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 }
 
 DownloadDialog::~DownloadDialog() { delete ui; }

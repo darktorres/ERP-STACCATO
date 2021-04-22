@@ -572,11 +572,11 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    File file("webdav.txt");
+    File webdavLogin("webdav.txt");
 
-    if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + file.errorString()); }
+    if (not webdavLogin.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + webdavLogin.errorString()); }
 
-    const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
+    const QStringList lines = QString(webdavLogin.readAll()).split("\r\n", Qt::SkipEmptyParts);
 
     authenticator->setRealm(lines.at(0));
     authenticator->setUser(lines.at(1));
@@ -593,22 +593,29 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
-  const auto reply = manager->put(QNetworkRequest(QUrl(url)), file.readAll());
+  const auto fileContent = file.readAll();
+
+  manager->put(QNetworkRequest(QUrl(url)), fileContent);
 
   ui->lineEditFoto->setText("Enviando...");
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
-    if (reply->error() != QNetworkReply::NoError) {
-      // TODO: log error in SQL
-      ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
-      ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+  connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
+    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+
+    if (redirect.isValid()) {
+      manager->put(QNetworkRequest(redirect), fileContent);
       return;
     }
 
-    ui->lineEditFoto->setText(url);
+    if (reply->error() != QNetworkReply::NoError) {
+      ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+      throw RuntimeException("Erro enviando foto: " + reply->errorString());
+    }
+
+    ui->lineEditFoto->setText(reply->url().toString());
     ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 
-    for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", url); }
+    for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", reply->url().toString()); }
   });
 }
 

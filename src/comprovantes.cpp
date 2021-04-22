@@ -57,6 +57,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   const QString url = selection.first().data().toString().replace("WEBDAV", "webdav");
 
   auto *manager = new QNetworkAccessManager(this);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
@@ -72,9 +73,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
     authenticator->setPassword(lines.at(2));
   });
 
-  auto request = QNetworkRequest(QUrl(url));
-  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-  auto reply = manager->get(request);
+  auto reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }

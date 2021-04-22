@@ -77,7 +77,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
-      if (reply->errorString().contains("server replied: Not Found")) { throw RuntimeException("Arquivo não encontrado no servidor!", this); }
+      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
 
       throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
     }

@@ -76,7 +76,11 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   auto reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
-    if (reply->error() != QNetworkReply::NoError) { throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this); }
+    if (reply->error() != QNetworkReply::NoError) {
+      if (reply->errorString().contains("server replied: Not Found")) { throw RuntimeException("Arquivo não encontrado no servidor!", this); }
+
+      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+    }
 
     const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 

@@ -404,6 +404,14 @@ void Devolucao::criarDevolucao() {
   modelVenda.submitAll();
 }
 
+void Devolucao::desvincularCompra(const QString &idVendaProduto2) {
+  SqlQuery query;
+
+  if (not query.exec("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = " + idVendaProduto2)) {
+    throw RuntimeException("Erro desvinculando da compra: " + query.lastError().text());
+  }
+}
+
 void Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2) {
   copiarProdutoParaDevolucao(currentRow);
 
@@ -422,6 +430,7 @@ void Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   //------------------------------------
 
   alterarLinhaOriginal(currentRow);
+  desvincularCompra(modelProdutos2.data(currentRow, "idVendaProduto2").toString());
 
   //------------------------------------
 
@@ -678,8 +687,6 @@ void Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   const QString status = modelCompra.data(0, "status").toString();
   const QString idVenda = modelCompra.data(0, "idVenda").toString();
 
-  modelCompra.setData(0, "idVenda", QVariant(QVariant::Int));
-  modelCompra.setData(0, "idVendaProduto2", QVariant(QVariant::Int));
   modelCompra.setData(0, "obs", idVenda + " DEVOLVEU");
   modelCompra.setData(0, "quant", quantDevolvida);
   modelCompra.setData(0, "caixas", quantDevolvida / stepQuant);

@@ -120,7 +120,11 @@ void LoginDialog::verificaVersao() {
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());
 
   if (currentVersion < serverVersion) {
-    throw RuntimeError("Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString());
+    throw RuntimeError("<pre>Vers&atilde;o do ERP n&atilde;o &eacute; a mais recente!<br />Sua vers&atilde;o: " + qApp->applicationVersion() +
+                       " <br />Vers&atilde;o atual: " + query.value("versaoAtual").toString() +
+                       "</pre><p><a "
+                       "href=\"http://" +
+                       qApp->getWebDavIp() + "/Instalador.exe\">Clique aqui para baixar a última versão</a></p>");
   }
 }
 

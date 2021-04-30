@@ -54,7 +54,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
   // --------------------------------------------------------------------------
 
-  const QString url = selection.first().data().toString().replace("WEBDAV", "webdav");
+  const QString url = selection.first().data().toString();
 
   auto *manager = new QNetworkAccessManager(this);
   manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);

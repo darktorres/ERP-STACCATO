@@ -87,7 +87,7 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
   modelPedidoFornecedor.setHeaderData("colecao", "Coleção");
   modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
-  modelPedidoFornecedor.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor.setHeaderData("prcUnitario", "R$ Unit.");
   modelPedidoFornecedor.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor.setHeaderData("preco", "Total");
   modelPedidoFornecedor.setHeaderData("un", "Un.");
@@ -198,7 +198,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 
     // TODO: se alterar quant. tem que alterar caixas
 
-    if (header == "Quant." or header == "$ Unit.") {
+    if (header == "Quant." or header == "R$ Unit.") {
       const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
       modelPedidoFornecedor.setData(row, "preco", preco);
     }

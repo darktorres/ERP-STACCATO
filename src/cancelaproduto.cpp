@@ -46,7 +46,7 @@ void CancelaProduto::setupTables() {
   model.setHeaderData("descricao", "Produto");
   model.setHeaderData("colecao", "Coleção");
   model.setHeaderData("caixas", "Caixas");
-  model.setHeaderData("prcUnitario", "$ Unit.");
+  model.setHeaderData("prcUnitario", "R$ Unit.");
   model.setHeaderData("quant", "Quant.");
   model.setHeaderData("preco", "Total");
   model.setHeaderData("un", "Un.");

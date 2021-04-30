@@ -167,7 +167,7 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor2.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor2.setHeaderData("un", "Un.");
   modelPedidoFornecedor2.setHeaderData("caixas", "Caixas");
-  modelPedidoFornecedor2.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor2.setHeaderData("prcUnitario", "R$ Unit.");
   modelPedidoFornecedor2.setHeaderData("preco", "Total");
 
   modelPedidoFornecedor2.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor2, this);
@@ -493,7 +493,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
       const int rowMae = match.first().row();
 
-      if (header == "Quant." or header == "$ Unit.") {
+      if (header == "Quant." or header == "R$ Unit.") {
         const double prcUnitario = modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
         const double preco = quant * prcUnitario;
 
@@ -541,7 +541,7 @@ void InputDialogFinanceiro::setTreeView() {
   modelTree.setHeaderData("un", "Un.");
   modelTree.setHeaderData("un2", "Un.2");
   modelTree.setHeaderData("caixas", "Caixas");
-  modelTree.setHeaderData("prcUnitario", "$ Unit.");
+  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
   modelTree.setHeaderData("preco", "Total");
   modelTree.setHeaderData("kgcx", "Kg./Cx.");
   modelTree.setHeaderData("formComercial", "Formato");

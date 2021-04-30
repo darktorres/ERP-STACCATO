@@ -35,6 +35,7 @@ private:
   auto copiarProdutoParaDevolucao(const int currentRow) -> void;
   auto criarContas() -> void;
   auto criarDevolucao() -> void;
+  auto desvincularCompra(const QString &idVendaProduto2) -> void;
   auto determinarIdDevolucao() -> void;
   auto devolverItem(const int currentRow, const int novoIdVendaProduto2) -> void;
   auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> void;

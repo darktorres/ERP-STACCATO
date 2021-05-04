@@ -6,6 +6,7 @@
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
+#include "usersession.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -572,15 +573,8 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    File webdavLogin("webdav.txt");
-
-    if (not webdavLogin.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + webdavLogin.errorString()); }
-
-    const QStringList lines = QString(webdavLogin.readAll()).split("\r\n", Qt::SkipEmptyParts);
-
-    authenticator->setRealm(lines.at(0));
-    authenticator->setUser(lines.at(1));
-    authenticator->setPassword(lines.at(2));
+    authenticator->setUser(UserSession::_user);
+    authenticator->setPassword(UserSession::_password);
   });
 
   const QString ip = qApp->getWebDavIp();

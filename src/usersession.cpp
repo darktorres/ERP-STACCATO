@@ -23,6 +23,8 @@ void UserSession::login(const QString &user, const QString &password) {
   idUsuario = query->value("idUsuario").toInt();
   nome = query->value("nome").toString();
   tipoUsuario = query->value("tipo").toString();
+  _user = user;
+  _password = password;
 }
 
 void UserSession::autorizacao(const QString &user, const QString &password) {

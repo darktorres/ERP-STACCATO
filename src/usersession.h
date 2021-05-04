@@ -20,7 +20,8 @@ public:
   inline static int idUsuario = -1;
   inline static QString nome = "";
   inline static QString tipoUsuario = "";
-  // TODO: save user/password in memory for webdav authentication
+  inline static QString _user = "";
+  inline static QString _password = "";
 
 private:
   inline static SqlQuery *query = nullptr; // defer creating query until database is set

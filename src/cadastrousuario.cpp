@@ -59,6 +59,7 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("webdav_compras", "Rede - Compras");
   modelPermissoes.setHeaderData("webdav_financeiro", "Rede - Financeiro");
   modelPermissoes.setHeaderData("webdav_obras", "Rede - Obras");
+  modelPermissoes.setHeaderData("webdav_logistica", "Rede - Logística");
 
   auto *transposeProxyModel = new QTransposeProxyModel(this);
   transposeProxyModel->setSourceModel(&modelPermissoes);
@@ -144,9 +145,9 @@ void CadastroUsuario::savingProcedures() {
   if (ui->lineEditPasswd->text() != "********") {
     SqlQuery query;
 
-    if (not query.exec("SELECT SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
+    if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
 
-    setData("passwd", query.value(0));
+    setData("password", query.value(0));
   }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }

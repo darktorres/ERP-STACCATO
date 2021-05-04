@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "file.h"
+#include "usersession.h"
 
 #include <QAuthenticator>
 #include <QDesktopServices>
@@ -62,15 +63,8 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    File file("webdav.txt");
-
-    if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo webdav: " + file.errorString()); }
-
-    const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
-
-    authenticator->setRealm(lines.at(0));
-    authenticator->setUser(lines.at(1));
-    authenticator->setPassword(lines.at(2));
+    authenticator->setUser(UserSession::_user);
+    authenticator->setPassword(UserSession::_password);
   });
 
   auto reply = manager->get(QNetworkRequest(QUrl(url)));

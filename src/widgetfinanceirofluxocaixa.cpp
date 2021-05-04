@@ -67,9 +67,12 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableCaixa2->setDisabled(true);
   ui->tableFuturo->setDisabled(true);
 
+  qDebug() << "repaint";
   repaint();
 
   // ----------------------------------------------------------------------------------------------------------
+
+  qDebug() << "tabela1";
 
   const QString filtroData =
       ui->groupBoxMes->isChecked() ? "`dataRealizado` IS NOT NULL AND DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`dataRealizado` IS NOT NULL";
@@ -93,6 +96,8 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   filtroConta.isEmpty() ? ui->tableCaixa->showColumn("contaDestino") : ui->tableCaixa->hideColumn("contaDestino");
   ui->tableCaixa->hideColumn("idConta");
 
+  qDebug() << "tabela1.1";
+
   // calcular saldo
 
   SqlQuery query;
@@ -101,7 +106,12 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
+  ui->tableCaixa->setEnabled(true);
+  repaint();
+
   // ----------------------------------------------------------------------------------------------------------
+
+  qDebug() << "tabela2";
 
   const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
 
@@ -122,13 +132,20 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   filtroConta2.isEmpty() ? ui->tableCaixa2->showColumn("contaDestino") : ui->tableCaixa2->hideColumn("contaDestino");
   ui->tableCaixa2->hideColumn("idConta");
 
+  qDebug() << "tabela2.1";
+
   // calcular saldo
 
   if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 
+  ui->tableCaixa2->setEnabled(true);
+  repaint();
+
   // ----------------------------------------------------------------------------------------------------------
+
+  qDebug() << "tabela3";
 
   modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_pendente v JOIN (SELECT @running_total := 0) r");
 
@@ -143,11 +160,10 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
-  // ----------------------------------------------------------------------------------------------------------
-
-  ui->tableCaixa->setEnabled(true);
-  ui->tableCaixa2->setEnabled(true);
   ui->tableFuturo->setEnabled(true);
+  repaint();
+
+  qDebug() << "end";
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {

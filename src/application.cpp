@@ -161,20 +161,10 @@ bool Application::dbReconnect(const bool silent) {
   return db.isOpen();
 }
 
-void Application::insertShaPassword(const QString &userPassword) {
-  SqlQuery query;
-
-  if (not query.exec("UPDATE usuario SET password = SHA_PASSWORD('" + userPassword + "') WHERE idUsuario = " + QString::number(UserSession::idUsuario))) {
-    throw RuntimeException("Erro inserindo senha SHA: " + query.lastError().text());
-  }
-}
-
 bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
   genericLogin(hostname);
 
   UserSession::login(user, userPassword);
-
-  insertShaPassword(userPassword);
 
   userLogin(user);
 

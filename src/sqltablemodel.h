@@ -28,8 +28,8 @@ public:
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
   auto removeSelection(const QModelIndexList &selection) -> void;
   auto select() -> bool;
-  auto setData(const int row, const QString &column, const QVariant &value) -> void;
-  auto setData(const int row, const int column, const QVariant &value) -> void;
+  auto setData(const int row, const QString &column, const QVariant &value, const bool adjustValue = true) -> void;
+  auto setData(const int row, const int column, const QVariant &value, const bool adjustValue = true) -> void;
   auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;

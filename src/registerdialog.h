@@ -36,7 +36,7 @@ protected:
   auto remove() -> void;
   auto removeBox() -> int;
   auto setConnections() -> void;
-  auto setData(const QString &key, const QVariant &value) -> void;
+  auto setData(const QString &key, const QVariant &value, const bool adjustValue = true) -> void;
   auto setForeignKey(SqlTableModel &secondaryModel) -> void;
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;

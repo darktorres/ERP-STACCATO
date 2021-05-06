@@ -90,7 +90,6 @@ private:
   QVector<Message> warningQueue;
   // methods
   auto genericLogin(const QString &hostname) -> void;
-  auto insertShaPassword(const QString &userPassword) -> void;
   auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> void;

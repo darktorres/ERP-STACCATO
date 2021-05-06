@@ -22,13 +22,13 @@ QVariant SqlTableModel::data(const int row, const int column) const {
 
 QVariant SqlTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
-void SqlTableModel::setData(const int row, const int column, const QVariant &value) {
+void SqlTableModel::setData(const int row, const int column, const QVariant &value, const bool adjustValue) {
   if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlTableModel"); }
 
   QVariant adjustedValue = value;
 
-  if (adjustedValue.userType() == QMetaType::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
-  if (adjustedValue.userType() == QMetaType::QString) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
+  if (adjustValue and adjustedValue.userType() == QMetaType::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+  if (adjustValue and adjustedValue.userType() == QMetaType::QString) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
 
   if (proxyModel) {
     proxyModel->setData(proxyModel->index(row, column), adjustedValue);
@@ -40,7 +40,7 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
   }
 }
 
-void SqlTableModel::setData(const int row, const QString &column, const QVariant &value) { setData(row, fieldIndex(column), value); }
+void SqlTableModel::setData(const int row, const QString &column, const QVariant &value, const bool adjustValue) { setData(row, fieldIndex(column), value, adjustValue); }
 
 bool SqlTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 

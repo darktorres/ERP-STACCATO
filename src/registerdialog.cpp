@@ -80,7 +80,7 @@ void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
   for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) { secondaryModel.setData(row, primaryKey, primaryId); }
 }
 
-void RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
+void RegisterDialog::setData(const QString &key, const QVariant &value, const bool adjustValue) { return model.setData(currentRow, key, value, adjustValue); }
 
 QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
 

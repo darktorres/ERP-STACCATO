@@ -145,9 +145,12 @@ void CadastroUsuario::savingProcedures() {
   if (ui->lineEditPasswd->text() != "********") {
     SqlQuery query;
 
-    if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
+    if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "'), SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) {
+      throw RuntimeException("Erro gerando senha: " + query.lastError().text());
+    }
 
-    setData("password", query.value(0));
+    setData("password", query.value(0), false);
+    setData("passwd", query.value(1), false);
   }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }

@@ -1144,7 +1144,7 @@ double ImportarXML::calculaGare(XML &xml) {
   for (auto &produto : xml.produtos) {
     const ImportarXML::NCM ncm = buscaNCM(produto.ncm);
 
-    if (qFuzzyIsNull(ncm.aliq)) { continue; }
+    if (not qFuzzyIsNull(ncm.aliq)) { continue; }
 
     const double icmsIntra = ncm.aliq;
     const double mva = (qFuzzyCompare(produto.pICMS, 4)) ? ncm.mva4 : ncm.mva12;

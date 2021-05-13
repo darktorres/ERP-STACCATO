@@ -753,7 +753,7 @@ void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
 
   if (precoVenda < custo) { modelErro.setData(row, "precoVendaUpd", red); }
 
-  if (ncm.length() != 8) { modelErro.setData(row, "ncmUpd", red); }
+  if (not ui->checkBoxRepresentacao->isChecked() and ncm.length() != 8) { modelErro.setData(row, "ncmUpd", red); }
 }
 
 bool ImportaProdutos::camposForaDoPadrao() {
@@ -763,7 +763,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
   if (produto.custo <= 0.) { return true; }
   if (produto.precoVenda <= 0.) { return true; }
   if (produto.precoVenda < produto.custo) { return true; }
-  if (produto.ncm.length() != 8) { return true; }
+  if (not ui->checkBoxRepresentacao->isChecked() and produto.ncm.length() != 8) { return true; }
 
   return false;
 }

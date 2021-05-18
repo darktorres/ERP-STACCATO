@@ -104,7 +104,11 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 
-  if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
+  double saldo1 = 0;
+
+  if (query.first()) { saldo1 = query.value("Acumulado").toDouble(); }
+
+  ui->doubleSpinBoxSaldo1->setValue(saldo1);
 
   ui->tableCaixa->setEnabled(true);
   repaint();
@@ -138,7 +142,11 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
 
-  if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
+  double saldo2 = 0;
+
+  if (query.first()) { saldo2 = query.value("Acumulado").toDouble(); }
+
+  ui->doubleSpinBoxSaldo2->setValue(saldo2);
 
   ui->tableCaixa2->setEnabled(true);
   repaint();

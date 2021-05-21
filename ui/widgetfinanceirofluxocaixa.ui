@@ -202,7 +202,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="TableView" name="tableCaixa">
+    <widget class="TableView" name="tableCaixa1">
      <property name="mouseTracking">
       <bool>true</bool>
      </property>
@@ -254,7 +254,7 @@
   <tabstop>groupBoxCaixa1</tabstop>
   <tabstop>itemBoxCaixa1</tabstop>
   <tabstop>doubleSpinBoxSaldo1</tabstop>
-  <tabstop>tableCaixa</tabstop>
+  <tabstop>tableCaixa1</tabstop>
   <tabstop>groupBoxCaixa2</tabstop>
   <tabstop>itemBoxCaixa2</tabstop>
   <tabstop>doubleSpinBoxSaldo2</tabstop>

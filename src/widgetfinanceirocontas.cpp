@@ -31,6 +31,8 @@ void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Receber) { modelVencidos.setQuery(Sql::view_a_receber_vencidos()); }
   if (tipo == Tipo::Pagar) { modelVencidos.setQuery(Sql::view_a_pagar_vencidos()); }
 
+  modelVencidos.sort("`Data Pagamento`");
+
   if (modelVencidos.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->setModel(&modelVencidos);
@@ -41,6 +43,8 @@ void WidgetFinanceiroContas::setupTables() {
 
   if (tipo == Tipo::Receber) { modelVencer.setQuery(Sql::view_a_receber_vencer()); }
   if (tipo == Tipo::Pagar) { modelVencer.setQuery(Sql::view_a_pagar_vencer()); }
+
+  modelVencer.sort("`Data Pagamento`");
 
   if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
@@ -105,19 +109,21 @@ void WidgetFinanceiroContas::updateTables() {
     modelIsSet = true;
   }
 
-  model.setQuery(model.query().executedQuery());
+  // -------------------------------------------------------------------------
+
+  model.select();
 
   if (model.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
-  modelVencidos.setQuery(modelVencidos.query().executedQuery());
+  modelVencidos.select();
 
   if (modelVencidos.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
-  modelVencer.setQuery(modelVencer.query().executedQuery());
+  modelVencer.select();
 
   if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 }
@@ -208,6 +214,8 @@ void WidgetFinanceiroContas::montaFiltro() {
         "`cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` `e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN "
         "`nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
+
+    model.sort(ui->radioButtonPago->isChecked() ? "`dataRealizado`" : "`dataPagamento`");
   }
 
   if (tipo == Tipo::Receber) {
@@ -269,7 +277,10 @@ void WidgetFinanceiroContas::montaFiltro() {
                    "pf2.ordemRepresentacao) AS ordemRepresentacao, `cr`.`valor` AS `valor`, `cr`.`tipo` AS `tipo`, `cr`.`parcela` AS `parcela`, `cr`.`observacao` AS `observacao`, `cr`.`status` AS "
                    "`status`, `v`.`statusFinanceiro` AS `statusFinanceiro` FROM `conta_a_receber_has_pagamento` `cr` LEFT JOIN `venda` `v` ON `cr`.`idVenda` = `v`.`idVenda` LEFT JOIN "
                    "pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda WHERE " +
-                   filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
+                   filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento`");
+
+    model.sort(ui->radioButtonRecebido->isChecked() ? "`cr`.`dataRealizado`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela`" : "`cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela`",
+               Qt::DescendingOrder);
   }
 
   if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + model.lastError().text(), this); }
@@ -295,7 +306,6 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("parcela", "Parcela");
   model.setHeaderData("observacao", "Obs.");
-  model.setHeaderData("status", "Status");
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
   model.proxyModel = new SortFilterProxyModel(&model, this);
@@ -309,6 +319,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   if (tipo == Tipo::Pagar) { ui->table->hideColumn("grupo"); }
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
+  ui->table->hideColumn("status");
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
@@ -528,7 +539,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   for (const auto index : selection) {
     if (model.data(index.row(), "status").toString() == "PAGO") { throw RuntimeError("Linha selecionada já paga!", this); }
     if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { throw RuntimeError("Pagamento selecionado não é transferência ITAÚ!", this); }
-    // TODO: se linha já estiver como agendado confirmar com usuario antes de gerar outro arquivo
+    // TODO: se linha já estiver como "GERADO GARE" confirmar com usuario antes de gerar outro arquivo
   }
 
   CNAB cnab(this);

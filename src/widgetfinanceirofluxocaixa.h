@@ -25,12 +25,17 @@ private:
   SqlQueryModel modelCaixa;
   SqlQueryModel modelCaixa2;
   SqlQueryModel modelFuturo;
+  QString filtroData;
   Ui::WidgetFinanceiroFluxoCaixa *ui;
   // methods
+  auto alterarData() -> void;
   auto montaFiltro() -> void;
+  auto montaTabela1() -> void;
+  auto montaTabela2() -> void;
+  auto montaTabela3() -> void;
   auto on_groupBoxCaixa1_toggled(const bool checked) -> void;
   auto on_groupBoxCaixa2_toggled(const bool checked) -> void;
+  auto on_tableCaixa1_activated(const QModelIndex &index) -> void;
   auto on_tableCaixa2_activated(const QModelIndex &index) -> void;
-  auto on_tableCaixa_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
 };

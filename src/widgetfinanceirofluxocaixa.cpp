@@ -13,7 +13,7 @@
 WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) {
   ui->setupUi(this);
 
-  ui->tableCaixa->setDisabled(true);
+  ui->tableCaixa1->setDisabled(true);
   ui->tableCaixa2->setDisabled(true);
   ui->tableFuturo->setDisabled(true);
 }
@@ -23,14 +23,14 @@ WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 void WidgetFinanceiroFluxoCaixa::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::alterarData, connectionType);
   connect(ui->groupBoxCaixa1, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled, connectionType);
   connect(ui->groupBoxCaixa2, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled, connectionType);
-  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
-  connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
-  connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::alterarData, connectionType);
+  connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaTabela1, connectionType);
+  connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaTabela2, connectionType);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
-  connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated, connectionType);
+  connect(ui->tableCaixa1, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa1_activated, connectionType);
   connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated, connectionType);
 }
 
@@ -52,6 +52,8 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     ui->groupBoxCaixa1->setChecked(true);
     ui->groupBoxCaixa2->setChecked(true);
 
+    filtroData = (ui->groupBoxMes->isChecked()) ? "WHERE DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+
     setConnections();
 
     isSet = true;
@@ -63,65 +65,66 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroFluxoCaixa::montaFiltro() {
-  ui->tableCaixa->setDisabled(true);
+  ui->tableCaixa1->setDisabled(true);
   ui->tableCaixa2->setDisabled(true);
   ui->tableFuturo->setDisabled(true);
 
   qDebug() << "repaint";
   repaint();
 
-  // ----------------------------------------------------------------------------------------------------------
+  montaTabela1();
+  montaTabela2();
+  montaTabela3();
 
+  qDebug() << "end";
+}
+
+void WidgetFinanceiroFluxoCaixa::montaTabela1() {
   qDebug() << "tabela1";
 
-  const QString filtroData =
-      ui->groupBoxMes->isChecked() ? "`dataRealizado` IS NOT NULL AND DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`dataRealizado` IS NOT NULL";
+  const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "WHERE idConta = " + ui->itemBoxCaixa1->getId().toString() : "";
 
-  const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa1->getId().toString() + " AND " : "";
+  modelCaixa.setQuery("WITH x AS (SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataRealizado) AS Acumulado FROM view_fluxo_resumo_realizado v " + filtroConta + " ORDER BY dataRealizado) SELECT * FROM x " +
+                      filtroData + " ORDER BY dataRealizado");
 
-  modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
-                      "WHERE " +
-                      filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
+  modelCaixa.select();
 
   modelCaixa.setHeaderData("dataRealizado", "Data Realizado");
   modelCaixa.setHeaderData("contaDestino", "Conta");
 
-  ui->tableCaixa->setModel(&modelCaixa);
+  ui->tableCaixa1->setModel(&modelCaixa);
 
-  ui->tableCaixa->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
-  ui->tableCaixa->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
-  ui->tableCaixa->setItemDelegateForColumn("R$", new ReaisDelegate(this));
-  ui->tableCaixa->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
+  ui->tableCaixa1->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
+  ui->tableCaixa1->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
+  ui->tableCaixa1->setItemDelegateForColumn("R$", new ReaisDelegate(this));
+  ui->tableCaixa1->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
-  filtroConta.isEmpty() ? ui->tableCaixa->showColumn("contaDestino") : ui->tableCaixa->hideColumn("contaDestino");
-  ui->tableCaixa->hideColumn("idConta");
+  filtroConta.isEmpty() ? ui->tableCaixa1->showColumn("contaDestino") : ui->tableCaixa1->hideColumn("contaDestino");
+  ui->tableCaixa1->hideColumn("idConta");
 
   qDebug() << "tabela1.1";
 
   // calcular saldo
 
-  SqlQuery query;
-
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
-
   double saldo1 = 0;
 
-  if (query.first()) { saldo1 = query.value("Acumulado").toDouble(); }
+  if (modelCaixa.rowCount() > 0) { saldo1 = modelCaixa.data(modelCaixa.rowCount() - 1, "Acumulado").toDouble(); }
 
   ui->doubleSpinBoxSaldo1->setValue(saldo1);
 
-  ui->tableCaixa->setEnabled(true);
+  ui->tableCaixa1->setEnabled(true);
   repaint();
+}
 
-  // ----------------------------------------------------------------------------------------------------------
-
+void WidgetFinanceiroFluxoCaixa::montaTabela2() {
   qDebug() << "tabela2";
 
-  const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
+  const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "WHERE idConta = " + ui->itemBoxCaixa2->getId().toString() : "";
 
-  modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
-                       "WHERE " +
-                       filtroConta2 + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
+  modelCaixa2.setQuery("WITH x AS (SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataRealizado) AS Acumulado FROM view_fluxo_resumo_realizado v " + filtroConta2 +
+                       " ORDER BY dataRealizado) SELECT * FROM x " + filtroData + " ORDER BY dataRealizado");
+
+  modelCaixa2.select();
 
   modelCaixa2.setHeaderData("dataRealizado", "Data Realizado");
   modelCaixa2.setHeaderData("contaDestino", "Conta");
@@ -140,24 +143,22 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { throw RuntimeException("Erro buscando saldo: " + query.lastError().text(), this); }
-
   double saldo2 = 0;
 
-  if (query.first()) { saldo2 = query.value("Acumulado").toDouble(); }
+  if (modelCaixa2.rowCount() > 0) { saldo2 = modelCaixa2.data(modelCaixa2.rowCount() - 1, "Acumulado").toDouble(); }
 
   ui->doubleSpinBoxSaldo2->setValue(saldo2);
 
   ui->tableCaixa2->setEnabled(true);
   repaint();
+}
 
-  // ----------------------------------------------------------------------------------------------------------
-
+void WidgetFinanceiroFluxoCaixa::montaTabela3() {
   qDebug() << "tabela3";
 
-  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_pendente v JOIN (SELECT @running_total := 0) r");
+  modelFuturo.setQuery("SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataPagamento) AS Acumulado FROM view_fluxo_resumo_pendente v ORDER BY dataPagamento");
 
-  if (modelFuturo.lastError().isValid()) { throw RuntimeException("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
+  modelFuturo.select();
 
   modelFuturo.setHeaderData("dataPagamento", "Data Pag.");
 
@@ -170,8 +171,6 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   ui->tableFuturo->setEnabled(true);
   repaint();
-
-  qDebug() << "end";
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
@@ -183,7 +182,7 @@ void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &ind
   dia->show();
 }
 
-void WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
+void WidgetFinanceiroFluxoCaixa::on_tableCaixa1_activated(const QModelIndex &index) {
   const QDate date = modelCaixa.data(index.row(), "dataRealizado").toDate();
   const QString idConta = modelCaixa.data(index.row(), "idConta").toString();
 
@@ -197,8 +196,6 @@ void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled(const bool checked) {
     ui->itemBoxCaixa1->clear();
     return;
   }
-
-  montaFiltro();
 }
 
 void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
@@ -206,6 +203,10 @@ void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
     ui->itemBoxCaixa2->clear();
     return;
   }
+}
+
+void WidgetFinanceiroFluxoCaixa::alterarData() {
+  filtroData = (ui->groupBoxMes->isChecked()) ? "WHERE DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
 
   montaFiltro();
 }

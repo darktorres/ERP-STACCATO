@@ -45,6 +45,8 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   modelViewRelatorioVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
 
+  modelViewRelatorioVendedor.select();
+
   ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
@@ -74,6 +76,8 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   if (tipoUsuario == "GERENTE LOJA") { loja = UserSession::fromLoja("descricao").toString(); }
 
   modelViewRelatorioLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
+
+  modelViewRelatorioLoja.select();
 
   ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
 

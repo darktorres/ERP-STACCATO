@@ -33,8 +33,6 @@ void WidgetFinanceiroContas::setupTables() {
 
   modelVencidos.sort("`Data Pagamento`");
 
-  if (modelVencidos.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
-
   ui->tableVencidos->setModel(&modelVencidos);
 
   ui->tableVencidos->setItemDelegate(new ReaisDelegate(this));
@@ -45,8 +43,6 @@ void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Pagar) { modelVencer.setQuery(Sql::view_a_pagar_vencer()); }
 
   modelVencer.sort("`Data Pagamento`");
-
-  if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->setModel(&modelVencer);
 

@@ -138,11 +138,7 @@ void WidgetEstoque::updateTables() {
 
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentTab == "Estoques") {
-    model.setQuery(model.query().executedQuery());
-
-    if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text()); }
-  }
+  if (currentTab == "Estoques") { model.select(); }
 
   if (currentTab == "Produtos") { modelProdutos.select(); }
 }
@@ -172,7 +168,7 @@ void WidgetEstoque::montaFiltro() {
       "ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       getMatch() + " GROUP BY e.idEstoque HAVING " + having);
 
-  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
+  model.select();
 
   setHeaderData();
 }
@@ -197,7 +193,7 @@ void WidgetEstoque::montaFiltroContabil() {
       "p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       getMatch() + " GROUP BY e.idEstoque HAVING contabil > 0");
 
-  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
+  model.select();
 
   setHeaderData();
 }
@@ -233,6 +229,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   const QString data = ui->dateEditMes->date().addDays(1).toString("yyyy-MM-dd");
 
   SqlQueryModel modelContabil;
+
   modelContabil.setQuery(
       "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0) AS contabil, "
       "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) / p.quantCaixa AS caixasContabil, e.lote, e.local, e.bloco, "
@@ -246,7 +243,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "e.created < '" +
       data + "' GROUP BY e.idEstoque HAVING contabil > 0 ORDER BY codComercial, lote");
 
-  if (modelContabil.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + modelContabil.lastError().text()); }
+  model.select();
 
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 

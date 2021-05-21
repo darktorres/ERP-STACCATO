@@ -30,20 +30,24 @@ bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) 
   return QSqlQueryModel::setHeaderData(field, Qt::Horizontal, value);
 }
 
-void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
-  // TODO: redo places that use this function
-
-  m_query = query;
-
-  QSqlQueryModel::setQuery(query, db);
+void SqlQueryModel::select() {
+  QSqlQueryModel::setQuery(last_query);
 
   if (lastError().isValid()) { throw RuntimeException("Erro lendo dados: " + lastError().text()); }
 }
 
-void SqlQueryModel::setQuery2(const QString &query, const QSqlDatabase &db) {
-  QSqlQueryModel::setQuery(query, db);
+void SqlQueryModel::select(const QString &query) {
+  last_query = query;
+  QSqlQueryModel::setQuery(query);
 
   if (lastError().isValid()) { throw RuntimeException("Erro lendo dados: " + lastError().text()); }
+}
+
+void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
+  Q_UNUSED(db);
+
+  base_query = query;
+  last_query = query;
 }
 
 int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const {
@@ -54,4 +58,6 @@ int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const
   return field;
 }
 
-void SqlQueryModel::sort(int column, Qt::SortOrder order) { setQuery2(m_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }
+void SqlQueryModel::sort(int column, Qt::SortOrder order) { select(base_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }
+
+void SqlQueryModel::sort(QString column, Qt::SortOrder order) { select(base_query + " ORDER BY " + column + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }

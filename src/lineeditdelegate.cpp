@@ -16,6 +16,8 @@ QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::ContraParteReceber) { model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_receber_has_pagamento"); }
   if (tipo == Tipo::Grupo) { model->setQuery("SELECT tipo FROM despesa"); }
 
+  model->select();
+
   auto *completer = new QCompleter(model, parent);
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   editor->setCompleter(completer);

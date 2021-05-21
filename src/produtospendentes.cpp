@@ -111,7 +111,7 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   //-----------------------------------------------
 
-  const bool representacao = (idVenda.at(11) == "R");
+  const bool representacao = (idVenda.at(11) == 'R');
 
   representacao ? ui->tableProdutos->hideColumn("custo") : ui->tableProdutos->hideColumn("custoVenda");
 
@@ -436,7 +436,7 @@ void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
 
   const int newRow = model.insertRowAtEnd();
 
-  const bool representacao = (modelViewProdutos.data(row, "idVenda").toString().at(11) == "R");
+  const bool representacao = (modelViewProdutos.data(row, "idVenda").toString().at(11) == 'R');
 
   const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelViewProdutos.data(row, "quant").toDouble();
   const double custo = representacao ? modelViewProdutos.data(row, "custoVenda").toDouble() : modelViewProdutos.data(row, "custo").toDouble();

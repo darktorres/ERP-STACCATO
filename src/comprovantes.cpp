@@ -39,7 +39,7 @@ void Comprovantes::setConnections() {
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE fotoEntrega IS NOT NULL AND idVenda = '" + idVenda + "'");
 
-  if (model.lastError().isValid()) { throw RuntimeException("Erro procurando comprovantes: " + model.lastError().text(), this); }
+  model.select();
 
   model.setHeaderData("fotoEntrega", "Arquivo");
 

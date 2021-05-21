@@ -29,6 +29,8 @@ WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setQuery(Sql::view_entrega_pendente());
 
+  modelVendas.select();
+
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
   modelVendas.setHeaderData("novoPrazoEntrega", "Novo Prazo");
   modelVendas.setHeaderData("dataRealReceb", "Receb.");
@@ -47,6 +49,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   // -----------------------------------------------------------------
 
   modelProdutos.setQuery(Sql::view_agendar_entrega() + " LIMIT 0");
+
+  modelProdutos.select();
 
   modelProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
   modelProdutos.setHeaderData("status", "Status");
@@ -276,11 +280,11 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 
   // -------------------------------------------------------------------------
 
-  modelVendas.setQuery(modelVendas.query().lastQuery());
+  modelVendas.select();
 
   // -------------------------------------------------------------------------
 
-  modelProdutos.setQuery(modelProdutos.query().lastQuery());
+  modelProdutos.select();
 
   // -------------------------------------------------------------------------
 
@@ -333,6 +337,8 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   modelVendas.setQuery(Sql::view_entrega_pendente(filtroBusca, filtroCheck, filtroStatus));
 
+  modelVendas.select();
+
   //-------------------------------------
 
   filtroProdutos();
@@ -353,6 +359,8 @@ void WidgetLogisticaAgendarEntrega::filtroProdutos() {
   if (not filtroCheck.isEmpty()) { filtros << "vp2.status IN (" + filtroCheck.join(", ") + ")"; }
 
   modelProdutos.setQuery(Sql::view_agendar_entrega(selectedIdVenda, filtros.join(" AND ")));
+
+  modelProdutos.select();
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {

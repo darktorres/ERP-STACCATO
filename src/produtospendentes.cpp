@@ -94,7 +94,7 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
       "('CANCELADO' , 'QUEBRADO') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
-  if (modelEstoque.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
+  modelEstoque.select();
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -231,10 +231,7 @@ void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
 void ProdutosPendentes::recarregarTabelas() {
   modelProdutos.select();
   modelViewProdutos.select();
-
-  modelEstoque.setQuery(modelEstoque.query().executedQuery());
-
-  if (modelEstoque.lastError().isValid()) { throw RuntimeException("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
+  modelEstoque.select();
 
   ui->tableProdutos->clearSelection();
 

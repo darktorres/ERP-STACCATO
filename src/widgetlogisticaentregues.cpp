@@ -47,9 +47,7 @@ void WidgetLogisticaEntregues::updateTables() {
 
   // -----------------------------------------------------------------
 
-  modelProdutos.setQuery(modelProdutos.query().executedQuery());
-
-  if (modelProdutos.lastError().isValid()) { throw RuntimeException("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
+  modelProdutos.select();
 }
 
 void WidgetLogisticaEntregues::delayFiltro() { timer.start(500); }
@@ -100,7 +98,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
       "vp2.obs FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
-  if (modelProdutos.lastError().isValid()) { throw RuntimeException("Erro: " + modelProdutos.lastError().text(), this); }
+  modelProdutos.select();
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");

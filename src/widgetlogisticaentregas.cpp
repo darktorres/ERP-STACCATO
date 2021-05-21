@@ -504,7 +504,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
                                  "FROM view_calendario_produto WHERE idVenda = '" +
                                  idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
-  if (modelProdutosAgrupado.lastError().isValid()) { throw RuntimeException("Erro buscando dados: " + modelProdutosAgrupado.lastError().text(), this); }
+  modelProdutosAgrupado.select();
 
   // -------------------------------------------------------------------------
 

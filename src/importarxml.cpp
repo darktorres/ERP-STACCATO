@@ -1151,7 +1151,8 @@ double ImportarXML::calculaGare(XML &xml) {
     const double baseCalculo = produto.valor + produto.vIPI + produto.outros + produto.frete + produto.seguro - produto.desconto;
     const double icmsProprio = produto.vICMS;
     const double baseST = (baseCalculo) * (1 + mva);
-    const double icmsST = (baseST * icmsIntra) - icmsProprio;
+    double icmsST = (baseST * icmsIntra) - icmsProprio;
+    icmsST = qMax(icmsST, 0.);
 
     total += icmsST;
 

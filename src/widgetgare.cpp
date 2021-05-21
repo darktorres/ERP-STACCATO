@@ -23,7 +23,7 @@ void WidgetGare::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetGare::montaFiltro, connectionType);
-  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->dateEditFiltro, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro, connectionType);
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked, connectionType);
@@ -40,8 +40,8 @@ void WidgetGare::resetTables() { modelIsSet = false; }
 
 void WidgetGare::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(qApp->serverDate());
-    ui->dateEditDia->setDate(qApp->serverDate());
+    ui->dateEditBaixa->setDate(qApp->serverDate());
+    ui->dateEditFiltro->setDate(qApp->serverDate());
 
     setConnections();
 
@@ -59,7 +59,20 @@ void WidgetGare::updateTables() {
 
 void WidgetGare::delayFiltro() { timer.start(500); }
 
+void WidgetGare::habilitarBotoes() {
+  const bool desabilitar = ui->radioButtonPago->isChecked();
+
+  ui->dateEditBaixa->setDisabled(desabilitar);
+  ui->pushButtonDarBaixaItau->setDisabled(desabilitar);
+  ui->pushButtonRemessaItau->setDisabled(desabilitar);
+  ui->pushButtonRetornoItau->setDisabled(desabilitar);
+}
+
 void WidgetGare::montaFiltro() {
+  habilitarBotoes();
+
+  //-------------------------------------
+
   QStringList filtros;
 
   //-------------------------------------
@@ -75,7 +88,7 @@ void WidgetGare::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(dataRealizado, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(dataRealizado, '%Y-%m-%d') = '" + ui->dateEditFiltro->date().toString("yyyy-MM-dd") + "'" : "";
   if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
@@ -101,7 +114,7 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   SqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEditBaixa->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
     throw RuntimeException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
   }
@@ -116,7 +129,6 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 void WidgetGare::setupTables() {
   model.setTable("view_gares");
 
-  model.setHeaderData("status", "Status");
   model.setHeaderData("valor", "R$");
   model.setHeaderData("numeroNFe", "NFe");
   model.setHeaderData("dataPagamento", "Data Pgt.");
@@ -131,6 +143,7 @@ void WidgetGare::setupTables() {
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("referencia");
+  ui->table->hideColumn("status");
   ui->table->hideColumn("cnpjOrig");
 
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGare::on_tableSelection_changed);

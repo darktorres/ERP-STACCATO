@@ -70,7 +70,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_7">
          <item row="0" column="0">
-          <widget class="QDateEdit" name="dateEditDia">
+          <widget class="QDateEdit" name="dateEditFiltro">
            <property name="currentSection">
             <enum>QDateTimeEdit::DaySection</enum>
            </property>
@@ -141,7 +141,7 @@
    <item row="2" column="1">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="3">
-      <widget class="QDateEdit" name="dateEdit">
+      <widget class="QDateEdit" name="dateEditBaixa">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -243,11 +243,11 @@
   <tabstop>radioButtonGerado</tabstop>
   <tabstop>radioButtonPago</tabstop>
   <tabstop>groupBoxDia</tabstop>
-  <tabstop>dateEditDia</tabstop>
+  <tabstop>dateEditFiltro</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
   <tabstop>doubleSpinBoxTotal</tabstop>
-  <tabstop>dateEdit</tabstop>
+  <tabstop>dateEditBaixa</tabstop>
   <tabstop>pushButtonDarBaixaItau</tabstop>
   <tabstop>pushButtonRemessaItau</tabstop>
   <tabstop>pushButtonRetornoItau</tabstop>

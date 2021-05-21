@@ -8,8 +8,6 @@
 WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetConsistencia) {
   ui->setupUi(this);
 
-  ui->dateEditMes->setDate(qApp->serverDate());
-
   setConnections();
 }
 
@@ -25,6 +23,7 @@ void WidgetConsistencia::resetTables() { modelIsSet = false; }
 
 void WidgetConsistencia::updateTables() {
   if (not modelIsSet) {
+    ui->dateEditMes->setDate(qApp->serverDate());
     setupTables();
     modelIsSet = true;
   }

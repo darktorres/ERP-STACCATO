@@ -29,6 +29,7 @@ private:
   Ui::WidgetGare *ui;
   // methods
   auto delayFiltro() -> void;
+  auto habilitarBotoes() -> void;
   auto montaFiltro() -> void;
   auto montarGare(const QModelIndexList &selection) -> QVector<CNAB::Gare>;
   auto on_pushButtonDarBaixaItau_clicked() -> void;

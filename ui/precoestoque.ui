@@ -68,7 +68,11 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEditBusca"/>
+      <widget class="QLineEdit" name="lineEditBusca">
+       <property name="placeholderText">
+        <string>Fornecedor/Descrição/Coleção/Cód. Com.</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

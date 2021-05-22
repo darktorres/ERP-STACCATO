@@ -61,6 +61,7 @@ public:
   bool write(int row, int col, const QVariant &value, const Format &format = Format());
   QVariant read(const CellReference &cell) const;
   QVariant read(int row, int col) const;
+  QVariant readValue(int row, int col) const;
   bool insertImage(int row, int col, const QImage &image);
   Chart *insertChart(int row, int col, const QSize &size);
   bool mergeCells(const CellRange &range, const Format &format = Format());

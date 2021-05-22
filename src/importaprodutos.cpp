@@ -106,7 +106,7 @@ void ImportaProdutos::importar() {
 
     progressDialog->setValue(current++);
 
-    if (xlsx.read(row, 1).toString().isEmpty()) { continue; }
+    if (xlsx.readValue(row, 1).toString().isEmpty()) { continue; }
 
     leituraProduto(xlsx, row);
 
@@ -354,15 +354,13 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   int count = 0;
 
   for (int row = 2; row < rows; ++row) {
-    const QString fornec = xlsx.read(row, 1).toString();
+    const QString fornec = xlsx.readValue(row, 1).toString();
 
     if (not fornec.isEmpty()) { ++count; }
     if (fornec.isEmpty() or m_fornecedores.contains(fornec)) { continue; }
 
-    m_fornecedores << xlsx.read(row, 1).toString();
+    m_fornecedores << xlsx.readValue(row, 1).toString();
   }
-
-  if (not m_fornecedores.filter("=IF").isEmpty()) { throw RuntimeError("Células estão com fórmula! Trocar por valores no Excel!"); }
 
   progressDialog->setMaximum(count);
 
@@ -415,56 +413,56 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   const QLocale locale(QLocale::Portuguese);
 
-  QVariant fornecedor = xlsx.read(row, 1);
-  QVariant descricao = xlsx.read(row, 2);
-  QVariant un = xlsx.read(row, 3);
-  QVariant colecao = xlsx.read(row, 4);
+  QVariant fornecedor = xlsx.readValue(row, 1);
+  QVariant descricao = xlsx.readValue(row, 2);
+  QVariant un = xlsx.readValue(row, 3);
+  QVariant colecao = xlsx.readValue(row, 4);
 
-  QVariant m2cx = xlsx.read(row, 5);
+  QVariant m2cx = xlsx.readValue(row, 5);
   if (m2cx.userType() == QMetaType::QString) { m2cx = locale.toDouble(m2cx.toString()); }
   m2cx = qApp->roundDouble(m2cx.toDouble());
 
-  QVariant pccx = xlsx.read(row, 6);
+  QVariant pccx = xlsx.readValue(row, 6);
   if (pccx.userType() == QMetaType::QString) { pccx = locale.toDouble(pccx.toString()); }
   pccx = qApp->roundDouble(pccx.toDouble());
 
-  QVariant kgcx = xlsx.read(row, 7);
+  QVariant kgcx = xlsx.readValue(row, 7);
   if (kgcx.userType() == QMetaType::QString) { kgcx = locale.toDouble(kgcx.toString()); }
   kgcx = qApp->roundDouble(kgcx.toDouble());
 
-  QVariant formComercial = xlsx.read(row, 8);
-  QVariant codComercial = xlsx.read(row, 9);
-  QVariant codBarras = xlsx.read(row, 10);
-  QVariant ncm = xlsx.read(row, 11);
+  QVariant formComercial = xlsx.readValue(row, 8);
+  QVariant codComercial = xlsx.readValue(row, 9);
+  QVariant codBarras = xlsx.readValue(row, 10);
+  QVariant ncm = xlsx.readValue(row, 11);
 
-  QVariant qtdPallet = xlsx.read(row, 12);
+  QVariant qtdPallet = xlsx.readValue(row, 12);
   if (qtdPallet.userType() == QMetaType::QString) { qtdPallet = locale.toDouble(qtdPallet.toString()); }
   qtdPallet = qApp->roundDouble(qtdPallet.toDouble());
 
-  QVariant custo = xlsx.read(row, 13);
+  QVariant custo = xlsx.readValue(row, 13);
   if (custo.userType() == QMetaType::QString) { custo = locale.toDouble(custo.toString()); }
   custo = qApp->roundDouble(custo.toDouble());
 
-  QVariant precoVenda = xlsx.read(row, 14);
+  QVariant precoVenda = xlsx.readValue(row, 14);
   if (precoVenda.userType() == QMetaType::QString) { precoVenda = locale.toDouble(precoVenda.toString()); }
   precoVenda = qApp->roundDouble(precoVenda.toDouble());
 
-  QVariant ui = xlsx.read(row, 15);
-  QVariant un2 = xlsx.read(row, 16);
+  QVariant ui = xlsx.readValue(row, 15);
+  QVariant un2 = xlsx.readValue(row, 16);
 
-  QVariant minimo = xlsx.read(row, 17);
+  QVariant minimo = xlsx.readValue(row, 17);
   if (minimo.userType() == QMetaType::QString) { minimo = locale.toDouble(minimo.toString()); }
   minimo = qApp->roundDouble(minimo.toDouble());
 
-  QVariant mva = xlsx.read(row, 18);
+  QVariant mva = xlsx.readValue(row, 18);
   if (mva.userType() == QMetaType::QString) { mva = locale.toDouble(mva.toString()); }
   mva = qApp->roundDouble(mva.toDouble());
 
-  QVariant st = xlsx.read(row, 19);
+  QVariant st = xlsx.readValue(row, 19);
   if (st.userType() == QMetaType::QString) { st = locale.toDouble(st.toString()); }
   st = qApp->roundDouble(st.toDouble());
 
-  QVariant sticms = xlsx.read(row, 20);
+  QVariant sticms = xlsx.readValue(row, 20);
   if (sticms.userType() == QMetaType::QString) { sticms = locale.toDouble(sticms.toString()); }
   sticms = qApp->roundDouble(sticms.toDouble());
 
@@ -974,26 +972,26 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 }
 
 void ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
-  if (xlsx.read(1, 1).toString() != "fornecedor") { throw RuntimeError("Faltou a coluna 'fornecedor' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 2).toString() != "descricao") { throw RuntimeError("Faltou a coluna 'descricao' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 3).toString() != "un") { throw RuntimeError("Faltou a coluna 'un' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 4).toString() != "colecao") { throw RuntimeError("Faltou a coluna 'colecao' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 5).toString() != "m2cx") { throw RuntimeError("Faltou a coluna 'm2cx' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 6).toString() != "pccx") { throw RuntimeError("Faltou a coluna 'pccx' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 7).toString() != "kgcx") { throw RuntimeError("Faltou a coluna 'kgcx' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 8).toString() != "formComercial") { throw RuntimeError("Faltou a coluna 'formComercial' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 9).toString() != "codComercial") { throw RuntimeError("Faltou a coluna 'codComercial' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 10).toString() != "codBarras") { throw RuntimeError("Faltou a coluna 'codBarras' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 11).toString() != "ncm") { throw RuntimeError("Faltou a coluna 'ncm' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 12).toString() != "qtdPallet") { throw RuntimeError("Faltou a coluna 'qtdPallet' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 13).toString() != "custo") { throw RuntimeError("Faltou a coluna 'custo' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 14).toString() != "precoVenda") { throw RuntimeError("Faltou a coluna 'precoVenda' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 15).toString() != "ui") { throw RuntimeError("Faltou a coluna 'ui' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 16).toString() != "un2") { throw RuntimeError("Faltou a coluna 'un2' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 17).toString() != "minimo") { throw RuntimeError("Faltou a coluna 'minimo' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 18).toString() != "mva") { throw RuntimeError("Faltou a coluna 'mva' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 19).toString() != "st") { throw RuntimeError("Faltou a coluna 'st' no cabeçalho da tabela!"); }
-  if (xlsx.read(1, 20).toString() != "sticms") { throw RuntimeError("Faltou a coluna 'sticms' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 1).toString() != "fornecedor") { throw RuntimeError("Faltou a coluna 'fornecedor' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 2).toString() != "descricao") { throw RuntimeError("Faltou a coluna 'descricao' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 3).toString() != "un") { throw RuntimeError("Faltou a coluna 'un' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 4).toString() != "colecao") { throw RuntimeError("Faltou a coluna 'colecao' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 5).toString() != "m2cx") { throw RuntimeError("Faltou a coluna 'm2cx' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 6).toString() != "pccx") { throw RuntimeError("Faltou a coluna 'pccx' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 7).toString() != "kgcx") { throw RuntimeError("Faltou a coluna 'kgcx' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 8).toString() != "formComercial") { throw RuntimeError("Faltou a coluna 'formComercial' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 9).toString() != "codComercial") { throw RuntimeError("Faltou a coluna 'codComercial' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 10).toString() != "codBarras") { throw RuntimeError("Faltou a coluna 'codBarras' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 11).toString() != "ncm") { throw RuntimeError("Faltou a coluna 'ncm' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 12).toString() != "qtdPallet") { throw RuntimeError("Faltou a coluna 'qtdPallet' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 13).toString() != "custo") { throw RuntimeError("Faltou a coluna 'custo' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 14).toString() != "precoVenda") { throw RuntimeError("Faltou a coluna 'precoVenda' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 15).toString() != "ui") { throw RuntimeError("Faltou a coluna 'ui' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 16).toString() != "un2") { throw RuntimeError("Faltou a coluna 'un2' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 17).toString() != "minimo") { throw RuntimeError("Faltou a coluna 'minimo' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 18).toString() != "mva") { throw RuntimeError("Faltou a coluna 'mva' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 19).toString() != "st") { throw RuntimeError("Faltou a coluna 'st' no cabeçalho da tabela!"); }
+  if (xlsx.readValue(1, 20).toString() != "sticms") { throw RuntimeError("Faltou a coluna 'sticms' no cabeçalho da tabela!"); }
 }
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {

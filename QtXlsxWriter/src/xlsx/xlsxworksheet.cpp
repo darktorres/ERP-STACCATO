@@ -530,6 +530,13 @@ QVariant Worksheet::read(int row, int column) const {
   return cell->value();
 }
 
+QVariant Worksheet::readValue(int row, int column) const {
+  Cell *cell = cellAt(row, column);
+  if (not cell) return QVariant();
+
+  return cell->value();
+}
+
 /*!
  * Returns the cell at the given \a row_column. If there
  * is no cell at the specified position, the function returns 0.

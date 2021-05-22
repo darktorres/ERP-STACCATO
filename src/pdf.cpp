@@ -54,7 +54,7 @@ void PDF::gerarPdf() {
 
   if (tipo == Tipo::Venda and queryEndFat.size() > 0) {
     const QString endereco = query.value("idEnderecoFaturamento").toInt() == 1
-                                 ? "Não há/Retira"
+                                 ? "NÃO HÁ/RETIRA"
                                  : queryEndFat.value("logradouro").toString() + " - " + queryEndFat.value("numero").toString() + " - " + queryEndFat.value("complemento").toString() + " - " +
                                        queryEndFat.value("bairro").toString() + " - " + queryEndFat.value("cidade").toString() + " - " + queryEndFat.value("uf").toString();
 
@@ -66,7 +66,7 @@ void PDF::gerarPdf() {
 
   if (queryEndEnt.size() > 0) {
     const QString endereco = query.value("idEnderecoEntrega").toInt() == 1
-                                 ? "Não há/Retira"
+                                 ? "NÃO HÁ/RETIRA"
                                  : queryEndEnt.value("logradouro").toString() + " - " + queryEndEnt.value("numero").toString() + " - " + queryEndEnt.value("complemento").toString() + " - " +
                                        queryEndEnt.value("bairro").toString() + " - " + queryEndEnt.value("cidade").toString() + " - " + queryEndEnt.value("uf").toString();
 

@@ -160,7 +160,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 
 QString SearchDialog::getText(const QVariant &id) {
   if (id == 0) { return QString(); }
-  if (model.tableName().contains("endereco") and id == 1) { return "Não há/Retira"; }
+  if (model.tableName().contains("endereco") and id == 1) { return "NÃO HÁ/RETIRA"; }
 
   QString queryText;
 

@@ -141,12 +141,9 @@ void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString filtroBusca = text.isEmpty() ? "0" : "Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'";
 
-  if (text.isEmpty()) {
-    modelPedido.setFilter("0");
-  } else {
-    modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
-  }
+  modelPedido.setFilter(filtroBusca);
 }
 
 // TODO: converter tabela inferior para arvore e permitir o desconsumo apenas das sublinhas (vp2)

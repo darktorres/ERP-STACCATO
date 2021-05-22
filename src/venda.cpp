@@ -361,15 +361,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  SqlQuery queryFornecedor;
-  queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
-
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
-
-  const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
-
-  if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
+  if (representacao) { verificaFreteLoja(); }
 
   // -------------------------------------------------------------------------
 
@@ -599,19 +591,7 @@ bool Venda::viewRegister() {
 
       // -------------------------------------------------------------------------
 
-      if (representacao) {
-        // TODO: a razaoSocial do fornecedor pode mudar, usar idProduto para buscar
-
-        SqlQuery queryFornecedor;
-        queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
-        queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
-
-        if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
-
-        const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
-
-        if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
-      }
+      if (representacao) { verificaFreteLoja(); }
     }
 
     //-----------------------------------------------------------------
@@ -700,6 +680,18 @@ void Venda::verificaDisponibilidadeEstoque() {
   if (not produtos.isEmpty()) {
     throw RuntimeError("Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada:\n    -" + produtos.join("\n    -") + "\n\nRemova ou diminua a quant. para prosseguir!");
   }
+}
+
+void Venda::verificaFreteLoja() {
+  SqlQuery queryFornecedor;
+  queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor f LEFT JOIN produto p ON f.idFornecedor = p.idFornecedor WHERE p.idProduto = :idProduto");
+  queryFornecedor.bindValue(":idProduto", modelItem.data(0, "idProduto"));
+
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+
+  const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
+
+  if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
 }
 
 void Venda::on_pushButtonVoltar_clicked() {

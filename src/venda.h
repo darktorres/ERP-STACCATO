@@ -80,6 +80,7 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;
+  auto verificaFreteLoja() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

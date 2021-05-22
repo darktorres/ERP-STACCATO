@@ -69,7 +69,7 @@ contains(CONFIG, deploy){
 }
 
 win32-msvc* {
-   QMAKE_CXXFLAGS += /std:c++17 /permissive-
+   QMAKE_CXXFLAGS += /std:c++17 /permissive- /W3
 }
 
 *-g++{

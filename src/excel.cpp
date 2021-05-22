@@ -58,12 +58,12 @@ void Excel::gerarExcel() {
                           " - CEP: " + queryLojaEnd.value("cep").toString() + "\n" + queryLoja.value("tel").toString() + " - " + queryLoja.value("tel2").toString();
 
   const QString endEntrega = queryEndEnt.value("logradouro").toString().isEmpty()
-                                 ? "Não há/Retira"
+                                 ? "NÃO HÁ/RETIRA"
                                  : queryEndEnt.value("logradouro").toString() + " " + queryEndEnt.value("numero").toString() + " " + queryEndEnt.value("complemento").toString() + " - " +
                                        queryEndEnt.value("bairro").toString() + ", " + queryEndEnt.value("cidade").toString();
 
   const QString endFat = queryEndFat.value("logradouro").toString().isEmpty()
-                             ? "Não há/Retira"
+                             ? "NÃO HÁ/RETIRA"
                              : queryEndFat.value("logradouro").toString() + " " + queryEndFat.value("numero").toString() + " " + queryEndFat.value("complemento").toString() + " - " +
                                    queryEndFat.value("bairro").toString() + ", " + queryEndFat.value("cidade").toString();
 

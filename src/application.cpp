@@ -255,7 +255,7 @@ void Application::startTransaction(const QString &messageLog) {
 
   if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
-  if (SqlQuery query; not query.exec("START TRANSACTION")) { return; }
+  if (SqlQuery query; not query.exec("START TRANSACTION")) { throw RuntimeException("Erro iniciando transação!"); }
 
   Log::createLog("Transação", messageLog);
 
@@ -267,7 +267,7 @@ void Application::endTransaction() {
 
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
-  if (SqlQuery query; not query.exec("COMMIT")) { return; }
+  if (SqlQuery query; not query.exec("COMMIT")) { throw RuntimeException("Erro encerrando transação!"); }
 
   inTransaction = false;
 
@@ -278,7 +278,8 @@ void Application::rollbackTransaction() {
   qDebug() << "rollbackTransaction";
 
   if (inTransaction) {
-    if (SqlQuery query; not query.exec("ROLLBACK")) { return; }
+    if (SqlQuery query; not query.exec("ROLLBACK")) { throw RuntimeException("Erro cancelando transação!"); }
+
     inTransaction = false;
   }
 

@@ -4,7 +4,6 @@
 #include "usersession.h"
 
 #include <QDebug>
-#include <QSqlError>
 
 void Log::createLog(const QString &tipo, const QString &message) {
   if (not QSqlDatabase::database().isOpen()) { return; }

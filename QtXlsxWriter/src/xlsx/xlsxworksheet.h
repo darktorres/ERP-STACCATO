@@ -62,6 +62,7 @@ public:
   bool write(int row, int column, const QVariant &value, const Format &format = Format());
   QVariant read(const CellReference &row_column) const;
   QVariant read(int row, int column) const;
+  QVariant readValue(int row, int column) const;
   bool writeString(const CellReference &row_column, const QString &value, const Format &format = Format());
   bool writeString(int row, int column, const QString &value, const Format &format = Format());
   bool writeString(const CellReference &row_column, const RichString &value, const Format &format = Format());

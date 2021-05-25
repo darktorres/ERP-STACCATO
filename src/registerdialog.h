@@ -10,6 +10,9 @@ class RegisterDialog : public QDialog {
   Q_OBJECT
 
 public:
+  enum class Tipo { Cadastrar, Atualizar };
+  Q_ENUM(Tipo)
+
   explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
   ~RegisterDialog() override = default;
 
@@ -26,12 +29,12 @@ protected:
   QString primaryId;
   QString primaryKey;
   SqlTableModel model;
-  enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
+  Tipo tipo = Tipo::Cadastrar;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
   auto confirmationMessage() -> bool;
   auto connectLineEditsToDirty() -> void;
-  auto data(const QString &key) -> QVariant;
+  auto data(const QString &key) const -> QVariant;
   auto marcarDirty() -> void;
   auto remove() -> void;
   auto removeBox() -> int;

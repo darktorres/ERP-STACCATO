@@ -14,4 +14,5 @@ public:
 private:
   int const descontinuadoColumn;
   enum class Status { Novo = 1, Atualizado = 2, ForaPadrao = 3, Errado = 4 };
+  Q_ENUM(Status)
 };

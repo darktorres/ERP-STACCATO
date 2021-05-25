@@ -11,6 +11,7 @@ class SendMail final : public QDialog {
 
 public:
   enum class Tipo { GerarCompra, Teste, Vazio };
+  Q_ENUM(Tipo)
 
   explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = nullptr);
   explicit SendMail(const Tipo tipo, QWidget *parent = nullptr);

@@ -12,6 +12,16 @@ class Estoque final : public QDialog {
   Q_OBJECT
 
 public:
+  enum class FieldColors {
+    White = 0,     // Não processado
+    Green = 1,     // Ok
+    Yellow = 2,    // Quant difere
+    Red = 3,       // Não encontrado
+    DarkGreen = 4, // Consumo
+    Cyan = 5       // Devolução
+  };
+  Q_ENUM(FieldColors)
+
   explicit Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent);
   ~Estoque();
 
@@ -25,15 +35,6 @@ private:
   SqlTableModel modelEstoque;
   SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
-
-  enum class FieldColors {
-    White = 0,     // Não processado
-    Green = 1,     // Ok
-    Yellow = 2,    // Quant difere
-    Red = 3,       // Não encontrado
-    DarkGreen = 4, // Consumo
-    Cyan = 5       // Devolução
-  };
 
   // methods
   auto buscarRestante() -> void;

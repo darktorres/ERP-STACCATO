@@ -13,6 +13,7 @@ class InputDialogConfirmacao final : public QDialog {
 
 public:
   enum class Tipo { Recebimento, Entrega, Representacao };
+  Q_ENUM(Tipo)
 
   explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent);
   ~InputDialogConfirmacao() final;

@@ -19,6 +19,7 @@ public:
   // TODO: adicionar tipo Frete
   // TODO: separa Entrada em DevolucaoCliente, DevolucaoFornecedor
   enum class Tipo { Entrada, Saida, Futura, SaidaAposFutura };
+  Q_ENUM(Tipo)
 
   explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();

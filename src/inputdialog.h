@@ -11,6 +11,7 @@ class InputDialog final : public QDialog {
 
 public:
   enum class Tipo { Carrinho, Faturamento, AgendarColeta, Coleta, AgendarRecebimento, AgendarEntrega, ReagendarPedido };
+  Q_ENUM(Tipo)
 
   explicit InputDialog(const Tipo &tipo, QWidget *parent);
   ~InputDialog();

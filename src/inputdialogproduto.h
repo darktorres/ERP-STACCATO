@@ -13,6 +13,7 @@ class InputDialogProduto final : public QDialog {
 
 public:
   enum class Tipo { GerarCompra, Faturamento };
+  Q_ENUM(Tipo)
 
   explicit InputDialogProduto(const Tipo &tipo, QWidget *parent);
   ~InputDialogProduto();

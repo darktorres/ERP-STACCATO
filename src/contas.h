@@ -13,6 +13,7 @@ class Contas final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
+  Q_ENUM(Tipo)
 
   explicit Contas(const Tipo tipo, QWidget *parent);
   ~Contas();

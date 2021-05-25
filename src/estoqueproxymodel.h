@@ -12,6 +12,7 @@ public:
 
 private:
   enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
+  Q_ENUM(Status)
   // attributes
   int const quantUpdColumn = -1;
   // methods

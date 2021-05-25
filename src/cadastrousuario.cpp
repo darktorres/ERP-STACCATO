@@ -146,7 +146,7 @@ void CadastroUsuario::savingProcedures() {
     SqlQuery query;
 
     if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "'), SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) {
-      throw RuntimeException("Erro gerando senha: " + query.lastError().text());
+      throw RuntimeException("Erro guardando senha: " + query.lastError().text());
     }
 
     setData("password", query.value(0), false);

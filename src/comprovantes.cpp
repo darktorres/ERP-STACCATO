@@ -76,13 +76,17 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
       throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
     }
 
+    const auto replyMsg = reply->readAll();
+
+    if (replyMsg.contains("could not be found on this server")) { throw RuntimeException("Arquivo não encontrado no servidor!"); }
+
     const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 
     File file(filename);
 
     if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
-    file.write(reply->readAll());
+    file.write(replyMsg);
 
     file.close();
 

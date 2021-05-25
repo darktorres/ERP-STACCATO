@@ -41,13 +41,8 @@ class ImportaProdutos final : public QDialog {
 
 public:
   enum class Tipo { Normal = 0, Promocao = 1 };
+  Q_ENUM(Tipo)
 
-  explicit ImportaProdutos(const Tipo tipo, QWidget *parent);
-  ~ImportaProdutos();
-
-  auto importarTabela() -> void;
-
-private:
   enum class FieldColors {
     White = 0,  // no change
     Green = 1,  // new value
@@ -55,7 +50,14 @@ private:
     Gray = 3,   // wrong value but accepted
     Red = 4     // wrong value, must be fixed
   };
+  Q_ENUM(FieldColors)
 
+  explicit ImportaProdutos(const Tipo tipo, QWidget *parent);
+  ~ImportaProdutos();
+
+  auto importarTabela() -> void;
+
+private:
   // attributes
   int itensError = 0;
   int itensExpired = 0;

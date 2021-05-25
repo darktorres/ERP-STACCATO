@@ -18,4 +18,5 @@ private:
   int const statusIndex;
 
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
+  Q_ENUM(FieldColors)
 };

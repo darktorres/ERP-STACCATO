@@ -28,6 +28,15 @@ class ImportarXML final : public QDialog {
   };
 
 public:
+  enum class FieldColors {
+    None = 0,      // Não processado
+    Green = 1,     // Ok
+    Yellow = 2,    // Quant difere
+    Red = 3,       // Não encontrado
+    DarkGreen = 4, // Consumo
+  };
+  Q_ENUM(FieldColors)
+
   explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent);
   ~ImportarXML();
 
@@ -44,14 +53,6 @@ private:
   SqlTableModel modelPagamento;
   SqlTableModel modelVenda;
   Ui::ImportarXML *ui;
-
-  enum class FieldColors {
-    None = 0,      // Não processado
-    Green = 1,     // Ok
-    Yellow = 2,    // Quant difere
-    Red = 3,       // Não encontrado
-    DarkGreen = 4, // Consumo
-  };
 
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> void;

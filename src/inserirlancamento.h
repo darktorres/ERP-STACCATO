@@ -13,6 +13,7 @@ class InserirLancamento final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
+  Q_ENUM(Tipo)
 
   explicit InserirLancamento(const Tipo tipo, QWidget *parent);
   ~InserirLancamento();

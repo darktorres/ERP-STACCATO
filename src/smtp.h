@@ -26,6 +26,9 @@ class Smtp final : public QObject {
   Q_OBJECT
 
 public:
+  enum class States { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close };
+  Q_ENUM(States)
+
   Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port = 465, const int timeout = 5000);
   ~Smtp() final;
 
@@ -37,7 +40,7 @@ signals:
 
 private:
   // attributes
-  enum class States { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close } state;
+  States state;
   int const timeout;
   quint16 const port;
   QSslSocket *socket;

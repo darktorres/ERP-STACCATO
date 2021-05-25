@@ -16,6 +16,7 @@ class WidgetFinanceiroContas final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Receber, Pagar };
+  Q_ENUM(Tipo)
 
   explicit WidgetFinanceiroContas(QWidget *parent);
   ~WidgetFinanceiroContas();

@@ -13,6 +13,7 @@ class CancelaProduto : public QDialog {
 
 public:
   enum class Tipo { CompraConfirmar, CompraFaturamento, LogisticaColeta, LogisticaRecebimento, LogisticaEntregues, NFeEntrada };
+  Q_ENUM(Tipo)
 
   explicit CancelaProduto(const Tipo &tipo, QWidget *parent);
   ~CancelaProduto();

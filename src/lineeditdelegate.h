@@ -7,6 +7,7 @@ class LineEditDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { ContraPartePagar, ContraParteReceber, Grupo };
+  Q_ENUM(Tipo)
 
   explicit LineEditDelegate(const Tipo tipo, QObject *parent);
   ~LineEditDelegate() = default;

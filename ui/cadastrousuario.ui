@@ -72,7 +72,7 @@
      <item>
       <widget class="QPushButton" name="pushButtonRemover">
        <property name="text">
-        <string>Remover</string>
+        <string>Desativar</string>
        </property>
       </widget>
      </item>

@@ -303,14 +303,14 @@
             <item>
              <widget class="QPushButton" name="pushButtonRemoverEnd">
               <property name="text">
-               <string>Remover End.</string>
+               <string>Desativar End.</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="checkBoxMostrarInativos">
               <property name="text">
-               <string>Mostrar Inativos</string>
+               <string>Mostrar desativados</string>
               </property>
               <property name="checkable">
                <bool>true</bool>
@@ -994,7 +994,7 @@ color: rgb(0, 0, 0);</string>
      <item>
       <widget class="QPushButton" name="pushButtonRemover">
        <property name="text">
-        <string>Remover</string>
+        <string>Desativar</string>
        </property>
       </widget>
      </item>
@@ -1022,11 +1022,6 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>LineEditCEP</class>
    <extends>QLineEdit</extends>
    <header>src/lineeditcep.h</header>
@@ -1035,6 +1030,11 @@ color: rgb(0, 0, 0);</string>
    <class>LineEditTel</class>
    <extends>QLineEdit</extends>
    <header>src/lineedittel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

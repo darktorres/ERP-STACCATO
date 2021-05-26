@@ -441,9 +441,47 @@ void Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   modelConsumos.submitAll();
 }
 
+void Devolucao::criarComissaoProfissional(const int currentRow) {
+  const QDate date = qApp->serverDate();
+
+  SqlQuery queryProfissional;
+
+  if (not queryProfissional.exec("SELECT p.nome_razao, v.rt FROM profissional p LEFT JOIN venda v ON p.idProfissional = v.idProfissional LEFT JOIN venda_has_produto2 vp2 ON v.idVenda = vp2.idVenda "
+                                 "WHERE vp2.idVendaProduto2 = " +
+                                 QString::number(modelProdutos2.data(currentRow, "idVendaProduto2").toInt())) or
+      not queryProfissional.first()) {
+    throw RuntimeException("Erro buscando dados do profissional: " + queryProfissional.lastError().text());
+  }
+
+  const double rt = queryProfissional.value("rt").toDouble() / 100;
+  const double valor = modelProdutos2.data(currentRow, "total").toDouble() * -1 * rt;
+  const QString profissional = queryProfissional.value("nome_razao").toString();
+
+  if (not qFuzzyIsNull(valor)) {
+    SqlQuery query1;
+    query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, idConta, centroCusto, valor, tipo, dataPagamento, grupo) "
+                   "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :idConta, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+    query1.bindValue(":dataEmissao", date);
+    query1.bindValue(":idVenda", idDevolucao);
+    query1.bindValue(":contraParte", profissional);
+    query1.bindValue(":idLoja", modelProdutos2.data(currentRow, "idLoja"));
+    query1.bindValue(":idConta", 8); // caixa matriz
+    query1.bindValue(":centroCusto", modelProdutos2.data(currentRow, "idLoja"));
+    query1.bindValue(":valor", valor);
+    query1.bindValue(":tipo", "1. Dinheiro");
+    // 01-15 paga dia 30, 16-30 paga prox dia 15
+    QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
+    QDate quinzena2 = date.addMonths(1);
+    quinzena2.setDate(quinzena2.year(), quinzena2.month(), 15);
+    query1.bindValue(":dataPagamento", date.day() <= 15 ? quinzena1 : quinzena2);
+    query1.bindValue(":grupo", "RT's");
+
+    if (not query1.exec()) { throw RuntimeException("Erro cadastrando RT: " + query1.lastError().text()); }
+  }
+}
+
 void Devolucao::criarContas() {
-  // TODO: 0considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos
-  // de contas
+  // TODO: 0considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos de contas
 
   if (qFuzzyIsNull(ui->doubleSpinBoxCredito->value())) { return; }
 
@@ -454,6 +492,7 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "contraParte", modelCliente.data(0, "nome_razao"));
   modelPagamentos.setData(newRow, "dataEmissao", qApp->serverDate());
   modelPagamentos.setData(newRow, "idVenda", idDevolucao);
+  // TODO: porque usa o idLoja do usuario?
   modelPagamentos.setData(newRow, "idLoja", UserSession::idLoja);
   modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value() * -1);
   modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
@@ -485,6 +524,7 @@ void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2
 
   determinarIdDevolucao();
 
+  criarComissaoProfissional(currentRow);
   criarContas();
   salvarCredito();
   inserirItens(currentRow, novoIdVendaProduto2);
@@ -505,8 +545,6 @@ void Devolucao::limparCampos() {
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {
-  // TODO: fazer lançamento negativo da RT do profissional
-
   //  10cx
 
   //  1cx devolvido -> -1cx consumo

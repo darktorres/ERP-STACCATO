@@ -33,6 +33,7 @@ private:
   auto atualizarDevolucao() -> void;
   auto atualizarIdRelacionado(const int currentRow) -> void;
   auto copiarProdutoParaDevolucao(const int currentRow) -> void;
+  auto criarComissaoProfissional(const int currentRow) -> void;
   auto criarContas() -> void;
   auto criarDevolucao() -> void;
   auto desvincularCompra(const QString &idVendaProduto2) -> void;

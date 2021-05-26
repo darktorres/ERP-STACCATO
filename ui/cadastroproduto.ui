@@ -1357,7 +1357,7 @@ color: rgb(0, 0, 0);</string>
         </size>
        </property>
        <property name="text">
-        <string>Remover</string>
+        <string>Desativar</string>
        </property>
       </widget>
      </item>

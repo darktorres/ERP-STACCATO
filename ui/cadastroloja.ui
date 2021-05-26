@@ -545,14 +545,14 @@ color: rgb(0, 0, 0);</string>
          <item>
           <widget class="QPushButton" name="pushButtonRemoverEnd">
            <property name="text">
-            <string>Remover end.</string>
+            <string>Desativar End.</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxMostrarInativos">
            <property name="text">
-            <string>Mostrar Inativos</string>
+            <string>Mostrar desativados</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -621,14 +621,14 @@ color: rgb(0, 0, 0);</string>
          <item>
           <widget class="QPushButton" name="pushButtonRemoverConta">
            <property name="text">
-            <string>Remover Conta</string>
+            <string>Desativar Conta</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxMostrarInativosConta">
            <property name="text">
-            <string>Mostrar Inativos</string>
+            <string>Mostrar desativados</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -908,7 +908,7 @@ color: rgb(0, 0, 0);</string>
      <item>
       <widget class="QPushButton" name="pushButtonRemover">
        <property name="text">
-        <string>Remover</string>
+        <string>Desativar</string>
        </property>
       </widget>
      </item>

@@ -413,8 +413,6 @@ void Orcamento::removeItem() {
 
   try {
     [&] {
-      if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
-
       if (not modelItem.removeRow(currentRowItem)) { throw RuntimeException("Erro removendo linha: " + modelItem.lastError().text()); }
 
       if (ui->lineEditOrcamento->text() != "Auto gerado") {

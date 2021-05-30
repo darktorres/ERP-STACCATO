@@ -302,6 +302,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("parcela", "Parcela");
   model.setHeaderData("observacao", "Obs.");
+  model.setHeaderData("status", "Status");
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
   model.proxyModel = new SortFilterProxyModel(&model, this);
@@ -315,7 +316,6 @@ void WidgetFinanceiroContas::montaFiltro() {
   if (tipo == Tipo::Pagar) { ui->table->hideColumn("grupo"); }
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
-  ui->table->hideColumn("status");
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {

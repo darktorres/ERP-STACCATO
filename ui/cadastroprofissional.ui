@@ -696,6 +696,12 @@ color: rgb(0, 0, 0);</string>
               <layout class="QGridLayout" name="gridLayout_9">
                <item row="1" column="1">
                 <widget class="LineEditTel" name="lineEditTel_Cel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -737,6 +743,12 @@ color: rgb(0, 0, 0);</string>
                </item>
                <item row="1" column="0">
                 <widget class="LineEditTel" name="lineEditTel_Res">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -764,6 +776,12 @@ color: rgb(0, 0, 0);</string>
                </item>
                <item row="1" column="5">
                 <widget class="LineEditTel" name="lineEditNextel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -777,6 +795,12 @@ color: rgb(0, 0, 0);</string>
                </item>
                <item row="1" column="2">
                 <widget class="LineEditTel" name="lineEditTel_Com">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -790,6 +814,12 @@ color: rgb(0, 0, 0);</string>
                </item>
                <item row="1" column="4">
                 <widget class="QLineEdit" name="lineEditIdNextel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>

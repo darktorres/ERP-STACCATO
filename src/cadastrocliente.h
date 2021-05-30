@@ -45,6 +45,7 @@ private:
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setEnderecoReadOnly(const bool readOnly) -> void;
   auto setItemBoxes() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;

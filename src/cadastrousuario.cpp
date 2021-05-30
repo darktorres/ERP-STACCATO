@@ -242,6 +242,8 @@ void CadastroUsuario::cadastrar() {
 }
 
 void CadastroUsuario::criarUsuarioMySQL() {
+  // TODO: verificar se usuário existe antes de criar
+
   File file("mysql.txt");
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString(), this); }
@@ -266,6 +268,8 @@ void CadastroUsuario::criarUsuarioMySQL() {
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
+  // TODO: colocar um timer delayed para não atrapalhar a digitação?
+
   SqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
@@ -298,6 +302,7 @@ bool CadastroUsuario::newRegister() {
   modelPermissoes.setData(row, "view_tab_venda", 1);
   modelPermissoes.setData(row, "view_tab_estoque", 1);
   modelPermissoes.setData(row, "view_tab_relatorio", 1);
+  modelPermissoes.setData(row, "webdav_documentos", 1);
 
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
 

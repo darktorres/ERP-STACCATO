@@ -133,3 +133,4 @@ void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFor
 
 // TODO: replace this with eliding? https://wiki.qt.io/Elided_Label
 // TODO: ajustar o tamanho do widget de acordo com o tamanho do texto para o autodimensionar funcionar corretamente na tableView (usar sizeHint?)
+// TODO: add clearButtonEnabled?

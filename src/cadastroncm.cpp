@@ -85,3 +85,5 @@ void CadastroNCM::on_pushButtonRemover_clicked() {
 
 // TODO: avisar após digitar NCM se ele já estiver cadastrado (o banco de dados não vai permitir cadastrar duplicado mas a mensagem de
 // erro dele não é amigável
+// TODO: colocar created/lastUpdated no sql
+// TODO: CEST deve ter 7 digitos, validar

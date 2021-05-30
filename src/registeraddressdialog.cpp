@@ -30,6 +30,8 @@ void RegisterAddressDialog::setupTables(const QString &table) {
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
+QVariant RegisterAddressDialog::dataEnd(const QString &key) const { return modelEnd.data(currentRowEnd, key); }
+
 void RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) { modelEnd.setData(currentRowEnd, key, value); }
 
 void RegisterAddressDialog::verificaEndereco(const QString &cidade, const QString &uf) {
@@ -40,7 +42,7 @@ void RegisterAddressDialog::verificaEndereco(const QString &cidade, const QStrin
 
   if (not query.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
 
-  if (not query.first()) { throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!", this); }
+  if (not query.first()) { throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão escritos corretamente!", this); }
 }
 
 bool RegisterAddressDialog::newRegister() {

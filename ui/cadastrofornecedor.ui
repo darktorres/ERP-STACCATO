@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1388</width>
-    <height>765</height>
+    <width>1336</width>
+    <height>708</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -229,6 +229,12 @@
               <layout class="QGridLayout" name="gridLayout_4">
                <item row="1" column="1">
                 <widget class="LineEditTel" name="lineEditTel_Cel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -270,6 +276,12 @@
                </item>
                <item row="1" column="0">
                 <widget class="LineEditTel" name="lineEditTel_Res">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -297,6 +309,12 @@
                </item>
                <item row="1" column="5">
                 <widget class="LineEditTel" name="lineEditNextel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -310,6 +328,12 @@
                </item>
                <item row="1" column="2">
                 <widget class="LineEditTel" name="lineEditTel_Com">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -323,6 +347,12 @@
                </item>
                <item row="1" column="4">
                 <widget class="QLineEdit" name="lineEditIdNextel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -628,7 +658,7 @@ color: rgb(0, 0, 0);</string>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QGridLayout" name="gridLayout_21">
+         <layout class="QGridLayout" name="gridLayout">
           <item row="1" column="0">
            <widget class="TableView" name="tableEndereco">
             <property name="mouseTracking">
@@ -655,223 +685,6 @@ color: rgb(0, 0, 0);</string>
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>false</bool>
             </attribute>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QGroupBox" name="groupBoxEndereco">
-            <property name="title">
-             <string>Endereço</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="labelDescricao">
-               <property name="text">
-                <string>Descricao</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="labelCEP">
-               <property name="text">
-                <string>CEP</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="labelEndereco">
-               <property name="text">
-                <string>Logradouro</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QLabel" name="labelNro">
-               <property name="text">
-                <string>Número</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="4">
-              <widget class="QLabel" name="labelComp">
-               <property name="text">
-                <string>Complemento</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="5">
-              <widget class="QLabel" name="labelBairro">
-               <property name="text">
-                <string>Bairro/Distrito</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="6">
-              <widget class="QLabel" name="labelCidade">
-               <property name="text">
-                <string>Cidade</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="7">
-              <widget class="QLabel" name="labelUF">
-               <property name="text">
-                <string>UF</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QComboBox" name="comboBoxTipoEnd">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Principal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Faturamento</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Entrega</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="LineEditCEP" name="lineEditCEP">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>75</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;O sistema preenche o endereço automaticamente a partir do CEP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="accessibleName">
-                <string>CEP</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLineEdit" name="lineEditLogradouro">
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>Logradouro</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QLineEdit" name="lineEditNumero">
-               <property name="minimumSize">
-                <size>
-                 <width>50</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>Número</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="QLineEdit" name="lineEditComplemento">
-               <property name="minimumSize">
-                <size>
-                 <width>75</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>Complemento</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true"/>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="5">
-              <widget class="QLineEdit" name="lineEditBairro">
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>Bairro/Distrito</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="6">
-              <widget class="QLineEdit" name="lineEditCidade">
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>Cidade</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="7">
-              <widget class="QLineEdit" name="lineEditUF">
-               <property name="minimumSize">
-                <size>
-                 <width>35</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="accessibleName">
-                <string>UF</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </widget>
           </item>
           <item row="1" column="1">
@@ -921,6 +734,220 @@ color: rgb(0, 0, 0);</string>
              </spacer>
             </item>
            </layout>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="groupBoxEndereco">
+            <property name="title">
+             <string/>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_22">
+             <item row="1" column="5">
+              <widget class="QLineEdit" name="lineEditBairro">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>Bairro</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="6">
+              <widget class="QLineEdit" name="lineEditCidade">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>Cidade</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="7">
+              <widget class="QLineEdit" name="lineEditUF">
+               <property name="minimumSize">
+                <size>
+                 <width>35</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>UF</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QLineEdit" name="lineEditComplemento">
+               <property name="minimumSize">
+                <size>
+                 <width>75</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>Complemento</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QLineEdit" name="lineEditNumero">
+               <property name="minimumSize">
+                <size>
+                 <width>50</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>Número</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLineEdit" name="lineEditLogradouro">
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>Logradouro</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="LineEditCEP" name="lineEditCEP">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>75</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;O sistema preenche o endereço automaticamente a partir do CEP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="accessibleName">
+                <string>CEP</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QComboBox" name="comboBoxTipoEnd">
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Principal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Faturamento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Entrega</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="6">
+              <widget class="QLabel" name="labelCidade">
+               <property name="text">
+                <string>Cidade</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="labelCEP">
+               <property name="text">
+                <string>CEP</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="labelDescricao">
+               <property name="text">
+                <string>Descricao</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="labelEndereco">
+               <property name="text">
+                <string>Logradouro</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QLabel" name="labelBairro">
+               <property name="text">
+                <string>Bairro/Distrito</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLabel" name="labelNro">
+               <property name="text">
+                <string>Número</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QLabel" name="labelComp">
+               <property name="text">
+                <string>Complemento</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="7">
+              <widget class="QLabel" name="labelUF">
+               <property name="text">
+                <string>UF</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1192,14 +1219,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>comboBoxSt</tabstop>
   <tabstop>doubleSpinBoxAliquotaSt</tabstop>
-  <tabstop>comboBoxTipoEnd</tabstop>
-  <tabstop>lineEditCEP</tabstop>
-  <tabstop>lineEditLogradouro</tabstop>
-  <tabstop>lineEditNumero</tabstop>
-  <tabstop>lineEditComplemento</tabstop>
-  <tabstop>lineEditBairro</tabstop>
-  <tabstop>lineEditCidade</tabstop>
-  <tabstop>lineEditUF</tabstop>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>

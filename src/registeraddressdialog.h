@@ -17,6 +17,7 @@ protected:
   SqlTableModel modelEnd;
   // methods
   auto getCodigoUF(const QString &uf) const -> int;
+  auto dataEnd(const QString &key) const -> QVariant;
   auto setDataEnd(const QString &key, const QVariant &value) -> void;
   auto verificaEndereco(const QString &cidade, const QString &uf) -> void;
   virtual auto newRegister() -> bool override;

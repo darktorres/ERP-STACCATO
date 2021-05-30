@@ -126,6 +126,8 @@ void Contas::preencher(const QModelIndex &index) {
         const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
         for (const auto &rowMatch : list) {
+          if (modelPendentes.data(rowMatch, "status").toString() == "CANCELADO") { continue; }
+
           if (queryConta.first()) {
             const int idConta = queryConta.value("idConta").toInt();
 

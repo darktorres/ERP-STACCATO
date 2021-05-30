@@ -52,8 +52,11 @@ void CadastroLoja::setConnections() {
 }
 
 void CadastroLoja::setupUi() {
+  // dados
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
   ui->lineEditSIGLA->setInputMask(">XXXX;_");
+
+  // endereco
   ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
 }
@@ -232,6 +235,8 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
 
   isDirty = true;
 
+  if (tipo == Tipo::Atualizar) { save(true); }
+
   return true;
 }
 
@@ -272,11 +277,22 @@ void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
 void CadastroLoja::on_tableEndereco_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoEndereco(); }
 
+  currentRowEnd = index.row();
+
+  const bool desativado = dataEnd("desativado").toBool();
+
+  ui->pushButtonAtualizarEnd->setEnabled(desativado);
+  ui->pushButtonRemoverEnd->setDisabled(desativado);
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
   ui->pushButtonRemoverEnd->show();
+
+  //------------------------------------------
+  disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroLoja::on_lineEditCEP_textChanged);
   mapperEnd.setCurrentModelIndex(index);
-  currentRowEnd = index.row();
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroLoja::on_lineEditCEP_textChanged);
+  //------------------------------------------
 }
 
 bool CadastroLoja::viewRegister() {
@@ -435,6 +451,8 @@ void CadastroLoja::verificaEndereco() {
   RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 

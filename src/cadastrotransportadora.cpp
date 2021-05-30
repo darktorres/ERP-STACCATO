@@ -211,6 +211,8 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
 
   isDirty = true;
 
+  if (tipo == Tipo::Atualizar) { save(true); }
+
   return true;
 }
 
@@ -251,20 +253,36 @@ void CadastroTransportadora::on_lineEditCEP_textChanged(const QString &cep) {
 void CadastroTransportadora::on_tableEndereco_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoEndereco(); }
 
+  currentRowEnd = index.row();
+
+  const bool desativado = dataEnd("desativado").toBool();
+
+  ui->pushButtonAtualizarEnd->setEnabled(desativado);
+  ui->pushButtonRemoverEnd->setDisabled(desativado);
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
   ui->pushButtonRemoverEnd->show();
+
+  //------------------------------------------
+  disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroTransportadora::on_lineEditCEP_textChanged);
   mapperEnd.setCurrentModelIndex(index);
-  currentRowEnd = index.row();
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroTransportadora::on_lineEditCEP_textChanged);
+  //------------------------------------------
 }
 
 void CadastroTransportadora::setupUi() {
+  // dados
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
   ui->lineEditANTT->setInputMask("99999999;_");
   ui->lineEditPlaca->setInputMask("AAA-9N99;_");
   ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
   ui->lineEditUfPlaca->setInputMask(">AA;_");
+
+  // endereco
+  ui->lineEditCEP->setInputMask("99999-999;_");
+  ui->lineEditUF->setInputMask(">AA;_");
 
   ui->lineEditCarga->setValidator(new QIntValidator(this));
 }
@@ -307,6 +325,8 @@ void CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
   if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
   isDirty = true;
+
+  if (tipo == Tipo::Atualizar) { save(true); }
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
@@ -402,11 +422,12 @@ void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool chec
 void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoVeiculo(); }
 
+  currentRowVeiculo = index.row();
+  mapperVeiculo.setCurrentModelIndex(index);
+
   ui->pushButtonAtualizarVeiculo->show();
   ui->pushButtonAdicionarVeiculo->hide();
   ui->pushButtonRemoverVeiculo->show();
-  mapperVeiculo.setCurrentModelIndex(index);
-  currentRowVeiculo = index.row();
 }
 
 bool CadastroTransportadora::newRegister() {
@@ -421,6 +442,8 @@ void CadastroTransportadora::verificaEndereco() {
   RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 

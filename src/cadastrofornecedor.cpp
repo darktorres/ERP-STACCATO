@@ -68,13 +68,13 @@ void CadastroFornecedor::setupTables() {
 void CadastroFornecedor::setupUi() {
   // dados
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
-  ui->lineEditContatoRG->setInputMask("99.999.999-9;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
   ui->lineEditUF->setInputMask(">AA;_");
 
   // endereco
   ui->lineEditCEP->setInputMask("99999-999;_");
+  ui->lineEditUF->setInputMask(">AA;_");
 
   // bancario
   ui->lineEditAgencia->setInputMask("9999-9;_");
@@ -113,7 +113,7 @@ void CadastroFornecedor::savingProcedures() {
   setData("contatoNome", ui->lineEditContatoNome->text());
   setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"));
   setData("contatoApelido", ui->lineEditContatoApelido->text());
-  setData("contatoRG", ui->lineEditContatoRG->text().remove(".").remove("-"));
+  setData("contatoRG", ui->lineEditContatoRG->text());
   setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"));
   setData("inscEstadual", ui->lineEditInscEstadual->text());
   setData("tel", ui->lineEditTel_Res->text());
@@ -131,13 +131,9 @@ void CadastroFornecedor::savingProcedures() {
   // Dados bancários
 
   setData("nomeBanco", ui->lineEditNomeBancario->text());
-
-  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) { setData("cnpjBanco", ui->lineEditCNPJBancario->text()); }
-
+  setData("cnpjBanco", (ui->lineEditCNPJBancario->text() == "../-") ? "" : ui->lineEditCNPJBancario->text());
   setData("banco", ui->lineEditBanco->text());
-
-  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) { setData("agencia", ui->lineEditAgencia->text()); }
-
+  setData("agencia", (ui->lineEditAgencia->text() == "-") ? "" : ui->lineEditAgencia->text());
   setData("cc", ui->lineEditCC->text());
   setData("poupanca", ui->checkBoxPoupanca->isChecked());
 
@@ -295,6 +291,8 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
 
   isDirty = true;
 
+  if (tipo == Tipo::Atualizar) { save(true); }
+
   return true;
 }
 
@@ -321,11 +319,22 @@ void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoEndereco(); }
 
+  currentRowEnd = index.row();
+
+  const bool desativado = dataEnd("desativado").toBool();
+
+  ui->pushButtonAtualizarEnd->setEnabled(desativado);
+  ui->pushButtonRemoverEnd->setDisabled(desativado);
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
   ui->pushButtonRemoverEnd->show();
+
+  //------------------------------------------
+  disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
   mapperEnd.setCurrentModelIndex(index);
-  currentRowEnd = index.row();
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
+  //------------------------------------------
 }
 
 bool CadastroFornecedor::viewRegister() {
@@ -456,6 +465,8 @@ void CadastroFornecedor::verificaEndereco() {
   RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
+
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 

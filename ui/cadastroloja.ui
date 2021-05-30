@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1176</width>
-    <height>685</height>
+    <width>1036</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -667,8 +667,8 @@ color: rgb(0, 0, 0);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1017</width>
-            <height>616</height>
+            <width>877</width>
+            <height>548</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">

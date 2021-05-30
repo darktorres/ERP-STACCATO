@@ -82,7 +82,7 @@ void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
 
 void RegisterDialog::setData(const QString &key, const QVariant &value, const bool adjustValue) { return model.setData(currentRow, key, value, adjustValue); }
 
-QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
+QVariant RegisterDialog::data(const QString &key) const { return model.data(currentRow, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
   if (model.fieldIndex(key) == -1) { throw RuntimeException("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
@@ -216,8 +216,8 @@ void RegisterDialog::clearFields() {
 }
 
 int RegisterDialog::removeBox() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
+  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja desativar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Desativar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   return msgBox.exec();

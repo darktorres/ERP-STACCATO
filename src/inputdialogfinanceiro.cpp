@@ -687,7 +687,13 @@ void InputDialogFinanceiro::verifyFields() {
 
     ui->widgetPgts->verifyFields();
 
-    if (modelFluxoCaixa.rowCount() == 0) { throw RuntimeError("Sem linhas de pagamento!"); }
+    if (modelFluxoCaixa.rowCount() == 0) {
+      QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
+      msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+      msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+      if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
+    }
   }
 }
 

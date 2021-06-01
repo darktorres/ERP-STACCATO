@@ -55,6 +55,7 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
   m_downloadDialog = new DownloadDialog();
 
   m_manager = new QNetworkAccessManager(this);
+  m_manager->setTransferTimeout(1000);
   m_manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
   connect(m_manager, &QNetworkAccessManager::finished, this, &QSimpleUpdater::checkDownloadedVersion);
@@ -335,6 +336,11 @@ void QSimpleUpdater::onCheckingFinished() {
  */
 
 void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
+  if (reply->isFinished() and not reply->isOpen()) {
+    emit done();
+    return;
+  }
+
   bool _new_update = false;
 
   QString _reply = QString::fromUtf8(reply->readAll());

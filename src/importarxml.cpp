@@ -1098,6 +1098,14 @@ void ImportarXML::parear() {
         const QString codComercialEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
         const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
 
+        if (codComercialEstoque == "IGNORAR") {
+          modelEstoque.setData(rowEstoque, "status", "IGNORAR");
+          modelEstoque.setData(rowEstoque, "quant", 0);
+          modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(FieldColors::Green));
+          modelEstoque.setData(rowEstoque, "restante", 0);
+          continue;
+        }
+
         // fazer busca por quantidades iguais
         const auto iguais =
             modelCompra.multiMatch({{"codComercial", codComercialEstoque}, {"quant", quantEstoque}, {"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);

@@ -552,6 +552,8 @@ void Orcamento::recalcularTotais() {
 }
 
 void Orcamento::verifyFields() {
+  verificaSeFoiAlterado();
+
   verificaDisponibilidadeEstoque();
 
   recalcularTotais();
@@ -1509,6 +1511,22 @@ void Orcamento::calcularPesoTotal() {
   }
 
   ui->spinBoxPesoTotal->setValue(total);
+}
+
+void Orcamento::verificaSeFoiAlterado() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT lastUpdated FROM orcamento WHERE idOrcamento = '" + data("idOrcamento").toString() + "'") or not query.first()) {
+    throw RuntimeException("Erro verificando se orçamento foi alterado: " + query.lastError().text());
+  }
+
+  const QDateTime serverLastUpdated = query.value("lastUpdated").toDateTime();
+  const QDateTime currentLastUpdated = data("lastUpdated").toDateTime();
+
+  if (serverLastUpdated > currentLastUpdated) {
+    viewRegisterById(primaryId);
+    throw RuntimeError("Orçamento foi modificado por outro usuário!\nRecarregando orçamento!");
+  }
 }
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)

@@ -84,6 +84,7 @@ private:
   auto updateMode() -> void final;
   auto verificaCadastroCliente() -> void;
   auto verificaDisponibilidadeEstoque() -> void;
+  auto verificaSeFoiAlterado() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

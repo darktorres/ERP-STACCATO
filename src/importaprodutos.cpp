@@ -468,7 +468,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   produto.idFornecedor = fornecedores.value(fornecedor.toString().trimmed());
   produto.fornecedor = fornecedor.toString().toUpper().trimmed();
-  produto.descricao = descricao.toString().remove("*").toUpper().trimmed();
+  produto.descricao = descricao.toString().remove("*").remove("()").replace('_', ' ').toUpper().trimmed();
   produto.un = un.toString().remove("*").toUpper().trimmed();
   produto.colecao = colecao.toString().remove("*").toUpper().trimmed();
   produto.m2cx = m2cx.toDouble();

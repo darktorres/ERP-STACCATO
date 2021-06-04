@@ -532,7 +532,17 @@ QVariant Worksheet::read(int row, int column) const {
 
 QVariant Worksheet::readValue(int row, int column) const {
   Cell *cell = cellAt(row, column);
-  if (not cell) return QVariant();
+
+  if (not cell) { return QVariant(); }
+
+  if (cell->isDateTime()) {
+    double val = cell->value().toDouble();
+    QDateTime dt = cell->dateTime();
+    if (val < 1) return dt.time();
+    // integer
+    if (fmod(val, 1.0) < 1.0 / (1000 * 60 * 60 * 24)) { return dt.date(); }
+    return dt;
+  }
 
   return cell->value();
 }

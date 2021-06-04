@@ -375,11 +375,12 @@ void CadastroLoja::cadastrar() {
 void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novaConta(); }
 
+  currentRowConta = index.row();
+  mapperConta.setCurrentModelIndex(index);
+
   ui->pushButtonAtualizarConta->show();
   ui->pushButtonAdicionarConta->hide();
   ui->pushButtonRemoverConta->show();
-  mapperConta.setCurrentModelIndex(index);
-  currentRowConta = index.row();
 }
 
 bool CadastroLoja::newRegister() {

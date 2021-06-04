@@ -32,7 +32,6 @@ void CadastroUsuario::setConnections() {
 
   connect(sdUsuario, &SearchDialog::itemSelected, this, &CadastroUsuario::viewRegisterById, connectionType);
   connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged, connectionType);
-  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited, connectionType);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked, connectionType);
@@ -88,7 +87,12 @@ void CadastroUsuario::modificarUsuario() {
   ui->comboBoxTipo->setDisabled(true);
 }
 
-void CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
+void CadastroUsuario::verifyFields() {
+  // TODO: deve marcar uma loja?
+  // quando não é marcado nenhuma loja o banco de dados salva como 1 - Alphaville
+
+  verificaUsuarioDisponivel();
+
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
@@ -267,8 +271,10 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
 
-void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
-  // TODO: colocar um timer delayed para não atrapalhar a digitação?
+void CadastroUsuario::verificaUsuarioDisponivel() {
+  const QString text = ui->lineEditUser->text();
+
+  if (text.isEmpty()) { return; }
 
   SqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
@@ -312,6 +318,5 @@ bool CadastroUsuario::newRegister() {
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
 // FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais
-
 // FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
-// TODO: mudar botao de 'remover' para 'desativar'
+// TODO: colocar combobox para escolher regime CLT/PJ/Outros

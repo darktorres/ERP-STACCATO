@@ -462,15 +462,15 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 }
 
 void WidgetFinanceiroContas::verificaCabecalho(QXlsx::Document &xlsx) {
-  if (xlsx.read(1, 1).toString() != "Data Emissão") { throw RuntimeError("Cabeçalho errado na coluna 1!"); }
-  if (xlsx.read(1, 2).toString() != "Centro de Custo") { throw RuntimeError("Cabeçalho errado na coluna 2!"); }
-  if (xlsx.read(1, 3).toString() != "Contraparte") { throw RuntimeError("Cabeçalho errado na coluna 3!"); }
-  if (xlsx.read(1, 4).toString() != "") { throw RuntimeError("Cabeçalho errado na coluna 4!"); }
-  if (xlsx.read(1, 5).toString() != "Tipo") { throw RuntimeError("Cabeçalho errado na coluna 5!"); }
-  if (xlsx.read(1, 6).toString() != "Vencimento") { throw RuntimeError("Cabeçalho errado na coluna 6!"); }
-  if (xlsx.read(1, 7).toString() != "Banco") { throw RuntimeError("Cabeçalho errado na coluna 7!"); }
-  if (xlsx.read(1, 8).toString() != "Obs") { throw RuntimeError("Cabeçalho errado na coluna 8!"); }
-  if (xlsx.read(1, 9).toString() != "Grupo") { throw RuntimeError("Cabeçalho errado na coluna 9!"); }
+  if (xlsx.readValue(1, 1).toString() != "Data Emissão") { throw RuntimeError("Cabeçalho errado na coluna 1!"); }
+  if (xlsx.readValue(1, 2).toString() != "Centro de Custo") { throw RuntimeError("Cabeçalho errado na coluna 2!"); }
+  if (xlsx.readValue(1, 3).toString() != "Contraparte") { throw RuntimeError("Cabeçalho errado na coluna 3!"); }
+  if (xlsx.readValue(1, 4).toString() != "") { throw RuntimeError("Cabeçalho errado na coluna 4!"); }
+  if (xlsx.readValue(1, 5).toString() != "Tipo") { throw RuntimeError("Cabeçalho errado na coluna 5!"); }
+  if (xlsx.readValue(1, 6).toString() != "Vencimento") { throw RuntimeError("Cabeçalho errado na coluna 6!"); }
+  if (xlsx.readValue(1, 7).toString() != "Banco") { throw RuntimeError("Cabeçalho errado na coluna 7!"); }
+  if (xlsx.readValue(1, 8).toString() != "Obs") { throw RuntimeError("Cabeçalho errado na coluna 8!"); }
+  if (xlsx.readValue(1, 9).toString() != "Grupo") { throw RuntimeError("Cabeçalho errado na coluna 9!"); }
 }
 
 void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
@@ -492,32 +492,32 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag");
 
   for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
-    if (xlsx.read(rowExcel, 1).toString().isEmpty()) { continue; }
+    if (xlsx.readValue(rowExcel, 1).toString().isEmpty()) { continue; }
 
     SqlQuery queryLoja;
 
-    if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
+    if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.readValue(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
       throw RuntimeException("Erro buscando idLoja: " + queryLoja.lastError().text());
     }
 
     SqlQuery queryConta;
 
-    if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.read(rowExcel, 7).toString() + "'") or not queryConta.first()) {
+    if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.readValue(rowExcel, 7).toString() + "'") or not queryConta.first()) {
       throw RuntimeException("Erro buscando idConta: " + queryConta.lastError().text());
     }
 
     const int rowModel = modelImportar.insertRowAtEnd();
 
-    modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1));
+    modelImportar.setData(rowModel, "dataEmissao", xlsx.readValue(rowExcel, 1));
     modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"));
-    modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3));
-    modelImportar.setData(rowModel, "valor", xlsx.read(rowExcel, 4));
-    modelImportar.setData(rowModel, "tipo", xlsx.read(rowExcel, 5));
-    modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6));
-    modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8));
+    modelImportar.setData(rowModel, "contraParte", xlsx.readValue(rowExcel, 3));
+    modelImportar.setData(rowModel, "valor", xlsx.readValue(rowExcel, 4));
+    modelImportar.setData(rowModel, "tipo", xlsx.readValue(rowExcel, 5));
+    modelImportar.setData(rowModel, "dataPagamento", xlsx.readValue(rowExcel, 6));
+    modelImportar.setData(rowModel, "observacao", xlsx.readValue(rowExcel, 8));
     modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"));
     modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"));
-    modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9));
+    modelImportar.setData(rowModel, "grupo", xlsx.readValue(rowExcel, 9));
   }
 
   modelImportar.submitAll();

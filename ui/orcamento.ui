@@ -432,7 +432,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="3">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxEstoque">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxEstoque">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -587,7 +587,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="7">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxDesconto">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxDesconto">
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Desconto por item&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -606,7 +606,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="4">
-                 <widget class="QDoubleSpinBox" name="spinBoxMinimo">
+                 <widget class="DoubleSpinBox" name="spinBoxMinimo">
                   <property name="maximumSize">
                    <size>
                     <width>55</width>
@@ -628,7 +628,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="8">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxTotalItem">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxTotalItem">
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Valor total do item&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -691,7 +691,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxCaixas">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxCaixas">
                   <property name="maximumSize">
                    <size>
                     <width>55</width>
@@ -737,7 +737,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="3">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxQuant">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxQuant">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -768,7 +768,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxPrecoUn">
+                 <widget class="DoubleSpinBox" name="doubleSpinBoxPrecoUn">
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Valor total do item&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -799,7 +799,7 @@ color: rgb(0, 0, 0);</string>
                  </widget>
                 </item>
                 <item row="1" column="5">
-                 <widget class="QDoubleSpinBox" name="spinBoxQuantCx">
+                 <widget class="DoubleSpinBox" name="spinBoxQuantCx">
                   <property name="maximumSize">
                    <size>
                     <width>55</width>
@@ -1219,7 +1219,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="2" column="5">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxDescontoGlobalReais">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxDescontoGlobalReais">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1244,7 +1244,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="2" column="6">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxDescontoGlobal">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxDescontoGlobal">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1320,7 +1320,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="0" column="5" colspan="2">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxSubTotalBruto">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxSubTotalBruto">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total bruto é o total do valor dos itens, &lt;span style=&quot; font-weight:600;&quot;&gt;sem nenhum desconto&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -1351,7 +1351,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="1" column="5" colspan="2">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxSubTotalLiq">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxSubTotalLiq">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total líq. do orçamento é o subtotal dos itens com desconto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -1382,7 +1382,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="4" column="5" colspan="2">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxTotal">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxTotal">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Valor total do orçamento, com desconto final.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -1404,7 +1404,7 @@ color: rgb(0, 0, 0);</string>
                </widget>
               </item>
               <item row="3" column="5" colspan="2">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
+               <widget class="DoubleSpinBox" name="doubleSpinBoxFrete">
                 <property name="wrapping">
                  <bool>false</bool>
                 </property>
@@ -1635,6 +1635,11 @@ color: rgb(0, 0, 0);</string>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>src/doublespinbox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

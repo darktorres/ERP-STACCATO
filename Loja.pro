@@ -134,6 +134,7 @@ SOURCES += \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
     src/doubledelegate.cpp \
+    src/doublespinbox.cpp \
     src/editdelegate.cpp \
     src/estoque.cpp \
     src/estoqueitem.cpp \
@@ -159,7 +160,6 @@ SOURCES += \
     src/itembox.cpp \
     src/itemboxdelegate.cpp \
     src/lineeditcep.cpp \
-    src/lineeditdecimal.cpp \
     src/lineeditdelegate.cpp \
     src/lineedittel.cpp \
     src/log.cpp \
@@ -267,6 +267,7 @@ HEADERS  += \
     src/dateformatdelegate.h \
     src/devolucao.h \
     src/doubledelegate.h \
+    src/doublespinbox.h \
     src/editdelegate.h \
     src/estoque.h \
     src/estoqueitem.h \
@@ -292,7 +293,6 @@ HEADERS  += \
     src/itembox.h \
     src/itemboxdelegate.h \
     src/lineeditcep.h \
-    src/lineeditdecimal.h \
     src/lineeditdelegate.h \
     src/lineedittel.h \
     src/log.h \

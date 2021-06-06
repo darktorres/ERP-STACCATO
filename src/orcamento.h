@@ -2,6 +2,8 @@
 
 #include "registerdialog.h"
 
+#include <QStack>
+
 namespace Ui {
 class Orcamento;
 }
@@ -24,22 +26,27 @@ private:
   double porcFrete = 0;
   int currentItemIsPromocao = 0;
   int currentRowItem = -1;
-  QList<QSqlRecord> backupItem;
   QDataWidgetMapper mapperItem;
+  QList<QSqlRecord> backupItem;
+  QStack<int> blockingSignals;
   SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
-  auto buscarCadastrarConsultor() -> void;
+  auto buscarConsultor() -> void;
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
   auto calcularPeso() -> double;
   auto calcularPesoTotal() -> void;
+  auto calcularTotais() -> std::tuple<double, double, double>;
   auto clearFields() -> void final;
+  auto corrigirValores() -> void;
+  auto dataItem(const QString &key) const -> QVariant;
   auto generateId() -> void;
+  auto montarLog() -> QString;
   auto newRegister() -> bool final;
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
@@ -76,7 +83,9 @@ private:
   auto removeItem() -> void;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
+  auto setDataItem(const QString &key, const QVariant &value, const bool adjustValue = true) -> void;
   auto setItemBoxes() -> void;
+  auto setarParametrosProduto() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;

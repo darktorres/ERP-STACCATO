@@ -567,7 +567,7 @@ void Orcamento::recalcularTotais() {
     if (brutoErrado2 or liquidoErrado2 or totalErrado2) {
       Log::createLog("Exceção", montarLog());
 
-      throw RuntimeException("Valores não conferem! Recalculando!");
+      throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
     }
   }
 }

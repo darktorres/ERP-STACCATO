@@ -2,16 +2,15 @@
 
 #include <QDebug>
 
-DoubleSpinBox::DoubleSpinBox(QWidget *parent) : QDoubleSpinBox(parent) {
-  // mapper uses setProperty in place of setValue, update valorIntacto manually
-  connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double value) { valorIntacto = value; });
-}
+DoubleSpinBox::DoubleSpinBox(QWidget *parent) : QDoubleSpinBox(parent) {}
 
 void DoubleSpinBox::setValue(const double value) {
-  valorIntacto = value;
+  fullValue = value;
   QDoubleSpinBox::setValue(value);
+
+  emit fullValueChanged(fullValue);
 }
 
-double DoubleSpinBox::value() const { return valorIntacto; }
+double DoubleSpinBox::value() const { return fullValue; }
 
-double DoubleSpinBox::baseValue() const { return QDoubleSpinBox::value(); }
+double DoubleSpinBox::visibleValue() const { return QDoubleSpinBox::value(); }

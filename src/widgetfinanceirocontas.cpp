@@ -577,13 +577,14 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       const QString cpfDest = queryFuncionario.value("cpfBanco").toString().remove(".").remove("/").remove("-");
       const QString agencia = queryFuncionario.value("agencia").toString().remove("-");
       const QStringList contaDac = queryFuncionario.value("cc").toString().split("-");
-      const QString conta = contaDac.at(0);
-      const QString dac = contaDac.at(1);
       const QString nome = queryFuncionario.value("nomeBanco").toString();
 
-      if (codBanco == 0 or cpfDest.isEmpty() or agencia.isEmpty() or conta.isEmpty() or dac.isEmpty() or nome.isEmpty()) {
-        throw RuntimeError("Dados bancários do funcionário incompletos: " + contraParte);
-      }
+      if (codBanco == 0 or cpfDest.isEmpty() or agencia.isEmpty() or nome.isEmpty()) { throw RuntimeError("Dados bancários incompletos do funcionário: " + contraParte); }
+
+      if (contaDac.size() != 2) { throw RuntimeError("Conta corrente formatada errada! Deve seguir o formato XXXXX-X!\nFuncionário: " + contraParte); }
+
+      const QString conta = contaDac.at(0);
+      const QString dac = contaDac.at(1);
 
       pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
       pagamento.codBanco = codBanco;
@@ -609,13 +610,14 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       const QString cnpjDest = queryFornecedor.value("cnpjBanco").toString().remove(".").remove("/").remove("-");
       const QString agencia = queryFornecedor.value("agencia").toString().remove("-");
       const QStringList contaDac = queryFornecedor.value("cc").toString().split("-");
-      const QString conta = contaDac.at(0);
-      const QString dac = contaDac.at(1);
       const QString nome = queryFornecedor.value("nomeBanco").toString();
 
-      if (codBanco == 0 or cnpjDest.isEmpty() or agencia.isEmpty() or conta.isEmpty() or dac.isEmpty() or nome.isEmpty()) {
-        throw RuntimeError("Dados bancários do fornecedor incompletos: " + contraParte);
-      }
+      if (codBanco == 0 or cnpjDest.isEmpty() or agencia.isEmpty() or nome.isEmpty()) { throw RuntimeError("Dados bancários incompletos do fornecedor: " + contraParte); }
+
+      if (contaDac.size() != 2) { throw RuntimeError("Conta corrente formatada errada! Deve seguir o formato XXXXX-X!\nFornecedor: " + contraParte); }
+
+      const QString conta = contaDac.at(0);
+      const QString dac = contaDac.at(1);
 
       pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
       pagamento.codBanco = codBanco;

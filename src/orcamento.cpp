@@ -585,8 +585,6 @@ void Orcamento::verifyFields() {
 
   if (ui->itemBoxProfissional->text().isEmpty()) { throw RuntimeError("Profissional inválido!", this); }
 
-
-  if (modelItem.rowCount() == 0) { throw RuntimeError("Não pode cadastrar um orçamento sem itens!", this); }
   if (ui->itemBoxEndereco->text().isEmpty()) { throw RuntimeError(R"(Endereço inválido! Se não possui endereço, escolha "NÃO HÁ/RETIRA"!)", this); }
 }
 
@@ -633,6 +631,8 @@ void Orcamento::savingProcedures() {
 }
 
 void Orcamento::buscarConsultor() {
+  if (modelItem.rowCount() == 0) { return; }
+
   QStringList fornecedores;
 
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }

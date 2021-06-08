@@ -381,7 +381,7 @@ void Venda::verifyFields() {
   if (not financeiro) { verificaDisponibilidadeEstoque(); }
 
   if (ui->widgetPgts->isVisible()) {
-    if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { throw RuntimeError("Total dos pagamentos difere do total do pedido!"); }
+    if (abs(ui->widgetPgts->getTotalPag() - ui->doubleSpinBoxTotal->value()) > 0.1) { throw RuntimeError("Total dos pagamentos difere do total do pedido!"); }
 
     ui->widgetPgts->verifyFields();
 

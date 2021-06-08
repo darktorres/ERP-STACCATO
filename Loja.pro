@@ -20,7 +20,7 @@ QT *= core gui sql network xml charts widgets
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-CONFIG *= c++latest warn_on
+CONFIG *= c++17 warn_on
 
 PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
@@ -68,15 +68,19 @@ contains(CONFIG, deploy){
       }
 }
 
+win32-msvc* {
+   QMAKE_CXXFLAGS += /permissive-
+}
+
 linux-g++{
     QMAKE_LFLAGS *= -fuse-ld=gold
 }
 
 linux-clang{
-    QMAKE_LFLAGS *= -fuse-ld=lld-10
+    QMAKE_LFLAGS *= -fuse-ld=lld-12
 }
 
-win32{
+win32-g++{ # ccache is not compatible with MSVC
     exists($(QTDIR)/bin/ccache.exe){
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC

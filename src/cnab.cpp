@@ -200,7 +200,9 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  File file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  const QString path = QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem";
+
+  File file(path);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 
@@ -213,7 +215,7 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
     throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
   }
 
-  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parent);
+  qApp->enqueueInformation("Arquivo gerado com sucesso: " + path, parent);
 
   return query2.lastInsertId().toString();
 }
@@ -487,7 +489,9 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
   writeBlanks(stream, 211);               // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  File file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+  const QString path = QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem";
+
+  File file(path);
 
   if (not file.open(QFile::WriteOnly)) { throw RuntimeException(file.errorString()); }
 
@@ -500,7 +504,7 @@ QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
     throw RuntimeException("Erro guardando CNAB: " + query2.lastError().text());
   }
 
-  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parent);
+  qApp->enqueueInformation("Arquivo gerado com sucesso: " + path, parent);
 
   return query2.lastInsertId().toString();
 }

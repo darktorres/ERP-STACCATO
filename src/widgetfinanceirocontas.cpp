@@ -566,6 +566,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
     if (grupo == "RH - SALÁRIOS") {
       SqlQuery queryFuncionario;
 
+      // TODO: use normalized string to replace diacritics?
       if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nome = '" + contraParte + "'")) {
         throw RuntimeException("Erro buscando dados báncarios do funcionário: " + queryFuncionario.lastError().text());
       }

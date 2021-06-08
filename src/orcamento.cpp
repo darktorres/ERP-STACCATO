@@ -590,33 +590,36 @@ void Orcamento::verifyFields() {
 
 void Orcamento::savingProcedures() {
   if (tipo == Tipo::Cadastrar) {
+    generateId();
+
     const int idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
-
-    if (idLoja == 0) { throw RuntimeException("Erro buscando idLoja!"); }
-
     setData("idLoja", idLoja);
 
     setData("idOrcamento", ui->lineEditOrcamento->text());
     setData("idOrcamentoBase", ui->lineEditOrcamento->text().left(11));
     setData("replicadoDe", ui->lineEditReplicaDe->text());
     setData("representacao", ui->checkBoxRepresentacao->isChecked());
+
+    atualizaReplica();
   }
 
-  setData("idUsuario", ui->itemBoxVendedor->getId());
-  setData("idCliente", ui->itemBoxCliente->getId());
+  buscarConsultor();
+
   setData("data", ui->dataEmissao->isReadOnly() ? qApp->serverDateTime() : ui->dataEmissao->dateTime());
   setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value());
   setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.);
   setData("frete", ui->doubleSpinBoxFrete->value());
+  setData("freteManual", ui->checkBoxFreteManual->isChecked());
+  setData("idCliente", ui->itemBoxCliente->getId());
   setData("idEnderecoEntrega", ui->itemBoxEndereco->getId());
   setData("idProfissional", ui->itemBoxProfissional->getId());
+  setData("idUsuario", ui->itemBoxVendedor->getId());
   setData("observacao", ui->plainTextEditObs->toPlainText());
   setData("prazoEntrega", ui->spinBoxPrazoEntrega->value());
   setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value());
   setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value());
   setData("total", ui->doubleSpinBoxTotal->value());
   setData("validade", ui->spinBoxValidade->value());
-  setData("freteManual", ui->checkBoxFreteManual->isChecked());
 
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
@@ -624,10 +627,6 @@ void Orcamento::savingProcedures() {
     modelItem.setData(row, "idOrcamento", ui->lineEditOrcamento->text());
     modelItem.setData(row, "idLoja", model.data(currentRow, "idLoja"));
   }
-
-  buscarConsultor();
-
-  atualizaReplica();
 }
 
 void Orcamento::buscarConsultor() {
@@ -656,14 +655,14 @@ void Orcamento::buscarConsultor() {
 }
 
 void Orcamento::atualizaReplica() {
-  if (not ui->lineEditReplicaDe->text().isEmpty()) {
-    SqlQuery query;
-    query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento");
-    query.bindValue(":idReplica", ui->lineEditOrcamento->text());
-    query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
+  if (ui->lineEditReplicaDe->text().isEmpty()) { return; }
 
-    if (not query.exec()) { throw RuntimeException("Erro salvando replicadoEm: " + query.lastError().text()); }
-  }
+  SqlQuery query;
+  query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento");
+  query.bindValue(":idReplica", ui->lineEditOrcamento->text());
+  query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
+
+  if (not query.exec()) { throw RuntimeException("Erro salvando replicadoEm: " + query.lastError().text()); }
 }
 
 void Orcamento::clearFields() {
@@ -1154,11 +1153,7 @@ void Orcamento::cadastrar() {
   try {
     qApp->startTransaction("Orcamento::cadastrar");
 
-    if (tipo == Tipo::Cadastrar) {
-      generateId();
-
-      currentRow = model.insertRowAtEnd();
-    }
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
     savingProcedures();
 

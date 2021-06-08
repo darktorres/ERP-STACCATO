@@ -535,7 +535,6 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   for (const auto index : selection) {
     if (model.data(index.row(), "status").toString() == "PAGO") { throw RuntimeError("Linha selecionada já paga!", this); }
     if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { throw RuntimeError("Pagamento selecionado não é transferência ITAÚ!", this); }
-    // TODO: se linha já estiver como "GERADO GARE" confirmar com usuario antes de gerar outro arquivo
   }
 
   CNAB cnab(this);
@@ -567,7 +566,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       SqlQuery queryFuncionario;
 
       // TODO: use normalized string to replace diacritics?
-      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nome = '" + contraParte + "'")) {
+      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nomeBanco = '" + contraParte + "'")) {
         throw RuntimeException("Erro buscando dados báncarios do funcionário: " + queryFuncionario.lastError().text());
       }
 
@@ -597,6 +596,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.nome = nome;
 
       pagamentos << pagamento;
+
     } else if (grupo == "PRODUTOS - VENDA") {
       SqlQuery queryFornecedor;
 
@@ -631,6 +631,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.codFornecedor = model.data(index.row(), "codFornecedor").toString() + " " + model.data(index.row(), "pf2_idVenda").toString();
 
       pagamentos << pagamento;
+
     } else {
       throw RuntimeError("Grupo não permitido: " + grupo);
     }

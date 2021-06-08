@@ -551,18 +551,18 @@ void Orcamento::recalcularTotais() {
 
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
 
-  const bool brutoErrado = abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1;
-  const bool liquidoErrado = abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1;
-  const bool totalErrado = abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1;
+  const bool brutoErrado = abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 0.1;
+  const bool liquidoErrado = abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 0.1;
+  const bool totalErrado = abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 0.1;
 
   if (brutoErrado or liquidoErrado or totalErrado) {
     corrigirValores();
 
     const auto [subTotalBruto2, subTotalLiq2, total2] = calcularTotais();
 
-    const bool brutoErrado2 = abs(subTotalBruto2 - ui->doubleSpinBoxSubTotalBruto->value()) > 1;
-    const bool liquidoErrado2 = abs(subTotalLiq2 - ui->doubleSpinBoxSubTotalLiq->value()) > 1;
-    const bool totalErrado2 = abs(total2 - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1;
+    const bool brutoErrado2 = abs(subTotalBruto2 - ui->doubleSpinBoxSubTotalBruto->value()) > 0.1;
+    const bool liquidoErrado2 = abs(subTotalLiq2 - ui->doubleSpinBoxSubTotalLiq->value()) > 0.1;
+    const bool totalErrado2 = abs(total2 - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 0.1;
 
     if (brutoErrado2 or liquidoErrado2 or totalErrado2) {
       Log::createLog("Exceção", montarLog());

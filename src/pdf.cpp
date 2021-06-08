@@ -77,7 +77,7 @@ void PDF::gerarPdf() {
 
   QString profissional = queryProfissional.value("nome_razao").toString();
   if (not profissional.isEmpty() and mostrarRT) { profissional += " <span style=\"color: red\"><strong>" + query.value("rt").toString() + "%</strong>"; }
-  dataManager->setReportVariable("Profissional", profissional.isEmpty() ? "Não há" : profissional);
+  dataManager->setReportVariable("Profissional", profissional.isEmpty() ? "NÃO HÁ" : profissional);
   dataManager->setReportVariable("EmailProfissional", queryProfissional.value("email"));
   dataManager->setReportVariable("Vendedor", queryVendedor.value("nome"));
   dataManager->setReportVariable("EmailVendedor", queryVendedor.value("email"));

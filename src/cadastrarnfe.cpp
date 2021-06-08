@@ -434,7 +434,7 @@ void CadastrarNFe::updateComplemento() {
       ui->doubleSpinBoxBaseICMS->value() + ui->doubleSpinBoxValorICMS->value() + ui->doubleSpinBoxValorPIS->value() + ui->doubleSpinBoxValorCOFINS->value(); // + ui->doubleSpinBoxValorIPI->value()
 
   const QString endereco = ui->itemBoxEnderecoEntrega->getId() == 1
-                               ? "Não há/Retira"
+                               ? "NÃO HÁ/RETIRA"
                                : ui->lineEditDestinatarioLogradouro_2->text() + ", " + ui->lineEditDestinatarioNumero_2->text() + " " + ui->lineEditDestinatarioComplemento_2->text() + " - " +
                                      ui->lineEditDestinatarioBairro_2->text() + " - " + ui->lineEditDestinatarioCidade_2->text() + " - " + ui->lineEditDestinatarioUF_2->text() + " - " +
                                      ui->lineEditDestinatarioCEP_2->text();

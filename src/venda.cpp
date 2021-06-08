@@ -442,6 +442,8 @@ void Venda::setupMapper() {
 void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 
 void Venda::savingProcedures() {
+  generateId();
+
   setData("data", ui->dateTimeEdit->isReadOnly() ? qApp->serverDateTime() : ui->dateTimeEdit->dateTime());
   setData("dataOrc", ui->dateTimeEditOrc->dateTime());
   setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value());
@@ -536,6 +538,7 @@ void Venda::updateMode() {
   ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
   ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->spinBoxPrazoEntrega->setButtonSymbols(QSpinBox::NoButtons);
 
   ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -1054,11 +1057,9 @@ void Venda::cadastrar() {
   try {
     qApp->startTransaction("Venda::cadastrar");
 
-    if (tipo == Tipo::Cadastrar) { // TODO: como sempre é cadastro, verificar se esse if pode ser removido (quando é tipo financeiro não é cadastrar e sim atualizar)
-      generateId();
+    if (tipo == Tipo::Atualizar) { throw RuntimeException("Erro Venda Cadastrar Tipo::Atualizar"); }
 
-      currentRow = model.insertRowAtEnd();
-    }
+    currentRow = model.insertRowAtEnd();
 
     savingProcedures();
     atualizarCredito();
@@ -1094,11 +1095,13 @@ void Venda::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    SqlQuery query3;
-    query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
-    query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
+    SqlQuery queryOrcamento;
+    queryOrcamento.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
+    queryOrcamento.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-    if (not query3.exec()) { throw RuntimeException("Erro marcando orçamento como 'FECHADO': " + query3.lastError().text()); }
+    if (not queryOrcamento.exec()) { throw RuntimeException("Erro marcando orçamento como 'FECHADO': " + queryOrcamento.lastError().text()); }
+
+    // -------------------------------------------------------------------------
 
     criarConsumos();
 
@@ -1106,13 +1109,15 @@ void Venda::cadastrar() {
 
     qApp->endTransaction();
 
+    // -------------------------------------------------------------------------
+
     backupItem.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
 
-    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
+    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE");
   } catch (std::exception &) {
     qApp->rollbackTransaction();
     model.select();
@@ -1348,9 +1353,8 @@ void Venda::show() {
 void Venda::financeiroSalvar() {
   atualizarCredito();
 
-  setData("statusFinanceiro", ui->comboBoxFinanceiro->currentText());
-
   setData("dataFinanceiro", qApp->serverDateTime());
+  setData("statusFinanceiro", ui->comboBoxFinanceiro->currentText());
 
   model.submitAll();
 

@@ -241,6 +241,13 @@ bool CadastroCliente::viewRegister() {
   ui->pushButtonAtualizarEnd->setDisabled(bloquear);
   ui->groupBoxPFPJ->setDisabled(bloquear);
 
+  //---------------------------------------------------
+
+  if (UserSession::_user == "zelante") {
+    ui->doubleSpinBoxCredito->setReadOnly(false);
+    ui->doubleSpinBoxCredito->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
+  }
+
   return true;
 }
 

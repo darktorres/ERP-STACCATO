@@ -168,12 +168,10 @@ void TableView::setPersistentColumns(const QStringList &value) { persistentColum
 
 void TableView::keyPressEvent(QKeyEvent *event) {
   if (event->matches(QKeySequence::Copy)) {
-    QModelIndexList cells = selectedIndexes();
-    std::sort(cells.begin(), cells.end()); // Necessary, otherwise they are in column order
-
     QString headers;
 
-    if (selectionBehavior() == QTableView::SelectRows) {
+    // dont copy headers if in single cell mode
+    if (selectionBehavior() == SelectRows) {
       for (int col = 0; col < model()->columnCount(); ++col) {
         if (isColumnHidden(col)) { continue; }
 
@@ -184,31 +182,30 @@ void TableView::keyPressEvent(QKeyEvent *event) {
       headers += '\n';
     }
 
-    QString text;
-    int currentRow = 0; // To determine when to insert newlines
+    //---------------------------------------
 
-    for (const QModelIndex &cell : cells) {
-      if (text.length() == 0) {
-        // First item
-      } else if (cell.row() != currentRow) {
-        // New row
-        text += '\n';
-      } else {
-        // Next cell
+    QString text;
+
+    const QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    for (const auto indexRow : selectedRows) {
+      for (int col = 0; col < model()->columnCount(); ++col) {
+        if (isColumnHidden(col)) { continue; }
+
+        QVariant currentText = indexRow.siblingAtColumn(col).data();
+
+        if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+        if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+
+        text += currentText.toString();
         text += '\t';
       }
 
-      currentRow = cell.row();
-
-      QVariant currentText = cell.data();
-
-      if (currentText.userType() == QMetaType::QDateTime) { currentText = cell.data().toString().replace("T", " ").replace(".000", ""); }
-      if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(cell.data().toDouble(), 'f', 2); }
-
-      text += currentText.toString();
+      text += '\n';
     }
 
     QApplication::clipboard()->setText(headers + text);
+
     return;
   }
 

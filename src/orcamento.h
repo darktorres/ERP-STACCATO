@@ -78,7 +78,6 @@ private:
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto recalcularTotais() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
   auto savingProcedures() -> void final;
@@ -94,6 +93,7 @@ private:
   auto verificaCadastroCliente() -> void;
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaSeFoiAlterado() -> void;
+  auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

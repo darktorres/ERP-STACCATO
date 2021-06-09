@@ -545,10 +545,7 @@ QString Orcamento::montarLog() {
   return logString.join("\n");
 }
 
-void Orcamento::recalcularTotais() {
-  calcPrecoGlobalTotal();
-  calcularPesoTotal();
-
+void Orcamento::verificarTotais() {
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
 
   const bool brutoErrado = abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 0.1;
@@ -577,7 +574,7 @@ void Orcamento::verifyFields() {
 
   verificaDisponibilidadeEstoque();
 
-  recalcularTotais();
+  verificarTotais();
 
   if (ui->itemBoxCliente->text().isEmpty()) { throw RuntimeError("Cliente inválido!", this); }
 
@@ -848,7 +845,6 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
     novoItem();
 
     calcPrecoGlobalTotal();
-
     calcularPesoTotal();
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }

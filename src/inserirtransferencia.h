@@ -21,9 +21,11 @@ private:
   SqlTableModel modelPara;
   Ui::InserirTransferencia *ui;
   // methods
+  auto buscarCreditoCliente() -> void;
   auto cadastrar() -> void;
   auto on_itemBoxCliente_textChanged(const QString &text) -> void;
-  auto on_itemBoxPara_textChanged(const QString &text) -> void;
+  auto on_itemBoxDe_textChanged(const QString &) -> void;
+  auto on_itemBoxPara_textChanged(const QString &) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;

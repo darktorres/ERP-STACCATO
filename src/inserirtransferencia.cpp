@@ -4,6 +4,7 @@
 #include "application.h"
 #include "sqlquery.h"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -28,8 +29,9 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->itemBoxPara, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxCliente_textChanged, connectionType);
+  connect(ui->itemBoxDe, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
+  connect(ui->itemBoxPara, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked, connectionType);
 }
@@ -69,7 +71,7 @@ void InserirTransferencia::cadastrar() {
   modelDe.setData(rowDe, "grupo", "Transferência");
   modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text());
 
-  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") { modelDe.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
+  if (ui->frameCliente->isVisible()) { modelDe.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
 
   // lancamento 'para'
 
@@ -91,16 +93,24 @@ void InserirTransferencia::cadastrar() {
   modelPara.setData(rowPara, "grupo", "Transferência");
   modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
-  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") { modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
+  if (ui->frameCliente->isVisible()) { modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
 
   modelDe.submitAll();
 
   modelPara.submitAll();
 
-  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") {
+  if (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES") {
     SqlQuery query;
 
     if (not query.exec("UPDATE cliente SET credito = credito - " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
+      throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text());
+    }
+  }
+
+  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") {
+    SqlQuery query;
+
+    if (not query.exec("UPDATE cliente SET credito = credito + " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
       throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text());
     }
   }
@@ -109,11 +119,13 @@ void InserirTransferencia::cadastrar() {
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
 void InserirTransferencia::verifyFields() {
+  if (ui->itemBoxDe->text() == ui->itemBoxPara->text()) { throw RuntimeError("Transferência para a mesma conta!", this); }
+
   if (ui->itemBoxDe->text().isEmpty()) { throw RuntimeError("Conta 'De' não preenchido!", this); }
 
   if (ui->itemBoxPara->text().isEmpty()) { throw RuntimeError("Conta 'Para' não preenchido!", this); }
 
-  if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES" and ui->itemBoxCliente->text().isEmpty()) { throw RuntimeError("Não selecionou cliente!"); }
+  if (ui->frameCliente->isVisible() and ui->itemBoxCliente->text().isEmpty()) { throw RuntimeError("Não selecionou cliente!"); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { throw RuntimeError("Valor não preenchido!", this); }
 
@@ -128,14 +140,38 @@ void InserirTransferencia::setupTables() {
   modelPara.setTable("conta_a_receber_has_pagamento");
 }
 
-void InserirTransferencia::on_itemBoxPara_textChanged(const QString &text) { ui->frameCliente->setVisible(text == "CRÉDITO DE CLIENTES"); }
+void InserirTransferencia::on_itemBoxDe_textChanged(const QString &) {
+  ui->itemBoxCliente->clear();
+
+  const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
+
+  ui->frameCliente->setVisible(mostrarCliente);
+
+  ui->doubleSpinBoxValor->setMaximum(999999.990000);
+}
+
+void InserirTransferencia::on_itemBoxPara_textChanged(const QString &) {
+  ui->itemBoxCliente->clear();
+
+  const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
+
+  ui->frameCliente->setVisible(mostrarCliente);
+
+  ui->doubleSpinBoxValor->setMaximum(999999.990000);
+}
 
 void InserirTransferencia::on_itemBoxCliente_textChanged(const QString &text) {
   if (text.isEmpty()) {
-    ui->doubleSpinBoxValor->setMaximum(999999.990000);
+    ui->doubleSpinBoxValor->setMaximum(0);
     ui->doubleSpinBoxValor->setValue(0);
     return;
   }
+
+  buscarCreditoCliente();
+}
+
+void InserirTransferencia::buscarCreditoCliente() {
+  if (ui->itemBoxCliente->text().isEmpty()) { return; }
 
   SqlQuery query;
 
@@ -143,8 +179,11 @@ void InserirTransferencia::on_itemBoxCliente_textChanged(const QString &text) {
     throw RuntimeException("Erro buscando crédito do cliente: " + query.lastError().text());
   }
 
-  ui->doubleSpinBoxValor->setMaximum(query.value("credito").toDouble());
+  const bool deCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES");
+  const double credito = query.value("credito").toDouble();
+
+  ui->doubleSpinBoxValor->setMaximum(deCliente ? credito : 999999.990000);
   ui->doubleSpinBoxValor->setValue(query.value("credito").toDouble());
 
-  if (qFuzzyIsNull(query.value("credito").toDouble())) { throw RuntimeError("Cliente selecionado não possui crédito!"); }
+  if (deCliente and qFuzzyIsNull(credito)) { throw RuntimeError("Cliente selecionado não possui crédito!"); }
 }

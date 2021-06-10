@@ -10,6 +10,7 @@
 #include <QIcon>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QSqlError>
 #include <QTimer>
 
@@ -364,6 +365,17 @@ void Application::updater() {
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
+}
+
+QString Application::removerDiacriticos(const QString &s, const bool removerSimbolos) {
+  QString normalized = s.normalized(QString::NormalizationForm_KD);
+  QString result;
+
+  copy_if(normalized.begin(), normalized.end(), std::back_inserter(result), [](QChar &c) { return c.toLatin1() != 0; });
+
+  if (removerSimbolos) { result.remove(QRegularExpression("[^a-zA-Z\\d\\s]")); }
+
+  return result;
 }
 
 bool Application::getSilent() const { return silent; }

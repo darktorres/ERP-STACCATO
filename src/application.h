@@ -47,6 +47,7 @@ public:
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
   auto lightTheme() -> void;
+  auto removerDiacriticos(const QString &s, const bool removerSimbolos = false) -> QString;
   auto reservarIdEstoque() -> int;
   auto reservarIdNFe() -> int;
   auto reservarIdPedido2() -> int;
@@ -61,6 +62,7 @@ public:
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;
+
   virtual auto notify(QObject *receiver, QEvent *event) -> bool override;
 
 signals:

@@ -170,9 +170,9 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   // 4. fazer evento de ciencia para cada nota
   // 5. repetir passo 1 para pegar os xmls das notas
 
-  const QString idLoja = ui->itemBoxLoja->getId().toString();
-
   if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
+
+  const QString idLoja = ui->itemBoxLoja->getId().toString();
 
   //----------------------------------------------------------
 
@@ -236,10 +236,6 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 }
 
 void NFeDistribuicao::confirmar(const bool silent) {
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
-  //----------------------------------------------------------
-
   auto match = model.multiMatch({{"confirmar", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -255,10 +251,6 @@ void NFeDistribuicao::confirmar(const bool silent) {
 }
 
 void NFeDistribuicao::desconhecer(const bool silent) {
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
-  //----------------------------------------------------------
-
   auto match = model.multiMatch({{"desconhecer", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -274,10 +266,6 @@ void NFeDistribuicao::desconhecer(const bool silent) {
 }
 
 void NFeDistribuicao::naoRealizar(const bool silent) {
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
-  //----------------------------------------------------------
-
   auto match = model.multiMatch({{"naoRealizar", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -293,10 +281,6 @@ void NFeDistribuicao::naoRealizar(const bool silent) {
 }
 
 void NFeDistribuicao::darCiencia(const bool silent) {
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
-  //----------------------------------------------------------
-
   auto match = model.multiMatch({{"ciencia", true}});
 
   while (match.size() > 0) { // select up to 20 rows
@@ -346,8 +330,6 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
   //----------------------------------------------------------
 
   for (auto &index : selection) {
@@ -367,8 +349,6 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
-
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
 
   //----------------------------------------------------------
 

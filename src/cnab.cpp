@@ -20,7 +20,7 @@ void CNAB::writeZeros(QTextStream &stream, const int count) {
 }
 
 void CNAB::writeText(QTextStream &stream, const QString &text, const int count) {
-  QString temp = text.left(count);
+  QString temp = qApp->removerDiacriticos(text.left(count).toUpper(), true);
 
   // pad text with count blanks to the right
   while (temp.size() < count) { temp.append(' '); }

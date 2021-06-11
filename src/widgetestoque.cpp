@@ -243,7 +243,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "e.created < '" +
       data + "' GROUP BY e.idEstoque HAVING contabil > 0 ORDER BY codComercial, lote");
 
-  model.select();
+  modelContabil.select();
 
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 

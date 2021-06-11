@@ -81,8 +81,8 @@ private:
   bool silent = false;
   bool updaterOpen = false;
   bool updating = false;
+  QDate serverDateCache;
   QDate systemDate = QDate::currentDate();
-  QDateTime serverDateCache;
   QMap<QString, QString> mapLojas;
   QPalette const defaultPalette = palette();
   QSqlDatabase db; // TODO: doc says not to store database as class member

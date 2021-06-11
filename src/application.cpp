@@ -396,13 +396,13 @@ QDate Application::serverDate() {
   if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
     SqlQuery query;
 
-    if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
+    if (not query.exec("SELECT CURDATE()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
 
     systemDate = QDate::currentDate();
-    serverDateCache = query.value("NOW()").toDateTime();
+    serverDateCache = query.value("CURDATE()").toDate();
   }
 
-  return serverDateCache.date();
+  return serverDateCache;
 }
 
 double Application::roundDouble(const double value) { return roundDouble(value, 4); }

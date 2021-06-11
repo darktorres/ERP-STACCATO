@@ -54,13 +54,13 @@ void Devolucao::unsetConnections() {
 
 void Devolucao::determinarIdDevolucao() {
   SqlQuery query;
-  query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(NOW()) HAVING MAX(idVenda) IS NOT NULL");
+  query.prepare("SELECT idVenda FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())");
   query.bindValue(":idVenda", idVenda + "D%");
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se existe devolução: " + query.lastError().text()); }
 
   if (query.first()) {
-    idDevolucao = query.value("id").toString();
+    idDevolucao = query.value("idVenda").toString();
   } else {
     criarDevolucao();
   }

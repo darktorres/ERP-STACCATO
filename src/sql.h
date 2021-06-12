@@ -7,6 +7,7 @@ class Sql {
 public:
   Sql() = delete;
 
+  static auto relatorio_contabil_passado(const QString &data) -> QString;
   static auto updateVendaStatus(const QString &idVendas) -> void;
   static auto updateVendaStatus(const QStringList &idVendas) -> void;
   static auto view_a_pagar_vencer() -> QString;

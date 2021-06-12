@@ -7,6 +7,7 @@
 #include "file.h"
 #include "searchdialogproxymodel.h"
 #include "sortfilterproxymodel.h"
+#include "sql.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
 
@@ -217,6 +218,7 @@ QString WidgetEstoque::getMatch() const {
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   // NOTE: verificar se deve considerar os estoques não recebidos (em coleta/recebimento)
+  //  (a principio deve considerar apenas o fisico)
 
   // 1. codigo produto
   // 2. descricao
@@ -230,18 +232,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   SqlQueryModel modelContabil;
 
-  modelContabil.setQuery(
-      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0) AS contabil, "
-      "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) / p.quantCaixa AS caixasContabil, e.lote, e.local, e.bloco, "
-      "e.codComercial, e.ncm, e.cstICMS, e.pICMS, e.cstIPI, e.cstPIS, e.cstCOFINS, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, e.valorUnid AS custoUnit, p.precoVenda AS precoVendaUnit, "
-      "e.valorUnid * (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + COALESCE(ajuste, 0)) AS precoVenda, ehc.idVenda FROM "
-      "estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, GROUP_CONCAT(DISTINCT vp.idVenda) AS idVenda "
-      "FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
-      data +
-      "') AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
-      "e.created < '" +
-      data + "' GROUP BY e.idEstoque HAVING contabil > 0 ORDER BY codComercial, lote");
+  modelContabil.setQuery(Sql::relatorio_contabil_passado(data));
 
   modelContabil.select();
 

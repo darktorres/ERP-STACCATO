@@ -33,6 +33,7 @@ private:
   auto fillComboBoxVendedor() -> void;
   auto listarLojas() -> void;
   auto montaFiltro() -> void;
+  auto montaFiltroTexto() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

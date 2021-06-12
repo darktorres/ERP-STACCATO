@@ -71,7 +71,7 @@ void WidgetOrcamento::setupTables() {
 void WidgetOrcamento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto, connectionType);
   connect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
@@ -93,7 +93,7 @@ void WidgetOrcamento::setConnections() {
 }
 
 void WidgetOrcamento::unsetConnections() {
-  disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro);
+  disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto);
   disconnect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
@@ -216,14 +216,18 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
+  modelViewOrcamento.setFilter(filtros.join(" AND "));
+}
+
+void WidgetOrcamento::montaFiltroTexto() {
+  if (ui->lineEditBusca->text().isEmpty()) { return montaFiltro(); }
+
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
-
   //-------------------------------------
 
-  modelViewOrcamento.setFilter(filtros.join(" AND "));
+  modelViewOrcamento.setFilter(filtroBusca);
 }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {

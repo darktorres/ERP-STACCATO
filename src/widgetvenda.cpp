@@ -110,15 +110,19 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
+  modelViewVenda.setFilter(filtros.join(" AND "));
+}
+
+void WidgetVenda::montaFiltroTexto() {
+  if (ui->lineEditBusca->text().isEmpty()) { return montaFiltro(); }
+
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 
-  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
-
   //-------------------------------------
 
-  modelViewVenda.setFilter(filtros.join(" AND "));
+  modelViewVenda.setFilter(filtroBusca);
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
@@ -170,7 +174,7 @@ void WidgetVenda::setPermissions() {
 void WidgetVenda::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -206,7 +210,7 @@ void WidgetVenda::setConnections() {
 }
 
 void WidgetVenda::unsetConnections() {
-  disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro);
+  disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);

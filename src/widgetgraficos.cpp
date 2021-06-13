@@ -24,7 +24,7 @@ void WidgetGraficos::updateTables() {
   if (not isSet) {
     setConnections();
 
-    if (UserSession::tipoUsuario == "GERENTE LOJA") {
+    if (UserSession::isGerente()) {
       const QString nomeLoja = UserSession::fromLoja("descricao").toString();
 
       if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, UserSession::idLoja); }

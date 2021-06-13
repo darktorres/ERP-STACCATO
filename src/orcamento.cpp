@@ -34,12 +34,12 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   setupMapper();
   newRegister();
 
-  if (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO") {
+  if (UserSession::isAdministrativo()) {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
   }
 
-  if (UserSession::tipoUsuario == "VENDEDOR") { buscarParametrosFrete(); }
+  if (UserSession::isVendedor()) { buscarParametrosFrete(); }
 
   setConnections();
 }
@@ -665,7 +665,7 @@ void Orcamento::atualizaReplica() {
 void Orcamento::clearFields() {
   RegisterDialog::clearFields();
 
-  if (UserSession::tipoUsuario == "VENDEDOR") { ui->itemBoxVendedor->setId(UserSession::idUsuario); }
+  if (UserSession::isVendedor()) { ui->itemBoxVendedor->setId(UserSession::idUsuario); }
 
   //  ui->itemBoxEndereco->setDisabled(true);
 }

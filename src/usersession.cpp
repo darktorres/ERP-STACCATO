@@ -6,6 +6,18 @@
 
 QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
 
+bool UserSession::isAdmin() { return (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "DIRETOR"); }
+
+bool UserSession::isAdministrativo() { return (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO" or UserSession::tipoUsuario == "DIRETOR"); }
+
+bool UserSession::isEspecial() { return (UserSession::tipoUsuario == "VENDEDOR ESPECIAL"); }
+
+bool UserSession::isGerente() { return (UserSession::tipoUsuario == "GERENTE LOJA"); }
+
+bool UserSession::isVendedor() { return (UserSession::tipoUsuario == "VENDEDOR"); }
+
+bool UserSession::isVendedorOrEspecial() { return (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL"); }
+
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
 void UserSession::login(const QString &user, const QString &password) {

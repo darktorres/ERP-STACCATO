@@ -260,7 +260,7 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not isSet) {
-    if (UserSession::tipoUsuario == "VENDEDOR") {
+    if (UserSession::isVendedor()) {
       ui->tableVendas->hide();
       ui->labelEntregasCliente->hide();
     }

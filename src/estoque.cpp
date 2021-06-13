@@ -21,9 +21,7 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   viewRegisterById(showWindow);
 
-  const QString tipoUsuario = UserSession::tipoUsuario;
-
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
+  if (UserSession::isVendedorOrEspecial()) { ui->pushButtonExibirNfe->hide(); }
 
   setConnections();
 }

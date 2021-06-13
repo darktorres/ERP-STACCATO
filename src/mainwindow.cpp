@@ -39,9 +39,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   setWindowTitle(windowTitle() + " - " + UserSession::nome + " - " + UserSession::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
-  if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+  if (UserSession::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
 
-  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
+  if (UserSession::isAdministrativo()) {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_pagamentos->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);

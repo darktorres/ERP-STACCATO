@@ -6,17 +6,19 @@
 
 QVariant User::getSetting(const QString &key) { return settings->value(key); }
 
-bool User::isAdmin() { return (User::tipoUsuario == "ADMINISTRADOR" or User::tipoUsuario == "DIRETOR"); }
+bool User::isAdmin() { return (User::tipo == "ADMINISTRADOR" or User::tipo == "DIRETOR"); }
 
-bool User::isAdministrativo() { return (User::tipoUsuario == "ADMINISTRADOR" or User::tipoUsuario == "ADMINISTRATIVO" or User::tipoUsuario == "DIRETOR"); }
+bool User::isAdministrativo() { return (User::tipo == "ADMINISTRADOR" or User::tipo == "ADMINISTRATIVO" or User::tipo == "DIRETOR"); }
 
-bool User::isEspecial() { return (User::tipoUsuario == "VENDEDOR ESPECIAL"); }
+bool User::isEspecial() { return (User::tipo == "VENDEDOR ESPECIAL"); }
 
-bool User::isGerente() { return (User::tipoUsuario == "GERENTE LOJA"); }
+bool User::isGerente() { return (User::tipo == "GERENTE LOJA"); }
 
-bool User::isVendedor() { return (User::tipoUsuario == "VENDEDOR"); }
+bool User::isOperacional() { return (User::tipo == "OPERACIONAL"); }
 
-bool User::isVendedorOrEspecial() { return (User::tipoUsuario == "VENDEDOR" or User::tipoUsuario == "VENDEDOR ESPECIAL"); }
+bool User::isVendedor() { return (User::tipo == "VENDEDOR"); }
+
+bool User::isVendedorOrEspecial() { return (User::tipo == "VENDEDOR" or User::tipo == "VENDEDOR ESPECIAL"); }
 
 void User::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
@@ -34,7 +36,7 @@ void User::login(const QString &user, const QString &password) {
   idLoja = query->value("idLoja").toString();
   idUsuario = query->value("idUsuario").toString();
   nome = query->value("nome").toString();
-  tipoUsuario = query->value("tipo").toString();
+  tipo = query->value("tipo").toString();
   usuario = user;
   senha = password;
 }

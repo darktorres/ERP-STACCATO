@@ -18,7 +18,7 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   setupMapper();
   newRegister();
 
-  if (User::isAdministrativo()) {
+  if (not User::isAdministrativo()) {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

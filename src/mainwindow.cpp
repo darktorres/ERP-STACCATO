@@ -17,8 +17,8 @@
 #include "importatabelaibpt.h"
 #include "orcamento.h"
 #include "precoestoque.h"
-#include "userconfig.h"
 #include "user.h"
+#include "userconfig.h"
 
 #include <QSqlError>
 
@@ -39,9 +39,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
-  if (User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
+  if (not User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
 
-  if (User::isAdministrativo()) {
+  if (not User::isAdministrativo()) {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_pagamentos->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);

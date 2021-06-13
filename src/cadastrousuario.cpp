@@ -15,7 +15,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
-  if (User::isAdmin()) { ui->table->hide(); }
+  if (not User::isAdmin()) { ui->table->hide(); }
 
   connectLineEditsToDirty();
   setupTables();

@@ -39,47 +39,45 @@ void WidgetVenda::setupTables() {
 }
 
 void WidgetVenda::montaFiltro() {
+  if (not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
+
+  //-------------------------------------
+
   QStringList filtros;
 
   //-------------------------------------
 
-  QString filtroLoja;
-
-  if (const auto tipoUsuario = UserSession::tipoUsuario; not ui->comboBoxLojas->currentText().isEmpty()) {
-    filtroLoja = "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
-  } else if (tipoUsuario == "GERENTE LOJA") {
-    filtroLoja = "(Código LIKE '%" + UserSession::fromLoja("sigla").toString() + "%')";
-  } else {
-    filtroLoja = "";
-  }
+  // para gerente o combobox é marcado com a loja e escondido então a regra abaixo se aplica
+  const QString filtroLoja = (ui->comboBoxLojas->currentText().isEmpty()) ? "" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
   //-------------------------------------
 
-  const QString filtroMes = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroMes = (ui->groupBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
   if (not filtroMes.isEmpty()) { filtros << filtroMes; }
 
   //-------------------------------------
 
-  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  const QString filtroDia = (ui->groupBoxDia->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
   if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
 
   const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
-  const QString filtroVendedor = ui->comboBoxVendedores->currentText().isEmpty() ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
+  const QString filtroVendedor = (ui->comboBoxVendedores->currentText().isEmpty()) ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
 
   //-------------------------------------
 
   const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
-  const QString filtroFornecedor = fornecedor.isEmpty() ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
+  const QString filtroFornecedor = (fornecedor.isEmpty()) ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 
-  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome) + "')";
+  const QString filtroRadio =
+      (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -116,13 +114,33 @@ void WidgetVenda::montaFiltro() {
 void WidgetVenda::montaFiltroTexto() {
   if (ui->lineEditBusca->text().isEmpty()) { return montaFiltro(); }
 
+  //-------------------------------------
+
+  QStringList filtros;
+
+  //-------------------------------------
+
+  QString filtroLoja;
+
+  const QString tipoUsuario = UserSession::tipoUsuario;
+
+  if (tipoUsuario == "GERENTE LOJA") { filtroLoja = "idLoja = " + QString::number(UserSession::idLoja); }
+
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
+
+  if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
+
+  //-------------------------------------
+
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 
+  filtros << filtroBusca;
+
   //-------------------------------------
 
-  modelViewVenda.setFilter(filtroBusca);
+  modelViewVenda.setFilter(filtros.join(" AND "));
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {

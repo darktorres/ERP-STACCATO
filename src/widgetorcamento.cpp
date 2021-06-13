@@ -228,7 +228,7 @@ void WidgetOrcamento::montaFiltroTexto() {
 
   QString filtroLoja;
 
-  if (UserSession::isGerente()) { filtroLoja = "idLoja = " + QString::number(UserSession::idLoja); }
+  if (UserSession::isGerente()) { filtroLoja = "idLoja = " + UserSession::idLoja; }
 
   if (UserSession::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
 

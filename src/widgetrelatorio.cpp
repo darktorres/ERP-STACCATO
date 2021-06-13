@@ -29,9 +29,9 @@ void WidgetRelatorio::setConnections() {
 void WidgetRelatorio::setFilterTotaisVendedor() {
   const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString idUsuario = (UserSession::isVendedor()) ? QString::number(UserSession::idUsuario) : "";
+  const QString idUsuario = (UserSession::isVendedor()) ? UserSession::idUsuario : "";
 
-  const QString idUsuarioConsultor = (UserSession::isEspecial()) ? QString::number(UserSession::idUsuario) : "";
+  const QString idUsuarioConsultor = (UserSession::isEspecial()) ? UserSession::idUsuario : "";
 
   const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
 
@@ -53,9 +53,9 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 void WidgetRelatorio::setFilterTotaisLoja() {
   const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString idUsuario = (UserSession::isVendedor()) ? QString::number(UserSession::idUsuario) : "";
+  const QString idUsuario = (UserSession::isVendedor()) ? UserSession::idUsuario : "";
 
-  const QString idUsuarioConsultor = (UserSession::isVendedorOrEspecial()) ? QString::number(UserSession::idUsuario) : "";
+  const QString idUsuarioConsultor = (UserSession::isVendedorOrEspecial()) ? UserSession::idUsuario : "";
 
   const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
 
@@ -122,9 +122,9 @@ void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
   QString filter = "Mês = '" + date + "'";
 
-  if (UserSession::isVendedor()) { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
+  if (UserSession::isVendedor()) { filter += " AND idUsuario = " + UserSession::idUsuario; }
 
-  if (UserSession::isEspecial()) { filter += " AND idUsuarioConsultor = " + QString::number(UserSession::idUsuario); }
+  if (UserSession::isEspecial()) { filter += " AND idUsuarioConsultor = " + UserSession::idUsuario; }
 
   if (UserSession::isGerente() and not UserSession::fromLoja("descricao").toString().isEmpty()) { filter += " AND Loja = '" + UserSession::fromLoja("descricao").toString() + "'"; }
 

@@ -243,7 +243,7 @@ bool CadastroCliente::viewRegister() {
 
   //---------------------------------------------------
 
-  if (UserSession::_user == "zelante") {
+  if (UserSession::usuario == "zelante") {
     ui->doubleSpinBoxCredito->setReadOnly(false);
     ui->doubleSpinBoxCredito->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   }

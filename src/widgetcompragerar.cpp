@@ -8,7 +8,7 @@
 #include "reaisdelegate.h"
 #include "sendmail.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xlsxdocument.h"
 
 #include <QDate>
@@ -191,7 +191,7 @@ void WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
 }
 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
-  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
+  const QString folderKey = User::getSetting("User/ComprasFolder").toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
 
@@ -343,7 +343,7 @@ bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
 QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) {
   const int firstRow = list.first().row();
   const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
-  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
+  const QString folderKey = User::getSetting("User/ComprasFolder").toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 

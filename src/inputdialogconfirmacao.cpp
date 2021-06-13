@@ -6,7 +6,7 @@
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -573,8 +573,8 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    authenticator->setUser(UserSession::usuario);
-    authenticator->setPassword(UserSession::senha);
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
   });
 
   const QString ip = qApp->getWebDavIp();

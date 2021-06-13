@@ -6,7 +6,7 @@
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
-#include "usersession.h"
+#include "user.h"
 #include "venda.h"
 
 #include <QDate>

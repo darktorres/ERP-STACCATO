@@ -5,7 +5,7 @@
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "searchdialog.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -20,7 +20,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   setupMapper();
   newRegister();
 
-  if (UserSession::isAdministrativo()) {
+  if (User::isAdministrativo()) {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

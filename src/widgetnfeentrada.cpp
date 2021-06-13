@@ -8,7 +8,7 @@
 #include "doubledelegate.h"
 #include "file.h"
 #include "reaisdelegate.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml_viewer.h"
 
 #include <QDebug>

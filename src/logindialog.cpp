@@ -2,7 +2,7 @@
 #include "ui_logindialog.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QMessageBox>
 #include <QSqlError>
@@ -18,14 +18,14 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   ui->lineEditUser->setFocus();
 
-  if (not UserSession::getSetting("User/lastuser").toString().isEmpty()) {
-    ui->lineEditUser->setText(UserSession::getSetting("User/lastuser").toString());
+  if (not User::getSetting("User/lastuser").toString().isEmpty()) {
+    ui->lineEditUser->setText(User::getSetting("User/lastuser").toString());
     ui->lineEditPass->setFocus();
   }
 
-  if (not UserSession::getSetting("Login/hostname").toString().isEmpty()) { ui->lineEditHostname->setText(UserSession::getSetting("Login/hostname").toString()); }
+  if (not User::getSetting("Login/hostname").toString().isEmpty()) { ui->lineEditHostname->setText(User::getSetting("Login/hostname").toString()); }
 
-  if (not UserSession::getSetting("Login/loja").toString().isEmpty()) { ui->comboBoxLoja->setCurrentText(UserSession::getSetting("Login/loja").toString()); }
+  if (not User::getSetting("Login/loja").toString().isEmpty()) { ui->comboBoxLoja->setCurrentText(User::getSetting("Login/loja").toString()); }
 
   ui->checkBoxSalvarSenha->hide();
   ui->labelHostname->hide();
@@ -33,12 +33,12 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->comboBoxLoja->hide();
 
   if (tipo == Tipo::Login) {
-    const bool salvarSenha = UserSession::getSetting("User/savePasswd").toBool();
+    const bool salvarSenha = User::getSetting("User/savePasswd").toBool();
 
     ui->checkBoxSalvarSenha->setChecked(salvarSenha);
 
     if (salvarSenha) {
-      const QString passwd = UserSession::getSetting("User/passwd").toString();
+      const QString passwd = User::getSetting("User/passwd").toString();
       ui->lineEditPass->setText(passwd);
       ui->pushButtonLogin->setFocus();
     }
@@ -86,11 +86,11 @@ void LoginDialog::on_pushButtonConfig_clicked() {
 
 void LoginDialog::on_pushButtonLogin_clicked() {
   if (tipo == Tipo::Login) {
-    UserSession::setSetting("User/savePasswd", ui->checkBoxSalvarSenha->isChecked());
+    User::setSetting("User/savePasswd", ui->checkBoxSalvarSenha->isChecked());
 
-    UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
-    UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
-    UserSession::setSetting("User/passwd", ui->lineEditPass->text());
+    User::setSetting("Login/hostname", ui->lineEditHostname->text());
+    User::setSetting("User/lastuser", ui->lineEditUser->text());
+    User::setSetting("User/passwd", ui->lineEditPass->text());
 
     if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
@@ -98,7 +98,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     verificaManutencao();
   }
 
-  if (tipo == Tipo::Autorizacao) { UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text()); }
+  if (tipo == Tipo::Autorizacao) { User::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text()); }
 
   accept();
 }
@@ -129,11 +129,11 @@ void LoginDialog::verificaVersao() {
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {
-  UserSession::setSetting("Login/loja", loja);
+  User::setSetting("Login/loja", loja);
   ui->lineEditHostname->setText(qApp->getMapLojas().value(loja));
 }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &hostname) {
-  UserSession::setSetting("Login/hostname", hostname);
+  User::setSetting("Login/hostname", hostname);
   qApp->updater();
 }

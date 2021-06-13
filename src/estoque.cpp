@@ -4,7 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoqueproxymodel.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
@@ -21,7 +21,7 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   viewRegisterById(showWindow);
 
-  if (UserSession::isVendedorOrEspecial()) { ui->pushButtonExibirNfe->hide(); }
+  if (User::isVendedorOrEspecial()) { ui->pushButtonExibirNfe->hide(); }
 
   setConnections();
 }

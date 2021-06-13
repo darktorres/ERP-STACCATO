@@ -5,7 +5,7 @@
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -243,7 +243,7 @@ bool CadastroCliente::viewRegister() {
 
   //---------------------------------------------------
 
-  if (UserSession::usuario == "zelante") {
+  if (User::usuario == "zelante") {
     ui->doubleSpinBoxCredito->setReadOnly(false);
     ui->doubleSpinBoxCredito->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   }

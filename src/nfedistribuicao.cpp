@@ -5,7 +5,7 @@
 #include "file.h"
 #include "nfeproxymodel.h"
 #include "reaisdelegate.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml_viewer.h"
 
 #include <QFile>
@@ -24,7 +24,7 @@ NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::
 NFeDistribuicao::~NFeDistribuicao() { delete ui; }
 
 void NFeDistribuicao::downloadAutomatico() {
-  if (not UserSession::getSetting("User/monitorarNFe").toBool()) { return; }
+  if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
   if (houveConsultaEmOutroPc()) { return; }
 
   updateTables();
@@ -56,7 +56,7 @@ void NFeDistribuicao::updateTables() {
     setConnections();
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-    if (UserSession::getSetting("User/monitorarNFe").toBool()) { ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr")); }
+    if (User::getSetting("User/monitorarNFe").toBool()) { ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr")); }
 
     isSet = true;
   }
@@ -320,7 +320,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
     model.setData(index.row(), "ciencia", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
+  const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? darCiencia(false) : agendarOperacao();
 }
@@ -340,7 +340,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
     model.setData(index.row(), "confirmar", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
+  const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? confirmar(false) : agendarOperacao();
 }
@@ -360,7 +360,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
     model.setData(index.row(), "desconhecer", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
+  const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? desconhecer(false) : agendarOperacao();
 }
@@ -380,7 +380,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
     model.setData(index.row(), "naoRealizar", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
+  const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? naoRealizar(false) : agendarOperacao();
 }

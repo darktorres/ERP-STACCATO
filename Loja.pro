@@ -196,8 +196,8 @@ SOURCES += \
     src/sqltreemodel.cpp \
     src/tableview.cpp \
     src/treeview.cpp \
+    src/user.cpp \
     src/userconfig.cpp \
-    src/usersession.cpp \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
@@ -328,8 +328,8 @@ HEADERS  += \
     src/sqltreemodel.h \
     src/tableview.h \
     src/treeview.h \
+    src/user.h \
     src/userconfig.h \
-    src/usersession.h \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \

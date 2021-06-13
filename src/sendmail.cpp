@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "smtp.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QFileDialog>
 #include <QSqlError>
@@ -57,11 +57,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
-    ui->lineEditCopia->setText(UserSession::getSetting("User/emailCopia").toString());
-    ui->lineEditServidor->setText(UserSession::getSetting("User/servidorSMTP").toString());
-    ui->lineEditPorta->setText(UserSession::getSetting("User/portaSMTP").toString());
-    ui->lineEditPasswd->setText(UserSession::getSetting("User/emailSenha").toString());
+    ui->lineEditEmail->setText(User::getSetting("User/emailCompra").toString());
+    ui->lineEditCopia->setText(User::getSetting("User/emailCopia").toString());
+    ui->lineEditServidor->setText(User::getSetting("User/servidorSMTP").toString());
+    ui->lineEditPorta->setText(User::getSetting("User/portaSMTP").toString());
+    ui->lineEditPasswd->setText(User::getSetting("User/emailSenha").toString());
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
@@ -105,10 +105,10 @@ void SendMail::on_pushButtonBuscar_clicked() {
 void SendMail::on_pushButtonEnviar_clicked() {
   progress->show();
 
-  UserSession::setSetting("User/servidorSMTP", ui->lineEditServidor->text());
-  UserSession::setSetting("User/portaSMTP", ui->lineEditPorta->text());
-  UserSession::setSetting("User/emailCompra", ui->lineEditEmail->text());
-  UserSession::setSetting("User/emailSenha", ui->lineEditPasswd->text());
+  User::setSetting("User/servidorSMTP", ui->lineEditServidor->text());
+  User::setSetting("User/portaSMTP", ui->lineEditPorta->text());
+  User::setSetting("User/emailCompra", ui->lineEditEmail->text());
+  User::setSetting("User/emailSenha", ui->lineEditPasswd->text());
 
   Smtp *smtp = new Smtp(ui->lineEditEmail->text(), ui->lineEditPasswd->text(), ui->lineEditServidor->text(), ui->lineEditPorta->text().toUShort());
   connect(smtp, &Smtp::status, this, &SendMail::mailSent);

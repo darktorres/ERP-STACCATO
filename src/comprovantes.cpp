@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "file.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QAuthenticator>
 #include <QDesktopServices>
@@ -63,8 +63,8 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    authenticator->setUser(UserSession::usuario);
-    authenticator->setPassword(UserSession::senha);
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
   });
 
   auto reply = manager->get(QNetworkRequest(QUrl(url)));

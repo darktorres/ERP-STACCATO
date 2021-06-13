@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "cadastrofornecedor.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -24,7 +24,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::isAdministrativo()) { ui->pushButtonRemover->setDisabled(true); }
+  if (User::isAdministrativo()) { ui->pushButtonRemover->setDisabled(true); }
 
   setConnections();
 }

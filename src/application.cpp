@@ -3,7 +3,7 @@
 #include "file.h"
 #include "log.h"
 #include "qsimpleupdater.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QFile>
@@ -29,7 +29,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 
   readSettingsFile();
 
-  if (UserSession::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
+  if (User::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
 
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
     QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
@@ -130,8 +130,8 @@ void Application::genericLogin(const QString &hostname) {
       db.setHostName(loja);
 
       if (db.open()) {
-        UserSession::setSetting("Login/hostname", loja);
-        UserSession::setSetting("Login/loja", mapLojas.key(loja));
+        User::setSetting("Login/hostname", loja);
+        User::setSetting("Login/loja", mapLojas.key(loja));
         updater();
         connected = true;
         break;
@@ -165,7 +165,7 @@ bool Application::dbReconnect(const bool silent) {
 bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
   genericLogin(hostname);
 
-  UserSession::login(user, userPassword);
+  User::login(user, userPassword);
 
   userLogin(user);
 
@@ -241,14 +241,14 @@ void Application::darkTheme() {
 
   setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
-  UserSession::setSetting("User/tema", "escuro");
+  User::setSetting("User/tema", "escuro");
 }
 
 void Application::lightTheme() {
   setPalette(defaultPalette);
   setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
-  UserSession::setSetting("User/tema", "claro");
+  User::setSetting("User/tema", "claro");
 }
 
 void Application::startTransaction(const QString &messageLog) {
@@ -351,7 +351,7 @@ void Application::showMessages() {
 void Application::updater() {
   if (updaterOpen) { return; }
 
-  const QString hostname = UserSession::getSetting("Login/hostname").toString();
+  const QString hostname = User::getSetting("Login/hostname").toString();
 
   if (hostname.isEmpty()) { return; }
 

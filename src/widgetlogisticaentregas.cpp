@@ -8,7 +8,7 @@
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xlsxdocument.h"
 
 #include <QDate>
@@ -512,7 +512,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString folderKey = UserSession::getSetting("User/EntregasPdfFolder").toString();
+  const QString folderKey = User::getSetting("User/EntregasPdfFolder").toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 

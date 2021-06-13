@@ -1,7 +1,7 @@
 #include "log.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 
@@ -10,7 +10,7 @@ void Log::createLog(const QString &tipo, const QString &message) {
 
   SqlQuery query;
   query.prepare("INSERT INTO log (idUsuario, versao, tipo, message) VALUES (:idUsuario, :versao, :tipo, :message)");
-  query.bindValue(":idUsuario", UserSession::idUsuario);
+  query.bindValue(":idUsuario", User::idUsuario);
   query.bindValue(":versao", qApp->applicationVersion());
   query.bindValue(":tipo", tipo);
   query.bindValue(":message", message);

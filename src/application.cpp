@@ -167,6 +167,8 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
 
   User::login(user, userPassword);
 
+  if (User::isOperacional()) { throw RuntimeError("Operacional bloqueado!"); }
+
   userLogin(user);
 
   // ------------------------------------------------------------

@@ -63,8 +63,8 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
     Q_UNUSED(reply)
 
-    authenticator->setUser(UserSession::_user);
-    authenticator->setPassword(UserSession::_password);
+    authenticator->setUser(UserSession::usuario);
+    authenticator->setPassword(UserSession::senha);
   });
 
   auto reply = manager->get(QNetworkRequest(QUrl(url)));

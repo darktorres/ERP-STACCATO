@@ -31,12 +31,12 @@ void UserSession::login(const QString &user, const QString &password) {
 
   if (not query->first()) { throw RuntimeError("Login inválido!"); }
 
-  idLoja = query->value("idLoja").toInt();
-  idUsuario = query->value("idUsuario").toInt();
+  idLoja = query->value("idLoja").toString();
+  idUsuario = query->value("idUsuario").toString();
   nome = query->value("nome").toString();
   tipoUsuario = query->value("tipo").toString();
-  _user = user;
-  _password = password;
+  usuario = user;
+  senha = password;
 }
 
 void UserSession::autorizacao(const QString &user, const QString &password) {

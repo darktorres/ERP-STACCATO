@@ -22,12 +22,12 @@ public:
   static auto login(const QString &user, const QString &password) -> void;
   static auto setSetting(const QString &key, const QVariant &value) -> void;
 
-  inline static int idLoja = -1;
-  inline static int idUsuario = -1;
+  inline static QString idLoja = "";
+  inline static QString idUsuario = "";
   inline static QString nome = "";
   inline static QString tipoUsuario = "";
-  inline static QString _user = "";
-  inline static QString _password = "";
+  inline static QString usuario = "";
+  inline static QString senha = "";
 
 private:
   inline static SqlQuery *query = nullptr; // defer creating query until database is set

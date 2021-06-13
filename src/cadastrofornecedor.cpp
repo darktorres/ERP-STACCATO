@@ -20,7 +20,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   setupMapper();
   newRegister();
 
-  if (User::isAdministrativo()) {
+  if (not User::isAdministrativo()) {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

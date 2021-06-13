@@ -1,7 +1,7 @@
 #include "financeiroproxymodel.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QBrush>
 #include <QDate>
@@ -69,7 +69,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").toString();
+      const QString tema = User::getSetting("User/tema").toString();
 
       return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }

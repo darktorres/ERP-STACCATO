@@ -2,7 +2,7 @@
 
 #include "application.h"
 #include "file.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -196,8 +196,8 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
   }
 
   if (not local) {
-    const QString servidorConfig = UserSession::getSetting("User/servidorACBr").toString();
-    const QString porta = UserSession::getSetting("User/portaACBr").toString();
+    const QString servidorConfig = User::getSetting("User/servidorACBr").toString();
+    const QString porta = User::getSetting("User/portaACBr").toString();
 
     if (servidorConfig.isEmpty() or porta.isEmpty()) { throw RuntimeError("Preencher IP e porta do ACBr nas configurações!"); }
 

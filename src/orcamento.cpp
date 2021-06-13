@@ -14,7 +14,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
-#include "usersession.h"
+#include "user.h"
 #include "venda.h"
 
 #include <QDebug>
@@ -34,12 +34,12 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   setupMapper();
   newRegister();
 
-  if (UserSession::isAdministrativo()) {
+  if (User::isAdministrativo()) {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
   }
 
-  if (UserSession::isVendedor()) { buscarParametrosFrete(); }
+  if (User::isVendedor()) { buscarParametrosFrete(); }
 
   setConnections();
 }
@@ -273,7 +273,7 @@ bool Orcamento::viewRegister() {
     }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
-      const QString idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toString();
+      const QString idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toString();
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
@@ -453,7 +453,7 @@ void Orcamento::removeItem() {
 }
 
 void Orcamento::generateId() {
-  const QString siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
+  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
 
   if (siglaLoja.isEmpty()) { throw RuntimeException("Erro buscando sigla da loja!"); }
 
@@ -589,7 +589,7 @@ void Orcamento::savingProcedures() {
   if (tipo == Tipo::Cadastrar) {
     generateId();
 
-    const int idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
+    const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
     setData("idLoja", idLoja);
 
     setData("idOrcamento", ui->lineEditOrcamento->text());
@@ -665,7 +665,7 @@ void Orcamento::atualizaReplica() {
 void Orcamento::clearFields() {
   RegisterDialog::clearFields();
 
-  if (UserSession::isVendedor()) { ui->itemBoxVendedor->setId(UserSession::idUsuario); }
+  if (User::isVendedor()) { ui->itemBoxVendedor->setId(User::idUsuario); }
 
   //  ui->itemBoxEndereco->setDisabled(true);
 }
@@ -1297,7 +1297,7 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
 }
 
 void Orcamento::buscarParametrosFrete() {
-  const int idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
+  const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
 
   if (idLoja == 0) { throw RuntimeException("Erro buscando idLoja!"); }
 

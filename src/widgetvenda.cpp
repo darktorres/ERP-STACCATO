@@ -4,7 +4,7 @@
 #include "application.h"
 #include "followup.h"
 #include "reaisdelegate.h"
-#include "usersession.h"
+#include "user.h"
 #include "venda.h"
 #include "vendaproxymodel.h"
 
@@ -77,7 +77,7 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   const QString filtroRadio =
-      (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome) + "')";
+      (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -122,9 +122,9 @@ void WidgetVenda::montaFiltroTexto() {
 
   QString filtroLoja;
 
-  if (UserSession::isGerente()) { filtroLoja = "idLoja = " + UserSession::idLoja; }
+  if (User::isGerente()) { filtroLoja = "idLoja = " + User::idLoja; }
 
-  if (UserSession::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
+  if (User::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')"; }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
@@ -164,18 +164,18 @@ void WidgetVenda::setPermissions() {
   try {
     listarLojas();
 
-    if (UserSession::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
+    if (User::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
 
-    if (UserSession::isGerente()) { ui->groupBoxLojas->hide(); }
+    if (User::isGerente()) { ui->groupBoxLojas->hide(); }
 
-    if (UserSession::isVendedorOrEspecial()) { ui->groupBoxVendedores->hide(); }
+    if (User::isVendedorOrEspecial()) { ui->groupBoxVendedores->hide(); }
 
     // TODO: remove this?
-    if (UserSession::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
+    if (User::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
 
-    (UserSession::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+    (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
+    ui->comboBoxLojas->setCurrentValue(User::idLoja);
 
     fillComboBoxVendedor();
 
@@ -332,8 +332,8 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
       // -------------------------------------------------------------------------
 
-      if (UserSession::isVendedor()) {
-        if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
+      if (User::isVendedor()) {
+        if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
           ui->radioButtonTodos->setDisabled(true);
           ui->radioButtonProprios->setChecked(true);
         } else {

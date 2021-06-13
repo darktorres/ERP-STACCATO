@@ -9,7 +9,7 @@
 #include "followup.h"
 #include "inputdialog.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml.h"
 
 #include <QDebug>
@@ -260,7 +260,7 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not isSet) {
-    if (UserSession::isVendedor()) {
+    if (User::isVendedor()) {
       ui->tableVendas->hide();
       ui->labelEntregasCliente->hide();
     }
@@ -866,8 +866,8 @@ void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
 
     query2.bindValue(":idVenda", modelVendas.data(row, "idVenda"));
     query2.bindValue(":idVendaBase", modelVendas.data(row, "idVenda").toString().left(11));
-    query2.bindValue(":idLoja", UserSession::idLoja);
-    query2.bindValue(":idUsuario", UserSession::idUsuario);
+    query2.bindValue(":idLoja", User::idLoja);
+    query2.bindValue(":idUsuario", User::idUsuario);
     query2.bindValue(":tipoOperacao", "Alteração do prazo de entrega");
     query2.bindValue(":observacao", observacao);
     query2.bindValue(":dataFollowup", qApp->serverDate());

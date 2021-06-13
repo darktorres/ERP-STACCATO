@@ -1,7 +1,7 @@
 #include "treeview.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QHeaderView>
@@ -123,7 +123,7 @@ void TreeView::mousePressEvent(QMouseEvent *event) {
 void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const {
   QTreeView::drawRow(painter, options, index);
 
-  const QString tema = UserSession::getSetting("User/tema").toString();
+  const QString tema = User::getSetting("User/tema").toString();
 
   const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
   painter->setPen(color);

@@ -1,6 +1,6 @@
 #include "followupproxymodel.h"
 
-#include "usersession.h"
+#include "user.h"
 
 #include <QBrush>
 #include <QSqlRecord>
@@ -29,7 +29,7 @@ QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").toString();
+      const QString tema = User::getSetting("User/tema").toString();
 
       return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }

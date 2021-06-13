@@ -19,7 +19,7 @@
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
@@ -41,7 +41,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
 
-  if (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO") {
+  if (User::tipoUsuario == "ADMINISTRADOR" or User::tipoUsuario == "ADMINISTRATIVO") {
     ui->dateTimeEdit->setReadOnly(false);
     ui->dateTimeEdit->setCalendarPopup(true);
   }
@@ -604,7 +604,7 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
     }
 
-    const QString tipoUsuario = UserSession::tipoUsuario;
+    const QString tipoUsuario = User::tipoUsuario;
 
     if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO") {
       ui->pushButtonDevolucao->hide();
@@ -1295,7 +1295,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 void Venda::generateId() {
-  const QString siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
+  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
 
   if (siglaLoja.isEmpty()) { throw RuntimeException("Erro buscando sigla da loja!"); }
 
@@ -1330,7 +1330,7 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  const QString tipoUsuario = UserSession::tipoUsuario;
+  const QString tipoUsuario = User::tipoUsuario;
 
   if (tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO" and tipoUsuario != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
 

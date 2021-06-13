@@ -4,7 +4,7 @@
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "file.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QSqlError>
 #include <QTransposeProxyModel>
@@ -15,7 +15,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
-  if (UserSession::isAdmin()) { ui->table->hide(); }
+  if (User::isAdmin()) { ui->table->hide(); }
 
   connectLineEditsToDirty();
   setupTables();
@@ -198,7 +198,7 @@ void CadastroUsuario::fillComboBoxLoja() {
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
-  ui->comboBoxLoja->setCurrentValue(UserSession::idLoja);
+  ui->comboBoxLoja->setCurrentValue(User::idLoja);
 }
 
 void CadastroUsuario::on_pushButtonCadastrar_clicked() { save(); }

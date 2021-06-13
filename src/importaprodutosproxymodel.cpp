@@ -1,6 +1,6 @@
 #include "importaprodutosproxymodel.h"
 
-#include "usersession.h"
+#include "user.h"
 
 #include <QBrush>
 #include <QSqlRecord>
@@ -47,7 +47,7 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").toString();
+      const QString tema = User::getSetting("User/tema").toString();
 
       return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }

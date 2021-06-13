@@ -18,7 +18,7 @@
 #include "orcamento.h"
 #include "precoestoque.h"
 #include "userconfig.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QSqlError>
 
@@ -31,17 +31,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  const QString hostname = UserSession::getSetting("Login/hostname").toString();
+  const QString hostname = User::getSetting("Login/hostname").toString();
 
   if (hostname.isEmpty()) { throw RuntimeException("A chave 'hostname não está configurada!'"); }
 
   const QString hostnameText = qApp->getMapLojas().key(hostname);
 
-  setWindowTitle(windowTitle() + " - " + UserSession::nome + " - " + UserSession::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
+  setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
-  if (UserSession::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
+  if (User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
 
-  if (UserSession::isAdministrativo()) {
+  if (User::isAdministrativo()) {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_pagamentos->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   SqlQuery query;
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
-  query.bindValue(":idUsuario", UserSession::idUsuario);
+  query.bindValue(":idUsuario", User::idUsuario);
 
   if (query.exec() and query.first()) {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
-  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").toString());
+  pushButtonStatus->setText("Conectado: " + User::getSetting("Login/hostname").toString());
   pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
 
-  const QString nomeUsuario = UserSession::nome;
+  const QString nomeUsuario = User::nome;
 
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "RODRIGO TORRES") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 
@@ -184,7 +184,7 @@ void MainWindow::reconnectDb() {
 }
 
 void MainWindow::verifyDb(const bool conectado) {
-  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").toString() : "Desconectado");
+  pushButtonStatus->setText(conectado ? "Conectado: " + User::getSetting("Login/hostname").toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }

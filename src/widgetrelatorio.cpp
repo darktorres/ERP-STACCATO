@@ -6,7 +6,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xlsxdocument.h"
 
 #include <QDebug>
@@ -29,11 +29,11 @@ void WidgetRelatorio::setConnections() {
 void WidgetRelatorio::setFilterTotaisVendedor() {
   const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString idUsuario = (UserSession::isVendedor()) ? UserSession::idUsuario : "";
+  const QString idUsuario = (User::isVendedor()) ? User::idUsuario : "";
 
-  const QString idUsuarioConsultor = (UserSession::isEspecial()) ? UserSession::idUsuario : "";
+  const QString idUsuarioConsultor = (User::isEspecial()) ? User::idUsuario : "";
 
-  const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
+  const QString loja = (User::isGerente()) ? User::fromLoja("descricao").toString() : "";
 
   modelViewRelatorioVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
 
@@ -53,11 +53,11 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 void WidgetRelatorio::setFilterTotaisLoja() {
   const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString idUsuario = (UserSession::isVendedor()) ? UserSession::idUsuario : "";
+  const QString idUsuario = (User::isVendedor()) ? User::idUsuario : "";
 
-  const QString idUsuarioConsultor = (UserSession::isVendedorOrEspecial()) ? UserSession::idUsuario : "";
+  const QString idUsuarioConsultor = (User::isVendedorOrEspecial()) ? User::idUsuario : "";
 
-  const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
+  const QString loja = (User::isGerente()) ? User::fromLoja("descricao").toString() : "";
 
   modelViewRelatorioLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
 
@@ -122,11 +122,11 @@ void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
   QString filter = "Mês = '" + date + "'";
 
-  if (UserSession::isVendedor()) { filter += " AND idUsuario = " + UserSession::idUsuario; }
+  if (User::isVendedor()) { filter += " AND idUsuario = " + User::idUsuario; }
 
-  if (UserSession::isEspecial()) { filter += " AND idUsuarioConsultor = " + UserSession::idUsuario; }
+  if (User::isEspecial()) { filter += " AND idUsuarioConsultor = " + User::idUsuario; }
 
-  if (UserSession::isGerente() and not UserSession::fromLoja("descricao").toString().isEmpty()) { filter += " AND Loja = '" + UserSession::fromLoja("descricao").toString() + "'"; }
+  if (User::isGerente() and not User::fromLoja("descricao").toString().isEmpty()) { filter += " AND Loja = '" + User::fromLoja("descricao").toString() + "'"; }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 

@@ -6,7 +6,7 @@
 #include "orcamento.h"
 #include "orcamentoproxymodel.h"
 #include "reaisdelegate.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -25,11 +25,11 @@ void WidgetOrcamento::setPermissions() {
     [&] {
       listarLojas();
 
-      if (UserSession::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
+      if (User::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
 
-      if (UserSession::isGerente()) { ui->groupBoxLojas->hide(); }
+      if (User::isGerente()) { ui->groupBoxLojas->hide(); }
 
-      if (UserSession::isVendedorOrEspecial()) {
+      if (User::isVendedorOrEspecial()) {
         ui->checkBoxValido->setChecked(true);
         ui->checkBoxExpirado->setChecked(true);
 
@@ -37,11 +37,11 @@ void WidgetOrcamento::setPermissions() {
       }
 
       // TODO: remove this?
-      if (UserSession::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
+      if (User::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
 
-      (UserSession::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+      (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-      ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
+      ui->comboBoxLojas->setCurrentValue(User::idLoja);
 
       fillComboBoxVendedor();
 
@@ -192,7 +192,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -228,9 +228,9 @@ void WidgetOrcamento::montaFiltroTexto() {
 
   QString filtroLoja;
 
-  if (UserSession::isGerente()) { filtroLoja = "idLoja = " + UserSession::idLoja; }
+  if (User::isGerente()) { filtroLoja = "idLoja = " + User::idLoja; }
 
-  if (UserSession::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
+  if (User::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')"; }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
@@ -286,8 +286,8 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
       // -------------------------------------------------------------------------
 
-      if (UserSession::isVendedor()) {
-        if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
+      if (User::isVendedor()) {
+        if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
           ui->radioButtonTodos->setDisabled(true);
           ui->radioButtonProprios->setChecked(true);
         } else {

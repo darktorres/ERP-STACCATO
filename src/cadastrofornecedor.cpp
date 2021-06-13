@@ -4,7 +4,7 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QInputDialog>
@@ -20,7 +20,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   setupMapper();
   newRegister();
 
-  if (UserSession::isAdministrativo()) {
+  if (User::isAdministrativo()) {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

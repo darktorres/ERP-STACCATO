@@ -2,7 +2,7 @@
 
 #include "application.h"
 #include "file.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -19,7 +19,7 @@ void Excel::gerarExcel() {
   // TODO: dear god, divide this into smaller funcs
 
   const QString folder = (tipo == Tipo::Orcamento) ? "User/OrcamentosFolder" : "User/VendasFolder";
-  const QString folderKey = UserSession::getSetting(folder).toString();
+  const QString folderKey = User::getSetting(folder).toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 

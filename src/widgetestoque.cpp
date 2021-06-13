@@ -8,7 +8,7 @@
 #include "searchdialogproxymodel.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 #include "xlsxdocument.h"
 
 #include <QDebug>
@@ -122,7 +122,7 @@ void WidgetEstoque::updateTables() {
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
-    if (UserSession::isVendedorOrEspecial()) {
+    if (User::isVendedorOrEspecial()) {
       ui->groupBoxFiltros->hide();
       ui->groupBoxRelatorio->hide();
     }

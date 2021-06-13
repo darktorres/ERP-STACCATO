@@ -5,7 +5,7 @@
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "itembox.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -170,7 +170,7 @@ bool CadastroProfissional::viewRegister() {
   (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
   const bool existeVinculo = verificaVinculo();
-  const bool administrativo = UserSession::isAdministrativo();
+  const bool administrativo = User::isAdministrativo();
   const bool bloquear = (existeVinculo and not administrativo);
 
   ui->lineEditProfissional->setReadOnly(bloquear);

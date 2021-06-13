@@ -3,7 +3,7 @@
 #include "application.h"
 #include "file.h"
 #include "lrreportengine.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDate>
 #include <QDebug>
@@ -23,7 +23,7 @@ PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(p
 void PDF::gerarPdf() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  const QString folderKey = UserSession::getSetting(folder).toString();
+  const QString folderKey = User::getSetting(folder).toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
 

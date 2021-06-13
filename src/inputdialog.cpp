@@ -6,7 +6,7 @@
 #include "editdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QSqlError>

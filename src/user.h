@@ -5,10 +5,10 @@
 
 #include <QSettings>
 
-class UserSession final {
+class User final {
 
 public:
-  UserSession() = delete;
+  User() = delete;
 
   static auto autorizacao(const QString &user, const QString &password) -> void;
   static auto fromLoja(const QString &parameter, const QString &user = nome) -> QVariant;

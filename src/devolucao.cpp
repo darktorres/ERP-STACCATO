@@ -6,7 +6,7 @@
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -493,7 +493,7 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "dataEmissao", qApp->serverDate());
   modelPagamentos.setData(newRow, "idVenda", idDevolucao);
   // TODO: porque usa o idLoja do usuario?
-  modelPagamentos.setData(newRow, "idLoja", UserSession::idLoja);
+  modelPagamentos.setData(newRow, "idLoja", User::idLoja);
   modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value() * -1);
   modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
   modelPagamentos.setData(newRow, "parcela", 1);

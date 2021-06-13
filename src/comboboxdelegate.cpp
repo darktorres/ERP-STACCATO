@@ -1,7 +1,7 @@
 #include "comboboxdelegate.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QComboBox>
 #include <QDebug>
@@ -33,7 +33,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::Pagamento) {
     SqlQuery query;
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-    query.bindValue(":idLoja", UserSession::idLoja);
+    query.bindValue(":idLoja", User::idLoja);
 
     if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), parent); }
 

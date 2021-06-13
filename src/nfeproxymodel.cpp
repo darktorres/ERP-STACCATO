@@ -1,7 +1,7 @@
 #include "nfeproxymodel.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDate>
 #include <QSqlRecord>
@@ -27,7 +27,7 @@ QVariant NFeProxyModel::data(const QModelIndex &proxyIndex, const int role) cons
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").toString();
+      const QString tema = User::getSetting("User/tema").toString();
 
       return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }

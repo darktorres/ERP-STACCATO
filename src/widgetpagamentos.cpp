@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "logindialog.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -138,7 +138,7 @@ void WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
 
   SqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-  queryPag.bindValue(":idLoja", UserSession::idLoja);
+  queryPag.bindValue(":idLoja", User::idLoja);
 
   if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 

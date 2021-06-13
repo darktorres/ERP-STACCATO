@@ -8,7 +8,7 @@
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml_viewer.h"
 
 #include <QDesktopServices>
@@ -146,11 +146,11 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
+  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
 
   if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
+  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
   if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 

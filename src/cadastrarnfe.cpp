@@ -7,7 +7,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDate>
 #include <QDir>
@@ -21,20 +21,20 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   setWindowFlags(Qt::Window);
 
-  const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
+  const int lojaACBr = User::getSetting("User/lojaACBr").toInt();
 
   if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
-  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
+  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
 
   if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
+  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
   if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
+  ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr"));
 
   setupTables();
 
@@ -1624,8 +1624,8 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 
 void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
-  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
-  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
+  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
+  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
   acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 
@@ -1843,11 +1843,11 @@ void CadastrarNFe::preencherTotais() {
 void CadastrarNFe::preencherImpostos() {
   // buscar aliquotas
 
-  const double porcentagemPIS = UserSession::fromLoja("porcentagemPIS").toDouble();
+  const double porcentagemPIS = User::fromLoja("porcentagemPIS").toDouble();
 
   if (qFuzzyIsNull(porcentagemPIS)) { throw RuntimeException("Erro buscando % PIS!", this); }
 
-  const double porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS").toDouble();
+  const double porcentagemCOFINS = User::fromLoja("porcentagemCOFINS").toDouble();
 
   if (qFuzzyIsNull(porcentagemCOFINS)) { throw RuntimeException("Erro buscando % COFINS!", this); }
 

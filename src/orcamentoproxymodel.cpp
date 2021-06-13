@@ -1,6 +1,6 @@
 #include "orcamentoproxymodel.h"
 
-#include "usersession.h"
+#include "user.h"
 
 #include <QBrush>
 #include <QSqlRecord>
@@ -72,7 +72,7 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").toString();
+      const QString tema = User::getSetting("User/tema").toString();
 
       return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }

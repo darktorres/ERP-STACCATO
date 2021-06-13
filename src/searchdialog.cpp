@@ -7,7 +7,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
-#include "usersession.h"
+#include "user.h"
 #include "xml.h"
 
 #include <QDebug>
@@ -384,8 +384,8 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
 
 SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   const QString filtro = "tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL') AND desativado = FALSE";
-  const QString filtroLoja = (UserSession::idLoja == "1" or UserSession::isEspecial()) ? "" : " AND idLoja = " + UserSession::idLoja;
-  const QString filtroAdmin = (UserSession::isAdministrativo()) ? "" : " AND nome != 'REPOSIÇÂO'";
+  const QString filtroLoja = (User::idLoja == "1" or User::isEspecial()) ? "" : " AND idLoja = " + User::idLoja;
+  const QString filtroAdmin = (User::isAdministrativo()) ? "" : " AND nome != 'REPOSIÇÂO'";
 
   SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, "nome", false, parent);
 

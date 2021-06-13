@@ -2,7 +2,7 @@
 #include "ui_widgetgraficos.h"
 
 #include "application.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QSqlError>
 
@@ -24,10 +24,10 @@ void WidgetGraficos::updateTables() {
   if (not isSet) {
     setConnections();
 
-    if (UserSession::isGerente()) {
-      const QString nomeLoja = UserSession::fromLoja("descricao").toString();
+    if (User::isGerente()) {
+      const QString nomeLoja = User::fromLoja("descricao").toString();
 
-      if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, UserSession::idLoja); }
+      if (not nomeLoja.isEmpty()) { ui->comboBoxLojas->addItem(nomeLoja, User::idLoja); }
     } else {
       SqlQuery query;
 

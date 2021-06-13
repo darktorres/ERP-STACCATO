@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "followupproxymodel.h"
-#include "usersession.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -47,8 +47,8 @@ void FollowUp::on_pushButtonSalvar_clicked() {
                   ":idLoja, :idUsuario, :semaforo, :observacao, :dataFollowup, :dataProxFollowup)");
     query.bindValue(":idOrcamento", id);
     query.bindValue(":idOrcamentoBase", id.left(11));
-    query.bindValue(":idLoja", UserSession::idLoja);
-    query.bindValue(":idUsuario", UserSession::idUsuario);
+    query.bindValue(":idLoja", User::idLoja);
+    query.bindValue(":idUsuario", User::idUsuario);
     query.bindValue(":semaforo", ui->radioButtonQuente->isChecked() ? 1 : ui->radioButtonMorno->isChecked() ? 2 : ui->radioButtonFrio->isChecked() ? 3 : 0);
     query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
@@ -60,8 +60,8 @@ void FollowUp::on_pushButtonSalvar_clicked() {
         "INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", id);
     query.bindValue(":idVendaBase", id.left(11));
-    query.bindValue(":idLoja", UserSession::idLoja);
-    query.bindValue(":idUsuario", UserSession::idUsuario);
+    query.bindValue(":idLoja", User::idLoja);
+    query.bindValue(":idUsuario", User::idUsuario);
     query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }

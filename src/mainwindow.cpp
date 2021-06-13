@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   const QString hostnameText = qApp->getMapLojas().key(hostname);
 
-  setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
+  setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipo + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
   if (not User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
 

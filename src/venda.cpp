@@ -41,7 +41,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
 
-  if (User::tipoUsuario == "ADMINISTRADOR" or User::tipoUsuario == "ADMINISTRATIVO") {
+  if (User::isAdministrativo()) {
     ui->dateTimeEdit->setReadOnly(false);
     ui->dateTimeEdit->setCalendarPopup(true);
   }
@@ -604,9 +604,7 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
     }
 
-    const QString tipoUsuario = User::tipoUsuario;
-
-    if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO") {
+    if (not User::isAdministrativo()) {
       ui->pushButtonDevolucao->hide();
       ui->pushButtonCancelamento->hide();
     }
@@ -1330,9 +1328,7 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  const QString tipoUsuario = User::tipoUsuario;
-
-  if (tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO" and tipoUsuario != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
+  if (not User::isAdministrativo()) { ui->pushButtonCorrigirFluxo->hide(); }
 
   ui->frameButtons->hide();
   financeiro = true;

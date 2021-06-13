@@ -27,21 +27,13 @@ void WidgetRelatorio::setConnections() {
 }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
-  QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
+  const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString tipoUsuario = UserSession::tipoUsuario;
+  const QString idUsuario = (UserSession::isVendedor()) ? QString::number(UserSession::idUsuario) : "";
 
-  QString idUsuario;
+  const QString idUsuarioConsultor = (UserSession::isEspecial()) ? QString::number(UserSession::idUsuario) : "";
 
-  if (tipoUsuario == "VENDEDOR") { idUsuario = QString::number(UserSession::idUsuario); }
-
-  QString idUsuarioConsultor;
-
-  if (tipoUsuario == "VENDEDOR ESPECIAL") { idUsuarioConsultor = QString::number(UserSession::idUsuario); }
-
-  QString loja;
-
-  if (tipoUsuario == "GERENTE LOJA") { loja = UserSession::fromLoja("descricao").toString(); }
+  const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
 
   modelViewRelatorioVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
 
@@ -59,21 +51,13 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
-  QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
+  const QString mes = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  const QString tipoUsuario = UserSession::tipoUsuario;
+  const QString idUsuario = (UserSession::isVendedor()) ? QString::number(UserSession::idUsuario) : "";
 
-  QString idUsuario;
+  const QString idUsuarioConsultor = (UserSession::isVendedorOrEspecial()) ? QString::number(UserSession::idUsuario) : "";
 
-  if (tipoUsuario == "VENDEDOR") { idUsuario = QString::number(UserSession::idUsuario); }
-
-  QString idUsuarioConsultor;
-
-  if (tipoUsuario == "VENDEDOR ESPECIAL") { idUsuarioConsultor = QString::number(UserSession::idUsuario); }
-
-  QString loja;
-
-  if (tipoUsuario == "GERENTE LOJA") { loja = UserSession::fromLoja("descricao").toString(); }
+  const QString loja = (UserSession::isGerente()) ? UserSession::fromLoja("descricao").toString() : "";
 
   modelViewRelatorioLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
 
@@ -136,18 +120,13 @@ void WidgetRelatorio::calcularTotalVendedor() {
 
 void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
-  const QString tipoUsuario = UserSession::tipoUsuario;
   QString filter = "Mês = '" + date + "'";
 
-  if (tipoUsuario == "VENDEDOR") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
+  if (UserSession::isVendedor()) { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario); }
 
-  if (tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuarioConsultor = " + QString::number(UserSession::idUsuario); }
+  if (UserSession::isEspecial()) { filter += " AND idUsuarioConsultor = " + QString::number(UserSession::idUsuario); }
 
-  if (tipoUsuario == "GERENTE LOJA") {
-    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
-
-    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
-  }
+  if (UserSession::isGerente() and not UserSession::fromLoja("descricao").toString().isEmpty()) { filter += " AND Loja = '" + UserSession::fromLoja("descricao").toString() + "'"; }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 

@@ -24,7 +24,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
+  if (UserSession::isAdministrativo()) { ui->pushButtonRemover->setDisabled(true); }
 
   setConnections();
 }

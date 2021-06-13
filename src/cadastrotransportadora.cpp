@@ -20,7 +20,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   setupMapper();
   newRegister();
 
-  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
+  if (UserSession::isAdministrativo()) {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

@@ -25,22 +25,21 @@ void WidgetOrcamento::setPermissions() {
     [&] {
       listarLojas();
 
-      const QString tipoUsuario = UserSession::tipoUsuario;
+      if (UserSession::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
 
-      if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") { ui->groupBoxMes->setChecked(true); }
+      if (UserSession::isGerente()) { ui->groupBoxLojas->hide(); }
 
-      if (tipoUsuario == "GERENTE LOJA") { ui->groupBoxLojas->hide(); }
-
-      if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
+      if (UserSession::isVendedorOrEspecial()) {
         ui->checkBoxValido->setChecked(true);
         ui->checkBoxExpirado->setChecked(true);
 
         ui->groupBoxVendedores->hide();
       }
 
+      // TODO: remove this?
       if (UserSession::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
 
-      (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+      (UserSession::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
       ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
 
@@ -229,11 +228,9 @@ void WidgetOrcamento::montaFiltroTexto() {
 
   QString filtroLoja;
 
-  const QString tipoUsuario = UserSession::tipoUsuario;
+  if (UserSession::isGerente()) { filtroLoja = "idLoja = " + QString::number(UserSession::idLoja); }
 
-  if (tipoUsuario == "GERENTE LOJA") { filtroLoja = "idLoja = " + QString::number(UserSession::idLoja); }
-
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
+  if (UserSession::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + UserSession::nome + "'" + " OR Consultor = '" + UserSession::nome + "')"; }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
@@ -289,7 +286,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
       // -------------------------------------------------------------------------
 
-      if (UserSession::tipoUsuario == "VENDEDOR") {
+      if (UserSession::isVendedor()) {
         if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
           ui->radioButtonTodos->setDisabled(true);
           ui->radioButtonProprios->setChecked(true);

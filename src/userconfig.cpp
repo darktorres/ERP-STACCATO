@@ -16,7 +16,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   getSettings();
 
-  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") { hideWidgets(); }
+  if (UserSession::isVendedorOrEspecial()) { hideWidgets(); }
 
   setConnections();
 

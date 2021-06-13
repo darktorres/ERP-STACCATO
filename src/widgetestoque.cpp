@@ -122,9 +122,7 @@ void WidgetEstoque::updateTables() {
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
-    const QString tipoUsuario = UserSession::tipoUsuario;
-
-    if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
+    if (UserSession::isVendedorOrEspecial()) {
       ui->groupBoxFiltros->hide();
       ui->groupBoxRelatorio->hide();
     }

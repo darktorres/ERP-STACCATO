@@ -3,6 +3,7 @@
 #include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
+#include <QStack>
 #include <QTimer>
 #include <QWidget>
 
@@ -24,12 +25,13 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  QTimer timer;
+  QStack<int> blockingSignals;
   QString selectedIdVenda;
-  SqlTableModel modelTranspAtual;
-  SqlTableModel modelTranspAgend;
-  SqlQueryModel modelVendas;
+  QTimer timer;
   SqlQueryModel modelProdutos;
+  SqlQueryModel modelVendas;
+  SqlTableModel modelTranspAgend;
+  SqlTableModel modelTranspAtual;
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   auto adicionaProdutoNoModel(const int row, const double caixas) -> void;

@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QStack>
 #include <QTimer>
 #include <QWidget>
 
@@ -25,6 +26,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   bool financeiro = false;
+  QStack<int> blockingSignals;
   QTimer timer;
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;

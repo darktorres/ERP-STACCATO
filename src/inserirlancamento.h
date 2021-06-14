@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class InserirLancamento;
@@ -20,6 +21,7 @@ public:
 
 private:
   // attributes
+  QStack<int> blockingSignals;
   SqlTableModel modelContaPagamento;
   Tipo const tipo;
   Ui::InserirLancamento *ui;

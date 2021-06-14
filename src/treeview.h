@@ -2,6 +2,7 @@
 
 #include "sqltreemodel.h"
 
+#include <QStack>
 #include <QTreeView>
 
 class TreeView final : public QTreeView {
@@ -21,6 +22,7 @@ protected:
 private:
   // attributes
   bool autoResize = true;
+  QStack<int> blockingSignals;
   SqlTreeModel *baseModel = nullptr;
   // methods
   auto collapseAll() -> void;

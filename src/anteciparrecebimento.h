@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QStack>
 #include <QTimer>
 
 namespace Ui {
@@ -18,6 +19,7 @@ public:
 
 private:
   // attributes
+  QStack<int> blockingSignals;
   QTimer timer;
   SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;

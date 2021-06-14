@@ -6,6 +6,7 @@
 
 #include <QDataWidgetMapper>
 #include <QDialog>
+#include <QStack>
 #include <QTextStream>
 
 namespace Ui {
@@ -30,6 +31,7 @@ private:
   // attributes
   bool manterAberto = false;
   QDataWidgetMapper mapper;
+  QStack<int> blockingSignals;
   QString arquivo;
   QString chaveAcesso;
   QString const idVenda;

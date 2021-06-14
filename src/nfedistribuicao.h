@@ -3,6 +3,7 @@
 #include "acbr.h"
 #include "sqltablemodel.h"
 
+#include <QStack>
 #include <QTimer>
 #include <QWidget>
 
@@ -28,6 +29,7 @@ private:
   int maximoNSU;
   int ultimoNSU;
   ACBr acbrRemoto;
+  QStack<int> blockingSignals;
   QString cnpjDest;
   QTimer timer;
   SqlTableModel model;

@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class Contas;
@@ -23,6 +24,7 @@ public:
 
 private:
   // attributes
+  QStack<int> blockingSignals;
   SqlTableModel modelPendentes;
   SqlTableModel modelProcessados;
   Tipo const tipo;

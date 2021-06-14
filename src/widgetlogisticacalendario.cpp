@@ -14,6 +14,10 @@ WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
 void WidgetLogisticaCalendario::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged, connectionType);
@@ -24,6 +28,8 @@ void WidgetLogisticaCalendario::setConnections() {
 }
 
 void WidgetLogisticaCalendario::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
   disconnect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
   disconnect(ui->groupBoxVeiculos, &QGroupBox::toggled, this, &WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled);

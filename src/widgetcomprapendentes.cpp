@@ -50,6 +50,10 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 }
 
 void WidgetCompraPendentes::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -78,6 +82,8 @@ void WidgetCompraPendentes::setConnections() {
 }
 
 void WidgetCompraPendentes::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);

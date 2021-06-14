@@ -33,6 +33,10 @@ Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), 
 Contas::~Contas() { delete ui; }
 
 void Contas::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked, connectionType);
@@ -40,6 +44,8 @@ void Contas::setConnections() {
 }
 
 void Contas::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
   disconnect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher);
 }

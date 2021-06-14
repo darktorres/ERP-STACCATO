@@ -26,6 +26,10 @@ WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::Wi
 WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 
 void WidgetNfeSaida::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro, connectionType);
@@ -44,6 +48,8 @@ void WidgetNfeSaida::setConnections() {
 }
 
 void WidgetNfeSaida::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);

@@ -76,8 +76,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio =
-      (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -187,6 +186,10 @@ void WidgetVenda::setPermissions() {
 }
 
 void WidgetVenda::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto, connectionType);
@@ -225,6 +228,8 @@ void WidgetVenda::setConnections() {
 }
 
 void WidgetVenda::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);

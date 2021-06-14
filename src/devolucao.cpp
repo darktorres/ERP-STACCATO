@@ -33,6 +33,10 @@ Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget
 Devolucao::~Devolucao() { delete ui; }
 
 void Devolucao::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged, connectionType);
@@ -44,6 +48,8 @@ void Devolucao::setConnections() {
 }
 
 void Devolucao::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
   disconnect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
   disconnect(ui->doubleSpinBoxCredito, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCredito_valueChanged);

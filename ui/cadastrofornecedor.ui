@@ -275,7 +275,7 @@
                 </widget>
                </item>
                <item row="1" column="0">
-                <widget class="LineEditTel" name="lineEditTel_Res">
+                <widget class="LineEditTel" name="lineEditTel">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -1211,7 +1211,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
   <tabstop>lineEditContatoRG</tabstop>
-  <tabstop>lineEditTel_Res</tabstop>
+  <tabstop>lineEditTel</tabstop>
   <tabstop>lineEditTel_Cel</tabstop>
   <tabstop>lineEditTel_Com</tabstop>
   <tabstop>lineEditIdNextel</tabstop>

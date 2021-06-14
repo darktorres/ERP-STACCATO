@@ -122,7 +122,7 @@ void CadastroCliente::savingProcedures() {
   setData("contatoApelido", ui->lineEditContatoApelido->text());
   setData("contatoRG", ui->lineEditContatoRG->text());
   setData("inscEstadual", ui->lineEditInscEstadual->text());
-  setData("tel", ui->lineEditTel_Res->text());
+  setData("tel", ui->lineEditTel->text());
   setData("telCel", ui->lineEditTel_Cel->text());
   setData("telCom", ui->lineEditTel_Com->text());
   setData("nextel", ui->lineEditNextel->text());
@@ -133,7 +133,7 @@ void CadastroCliente::savingProcedures() {
   setData("pfpj", tipoPFPJ);
   setData("credito", ui->doubleSpinBoxCredito->value());
 
-  const bool incompleto = (modelEnd.rowCount() == 0 or ui->lineEditTel_Res->text().isEmpty() or ui->lineEditEmail->text().isEmpty());
+  const bool incompleto = (modelEnd.rowCount() == 0 or ui->lineEditTel->text().isEmpty() or ui->lineEditEmail->text().isEmpty());
 
   setData("incompleto", incompleto);
 }
@@ -166,7 +166,7 @@ void CadastroCliente::setupMapper() {
   addMapping(ui->lineEditNomeFantasia, "nomeFantasia");
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
-  addMapping(ui->lineEditTel_Res, "tel");
+  addMapping(ui->lineEditTel, "tel");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));

@@ -1182,39 +1182,21 @@ void Orcamento::cadastrar() {
 }
 
 void Orcamento::verificaCadastroCliente() {
-  const int idCliente = ui->itemBoxCliente->getId().toInt();
-
-  bool incompleto = false;
-
-  SqlQuery queryCliente;
-  queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
-  queryCliente.bindValue(":idCliente", idCliente);
-
-  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text()); }
-
-  if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) { incompleto = true; }
-
   SqlQuery queryCadastro;
-  queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE idCliente = :idCliente");
-  queryCadastro.bindValue(":idCliente", idCliente);
 
-  if (not queryCadastro.exec()) { throw RuntimeException("Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text()); }
+  if (not queryCadastro.exec("SELECT incompleto FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString()) or not queryCadastro.first()) {
+    throw RuntimeException("Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text());
+  }
 
-  if (not queryCadastro.first()) { incompleto = true; }
-
-  queryCadastro.prepare("SELECT c.incompleto FROM orcamento o LEFT JOIN cliente c ON o.idCliente = c.idCliente WHERE c.idCliente = :idCliente AND c.incompleto = TRUE");
-  queryCadastro.bindValue(":idCliente", idCliente);
-
-  if (not queryCadastro.exec()) { throw RuntimeException("Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text()); }
-
-  if (queryCadastro.first()) { incompleto = true; }
+  const bool incompleto = queryCadastro.value("incompleto").toBool();
 
   if (incompleto) {
     auto *cadCliente = new CadastroCliente(this);
-    cadCliente->viewRegisterById(idCliente);
+    cadCliente->viewRegisterById(ui->itemBoxCliente->getId());
+    cadCliente->marcarCompletar();
     cadCliente->show();
 
-    throw RuntimeError("Cadastro incompleto, deve preencher pelo menos:\n  -CPF/CNPJ\n  -Telefone Principal\n  -Email\n  -Endereço");
+    throw RuntimeError("Cadastro incompleto, preencha os campos obrigatórios!");
   }
 }
 

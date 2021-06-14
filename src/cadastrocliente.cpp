@@ -29,6 +29,25 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
 
 CadastroCliente::~CadastroCliente() { delete ui; }
 
+void CadastroCliente::marcarCompletar() {
+  completarCadastro = true;
+
+  const QString styleSheetAmarelo = "QLineEdit:read-only {"
+                                    "    background-color: rgb(255, 255, 127);"
+                                    "	color: #7f7f3f;"
+                                    "}"
+                                    ""
+                                    "QLineEdit:!read-only {"
+                                    "    background-color: rgb(255, 255, 127);"
+                                    "    color: #000000;"
+                                    "}";
+
+  ui->lineEditCPF->setStyleSheet(styleSheetAmarelo);
+  ui->lineEditCNPJ->setStyleSheet(styleSheetAmarelo);
+  ui->lineEditTel->setStyleSheet(styleSheetAmarelo);
+  ui->lineEditEmail->setStyleSheet(styleSheetAmarelo);
+}
+
 void CadastroCliente::setItemBoxes() {
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
@@ -105,6 +124,8 @@ void CadastroCliente::verifyFields() {
 
     if (query.first()) { throw RuntimeError("CPF/CNPJ já cadastrado!"); }
   }
+
+  if (completarCadastro and verificaIncompleto()) { throw RuntimeError("Cadastro incompleto, deve preencher pelo menos:\n  -CPF/CNPJ\n  -Telefone Principal\n  -Email\n  -Endereço"); }
 }
 
 void CadastroCliente::savingProcedures() {
@@ -132,10 +153,25 @@ void CadastroCliente::savingProcedures() {
   setData("idUsuarioRel", ui->itemBoxVendedor->getId());
   setData("pfpj", tipoPFPJ);
   setData("credito", ui->doubleSpinBoxCredito->value());
+  setData("incompleto", verificaIncompleto());
+}
 
-  const bool incompleto = (modelEnd.rowCount() == 0 or ui->lineEditTel->text().isEmpty() or ui->lineEditEmail->text().isEmpty());
+bool CadastroCliente::verificaIncompleto() {
+  const bool cpf = (tipoPFPJ == "PF" and ui->lineEditCPF->text() == "..-");
+  const bool cnpj = (tipoPFPJ == "PJ" and ui->lineEditCNPJ->text() == "../-");
+  const bool telefone = ui->lineEditTel->text().isEmpty();
+  const bool email = ui->lineEditEmail->text().isEmpty();
 
-  setData("incompleto", incompleto);
+  bool endereco = true;
+
+  for (int row = 0; row < modelEnd.rowCount(); ++row) {
+    if (not modelEnd.data(row, "desativado").toBool()) {
+      endereco = false;
+      break;
+    }
+  }
+
+  return (cpf or cnpj or telefone or email or endereco);
 }
 
 void CadastroCliente::clearFields() {

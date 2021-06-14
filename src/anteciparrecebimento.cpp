@@ -57,7 +57,7 @@ void AnteciparRecebimento::setConnections() {
 }
 
 void AnteciparRecebimento::unsetConnections() {
-  connect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro);
+  disconnect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged);

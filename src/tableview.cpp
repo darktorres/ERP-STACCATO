@@ -186,22 +186,35 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
     QString text;
 
-    const QModelIndexList selectedRows = selectionModel()->selectedRows();
+    if (selectionBehavior() == SelectItems) {
+      const QModelIndexList selectedCell = selectionModel()->selectedIndexes();
 
-    for (const auto indexRow : selectedRows) {
-      for (int col = 0; col < model()->columnCount(); ++col) {
-        if (isColumnHidden(col)) { continue; }
+      QVariant currentText = selectedCell.first().data();
 
-        QVariant currentText = indexRow.siblingAtColumn(col).data();
+      if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+      if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
 
-        if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
-        if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+      text += currentText.toString();
+    }
 
-        text += currentText.toString();
-        text += '\t';
+    if (selectionBehavior() == SelectRows) {
+      const QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+      for (const auto indexRow : selectedRows) {
+        for (int col = 0; col < model()->columnCount(); ++col) {
+          if (isColumnHidden(col)) { continue; }
+
+          QVariant currentText = indexRow.siblingAtColumn(col).data();
+
+          if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+          if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+
+          text += currentText.toString();
+          text += '\t';
+        }
+
+        text += '\n';
       }
-
-      text += '\n';
     }
 
     QApplication::clipboard()->setText(headers + text);

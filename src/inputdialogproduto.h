@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class InputDialogProduto;
@@ -24,6 +25,7 @@ public:
 
 private:
   // attributes
+  QStack<int> blockingSignals;
   SqlTableModel modelPedidoFornecedor;
   Tipo const tipo;
   Ui::InputDialogProduto *ui;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QStack>
 #include <QWidget>
 
 namespace Ui {
@@ -20,6 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QStack<int> blockingSignals;
   Ui::WidgetLogisticaCalendario *ui;
   // methods
   auto listarVeiculos() -> void;

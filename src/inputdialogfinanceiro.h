@@ -4,6 +4,7 @@
 #include "sqltreemodel.h"
 
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class InputDialogFinanceiro;
@@ -26,6 +27,7 @@ public:
 private:
   // attributes
   bool representacao;
+  QStack<int> blockingSignals;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelPedidoFornecedor2;
   SqlTableModel modelPedidoFornecedor;

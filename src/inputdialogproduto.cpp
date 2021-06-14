@@ -58,6 +58,10 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
 InputDialogProduto::~InputDialogProduto() { delete ui; }
 
 void InputDialogProduto::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged, connectionType);
@@ -69,6 +73,8 @@ void InputDialogProduto::setConnections() {
 }
 
 void InputDialogProduto::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);

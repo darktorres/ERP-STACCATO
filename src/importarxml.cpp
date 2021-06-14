@@ -34,6 +34,10 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataFaturame
 ImportarXML::~ImportarXML() { delete ui; }
 
 void ImportarXML::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
@@ -45,6 +49,8 @@ void ImportarXML::setConnections() {
 }
 
 void ImportarXML::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
   disconnect(ui->itemBoxNFe, &ItemBox::textChanged, this, &ImportarXML::on_itemBoxNFe_textChanged);
   disconnect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);

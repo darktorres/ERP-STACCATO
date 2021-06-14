@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class Devolucao;
@@ -18,6 +19,7 @@ public:
 private:
   // attributes
   bool const isRepresentacao;
+  QStack<int> blockingSignals;
   QString const idVenda;
   QString idDevolucao;
   SqlTableModel modelCliente;

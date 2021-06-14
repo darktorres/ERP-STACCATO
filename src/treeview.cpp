@@ -22,6 +22,10 @@ TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
 }
 
 void TreeView::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns, connectionType);
@@ -31,6 +35,8 @@ void TreeView::setConnections() {
 }
 
 void TreeView::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns);
   disconnect(this, &QTreeView::collapsed, this, &TreeView::resizeAllColumns);
   disconnect(this, &QWidget::customContextMenuRequested, this, &TreeView::showContextMenu);

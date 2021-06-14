@@ -3,6 +3,8 @@
 #include "registerdialog.h"
 #include "searchdialog.h"
 
+#include <QStack>
+
 namespace Ui {
 class CadastroProduto;
 }
@@ -16,6 +18,7 @@ public:
 
 private:
   // attributes
+  QStack<int> blockingSignals;
   SearchDialog *const sdProduto = SearchDialog::produto(true, true, true, false, this);
   Ui::CadastroProduto *ui;
   // methods

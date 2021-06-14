@@ -6,6 +6,7 @@
 
 #include <QDate>
 #include <QDialog>
+#include <QStack>
 
 namespace Ui {
 class ImportarXML;
@@ -44,6 +45,7 @@ private:
   // attributes
   QDate const dataFaturamento;
   QMap<QString, double> mapNFes;
+  QStack<int> blockingSignals;
   QStringList const idsCompra;
   SqlTableModel modelCompra;
   SqlTableModel modelConsumo;
@@ -53,7 +55,6 @@ private:
   SqlTableModel modelPagamento;
   SqlTableModel modelVenda;
   Ui::ImportarXML *ui;
-
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> void;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> void;

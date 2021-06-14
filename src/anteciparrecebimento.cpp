@@ -39,6 +39,10 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
 AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
 
 void AnteciparRecebimento::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro, connectionType);
@@ -57,6 +61,8 @@ void AnteciparRecebimento::setConnections() {
 }
 
 void AnteciparRecebimento::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro);

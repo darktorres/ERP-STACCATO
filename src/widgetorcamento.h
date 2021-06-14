@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QStack>
 #include <QTimer>
 #include <QWidget>
 
@@ -23,6 +24,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QStack<int> blockingSignals;
   QTimer timer;
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;

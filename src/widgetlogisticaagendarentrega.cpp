@@ -170,6 +170,10 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 void WidgetLogisticaAgendarEntrega::delayFiltro() { timer.start(500); }
 
 void WidgetLogisticaAgendarEntrega::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -207,6 +211,8 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
 }
 
 void WidgetLogisticaAgendarEntrega::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);

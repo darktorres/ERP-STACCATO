@@ -3,6 +3,8 @@
 #include "registerdialog.h"
 #include "sqltreemodel.h"
 
+#include <QStack>
+
 namespace Ui {
 class Venda;
 }
@@ -28,6 +30,7 @@ private:
   double porcFrete;
   int idLoja;
   QList<QSqlRecord> backupItem;
+  QStack<int> blockingSignals;
   SqlTableModel modelFluxoCaixa2;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelItem2;

@@ -68,6 +68,10 @@ void WidgetOrcamento::setupTables() {
 }
 
 void WidgetOrcamento::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto, connectionType);
@@ -92,6 +96,8 @@ void WidgetOrcamento::setConnections() {
 }
 
 void WidgetOrcamento::unsetConnections() {
+  blockingSignals.push(0);
+
   disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto);
   disconnect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);

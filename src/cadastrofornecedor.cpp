@@ -108,25 +108,26 @@ void CadastroFornecedor::verifyFields() {
 }
 
 void CadastroFornecedor::savingProcedures() {
-  setData("razaoSocial", ui->lineEditFornecedor->text());
-  setData("nomeFantasia", ui->lineEditNomeFantasia->text());
-  setData("contatoNome", ui->lineEditContatoNome->text());
-  setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"));
-  setData("contatoApelido", ui->lineEditContatoApelido->text());
-  setData("contatoRG", ui->lineEditContatoRG->text());
-  setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"));
-  setData("inscEstadual", ui->lineEditInscEstadual->text());
-  setData("tel", ui->lineEditTel->text());
-  setData("telCel", ui->lineEditTel_Cel->text());
-  setData("telCom", ui->lineEditTel_Com->text());
-  setData("nextel", ui->lineEditNextel->text());
-  setData("email", ui->lineEditEmail->text());
   setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value());
-  setData("st", ui->comboBoxSt->currentText());
+  setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"));
   setData("comissao1", ui->doubleSpinBoxComissaoVendedor->value());
   setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value());
   setData("comissaoLoja", ui->doubleSpinBoxComissaoLoja->value());
+  setData("contatoApelido", ui->lineEditContatoApelido->text());
+  setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"));
+  setData("contatoNome", ui->lineEditContatoNome->text());
+  setData("contatoRG", ui->lineEditContatoRG->text());
+  setData("email", ui->lineEditEmail->text());
   setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt());
+  setData("inscEstadual", ui->lineEditInscEstadual->text());
+  setData("nextel", ui->lineEditNextel->text());
+  setData("nomeFantasia", ui->lineEditNomeFantasia->text());
+  setData("razaoSocial", ui->lineEditFornecedor->text());
+  setData("st", ui->comboBoxSt->currentText());
+  setData("tel", ui->lineEditTel->text());
+  setData("telCel", ui->lineEditTel_Cel->text());
+  setData("telCom", ui->lineEditTel_Com->text());
+  setData("vemDoSul", ui->checkBoxVemSul->isChecked());
 
   // Dados bancários
 
@@ -153,6 +154,13 @@ void CadastroFornecedor::clearFields() {
 }
 
 void CadastroFornecedor::setupMapper() {
+  addMapping(ui->checkBoxRepresentacao, "representacao", "checked");
+  addMapping(ui->checkBoxVemSul, "vemDoSul");
+  addMapping(ui->comboBoxSt, "st");
+  addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
+  addMapping(ui->doubleSpinBoxComissaoEspecial, "comissao2");
+  addMapping(ui->doubleSpinBoxComissaoLoja, "comissaoLoja");
+  addMapping(ui->doubleSpinBoxComissaoVendedor, "comissao1");
   addMapping(ui->lineEditCNPJ, "cnpj");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
@@ -167,30 +175,24 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->lineEditInscEstadual, "inscEstadual");
   addMapping(ui->lineEditNextel, "nextel");
   addMapping(ui->lineEditNomeFantasia, "nomeFantasia");
+  addMapping(ui->lineEditTel, "tel");
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
-  addMapping(ui->lineEditTel, "tel");
-  addMapping(ui->checkBoxRepresentacao, "representacao", "checked");
-  addMapping(ui->comboBoxSt, "st");
-  addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
-  addMapping(ui->doubleSpinBoxComissaoVendedor, "comissao1");
-  addMapping(ui->doubleSpinBoxComissaoEspecial, "comissao2");
-  addMapping(ui->doubleSpinBoxComissaoLoja, "comissaoLoja");
 
-  addMapping(ui->lineEditNomeBancario, "nomeBanco");
-  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
-  addMapping(ui->lineEditBanco, "banco");
-  addMapping(ui->lineEditAgencia, "agencia");
-  addMapping(ui->lineEditCC, "cc");
   addMapping(ui->checkBoxPoupanca, "poupanca");
+  addMapping(ui->lineEditAgencia, "agencia");
+  addMapping(ui->lineEditBanco, "banco");
+  addMapping(ui->lineEditCC, "cc");
+  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
+  addMapping(ui->lineEditNomeBancario, "nomeBanco");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
+  mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));
+  mapperEnd.addMapping(ui->lineEditCidade, modelEnd.fieldIndex("cidade"));
+  mapperEnd.addMapping(ui->lineEditComplemento, modelEnd.fieldIndex("complemento"));
   mapperEnd.addMapping(ui->lineEditLogradouro, modelEnd.fieldIndex("logradouro"));
   mapperEnd.addMapping(ui->lineEditNumero, modelEnd.fieldIndex("numero"));
-  mapperEnd.addMapping(ui->lineEditComplemento, modelEnd.fieldIndex("complemento"));
-  mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
-  mapperEnd.addMapping(ui->lineEditCidade, modelEnd.fieldIndex("cidade"));
   mapperEnd.addMapping(ui->lineEditUF, modelEnd.fieldIndex("uf"));
 }
 

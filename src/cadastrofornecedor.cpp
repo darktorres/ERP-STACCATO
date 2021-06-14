@@ -116,7 +116,7 @@ void CadastroFornecedor::savingProcedures() {
   setData("contatoRG", ui->lineEditContatoRG->text());
   setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"));
   setData("inscEstadual", ui->lineEditInscEstadual->text());
-  setData("tel", ui->lineEditTel_Res->text());
+  setData("tel", ui->lineEditTel->text());
   setData("telCel", ui->lineEditTel_Cel->text());
   setData("telCom", ui->lineEditTel_Com->text());
   setData("nextel", ui->lineEditNextel->text());
@@ -169,7 +169,7 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->lineEditNomeFantasia, "nomeFantasia");
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
-  addMapping(ui->lineEditTel_Res, "tel");
+  addMapping(ui->lineEditTel, "tel");
   addMapping(ui->checkBoxRepresentacao, "representacao", "checked");
   addMapping(ui->comboBoxSt, "st");
   addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");

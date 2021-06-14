@@ -109,7 +109,7 @@ void CadastroProfissional::setupMapper() {
   addMapping(ui->lineEditProfissional, "nome_razao");
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
-  addMapping(ui->lineEditTel_Res, "tel");
+  addMapping(ui->lineEditTel, "tel");
 
   addMapping(ui->lineEditNomeBancario, "nomeBanco");
   addMapping(ui->lineEditCPFBancario, "cpfBanco");
@@ -244,7 +244,7 @@ void CadastroProfissional::savingProcedures() {
   setData("contatoNome", ui->lineEditContatoNome->text());
   setData("contatoApelido", ui->lineEditContatoApelido->text());
   setData("inscEstadual", ui->lineEditInscEstadual->text());
-  setData("tel", ui->lineEditTel_Res->text());
+  setData("tel", ui->lineEditTel->text());
   setData("telCel", ui->lineEditTel_Cel->text());
   setData("telCom", ui->lineEditTel_Com->text());
   setData("nextel", ui->lineEditNextel->text());

@@ -14,8 +14,11 @@ public:
   explicit CadastroCliente(QWidget *parent);
   ~CadastroCliente() final;
 
+  auto marcarCompletar() -> void;
+
 private:
   // attributes
+  bool completarCadastro;
   QString tipoPFPJ;
   SearchDialog *const sdCliente = SearchDialog::cliente(this);
   Ui::CadastroCliente *ui;
@@ -53,6 +56,7 @@ private:
   auto successMessage() -> void final;
   auto updateMode() -> void final;
   auto verificaEndereco() -> void;
+  auto verificaIncompleto() -> bool;
   auto verificaVinculo() -> bool;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;

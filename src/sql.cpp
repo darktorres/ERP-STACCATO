@@ -341,6 +341,96 @@ QString Sql::relatorio_contabil_passado(const QString &data) {
          " ORDER BY idEstoque";
 }
 
+QString Sql::queryEstoque(const QString &match, const QString &having) {
+  return " SELECT "
+         "    n.cnpjDest AS cnpjDest,"
+         "    e.status,"
+         "    e.idEstoque,"
+         "    p.fornecedor,"
+         "    e.descricao,"
+         "    e.restante AS restante,"
+         "    e.un AS unEst,"
+         "    e.restante / p.quantCaixa AS caixas,"
+         "    e.lote,"
+         "    e.local,"
+         "    e.bloco,"
+         "    e.codComercial,"
+         "    ANY_VALUE(n.numeroNFe) AS nfe,"
+         "    ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta,"
+         "    ANY_VALUE(pf.dataRealColeta) AS dataRealColeta,"
+         "    ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
+         "    ANY_VALUE(pf.dataRealReceb) AS dataRealReceb"
+         " FROM"
+         "    estoque e"
+         "        LEFT JOIN"
+         "    estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque"
+         "        LEFT JOIN"
+         "    pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2"
+         "        LEFT JOIN"
+         "    nfe n ON e.idNFe = n.idNFe"
+         "        LEFT JOIN"
+         "    produto p ON e.idProduto = p.idProduto"
+         " WHERE"
+         "    e.status NOT IN ('CANCELADO' , 'QUEBRADO') "
+         + match +
+         " GROUP BY e.idEstoque"
+         " HAVING " + having;
+}
+
+QString Sql::queryEstoqueContabil(const QString &match) {
+  // TODO: trocar CURDATE() por uma data escolhida pelo usuario
+
+  return " WITH ehc AS"
+         " (   "
+         "    SELECT "
+         "        ehc.idEstoque, SUM(ehc.quant) AS contabil"
+         "    FROM"
+         "        estoque_has_consumo ehc"
+         "    LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2"
+         "    WHERE"
+         "        vp.dataRealEnt < CURDATE() AND ehc.status != 'CANCELADO'"
+         "    GROUP BY ehc.idEstoque"
+         " )"
+         " SELECT "
+         "    n.cnpjDest AS cnpjDest,"
+         "    e.status,"
+         "    e.idEstoque,"
+         "    p.fornecedor,"
+         "    e.descricao,"
+         "	e.quant + e.ajuste + COALESCE(ehc.contabil, 0) AS contabil,"
+         "    (e.quant + e.ajuste + COALESCE(ehc.contabil, 0)) / p.quantCaixa AS caixasContabil,"
+         "    e.restante AS restante,"
+         "    e.restante / p.quantCaixa AS caixas,"
+         "    e.un AS unEst,"
+         "    e.lote,"
+         "    e.local,"
+         "    e.bloco,"
+         "    e.codComercial,"
+         "    ANY_VALUE(n.numeroNFe) AS nfe,"
+         "    ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta,"
+         "    ANY_VALUE(pf.dataRealColeta) AS dataRealColeta,"
+         "    ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
+         "    ANY_VALUE(pf.dataRealReceb) AS dataRealReceb"
+         " FROM"
+         "    estoque e"
+         "        LEFT JOIN"
+         "	ehc ON e.idEstoque = ehc.idEstoque"
+         "        LEFT JOIN"
+         "    estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque"
+         "        LEFT JOIN"
+         "    pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2"
+         "        LEFT JOIN"
+         "    nfe n ON e.idNFe = n.idNFe"
+         "        LEFT JOIN"
+         "    produto p ON e.idProduto = p.idProduto"
+         " WHERE"
+         "    e.status NOT IN ('CANCELADO' , 'QUEBRADO')"
+         + match +
+         " GROUP BY e.idEstoque"
+         " HAVING contabil > 0"
+         " ORDER BY e.idEstoque";
+}
+
 // clang-format on
 
 // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem

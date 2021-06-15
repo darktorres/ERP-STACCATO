@@ -7,6 +7,8 @@ class Sql {
 public:
   Sql() = delete;
 
+  static auto queryEstoque(const QString &match, const QString &having) -> QString;
+  static auto queryEstoqueContabil(const QString &match) -> QString;
   static auto relatorio_contabil_passado(const QString &data) -> QString;
   static auto updateVendaStatus(const QString &idVendas) -> void;
   static auto updateVendaStatus(const QStringList &idVendas) -> void;

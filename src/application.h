@@ -99,4 +99,8 @@ private:
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;
   auto userLogin(const QString &user) -> void;
+
+  // for multiple comparison without repetition
+  // is_in(status, "ENTREGUE", "QUEBRADO", "CANCELADO")
+  //  template <typename First, typename... T> bool is_in(First &&first, T &&...t) { return ((first == t) || ...); }
 };

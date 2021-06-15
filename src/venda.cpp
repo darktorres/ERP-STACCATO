@@ -1149,6 +1149,8 @@ void Venda::criarConsumos() {
 }
 
 void Venda::cancelamento() {
+  // TODO: guardar na tabela de followup o usuario que cancelou e em qual data
+
   const QString idOrcamento = ui->lineEditIdOrcamento->text();
 
   SqlQuery query1;
@@ -1235,7 +1237,8 @@ void Venda::on_pushButtonCancelamento_clicked() {
   const QDate dataVenda = data("data").toDate();
   const QDate dataAtual = qApp->serverDate();
 
-  if (dataVenda.month() != dataAtual.month()) { // trocar para dataAtual.month == dataVenda.month + 1 pois pode ser apenas no mês seguinte e não qualquer mês seguinte
+  // TODO: trocar para dataAtual.month == dataVenda.month + 1 pois pode ser apenas no mês seguinte e não qualquer mês seguinte
+  if (dataVenda.month() != dataAtual.month()) {
     const int diaSemana = dataAtual.dayOfWeek();
     const int dia = dataAtual.day();
 

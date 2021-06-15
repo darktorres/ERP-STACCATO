@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  bool completarCadastro;
+  bool completarCadastro = false;
   QString tipoPFPJ;
   SearchDialog *const sdCliente = SearchDialog::cliente(this);
   Ui::CadastroCliente *ui;

@@ -610,10 +610,9 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
     }
 
-    if (not User::isAdministrativo()) {
-      ui->pushButtonDevolucao->hide();
-      ui->pushButtonCancelamento->hide();
-    }
+    if (not User::isAdministrativo() and not User::isGerente()) { ui->pushButtonCancelamento->hide(); }
+
+    if (not User::isAdministrativo()) { ui->pushButtonDevolucao->hide(); }
 
     if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
 

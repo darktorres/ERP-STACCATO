@@ -242,6 +242,12 @@ void WidgetOrcamento::montaFiltroTexto() {
 
   //-------------------------------------
 
+  const QString filtroStatus = "status NOT IN ('CANCELADO')";
+
+  filtros << filtroStatus;
+
+  //-------------------------------------
+
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 

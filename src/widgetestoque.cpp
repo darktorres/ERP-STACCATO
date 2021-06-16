@@ -97,15 +97,12 @@ void WidgetEstoque::setHeaderData() {
   model.setHeaderData("idEstoque", "Estoque");
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("descricao", "Produto");
+  if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("caixasContabil", "Cx. Contábil"); }
+  if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("contabil", "Contábil"); }
+  model.setHeaderData("caixas", "Cx Rest.");
   model.setHeaderData("restante", "Quant. Rest.");
-
-  if (ui->radioButtonEstoqueContabil->isChecked()) {
-    model.setHeaderData("contabil", "Contábil");
-    model.setHeaderData("caixasContabil", "Caixas");
-  }
-
   model.setHeaderData("unEst", "Un.");
-  model.setHeaderData("caixas", "Caixas");
+  if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("unProd", "Un. Prod."); }
   model.setHeaderData("lote", "Lote");
   model.setHeaderData("local", "Local");
   model.setHeaderData("bloco", "Bloco");
@@ -115,6 +112,20 @@ void WidgetEstoque::setHeaderData() {
   model.setHeaderData("dataRealColeta", "Coleta");
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");
   model.setHeaderData("dataRealReceb", "Receb.");
+
+  if (ui->radioButtonEstoqueContabil->isChecked()) {
+    ui->tableEstoque->hideColumn("ncm");
+    ui->tableEstoque->hideColumn("cstICMS");
+    ui->tableEstoque->hideColumn("pICMS");
+    ui->tableEstoque->hideColumn("cstIPI");
+    ui->tableEstoque->hideColumn("cstPIS");
+    ui->tableEstoque->hideColumn("cstCOFINS");
+    ui->tableEstoque->hideColumn("custoUnit");
+    ui->tableEstoque->hideColumn("precoVendaUnit");
+    ui->tableEstoque->hideColumn("custo");
+    ui->tableEstoque->hideColumn("precoVenda");
+    ui->tableEstoque->hideColumn("idVenda");
+  }
 }
 
 void WidgetEstoque::updateTables() {
@@ -175,7 +186,7 @@ void WidgetEstoque::montaFiltro2() {
 }
 
 void WidgetEstoque::montaFiltroContabil() {
-  model.setQuery(Sql::queryEstoqueContabil(getMatch()));
+  model.setQuery(Sql::view_estoque_contabil(getMatch()));
 
   model.select();
 
@@ -200,9 +211,6 @@ QString WidgetEstoque::getMatch() const {
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
-  // NOTE: verificar se deve considerar os estoques não recebidos (em coleta/recebimento)
-  //  (a principio deve considerar apenas o fisico)
-
   // 1. codigo produto
   // 2. descricao
   // 3. ncm
@@ -211,11 +219,11 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   // 6. valor
   // 7. aliquota icms (se tiver)
 
-  const QString data = ui->dateEditMes->date().addDays(1).toString("yyyy-MM-dd");
+  const QString data = ui->dateEditMes->date().toString("yyyy-MM-dd");
 
   SqlQueryModel modelContabil;
 
-  modelContabil.setQuery(Sql::relatorio_contabil_passado(data));
+  modelContabil.setQuery(Sql::view_estoque_contabil("", data));
 
   modelContabil.select();
 
@@ -298,3 +306,4 @@ void WidgetEstoque::on_radioButtonEstoque_toggled(bool checked) {
 // TODO: fix fulltext indexes (put match against inside subquery)
 // TODO: criar um segundo relatorio para os gerentes sem o custo
 // TODO: dividir os 2 widgets em classes separadas
+// TODO: ordenar estoque zerado por status congela o sistema

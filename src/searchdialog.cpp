@@ -84,31 +84,42 @@ void SearchDialog::setupTables(const QString &table) {
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
+void SearchDialog::buscaProduto(const QString &searchFilter) {
+  const QString descontinuado = " AND descontinuado = " + QString(ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE");
+  const QString representacao = (showAllProdutos) ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
+  const QString showEstoque = (compraAvulsa) ? " AND estoque = FALSE AND promocao <= 1" : "";
+
+  model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
+}
+
 void SearchDialog::on_lineEditBusca_textChanged() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  if (text.isEmpty()) {
-    model.setFilter(naoListarBuscaVazia ? "0" : filter);
-    if (model.tableName() == "profissional") { model.setFilter("idProfissional = 1"); }
+  if (text.isEmpty() and model.tableName() == "profissional") { return model.setFilter("idProfissional = 1"); }
 
-    return;
-  }
+  if (text.isEmpty()) { return model.setFilter(naoListarBuscaVazia ? "0" : filter); }
 
-  if (model.tableName() == "view_nfe_inutilizada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
+  // ----------------------------------------
 
-  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
+  //  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
+  //  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
 
-  QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
+  //  QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 
-  if (model.tableName() == "view_produto") {
-    const QString descontinuado = " AND descontinuado = " + QString(ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE");
-    const QString representacao = showAllProdutos ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
-    const QString showEstoque = compraAvulsa ? " AND estoque = FALSE AND promocao <= 1" : "";
+  // ----------------------------------------
 
-    return model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
-  }
+  // MySQL Full-Text doesn't support prefix, use LIKE instead
+
+  QStringList strings;
+
+  for (auto &ftIndex : fullTextIndex.split(", ", Qt::SkipEmptyParts)) { strings << ftIndex + " LIKE '%" + text + "%'"; }
+
+  QString searchFilter = strings.join(" OR ").prepend("(").append(")");
+
+  // ----------------------------------------
+
+  if (model.tableName() == "view_produto") { return buscaProduto(searchFilter); }
 
   if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
 
@@ -236,7 +247,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, "", "", "", true, parent);
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, "numeroNFe, xml, chaveAcesso", "", "", true, parent);
 
   sdNFe->ui->lineEditBusca->show();
 

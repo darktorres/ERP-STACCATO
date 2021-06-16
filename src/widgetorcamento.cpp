@@ -74,7 +74,7 @@ void WidgetOrcamento::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
@@ -98,7 +98,7 @@ void WidgetOrcamento::setConnections() {
 void WidgetOrcamento::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltroTexto);
+  disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
@@ -172,7 +172,7 @@ void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
 }
 
 void WidgetOrcamento::montaFiltro() {
-  if (not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
+  if (not User::isGerente() and not User::isVendedorOrEspecial() and not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
 
   //-------------------------------------
 
@@ -220,42 +220,21 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
+
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
   modelViewOrcamento.setFilter(filtros.join(" AND "));
 }
 
 void WidgetOrcamento::montaFiltroTexto() {
-  if (ui->lineEditBusca->text().isEmpty()) { return montaFiltro(); }
-
-  //-------------------------------------
-
-  QStringList filtros;
-
-  //-------------------------------------
-
-  QString filtroLoja;
-
-  if (User::isGerente()) { filtroLoja = "idLoja = " + User::idLoja; }
-
-  if (User::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')"; }
-
-  if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
-
-  //-------------------------------------
-
-  const QString filtroStatus = "status NOT IN ('CANCELADO')";
-
-  filtros << filtroStatus;
-
-  //-------------------------------------
-
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  filtros << filtroBusca;
-
-  //-------------------------------------
-
-  modelViewOrcamento.setFilter(filtros.join(" AND "));
+  modelViewOrcamento.setFilter(filtroBusca);
 }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {

@@ -39,7 +39,7 @@ void WidgetVenda::setupTables() {
 }
 
 void WidgetVenda::montaFiltro() {
-  if (not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
+  if (not User::isGerente() and not User::isVendedorOrEspecial() and not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
 
   //-------------------------------------
 
@@ -107,43 +107,23 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  modelViewVenda.setFilter(filtros.join(" AND "));
-}
-
-void WidgetVenda::montaFiltroTexto() {
-  if (ui->lineEditBusca->text().isEmpty()) { return montaFiltro(); }
-
-  //-------------------------------------
-
-  QStringList filtros;
-
-  //-------------------------------------
-
-  QString filtroLoja;
-
-  if (User::isGerente()) { filtroLoja = "idLoja = " + User::idLoja; }
-
-  if (User::isVendedorOrEspecial()) { filtroLoja = "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')"; }
-
-  if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
-
-  //-------------------------------------
-
-  const QString filtroStatus = "status NOT IN ('CANCELADO')";
-
-  filtros << filtroStatus;
-
-  //-------------------------------------
-
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 
-  filtros << filtroBusca;
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
   //-------------------------------------
 
   modelViewVenda.setFilter(filtros.join(" AND "));
+}
+
+void WidgetVenda::montaFiltroTexto() {
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
+                              "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
+
+  modelViewVenda.setFilter(filtroBusca);
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
@@ -198,7 +178,7 @@ void WidgetVenda::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -236,7 +216,7 @@ void WidgetVenda::setConnections() {
 void WidgetVenda::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltroTexto);
+  disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);

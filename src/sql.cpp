@@ -378,7 +378,7 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          "        LEFT JOIN"
          "    produto p ON e.idProduto = p.idProduto"
          " WHERE"
-         "    e.status NOT IN ('CANCELADO' , 'QUEBRADO') "
+         "    e.status NOT IN ('CANCELADO', 'IGNORAR') "
          + match +
          " GROUP BY e.idEstoque"
          " HAVING " + having;

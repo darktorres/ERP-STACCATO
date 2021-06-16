@@ -205,7 +205,7 @@ QString WidgetEstoque::getMatch() const {
   const QString text2 = strings.join(" ");
 
   const QString match =
-      " AND (MATCH (e.descricao , e.codComercial) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+      " AND (MATCH (e.descricao , e.codComercial) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR e.idEstoque LIKE '" + text + "%')";
 
   return match;
 }

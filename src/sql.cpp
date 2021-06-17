@@ -248,8 +248,7 @@ QString Sql::view_relatorio_loja(const QString& mes, const QString &idUsuario, c
          "view_relatorio_reposicao r ON `r`.`loja` = `v`.`Loja` "
          "AND r.data = v.Mês " +
          filtro +
-         " GROUP BY `v`.`Loja`, Mês "
-         "ORDER BY `v`.`Loja`";
+         " GROUP BY `v`.`Loja`, Mês ";
 }
 
 QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuario, const QString &idUsuarioConsultor, const QString &loja){
@@ -274,8 +273,7 @@ QString Sql::view_relatorio_vendedor(const QString& mes, const QString &idUsuari
          "FROM "
          "`comissao` `c` " +
          filtro +
-         " GROUP BY `idUsuario` , `Loja` , `Mês` "
-         "ORDER BY `Loja`, `Vendedor`";
+         " GROUP BY `idUsuario` , `Loja` , `Mês` ";
 }
 
 QString Sql::view_estoque_contabil(const QString &match, const QString &data) {
@@ -344,8 +342,7 @@ QString Sql::view_estoque_contabil(const QString &match, const QString &data) {
          "    e.status = 'ESTOQUE' AND DATE(e.created) <= '" + data + "' "
          + match +
          " GROUP BY e.idEstoque"
-         " HAVING contabil > 0"
-         " ORDER BY idEstoque";
+         " HAVING contabil > 0";
 }
 
 QString Sql::queryEstoque(const QString &match, const QString &having) {

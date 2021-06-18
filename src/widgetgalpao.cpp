@@ -1,4 +1,4 @@
-#include "galpao.h"
+#include "widgetgalpao.h"
 #include "ui_galpao.h"
 
 #include "application.h"
@@ -11,23 +11,23 @@
 #include <QGraphicsRectItem>
 #include <QSqlError>
 
-Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) { ui->setupUi(this); }
+WidgetGalpao::WidgetGalpao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpao) { ui->setupUi(this); }
 
-Galpao::~Galpao() { delete ui; }
+WidgetGalpao::~WidgetGalpao() { delete ui; }
 
-void Galpao::resetTables() { modelIsSet = false; }
+void WidgetGalpao::resetTables() { modelIsSet = false; }
 
-void Galpao::setConnections() {
+void WidgetGalpao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged, connectionType);
-  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled, connectionType);
-  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged, connectionType);
-  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked, connectionType);
-  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked, connectionType);
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged, connectionType);
+  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &WidgetGalpao::on_groupBoxEdicao_toggled, connectionType);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetGalpao::on_itemBoxVeiculo_textChanged, connectionType);
+  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonCriarPallet_clicked, connectionType);
+  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
 }
 
-void Galpao::updateTables() {
+void WidgetGalpao::updateTables() {
   if (not isSet) {
     scene = new QGraphicsScene(this);
     ui->graphicsGalpao->setScene(scene);
@@ -60,7 +60,7 @@ void Galpao::updateTables() {
   carregarPallets();
 }
 
-void Galpao::setupTables() {
+void WidgetGalpao::setupTables() {
   modelTranspAgend.setTable("veiculo_has_produto");
 
   modelTranspAgend.setHeaderData("data", "Agendado");
@@ -91,10 +91,10 @@ void Galpao::setupTables() {
   ui->tableTranspAgend->hideColumn("idProduto");
   ui->tableTranspAgend->hideColumn("obs");
 
-  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Galpao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
+  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
 }
 
-void Galpao::carregarPallets() {
+void WidgetGalpao::carregarPallets() {
   scene->clear();
 
   scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
@@ -150,8 +150,8 @@ void Galpao::carregarPallets() {
     pallet->setLabel(iterator.key());
     pallet->setText(strings.join("\n"));
 
-    connect(pallet, &PalletItem::save, this, &Galpao::salvarPallets);
-    connect(pallet, &PalletItem::unselectOthers, this, &Galpao::unselectOthers);
+    connect(pallet, &PalletItem::save, this, &WidgetGalpao::salvarPallets);
+    connect(pallet, &PalletItem::unselectOthers, this, &WidgetGalpao::unselectOthers);
 
     scene->addItem(pallet);
 
@@ -159,7 +159,7 @@ void Galpao::carregarPallets() {
   }
 }
 
-void Galpao::salvarPallets() {
+void WidgetGalpao::salvarPallets() {
   auto items = scene->items();
 
   for (auto item : items) {
@@ -175,15 +175,15 @@ void Galpao::salvarPallets() {
   }
 }
 
-void Galpao::on_dateTimeEdit_dateChanged(const QDate &) {
+void WidgetGalpao::on_dateTimeEdit_dateChanged(const QDate &) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   setFilter();
 }
 
-void Galpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
+void WidgetGalpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
 
-void Galpao::setFilter() {
+void WidgetGalpao::setFilter() {
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
   modelTranspAgend.select();
@@ -191,7 +191,7 @@ void Galpao::setFilter() {
   on_table_selectionChanged();
 }
 
-void Galpao::on_table_selectionChanged() {
+void WidgetGalpao::on_table_selectionChanged() {
   auto items = scene->items();
 
   for (auto item : items) {
@@ -219,7 +219,7 @@ void Galpao::on_table_selectionChanged() {
   scene->update();
 }
 
-void Galpao::unselectOthers() {
+void WidgetGalpao::unselectOthers() {
   auto items = scene->items();
 
   for (auto item : items) {
@@ -227,15 +227,15 @@ void Galpao::unselectOthers() {
   }
 }
 
-void Galpao::on_pushButtonCriarPallet_clicked() {
+void WidgetGalpao::on_pushButtonCriarPallet_clicked() {
   //
 }
 
-void Galpao::on_pushButtonRemoverPallet_clicked() {
+void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   //
 }
 
-void Galpao::on_groupBoxEdicao_toggled(bool checked) {
+void WidgetGalpao::on_groupBoxEdicao_toggled(bool checked) {
   auto items = scene->items();
 
   for (auto item : items) {
@@ -248,7 +248,7 @@ void Galpao::on_groupBoxEdicao_toggled(bool checked) {
   ui->pushButtonRemoverPallet->setDisabled(true);
 }
 
-void Galpao::resizeEvent(QResizeEvent *event) {
+void WidgetGalpao::resizeEvent(QResizeEvent *event) {
   ui->graphicsGalpao->fitInView(0, 0, 624, 586, Qt::KeepAspectRatio);
 
   QWidget::resizeEvent(event);

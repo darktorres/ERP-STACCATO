@@ -54,7 +54,7 @@ QTabWidget::pane {
 </string>
       </property>
       <property name="currentIndex">
-       <number>7</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabOrcamentos">
        <attribute name="title">
@@ -212,7 +212,7 @@ QTabWidget::pane {
        </attribute>
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="0" column="0">
-         <widget class="Galpao" name="widgetGalpao" native="true"/>
+         <widget class="TabGalpao" name="widgetGalpao" native="true"/>
         </item>
        </layout>
       </widget>
@@ -630,9 +630,9 @@ QTabWidget::pane {
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Galpao</class>
+   <class>TabGalpao</class>
    <extends>QWidget</extends>
-   <header>src/galpao.h</header>
+   <header>src/tabgalpao.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -149,7 +149,6 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
-    src/galpao.cpp \
     src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
@@ -197,6 +196,7 @@ SOURCES += \
     src/tabcompras.cpp \
     src/tabestoque.cpp \
     src/tabfinanceiro.cpp \
+    src/tabgalpao.cpp \
     src/tableview.cpp \
     src/tablogistica.cpp \
     src/tabnfe.cpp \
@@ -221,6 +221,7 @@ SOURCES += \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
+    src/widgetgalpao.cpp \
     src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
@@ -285,7 +286,6 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
-    src/galpao.h \
     src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
@@ -332,6 +332,7 @@ HEADERS  += \
     src/tabcompras.h \
     src/tabestoque.h \
     src/tabfinanceiro.h \
+    src/tabgalpao.h \
     src/tableview.h \
     src/tablogistica.h \
     src/tabnfe.h \
@@ -356,6 +357,7 @@ HEADERS  += \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
+    src/widgetgalpao.h \
     src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
@@ -400,7 +402,6 @@ FORMS += \
     ui/devolucao.ui \
     ui/estoque.ui \
     ui/followup.ui \
-    ui/galpao.ui \
     ui/importaprodutos.ui \
     ui/importarxml.ui \
     ui/inputdialog.ui \
@@ -421,6 +422,7 @@ FORMS += \
     ui/tabcompras.ui \
     ui/tabestoque.ui \
     ui/tabfinanceiro.ui \
+    ui/tabgalpao.ui \
     ui/tablogistica.ui \
     ui/tabnfe.ui \
     ui/userconfig.ui \
@@ -441,6 +443,7 @@ FORMS += \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
+    ui/widgetgalpao.ui \
     ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \

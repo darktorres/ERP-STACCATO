@@ -212,6 +212,7 @@ SOURCES += \
     src/widgetconsistencia.cpp \
     src/widgetdevolucao.cpp \
     src/widgetestoque.cpp \
+    src/widgetestoquepeso.cpp \
     src/widgetestoqueproduto.cpp \
     src/widgetestoques.cpp \
     src/widgetfinanceiro.cpp \
@@ -346,6 +347,7 @@ HEADERS  += \
     src/widgetconsistencia.h \
     src/widgetdevolucao.h \
     src/widgetestoque.h \
+    src/widgetestoquepeso.h \
     src/widgetestoqueproduto.h \
     src/widgetestoques.h \
     src/widgetfinanceiro.h \
@@ -430,6 +432,7 @@ FORMS += \
     ui/widgetconsistencia.ui \
     ui/widgetdevolucao.ui \
     ui/widgetestoque.ui \
+    ui/widgetestoquepeso.ui \
     ui/widgetestoqueproduto.ui \
     ui/widgetestoques.ui \
     ui/widgetfinanceiro.ui \

@@ -39,16 +39,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabPeso">
-      <attribute name="title">
-       <string>Peso</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="WidgetEstoquePeso" name="widgetPeso" native="true"/>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
   </layout>
@@ -64,12 +54,6 @@
    <class>WidgetEstoqueProduto</class>
    <extends>QWidget</extends>
    <header>src/widgetestoqueproduto.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WidgetEstoquePeso</class>
-   <extends>QWidget</extends>
-   <header>src/widgetestoquepeso.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

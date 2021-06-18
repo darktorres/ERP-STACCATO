@@ -23,7 +23,6 @@ void TabEstoque::updateTables() {
 
   if (currenTab == "Estoques") { ui->widgetEstoques->updateTables(); }
   if (currenTab == "Produtos") { ui->widgetProdutos->updateTables(); }
-  if (currenTab == "Peso") { ui->widgetPeso->updateTables(); }
 }
 
 void TabEstoque::resetTables() {

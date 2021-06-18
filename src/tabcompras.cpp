@@ -1,14 +1,14 @@
-#include "widgetcompra.h"
+#include "tabcompras.h"
 #include "ui_widgetcompra.h"
 
-WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
+TabCompras::TabCompras(QWidget *parent) : QWidget(parent), ui(new Ui::TabCompras) {
   ui->setupUi(this);
   setConnections();
 }
 
-WidgetCompra::~WidgetCompra() { delete ui; }
+TabCompras::~TabCompras() { delete ui; }
 
-void WidgetCompra::resetTables() {
+void TabCompras::resetTables() {
   ui->widgetDevolucao->resetTables();
   ui->widgetResumo->resetTables();
   ui->widgetPendentes->resetTables();
@@ -19,7 +19,7 @@ void WidgetCompra::resetTables() {
   ui->widgetHistorico->resetTables();
 }
 
-void WidgetCompra::updateTables() {
+void TabCompras::updateTables() {
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentTab == "Devoluções") { ui->widgetDevolucao->updateTables(); }
@@ -32,12 +32,12 @@ void WidgetCompra::updateTables() {
   if (currentTab == "Histórico") { ui->widgetHistorico->updateTables(); }
 }
 
-void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
+void TabCompras::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
-void WidgetCompra::setConnections() {
+void TabCompras::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(
       ui->widgetGerar, &WidgetCompraGerar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); }, connectionType);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabCompras::on_tabWidget_currentChanged, connectionType);
 }

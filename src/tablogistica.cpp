@@ -1,10 +1,10 @@
-#include "widgetlogistica.h"
+#include "tablogistica.h"
 #include "ui_widgetlogistica.h"
 
 #include <QDebug>
 #include <QSqlError>
 
-WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
+TabLogistica::TabLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::TabLogistica) {
   ui->setupUi(this);
 
   ui->splitter->setStretchFactor(0, 1);
@@ -13,16 +13,16 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
   setConnections();
 }
 
-WidgetLogistica::~WidgetLogistica() { delete ui; }
+TabLogistica::~TabLogistica() { delete ui; }
 
-void WidgetLogistica::setConnections() {
+void TabLogistica::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked, connectionType);
-  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged, connectionType);
+  connect(ui->tableForn, &TableView::clicked, this, &TabLogistica::on_tableForn_clicked, connectionType);
+  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &TabLogistica::on_tabWidgetLogistica_currentChanged, connectionType);
 }
 
-void WidgetLogistica::resetTables() {
+void TabLogistica::resetTables() {
   ui->widgetAgendarColeta->resetTables();
   ui->widgetColeta->resetTables();
   ui->widgetRecebimento->resetTables();
@@ -34,7 +34,7 @@ void WidgetLogistica::resetTables() {
   ui->widgetCalendario->resetTables();
 }
 
-void WidgetLogistica::updateTables() {
+void TabLogistica::updateTables() {
   ui->tableForn->setModel(&modelViewLogistica);
 
   const QString currentTab = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
@@ -68,7 +68,7 @@ void WidgetLogistica::updateTables() {
   if (currentTab == "Devolução") { ui->widgetDevolucao->updateTables(); }
 }
 
-void WidgetLogistica::on_tableForn_clicked(const QModelIndex &index) {
+void TabLogistica::on_tableForn_clicked(const QModelIndex &index) {
   const QString fornecedor = index.isValid() ? modelViewLogistica.data(index.row(), "fornecedor").toString() : "";
 
   const QString currentTab = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
@@ -79,7 +79,7 @@ void WidgetLogistica::on_tableForn_clicked(const QModelIndex &index) {
   if (currentTab == "Representação") { ui->widgetRepresentacao->tableFornLogistica_clicked(fornecedor); }
 }
 
-void WidgetLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }
+void TabLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }
 
 // TODO: 1followup das entregas (no lugar de followup colocar campo observacao no inputDialog?)
 // TODO: 5colocar aba para fazer cotacao frete, puxar os orcamentos abertos com o peso das caixas para calcular frete

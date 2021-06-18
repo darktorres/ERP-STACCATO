@@ -3,22 +3,22 @@
 #include <QWidget>
 
 namespace Ui {
-class WidgetCompra;
+class TabEstoque;
 }
 
-class WidgetCompra final : public QWidget {
+class TabEstoque final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompra(QWidget *parent);
-  ~WidgetCompra();
+  explicit TabEstoque(QWidget *parent);
+  ~TabEstoque();
 
   auto resetTables() -> void;
   auto updateTables() -> void;
 
 private:
   // attributes
-  Ui::WidgetCompra *ui;
+  Ui::TabEstoque *ui;
   // methods
   auto on_tabWidget_currentChanged(const int &) -> void;
   auto setConnections() -> void;

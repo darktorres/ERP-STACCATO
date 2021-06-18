@@ -1,9 +1,9 @@
-#include "widgetfinanceiro.h"
+#include "tabfinanceiro.h"
 #include "ui_widgetfinanceiro.h"
 
 #include <QDebug>
 
-WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
+TabFinanceiro::TabFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::TabFinanceiro) {
   ui->setupUi(this);
 
   ui->widgetPagar->setTipo(WidgetFinanceiroContas::Tipo::Pagar);
@@ -13,15 +13,15 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   setConnections();
 }
 
-WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
+TabFinanceiro::~TabFinanceiro() { delete ui; }
 
-void WidgetFinanceiro::setConnections() {
+void TabFinanceiro::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabFinanceiro::updateTables, connectionType);
 }
 
-void WidgetFinanceiro::updateTables() {
+void TabFinanceiro::updateTables() {
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentTab == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
@@ -32,7 +32,7 @@ void WidgetFinanceiro::updateTables() {
   if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
 }
 
-void WidgetFinanceiro::resetTables() {
+void TabFinanceiro::resetTables() {
   ui->widgetFluxoCaixa->resetTables();
   ui->widgetPagar->resetTables();
   ui->widgetReceber->resetTables();

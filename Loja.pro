@@ -194,14 +194,18 @@ SOURCES += \
     src/sqlquerymodel.cpp \
     src/sqltablemodel.cpp \
     src/sqltreemodel.cpp \
+    src/tabcompras.cpp \
+    src/tabestoque.cpp \
+    src/tabfinanceiro.cpp \
     src/tableview.cpp \
+    src/tablogistica.cpp \
+    src/tabnfe.cpp \
     src/treeview.cpp \
     src/user.cpp \
     src/userconfig.cpp \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
-    src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
@@ -211,18 +215,15 @@ SOURCES += \
     src/widgetcompraresumo.cpp \
     src/widgetconsistencia.cpp \
     src/widgetdevolucao.cpp \
-    src/widgetestoque.cpp \
     src/widgetestoquepeso.cpp \
     src/widgetestoqueproduto.cpp \
     src/widgetestoques.cpp \
-    src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
-    src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
     src/widgetlogisticacalendario.cpp \
@@ -232,7 +233,6 @@ SOURCES += \
     src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
-    src/widgetnfe.cpp \
     src/widgetnfeentrada.cpp \
     src/widgetnfesaida.cpp \
     src/widgetorcamento.cpp \
@@ -329,14 +329,18 @@ HEADERS  += \
     src/sqlquerymodel.h \
     src/sqltablemodel.h \
     src/sqltreemodel.h \
+    src/tabcompras.h \
+    src/tabestoque.h \
+    src/tabfinanceiro.h \
     src/tableview.h \
+    src/tablogistica.h \
+    src/tabnfe.h \
     src/treeview.h \
     src/user.h \
     src/userconfig.h \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
-    src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \
@@ -346,18 +350,15 @@ HEADERS  += \
     src/widgetcompraresumo.h \
     src/widgetconsistencia.h \
     src/widgetdevolucao.h \
-    src/widgetestoque.h \
     src/widgetestoquepeso.h \
     src/widgetestoqueproduto.h \
     src/widgetestoques.h \
-    src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
-    src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \
     src/widgetlogisticacalendario.h \
@@ -367,7 +368,6 @@ HEADERS  += \
     src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
-    src/widgetnfe.h \
     src/widgetnfeentrada.h \
     src/widgetnfesaida.h \
     src/widgetorcamento.h \
@@ -418,10 +418,14 @@ FORMS += \
     ui/produtospendentes.ui \
     ui/searchdialog.ui \
     ui/sendmail.ui \
+    ui/tabcompras.ui \
+    ui/tabestoque.ui \
+    ui/tabfinanceiro.ui \
+    ui/tablogistica.ui \
+    ui/tabnfe.ui \
     ui/userconfig.ui \
     ui/validadedialog.ui \
     ui/venda.ui \
-    ui/widgetcompra.ui \
     ui/widgetcompraconfirmar.ui \
     ui/widgetcompraconsumos.ui \
     ui/widgetcompradevolucao.ui \
@@ -431,18 +435,15 @@ FORMS += \
     ui/widgetcompraresumo.ui \
     ui/widgetconsistencia.ui \
     ui/widgetdevolucao.ui \
-    ui/widgetestoque.ui \
     ui/widgetestoquepeso.ui \
     ui/widgetestoqueproduto.ui \
     ui/widgetestoques.ui \
-    ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \
-    ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \
     ui/widgetlogisticacalendario.ui \
@@ -452,7 +453,6 @@ FORMS += \
     ui/widgetlogisticaentregues.ui \
     ui/widgetlogisticarecebimento.ui \
     ui/widgetlogisticarepresentacao.ui \
-    ui/widgetnfe.ui \
     ui/widgetnfeentrada.ui \
     ui/widgetnfesaida.ui \
     ui/widgetorcamento.ui \

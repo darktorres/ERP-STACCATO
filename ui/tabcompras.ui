@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetCompra</class>
- <widget class="QWidget" name="WidgetCompra">
+ <class>TabCompras</class>
+ <widget class="QWidget" name="TabCompras">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -54,7 +54,7 @@ QTabWidget::pane {
 </string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="tabOrcamentos">
        <attribute name="title">
@@ -127,7 +127,7 @@ QTabWidget::pane {
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="WidgetCompra" name="widgetCompra" native="true"/>
+         <widget class="TabCompras" name="widgetCompra" native="true"/>
         </item>
        </layout>
       </widget>
@@ -152,7 +152,7 @@ QTabWidget::pane {
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="WidgetLogistica" name="widgetLogistica" native="true"/>
+         <widget class="TabLogistica" name="widgetLogistica" native="true"/>
         </item>
        </layout>
       </widget>
@@ -177,7 +177,7 @@ QTabWidget::pane {
          <number>0</number>
         </property>
         <item row="0" column="1">
-         <widget class="WidgetNfe" name="widgetNfe" native="true"/>
+         <widget class="TabNFe" name="widgetNFe" native="true"/>
         </item>
        </layout>
       </widget>
@@ -202,7 +202,7 @@ QTabWidget::pane {
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="WidgetEstoque" name="widgetEstoque" native="true"/>
+         <widget class="TabEstoque" name="widgetEstoque" native="true"/>
         </item>
        </layout>
       </widget>
@@ -237,7 +237,7 @@ QTabWidget::pane {
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="WidgetFinanceiro" name="widgetFinanceiro" native="true"/>
+         <widget class="TabFinanceiro" name="widgetFinanceiro" native="true"/>
         </item>
        </layout>
       </widget>
@@ -576,27 +576,27 @@ QTabWidget::pane {
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetCompra</class>
+   <class>TabCompras</class>
    <extends>QWidget</extends>
-   <header>src/widgetcompra.h</header>
+   <header>src/tabcompras.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetLogistica</class>
+   <class>TabLogistica</class>
    <extends>QWidget</extends>
-   <header>src/widgetlogistica.h</header>
+   <header>src/tablogistica.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetNfe</class>
+   <class>TabNFe</class>
    <extends>QWidget</extends>
-   <header>src/widgetnfe.h</header>
+   <header>src/tabnfe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetEstoque</class>
+   <class>TabEstoque</class>
    <extends>QWidget</extends>
-   <header>src/widgetestoque.h</header>
+   <header>src/tabestoque.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -606,9 +606,9 @@ QTabWidget::pane {
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetFinanceiro</class>
+   <class>TabFinanceiro</class>
    <extends>QWidget</extends>
-   <header>src/widgetfinanceiro.h</header>
+   <header>src/tabfinanceiro.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

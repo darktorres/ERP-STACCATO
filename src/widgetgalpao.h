@@ -6,15 +6,15 @@
 #include <QWidget>
 
 namespace Ui {
-class Galpao;
+class WidgetGalpao;
 }
 
-class Galpao : public QWidget {
+class WidgetGalpao : public QWidget {
   Q_OBJECT
 
 public:
-  explicit Galpao(QWidget *parent = nullptr);
-  ~Galpao();
+  explicit WidgetGalpao(QWidget *parent = nullptr);
+  ~WidgetGalpao();
 
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -25,7 +25,7 @@ private:
   bool modelIsSet = false;
   QGraphicsScene *scene;
   SqlTableModel modelTranspAgend;
-  Ui::Galpao *ui;
+  Ui::WidgetGalpao *ui;
   // methods
   auto carregarPallets() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &) -> void;

@@ -25,6 +25,7 @@ void TabNFe::updateTables() {
 void TabNFe::resetTables() {
   ui->widgetEntrada->resetTables();
   ui->widgetSaida->resetTables();
+  ui->widgetDistribuicao->resetTables();
 }
 
 void TabNFe::on_tabWidgetNfe_currentChanged(const int) { updateTables(); }

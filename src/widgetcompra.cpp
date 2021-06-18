@@ -3,7 +3,6 @@
 
 WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
   ui->setupUi(this);
-
   setConnections();
 }
 

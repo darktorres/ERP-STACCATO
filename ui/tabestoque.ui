@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetEstoque</class>
- <widget class="QWidget" name="WidgetEstoque">
+ <class>TabEstoque</class>
+ <widget class="QWidget" name="TabEstoque">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,7 +19,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabEstoque">
+     <widget class="QWidget" name="tabEstoques">
       <attribute name="title">
        <string>Estoques</string>
       </attribute>
@@ -29,7 +29,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabProduto">
+     <widget class="QWidget" name="tabProdutos">
       <attribute name="title">
        <string>Produtos</string>
       </attribute>

@@ -5,15 +5,15 @@
 #include <QWidget>
 
 namespace Ui {
-class WidgetLogistica;
+class TabLogistica;
 }
 
-class WidgetLogistica final : public QWidget {
+class TabLogistica final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogistica(QWidget *parent);
-  ~WidgetLogistica();
+  explicit TabLogistica(QWidget *parent);
+  ~TabLogistica();
 
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,7 +21,7 @@ public:
 private:
   // attributes
   SqlTableModel modelViewLogistica;
-  Ui::WidgetLogistica *ui;
+  Ui::TabLogistica *ui;
   // methods
   auto setConnections() -> void;
   auto on_tableForn_clicked(const QModelIndex &index) -> void;

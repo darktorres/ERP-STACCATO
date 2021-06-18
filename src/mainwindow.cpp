@@ -140,7 +140,7 @@ void MainWindow::resetTables() {
   ui->widgetVenda->resetTables();
   ui->widgetCompra->resetTables();
   ui->widgetLogistica->resetTables();
-  ui->widgetNfe->resetTables();
+  ui->widgetNFe->resetTables();
   ui->widgetEstoque->resetTables();
   ui->widgetFinanceiro->resetTables();
   ui->widgetRelatorio->resetTables();
@@ -164,7 +164,7 @@ void MainWindow::updateTables() {
     if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
     if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
     if (currentTab == "Logística") { ui->widgetLogistica->updateTables(); }
-    if (currentTab == "NFe") { ui->widgetNfe->updateTables(); }
+    if (currentTab == "NFe") { ui->widgetNFe->updateTables(); }
     if (currentTab == "Estoque") { ui->widgetEstoque->updateTables(); }
     if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
     if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }

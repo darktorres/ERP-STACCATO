@@ -3,22 +3,23 @@
 #include <QWidget>
 
 namespace Ui {
-class WidgetFinanceiro;
+class TabNFe;
 }
 
-class WidgetFinanceiro final : public QWidget {
+class TabNFe final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiro(QWidget *parent);
-  ~WidgetFinanceiro();
+  explicit TabNFe(QWidget *parent);
+  ~TabNFe();
 
   auto resetTables() -> void;
   auto updateTables() -> void;
 
 private:
   // attributes
-  Ui::WidgetFinanceiro *ui;
+  Ui::TabNFe *ui;
   // methods
+  auto on_tabWidgetNfe_currentChanged(const int) -> void;
   auto setConnections() -> void;
 };

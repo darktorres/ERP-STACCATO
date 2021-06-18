@@ -1,24 +1,24 @@
-#include "widgetestoque.h"
-#include "ui_widgetestoque.h"
+#include "tabestoque.h"
+#include "ui_tabestoque.h"
 
 #include <QDebug>
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
+TabEstoque::TabEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::TabEstoque) {
   ui->setupUi(this);
   setConnections();
 }
 
-WidgetEstoque::~WidgetEstoque() { delete ui; }
+TabEstoque::~TabEstoque() { delete ui; }
 
-void WidgetEstoque::setConnections() {
+void TabEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetEstoque::on_tabWidget_currentChanged, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabEstoque::on_tabWidget_currentChanged, connectionType);
 }
 
-void WidgetEstoque::on_tabWidget_currentChanged(const int &) { updateTables(); }
+void TabEstoque::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
-void WidgetEstoque::updateTables() {
+void TabEstoque::updateTables() {
   const QString currenTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currenTab == "Estoques") { ui->widgetEstoques->updateTables(); }
@@ -26,7 +26,7 @@ void WidgetEstoque::updateTables() {
   if (currenTab == "Peso") { ui->widgetPeso->updateTables(); }
 }
 
-void WidgetEstoque::resetTables() {
+void TabEstoque::resetTables() {
   ui->widgetEstoques->resetTables();
   ui->widgetProdutos->resetTables();
 }

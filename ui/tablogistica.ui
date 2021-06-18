@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetLogistica</class>
- <widget class="QWidget" name="WidgetLogistica">
+ <class>TabLogistica</class>
+ <widget class="QWidget" name="TabLogistica">
   <property name="enabled">
    <bool>true</bool>
   </property>

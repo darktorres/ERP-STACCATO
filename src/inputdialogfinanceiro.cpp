@@ -13,6 +13,7 @@
 
 #include <QDebug>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QSqlError>
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {

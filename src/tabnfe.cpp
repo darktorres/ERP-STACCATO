@@ -1,5 +1,5 @@
 #include "tabnfe.h"
-#include "ui_widgetnfe.h"
+#include "ui_tabnfe.h"
 
 TabNFe::TabNFe(QWidget *parent) : QWidget(parent), ui(new Ui::TabNFe) {
   ui->setupUi(this);

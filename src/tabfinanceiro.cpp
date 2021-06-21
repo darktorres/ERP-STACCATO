@@ -1,5 +1,5 @@
 #include "tabfinanceiro.h"
-#include "ui_widgetfinanceiro.h"
+#include "ui_tabfinanceiro.h"
 
 #include <QDebug>
 

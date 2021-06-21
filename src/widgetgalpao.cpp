@@ -1,5 +1,5 @@
 #include "widgetgalpao.h"
-#include "ui_galpao.h"
+#include "ui_widgetgalpao.h"
 
 #include "application.h"
 #include "palletitem.h"

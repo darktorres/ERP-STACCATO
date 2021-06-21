@@ -1,5 +1,5 @@
 #include "tablogistica.h"
-#include "ui_widgetlogistica.h"
+#include "ui_tablogistica.h"
 
 #include <QDebug>
 #include <QSqlError>

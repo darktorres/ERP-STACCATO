@@ -88,6 +88,7 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   //-----------------------------------------------
 
+  // TODO: move query to Sql class
   modelEstoque.setQuery(
       "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, e.restante / p.quantCaixa AS `Caixas`, `e`.`lote` AS `lote`, "
       "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` WHERE e.status NOT IN "

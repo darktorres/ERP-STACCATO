@@ -499,6 +499,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   SqlQueryModel modelProdutosAgrupado;
 
+  // TODO: move query to Sql class
   modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, ANY_VALUE(lote) AS lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS "
                                  "quant, ANY_VALUE(un) AS un, ANY_VALUE(isEstoque) AS isEstoque "
                                  "FROM view_calendario_produto WHERE idVenda = '" +

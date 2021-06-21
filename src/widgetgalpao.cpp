@@ -91,7 +91,9 @@ void WidgetGalpao::setupTables() {
   ui->tableTranspAgend->hideColumn("idProduto");
   ui->tableTranspAgend->hideColumn("obs");
 
-  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_table_selectionChanged, connectionType);
 }
 
 void WidgetGalpao::carregarPallets() {

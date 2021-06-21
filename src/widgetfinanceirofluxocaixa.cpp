@@ -84,6 +84,7 @@ void WidgetFinanceiroFluxoCaixa::montaTabela1() {
 
   const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "WHERE idConta = " + ui->itemBoxCaixa1->getId().toString() : "";
 
+  // TODO: move query to Sql class
   modelCaixa.setQuery("WITH x AS (SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataRealizado) AS Acumulado FROM view_fluxo_resumo_realizado v " + filtroConta + " ORDER BY dataRealizado) SELECT * FROM x " +
                       filtroData + " ORDER BY dataRealizado");
 
@@ -121,6 +122,7 @@ void WidgetFinanceiroFluxoCaixa::montaTabela2() {
 
   const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "WHERE idConta = " + ui->itemBoxCaixa2->getId().toString() : "";
 
+  // TODO: move query to Sql class
   modelCaixa2.setQuery("WITH x AS (SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataRealizado) AS Acumulado FROM view_fluxo_resumo_realizado v " + filtroConta2 +
                        " ORDER BY dataRealizado) SELECT * FROM x " + filtroData + " ORDER BY dataRealizado");
 
@@ -156,6 +158,7 @@ void WidgetFinanceiroFluxoCaixa::montaTabela2() {
 void WidgetFinanceiroFluxoCaixa::montaTabela3() {
   qDebug() << "tabela3";
 
+  // TODO: move query to Sql class
   modelFuturo.setQuery("SELECT v.*, SUM(v.`R$`) OVER (ORDER BY dataPagamento) AS Acumulado FROM view_fluxo_resumo_pendente v ORDER BY dataPagamento");
 
   modelFuturo.select();

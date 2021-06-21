@@ -91,6 +91,7 @@ void WidgetLogisticaEntregues::setupTables() {
 void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
+  // TODO: move query to Sql class
   modelProdutos.setQuery(
       "SELECT `vp2`.`idVendaProduto2` AS `idVendaProduto2`, `vp2`.`idProduto` AS `idProduto`, `vp2`.`dataPrevEnt` AS `dataPrevEnt`, `vp2`.`dataRealEnt` AS `dataRealEnt`, `vp2`.`status` "
       "AS `status`, `vp2`.`fornecedor` AS `fornecedor`, `vp2`.`idVenda` AS `idVenda`, `vp2`.`produto` AS `produto`, `vp2`.`caixas` AS `caixas`, `vp2`.`quant` AS `quant`, `vp2`.`un` AS "

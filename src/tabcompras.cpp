@@ -1,5 +1,5 @@
 #include "tabcompras.h"
-#include "ui_widgetcompra.h"
+#include "ui_tabcompras.h"
 
 TabCompras::TabCompras(QWidget *parent) : QWidget(parent), ui(new Ui::TabCompras) {
   ui->setupUi(this);

@@ -183,6 +183,7 @@ SOURCES += \
     src/reaisdelegate.cpp \
     src/registeraddressdialog.cpp \
     src/registerdialog.cpp \
+    src/scrollarea.cpp \
     src/searchdialog.cpp \
     src/searchdialogproxymodel.cpp \
     src/sendmail.cpp \
@@ -319,6 +320,7 @@ HEADERS  += \
     src/reaisdelegate.h \
     src/registeraddressdialog.h \
     src/registerdialog.h \
+    src/scrollarea.h \
     src/searchdialog.h \
     src/searchdialogproxymodel.h \
     src/sendmail.h \

@@ -12,11 +12,7 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) {
-  ui->setupUi(this);
-  ui->groupBoxStatusFinanceiro->hide();
-  timer.setSingleShot(true);
-}
+WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -48,30 +44,30 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   // para gerente o combobox é marcado com a loja e escondido então a regra abaixo se aplica
-  const QString filtroLoja = (ui->comboBoxLojas->currentText().isEmpty()) ? "" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+  const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
   //-------------------------------------
 
-  const QString filtroMes = (ui->groupBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroMes = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
   if (not filtroMes.isEmpty()) { filtros << filtroMes; }
 
   //-------------------------------------
 
-  const QString filtroDia = (ui->groupBoxDia->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  const QString filtroDia = (ui->checkBoxDia->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
   if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
 
   const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
-  const QString filtroVendedor = (ui->comboBoxVendedores->currentText().isEmpty()) ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
+  const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
 
   //-------------------------------------
 
   const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
-  const QString filtroFornecedor = (fornecedor.isEmpty()) ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
+  const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
@@ -143,29 +139,35 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
   montaFiltro();
 }
 
-void WidgetVenda::setPermissions() {
+void WidgetVenda::setWidgets() {
   unsetConnections();
 
   try {
-    listarLojas();
+    fillComboBoxFornecedor();
+    fillComboBoxLoja();
 
-    if (User::isAdministrativo()) { ui->groupBoxMes->setChecked(true); }
-
-    if (User::isGerente()) { ui->groupBoxLojas->hide(); }
-
-    if (User::isVendedorOrEspecial()) { ui->groupBoxVendedores->hide(); }
-
-    // TODO: remove this?
-    if (User::nome == "VIVIANE") { ui->groupBoxVendedores->show(); }
-
-    (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
-
-    ui->comboBoxLojas->setCurrentValue(User::idLoja);
+    if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
     fillComboBoxVendedor();
 
+    if (User::isAdministrativo()) {
+      ui->checkBoxMes->setChecked(true);
+      ui->dateEditMes->setEnabled(true);
+    }
+
+    if (User::isGerente()) { ui->frameLojas->hide(); }
+
+    if (User::isVendedorOrEspecial()) { ui->frameVendedores->hide(); }
+
+    // TODO: remove this?
+    if (User::nome == "VIVIANE") { ui->frameVendedores->show(); }
+
+    (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
+
+    ui->groupBoxStatusFinanceiro->hide();
   } catch (std::exception &) {}
 
   setConnections();
@@ -183,6 +185,7 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->checkBoxDia, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxEmEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -193,6 +196,7 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->checkBoxMes, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -200,16 +204,14 @@ void WidgetVenda::setConnections() {
   connect(ui->comboBoxFornecedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged, connectionType);
   connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditDia_dateChanged, connectionType);
+  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled, connectionType);
   connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked, connectionType);
-  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled, connectionType);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonTodos_toggled, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated, connectionType);
 }
 
@@ -221,6 +223,7 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxDia, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxEmEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
@@ -231,6 +234,7 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxMes, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
@@ -239,41 +243,23 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
   disconnect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditDia_dateChanged);
+  disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
   disconnect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
-  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
+  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonTodos_toggled);
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
 void WidgetVenda::delayFiltro() { timer.start(500); }
 
-void WidgetVenda::fillComboBoxVendedor() {
-  ui->comboBoxVendedores->clear();
-
-  const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
-
-  SqlQuery query;
-
-  if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-    throw RuntimeException("Erro: " + query.lastError().text(), this);
-  }
-
-  ui->comboBoxVendedores->addItem("");
-
-  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
-}
-
 void WidgetVenda::updateTables() {
   if (not isSet) {
-    setComboBoxFornecedores();
-    setPermissions();
+    timer.setSingleShot(true);
+    setWidgets();
     setConnections();
     isSet = true;
   }
@@ -287,17 +273,57 @@ void WidgetVenda::updateTables() {
   modelViewVenda.select();
 }
 
-void WidgetVenda::setComboBoxFornecedores() {
+void WidgetVenda::fillComboBoxVendedor() {
+  unsetConnections();
+
+  try {
+    ui->comboBoxVendedores->clear();
+
+    ui->comboBoxVendedores->addItem("Vendedores");
+
+    const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+
+    SqlQuery query;
+
+    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+      throw RuntimeException("Erro: " + query.lastError().text(), this);
+    }
+
+    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+  } catch (std::exception &) {}
+
+  setConnections();
+}
+
+void WidgetVenda::fillComboBoxLoja() {
+  unsetConnections();
+
+  try {
+    ui->comboBoxLojas->clear();
+
+    ui->comboBoxLojas->addItem("Lojas");
+
+    SqlQuery query;
+
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
+
+    while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
+  } catch (std::exception &) {}
+
+  setConnections();
+}
+
+void WidgetVenda::fillComboBoxFornecedor() {
   unsetConnections();
 
   try {
     ui->comboBoxFornecedores->clear();
 
+    ui->comboBoxFornecedores->addItem("Fornecedores");
+
     SqlQuery query;
 
     if (not query.exec("SELECT razaoSocial FROM fornecedor")) { throw RuntimeException("Erro buscando fornecedores: " + query.lastError().text(), this); }
-
-    ui->comboBoxFornecedores->addItem("");
 
     while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
   } catch (std::exception &) {}
@@ -375,10 +401,22 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   montaFiltro();
 }
 
-void WidgetVenda::listarLojas() {
-  SqlQuery query;
+void WidgetVenda::on_radioButtonTodos_toggled(bool checked) {
+  if (checked) { montaFiltro(); }
+}
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
+void WidgetVenda::on_radioButtonProprios_toggled(bool checked) {
+  if (checked) { montaFiltro(); }
+}
 
-  while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
+void WidgetVenda::on_dateEditDia_dateChanged(const QDate &) {
+  if (not ui->checkBoxDia->isChecked()) { return; }
+
+  montaFiltro();
+}
+
+void WidgetVenda::on_dateEditMes_dateChanged(const QDate &) {
+  if (not ui->checkBoxMes->isChecked()) { return; }
+
+  montaFiltro();
 }

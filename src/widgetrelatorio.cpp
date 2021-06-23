@@ -55,7 +55,7 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   const QString idUsuario = (User::isVendedor()) ? User::idUsuario : "";
 
-  const QString idUsuarioConsultor = (User::isVendedorOrEspecial()) ? User::idUsuario : "";
+  const QString idUsuarioConsultor = (User::isEspecial()) ? User::idUsuario : "";
 
   const QString loja = (User::isGerente()) ? User::fromLoja("descricao").toString() : "";
 
@@ -142,6 +142,14 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 void WidgetRelatorio::updateTables() {
   if (not isSet) {
     ui->dateEditMes->setDate(qApp->serverDate());
+
+    if (not User::isAdministrativo()) { ui->frameLoja->hide(); }
+
+    if (User::isVendedor()) {
+      ui->frameLoja->hide();
+      ui->frameVendedores->hide();
+    }
+
     setConnections();
     isSet = true;
   }

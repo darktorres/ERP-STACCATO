@@ -46,10 +46,59 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Filtros:</string>
+      <string>Filtros</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_12">
-      <item row="4" column="0">
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="radioButtonEntregaLimpar">
+        <property name="text">
+         <string>Todos</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButtonTotalEntrega">
+        <property name="text">
+         <string>100% entregue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButtonParcialEntrega">
+        <property name="text">
+         <string>Parte entregue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButtonSemEntrega">
+        <property name="text">
+         <string>Sem entrega</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer_5">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -61,37 +110,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="3" column="0">
-       <widget class="QRadioButton" name="radioButtonSemEntrega">
-        <property name="text">
-         <string>Sem entrega</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QRadioButton" name="radioButtonParcialEntrega">
-        <property name="text">
-         <string>Parte entregue</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonTotalEntrega">
-        <property name="text">
-         <string>100% entregue</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButtonEntregaLimpar">
-        <property name="text">
-         <string>Todos</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

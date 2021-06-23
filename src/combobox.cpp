@@ -2,6 +2,8 @@
 
 #include "application.h"
 
+#include <QDebug>
+
 ComboBox::ComboBox(QWidget *parent) : QComboBox(parent) {}
 
 QVariant ComboBox::getCurrentValue() const { return currentData(); }
@@ -14,5 +16,5 @@ void ComboBox::setCurrentValue(const QVariant &value) {
     }
   }
 
-  throw RuntimeException("Erro procurando " + value.toString() + "!");
+  throw RuntimeException("Não encontrou valor '" + value.toString() + "' no " + objectName() + "!");
 }

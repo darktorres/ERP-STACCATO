@@ -83,28 +83,15 @@
      </widget>
      <widget class="QWidget" name="layoutWidget2">
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelContasReceberBuscar">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Buscar:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
+       <item row="2" column="2">
         <widget class="QLineEdit" name="lineEditBusca">
          <property name="enabled">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QScrollArea" name="scrollArea">
+       <item row="0" column="0" rowspan="3">
+        <widget class="ScrollArea" name="scrollArea">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -119,122 +106,158 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>183</width>
-            <height>975</height>
+            <width>192</width>
+            <height>1003</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item row="2" column="0">
+            <spacer name="verticalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item row="0" column="0">
             <widget class="QGroupBox" name="groupBoxFiltros">
              <property name="enabled">
               <bool>true</bool>
              </property>
              <property name="title">
-              <string>Filtros:</string>
+              <string>Filtros</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_12">
-              <item row="16" column="0">
-               <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Antecipar recebimento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="17" column="0">
-               <widget class="QPushButton" name="pushButtonInserirLancamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Inserir lançamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="0">
-               <widget class="QGroupBox" name="groupBoxRealizado">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QGroupBox" name="groupBox_2">
                 <property name="title">
-                 <string>Realizado De/Até</string>
+                 <string>Status</string>
                 </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_8">
-                 <item row="1" column="0">
-                  <widget class="QDateEdit" name="dateEditRealizadoDe">
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <property name="topMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonTodos">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
-                   <property name="calendarPopup">
+                   <property name="text">
+                    <string>Todos</string>
+                   </property>
+                   <property name="checked">
                     <bool>true</bool>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QDateEdit" name="dateEditRealizadoAte">
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonPendente">
                    <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="calendarPopup">
                     <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Pendente</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonConferido">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Conferido</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonAgendado">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Agendado</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonRecebido">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Recebido</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonPago">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Pago</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonCancelado">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Cancelado</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonTodos">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Todos</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="15" column="0">
-               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Importar folha pag.</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QRadioButton" name="radioButtonPago">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Pago</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QRadioButton" name="radioButtonRecebido">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Recebido</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="0">
+              <item>
                <widget class="QGroupBox" name="groupBoxLojas">
                 <property name="enabled">
                  <bool>true</bool>
@@ -248,37 +271,196 @@
                 <property name="checked">
                  <bool>false</bool>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_2">
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <property name="leftMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <widget class="ItemBox" name="itemBoxLojas"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBoxVencimento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="title">
+                 <string>Vencimento</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_8">
+                 <property name="leftMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>2</number>
+                 </property>
+                 <item row="1" column="1">
+                  <widget class="QDateEdit" name="dateEditVencimentoAte">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QDateEdit" name="dateEditVencimentoDe">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="0" column="0">
-                  <widget class="ItemBox" name="itemBoxLojas">
+                  <widget class="QLabel" name="label_3">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>De</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Até</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QRadioButton" name="radioButtonPendente">
+              <item>
+               <widget class="QGroupBox" name="groupBoxRealizado">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="text">
-                 <string>Pendente</string>
-                </property>
-               </widget>
-              </item>
-              <item row="11" column="0">
-               <widget class="QGroupBox" name="groupBox">
                 <property name="title">
-                 <string>R$ De/Até</string>
+                 <string>Realizado</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_5">
+                 <property name="leftMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>2</number>
+                 </property>
+                 <item row="0" column="1">
+                  <widget class="QDateEdit" name="dateEditRealizadoDe">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QDateEdit" name="dateEditRealizadoAte">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="0" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>De</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_6">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Até</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox">
+                <property name="title">
+                 <string>R$</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_4">
+                 <property name="leftMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>2</number>
+                 </property>
+                 <item row="0" column="1">
                   <widget class="QDoubleSpinBox" name="doubleSpinBoxDe">
                    <property name="showGroupSeparator" stdset="0">
                     <bool>true</bool>
@@ -291,7 +473,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
+                 <item row="1" column="1">
                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAte">
                    <property name="showGroupSeparator" stdset="0">
                     <bool>true</bool>
@@ -304,58 +486,100 @@
                    </property>
                   </widget>
                  </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="9" column="0">
-               <widget class="QGroupBox" name="groupBoxVencimento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="title">
-                 <string>Vencimento De/Até</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_4">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_7">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>De</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="0">
-                  <widget class="QDateEdit" name="dateEditVencimentoDe">
-                   <property name="enabled">
-                    <bool>false</bool>
+                  <widget class="QLabel" name="label_8">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
-                   <property name="calendarPopup">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QDateEdit" name="dateEditVencimentoAte">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="calendarPopup">
-                    <bool>true</bool>
+                   <property name="text">
+                    <string>Até</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="6" column="0">
-               <widget class="QRadioButton" name="radioButtonCancelado">
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="groupBox_3">
+             <property name="title">
+              <string>Operações</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="pushButtonRemessaItau">
+                <property name="text">
+                 <string>Gerar remessa ITAÚ</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Cancelado</string>
+                 <string>Importar folha pag.</string>
                 </property>
                </widget>
               </item>
-              <item row="18" column="0">
+              <item>
+               <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Antecipar recebimento</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButtonInserirLancamento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Inserir lançamento</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="pushButtonInserirTransferencia">
                 <property name="enabled">
                  <bool>true</bool>
@@ -365,34 +589,7 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QRadioButton" name="radioButtonAgendado">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Agendado</string>
-                </property>
-               </widget>
-              </item>
-              <item row="20" column="0">
-               <widget class="QPushButton" name="pushButtonReverterPagamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Reverter pagamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="14" column="0">
-               <widget class="QPushButton" name="pushButtonRemessaItau">
-                <property name="text">
-                 <string>Gerar remessa ITAÚ</string>
-                </property>
-               </widget>
-              </item>
-              <item row="19" column="0">
+              <item>
                <widget class="QPushButton" name="pushButtonExcluirLancamento">
                 <property name="enabled">
                  <bool>true</bool>
@@ -402,37 +599,37 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QRadioButton" name="radioButtonConferido">
+              <item>
+               <widget class="QPushButton" name="pushButtonReverterPagamento">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Conferido</string>
+                 <string>Reverter pagamento</string>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
-           <item row="1" column="0">
-            <spacer name="verticalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>290</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
           </layout>
          </widget>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="1">
+        <widget class="QLabel" name="labelContasReceberBuscar">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Buscar:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
         <widget class="TableView" name="table">
          <property name="mouseTracking">
           <bool>true</bool>
@@ -467,6 +664,12 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header>src/scrollarea.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
@@ -476,12 +679,6 @@
   <tabstop>tableVencidos</tabstop>
   <tabstop>tableVencer</tabstop>
   <tabstop>scrollArea</tabstop>
-  <tabstop>radioButtonTodos</tabstop>
-  <tabstop>radioButtonPendente</tabstop>
-  <tabstop>radioButtonAgendado</tabstop>
-  <tabstop>radioButtonRecebido</tabstop>
-  <tabstop>radioButtonPago</tabstop>
-  <tabstop>radioButtonCancelado</tabstop>
   <tabstop>groupBoxLojas</tabstop>
   <tabstop>itemBoxLojas</tabstop>
   <tabstop>groupBoxVencimento</tabstop>
@@ -489,13 +686,6 @@
   <tabstop>dateEditVencimentoAte</tabstop>
   <tabstop>doubleSpinBoxDe</tabstop>
   <tabstop>doubleSpinBoxAte</tabstop>
-  <tabstop>pushButtonRemessaItau</tabstop>
-  <tabstop>pushButtonImportarFolhaPag</tabstop>
-  <tabstop>pushButtonAdiantarRecebimento</tabstop>
-  <tabstop>pushButtonInserirLancamento</tabstop>
-  <tabstop>pushButtonInserirTransferencia</tabstop>
-  <tabstop>pushButtonExcluirLancamento</tabstop>
-  <tabstop>pushButtonReverterPagamento</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
  </tabstops>

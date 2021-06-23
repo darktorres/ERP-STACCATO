@@ -30,17 +30,22 @@ private:
   Ui::WidgetOrcamento *ui;
   // methods
   auto delayFiltro() -> void;
+  auto fillComboBoxFollowup() -> void;
+  auto fillComboBoxFornecedor() -> void;
+  auto fillComboBoxLoja() -> void;
   auto fillComboBoxVendedor() -> void;
-  auto listarLojas() -> void;
   auto montaFiltro() -> void;
   auto montaFiltroTexto() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
+  auto on_dateEditMes_dateChanged(const QDate &) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCriarOrc_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
+  auto on_radioButtonProprios_toggled(bool checked) -> void;
+  auto on_radioButtonTodos_toggled(bool checked) -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
-  auto setPermissions() -> void;
+  auto setWidgets() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };

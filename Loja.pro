@@ -216,13 +216,13 @@ SOURCES += \
     src/widgetcompraresumo.cpp \
     src/widgetconsistencia.cpp \
     src/widgetdevolucao.cpp \
-    src/widgetestoquepeso.cpp \
     src/widgetestoqueproduto.cpp \
     src/widgetestoques.cpp \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgalpao.cpp \
+    src/widgetgalpaopeso.cpp \
     src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
@@ -353,13 +353,13 @@ HEADERS  += \
     src/widgetcompraresumo.h \
     src/widgetconsistencia.h \
     src/widgetdevolucao.h \
-    src/widgetestoquepeso.h \
     src/widgetestoqueproduto.h \
     src/widgetestoques.h \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgalpao.h \
+    src/widgetgalpaopeso.h \
     src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
@@ -439,13 +439,13 @@ FORMS += \
     ui/widgetcompraresumo.ui \
     ui/widgetconsistencia.ui \
     ui/widgetdevolucao.ui \
-    ui/widgetestoquepeso.ui \
     ui/widgetestoqueproduto.ui \
     ui/widgetestoques.ui \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgalpao.ui \
+    ui/widgetgalpaopeso.ui \
     ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \

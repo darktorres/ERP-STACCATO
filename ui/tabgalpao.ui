@@ -59,7 +59,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="WidgetEstoquePeso" name="widgetEstoquePeso" native="true"/>
+        <widget class="WidgetGalpaoPeso" name="widgetGalpaoPeso" native="true"/>
        </item>
       </layout>
      </widget>
@@ -69,9 +69,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>WidgetEstoquePeso</class>
+   <class>WidgetGalpaoPeso</class>
    <extends>QWidget</extends>
-   <header>src/widgetestoquepeso.h</header>
+   <header>src/widgetgalpaopeso.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

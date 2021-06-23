@@ -1,5 +1,5 @@
-#include "widgetestoquepeso.h"
-#include "ui_widgetestoquepeso.h"
+#include "widgetgalpaopeso.h"
+#include "ui_widgetgalpaopeso.h"
 
 #include "application.h"
 #include "sqlquery.h"
@@ -7,13 +7,13 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetEstoquePeso::WidgetEstoquePeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoquePeso) { ui->setupUi(this); }
+WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpaoPeso) { ui->setupUi(this); }
 
-WidgetEstoquePeso::~WidgetEstoquePeso() { delete ui; }
+WidgetGalpaoPeso::~WidgetGalpaoPeso() { delete ui; }
 
-void WidgetEstoquePeso::resetTables() { modelIsSet = false; }
+void WidgetGalpaoPeso::resetTables() { modelIsSet = false; }
 
-void WidgetEstoquePeso::setChart() {
+void WidgetGalpaoPeso::setChart() {
   axisX = new QDateTimeAxis;
   axisX->setFormat("dd-MM-yyyy");
 
@@ -46,7 +46,7 @@ void WidgetEstoquePeso::setChart() {
   gridLayout->addWidget(widgetPushButton, 1, 0);
 }
 
-void WidgetEstoquePeso::updateChart() {
+void WidgetGalpaoPeso::updateChart() {
   series->clear();
 
   for (int row = 0; row < model.rowCount(); ++row) {
@@ -59,7 +59,7 @@ void WidgetEstoquePeso::updateChart() {
   chartView->resetRange(false, true);
 }
 
-void WidgetEstoquePeso::updateTables() {
+void WidgetGalpaoPeso::updateTables() {
   if (not isSet) {
     setConnections();
     isSet = true;
@@ -74,7 +74,7 @@ void WidgetEstoquePeso::updateTables() {
   updateChart();
 }
 
-void WidgetEstoquePeso::on_pushButtonAtualizar_clicked() {
+void WidgetGalpaoPeso::on_pushButtonAtualizar_clicked() {
   // TODO: colocar uma confirmacao avisando que a atualizacao leva alguns minutos
 
   SqlQuery query;
@@ -93,13 +93,13 @@ void WidgetEstoquePeso::on_pushButtonAtualizar_clicked() {
   }
 }
 
-void WidgetEstoquePeso::setConnections() {
+void WidgetGalpaoPeso::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &WidgetEstoquePeso::on_pushButtonAtualizar_clicked, connectionType);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &WidgetGalpaoPeso::on_pushButtonAtualizar_clicked, connectionType);
 }
 
-void WidgetEstoquePeso::setupTables() {
+void WidgetGalpaoPeso::setupTables() {
   model.setTable("estoque_peso");
 
   model.setFilter("");

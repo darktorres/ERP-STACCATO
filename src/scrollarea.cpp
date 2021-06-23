@@ -5,4 +5,4 @@
 
 ScrollArea::ScrollArea(QWidget *parent) : QScrollArea(parent) {}
 
-QSize ScrollArea::sizeHint() const { return QScrollArea::sizeHint() + QSize(verticalScrollBar()->sizeHint().width(), 0); }
+QSize ScrollArea::sizeHint() const { return QScrollArea::sizeHint() + QSize(verticalScrollBar()->sizeHint().width(), 0) + QSize(horizontalScrollBar()->sizeHint().width(), 0); }

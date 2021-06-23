@@ -18,12 +18,12 @@ void TabGalpao::updateTables() {
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
-  if (currentTab == "Peso") { ui->widgetEstoquePeso->updateTables(); }
+  if (currentTab == "Peso") { ui->widgetGalpaoPeso->updateTables(); }
 }
 
 void TabGalpao::resetTables() {
   ui->widgetGalpao->resetTables();
-  ui->widgetEstoquePeso->resetTables();
+  ui->widgetGalpaoPeso->resetTables();
 }
 
 void TabGalpao::on_tabWidget_currentChanged(const int) { updateTables(); }

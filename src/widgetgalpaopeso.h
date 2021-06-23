@@ -7,17 +7,17 @@
 #include <QtCharts>
 
 namespace Ui {
-class WidgetEstoquePeso;
+class WidgetGalpaoPeso;
 }
 
 QT_CHARTS_USE_NAMESPACE
 
-class WidgetEstoquePeso : public QWidget {
+class WidgetGalpaoPeso : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetEstoquePeso(QWidget *parent = nullptr);
-  ~WidgetEstoquePeso();
+  explicit WidgetGalpaoPeso(QWidget *parent = nullptr);
+  ~WidgetGalpaoPeso();
 
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -32,7 +32,7 @@ private:
   QLineSeries *series;
   QValueAxis *axisY;
   SqlTableModel model;
-  Ui::WidgetEstoquePeso *ui;
+  Ui::WidgetGalpaoPeso *ui;
   // methods
   auto on_pushButtonAtualizar_clicked() -> void;
   auto setChart() -> void;

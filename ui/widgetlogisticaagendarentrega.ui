@@ -26,41 +26,83 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Filtros:</string>
+      <string>Filtros</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_10">
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButtonEntregaLimpar">
-        <property name="text">
-         <string>Todos</string>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string/>
         </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QRadioButton" name="radioButtonEntregaLimpar">
+           <property name="text">
+            <string>Todos</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonTotalEstoque">
+           <property name="text">
+            <string>100% estoque</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonParcialEstoque">
+           <property name="text">
+            <string>Parte estoque</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonSemEstoque">
+           <property name="text">
+            <string>Sem estoque</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonTotalEstoque">
-        <property name="text">
-         <string>100% estoque</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QRadioButton" name="radioButtonParcialEstoque">
-        <property name="text">
-         <string>Parte estoque</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QRadioButton" name="radioButtonSemEstoque">
-        <property name="text">
-         <string>Sem estoque</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item>
        <widget class="QGroupBox" name="groupBoxStatus">
         <property name="title">
          <string>Status</string>
@@ -71,145 +113,20 @@
         <property name="checked">
          <bool>true</bool>
         </property>
-        <layout class="QGridLayout" name="gridLayout_40">
-         <item row="12" column="0">
-          <widget class="QCheckBox" name="checkBoxCancelado">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Cancelado</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QCheckBox" name="checkBoxEmFaturamento">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em Faturamento</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="checkBoxEmColeta">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em Coleta</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QCheckBox" name="checkBoxRepoReceb">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Repo. Receb.</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="0">
-          <widget class="QCheckBox" name="checkBoxDevolvido">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Devolvido</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="checkBoxEmRecebimento">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em Recebimento</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="checkBoxEstoque">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Estoque</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="0">
-          <widget class="QCheckBox" name="checkBoxEntregue">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Entregue</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
-          <widget class="QCheckBox" name="checkBoxEntregaAgend">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Entrega Agend.</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QCheckBox" name="checkBoxEmEntrega">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em Entrega</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEmCompra">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em Compra</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
           <widget class="QCheckBox" name="checkBoxPendente">
            <property name="enabled">
             <bool>true</bool>
@@ -222,7 +139,7 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item>
           <widget class="QCheckBox" name="checkBoxIniciado">
            <property name="enabled">
             <bool>true</bool>
@@ -235,7 +152,124 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="0">
+         <item>
+          <widget class="QCheckBox" name="checkBoxEmCompra">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em Compra</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEmFaturamento">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em Faturamento</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEmColeta">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em Coleta</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEmRecebimento">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em Recebimento</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEstoque">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Estoque</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEntregaAgend">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Entrega Agend.</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEmEntrega">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em Entrega</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxEntregue">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Entregue</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxRepoReceb">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Repo. Receb.</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="checkBoxRepoEntrega">
            <property name="enabled">
             <bool>true</bool>
@@ -248,18 +282,38 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxCancelado">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Cancelado</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxDevolvido">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Devolvido</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item>
        <spacer name="verticalSpacer_5">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>290</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
        </spacer>
@@ -481,9 +535,6 @@
          </item>
         </layout>
        </item>
-       <item row="6" column="1">
-        <layout class="QGridLayout" name="gridLayout_2"/>
-       </item>
        <item row="5" column="0" colspan="2">
         <widget class="QPushButton" name="pushButtonReagendarPedido">
          <property name="text">
@@ -656,12 +707,31 @@
      </widget>
      <widget class="QFrame" name="frameCaminhao">
       <layout class="QGridLayout" name="gridLayout_4">
+       <item row="4" column="0">
+        <widget class="QPushButton" name="pushButtonAgendarCarga">
+         <property name="text">
+          <string>Agendar/Montar Carga</string>
+         </property>
+        </widget>
+       </item>
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>Pedidos já agendados</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item row="0" column="0">
            <widget class="TableView" name="tableTranspAgend">
             <property name="palette">
@@ -724,6 +794,18 @@
           <string>Pedidos sendo agendados</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item row="1" column="0">
            <widget class="QPushButton" name="pushButtonAdicionarProduto">
             <property name="text">
@@ -806,6 +888,21 @@
        </item>
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item row="0" column="1">
+          <widget class="ItemBox" name="itemBoxVeiculo"/>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
@@ -813,13 +910,22 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="ItemBox" name="itemBoxVeiculo"/>
-         </item>
         </layout>
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout_7">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_3">
            <property name="sizePolicy">
@@ -842,13 +948,6 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="0">
-        <widget class="QPushButton" name="pushButtonAgendarCarga">
-         <property name="text">
-          <string>Agendar/Montar Carga</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -868,10 +967,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>radioButtonEntregaLimpar</tabstop>
-  <tabstop>radioButtonTotalEstoque</tabstop>
-  <tabstop>radioButtonParcialEstoque</tabstop>
-  <tabstop>radioButtonSemEstoque</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxIniciado</tabstop>

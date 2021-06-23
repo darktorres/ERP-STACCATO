@@ -22,39 +22,81 @@
      <property name="title">
       <string>Filtros</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButtonPendente">
-        <property name="text">
-         <string>Pendente</string>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Status</string>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>3</number>
+         </property>
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QRadioButton" name="radioButtonPendente">
+           <property name="text">
+            <string>Pendente</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonLiberado">
+           <property name="text">
+            <string>Liberado</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonGerado">
+           <property name="text">
+            <string>Gerado</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonPago">
+           <property name="text">
+            <string>Pago</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonLiberado">
-        <property name="text">
-         <string>Liberado</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QRadioButton" name="radioButtonGerado">
-        <property name="text">
-         <string>Gerado</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QRadioButton" name="radioButtonPago">
-        <property name="text">
-         <string>Pago</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item>
        <widget class="QGroupBox" name="groupBoxDia">
         <property name="enabled">
          <bool>true</bool>
@@ -69,6 +111,21 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_7">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <item row="0" column="0">
           <widget class="QDateEdit" name="dateEditFiltro">
            <property name="currentSection">
@@ -82,7 +139,7 @@
         </layout>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -238,10 +295,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>radioButtonPendente</tabstop>
-  <tabstop>radioButtonLiberado</tabstop>
-  <tabstop>radioButtonGerado</tabstop>
-  <tabstop>radioButtonPago</tabstop>
   <tabstop>groupBoxDia</tabstop>
   <tabstop>dateEditFiltro</tabstop>
   <tabstop>table</tabstop>

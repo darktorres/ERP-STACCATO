@@ -12,7 +12,10 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
+WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) {
+  ui->setupUi(this);
+  ui->groupBoxStatusFinanceiro->hide();
+}
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -166,8 +169,6 @@ void WidgetVenda::setWidgets() {
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
-
-    ui->groupBoxStatusFinanceiro->hide();
   } catch (std::exception &) {}
 
   setConnections();

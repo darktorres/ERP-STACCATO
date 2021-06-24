@@ -531,11 +531,14 @@ QString Orcamento::montarLog() {
   logString << "\nsubTotalLiq: " + QString::number(subTotalLiq) + "\nspinBoxLiq: " + QString::number(ui->doubleSpinBoxSubTotalLiq->value());
   logString << "\ntotal: " + QString::number(total) + "\nspinBoxTotal: " + QString::number(ui->doubleSpinBoxTotal->value());
   logString << "\nspinBoxFrete: " + QString::number(ui->doubleSpinBoxFrete->value());
+  logString << "";
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
 
-    logString << "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+    logString << "--------------------";
+
+    logString << "\nId: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
                      "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
                      "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
                      "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +

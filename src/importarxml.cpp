@@ -556,12 +556,10 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
 
 double ImportarXML::buscarCaixas(const int rowEstoque) {
   SqlQuery query;
-  query.prepare("SELECT quantCaixa FROM produto WHERE codComercial = :codComercial");
-  query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
+  query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
+  query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
-
-  if (not query.first()) { return 0; }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto " + modelEstoque.data(rowEstoque, "descricao").toString() + ": " + query.lastError().text()); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
@@ -574,12 +572,9 @@ void ImportarXML::associarIgual(const int rowCompra, const int rowEstoque) {
   modelCompra.setData(rowCompra, "descricao", modelEstoque.data(rowEstoque, "descricao").toString());
   modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(FieldColors::Green));
 
-  const double caixas = buscarCaixas(rowEstoque);
-
-  if (not qFuzzyIsNull(caixas)) { modelEstoque.setData(rowEstoque, "caixas", caixas); }
-
   modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(FieldColors::Green));
   modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"));
+  modelEstoque.setData(rowEstoque, "caixas", buscarCaixas(rowEstoque));
 
   const int rowEstoque_compra = modelEstoque_compra.insertRowAtEnd();
 
@@ -614,12 +609,9 @@ void ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
   modelCompra.setData(rowCompra, "descricao", modelEstoque.data(rowEstoque, "descricao").toString());
   modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(FieldColors::Green));
 
-  const double caixas = buscarCaixas(rowEstoque);
-
-  if (not qFuzzyIsNull(caixas)) { modelEstoque.setData(rowEstoque, "caixas", caixas); }
-
   modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoquePareado, quantEstoque) ? FieldColors::Green : FieldColors::Yellow));
   modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"));
+  modelEstoque.setData(rowEstoque, "caixas", buscarCaixas(rowEstoque));
 
   const int rowEstoque_compra = modelEstoque_compra.insertRowAtEnd();
 

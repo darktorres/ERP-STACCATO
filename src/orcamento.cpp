@@ -1062,7 +1062,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   queryProduto.prepare("SELECT (descontinuado OR desativado) AS invalido FROM produto WHERE idProduto = :idProduto");
 
   SqlQuery queryEquivalente;
-  queryEquivalente.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
+  queryEquivalente.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
   SqlQuery queryEstoque;
   queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant");
@@ -1076,6 +1076,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
       if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
 
       if (queryProduto.value("invalido").toBool()) {
+        queryEquivalente.bindValue(":fornecedor", modelItem.data(row, "fornecedor"));
         queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
 
         if (not queryEquivalente.exec()) { throw RuntimeException("Erro procurando produto equivalente: " + queryEquivalente.lastError().text()); }

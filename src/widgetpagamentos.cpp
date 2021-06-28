@@ -108,12 +108,18 @@ void WidgetPagamentos::comboBoxParc(QHBoxLayout *layout) {
 
 QComboBox *WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   auto *comboBoxData = new QComboBox(this);
-  comboBoxData->insertItem(0, "DATA MÊS");
-  comboBoxData->insertItem(1, "DATA + 1 MÊS");
-  comboBoxData->insertItem(2, "14");
-  comboBoxData->insertItem(3, "20");
-  comboBoxData->insertItem(4, "28");
-  comboBoxData->insertItem(5, "30");
+  comboBoxData->addItem("DATA MÊS");
+  comboBoxData->addItem("DATA + 1 MÊS");
+  comboBoxData->addItem("14");
+  comboBoxData->addItem("20");
+  comboBoxData->addItem("28");
+  comboBoxData->addItem("30");
+  comboBoxData->addItem("60");
+  comboBoxData->addItem("90");
+  comboBoxData->addItem("120");
+  comboBoxData->addItem("150");
+  comboBoxData->addItem("180");
+  comboBoxData->addItem("210");
   layout->addWidget(comboBoxData);
   connect(comboBoxData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   listTipoData << comboBoxData;

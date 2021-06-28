@@ -101,21 +101,21 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
   // ----------------------------------------
 
-  //  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
-
-  //  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
-
-  //  QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
-
-  // ----------------------------------------
-
   // MySQL Full-Text doesn't support prefix, use LIKE instead
 
-  QStringList strings;
+  const QStringList textStrings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &ftIndex : fullTextIndex.split(", ", Qt::SkipEmptyParts)) { strings << ftIndex + " LIKE '%" + text + "%'"; }
+  QStringList filtroLike;
 
-  QString searchFilter = strings.join(" OR ").prepend("(").append(")");
+  for (const auto &ftIndex : fullTextIndex.split(", ", Qt::SkipEmptyParts)) {
+    QStringList parteFiltro;
+
+    for (const auto &palavra : textStrings) { parteFiltro << ftIndex + " LIKE '%" + palavra + "%'"; }
+
+    filtroLike << ("(" + parteFiltro.join(" AND ") + ")");
+  }
+
+  QString searchFilter = filtroLike.join(" OR ").prepend("(").append(")");
 
   // ----------------------------------------
 

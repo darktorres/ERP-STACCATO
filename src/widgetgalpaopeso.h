@@ -30,6 +30,7 @@ private:
   QChart *chart;
   QDateTimeAxis *axisX;
   QLineSeries *series;
+  QProgressDialog *progressDialog;
   QValueAxis *axisY;
   SqlTableModel model;
   Ui::WidgetGalpaoPeso *ui;
@@ -37,6 +38,7 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto setChart() -> void;
   auto setConnections() -> void;
+  auto setProgressDialog() -> void;
   auto setupTables() -> void;
   auto updateChart() -> void;
 };

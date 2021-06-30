@@ -446,6 +446,8 @@ void Orcamento::removeItem() {
       ui->itemBoxProduto->setFornecedorRep("");
     }
 
+    redoBackupItem();
+
     novoItem();
   } catch (std::exception &) {}
 
@@ -840,7 +842,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(dataItem("fornecedor").toString()); }
 
-    if (tipoItem == Tipo::Cadastrar) { backupItem.append(modelItem.record(currentRowItem)); }
+    redoBackupItem();
 
     isDirty = true;
     ui->checkBoxRepresentacao->setDisabled(true);
@@ -1534,6 +1536,16 @@ void Orcamento::verificaSeFoiAlterado() {
   if (serverLastUpdated > currentLastUpdated) {
     viewRegisterById(primaryId);
     throw RuntimeError("Orçamento foi modificado por outro usuário!\nRecarregando orçamento!");
+  }
+}
+
+void Orcamento::redoBackupItem() {
+  backupItem.clear();
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) != "*") { continue; } // skip saved items
+
+    backupItem.append(modelItem.record(row));
   }
 }
 

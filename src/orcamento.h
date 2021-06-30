@@ -78,6 +78,7 @@ private:
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto redoBackupItem() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
   auto savingProcedures() -> void final;

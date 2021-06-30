@@ -39,11 +39,12 @@ void WidgetGalpaoPeso::setChart() {
   chartView->setFormatX("QDateTime");
   chartView->setFormatY("QString");
 
-  auto gridLayout = static_cast<QGridLayout *>(ui->frame->layout());
-  auto widgetPushButton = gridLayout->takeAt(0)->widget();
-  gridLayout->removeWidget(widgetPushButton);
+  const auto gridLayout = static_cast<QGridLayout *>(ui->frame->layout());
+
+  const auto horizontalLayout = gridLayout->takeAt(0);
+
   gridLayout->addWidget(chartView, 0, 0);
-  gridLayout->addWidget(widgetPushButton, 1, 0);
+  gridLayout->addItem(horizontalLayout, 1, 0);
 }
 
 void WidgetGalpaoPeso::updateChart() {
@@ -75,22 +76,32 @@ void WidgetGalpaoPeso::updateTables() {
 }
 
 void WidgetGalpaoPeso::on_pushButtonAtualizar_clicked() {
-  // TODO: colocar uma confirmacao avisando que a atualizacao leva alguns minutos
-
   SqlQuery query;
 
   if (not query.exec("TRUNCATE estoque_peso")) { throw RuntimeException("Erro limpando dados antigos: " + query.lastError().text()); }
 
-  if (not query.exec("CALL estoque_peso(365)")) { throw RuntimeException("Erro calculando peso do estoque: " + query.lastError().text()); }
+  setProgressDialog();
 
-  while (query.next()) {
+  for (int dia = 0; dia < ui->spinBoxDias->value(); ++dia) {
+    if (progressDialog->wasCanceled()) { break; }
+
     const int row = model.insertRowAtEnd();
 
-    model.setData(row, "data", query.value("n"));
+    if (not query.exec("SELECT CURDATE() + INTERVAL - " + QString::number(dia) + " DAY AS data, kg_dia(CURDATE() + INTERVAL - " + QString::number(dia) + " DAY) AS kg") or not query.first()) {
+      throw RuntimeException("Erro calculando peso do estoque: " + query.lastError().text());
+    }
+
+    model.setData(row, "data", query.value("data"));
     model.setData(row, "kg", query.value("kg"));
 
-    model.submitAll();
+    progressDialog->setValue(progressDialog->value() + 1);
   }
+
+  progressDialog->cancel();
+
+  model.submitAll();
+
+  updateChart();
 }
 
 void WidgetGalpaoPeso::setConnections() {
@@ -108,4 +119,17 @@ void WidgetGalpaoPeso::setupTables() {
   model.setHeaderData("kg", "Kg.");
 
   model.select();
+}
+
+void WidgetGalpaoPeso::setProgressDialog() {
+  if (not progressDialog) { progressDialog = new QProgressDialog(this); }
+
+  progressDialog->reset();
+  progressDialog->setCancelButton(nullptr);
+  progressDialog->setLabelText("Processando...");
+  progressDialog->setWindowTitle("ERP Staccato");
+  progressDialog->setWindowModality(Qt::WindowModal);
+  progressDialog->setMinimum(0);
+  progressDialog->setMaximum(ui->spinBoxDias->value());
+  progressDialog->setCancelButtonText("Cancelar");
 }

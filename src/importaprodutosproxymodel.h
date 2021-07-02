@@ -1,9 +1,10 @@
 #pragma once
 
-#include <QIdentityProxyModel>
+#include "sortfilterproxymodel.h"
+
 #include <QSqlQueryModel>
 
-class ImportaProdutosProxyModel final : public QIdentityProxyModel {
+class ImportaProdutosProxyModel final : public SortFilterProxyModel {
 
 public:
   explicit ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent);

@@ -5,7 +5,7 @@
 #include <QBrush>
 #include <QSqlRecord>
 
-ImportaProdutosProxyModel::ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->record().indexOf("descontinuado")) {
+ImportaProdutosProxyModel::ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent) : SortFilterProxyModel(model, parent), descontinuadoColumn(model->record().indexOf("descontinuado")) {
   setSourceModel(model);
 }
 
@@ -53,5 +53,5 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
     }
   }
 
-  return QIdentityProxyModel::data(proxyIndex, role);
+  return QSortFilterProxyModel::data(proxyIndex, role);
 }

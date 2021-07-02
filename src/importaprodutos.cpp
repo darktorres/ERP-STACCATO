@@ -125,6 +125,8 @@ void ImportaProdutos::importar() {
 
   setupTables();
 
+  ui->tableProdutos->sortByColumn("validade", Qt::DescendingOrder);
+
   showMaximized();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +

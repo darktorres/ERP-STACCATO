@@ -81,6 +81,7 @@ private:
   Ui::ImportaProdutos *ui;
   // methods
   auto atualizaCamposProduto(const int row) -> void;
+  auto atualizaPrecoEstoque(const int row) -> void;
   auto atualizaProduto() -> void;
   auto buscarCadastrarFornecedor() -> int;
   auto cadastraFornecedores(QXlsx::Document &xlsx) -> void;

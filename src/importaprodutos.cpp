@@ -506,19 +506,23 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   produto.quantCaixa = quantCaixa;
 }
 
-void ImportaProdutos::atualizaCamposProduto(const int row) {
-  bool changed = false;
-
+void ImportaProdutos::atualizaPrecoEstoque(const int row) {
   const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), 1, Qt::MatchExactly);
 
   for (auto estoqueIndex : estoqueList) {
     if (produto.precoVenda > modelEstoque.data(estoqueIndex.row(), "precoVenda").toDouble()) { modelEstoque.setData(estoqueIndex.row(), "precoVenda", produto.precoVenda); }
   }
+}
+
+void ImportaProdutos::atualizaCamposProduto(const int row) {
+  atualizaPrecoEstoque(row);
 
   modelProduto.setData(row, "atualizarTabelaPreco", true);
 
   const int yellow = static_cast<int>(FieldColors::Yellow);
   const int white = static_cast<int>(FieldColors::White);
+
+  bool changed = false;
 
   if (modelProduto.data(row, "fornecedor") != produto.fornecedor) {
     modelProduto.setData(row, "fornecedor", produto.fornecedor);

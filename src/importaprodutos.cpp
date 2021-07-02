@@ -509,7 +509,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 }
 
 void ImportaProdutos::atualizaPrecoEstoque(const int row) {
-  const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), 1, Qt::MatchExactly);
+  const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), -1, Qt::MatchExactly);
 
   for (auto estoqueIndex : estoqueList) {
     if (produto.precoVenda > modelEstoque.data(estoqueIndex.row(), "precoVenda").toDouble()) { modelEstoque.setData(estoqueIndex.row(), "precoVenda", produto.precoVenda); }

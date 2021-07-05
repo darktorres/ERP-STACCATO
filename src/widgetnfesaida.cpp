@@ -1,6 +1,7 @@
 #include "widgetnfesaida.h"
 #include "ui_widgetnfesaida.h"
 
+#include "acbrlib.h"
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
@@ -212,6 +213,8 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
+  // TODO: alterar para usar acbrRemoto de forma que o email precise ser configurado uma unica vez e possa ser usado remotamente de qualquer pc
+
   //  ACBr acbrLocal;
   //  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
@@ -286,8 +289,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal;
-
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
@@ -315,13 +316,12 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    const QString pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
-
-    if (pdfOrigem.isEmpty()) { throw RuntimeException("Resposta vazia!"); }
+    ACBrLib::gerarDanfe(query.value("xml").toByteArray(), false);
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = "arquivos/" + chaveAcesso + ".pdf";
+    const QString pdfOrigem = QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf";
+    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
 
     File filePdf(pdfDestino);
 
@@ -330,7 +330,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {

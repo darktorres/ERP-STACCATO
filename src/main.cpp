@@ -54,8 +54,6 @@ int main(int argc, char *argv[]) {
 
 // ----------------- SERVIDOR ----------------------
 
-// TODO: colocar pelo menos as ultimas copias do backup do mysql na nuvem
-
 // -------------------------------------------------
 
 // TODO: replace insert querys with model so values can be correctly rounded (Application::roundDouble)

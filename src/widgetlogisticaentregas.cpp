@@ -1,6 +1,7 @@
 #include "widgetlogisticaentregas.h"
 #include "ui_widgetlogisticaentregas.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
@@ -336,8 +337,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  ACBr acbrLocal;
-  acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
+  ACBrLib::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged() { montaFiltro(); }

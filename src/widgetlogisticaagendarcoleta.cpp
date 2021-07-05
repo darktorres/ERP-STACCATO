@@ -1,6 +1,7 @@
 #include "widgetlogisticaagendarcoleta.h"
 #include "ui_widgetlogisticaagendarcoleta.h"
 
+#include "acbrlib.h"
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
@@ -379,8 +380,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
-  ACBr acbrLocal;
-  acbrLocal.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt());
+  ACBrLib::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt());
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged() { montaFiltro(); }

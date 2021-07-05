@@ -1,6 +1,7 @@
 #include "cadastrarnfe.h"
 #include "ui_cadastrarnfe.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "cadastrocliente.h"
 #include "file.h"
@@ -381,8 +382,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
     enviarEmail(acbrRemoto, filePath);      // close if error
 
-    ACBr acbrLocal;
-    acbrLocal.gerarDanfe(xml.toLatin1()); // close if error
+    ACBrLib::gerarDanfe(xml.toLatin1()); // close if error
   } catch (std::exception &) {
     if (not manterAberto) { close(); }
     manterAberto = false;

@@ -1,6 +1,7 @@
 #include "widgetnfeentrada.h"
 #include "ui_widgetnfeentrada.h"
 
+#include "acbrlib.h"
 #include "acbr.h"
 #include "application.h"
 #include "checkboxdelegate.h"
@@ -225,8 +226,6 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal;
-
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
@@ -254,12 +253,11 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    const QString pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
-
-    if (pdfOrigem.isEmpty()) { throw RuntimeException("Resposta vazia!"); }
+    ACBrLib::gerarDanfe(query.value("xml").toByteArray(), false);
 
     // copiar para pasta predefinida
 
+    const QString pdfOrigem = QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf";
     const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
 
     File filePdf(pdfDestino);
@@ -269,7 +267,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
     if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);
 }
 
 // TODO: 5copiar filtros do widgetnfesaida

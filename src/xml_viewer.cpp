@@ -1,6 +1,7 @@
 #include "xml_viewer.h"
 #include "ui_xml_viewer.h"
 
+#include "acbrlib.h"
 #include "acbr.h"
 
 XML_Viewer::XML_Viewer(const QByteArray &content, QWidget *parent) : QDialog(parent), fileContent(content), xml(content), ui(new Ui::XML_Viewer) {
@@ -24,7 +25,4 @@ void XML_Viewer::setConnections() {
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &XML_Viewer::on_pushButtonDanfe_clicked, connectionType);
 }
 
-void XML_Viewer::on_pushButtonDanfe_clicked() {
-  ACBr acbrLocal;
-  acbrLocal.gerarDanfe(fileContent);
-}
+void XML_Viewer::on_pushButtonDanfe_clicked() { ACBrLib::gerarDanfe(fileContent, true); }

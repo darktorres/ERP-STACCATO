@@ -1,12 +1,10 @@
 #include "acbr.h"
 
 #include "application.h"
-#include "file.h"
+#include "sqlquery.h"
 #include "user.h"
 
 #include <QDesktopServices>
-#include <QDir>
-#include <QFileInfo>
 #include <QSqlError>
 #include <QThread>
 #include <QUrl>
@@ -70,46 +68,6 @@ void ACBr::readSocket() {
     recebido = true;
     return;
   }
-}
-
-void ACBr::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) { throw RuntimeError("Produto não possui nota!"); }
-
-  SqlQuery query;
-  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", idNFe);
-
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando chaveAcesso: " + query.lastError().text()); }
-
-  gerarDanfe(query.value("xml").toByteArray(), true);
-}
-
-QString ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  if (fileContent.indexOf("Id=") == -1) { throw RuntimeException("Não encontrado a chave de acesso!"); }
-
-  const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
-
-  File file(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
-
-  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString()); }
-
-  file.write(fileContent);
-
-  file.close();
-
-  QFileInfo info(file);
-
-  QString respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(" + info.absoluteFilePath() + ")", true);
-
-  if (not respostaSavePdf.contains("Arquivo criado em:")) { throw RuntimeException(respostaSavePdf + " - Verifique se o arquivo não está aberto!"); }
-
-  respostaSavePdf = respostaSavePdf.remove("OK: Arquivo criado em: ");
-
-  if (openFile) { abrirPdf(respostaSavePdf); }
-
-  return respostaSavePdf;
-
-  // TODO: 1copiar arquivo para pasta predefinida e renomear arquivo para formato 'DANFE_xxx.xxx_idpedido'
 }
 
 std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {

@@ -109,6 +109,7 @@ RESOURCES += \
 
 SOURCES += \
     src/acbr.cpp \
+    src/acbrlib.cpp \
     src/anteciparrecebimento.cpp \
     src/application.cpp \
     src/baixaorcamento.cpp \
@@ -247,6 +248,7 @@ SOURCES += \
 
 HEADERS  += \
     src/acbr.h \
+    src/acbrlib.h \
     src/anteciparrecebimento.h \
     src/application.h \
     src/baixaorcamento.h \

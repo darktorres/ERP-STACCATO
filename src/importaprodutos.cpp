@@ -125,7 +125,7 @@ void ImportaProdutos::importar() {
 
   setupTables();
 
-  ui->tableProdutos->sortByColumn("validade", Qt::DescendingOrder);
+  ui->tableProdutos->sortByColumn("descontinuado", Qt::AscendingOrder);
 
   showMaximized();
 
@@ -714,7 +714,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
 }
 
 void ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
-  modelProduto.setData(row, "descontinuado", false);
+  modelProduto.setData(row, "descontinuado", 0);
 
   itensExpired--;
 }

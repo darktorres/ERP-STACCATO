@@ -177,6 +177,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -191,6 +192,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged, connectionType);
@@ -214,6 +216,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   blockingSignals.push(0);
 
   disconnect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
@@ -228,6 +231,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled);
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
@@ -341,7 +345,19 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   //-------------------------------------
 
-  modelVendas.setQuery(Sql::view_entrega_pendente(filtroBusca, filtroCheck, filtroStatus));
+  const bool atelier = ui->checkBoxAtelier->isChecked();
+
+  const QString filtroAtelier = (atelier ? " AND vp2.fornecedor = 'ATELIER STACCATO'" : "");
+
+  //-------------------------------------
+
+  const bool servicos = ui->checkBoxServicos->isChecked();
+
+  const QString filtroServicos = (servicos ? " AND vp2.fornecedor = 'STACCATO SERVIÇOS ESPECIAIS (SSE)'" : "");
+
+  //-------------------------------------
+
+  modelVendas.setQuery(Sql::view_entrega_pendente(filtroBusca, filtroCheck, filtroStatus, filtroAtelier, filtroServicos));
 
   modelVendas.select();
 

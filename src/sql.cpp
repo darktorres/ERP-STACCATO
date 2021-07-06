@@ -19,7 +19,7 @@ void Sql::updateVendaStatus(const QString &idVendas) {
 
 // clang-format off
 
-QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus) {
+QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {
   return "SELECT "
          "SUM(p.kgcx * vp2.caixas) AS kg,"
          "`che`.`bairro` AS `Bairro`,"
@@ -47,6 +47,8 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          "AND (`v`.`devolucao` = FALSE) " +
          filtroBusca +
          filtroStatus +
+         filtroAtelier +
+         filtroServico +
          " GROUP BY `vp2`.`idVenda` " +
          filtroCheck;
 }

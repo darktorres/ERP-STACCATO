@@ -508,15 +508,15 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   produto.quantCaixa = quantCaixa;
 }
 
-void ImportaProdutos::atualizaPrecoEstoque(const int row) {
-  const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), -1, Qt::MatchExactly);
+void ImportaProdutos::atualizaPrecoEstoque() {
+  SqlQuery query;
 
-  for (auto estoqueIndex : estoqueList) { modelEstoque.setData(estoqueIndex.row(), "precoVenda", produto.precoVenda); }
+  if (not query.exec("UPDATE produto p1, produto p2 SET p2.precoVenda = p1.precoVenda WHERE p2.estoque = 1 AND p1.idProduto = p2.idProdutoRelacionado AND p1.precoVenda <> p2.precoVenda")) {
+    throw RuntimeException("Erro atualizando preço dos estoques: " + query.lastError().text());
+  }
 }
 
 void ImportaProdutos::atualizaCamposProduto(const int row) {
-  atualizaPrecoEstoque(row);
-
   modelProduto.setData(row, "atualizarTabelaPreco", true);
 
   const int yellow = static_cast<int>(FieldColors::Yellow);
@@ -953,6 +953,8 @@ void ImportaProdutos::salvar() {
   SqlQuery queryExpirar;
 
   if (not queryExpirar.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + queryExpirar.lastError().text()); }
+
+  atualizaPrecoEstoque();
 }
 
 void ImportaProdutos::on_pushButtonSalvar_clicked() {

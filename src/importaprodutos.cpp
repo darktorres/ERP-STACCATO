@@ -524,6 +524,8 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
 
   bool changed = false;
 
+  // TODO: trocar esses códigos repetidos por um for() dos membros de 'produto'
+
   if (modelProduto.data(row, "fornecedor") != produto.fornecedor) {
     modelProduto.setData(row, "fornecedor", produto.fornecedor);
     modelProduto.setData(row, "fornecedorUpd", yellow);

@@ -829,7 +829,7 @@ color: rgb(0, 0, 0);</string>
                   <string>R$ </string>
                  </property>
                  <property name="decimals">
-                  <number>4</number>
+                  <number>2</number>
                  </property>
                  <property name="minimum">
                   <double>-9999999.000000000000000</double>
@@ -904,9 +904,6 @@ color: rgb(0, 0, 0);</string>
                  </property>
                  <property name="prefix">
                   <string>R$ </string>
-                 </property>
-                 <property name="decimals">
-                  <number>4</number>
                  </property>
                  <property name="minimum">
                   <double>-9999999.000000000000000</double>
@@ -1001,9 +998,6 @@ color: rgb(0, 0, 0);</string>
                  <property name="prefix">
                   <string>R$ </string>
                  </property>
-                 <property name="decimals">
-                  <number>4</number>
-                 </property>
                  <property name="minimum">
                   <double>-9999999.000000000000000</double>
                  </property>
@@ -1038,9 +1032,6 @@ color: rgb(0, 0, 0);</string>
                  <property name="prefix">
                   <string>R$ </string>
                  </property>
-                 <property name="decimals">
-                  <number>4</number>
-                 </property>
                  <property name="minimum">
                   <double>-9999999.000000000000000</double>
                  </property>
@@ -1068,9 +1059,6 @@ color: rgb(0, 0, 0);</string>
                  </property>
                  <property name="prefix">
                   <string>R$ </string>
-                 </property>
-                 <property name="decimals">
-                  <number>4</number>
                  </property>
                  <property name="minimum">
                   <double>-9999999.000000000000000</double>

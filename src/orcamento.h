@@ -81,6 +81,7 @@ private:
   auto redoBackupItem() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
+  auto resizeSpinBoxes() -> void;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setDataItem(const QString &key, const QVariant &value, const bool adjustValue = true) -> void;

@@ -10,6 +10,7 @@
 #include "user.h"
 #include "xml.h"
 
+#include <QAuthenticator>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -495,6 +496,13 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
 
   auto *manager = new QNetworkAccessManager(this);
   manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
+  });
 
   auto reply = manager->get(QNetworkRequest(QUrl(url)));
 

@@ -163,6 +163,7 @@ SOURCES += \
     src/inserirtransferencia.cpp \
     src/itembox.cpp \
     src/itemboxdelegate.cpp \
+    src/lineedit.cpp \
     src/lineeditcep.cpp \
     src/lineeditdelegate.cpp \
     src/lineedittel.cpp \
@@ -302,6 +303,7 @@ HEADERS  += \
     src/inserirtransferencia.h \
     src/itembox.h \
     src/itemboxdelegate.h \
+    src/lineedit.h \
     src/lineeditcep.h \
     src/lineeditdelegate.h \
     src/lineedittel.h \

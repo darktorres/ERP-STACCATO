@@ -2,15 +2,13 @@
 
 #include <QDebug>
 
-DoubleSpinBox::DoubleSpinBox(QWidget *parent) : QDoubleSpinBox(parent) {}
+DoubleSpinBox::DoubleSpinBox(QWidget *parent) : QDoubleSpinBox(parent) { connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DoubleSpinBox::resizeToContent); }
 
-void DoubleSpinBox::setValue(const double value) {
-  fullValue = value;
-  QDoubleSpinBox::setValue(value);
+void DoubleSpinBox::resizeToContent() {
+  const int fmSize = fontMetrics().boundingRect(text()).width();
+  const int buttonsSize = (buttonSymbols() == NoButtons ? 0 : 12);
 
-  emit fullValueChanged(fullValue);
+  setFixedWidth(fmSize + buttonsSize + 20);
 }
 
-double DoubleSpinBox::value() const { return fullValue; }
-
-double DoubleSpinBox::visibleValue() const { return QDoubleSpinBox::value(); }
+// TODO: adicionar lógica para mostrar 2 decimais mas guardar internamente 4 decimais

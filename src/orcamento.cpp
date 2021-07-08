@@ -42,6 +42,15 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   if (User::isVendedor()) { buscarParametrosFrete(); }
 
+  ui->labelEstoque->hide();
+  ui->doubleSpinBoxEstoque->hide();
+
+  ui->labelMinimo->hide();
+  ui->doubleSpinBoxMinimo->hide();
+
+  ui->labelUn->hide();
+  ui->lineEditUn->hide();
+
   setConnections();
 }
 
@@ -81,6 +90,8 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
 
   currentRowItem = index.row();
 
+  // -------------------------------------------------------------------------
+
   unsetConnections();
 
   try {
@@ -89,6 +100,10 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   } catch (std::exception &) {}
 
   setConnections();
+
+  // -------------------------------------------------------------------------
+
+  resizeSpinBoxes();
 }
 
 void Orcamento::setConnections() {
@@ -307,14 +322,24 @@ void Orcamento::novoItem() {
 
   // -----------------------
 
+  ui->doubleSpinBoxEstoque->setSuffix("");
+  ui->doubleSpinBoxMinimo->setSuffix("");
+  ui->doubleSpinBoxQuant->setSuffix("");
+  ui->doubleSpinBoxQuantCx->setSuffix("");
+
   ui->doubleSpinBoxCaixas->setDisabled(true);
   ui->doubleSpinBoxDesconto->setDisabled(true);
+  ui->doubleSpinBoxEstoque->setDisabled(true);
+  ui->doubleSpinBoxMinimo->setDisabled(true);
   ui->doubleSpinBoxPrecoUn->setDisabled(true);
   ui->doubleSpinBoxQuant->setDisabled(true);
+  ui->doubleSpinBoxQuantCx->setDisabled(true);
   ui->doubleSpinBoxTotalItem->setDisabled(true);
+  ui->lineEditCodComercial->setDisabled(true);
+  ui->lineEditFormComercial->setDisabled(true);
+  ui->lineEditFornecedor->setDisabled(true);
+  ui->lineEditObs->setDisabled(true);
   ui->lineEditUn->setDisabled(true);
-  ui->spinBoxMinimo->setDisabled(true);
-  ui->spinBoxQuantCx->setDisabled(true);
 
   ui->doubleSpinBoxCaixas->setSingleStep(1.);
   ui->doubleSpinBoxQuant->setSingleStep(1.);
@@ -322,16 +347,16 @@ void Orcamento::novoItem() {
   ui->doubleSpinBoxCaixas->clear();
   ui->doubleSpinBoxDesconto->clear();
   ui->doubleSpinBoxEstoque->clear();
+  ui->doubleSpinBoxMinimo->clear();
   ui->doubleSpinBoxPrecoUn->clear();
   ui->doubleSpinBoxQuant->clear();
+  ui->doubleSpinBoxQuantCx->clear();
   ui->doubleSpinBoxTotalItem->clear();
   ui->lineEditCodComercial->clear();
   ui->lineEditFormComercial->clear();
   ui->lineEditFornecedor->clear();
   ui->lineEditObs->clear();
   ui->lineEditUn->clear();
-  ui->spinBoxMinimo->clear();
-  ui->spinBoxQuantCx->clear();
 }
 
 void Orcamento::setupMapper() {
@@ -912,6 +937,17 @@ void Orcamento::on_pushButtonApagarOrc_clicked() {
   baixa->show();
 }
 
+void Orcamento::resizeSpinBoxes() {
+  ui->doubleSpinBoxPrecoUn->resizeToContent();
+  ui->doubleSpinBoxCaixas->resizeToContent();
+  ui->doubleSpinBoxQuant->resizeToContent();
+  ui->doubleSpinBoxMinimo->resizeToContent();
+  ui->doubleSpinBoxQuantCx->resizeToContent();
+  ui->doubleSpinBoxDesconto->resizeToContent();
+  ui->doubleSpinBoxTotalItem->resizeToContent();
+  ui->doubleSpinBoxEstoque->resizeToContent();
+}
+
 void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   if (ui->itemBoxProduto->text().isEmpty()) { return; }
 
@@ -927,15 +963,13 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditFormComercial->clear();
   ui->lineEditFornecedor->clear();
   ui->lineEditUn->clear();
-  ui->spinBoxMinimo->clear();
-  ui->spinBoxQuantCx->clear();
+  ui->doubleSpinBoxMinimo->clear();
+  ui->doubleSpinBoxQuantCx->clear();
 
   // não apagar observação caso esteja atualizando produto
   if (ui->pushButtonAdicionarItem->isVisible()) { ui->lineEditObs->clear(); }
 
   // -------------------------------------------------------------------------
-
-  setarParametrosProduto();
 
   unsetConnections();
 
@@ -947,6 +981,14 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   } catch (std::exception &) {}
 
   setConnections();
+
+  // -------------------------------------------------------------------------
+
+  setarParametrosProduto();
+
+  // -------------------------------------------------------------------------
+
+  resizeSpinBoxes();
 }
 
 void Orcamento::setarParametrosProduto() {
@@ -956,6 +998,8 @@ void Orcamento::setarParametrosProduto() {
 
   if (not query.exec() or not query.first()) { throw RuntimeException("Erro na busca do produto: " + query.lastError().text()); }
 
+  // -------------------------------------------------------------------------
+
   ui->doubleSpinBoxEstoque->setValue(query.value("estoqueRestante").toDouble());
   ui->doubleSpinBoxPrecoUn->setValue(query.value("precoVenda").toDouble());
   ui->lineEditCodComercial->setText(query.value("codComercial").toString());
@@ -963,46 +1007,71 @@ void Orcamento::setarParametrosProduto() {
   ui->lineEditFornecedor->setText(query.value("fornecedor").toString());
   ui->lineEditUn->setText(query.value("un").toString().toUpper());
 
+  // -------------------------------------------------------------------------
+
   const double minimo = query.value("minimo").toDouble();
-  const double multiplo = query.value("multiplo").toDouble();
   const double quantCaixa = query.value("quantCaixa").toDouble();
 
-  ui->spinBoxQuantCx->setValue(quantCaixa);
+  ui->doubleSpinBoxQuantCx->setValue(quantCaixa);
+  ui->doubleSpinBoxMinimo->setValue(minimo);
 
-  ui->spinBoxMinimo->setValue(minimo);
   ui->doubleSpinBoxQuant->setMinimum(minimo);
   ui->doubleSpinBoxCaixas->setMinimum(minimo / quantCaixa);
+
+  ui->doubleSpinBoxCaixas->setSingleStep(1);
+  ui->doubleSpinBoxQuant->setSingleStep(quantCaixa);
+
+  // -------------------------------------------------------------------------
+
+  const bool mostraMinimo = not qFuzzyIsNull(minimo);
+  const double multiplo = query.value("multiplo").toDouble();
+
+  ui->doubleSpinBoxMinimo->setVisible(mostraMinimo);
+  ui->labelMinimo->setVisible(mostraMinimo);
+
+  if (not qFuzzyIsNull(multiplo)) {
+    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa);
+    ui->doubleSpinBoxQuant->setSingleStep(multiplo);
+  }
+
+  // -------------------------------------------------------------------------
 
   currentItemIsEstoque = query.value("estoque").toBool();
   currentItemIsPromocao = query.value("promocao").toInt();
 
   if (currentItemIsEstoque) {
-    ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
     ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / quantCaixa);
+    ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
   } else {
-    ui->doubleSpinBoxQuant->setMaximum(9999999.000000);
-    ui->doubleSpinBoxCaixas->setMaximum(9999999.000000);
+    ui->doubleSpinBoxCaixas->setMaximum(9'999'999.000000);
+    ui->doubleSpinBoxQuant->setMaximum(9'999'999.000000);
   }
 
-  ui->doubleSpinBoxCaixas->setEnabled(true);
+  ui->labelEstoque->setVisible(currentItemIsEstoque);
+  ui->doubleSpinBoxEstoque->setVisible(currentItemIsEstoque);
+
+  // -------------------------------------------------------------------------
+
   ui->doubleSpinBoxCaixas->setEnabled(true);
   ui->doubleSpinBoxDesconto->setEnabled(true);
-  ui->doubleSpinBoxQuant->setEnabled(true);
-  ui->doubleSpinBoxTotalItem->setEnabled(true);
+  ui->doubleSpinBoxEstoque->setEnabled(true);
+  ui->doubleSpinBoxMinimo->setEnabled(true);
   ui->doubleSpinBoxPrecoUn->setEnabled(true);
+  ui->doubleSpinBoxQuant->setEnabled(true);
+  ui->doubleSpinBoxQuantCx->setEnabled(true);
+  ui->doubleSpinBoxTotalItem->setEnabled(true);
+  ui->lineEditCodComercial->setEnabled(true);
+  ui->lineEditFormComercial->setEnabled(true);
+  ui->lineEditFornecedor->setEnabled(true);
+  ui->lineEditObs->setEnabled(true);
   ui->lineEditUn->setEnabled(true);
-  ui->spinBoxMinimo->setEnabled(true);
-  ui->spinBoxQuantCx->setEnabled(true);
 
-  ui->doubleSpinBoxCaixas->setSingleStep(1.);
-  ui->doubleSpinBoxQuant->setSingleStep(quantCaixa);
+  // -------------------------------------------------------------------------
 
-  // TODO: 0verificar se preciso tratar os casos sem multiplo
-  // if (minimo != 0) ...
-  if (not qFuzzyIsNull(minimo) and not qFuzzyIsNull(multiplo)) {
-    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa);
-    ui->doubleSpinBoxQuant->setSingleStep(multiplo);
-  }
+  ui->doubleSpinBoxEstoque->setSuffix(" " + ui->lineEditUn->text());
+  ui->doubleSpinBoxMinimo->setSuffix(" " + ui->lineEditUn->text());
+  ui->doubleSpinBoxQuant->setSuffix(" " + ui->lineEditUn->text());
+  ui->doubleSpinBoxQuantCx->setSuffix(" " + ui->lineEditUn->text());
 }
 
 void Orcamento::on_itemBoxProfissional_idChanged(const QVariant &) {
@@ -1220,7 +1289,7 @@ void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();
   const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->spinBoxQuantCx->value();
+  const double quant = caixas2 * ui->doubleSpinBoxQuantCx->value();
 
   unsetConnections();
 

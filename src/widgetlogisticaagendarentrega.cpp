@@ -665,6 +665,7 @@ void WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
 
   // -------------------------------------------------------------------------
 
+  const double kgcx = modelProdutosTemp.data(0, "kg").toDouble() / modelProdutosTemp.data(0, "caixas").toDouble();
   const double quantCaixa = modelProdutosTemp.data(0, "quantCaixa").toDouble();
   const double proporcao = caixasAgendar / caixasTotal;
   const double parcial = modelProdutosTemp.data(0, "parcial").toDouble();
@@ -673,6 +674,7 @@ void WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
 
   modelProdutosTemp.setData(0, "quant", (caixasAgendar * quantCaixa));
   modelProdutosTemp.setData(0, "caixas", caixasAgendar);
+  modelProdutosTemp.setData(0, "kg", caixasAgendar * kgcx);
   modelProdutosTemp.setData(0, "parcial", parcial * proporcao);
   modelProdutosTemp.setData(0, "parcialDesc", parcialDesc * proporcao);
   modelProdutosTemp.setData(0, "total", total * proporcao);
@@ -702,6 +704,7 @@ void WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
   modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto2"));
   modelProdutosTemp.setData(newRow, "quant", ((caixasTotal - caixasAgendar) * quantCaixa));
   modelProdutosTemp.setData(newRow, "caixas", (caixasTotal - caixasAgendar));
+  modelProdutosTemp.setData(newRow, "kg", (caixasTotal - caixasAgendar) * kgcx);
   modelProdutosTemp.setData(newRow, "parcial", parcial * proporcaoNovo);
   modelProdutosTemp.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo);
   modelProdutosTemp.setData(newRow, "total", total * proporcaoNovo);

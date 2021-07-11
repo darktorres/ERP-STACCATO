@@ -627,6 +627,7 @@ void Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
 
   //--------------------------------------------------------------
 
+  const double kgcx = modelProdutos2.data(currentRow, "kg").toDouble() / modelProdutos2.data(currentRow, "caixas").toDouble();
   const double quantDevolvida = ui->doubleSpinBoxQuant->value();
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
   const double caixas = quantDevolvida / stepQuant * -1;
@@ -642,6 +643,7 @@ void Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
   modelDevolvidos1.setData(newRow, "prcUnitario", prcUnitario);
   modelDevolvidos1.setData(newRow, "descUnitario", prcUnitario);
   modelDevolvidos1.setData(newRow, "caixas", caixas);
+  modelDevolvidos1.setData(newRow, "kg", caixas * kgcx * -1);
   modelDevolvidos1.setData(newRow, "quant", quantDevolvidaInvertida);
   modelDevolvidos1.setData(newRow, "parcial", total);
   modelDevolvidos1.setData(newRow, "desconto", 0);
@@ -694,6 +696,7 @@ void Devolucao::dividirVenda(const int currentRow, const int novoIdVendaProduto2
 
   //--------------------------------------------------------------------
 
+  const double kgcx = modelProdutos2.data(currentRow, "kg").toDouble() / modelProdutos2.data(currentRow, "caixas").toDouble();
   const double quant = modelProdutos2.data(currentRow, "quant").toDouble();
   const double quantDevolvida = ui->doubleSpinBoxQuant->value();
   const double restante = quant - quantDevolvida;
@@ -708,6 +711,7 @@ void Devolucao::dividirVenda(const int currentRow, const int novoIdVendaProduto2
   modelProdutos2.setData(newRow, "idVendaProduto2", novoIdVendaProduto2);
   modelProdutos2.setData(newRow, "idRelacionado", modelProdutos2.data(currentRow, "idVendaProduto2"));
   modelProdutos2.setData(newRow, "caixas", (restante / stepQuant));
+  modelProdutos2.setData(newRow, "kg", (restante / stepQuant) * kgcx);
   modelProdutos2.setData(newRow, "quant", restante);
   modelProdutos2.setData(newRow, "parcial", parcial);
   modelProdutos2.setData(newRow, "parcialDesc", parcialDesc);
@@ -853,6 +857,7 @@ void Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
 }
 
 void Devolucao::alterarLinhaOriginal(const int currentRow) {
+  const double kgcx = modelProdutos2.data(currentRow, "kg").toDouble() / modelProdutos2.data(currentRow, "caixas").toDouble();
   const double prcUnitario = modelProdutos2.data(currentRow, "prcUnitario").toDouble();
   const double desconto = modelProdutos2.data(currentRow, "desconto").toDouble();
   const double descGlobal = modelProdutos2.data(currentRow, "descGlobal").toDouble();
@@ -864,6 +869,7 @@ void Devolucao::alterarLinhaOriginal(const int currentRow) {
   const double totalRestante = parcialDescRestante * (1 - (descGlobal / 100));
 
   modelProdutos2.setData(currentRow, "caixas", caixas);
+  modelProdutos2.setData(currentRow, "kg", caixas * kgcx);
   modelProdutos2.setData(currentRow, "quant", quantDevolvida);
   modelProdutos2.setData(currentRow, "parcial", parcialRestante);
   modelProdutos2.setData(currentRow, "parcialDesc", parcialDescRestante);

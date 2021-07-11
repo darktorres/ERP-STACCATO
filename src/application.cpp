@@ -428,7 +428,7 @@ int Application::reservarIdEstoque() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'estoque'") or not query.first()) {
     throw RuntimeException("Erro reservar id estoque: " + query.lastError().text());
   }
 
@@ -444,7 +444,7 @@ int Application::reservarIdVendaProduto2() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'venda_has_produto2'") or not query.first()) {
     throw RuntimeException("Erro reservar id venda: " + query.lastError().text());
   }
 
@@ -460,7 +460,7 @@ int Application::reservarIdNFe() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'nfe'") or not query.first()) {
     throw RuntimeException("Erro reservar id nfe: " + query.lastError().text());
   }
 
@@ -476,7 +476,7 @@ int Application::reservarIdPedido2() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
     throw RuntimeException("Erro reservar id compra: " + query.lastError().text());
   }
 

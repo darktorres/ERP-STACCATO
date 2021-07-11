@@ -11,10 +11,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 
-WidgetEstoques::WidgetEstoques(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoques) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetEstoques::WidgetEstoques(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoques) { ui->setupUi(this); }
 
 WidgetEstoques::~WidgetEstoques() { delete ui; }
 
@@ -77,6 +74,7 @@ void WidgetEstoques::setHeaderData() {
 
 void WidgetEstoques::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
@@ -128,20 +126,14 @@ void WidgetEstoques::montaFiltroContabil() {
 }
 
 QString WidgetEstoques::getMatch() const {
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  if (text.isEmpty()) { return QString(); }
+  if (textoBusca.isEmpty()) { return QString(); }
 
-  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
+  const QString filtroBusca =
+      " AND (e.idEstoque LIKE '%" + textoBusca + "%' OR e.descricao LIKE '%" + textoBusca + "%' OR e.codComercial LIKE '%" + textoBusca + "%' OR p.fornecedor LIKE '%" + textoBusca + "%')";
 
-  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
-
-  const QString text2 = strings.join(" ");
-
-  const QString match =
-      " AND (MATCH (e.descricao , e.codComercial) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR e.idEstoque LIKE '" + text + "%')";
-
-  return match;
+  return filtroBusca;
 }
 
 void WidgetEstoques::on_pushButtonRelatorio_clicked() {

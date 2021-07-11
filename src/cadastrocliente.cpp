@@ -84,7 +84,7 @@ void CadastroCliente::setupUi() {
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
-  ui->lineEditInscEstadual->setValidator(new QRegExpValidator(QRegExp(R"([0-9]\d{0,15})"), this));
+  ui->lineEditInscEstadual->setValidator(new QRegularExpressionValidator(QRegularExpression(R"([0-9]\d{0,15})"), this));
 
   // endereco
   ui->lineEditCEP->setInputMask("99999-999;_");
@@ -545,7 +545,7 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
     ui->lineEditInscEstadual->setText("ISENTO");
     ui->lineEditInscEstadual->setReadOnly(true);
   } else {
-    ui->lineEditInscEstadual->setValidator(new QRegExpValidator(QRegExp(R"([0-9]\d{0,15})"), this));
+    ui->lineEditInscEstadual->setValidator(new QRegularExpressionValidator(QRegularExpression(R"([0-9]\d{0,15})"), this));
     ui->lineEditInscEstadual->clear();
     ui->lineEditInscEstadual->setReadOnly(false);
   }

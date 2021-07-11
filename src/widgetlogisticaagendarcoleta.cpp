@@ -2,7 +2,6 @@
 #include "ui_widgetlogisticaagendarcoleta.h"
 
 #include "acbrlib.h"
-#include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
@@ -20,10 +19,7 @@
 #include <QStandardItemModel>
 #include <QUrl>
 
-WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) { ui->setupUi(this); }
 
 WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 
@@ -165,6 +161,7 @@ void WidgetLogisticaAgendarColeta::delayFiltro() { timer.start(500); }
 
 void WidgetLogisticaAgendarColeta::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     ui->frameCaminhao->hide();
     ui->pushButtonCancelarCarga->hide();
     ui->dateTimeEdit->setDate(qApp->serverDate());

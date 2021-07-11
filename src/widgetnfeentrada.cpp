@@ -2,7 +2,6 @@
 #include "ui_widgetnfeentrada.h"
 
 #include "acbrlib.h"
-#include "acbr.h"
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "dateformatdelegate.h"
@@ -18,10 +17,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
@@ -37,6 +33,7 @@ void WidgetNfeEntrada::setConnections() {
 
 void WidgetNfeEntrada::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

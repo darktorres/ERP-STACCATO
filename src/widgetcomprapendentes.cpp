@@ -16,10 +16,7 @@
 #include <QSqlError>
 #include <QtMath>
 
-WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) { ui->setupUi(this); }
 
 WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }
 
@@ -111,6 +108,8 @@ void WidgetCompraPendentes::unsetConnections() {
 
 void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
+
     setConnections();
 
     ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, true, this));

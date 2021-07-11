@@ -1,7 +1,6 @@
 #include "widgetcompraconsumos.h"
 #include "ui_widgetcompraconsumos.h"
 
-#include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
@@ -11,15 +10,13 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
 
 WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 
 void WidgetCompraConsumos::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

@@ -6,8 +6,6 @@ namespace Ui {
 class WidgetGraficos;
 }
 
-QT_CHARTS_USE_NAMESPACE
-
 class WidgetGraficos : public QWidget {
   Q_OBJECT
 

@@ -18,10 +18,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) { ui->setupUi(this); }
 
 WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 
@@ -87,6 +84,7 @@ void WidgetFinanceiroContas::setConnections() {
 
 void WidgetFinanceiroContas::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     ui->radioButtonPendente->setChecked(true);
     ui->dateEditRealizadoAte->setDate(qApp->serverDate());
     ui->dateEditRealizadoDe->setDate(qApp->serverDate());

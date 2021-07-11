@@ -5,10 +5,7 @@
 
 #include <QDebug>
 
-WidgetEstoqueProduto::WidgetEstoqueProduto(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoqueProduto) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetEstoqueProduto::WidgetEstoqueProduto(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoqueProduto) { ui->setupUi(this); }
 
 WidgetEstoqueProduto::~WidgetEstoqueProduto() { delete ui; }
 
@@ -64,6 +61,7 @@ void WidgetEstoqueProduto::setupTables() {
 
 void WidgetEstoqueProduto::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

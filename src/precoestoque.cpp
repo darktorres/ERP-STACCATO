@@ -6,12 +6,15 @@
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
+
+  timer.setSingleShot(true);
 
   setWindowFlags(Qt::Window);
   setupTables();
@@ -23,7 +26,8 @@ PrecoEstoque::~PrecoEstoque() { delete ui; }
 void PrecoEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &PrecoEstoque::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::delayFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked, connectionType);
 }
@@ -104,14 +108,28 @@ void PrecoEstoque::on_pushButtonSalvar_clicked() {
 
 void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 
-void PrecoEstoque::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+void PrecoEstoque::on_lineEditBusca_textChanged() {
+  QStringList filtros;
 
-  if (text.isEmpty()) { return modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0"); }
+  //-------------------------------------
 
-  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
+  const QString filtroBusca =
+      (textoBusca.isEmpty()) ? ""
+                             : "(fornecedor LIKE '%" + textoBusca + "%' OR descricao LIKE '%" + textoBusca + "%' OR codComercial LIKE '%" + textoBusca + "%' OR colecao LIKE '%" + textoBusca + "%')";
 
-  modelProduto.setFilter("MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
+  if (not filtroBusca.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
+  const QString filtro2 = "estoque = TRUE AND estoqueRestante > 0";
+
+  if (not filtro2.isEmpty()) { filtros << filtro2; }
+
+  //-------------------------------------
+
+  modelProduto.setFilter(filtros.join(" AND "));
 }
+
+void PrecoEstoque::delayFiltro() { timer.start(500); }

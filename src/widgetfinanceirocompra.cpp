@@ -6,10 +6,7 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 
 WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 
@@ -23,6 +20,7 @@ void WidgetFinanceiroCompra::setConnections() {
 
 void WidgetFinanceiroCompra::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

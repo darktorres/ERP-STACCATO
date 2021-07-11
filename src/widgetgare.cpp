@@ -11,11 +11,7 @@
 #include <QFileDialog>
 #include <QSqlError>
 
-WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
-  ui->setupUi(this);
-
-  timer.setSingleShot(true);
-}
+WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) { ui->setupUi(this); }
 
 WidgetGare::~WidgetGare() { delete ui; }
 
@@ -40,6 +36,7 @@ void WidgetGare::resetTables() { modelIsSet = false; }
 
 void WidgetGare::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     ui->dateEditBaixa->setDate(qApp->serverDate());
     ui->dateEditFiltro->setDate(qApp->serverDate());
 

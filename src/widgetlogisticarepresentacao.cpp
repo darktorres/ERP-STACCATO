@@ -11,10 +11,7 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 
@@ -28,6 +25,7 @@ void WidgetLogisticaRepresentacao::setConnections() {
 
 void WidgetLogisticaRepresentacao::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

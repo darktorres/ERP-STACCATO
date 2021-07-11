@@ -66,22 +66,22 @@ void CalculoFrete::handleNetworkData(QNetworkReply *networkReply) {
       xml.readNext();
 
       if (xml.tokenType() == QXmlStreamReader::StartElement) {
-        if (xml.name() == "origin_address") {
+        if (xml.name().toString() == "origin_address") {
           xml.readNext();
           ui->comboBoxOrigem->setCurrentText(xml.text().toString());
         }
 
-        if (xml.name() == "destination_address") {
+        if (xml.name().toString() == "destination_address") {
           xml.readNext();
           ui->comboBoxDestino->setCurrentText(xml.text().toString());
         }
 
-        if (xml.name() == "distance") {
+        if (xml.name().toString() == "distance") {
           while (not xml.atEnd()) {
             xml.readNext();
 
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
-              if (xml.name() == "text") {
+              if (xml.name().toString() == "text") {
                 xml.readNext();
                 qDebug() << "distance: " << xml.text();
                 ui->lineEditDistancia->setText(xml.text().toString());

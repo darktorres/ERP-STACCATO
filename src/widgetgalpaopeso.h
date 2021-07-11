@@ -10,8 +10,6 @@ namespace Ui {
 class WidgetGalpaoPeso;
 }
 
-QT_CHARTS_USE_NAMESPACE
-
 class WidgetGalpaoPeso : public QWidget {
   Q_OBJECT
 

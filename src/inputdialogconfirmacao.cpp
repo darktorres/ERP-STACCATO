@@ -495,9 +495,12 @@ void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
     modelVendaProduto.setData(newRow, col, value);
   }
 
+  const double kgcx = modelVendaProduto.data(0, "kg").toDouble() / modelVendaProduto.data(0, "caixas").toDouble();
+
   modelVendaProduto.setData(newRow, "idRelacionado", novoIdVendaProduto2);
   modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa);
   modelVendaProduto.setData(newRow, "caixas", caixasDefeito);
+  modelVendaProduto.setData(newRow, "kg", caixasDefeito * kgcx);
   modelVendaProduto.setData(newRow, "prcUnitario", 0);
   modelVendaProduto.setData(newRow, "descUnitario", 0);
   modelVendaProduto.setData(newRow, "parcial", 0);
@@ -507,7 +510,6 @@ void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
   modelVendaProduto.setData(newRow, "total", 0);
   modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA");
   modelVendaProduto.setData(newRow, "reposicaoEntrega", true);
-
   modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
 }
 
@@ -638,11 +640,13 @@ double InputDialogConfirmacao::getCaixasDefeito(const int row) {
 }
 
 void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
+  const double kgcx = modelVendaProduto.data(0, "kg").toDouble() / modelVendaProduto.data(0, "caixas").toDouble();
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
 
   modelVendaProduto.setData(0, "caixas", caixasRestante);
   modelVendaProduto.setData(0, "quant", quantRestante);
+  modelVendaProduto.setData(0, "kg", caixasRestante * kgcx);
 
   const double prcUnitario = modelVendaProduto.data(0, "prcUnitario").toDouble();
   const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
@@ -688,6 +692,7 @@ void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
   modelVendaProduto.setData(rowQuebrado2, "idVendaProduto2", novoIdVendaProduto2);
   modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"));
   modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito);
+  modelVendaProduto.setData(rowQuebrado2, "kg", caixasDefeito * kgcx);
   modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito);
   modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO");
 

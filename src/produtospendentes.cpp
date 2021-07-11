@@ -514,6 +514,7 @@ void ProdutosPendentes::dividirCompra(const double quantSeparar, const double qu
 void ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
   // NOTE: *quebralinha venda_produto2
 
+  const double kgcx = modelProdutos.data(rowProduto, "kg").toDouble() / modelProdutos.data(rowProduto, "caixas").toDouble();
   const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
   const double proporcao = quantSeparar / quantVenda;
   const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble();
@@ -522,6 +523,7 @@ void ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
   modelProdutos.setData(rowProduto, "quant", quantSeparar);
   modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa));
+  modelProdutos.setData(rowProduto, "kg", (quantSeparar / quantCaixa) * kgcx);
   modelProdutos.setData(rowProduto, "parcial", parcial * proporcao);
   modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc * proporcao);
   modelProdutos.setData(rowProduto, "total", total * proporcao);
@@ -551,6 +553,7 @@ void ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"));
   modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar));
   modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / quantCaixa);
+  modelProdutos.setData(newRow, "kg", ((quantVenda - quantSeparar) / quantCaixa) * kgcx);
   modelProdutos.setData(newRow, "parcial", parcial * proporcaoNovo);
   modelProdutos.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo);
   modelProdutos.setData(newRow, "total", total * proporcaoNovo);

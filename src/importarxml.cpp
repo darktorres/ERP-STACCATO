@@ -981,9 +981,11 @@ int ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {
   const double parcial = modelVenda.data(rowVenda, "parcial").toDouble();
   const double parcialDesc = modelVenda.data(rowVenda, "parcialDesc").toDouble();
   const double total = modelVenda.data(rowVenda, "total").toDouble();
+  const double kg = modelVenda.data(rowVenda, "kg").toDouble();
 
   modelVenda.setData(rowVenda, "quant", quantAdicionar);
   modelVenda.setData(rowVenda, "caixas", quantAdicionar / quantCaixa);
+  modelVenda.setData(rowVenda, "kg", kg * proporcao);
   modelVenda.setData(rowVenda, "parcial", parcial * proporcao);
   modelVenda.setData(rowVenda, "parcialDesc", parcialDesc * proporcao);
   modelVenda.setData(rowVenda, "total", total * proporcao);
@@ -1011,6 +1013,7 @@ int ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {
   modelVenda.setData(newRowVenda, "idRelacionado", modelVenda.data(rowVenda, "idVendaProduto2"));
   modelVenda.setData(newRowVenda, "quant", quantNovo);
   modelVenda.setData(newRowVenda, "caixas", quantNovo / quantCaixa);
+  modelVenda.setData(newRowVenda, "kg", kg * proporcaoNovo);
   modelVenda.setData(newRowVenda, "parcial", parcial * proporcaoNovo);
   modelVenda.setData(newRowVenda, "parcialDesc", parcialDesc * proporcaoNovo);
   modelVenda.setData(newRowVenda, "total", total * proporcaoNovo);

@@ -6,10 +6,7 @@
 
 #include <QDebug>
 
-WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) { ui->setupUi(this); }
 
 WidgetDevolucao::~WidgetDevolucao() { delete ui; }
 
@@ -17,6 +14,7 @@ void WidgetDevolucao::resetTables() { modelIsSet = false; }
 
 void WidgetDevolucao::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     ui->dateEditMes->setDate(qApp->serverDate());
     isSet = true;

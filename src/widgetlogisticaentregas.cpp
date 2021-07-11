@@ -23,8 +23,6 @@
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
 
-  timer.setSingleShot(true);
-
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
@@ -49,6 +47,7 @@ void WidgetLogisticaEntregas::setConnections() {
 
 void WidgetLogisticaEntregas::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

@@ -11,10 +11,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 
 WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 
@@ -33,6 +30,7 @@ void WidgetLogisticaEntregues::setConnections() {
 
 void WidgetLogisticaEntregues::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

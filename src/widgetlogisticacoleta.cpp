@@ -13,10 +13,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 
 WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }
 
@@ -34,6 +31,7 @@ void WidgetLogisticaColeta::setConnections() {
 
 void WidgetLogisticaColeta::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

@@ -19,10 +19,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarEntrega) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarEntrega) { ui->setupUi(this); }
 
 WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 
@@ -270,6 +267,8 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
+
     if (User::isVendedor()) {
       ui->tableVendas->hide();
       ui->labelEntregasCliente->hide();

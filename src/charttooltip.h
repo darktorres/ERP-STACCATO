@@ -3,8 +3,6 @@
 #include <QGraphicsItem>
 #include <QtCharts>
 
-QT_CHARTS_USE_NAMESPACE
-
 class ChartTooltip final : public QGraphicsItem {
 public:
   explicit ChartTooltip(QChart *chart);

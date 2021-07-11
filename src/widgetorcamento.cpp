@@ -251,23 +251,27 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   const QString filtroData = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
   //-------------------------------------
 
   const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
+
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
 
   //-------------------------------------
 
   const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
   const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
+
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 
   const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')";
+
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -285,6 +289,7 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   const QString filtroFollowup = (ui->comboBoxFollowup->currentIndex() > 0) ? "(semaforo = " + QString::number(ui->comboBoxFollowup->currentIndex()) + ")" : "";
+
   if (not filtroFollowup.isEmpty()) { filtros << filtroFollowup; }
 
   //-------------------------------------

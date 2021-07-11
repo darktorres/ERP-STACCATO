@@ -14,10 +14,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 
 WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
 
@@ -35,6 +32,7 @@ void WidgetLogisticaRecebimento::setConnections() {
 
 void WidgetLogisticaRecebimento::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

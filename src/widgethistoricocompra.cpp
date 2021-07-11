@@ -2,7 +2,6 @@
 #include "ui_widgethistoricocompra.h"
 
 #include "acbrlib.h"
-#include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
@@ -11,10 +10,7 @@
 
 #include <QSqlError>
 
-WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
 
 WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 
@@ -29,6 +25,7 @@ void WidgetHistoricoCompra::setConnections() {
 
 void WidgetHistoricoCompra::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     setConnections();
     isSet = true;
   }

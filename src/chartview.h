@@ -2,8 +2,6 @@
 
 #include "charttooltip.h"
 
-QT_CHARTS_USE_NAMESPACE
-
 // TODO: why is this not derived from QChartView
 class ChartView : public QGraphicsView {
 public:

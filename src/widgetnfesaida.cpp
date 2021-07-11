@@ -1,8 +1,8 @@
 #include "widgetnfesaida.h"
 #include "ui_widgetnfesaida.h"
 
-#include "acbrlib.h"
 #include "acbr.h"
+#include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "file.h"
@@ -19,10 +19,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
-  ui->setupUi(this);
-  timer.setSingleShot(true);
-}
+WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
 
 WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 
@@ -68,6 +65,7 @@ void WidgetNfeSaida::unsetConnections() {
 
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
+    timer.setSingleShot(true);
     ui->dateEdit->setDate(qApp->serverDate());
     setConnections();
     isSet = true;

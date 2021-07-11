@@ -1322,7 +1322,7 @@ void Venda::generateId() {
 
   if (not query.exec()) { throw RuntimeException("Erro na query: " + query.lastError().text()); }
 
-  const int last = query.first() ? query.value("idVenda").toString().remove(id).leftRef(4).toInt() : 0;
+  const int last = query.first() ? query.value("idVenda").toString().remove(id).left(4).toInt() : 0;
 
   id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
 

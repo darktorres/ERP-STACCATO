@@ -702,10 +702,13 @@ void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
 }
 
 void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
+  // NOTE: *quebralinha veiculo_has_produto
   // diminuir quantidade da linha selecionada
 
-  // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
+  const double kgcx = modelVeiculo.data(row, "kg").toDouble() / modelVeiculo.data(row, "caixas").toDouble();
+
   modelVeiculo.setData(row, "caixas", caixas - caixasDefeito);
+  modelVeiculo.setData(row, "kg", (caixas - caixasDefeito) * kgcx);
   modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * quantCaixa);
 
   // copiar linha com quantDefeito
@@ -724,9 +727,9 @@ void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
     modelVeiculo.setData(rowQuebrado, col, value);
   }
 
-  // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
   modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2);
   modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito);
+  modelVeiculo.setData(rowQuebrado, "kg", caixasDefeito * kgcx);
   modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * quantCaixa);
   modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO");
 

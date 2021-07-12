@@ -588,7 +588,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   const QString extension = info.suffix();
 
-  const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
+  const QString url = "https://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
   const auto fileContent = file.readAll();
 

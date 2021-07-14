@@ -304,7 +304,7 @@ void Contas::setupTables() {
   ui->tableProcessados->hideColumn("desativado");
 }
 
-bool Contas::verifyFields() {
+void Contas::verifyFields() {
   for (int row = 0; row < ui->tablePendentes->rowCount(); ++row) {
     const QString status = modelPendentes.data(row, "status").toString();
 
@@ -317,12 +317,10 @@ bool Contas::verifyFields() {
       if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio!", this); }
     }
   }
-
-  return true;
 }
 
 void Contas::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
   qApp->startTransaction("Contas::on_pushButtonSalvar_clicked");
 

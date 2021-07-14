@@ -225,9 +225,15 @@ int RegisterDialog::removeBox() {
 
 void RegisterDialog::remove() {
   if (removeBox() == QMessageBox::Yes) {
+    qApp->startTransaction("RegisterDialog::remove");
+
     setData("desativado", true);
 
     model.submitAll();
+
+    qApp->endTransaction();
+
+    qApp->enqueueInformation("Cadastro desativado com sucesso!");
 
     isDirty = false;
 

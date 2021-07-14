@@ -320,7 +320,11 @@ bool Contas::verifyFields() {
 void Contas::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
+  qApp->startTransaction("Contas::on_pushButtonSalvar_clicked");
+
   modelPendentes.submitAll();
+
+  qApp->endTransaction();
 
   close();
 }

@@ -39,6 +39,8 @@ void Contas::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked, connectionType);
+  connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher, connectionType);
 }
@@ -46,6 +48,8 @@ void Contas::setConnections() {
 void Contas::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked);
+  disconnect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
   disconnect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher);
 }
@@ -210,10 +214,10 @@ void Contas::setupTables() {
 
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
+  //  ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
+  //  ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), modelPendentes.fieldIndex("tipo"), (tipo == Tipo::Receber), this));
 
   if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
@@ -363,6 +367,50 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
   modelPendentes.select();
 
   modelProcessados.select();
+}
+
+void Contas::on_pushButtonCriarLancamento_clicked() {
+  unsetConnections();
+
+  try {
+    [&] {
+      const int newRow = modelPendentes.insertRowAtEnd();
+
+      modelPendentes.setData(newRow, "status", "PENDENTE");
+      modelPendentes.setData(newRow, "dataEmissao", qApp->serverDate());
+    }();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
+void Contas::on_pushButtonDuplicarLancamento_clicked() {
+  const auto list = ui->tablePendentes->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
+
+  for (const auto index : list) {
+    const int row = index.row();
+    const int newRow = modelPendentes.insertRowAtEnd();
+
+    for (int col = 0; col < modelPendentes.columnCount(); ++col) {
+      if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
+      if (modelPendentes.fieldIndex("nfe") == col) { continue; }
+      if (modelPendentes.fieldIndex("valor") == col) { continue; }
+      if (modelPendentes.fieldIndex("desativado") == col) { continue; }
+      if (modelPendentes.fieldIndex("created") == col) { continue; }
+      if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }
+
+      const QVariant value = modelPendentes.data(row, col);
+
+      if (value.isNull()) { continue; }
+
+      modelPendentes.setData(newRow, col, value);
+    }
+  }
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

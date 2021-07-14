@@ -100,7 +100,10 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
       modelContaPagamento.setData(newRow, "status", "PENDENTE");
       modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -208,7 +211,10 @@ void InserirLancamento::preencher(const QModelIndex &index) {
         modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

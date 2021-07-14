@@ -924,7 +924,10 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
       ui->widgetPgts->setTotal(total);
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -963,7 +966,10 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -991,7 +997,10 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1019,7 +1028,10 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
       ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
       ui->widgetPgts->resetarPagamentos();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

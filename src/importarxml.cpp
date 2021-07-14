@@ -81,7 +81,11 @@ void ImportarXML::updateTableData(const QModelIndex &topLeft) {
 
       reparear(topLeft);
     }();
-  } catch (std::exception &) { ui->pushButtonImportar->setDisabled(true); }
+  } catch (std::exception &) {
+    ui->pushButtonImportar->setDisabled(true);
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -465,7 +469,7 @@ void ImportarXML::verifyFields() {
 void ImportarXML::on_pushButtonImportar_clicked() {
   try {
     verifyFields();
-  } catch (std::exception &) { return; }
+  } catch (std::exception &) { throw; }
 
   unsetConnections();
 
@@ -476,9 +480,9 @@ void ImportarXML::on_pushButtonImportar_clicked() {
 
     qApp->endTransaction();
   } catch (std::exception &) {
-    qApp->rollbackTransaction();
     ui->pushButtonImportar->setDisabled(true);
-    return;
+    setConnections();
+    throw;
   }
 
   setConnections();
@@ -523,8 +527,11 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
         ui->itemBoxNFe->setReadOnly(true);
       }
     }();
-  } catch (RuntimeError &) {
-  } catch (std::exception &) { ui->pushButtonImportar->setDisabled(true); }
+  } catch (std::exception &) {
+    ui->pushButtonImportar->setDisabled(true);
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -548,8 +555,11 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
         ui->itemBoxNFe->setReadOnly(true);
       }
     }();
-  } catch (RuntimeError &) {
-  } catch (std::exception &) { ui->pushButtonImportar->setDisabled(true); }
+  } catch (std::exception &) {
+    ui->pushButtonImportar->setDisabled(true);
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1138,7 +1148,11 @@ void ImportarXML::parear() {
 
       ui->tableCompra->setFocus(); // for updating proxyModel
     }();
-  } catch (std::exception &) { ui->pushButtonImportar->setDisabled(true); }
+  } catch (std::exception &) {
+    ui->pushButtonImportar->setDisabled(true);
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

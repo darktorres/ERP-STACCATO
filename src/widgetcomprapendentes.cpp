@@ -299,7 +299,10 @@ void WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged(const doub
 
     const double quant2 = caixas2 * stepQt;
     ui->doubleSpinBoxAvulsoQuant->setValue(quant2);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -316,7 +319,10 @@ void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const doubl
 
     const double caixas2 = quant2 / stepQt;
     ui->doubleSpinBoxAvulsoCaixas->setValue(caixas2);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

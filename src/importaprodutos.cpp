@@ -46,7 +46,10 @@ void ImportaProdutos::importarTabela() {
     qApp->startTransaction("ImportaProdutos::importaTabela");
 
     importar();
-  } catch (std::exception &) { close(); }
+  } catch (std::exception &) {
+    close();
+    throw;
+  }
 }
 
 void ImportaProdutos::verificaSeRepresentacao() {
@@ -970,7 +973,10 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 
   try {
     salvar();
-  } catch (std::exception &) { close(); }
+  } catch (std::exception &) {
+    close();
+    throw;
+  }
 
   qApp->endTransaction();
 

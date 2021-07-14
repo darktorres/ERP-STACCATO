@@ -42,7 +42,10 @@ void CadastroProduto::clearFields() {
     ui->textEditObserv->clear();
 
     setupUi();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

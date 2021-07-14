@@ -97,7 +97,10 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   try {
     mapperItem.setCurrentModelIndex(index);
     setarParametrosProduto();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 
@@ -475,7 +478,10 @@ void Orcamento::removeItem() {
     redoBackupItem();
 
     novoItem();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -720,7 +726,10 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
 
     const double itemBruto2 = quant2 * prcUn;
     ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -879,7 +888,10 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
     calcularPesoTotal();
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -927,7 +939,10 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
     const double itemBruto2 = quant2 * prcUn;
     ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -978,7 +993,10 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
     ui->doubleSpinBoxQuant->setValue(0.);
     ui->doubleSpinBoxDesconto->setValue(0.);
     ui->doubleSpinBoxTotalItem->setValue(0.);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 
@@ -1298,7 +1316,10 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
     const double itemBruto = quant * prcUn;
 
     ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1321,7 +1342,10 @@ void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double de
 
     ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1336,7 +1360,10 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
     ui->doubleSpinBoxTotal->setMinimum(frete);
     ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1387,7 +1414,10 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
 
     ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1410,7 +1440,10 @@ void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
     ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
     ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

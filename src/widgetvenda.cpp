@@ -135,7 +135,10 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 
@@ -169,7 +172,10 @@ void WidgetVenda::setWidgets() {
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -291,7 +297,10 @@ void WidgetVenda::fillComboBoxVendedor() {
     }
 
     while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -309,7 +318,10 @@ void WidgetVenda::fillComboBoxLoja() {
     if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -327,7 +339,10 @@ void WidgetVenda::fillComboBoxFornecedor() {
     if (not query.exec("SELECT razaoSocial FROM fornecedor")) { throw RuntimeException("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -361,7 +376,10 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
       montaFiltro();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -395,7 +413,10 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 

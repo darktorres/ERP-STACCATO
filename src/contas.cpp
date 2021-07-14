@@ -170,7 +170,10 @@ void Contas::preencher(const QModelIndex &index) {
         if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

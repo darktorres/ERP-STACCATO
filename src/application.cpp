@@ -318,20 +318,7 @@ void Application::showMessages() {
     if (exception.message.contains("WSREP has not yet prepared node for application use")) { exception.message = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!"; }
     if (exception.message.contains("WSREP detected deadlock/conflict and aborted the transaction")) { exception.message = "Conflito detectado no banco de dados! Tente novamente!"; }
 
-    const QString error1 = "Conexão com o servidor perdida!";
-    const QString error2 = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!";
-
-    if (exception.message.contains(error1) or exception.message.contains(error2)) {
-      const bool conectado = dbReconnect(true);
-
-      emit verifyDb(conectado);
-
-      if (conectado) {
-        continue;
-      } else {
-        QMessageBox::critical(exception.widget, "Erro!", exception.message);
-      }
-    }
+    if (exception.message == "Conexão com o servidor perdida!") { emit verifyDb(false); }
 
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }

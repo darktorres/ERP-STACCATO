@@ -38,5 +38,5 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto validarData(const QModelIndex &index) -> bool;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

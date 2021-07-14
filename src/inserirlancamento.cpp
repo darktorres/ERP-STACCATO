@@ -111,7 +111,11 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 void InserirLancamento::on_pushButtonSalvar_clicked() {
   verifyFields();
 
+  qApp->startTransaction("InserirLancamento::on_pushButtonSalvar_clicked");
+
   modelContaPagamento.submitAll();
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Lançamento salvo com sucesso!", this);
 

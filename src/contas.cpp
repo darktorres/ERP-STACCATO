@@ -55,31 +55,33 @@ void Contas::unsetConnections() {
 }
 
 bool Contas::validarData(const QModelIndex &index) {
-  if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
-    const int row = index.row();
-    const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
+  Q_UNUSED(index)
 
-    SqlQuery query;
-    query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", idPagamento);
+  //  if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
+  //    const int row = index.row();
+  //    const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
+  //    SqlQuery query;
+  //    query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
+  //    query.bindValue(":idPagamento", idPagamento);
 
-    const QDate oldDate = query.value("dataPagamento").toDate();
-    const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
+  //    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
-    if (oldDate.isNull()) { return true; }
+  //    const QDate oldDate = query.value("dataPagamento").toDate();
+  //    const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
 
-    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
-      modelPendentes.setData(row, "dataPagamento", oldDate);
-      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
-    }
+  //    if (oldDate.isNull()) { return true; }
 
-    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
-      modelPendentes.setData(row, "dataPagamento", oldDate);
-      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
-    }
-  }
+  //    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
+  //      modelPendentes.setData(row, "dataPagamento", oldDate);
+  //      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
+  //    }
+
+  //    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
+  //      modelPendentes.setData(row, "dataPagamento", oldDate);
+  //      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
+  //    }
+  //  }
 
   return true;
 }
@@ -93,21 +95,21 @@ void Contas::preencher(const QModelIndex &index) {
     [&] {
       const int row = index.row();
 
-      if (index.column() == ui->tablePendentes->columnIndex("valor")) {
-        SqlQuery query;
-        query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-        query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
+      //      if (index.column() == ui->tablePendentes->columnIndex("valor")) {
+      //        SqlQuery query;
+      //        query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
+      //        query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
-        if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando valor: " + query.lastError().text(), this); }
+      //        if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando valor: " + query.lastError().text(), this); }
 
-        const double oldValor = query.value("valor").toDouble();
-        const double newValor = modelPendentes.data(row, "valor").toDouble();
+      //        const double oldValor = query.value("valor").toDouble();
+      //        const double newValor = modelPendentes.data(row, "valor").toDouble();
 
-        if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-          modelPendentes.setData(row, "valor", oldValor);
-          throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
-        }
-      }
+      //        if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
+      //          modelPendentes.setData(row, "valor", oldValor);
+      //          throw RuntimeError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
+      //        }
+      //      }
 
       if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
         const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();

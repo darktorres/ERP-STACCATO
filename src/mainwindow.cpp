@@ -172,7 +172,10 @@ void MainWindow::updateTables() {
     if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
     //    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
     if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    qApp->setUpdating(false);
+    throw;
+  }
 
   qApp->setUpdating(false);
 }

@@ -811,7 +811,10 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
         modelViewProdutoEstoque.setData(row, "descUnitario", preco);
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 
@@ -889,7 +892,10 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
       mapper.setCurrentModelIndex(index);
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -913,7 +919,10 @@ void CadastrarNFe::calculaSt() {
 
       updateTotais();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -943,7 +952,10 @@ void CadastrarNFe::calculaIcms() {
 
       updateTotais();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -973,7 +985,10 @@ void CadastrarNFe::calculaPis() {
 
       updateTotais();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1003,7 +1018,10 @@ void CadastrarNFe::calculaCofins() {
 
       updateTotais();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -1198,7 +1216,10 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
         // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

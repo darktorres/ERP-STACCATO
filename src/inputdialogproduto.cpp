@@ -213,7 +213,10 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
       const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
       modelPedidoFornecedor.setData(row, "prcUnitario", preco);
     }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    throw;
+  }
 
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
@@ -298,7 +301,10 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
 
       ui->doubleSpinBoxTotal->setValue(total + valueSt);
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -320,7 +326,10 @@ void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
 
       ui->doubleSpinBoxTotal->setValue(total + valueSt);
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

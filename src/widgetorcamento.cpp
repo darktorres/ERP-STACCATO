@@ -49,7 +49,10 @@ void WidgetOrcamento::setWidgets() {
 
       ui->dateEditMes->setDate(qApp->serverDate());
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -144,7 +147,10 @@ void WidgetOrcamento::fillComboBoxVendedor() {
     }
 
     while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -162,7 +168,10 @@ void WidgetOrcamento::fillComboBoxLoja() {
     if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -177,7 +186,10 @@ void WidgetOrcamento::fillComboBoxFollowup() {
     ui->comboBoxFollowup->addItem("QUENTE");
     ui->comboBoxFollowup->addItem("MORNO");
     ui->comboBoxFollowup->addItem("FRIO");
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -195,7 +207,10 @@ void WidgetOrcamento::fillComboBoxFornecedor() {
     if (not query.exec("SELECT razaoSocial FROM fornecedor")) { throw RuntimeException("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }
@@ -335,7 +350,10 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
         child->setChecked(enabled);
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 
@@ -362,7 +380,10 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
       montaFiltro();
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

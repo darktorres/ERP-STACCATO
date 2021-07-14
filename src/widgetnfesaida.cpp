@@ -341,7 +341,10 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
       child->setEnabled(true);
       child->setChecked(enabled);
     }
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 

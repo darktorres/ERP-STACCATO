@@ -435,7 +435,10 @@ void AnteciparRecebimento::selecionarTaxa() {
     ui->table->horizontalScrollBar()->setSliderPosition(hpos);
 
     calcularTotais();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 }

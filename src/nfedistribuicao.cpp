@@ -34,11 +34,9 @@ void NFeDistribuicao::downloadAutomatico() {
 
   try {
     on_pushButtonPesquisar_clicked();
-  } catch (std::exception &e) {
-    qDebug() << "what: " << e.what();
+  } catch (std::exception &) {
     qApp->setSilent(false);
-    qApp->rollbackTransaction();
-    return;
+    throw;
   }
 
   qApp->setSilent(false);
@@ -607,7 +605,10 @@ void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
         child->setChecked(enabled);
       }
     }();
-  } catch (std::exception &) {}
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
 
   setConnections();
 

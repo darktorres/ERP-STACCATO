@@ -137,10 +137,6 @@ void ACBr::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-void ACBr::abrirPdf(const QString &filePath) {
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { throw RuntimeException("Erro abrindo PDF!"); }
-}
-
 QString ACBr::enviarComando(const QString &comando, const bool local) {
   recebido = false;
   enviado = false;

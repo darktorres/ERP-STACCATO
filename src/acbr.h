@@ -27,7 +27,6 @@ private:
   QString resposta;
   QTcpSocket socket;
   // methods
-  auto abrirPdf(const QString &filePath) -> void;
   auto error(QAbstractSocket::SocketError socketError) -> void;
   auto readSocket() -> void;
   auto removerNota(const int idNFe) -> void;

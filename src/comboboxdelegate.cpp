@@ -32,10 +32,8 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   if (tipo == Tipo::Pagamento) {
     SqlQuery query;
-    query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-    query.bindValue(":idLoja", User::idLoja);
 
-    if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), parent); }
+    if (not query.exec("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = " + User::idLoja)) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), parent); }
 
     list << "";
 

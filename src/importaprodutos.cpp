@@ -244,10 +244,6 @@ void ImportaProdutos::setupModels() {
   modelErro.setHeaderData("markup", "Markup");
 
   modelErro.proxyModel = new ImportaProdutosProxyModel(&modelErro, this);
-
-  //-------------------------------------------------------------//
-
-  modelEstoque.setTable("produto");
 }
 
 void ImportaProdutos::setupTables() {
@@ -397,12 +393,6 @@ void ImportaProdutos::mostraApenasEstesFornecedores() {
   modelProduto.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
 
   modelProduto.select();
-
-  //-------------------------------------------------------------//
-
-  modelEstoque.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = TRUE AND promocao = FALSE");
-
-  modelEstoque.select();
 }
 
 void ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -938,8 +928,6 @@ int ImportaProdutos::buscarCadastrarFornecedor() {
 
 void ImportaProdutos::salvar() {
   modelProduto.submitAll();
-
-  modelEstoque.submitAll();
 
   SqlQuery queryPrecos;
 

@@ -27,6 +27,7 @@ class Application : public QApplication {
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
+  ~Application();
 
   auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;

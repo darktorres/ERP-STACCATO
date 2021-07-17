@@ -37,6 +37,8 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   }
 }
 
+Application::~Application() { db.close(); }
+
 // for system errors
 void Application::enqueueException(const QString &exception, QWidget *parent) {
   // TODO: guardar o arquivo/linha que chamou essa funcao

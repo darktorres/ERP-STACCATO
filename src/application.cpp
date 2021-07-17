@@ -284,7 +284,8 @@ void Application::rollbackTransaction() {
   qDebug() << "rollbackTransaction";
 
   if (inTransaction) {
-    if (SqlQuery query; not query.exec("ROLLBACK")) { throw RuntimeException("Erro cancelando transação!"); }
+    SqlQuery query;
+    query.exec("ROLLBACK");
 
     inTransaction = false;
   }

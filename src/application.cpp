@@ -321,6 +321,13 @@ void Application::showMessages() {
     if (exception.message.contains("Lost connection to MySQL server during query")) { exception.message = "Conexão com o servidor perdida!"; }
     if (exception.message.contains("WSREP has not yet prepared node for application use")) { exception.message = "Servidor fora de sincronia! Aguarde um momento ou conecte-se em outro servidor!"; }
     if (exception.message.contains("WSREP detected deadlock/conflict and aborted the transaction")) { exception.message = "Conflito detectado no banco de dados! Tente novamente!"; }
+    if (exception.message.contains("Lock wait timeout exceeded")) { exception.message = "Tabela em uso! Aguarde um momento e tente novamente!"; }
+    if (exception.message.contains("Deadlock found when trying to get lock")) { exception.message = "Conflito detectado no banco de dados! Tente novamente!"; }
+    if (exception.message.contains("Data too long for column")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
+    if (exception.message.contains("a foreign key constraint fails")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
+    if (exception.message.contains("Duplicate entry")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
+    if (exception.message.contains("cannot be null")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
+    if (exception.message.contains("Incorrect string value")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
 
     if (exception.message == "Conexão com o servidor perdida!") { emit verifyDb(false); }
 

@@ -7,5 +7,6 @@ class EditDelegate final : public QStyledItemDelegate {
 public:
   explicit EditDelegate(QObject *parent);
 
+private:
   auto displayText(const QVariant &value, const QLocale &locale) const -> QString final;
 };

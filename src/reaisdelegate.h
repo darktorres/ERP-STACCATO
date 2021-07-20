@@ -9,10 +9,11 @@ public:
   explicit ReaisDelegate(QObject *parent);
   ~ReaisDelegate() = default;
 
-  auto displayText(const QVariant &value, const QLocale &locale) const -> QString override;
-  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * override;
-
 private:
+  // attributes
   bool const readOnly = false;
   int const decimais = 2;
+  // methods
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * override;
+  auto displayText(const QVariant &value, const QLocale &locale) const -> QString override;
 };

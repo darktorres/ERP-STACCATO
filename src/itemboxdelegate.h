@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class ItemBoxDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   enum class Tipo { Loja, Conta };

@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class ComboBoxDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   enum class Tipo { Receber, Pagar, Conta, Pagamento, Grupo, ST };

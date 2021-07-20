@@ -2,6 +2,7 @@
 #include "logindialog.h"
 #include "mainwindow.h"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QSharedMemory>
 

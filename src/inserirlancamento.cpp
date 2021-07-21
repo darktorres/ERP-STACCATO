@@ -69,7 +69,7 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
 
-  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo", "status", "idConta"});
+  ui->table->setPersistentColumns({"tipo", "status", "grupo"});
 
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");

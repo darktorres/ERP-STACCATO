@@ -229,7 +229,7 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
 
-  ui->tablePendentes->setPersistentColumns({"status", "idConta", "centroCusto"});
+  ui->tablePendentes->setPersistentColumns({"status"});
 
   if (tipo == Tipo::Receber) {
     ui->tablePendentes->hideColumn("representacao");
@@ -283,8 +283,6 @@ void Contas::setupTables() {
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
-
-  ui->tableProcessados->setPersistentColumns({"idConta", "centroCusto"});
 
   if (tipo == Tipo::Receber) {
     ui->tableProcessados->hideColumn("representacao");

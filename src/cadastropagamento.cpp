@@ -70,7 +70,7 @@ void CadastroPagamento::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn("centavoSobressalente", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("apenasRepresentacao", new CheckBoxDelegate(true, this));
 
-  ui->tablePagamentos->setPersistentColumns({"idConta", "pula1Mes", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
+  ui->tablePagamentos->setPersistentColumns({"pula1Mes", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
 
   // -------------------------------------------------------------------------
 

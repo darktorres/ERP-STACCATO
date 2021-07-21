@@ -22,7 +22,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->comboBoxOrigem->addItem("2 - Merc. Interno", 2);
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
-  ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
+  ui->itemBoxFornecedor->setRegisterDialog("CadastroFornecedor");
 
   if (not User::isAdministrativo()) { ui->pushButtonRemover->setDisabled(true); }
 

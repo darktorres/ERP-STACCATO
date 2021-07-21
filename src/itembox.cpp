@@ -1,5 +1,12 @@
 #include "itembox.h"
 
+#include "application.h"
+#include "cadastrocliente.h"
+#include "cadastrofornecedor.h"
+#include "cadastroloja.h"
+#include "cadastroprofissional.h"
+#include "cadastrotransportadora.h"
+
 #include <QDebug>
 #include <QMouseEvent>
 
@@ -41,6 +48,18 @@ void ItemBox::search() {
 }
 
 void ItemBox::edit() {
+  if (not registerDialog and not registerDialogType.isEmpty()) {
+    if (registerDialogType == "CadastroCliente") { registerDialog = new CadastroCliente(this); }
+    if (registerDialogType == "CadastroFornecedor") { registerDialog = new CadastroFornecedor(this); }
+    if (registerDialogType == "CadastroLoja") { registerDialog = new CadastroLoja(this); }
+    if (registerDialogType == "CadastroProfissional") { registerDialog = new CadastroProfissional(this); }
+    if (registerDialogType == "CadastroTransportadora") { registerDialog = new CadastroTransportadora(this); }
+
+    if (not registerDialog) { throw RuntimeException("RegisterDialog nulo!"); }
+
+    connect(registerDialog, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
+  }
+
   if (registerDialog) {
     if (not id.isNull()) { registerDialog->viewRegisterById(id); }
 
@@ -49,12 +68,6 @@ void ItemBox::edit() {
 }
 
 void ItemBox::resetCursor() { setCursorPosition(0); }
-
-void ItemBox::setRegisterDialog(RegisterDialog *dialog) {
-  registerDialog = dialog;
-  connect(dialog, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
-  setIcons();
-}
 
 QVariant ItemBox::getId() const { return id; }
 
@@ -78,6 +91,11 @@ void ItemBox::clear() {
   QLineEdit::clear();
 
   QLineEdit::setToolTip(QString());
+}
+
+void ItemBox::setRegisterDialog(const QString &type) {
+  registerDialogType = type;
+  setIcons();
 }
 
 void ItemBox::setSearchDialog(SearchDialog *dialog) {
@@ -113,7 +131,7 @@ void ItemBox::setIcons() {
     searchButton->hide();
   }
 
-  if (registerDialog) {
+  if (not registerDialogType.isEmpty()) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
     plusButton->show();

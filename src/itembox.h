@@ -20,7 +20,7 @@ public:
   auto setFornecedorRep(const QString &fornecedor) -> void;
   auto setId(const QVariant &newId) -> void;
   auto setReadOnlyItemBox(const bool isReadOnly) -> void;
-  auto setRegisterDialog(RegisterDialog *dialog) -> void;
+  auto setRegisterDialog(const QString &type) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setSearchDialog(SearchDialog *dialog) -> void;
 
@@ -33,6 +33,7 @@ private:
   bool readOnlyItemBox = false;
   QPushButton *plusButton;
   QPushButton *searchButton;
+  QString registerDialogType;
   QVariant id;
   RegisterDialog *registerDialog = nullptr;
   SearchDialog *searchDialog = nullptr;

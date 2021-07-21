@@ -54,7 +54,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 Venda::~Venda() { delete ui; }
 
 void Venda::setItemBoxes() {
-  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
+  ui->itemBoxCliente->setRegisterDialog("CadastroCliente");
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));

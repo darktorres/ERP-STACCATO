@@ -57,12 +57,12 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 Orcamento::~Orcamento() { delete ui; }
 
 void Orcamento::setItemBoxes() {
-  ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
+  ui->itemBoxCliente->setRegisterDialog("CadastroCliente");
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, false, this));
-  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
+  ui->itemBoxProfissional->setRegisterDialog("CadastroProfissional");
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 }

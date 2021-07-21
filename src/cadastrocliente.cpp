@@ -51,7 +51,7 @@ void CadastroCliente::marcarCompletar() {
 void CadastroCliente::setItemBoxes() {
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
-  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
+  ui->itemBoxProfissional->setRegisterDialog("CadastroProfissional");
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 }
 

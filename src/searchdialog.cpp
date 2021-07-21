@@ -179,6 +179,8 @@ QString SearchDialog::getText(const QVariant &id) {
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + id.toString() + "'";
 
+  if (caching and cacheSearchDialog.contains(queryText)) { return cacheSearchDialog.value(queryText); }
+
   SqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) { throw RuntimeException("Erro na query getText: " + query.lastError().text(), this); }
@@ -188,6 +190,8 @@ QString SearchDialog::getText(const QVariant &id) {
   for (const auto &key : std::as_const(textKeys)) {
     if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) { res += (res.isEmpty() ? "" : " - ") + query.value(key).toString(); }
   }
+
+  if (caching) { cacheSearchDialog.insert(queryText, res); }
 
   return res;
 }
@@ -409,6 +413,26 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   sdVendedor->ui->lineEditBusca->setPlaceholderText("Função/Nome");
 
   return sdVendedor;
+}
+
+SearchDialog *SearchDialog::getCacheConta() {
+  if (not cacheConta) {
+    cacheConta = conta(nullptr);
+    cacheConta->caching = true;
+  }
+
+  return cacheConta;
+}
+
+void SearchDialog::clearCache() { cacheSearchDialog.clear(); }
+
+SearchDialog *SearchDialog::getCacheLoja() {
+  if (not cacheLoja) {
+    cacheLoja = loja(nullptr);
+    cacheLoja->caching = true;
+  }
+
+  return cacheLoja;
 }
 
 SearchDialog *SearchDialog::conta(QWidget *parent) {

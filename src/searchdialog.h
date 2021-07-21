@@ -27,6 +27,10 @@ public:
   static auto veiculo(QWidget *parent) -> SearchDialog *;
   static auto vendedor(QWidget *parent) -> SearchDialog *;
 
+  static auto getCacheLoja() -> SearchDialog *;
+  static auto getCacheConta() -> SearchDialog *;
+  static auto clearCache() -> void;
+
   auto getFilter() const -> QString;
   auto getText(const QVariant &id) -> QString;
   auto setFilter(const QString &newFilter) -> void;
@@ -42,6 +46,7 @@ private:
   ~SearchDialog() final;
 
   // attributes
+  bool caching = false;
   bool compraAvulsa = false;
   bool isRepresentacao = false;
   bool naoListarBuscaVazia = true;
@@ -71,4 +76,9 @@ private:
   auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table, const QString &sortColumn) -> void;
+
+  inline static SearchDialog *cacheLoja;
+  inline static SearchDialog *cacheConta;
+
+  inline static QHash<QString, QString> cacheSearchDialog;
 };

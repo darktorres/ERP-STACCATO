@@ -121,6 +121,8 @@ void SqlTableModel::setFilter(const QString &filter) {
 void SqlTableModel::setSort(const QString &column, Qt::SortOrder order) { QSqlTableModel::setSort(fieldIndex(column), order); }
 
 void SqlTableModel::setTable(const QString &tableName) {
+  if (not database().isValid()) { throw RuntimeException("Model sem database!"); }
+
   QSqlTableModel::setTable(tableName);
   setEditStrategy(QSqlTableModel::OnManualSubmit);
   setFilter("0");

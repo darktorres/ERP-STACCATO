@@ -45,4 +45,5 @@ private:
   auto search() -> void;
   auto setConnections() -> void;
   auto setIcons() -> void;
+  auto sizeHint() const -> QSize override;
 };

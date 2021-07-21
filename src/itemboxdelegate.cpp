@@ -35,4 +35,17 @@ void ItemBoxDelegate::commitEditor() {
   emit commitData(editor);
   emit closeEditor(editor);
 }
+
+QString ItemBoxDelegate::displayText(const QVariant &value, const QLocale &locale) const {
+  Q_UNUSED(value)
+  Q_UNUSED(locale)
+
+  if (value.isNull() or value == 0 or value == "0") { return QString(); }
+
+  QString dispText;
+
+  if (tipo == Tipo::Loja) { dispText = SearchDialog::getCacheLoja()->getText(value); }
+  if (tipo == Tipo::Conta) { dispText = SearchDialog::getCacheConta()->getText(value); }
+
+  return dispText;
 }

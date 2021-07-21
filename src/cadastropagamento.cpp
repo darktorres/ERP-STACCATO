@@ -27,7 +27,11 @@ CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new 
   setConnections();
 }
 
-CadastroPagamento::~CadastroPagamento() { delete ui; }
+CadastroPagamento::~CadastroPagamento() {
+  delete ui;
+
+  SearchDialog::clearCache();
+}
 
 void CadastroPagamento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);

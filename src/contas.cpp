@@ -8,6 +8,7 @@
 #include "lineeditdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
+#include "searchdialog.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 
@@ -30,7 +31,11 @@ Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), 
   setConnections();
 }
 
-Contas::~Contas() { delete ui; }
+Contas::~Contas() {
+  delete ui;
+
+  SearchDialog::clearCache();
+}
 
 void Contas::setConnections() {
   if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections

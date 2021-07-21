@@ -28,7 +28,11 @@ InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog
   setConnections();
 }
 
-InserirLancamento::~InserirLancamento() { delete ui; }
+InserirLancamento::~InserirLancamento() {
+  delete ui;
+
+  SearchDialog::clearCache();
+}
 
 void InserirLancamento::setupTables() {
   if (tipo == Tipo::Pagar) { modelContaPagamento.setTable("conta_a_pagar_has_pagamento"); }

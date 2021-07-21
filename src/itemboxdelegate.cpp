@@ -31,5 +31,8 @@ void ItemBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 
 void ItemBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());
+
   emit commitData(editor);
+  emit closeEditor(editor);
+}
 }

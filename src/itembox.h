@@ -18,11 +18,11 @@ public:
   auto getId() const -> QVariant;
   auto setFilter(const QString &filter) -> void;
   auto setFornecedorRep(const QString &fornecedor) -> void;
+  auto setId(const QVariant &newId) -> void;
   auto setReadOnlyItemBox(const bool isReadOnly) -> void;
   auto setRegisterDialog(RegisterDialog *dialog) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setSearchDialog(SearchDialog *dialog) -> void;
-  auto setId(const QVariant &newId) -> void;
 
 signals:
   void idChanged(const QVariant &changedId);
@@ -31,8 +31,8 @@ private:
   Q_PROPERTY(QVariant id READ getId WRITE setId STORED false)
   // attributes
   bool readOnlyItemBox = false;
-  QPushButton *searchButton;
   QPushButton *plusButton;
+  QPushButton *searchButton;
   QVariant id;
   RegisterDialog *registerDialog = nullptr;
   SearchDialog *searchDialog = nullptr;

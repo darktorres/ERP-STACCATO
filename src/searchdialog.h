@@ -13,14 +13,6 @@ class SearchDialog final : public QDialog {
   Q_OBJECT
 
 public:
-  ~SearchDialog() final;
-
-  auto getFilter() const -> QString;
-  auto getText(const QVariant &id) -> QString;
-  auto setFilter(const QString &newFilter) -> void;
-  auto setFornecedorRep(const QString &newFornecedorRep) -> void;
-  auto setRepresentacao(const bool isRepresentacao) -> void;
-
   // Factory Methods
   static auto cliente(QWidget *parent) -> SearchDialog *;
   static auto conta(QWidget *parent) -> SearchDialog *;
@@ -35,10 +27,20 @@ public:
   static auto veiculo(QWidget *parent) -> SearchDialog *;
   static auto vendedor(QWidget *parent) -> SearchDialog *;
 
+  auto getFilter() const -> QString;
+  auto getText(const QVariant &id) -> QString;
+  auto setFilter(const QString &newFilter) -> void;
+  auto setFornecedorRep(const QString &newFornecedorRep) -> void;
+  auto setRepresentacao(const bool isRepresentacao) -> void;
+
 signals:
   void itemSelected(const QVariant &id);
 
 private:
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
+                        const QString &sortColumn, const bool naoListar, QWidget *parent);
+  ~SearchDialog() final;
+
   // attributes
   bool compraAvulsa = false;
   bool isRepresentacao = false;
@@ -55,9 +57,6 @@ private:
   SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
-                        const QString &sortColumn, const bool naoListar, QWidget *parent);
-
   auto buscaProduto(const QString &searchFilter) -> void;
   auto delayFiltro() -> void;
   auto hideColumns(const QStringList &columns) -> void;
@@ -71,5 +70,5 @@ private:
   auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
-  auto setupTables(const QString &table) -> void;
+  auto setupTables(const QString &table, const QString &sortColumn) -> void;
 };

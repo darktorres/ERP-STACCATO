@@ -22,7 +22,6 @@ public:
   explicit RuntimeError(const QString &message, QWidget *parent = nullptr);
 };
 
-class Application : public QApplication {
 class Application final : public QApplication {
   Q_OBJECT
 

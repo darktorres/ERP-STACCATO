@@ -149,6 +149,17 @@ void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter)
 
 void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }
 
+QSize ItemBox::sizeHint() const {
+  int iconsMargin = 0;
+
+  if (searchButton->isVisible()) { iconsMargin += 30; }
+  if (plusButton->isVisible()) { iconsMargin += 30; }
+
+  QSize customSize = QLineEdit::sizeHint();
+  customSize.setWidth(fontMetrics().horizontalAdvance(text()) + iconsMargin);
+  return customSize;
+}
+
 // TODO: replace this with eliding? https://wiki.qt.io/Elided_Label
 // TODO: ajustar o tamanho do widget de acordo com o tamanho do texto para o autodimensionar funcionar corretamente na tableView (usar sizeHint?)
 // TODO: add clearButtonEnabled?

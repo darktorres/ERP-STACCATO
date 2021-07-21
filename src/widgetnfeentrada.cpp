@@ -59,8 +59,6 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->table->setModel(&modelViewNFeEntrada);
 
-  ui->table->setPersistentColumns({"utilizada"});
-
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
   ui->table->hideColumn("nsu");
@@ -68,9 +66,12 @@ void WidgetNfeEntrada::setupTables() {
   ui->table->showColumn("created");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
   ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("GARE Pago Em", new DateFormatDelegate(this));
   ui->table->setItemDelegateForColumn("utilizada", new CheckBoxDelegate(true, this));
+
+  ui->table->setPersistentColumns({"utilizada"});
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {

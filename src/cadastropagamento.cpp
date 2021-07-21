@@ -61,6 +61,8 @@ void CadastroPagamento::setupTables() {
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
+  ui->tablePagamentos->hideColumn("idPagamento");
+
   ui->tablePagamentos->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tablePagamentos->setItemDelegateForColumn("pula1Mes", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("ajustaDiaUtil", new CheckBoxDelegate(true, this));
@@ -69,8 +71,6 @@ void CadastroPagamento::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn("apenasRepresentacao", new CheckBoxDelegate(true, this));
 
   ui->tablePagamentos->setPersistentColumns({"idConta", "pula1Mes", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
-
-  ui->tablePagamentos->hideColumn("idPagamento");
 
   // -------------------------------------------------------------------------
 

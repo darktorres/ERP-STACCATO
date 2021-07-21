@@ -13,6 +13,8 @@ ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledIt
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new QComboBox(parent);
 
+  // TODO: cache querys below
+
   QStringList list;
 
   if (tipo == Tipo::Receber) {

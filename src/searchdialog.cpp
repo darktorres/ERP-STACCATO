@@ -29,14 +29,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
-  setupTables(table);
-
-  if (naoListarBuscaVazia) { model.setFilter("0"); }
-  if (table == "profissional") { model.setFilter("idProfissional = 1"); }
-
-  if (not sortColumn.isEmpty()) { model.setSort(sortColumn); }
-
-  model.select();
+  setupTables(table, sortColumn);
 
   if (fullTextIndex.isEmpty()) {
     ui->lineEditBusca->hide();
@@ -73,16 +66,22 @@ void SearchDialog::setConnections() {
 
 void SearchDialog::delayFiltro() { timer.start(500); }
 
-void SearchDialog::setupTables(const QString &table) {
+void SearchDialog::setupTables(const QString &table, const QString &sortColumn) {
   model.setTable(table);
 
   setFilter(filter);
+  if (naoListarBuscaVazia) { model.setFilter("0"); }
+  if (table == "profissional") { model.setFilter("idProfissional = 1"); }
 
   model.proxyModel = new SearchDialogProxyModel(&model, this);
 
   ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
+  if (not sortColumn.isEmpty()) { model.setSort(sortColumn); }
+
+  model.select();
 }
 
 void SearchDialog::buscaProduto(const QString &searchFilter) {
@@ -442,7 +441,7 @@ SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *parent) {
-  const QString filtroNaoHa = mostrarNaoHa ? "" : " AND idProfissional NOT IN (1)";
+  const QString filtroNaoHa = (mostrarNaoHa) ? "" : " AND idProfissional NOT IN (1)";
 
   SearchDialog *sdProfissional =
       new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, "nome_razao", true, parent);

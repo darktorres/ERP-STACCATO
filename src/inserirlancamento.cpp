@@ -167,21 +167,23 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
 
-  const int row = list.first().row();
-  const int newRow = modelContaPagamento.insertRowAtEnd();
+  for (const auto index : list) {
+    const int row = index.row();
+    const int newRow = modelContaPagamento.insertRowAtEnd();
 
-  for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
-    if (modelContaPagamento.fieldIndex("nfe") == col) { continue; }
-    if (modelContaPagamento.fieldIndex("valor") == col) { continue; }
-    if (modelContaPagamento.fieldIndex("desativado") == col) { continue; }
-    if (modelContaPagamento.fieldIndex("created") == col) { continue; }
-    if (modelContaPagamento.fieldIndex("lastUpdated") == col) { continue; }
+    for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
+      if (modelContaPagamento.fieldIndex("nfe") == col) { continue; }
+      if (modelContaPagamento.fieldIndex("valor") == col) { continue; }
+      if (modelContaPagamento.fieldIndex("desativado") == col) { continue; }
+      if (modelContaPagamento.fieldIndex("created") == col) { continue; }
+      if (modelContaPagamento.fieldIndex("lastUpdated") == col) { continue; }
 
-    const QVariant value = modelContaPagamento.data(row, col);
+      const QVariant value = modelContaPagamento.data(row, col);
 
-    if (value.isNull()) { continue; }
+      if (value.isNull()) { continue; }
 
-    modelContaPagamento.setData(newRow, col, value);
+      modelContaPagamento.setData(newRow, col, value);
+    }
   }
 }
 

@@ -372,6 +372,12 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
+  const bool naoHa = (ui->itemBoxProfissional->text() == "NÃO HÁ");
+
+  ui->frameRT->setDisabled(naoHa);
+
+  // -------------------------------------------------------------------------
+
   calcularPesoTotal();
 
   // -------------------------------------------------------------------------
@@ -399,7 +405,7 @@ void Venda::verifyFields() {
 
   if (ui->itemBoxEnderecoFat->text().isEmpty()) { throw RuntimeError("Deve selecionar um endereço de faturamento!"); }
 
-  if (not financeiro and ui->itemBoxProfissional->getId() != 1 and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
+  if (not financeiro and ui->itemBoxProfissional->text() != "NÃO HÁ" and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
     ui->checkBoxRT->setChecked(true);
     throw RuntimeError("Por favor preencha a pontuação!");
   }
@@ -1468,7 +1474,15 @@ void Venda::on_checkBoxRT_toggled(bool checked) {
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");
 }
 
-void Venda::on_itemBoxProfissional_textChanged(const QString &) { on_checkBoxPontuacaoPadrao_toggled(ui->checkBoxPontuacaoPadrao->isChecked()); }
+void Venda::on_itemBoxProfissional_textChanged(const QString &) {
+  const bool naoHa = (ui->itemBoxProfissional->text() == "NÃO HÁ");
+
+  ui->frameRT->setDisabled(naoHa);
+
+  if (naoHa) { return ui->checkBoxPontuacaoIsento->setChecked(true); }
+
+  on_checkBoxPontuacaoPadrao_toggled(ui->checkBoxPontuacaoPadrao->isChecked());
+}
 
 void Venda::copiaProdutosOrcamento() {
   SqlQuery queryProdutos;

@@ -87,6 +87,7 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("estoque");
   ui->table->hideColumn("promocao");
+  ui->table->hideColumn("compra");
   ui->table->hideColumn("idProdutoRelacionado");
   ui->table->hideColumn("desativado");
 

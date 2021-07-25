@@ -277,6 +277,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("ipi");
   ui->tableProdutos->hideColumn("estoque");
   ui->tableProdutos->hideColumn("promocao");
+  ui->tableProdutos->hideColumn("compra");
   ui->tableProdutos->hideColumn("idProdutoRelacionado");
 
   ui->tableProdutos->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
@@ -329,6 +330,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->hideColumn("ipi");
   ui->tableErro->hideColumn("estoque");
   ui->tableErro->hideColumn("promocao");
+  ui->tableErro->hideColumn("compra");
   ui->tableErro->hideColumn("idProdutoRelacionado");
 
   ui->tableErro->setItemDelegateForColumn("validade", new DateFormatDelegate(this));

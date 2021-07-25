@@ -28,12 +28,13 @@ private:
   SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
-  auto delayFiltro() -> void;
   auto cancelar(const QModelIndexList &list) -> void;
+  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;

@@ -36,6 +36,7 @@ private:
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonDanfe_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_tablePedidos_clicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setTreeView() -> void;

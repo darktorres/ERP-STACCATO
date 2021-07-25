@@ -5,6 +5,7 @@
 #include "doubledelegate.h"
 #include "excel.h"
 #include "financeiroproxymodel.h"
+#include "followup.h"
 #include "inputdialog.h"
 #include "pdf.h"
 #include "produtospendentes.h"
@@ -55,7 +56,6 @@ void WidgetCompraPendentes::setConnections() {
 
   connect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
-  connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -68,12 +68,14 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
-  connect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged, connectionType);
+  connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro, connectionType);
   connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked, connectionType);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated, connectionType);
 }
@@ -83,7 +85,6 @@ void WidgetCompraPendentes::unsetConnections() {
 
   disconnect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  disconnect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -96,12 +97,14 @@ void WidgetCompraPendentes::unsetConnections() {
   disconnect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  disconnect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged);
+  disconnect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged);
+  disconnect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro);
   disconnect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
   disconnect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
 }
@@ -349,6 +352,18 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   PDF impressao(idVenda, PDF::Tipo::Venda, this);
   impressao.mostrarRT = true;
   impressao.gerarPdf();
+}
+
+void WidgetCompraPendentes::on_pushButtonFollowup_clicked() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para

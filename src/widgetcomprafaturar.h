@@ -30,8 +30,9 @@ private:
   auto montaFiltro() -> void;
   auto on_checkBoxRepresentacao_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarFaturado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
-  auto setupTables() -> void;
   auto setConnections() -> void;
+  auto setupTables() -> void;
 };

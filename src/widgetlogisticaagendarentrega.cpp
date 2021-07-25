@@ -197,6 +197,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked, connectionType);
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked, connectionType);
   connect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked, connectionType);
   connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked, connectionType);
@@ -236,6 +237,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked);
   disconnect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
   disconnect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked);
   disconnect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked);
   disconnect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
@@ -1005,6 +1007,18 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   updateTables();
 
   qApp->enqueueInformation("Nota importada com sucesso!", this);
+}
+
+void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {
+  const auto list = ui->tableVendas->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelVendas.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

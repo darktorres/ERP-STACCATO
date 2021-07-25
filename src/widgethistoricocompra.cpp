@@ -4,6 +4,7 @@
 #include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "followup.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
@@ -20,6 +21,7 @@ void WidgetHistoricoCompra::setConnections() {
   connect(&timer, &QTimer::timeout, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::delayFiltro, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonDanfe_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->tablePedidos, &TableView::clicked, this, &WidgetHistoricoCompra::on_tablePedidos_clicked, connectionType);
 }
 
@@ -169,6 +171,18 @@ void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   ACBrLib::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt());
+}
+
+void WidgetHistoricoCompra::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->tablePedidos->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelViewComprasFinanceiro.data(selection.first().row(), "OC").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Compra, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

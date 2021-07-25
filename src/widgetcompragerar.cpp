@@ -4,6 +4,7 @@
 #include "application.h"
 #include "excel.h"
 #include "file.h"
+#include "followup.h"
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
@@ -106,6 +107,7 @@ void WidgetCompraGerar::setConnections() {
 
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked, connectionType);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked, connectionType);
   connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked, connectionType);
 }
@@ -502,6 +504,18 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   updateTables();
 
   qApp->enqueueInformation("Itens cancelados!", this);
+}
+
+void WidgetCompraGerar::on_pushButtonFollowup_clicked() {
+  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelProdutos.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes

@@ -2,6 +2,7 @@
 #include "ui_widgetcompradevolucao.h"
 
 #include "application.h"
+#include "followup.h"
 #include "sql.h"
 
 #include <QDate>
@@ -18,6 +19,7 @@ void WidgetCompraDevolucao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked, connectionType);
   connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked, connectionType);
   connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked, connectionType);
@@ -230,4 +232,16 @@ void WidgetCompraDevolucao::on_table_selectionChanged() {
   } else {
     ui->pushButtonRetornarEstoque->setEnabled(true);
   }
+}
+
+void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }

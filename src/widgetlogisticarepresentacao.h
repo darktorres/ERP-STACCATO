@@ -30,6 +30,7 @@ private:
   // methods
   auto delayFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarEntregue_clicked() -> void;
   auto processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) -> void;
   auto setConnections() -> void;

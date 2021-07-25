@@ -12,7 +12,8 @@ class FollowUp final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Orcamento, Venda };
+  // TODO: adicionar um modo misto para mostrar Venda/Compra na mesma tela?
+  enum class Tipo { Orcamento, Venda, Compra, Estoque };
   Q_ENUM(Tipo)
 
   explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent);

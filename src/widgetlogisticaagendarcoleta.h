@@ -43,6 +43,7 @@ private:
   auto on_pushButtonAgendarColeta_clicked() -> void;
   auto on_pushButtonCancelarCarga_clicked() -> void;
   auto on_pushButtonDanfe_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;

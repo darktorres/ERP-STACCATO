@@ -67,6 +67,16 @@
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="5">
+          <widget class="QPushButton" name="pushButtonReagendar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Reagendar</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QPushButton" name="pushButtonGerarNFe">
            <property name="enabled">
@@ -77,6 +87,16 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pushButtonProtocoloEntrega">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Protocolo Entrega</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="4">
           <widget class="QPushButton" name="pushButtonImprimirDanfe">
            <property name="enabled">
@@ -84,6 +104,16 @@
            </property>
            <property name="text">
             <string>Imprimir DANFE</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="6">
+          <widget class="QPushButton" name="pushButtonCancelarEntrega">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Cancelar entrega</string>
            </property>
           </widget>
          </item>
@@ -107,33 +137,10 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="6">
-          <widget class="QPushButton" name="pushButtonCancelarEntrega">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
+         <item row="0" column="7">
+          <widget class="QPushButton" name="pushButtonFollowup">
            <property name="text">
-            <string>Cancelar entrega</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5">
-          <widget class="QPushButton" name="pushButtonReagendar">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Reagendar</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="pushButtonProtocoloEntrega">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Protocolo Entrega</string>
+            <string>Followup</string>
            </property>
           </widget>
          </item>

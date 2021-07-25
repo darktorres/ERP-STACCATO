@@ -38,6 +38,7 @@ private:
   auto on_pushButtonMarcarColetado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

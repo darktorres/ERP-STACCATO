@@ -16,12 +16,15 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   setupTables();
 
-  setWindowTitle((tipo == Tipo::Orcamento ? "Orçamento: " : "Pedido: ") + id);
+  if (tipo == Tipo::Orcamento) { setWindowTitle("Orçamento: " + id); }
+  if (tipo == Tipo::Venda) { setWindowTitle("Pedido: " + id); }
+  if (tipo == Tipo::Compra) { setWindowTitle("OC: " + id); }
+  if (tipo == Tipo::Estoque) { setWindowTitle("Estoque: " + id); }
 
   ui->dateFollowup->setDateTime(qApp->serverDateTime());
   ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
-  if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
+  if (tipo != Tipo::Orcamento) { ui->frameOrcamento->hide(); }
 
   setConnections();
 }
@@ -83,7 +86,10 @@ bool FollowUp::verifyFields() {
 }
 
 void FollowUp::setupTables() {
-  modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
+  if (tipo == Tipo::Orcamento) { modelViewFollowup.setTable("view_followup_orcamento"); }
+  if (tipo == Tipo::Venda) { modelViewFollowup.setTable("view_followup_venda"); }
+  if (tipo == Tipo::Compra) { modelViewFollowup.setTable("view_followup_pedido_fornecedor"); }
+  if (tipo == Tipo::Estoque) { modelViewFollowup.setTable("view_followup_estoque"); }
 
   if (tipo == Tipo::Orcamento) {
     modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
@@ -92,11 +98,18 @@ void FollowUp::setupTables() {
 
   if (tipo == Tipo::Venda) { modelViewFollowup.setHeaderData("idVenda", "Venda"); }
 
+  if (tipo == Tipo::Compra) { modelViewFollowup.setHeaderData("ordemCompra", "OC"); }
+
+  if (tipo == Tipo::Estoque) { modelViewFollowup.setHeaderData("idEstoque", "Estoque"); }
+
   modelViewFollowup.setHeaderData("nome", "Usuário");
   modelViewFollowup.setHeaderData("observacao", "Observação");
   modelViewFollowup.setHeaderData("dataFollowup", "Data");
 
-  modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
+  if (tipo == Tipo::Orcamento) { modelViewFollowup.setFilter("idOrcamento LIKE '" + id.left(12) + "%'"); }
+  if (tipo == Tipo::Venda) { modelViewFollowup.setFilter("idVenda LIKE '" + id.left(11) + "%'"); }
+  if (tipo == Tipo::Compra) { modelViewFollowup.setFilter("ordemCompra = " + id); }
+  if (tipo == Tipo::Estoque) { modelViewFollowup.setFilter("idEstoque = " + id); }
 
   modelViewFollowup.setSort("dataFollowup");
 
@@ -115,7 +128,12 @@ void FollowUp::setupTables() {
 
     modelOrcamento.select();
 
-    ui->plainTextEditBaixa->setPlainText(modelOrcamento.data(0, "motivoCancelamento").toString() + "\n\n" + modelOrcamento.data(0, "observacaoCancelamento").toString());
+    const QString motivoCancelamento = modelOrcamento.data(0, "motivoCancelamento").toString();
+    const QString observacaoCancelamento = modelOrcamento.data(0, "observacaoCancelamento").toString();
+
+    ui->plainTextEditBaixa->setPlainText(motivoCancelamento + "\n\n" + observacaoCancelamento);
+
+    if (motivoCancelamento.isEmpty() and observacaoCancelamento.isEmpty()) { ui->plainTextEditBaixa->hide(); }
   }
 }
 

@@ -27,6 +27,7 @@ private:
   // methods
   auto montaFiltro() -> void;
   auto on_pushButtonDevolucaoFornecedor_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonRetornarEstoque_clicked() -> void;
   auto on_radioButtonFiltroDevolvido_clicked(const bool) -> void;
   auto on_radioButtonFiltroPendente_clicked(const bool) -> void;

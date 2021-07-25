@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
+#include "followup.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -50,6 +51,7 @@ void WidgetCompraConfirmar::setConnections() {
 
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonFollowup_clicked, connectionType);
 }
 
 void WidgetCompraConfirmar::updateTables() {
@@ -131,6 +133,18 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
   cancelaProduto->setFilter(modelViewCompras.data(list.first().row(), "OC").toString());
+}
+
+void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelViewCompras.data(selection.first().row(), "OC").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Compra, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

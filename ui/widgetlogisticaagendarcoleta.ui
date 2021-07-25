@@ -150,6 +150,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonFollowup">
+       <property name="text">
+        <string>Followup</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="0" column="2" rowspan="4">

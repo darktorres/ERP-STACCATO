@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
+#include "followup.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
@@ -25,6 +26,7 @@ void WidgetLogisticaRecebimento::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::delayFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonVenda_clicked, connectionType);
@@ -319,6 +321,18 @@ void WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
 
     if (not query3.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query3.lastError().text()); }
   }
+}
+
+void WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelViewRecebimento.data(selection.first().row(), "idEstoque").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 0marcar em qual bloco foi guardado (opcional?)

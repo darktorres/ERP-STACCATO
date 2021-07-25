@@ -51,6 +51,7 @@ private:
   auto on_pushButtonAdicionarParcial_clicked() -> void;
   auto on_pushButtonAdicionarProduto_clicked() -> void;
   auto on_pushButtonAgendarCarga_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarNFeFutura_clicked() -> void;
   auto on_pushButtonImportarNFe_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;

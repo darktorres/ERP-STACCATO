@@ -4,6 +4,7 @@
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "file.h"
+#include "followup.h"
 #include "sql.h"
 #include "user.h"
 #include "xlsxdocument.h"
@@ -20,6 +21,7 @@ void WidgetEstoques::setConnections() {
 
   connect(&timer, &QTimer::timeout, this, &WidgetEstoques::escolheFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoques::delayFiltro, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->radioButtonEstoqueContabil, &QRadioButton::clicked, this, &WidgetEstoques::montaFiltroContabil, connectionType);
   connect(ui->radioButtonEstoqueZerado, &QRadioButton::clicked, this, &WidgetEstoques::montaFiltro, connectionType);
@@ -195,4 +197,16 @@ void WidgetEstoques::gerarExcel(const QString &arquivoModelo, const QString &fil
   }
 
   if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!"); }
+}
+
+void WidgetEstoques::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = model.data(selection.first().row(), "idEstoque").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }

@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
+#include "followup.h"
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
@@ -51,6 +52,7 @@ void WidgetCompraFaturar::setConnections() {
 
   connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::on_checkBoxRepresentacao_toggled, connectionType);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked, connectionType);
 }
@@ -199,6 +201,18 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
   ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
   montaFiltro();
+}
+
+void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelViewFaturamento.data(selection.first().row(), "OC").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Compra, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

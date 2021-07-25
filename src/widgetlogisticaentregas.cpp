@@ -6,6 +6,7 @@
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
 #include "file.h"
+#include "followup.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
@@ -37,6 +38,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked, connectionType);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked, connectionType);
   connect(ui->pushButtonImprimirDanfe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
@@ -678,6 +680,18 @@ QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 
   return fileName;
+}
+
+void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {
+  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelCarga.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto

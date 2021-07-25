@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
+#include "followup.h"
 #include "inputdialog.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -24,6 +25,7 @@ void WidgetLogisticaColeta::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaColeta::delayFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonVenda_clicked, connectionType);
@@ -289,4 +291,16 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
   updateTables();
 
   qApp->enqueueInformation("Cancelado com sucesso!", this);
+}
+
+void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelViewColeta.data(selection.first().row(), "idEstoque").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }

@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
+#include "followup.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -20,6 +21,7 @@ void WidgetLogisticaRepresentacao::setConnections() {
 
   connect(&timer, &QTimer::timeout, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::delayFiltro, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked, connectionType);
 }
 
@@ -127,6 +129,18 @@ void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
+}
+
+void WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString codigo = modelViewLogisticaRepresentacao.data(list.first().row(), "idVenda").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

@@ -37,6 +37,7 @@ private:
   auto on_groupBoxStatus_toggled(bool enabled) -> void;
   auto on_pushButtonComprarAvulso_clicked() -> void;
   auto on_pushButtonExcel_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonPDF_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;

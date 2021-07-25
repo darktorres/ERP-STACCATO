@@ -42,6 +42,7 @@ private:
   auto on_pushButtonCancelarEntrega_clicked() -> void;
   auto on_pushButtonConfirmarEntrega_clicked() -> void;
   auto on_pushButtonConsultarNFe_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarNFe_clicked() -> void;
   auto on_pushButtonImprimirDanfe_clicked() -> void;
   auto on_pushButtonProtocoloEntrega_clicked() -> void;

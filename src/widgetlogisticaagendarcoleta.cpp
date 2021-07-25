@@ -5,6 +5,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
+#include "followup.h"
 #include "inputdialog.h"
 #include "user.h"
 #include "venda.h"
@@ -35,6 +36,7 @@ void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->pushButtonAgendarColeta, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked, connectionType);
   connect(ui->pushButtonCancelarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMontarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked, connectionType);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked, connectionType);
@@ -434,6 +436,18 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   //-------------------------------------
 
   modelEstoque.setFilter(filtros.join(" AND "));
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelEstoque.data(selection.first().row(), "idEstoque").toString();
+
+  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de

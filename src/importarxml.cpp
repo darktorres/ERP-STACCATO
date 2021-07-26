@@ -341,7 +341,7 @@ void ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
     query.bindValue(":idProduto", idProduto);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":estoqueRestante", estoqueRestante);
-    query.bindValue(":descontinuado", qFuzzyIsNull(estoqueRestante) ? true : false);
+    query.bindValue(":descontinuado", qFuzzyIsNull(estoqueRestante));
     query.bindValue(":custo", valorUnid);
 
     if (not query.exec()) { throw RuntimeException("Erro criando produto_estoque: " + query.lastError().text()); }

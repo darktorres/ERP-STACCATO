@@ -120,26 +120,24 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
   unsetConnections();
 
   try {
-    [&] {
-      double total = 0;
+    double total = 0;
 
-      const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-      for (const auto &index : list) {
-        const int row = index.row();
+    for (const auto &index : list) {
+      const int row = index.row();
 
-        modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota);
+      modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota);
 
-        total += modelPedidoFornecedor2.data(row, "preco").toDouble();
-      }
+      total += modelPedidoFornecedor2.data(row, "preco").toDouble();
+    }
 
-      const double valueSt = total * (aliquota / 100);
+    const double valueSt = total * (aliquota / 100);
 
-      ui->doubleSpinBoxSt->setValue(valueSt);
+    ui->doubleSpinBoxSt->setValue(valueSt);
 
-      // TODO: adicionar frete/adicionais
-      ui->doubleSpinBoxTotal->setValue(total);
-    }();
+    // TODO: adicionar frete/adicionais
+    ui->doubleSpinBoxTotal->setValue(total);
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -475,16 +473,14 @@ void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
   try {
-    [&] {
-      double total = 0;
+    double total = 0;
 
-      const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-      for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
-      ui->doubleSpinBoxTotal->setValue(total);
-      ui->widgetPgts->setTotal(total);
-    }();
+    ui->doubleSpinBoxTotal->setValue(total);
+    ui->widgetPgts->setTotal(total);
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -516,28 +512,26 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   try {
-    [&] {
-      const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
-      const int rowPF2 = topLeft.row();
+    const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
+    const int rowPF2 = topLeft.row();
 
-      const double quant = modelPedidoFornecedor2.data(rowPF2, "quant").toDouble();
+    const double quant = modelPedidoFornecedor2.data(rowPF2, "quant").toDouble();
 
-      if (header == "Quant." or header == "R$ Unit.") {
-        const double prcUnitario = modelPedidoFornecedor2.data(rowPF2, "prcUnitario").toDouble();
-        const double preco = quant * prcUnitario;
+    if (header == "Quant." or header == "R$ Unit.") {
+      const double prcUnitario = modelPedidoFornecedor2.data(rowPF2, "prcUnitario").toDouble();
+      const double preco = quant * prcUnitario;
 
-        modelPedidoFornecedor2.setData(rowPF2, "preco", preco);
-      }
+      modelPedidoFornecedor2.setData(rowPF2, "preco", preco);
+    }
 
-      if (header == "Total") {
-        const double preco = modelPedidoFornecedor2.data(rowPF2, "preco").toDouble();
-        const double prcUnitario = preco / quant;
+    if (header == "Total") {
+      const double preco = modelPedidoFornecedor2.data(rowPF2, "preco").toDouble();
+      const double prcUnitario = preco / quant;
 
-        modelPedidoFornecedor2.setData(rowPF2, "prcUnitario", prcUnitario);
-      }
+      modelPedidoFornecedor2.setData(rowPF2, "prcUnitario", prcUnitario);
+    }
 
-      if (header == "Quant." or header == "R$ Unit." or header == "Total") { atualizaPrecosPF1(rowPF2); }
-    }();
+    if (header == "Quant." or header == "R$ Unit." or header == "Total") { atualizaPrecosPF1(rowPF2); }
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -676,20 +670,18 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   unsetConnections();
 
   try {
-    [=] {
-      verifyFields();
+    verifyFields();
 
-      qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
+    qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
 
-      cadastrar();
+    cadastrar();
 
-      qApp->endTransaction();
+    qApp->endTransaction();
 
-      qApp->enqueueInformation("Dados salvos com sucesso!", this);
+    qApp->enqueueInformation("Dados salvos com sucesso!", this);
 
-      QDialog::accept();
-      close();
-    }();
+    QDialog::accept();
+    close();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -786,21 +778,19 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
   unsetConnections();
 
   try {
-    [=] {
-      double total = 0;
+    double total = 0;
 
-      const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-      for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
-      const double aliquota = valueSt * 100 / total;
+    const double aliquota = valueSt * 100 / total;
 
-      ui->doubleSpinBoxAliquota->setValue(aliquota);
+    ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-      for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
+    for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
 
-      ui->doubleSpinBoxTotal->setValue(total);
-    }();
+    ui->doubleSpinBoxTotal->setValue(total);
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -815,34 +805,32 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
   unsetConnections();
 
   try {
-    [=] {
-      if (text == "Sem ST") {
-        ui->doubleSpinBoxSt->setValue(0);
-        ui->doubleSpinBoxAliquota->setValue(0);
+    if (text == "Sem ST") {
+      ui->doubleSpinBoxSt->setValue(0);
+      ui->doubleSpinBoxAliquota->setValue(0);
 
-        ui->labelAliquota->hide();
-        ui->doubleSpinBoxAliquota->hide();
-        ui->labelSt->hide();
-        ui->doubleSpinBoxSt->hide();
-      }
+      ui->labelAliquota->hide();
+      ui->doubleSpinBoxAliquota->hide();
+      ui->labelSt->hide();
+      ui->doubleSpinBoxSt->hide();
+    }
 
-      if (text == "ST Fornecedor" or text == "ST Loja") {
-        ui->doubleSpinBoxAliquota->setValue(4.68);
+    if (text == "ST Fornecedor" or text == "ST Loja") {
+      ui->doubleSpinBoxAliquota->setValue(4.68);
 
-        ui->labelAliquota->show();
-        ui->doubleSpinBoxAliquota->show();
-        ui->labelSt->show();
-        ui->doubleSpinBoxSt->show();
-        ui->dateEditPgtSt->show();
-      }
+      ui->labelAliquota->show();
+      ui->doubleSpinBoxAliquota->show();
+      ui->labelSt->show();
+      ui->doubleSpinBoxSt->show();
+      ui->dateEditPgtSt->show();
+    }
 
-      const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-      for (const auto &index : list) {
-        modelPedidoFornecedor2.setData(index.row(), "st", text);
-        modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
-      }
-    }();
+    for (const auto &index : list) {
+      modelPedidoFornecedor2.setData(index.row(), "st", text);
+      modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
+    }
   } catch (std::exception &) {
     setConnections();
     throw;

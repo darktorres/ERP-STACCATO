@@ -360,22 +360,20 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
   try {
-    [&] {
-      fillComboBoxVendedor();
+    fillComboBoxVendedor();
 
-      // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-      if (User::isVendedor()) {
-        if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
-          ui->radioButtonTodos->setDisabled(true);
-          ui->radioButtonProprios->setChecked(true);
-        } else {
-          ui->radioButtonTodos->setEnabled(true);
-        }
+    if (User::isVendedor()) {
+      if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
+        ui->radioButtonTodos->setDisabled(true);
+        ui->radioButtonProprios->setChecked(true);
+      } else {
+        ui->radioButtonTodos->setEnabled(true);
       }
+    }
 
-      montaFiltro();
-    }();
+    montaFiltro();
   } catch (std::exception &) {
     setConnections();
     throw;

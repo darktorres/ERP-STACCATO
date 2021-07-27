@@ -98,12 +98,10 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   unsetConnections();
 
   try {
-    [&] {
-      const int newRow = modelContaPagamento.insertRowAtEnd();
+    const int newRow = modelContaPagamento.insertRowAtEnd();
 
-      modelContaPagamento.setData(newRow, "status", "PENDENTE");
-      modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
-    }();
+    modelContaPagamento.setData(newRow, "status", "PENDENTE");
+    modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -195,32 +193,30 @@ void InserirLancamento::preencher(const QModelIndex &index) {
   unsetConnections();
 
   try {
-    [&] {
-      const int row = index.row();
+    const int row = index.row();
 
-      if (index.column() == ui->table->columnIndex("dataRealizado")) {
-        const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
-        const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
+    if (index.column() == ui->table->columnIndex("dataRealizado")) {
+      const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
+      const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
 
-        SqlQuery queryConta;
+      SqlQuery queryConta;
 
-        if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-          throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
-        }
-
-        if (queryConta.first()) {
-          const int idConta = queryConta.value("idConta").toInt();
-
-          if (idContaExistente == 0 and idConta != 0) { modelContaPagamento.setData(row, "idConta", idConta); }
-        }
-
-        modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
-        modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"));
-        modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"));
-        modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
-        modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+        throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
       }
-    }();
+
+      if (queryConta.first()) {
+        const int idConta = queryConta.value("idConta").toInt();
+
+        if (idContaExistente == 0 and idConta != 0) { modelContaPagamento.setData(row, "idConta", idConta); }
+      }
+
+      modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+      modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"));
+      modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"));
+      modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
+      modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
+    }
   } catch (std::exception &) {
     setConnections();
     throw;

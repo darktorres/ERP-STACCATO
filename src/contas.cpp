@@ -376,12 +376,10 @@ void Contas::on_pushButtonCriarLancamento_clicked() {
   unsetConnections();
 
   try {
-    [&] {
-      const int newRow = modelPendentes.insertRowAtEnd();
+    const int newRow = modelPendentes.insertRowAtEnd();
 
-      modelPendentes.setData(newRow, "status", "PENDENTE");
-      modelPendentes.setData(newRow, "dataEmissao", qApp->serverDate());
-    }();
+    modelPendentes.setData(newRow, "status", "PENDENTE");
+    modelPendentes.setData(newRow, "dataEmissao", qApp->serverDate());
   } catch (std::exception &) {
     setConnections();
     throw;

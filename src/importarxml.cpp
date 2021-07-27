@@ -63,24 +63,22 @@ void ImportarXML::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   try {
-    [&] {
-      const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
-      const int row = topLeft.row();
+    const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
+    const int row = topLeft.row();
 
-      // TODO: se alterar quant. tem que alterar caixas
+    // TODO: se alterar quant. tem que alterar caixas
 
-      if (header == "Quant." or header == "R$ Unid.") {
-        const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
-        modelEstoque.setData(row, "valor", preco);
-      }
+    if (header == "Quant." or header == "R$ Unid.") {
+      const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
+      modelEstoque.setData(row, "valor", preco);
+    }
 
-      if (header == "R$") {
-        const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
-        modelEstoque.setData(row, "valorUnid", prcUnitario);
-      }
+    if (header == "R$") {
+      const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
+      modelEstoque.setData(row, "valorUnid", prcUnitario);
+    }
 
-      reparear(topLeft);
-    }();
+    reparear(topLeft);
   } catch (std::exception &) {
     ui->pushButtonImportar->setDisabled(true);
     setConnections();
@@ -516,17 +514,15 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
   unsetConnections();
 
   try {
-    [&] {
-      usarXMLInutilizado();
-      parear();
+    usarXMLInutilizado();
+    parear();
 
-      const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+    const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-      if (list.isEmpty()) {
-        ui->pushButtonProcurar->setDisabled(true);
-        ui->itemBoxNFe->setReadOnly(true);
-      }
-    }();
+    if (list.isEmpty()) {
+      ui->pushButtonProcurar->setDisabled(true);
+      ui->itemBoxNFe->setReadOnly(true);
+    }
   } catch (std::exception &) {
     ui->pushButtonImportar->setDisabled(true);
     setConnections();

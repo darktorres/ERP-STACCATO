@@ -288,19 +288,17 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
   unsetConnections();
 
   try {
-    [&] {
-      double total = 0;
+    double total = 0;
 
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-      const double valueSt = total * aliquota / 100;
+    const double valueSt = total * aliquota / 100;
 
-      ui->doubleSpinBoxST->setValue(valueSt);
+    ui->doubleSpinBoxST->setValue(valueSt);
 
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
-      ui->doubleSpinBoxTotal->setValue(total + valueSt);
-    }();
+    ui->doubleSpinBoxTotal->setValue(total + valueSt);
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -313,19 +311,17 @@ void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
   unsetConnections();
 
   try {
-    [&] {
-      double total = 0;
+    double total = 0;
 
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-      const double aliquota = valueSt * 100 / total;
+    const double aliquota = valueSt * 100 / total;
 
-      ui->doubleSpinBoxAliquota->setValue(aliquota);
+    ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
-      ui->doubleSpinBoxTotal->setValue(total + valueSt);
-    }();
+    ui->doubleSpinBoxTotal->setValue(total + valueSt);
   } catch (std::exception &) {
     setConnections();
     throw;

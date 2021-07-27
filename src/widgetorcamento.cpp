@@ -19,36 +19,34 @@ void WidgetOrcamento::setWidgets() {
   unsetConnections();
 
   try {
-    [&] {
-      fillComboBoxFornecedor();
-      fillComboBoxFollowup();
-      fillComboBoxLoja();
+    fillComboBoxFornecedor();
+    fillComboBoxFollowup();
+    fillComboBoxLoja();
 
-      if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
-      fillComboBoxVendedor();
+    fillComboBoxVendedor();
 
-      if (User::isAdministrativo()) {
-        ui->checkBoxMes->setChecked(true);
-        ui->dateEditMes->setEnabled(true);
-      }
+    if (User::isAdministrativo()) {
+      ui->checkBoxMes->setChecked(true);
+      ui->dateEditMes->setEnabled(true);
+    }
 
-      if (User::isGerente()) { ui->frameLojas->hide(); }
+    if (User::isGerente()) { ui->frameLojas->hide(); }
 
-      if (User::isVendedorOrEspecial()) {
-        ui->checkBoxValido->setChecked(true);
-        ui->checkBoxExpirado->setChecked(true);
+    if (User::isVendedorOrEspecial()) {
+      ui->checkBoxValido->setChecked(true);
+      ui->checkBoxExpirado->setChecked(true);
 
-        ui->frameVendedores->hide();
-      }
+      ui->frameVendedores->hide();
+    }
 
-      // TODO: remove this?
-      if (User::nome == "VIVIANE") { ui->frameVendedores->show(); }
+    // TODO: remove this?
+    if (User::nome == "VIVIANE") { ui->frameVendedores->show(); }
 
-      (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
+    (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-      ui->dateEditMes->setDate(qApp->serverDate());
-    }();
+    ui->dateEditMes->setDate(qApp->serverDate());
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -342,14 +340,12 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    [&] {
-      const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
-      for (const auto &child : children) {
-        child->setEnabled(true);
-        child->setChecked(enabled);
-      }
-    }();
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -364,22 +360,20 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
   try {
-    [&] {
-      fillComboBoxVendedor();
+    fillComboBoxVendedor();
 
-      // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-      if (User::isVendedor()) {
-        if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
-          ui->radioButtonTodos->setDisabled(true);
-          ui->radioButtonProprios->setChecked(true);
-        } else {
-          ui->radioButtonTodos->setEnabled(true);
-        }
+    if (User::isVendedor()) {
+      if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
+        ui->radioButtonTodos->setDisabled(true);
+        ui->radioButtonProprios->setChecked(true);
+      } else {
+        ui->radioButtonTodos->setEnabled(true);
       }
+    }
 
-      montaFiltro();
-    }();
+    montaFiltro();
   } catch (std::exception &) {
     setConnections();
     throw;

@@ -35,6 +35,7 @@ private:
   Tipo const tipo;
   Ui::InputDialogFinanceiro *ui;
   // methods
+  auto atualizaPrecosPF1(const int rowPF2) -> void;
   auto cadastrar() -> void;
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;

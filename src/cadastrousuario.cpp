@@ -91,7 +91,7 @@ void CadastroUsuario::verifyFields() {
   // TODO: deve marcar uma loja?
   // quando não é marcado nenhuma loja o banco de dados salva como 1 - Alphaville
 
-  verificaUsuarioDisponivel();
+  if (tipo == Tipo::Cadastrar) { verificaUsuarioDisponivel(); }
 
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 

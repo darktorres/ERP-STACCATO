@@ -13,12 +13,16 @@
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
-  setConnections();
-
   setEditTriggers(NoEditTriggers);
   setAlternatingRowColors(true);
   setUniformRowHeights(true);
   setSortingEnabled(true);
+
+  header()->setResizeContentsPrecision(0);
+  header()->setDefaultSectionSize(20);
+  header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+  setConnections();
 }
 
 void TreeView::setConnections() {
@@ -115,7 +119,13 @@ int TreeView::columnIndex(const QString &column) const {
   return columnIndex;
 }
 
-void TreeView::setAutoResize(const bool value) { autoResize = value; }
+void TreeView::setAutoResize(const bool value) {
+  autoResize = value;
+
+  header()->setSectionResizeMode(autoResize ? QHeaderView::ResizeToContents : QHeaderView::Interactive);
+
+  if (autoResize) { resizeAllColumns(); }
+}
 
 void TreeView::mousePressEvent(QMouseEvent *event) {
   const QModelIndex item = indexAt(event->pos());

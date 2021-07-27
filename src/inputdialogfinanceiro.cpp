@@ -493,41 +493,50 @@ void InputDialogFinanceiro::calcularTotal() {
   setConnections();
 }
 
+void InputDialogFinanceiro::atualizaPrecosPF1(const int rowPF2) {
+  const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(rowPF2, "idPedidoFK"), 1, Qt::MatchExactly);
+
+  if (match.isEmpty()) { throw RuntimeException("Erro atualizando valores na linha mãe!", this); }
+
+  const int rowPF1 = match.first().row();
+
+  const auto match2 = modelPedidoFornecedor2.match("idPedidoFK", modelPedidoFornecedor2.data(rowPF2, "idPedidoFK"), -1, Qt::MatchExactly);
+
+  double newPreco = 0;
+
+  for (auto index2 : match2) { newPreco += modelPedidoFornecedor2.data(index2.row(), "preco").toDouble(); }
+
+  double newPrcUnit = newPreco / modelPedidoFornecedor.data(rowPF1, "quant").toDouble();
+
+  modelPedidoFornecedor.setData(rowPF1, "prcUnitario", newPrcUnit);
+  modelPedidoFornecedor.setData(rowPF1, "preco", newPreco);
+}
+
 void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   try {
     [&] {
       const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
-      const int row = topLeft.row();
+      const int rowPF2 = topLeft.row();
 
-      const double quant = modelPedidoFornecedor2.data(row, "quant").toDouble();
-
-      const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
-
-      if (match.isEmpty()) { throw RuntimeException("Erro atualizando valores na linha mãe!", this); }
-
-      const int rowMae = match.first().row();
+      const double quant = modelPedidoFornecedor2.data(rowPF2, "quant").toDouble();
 
       if (header == "Quant." or header == "R$ Unit.") {
-        const double prcUnitario = modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
+        const double prcUnitario = modelPedidoFornecedor2.data(rowPF2, "prcUnitario").toDouble();
         const double preco = quant * prcUnitario;
 
-        modelPedidoFornecedor2.setData(row, "preco", preco);
-
-        modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
-        modelPedidoFornecedor.setData(rowMae, "preco", preco);
+        modelPedidoFornecedor2.setData(rowPF2, "preco", preco);
       }
 
       if (header == "Total") {
-        const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
+        const double preco = modelPedidoFornecedor2.data(rowPF2, "preco").toDouble();
         const double prcUnitario = preco / quant;
 
-        modelPedidoFornecedor2.setData(row, "prcUnitario", prcUnitario);
-
-        modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario);
-        modelPedidoFornecedor.setData(rowMae, "preco", preco);
+        modelPedidoFornecedor2.setData(rowPF2, "prcUnitario", prcUnitario);
       }
+
+      if (header == "Quant." or header == "R$ Unit." or header == "Total") { atualizaPrecosPF1(rowPF2); }
     }();
   } catch (std::exception &) {
     setConnections();

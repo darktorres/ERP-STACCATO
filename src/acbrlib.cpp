@@ -111,7 +111,11 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 
   trim(buffer);
 
-  throw RuntimeException("Erro ACBrLib: " + QString::fromStdString(buffer));
+  const QString errorMessage = QString::fromStdString(buffer);
+
+  if (errorMessage.contains("Unable to create file")) { throw RuntimeException("Não foi possível criar o arquivo, verifique se ele não está aberto!"); }
+
+  throw RuntimeException("Erro ACBrLib: " + errorMessage);
 }
 
 #else

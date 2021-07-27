@@ -162,6 +162,8 @@ void TableView::setAutoResize(const bool value) {
   autoResize = value;
 
   horizontalHeader()->setSectionResizeMode(autoResize ? QHeaderView::ResizeToContents : QHeaderView::Interactive);
+
+  if (autoResize) { resizeColumnsToContents(); }
 }
 
 void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }

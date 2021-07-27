@@ -130,6 +130,7 @@ void WidgetLogisticaEntregas::setupTables() {
   modelProdutos.setHeaderData("lote", "Lote");
   modelProdutos.setHeaderData("local", "Local");
   modelProdutos.setHeaderData("bloco", "Bloco");
+  modelProdutos.setHeaderData("isEstoque", "Estoque?");
 
   ui->tableProdutos->setModel(&modelProdutos);
 

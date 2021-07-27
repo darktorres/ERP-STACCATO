@@ -136,9 +136,16 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   }
 
   if (tipo == Tipo::Pagar) {
+    const QString header = model.headerData(index.column(), Qt::Horizontal).toString();
+    const QString ordemCompra = model.data(index.row(), "ordemCompra").toString();
+
+    if (header == "OC" and ordemCompra.isEmpty()) { throw RuntimeError("Sem OC!"); }
+
     auto *contas = new Contas(Contas::Tipo::Pagar, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
-    contas->viewContaPagar(model.data(index.row(), "dataPagamento").toString());
+
+    if (header == "OC") { contas->viewContaPagarOrdemCompra(ordemCompra); }
+    if (header != "OC") { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString()); }
   }
 }
 

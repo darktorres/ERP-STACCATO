@@ -336,10 +336,42 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void Contas::viewContaPagar(const QString &dataPagamento) {
+void Contas::viewContaPagarData(const QString &dataPagamento) {
+  setWindowTitle(windowTitle() + " - Data: " + QDate::fromString(dataPagamento, "yyyy-MM-dd").toString("dd-MM-yyyy"));
+
+  // -------------------------------------------------------------------------
+
   modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
   modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO', 'CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
+
+  // -------------------------------------------------------------------------
+
+  modelPendentes.select();
+
+  modelProcessados.select();
+}
+
+void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
+  setWindowTitle(windowTitle() + " - OC: " + ordemCompra);
+
+  // -------------------------------------------------------------------------
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra) or not query.first()) {
+    throw RuntimeException("Erro buscando OC: " + query.lastError().text());
+  }
+
+  const QString idCompra = query.value("idCompra").toString();
+
+  // -------------------------------------------------------------------------
+
+  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+
+  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO', 'CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
+
+  // -------------------------------------------------------------------------
 
   modelPendentes.select();
 
@@ -355,7 +387,11 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   const QString idVenda = query.value("idVenda").toString();
 
+  // -------------------------------------------------------------------------
+
   setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
+
+  // -------------------------------------------------------------------------
 
   modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
                                              : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");

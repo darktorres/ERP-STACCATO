@@ -28,8 +28,8 @@ private:
   QChart *chart;
   QDateTimeAxis *axisX;
   QLineSeries *series;
-  QProgressDialog *progressDialog;
   QValueAxis *axisY;
+  QProgressDialog progressDialog;
   SqlTableModel model;
   Ui::WidgetGalpaoPeso *ui;
   // methods

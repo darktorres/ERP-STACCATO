@@ -9,14 +9,14 @@
 #include <QThread>
 #include <QUrl>
 
-ACBr::ACBr(QObject *parent) : QObject(parent), progressDialog(new QProgressDialog()) {
-  progressDialog->reset();
-  progressDialog->setCancelButton(nullptr);
-  progressDialog->setLabelText("Esperando ACBr...");
-  progressDialog->setWindowTitle("ERP Staccato");
-  progressDialog->setWindowModality(Qt::WindowModal);
-  progressDialog->setMaximum(0);
-  progressDialog->setMinimum(0);
+ACBr::ACBr(QObject *parent) : QObject(parent) {
+  progressDialog.reset();
+  progressDialog.setCancelButton(nullptr);
+  progressDialog.setLabelText("Esperando ACBr...");
+  progressDialog.setWindowTitle("ERP Staccato");
+  progressDialog.setWindowModality(Qt::WindowModal);
+  progressDialog.setMaximum(0);
+  progressDialog.setMinimum(0);
 
   setConnections();
 }
@@ -32,7 +32,7 @@ void ACBr::setConnections() {
 }
 
 void ACBr::error(QAbstractSocket::SocketError socketError) {
-  progressDialog->cancel();
+  progressDialog.cancel();
 
   switch (socketError) {
   case QAbstractSocket::ConnectionRefusedError: [[fallthrough]];
@@ -141,10 +141,10 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
   recebido = false;
   enviado = false;
   resposta.clear();
-  progressDialog->reset();
+  progressDialog.reset();
 
   if (local) {
-    if (not qApp->getSilent()) { progressDialog->show(); }
+    if (not qApp->getSilent()) { progressDialog.show(); }
 
     if (not conectado) { socket.connectToHost("localhost", 3434); }
   }
@@ -155,7 +155,7 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
 
     if (servidorConfig.isEmpty() or porta.isEmpty()) { throw RuntimeError("Preencher IP e porta do ACBr nas configurações!"); }
 
-    if (not qApp->getSilent()) { progressDialog->show(); }
+    if (not qApp->getSilent()) { progressDialog.show(); }
 
     if (not conectado) { socket.connectToHost(servidorConfig, porta.toUShort()); }
   }
@@ -163,7 +163,7 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
   while (not pronto) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(10);
-    if (progressDialog->wasCanceled()) { throw std::exception(); }
+    if (progressDialog.wasCanceled()) { throw std::exception(); }
   }
 
   socket.write(comando.toUtf8() + "\r\n.\r\n");
@@ -171,16 +171,16 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
   while (not enviado and conectado) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(10);
-    if (progressDialog->wasCanceled()) { throw std::exception(); }
+    if (progressDialog.wasCanceled()) { throw std::exception(); }
   }
 
   while (not recebido and conectado) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(10);
-    if (progressDialog->wasCanceled()) { throw std::exception(); }
+    if (progressDialog.wasCanceled()) { throw std::exception(); }
   }
 
-  progressDialog->cancel();
+  progressDialog.cancel();
 
   return resposta;
 }

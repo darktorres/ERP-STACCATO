@@ -7,7 +7,11 @@
 #include <QDebug>
 #include <QSqlError>
 
-WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpaoPeso) { ui->setupUi(this); }
+WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpaoPeso) {
+  ui->setupUi(this);
+  progressDialog.setAutoClose(true);
+  progressDialog.reset();
+}
 
 WidgetGalpaoPeso::~WidgetGalpaoPeso() { delete ui; }
 
@@ -83,7 +87,7 @@ void WidgetGalpaoPeso::on_pushButtonAtualizar_clicked() {
   setProgressDialog();
 
   for (int dia = 0; dia < ui->spinBoxDias->value(); ++dia) {
-    if (progressDialog->wasCanceled()) { break; }
+    if (progressDialog.wasCanceled()) { break; }
 
     const int row = model.insertRowAtEnd();
 
@@ -94,10 +98,8 @@ void WidgetGalpaoPeso::on_pushButtonAtualizar_clicked() {
     model.setData(row, "data", query.value("data"));
     model.setData(row, "kg", query.value("kg"));
 
-    progressDialog->setValue(progressDialog->value() + 1);
+    progressDialog.setValue(dia + 1);
   }
-
-  progressDialog->cancel();
 
   model.submitAll();
 
@@ -122,14 +124,12 @@ void WidgetGalpaoPeso::setupTables() {
 }
 
 void WidgetGalpaoPeso::setProgressDialog() {
-  if (not progressDialog) { progressDialog = new QProgressDialog(this); }
-
-  progressDialog->reset();
-  progressDialog->setCancelButton(nullptr);
-  progressDialog->setLabelText("Processando...");
-  progressDialog->setWindowTitle("ERP Staccato");
-  progressDialog->setWindowModality(Qt::WindowModal);
-  progressDialog->setMinimum(0);
-  progressDialog->setMaximum(ui->spinBoxDias->value());
-  progressDialog->setCancelButtonText("Cancelar");
+  progressDialog.reset();
+  progressDialog.setCancelButton(nullptr);
+  progressDialog.setLabelText("Processando...");
+  progressDialog.setWindowTitle("ERP Staccato");
+  progressDialog.setWindowModality(Qt::WindowModal);
+  progressDialog.setMinimum(0);
+  progressDialog.setMaximum(ui->spinBoxDias->value());
+  progressDialog.setCancelButtonText("Cancelar");
 }

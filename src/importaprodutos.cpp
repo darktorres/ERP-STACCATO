@@ -82,7 +82,7 @@ void ImportaProdutos::importar() {
   xlsx.selectSheet("BASE");
   verificaTabela(xlsx);
 
-  progressDialog->show();
+  progressDialog.show();
 
   cadastraFornecedores(xlsx);
   verificaSeRepresentacao();
@@ -102,12 +102,12 @@ void ImportaProdutos::importar() {
   const int rowCount = xlsx.dimension().rowCount();
 
   for (int row = 2; row <= rowCount; ++row) {
-    if (progressDialog->wasCanceled()) {
+    if (progressDialog.wasCanceled()) {
       canceled = true;
       break;
     }
 
-    progressDialog->setValue(current++);
+    progressDialog.setValue(current++);
 
     if (xlsx.readValue(row, 1).toString().isEmpty()) { continue; }
 
@@ -122,7 +122,7 @@ void ImportaProdutos::importar() {
     existeNoModel ? atualizaProduto() : insereEmOk();
   }
 
-  progressDialog->cancel();
+  progressDialog.cancel();
 
   if (canceled) { throw std::exception(); }
 
@@ -139,15 +139,14 @@ void ImportaProdutos::importar() {
 }
 
 void ImportaProdutos::setProgressDialog() {
-  progressDialog = new QProgressDialog(this);
-  progressDialog->reset();
-  progressDialog->setCancelButton(nullptr);
-  progressDialog->setLabelText("Importando...");
-  progressDialog->setWindowTitle("ERP Staccato");
-  progressDialog->setWindowModality(Qt::WindowModal);
-  progressDialog->setMinimum(0);
-  progressDialog->setMaximum(0);
-  progressDialog->setCancelButtonText("Cancelar");
+  progressDialog.reset();
+  progressDialog.setCancelButton(nullptr);
+  progressDialog.setLabelText("Importando...");
+  progressDialog.setWindowTitle("ERP Staccato");
+  progressDialog.setWindowModality(Qt::WindowModal);
+  progressDialog.setMinimum(0);
+  progressDialog.setMaximum(0);
+  progressDialog.setCancelButtonText("Cancelar");
 }
 
 bool ImportaProdutos::readFile() {
@@ -365,7 +364,7 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
     m_fornecedores << xlsx.readValue(row, 1).toString();
   }
 
-  progressDialog->setMaximum(count);
+  progressDialog.setMaximum(count);
 
   QStringList ids;
 

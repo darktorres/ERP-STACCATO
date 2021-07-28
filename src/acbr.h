@@ -21,7 +21,7 @@ private:
   bool enviado = false;
   bool pronto = false;
   bool recebido = false;
-  QProgressDialog *progressDialog;
+  QProgressDialog progressDialog;
   QString const welcome = "Esperando por comandos.\x03";
   QString lastHost;
   QString resposta;

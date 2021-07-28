@@ -150,6 +150,8 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
       max_y = QDateTime::fromMSecsSinceEpoch(max_y.toReal());
     }
 
+    max_y = max_y.toDouble() * 1.1;
+
     axisY->setRange(min_y, max_y);
 
     if (startYZero) { axisY->setMin(0); }

@@ -25,6 +25,5 @@ private:
   int const descontinuadoColumn;
   int const estoqueColumn;
   int const promocaoColumn;
-  int const validadeColumn;
   // methods
 };

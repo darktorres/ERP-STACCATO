@@ -32,6 +32,7 @@ public:
   auto setTotal(double value) -> void;
   auto verifyFields() -> void;
 
+  // TODO: make private?
   // attributes
   int pagamentos = 0; // TODO: rename this to count
   QList<QCheckBox *> listCheckBoxRep;

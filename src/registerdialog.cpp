@@ -25,6 +25,7 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeySt
 }
 
 void RegisterDialog::connectLineEditsToDirty() {
+  // TODO: this connect the SearchDialog lineEdit too, fix
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }

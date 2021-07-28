@@ -113,7 +113,7 @@ void PDF::gerarPdf() {
 
       if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text(), parent); }
 
-      if (queryPgt.value("valor") == 0) { continue; }
+      if (qFuzzyIsNull(queryPgt.value("valor").toDouble())) { continue; }
 
       const QString pagEm = (queryPgt.value("parcelas").toInt() == 1) ? " - pag. em: " : " - 1° pag. em: ";
       const QString observacao = queryPgt.value("observacao").toString();

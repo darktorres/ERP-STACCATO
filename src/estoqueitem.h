@@ -8,6 +8,7 @@ class EstoqueItem : public QObject, public QGraphicsSimpleTextItem {
 public:
   explicit EstoqueItem(const QString &text, const int idVendaProduto2, QGraphicsItem *parent = nullptr);
 
+  // TODO: make this private?
   int const idVendaProduto2;
 
 signals:

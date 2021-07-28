@@ -524,9 +524,6 @@ void Venda::updateMode() {
   ui->frameRT->hide();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
-  ui->tableFluxoCaixa2->hide();
-  ui->tableFluxoCaixa2->hide();
-  ui->widgetPgts->hide();
   ui->widgetPgts->hide();
 
   ui->checkBoxFreteManual->setDisabled(true);

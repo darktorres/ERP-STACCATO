@@ -5,6 +5,7 @@
 
 class XML final {
 
+private:
   struct Produto {
     // produto
     QString codProd;

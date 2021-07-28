@@ -86,7 +86,7 @@ void WidgetGraficos::updateChart() {
     }
   }
 
-  for (auto serie : qAsConst(series)) { serie->clear(); }
+  for (const auto &serie : qAsConst(series)) { serie->clear(); }
 
   while (queryChart.next()) {
     for (int i = 0; i < 13; ++i) {

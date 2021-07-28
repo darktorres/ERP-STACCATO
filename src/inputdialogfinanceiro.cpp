@@ -296,7 +296,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
         const int idConta = query2.value("idConta").toInt();
-        const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
+        const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
 
         //-----------------------------------------------------------------
 
@@ -327,15 +327,12 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
           modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
 
-          double val;
+          const bool primeiraParcela = (parcela == 0);
+          const bool ultimaParcela = (parcela == parcelas - 1);
 
-          if (centavoSobressalente and parcela == 0) {
-            val = valorParcela + restoParcela;
-          } else if (not centavoSobressalente and parcela == parcelas - 1) {
-            val = valorParcela + restoParcela;
-          } else {
-            val = valorParcela;
-          }
+          double val = valorParcela;
+
+          if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
 
           modelFluxoCaixa.setData(row, "valor", val);
           modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);

@@ -12,8 +12,8 @@
 #include "log.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
 #include "produtoproxymodel.h"
+#include "reaisdelegate.h"
 #include "user.h"
 #include "venda.h"
 
@@ -254,6 +254,7 @@ bool Orcamento::viewRegister() {
 
       ui->spinBoxValidade->setReadOnly(true);
       ui->spinBoxValidade->setButtonSymbols(QSpinBox::NoButtons);
+      ui->spinBoxPrazoEntrega->setButtonSymbols(QSpinBox::NoButtons);
 
       ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
       ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -1625,7 +1626,7 @@ void Orcamento::calcularPesoTotal() {
     }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
-    total += modelItem.data(row, "caixas").toInt() * kgcx;
+    total += modelItem.data(row, "caixas").toDouble() * kgcx;
   }
 
   ui->spinBoxPesoTotal->setValue(total);

@@ -6,8 +6,8 @@
 #include "doubledelegate.h"
 #include "followup.h"
 #include "inputdialogfinanceiro.h"
-#include "reaisdelegate.h"
 #include "produtoproxymodel.h"
+#include "reaisdelegate.h"
 
 #include <QSqlError>
 
@@ -186,3 +186,4 @@ void WidgetHistoricoCompra::on_pushButtonFollowup_clicked() {
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
 // TODO: 4verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
 // TODO: renomear essa classe para WidgetCompraHistorico
+// TODO: duplo clique na coluna de idVenda deve abrir a Venda para facilitar

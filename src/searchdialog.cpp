@@ -5,8 +5,8 @@
 #include "doubledelegate.h"
 #include "file.h"
 #include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
 #include "produtoproxymodel.h"
+#include "reaisdelegate.h"
 #include "user.h"
 #include "xml.h"
 
@@ -227,6 +227,56 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
   return sdCliente;
 }
 
+SearchDialog *SearchDialog::conta(QWidget *parent) {
+  SearchDialog *sdConta = new SearchDialog("Buscar Conta", "loja_has_conta", "idConta", {"banco", "agencia", "conta"}, {}, "", "banco", false, parent);
+
+  sdConta->hideColumns({"idConta", "idLoja", "desativado"});
+
+  sdConta->setHeaderData("banco", "Banco");
+  sdConta->setHeaderData("agencia", "Agência");
+  sdConta->setHeaderData("conta", "Conta");
+
+  return sdConta;
+}
+
+SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
+  SearchDialog *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", "", false, parent);
+
+  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "desativado"});
+
+  sdEndereco->setHeaderData("descricao", "Descrição");
+  sdEndereco->setHeaderData("cep", "CEP");
+  sdEndereco->setHeaderData("logradouro", "Logradouro");
+  sdEndereco->setHeaderData("numero", "Número");
+  sdEndereco->setHeaderData("complemento", "Comp.");
+  sdEndereco->setHeaderData("bairro", "Bairro");
+  sdEndereco->setHeaderData("cidade", "Cidade");
+  sdEndereco->setHeaderData("uf", "UF");
+
+  return sdEndereco;
+}
+
+SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
+  SearchDialog *sdFornecedor = new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE",
+                                                "razaoSocial", false, parent);
+
+  sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2",     "comissaoLoja",  "desativado", "email", "idFornecedor", "idNextel", "inscEstadual", "nextel",    "representacao", "st", "tel",
+                             "telCel",     "telCom",    "especialidade", "fretePagoLoja", "vemDoSul",   "banco", "agencia",      "cc",       "poupanca",     "nomeBanco", "cnpjBanco"});
+
+  sdFornecedor->setHeaderData("razaoSocial", "Razão Social");
+  sdFornecedor->setHeaderData("nomeFantasia", "Nome Fantasia");
+  sdFornecedor->setHeaderData("contatoNome", "Nome do Contato");
+  sdFornecedor->setHeaderData("cnpj", "CNPJ");
+  sdFornecedor->setHeaderData("contatoCPF", "CPF do Contato");
+  sdFornecedor->setHeaderData("contatoApelido", "Apelido do Contato");
+  sdFornecedor->setHeaderData("contatoRG", "RG do Contato");
+  sdFornecedor->setHeaderData("validadeProdutos", "Validade Produtos");
+
+  sdFornecedor->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia/CNPJ/CPF do Contato");
+
+  return sdFornecedor;
+}
+
 SearchDialog *SearchDialog::loja(QWidget *parent) {
   SearchDialog *sdLoja = new SearchDialog("Buscar Loja", "loja", "idLoja", {"nomeFantasia"}, "descricao, nomeFantasia, razaoSocial", "desativado = FALSE", "descricao", false, parent);
 
@@ -329,25 +379,31 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   return sdProd;
 }
 
-SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
-  SearchDialog *sdFornecedor = new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE",
-                                                "razaoSocial", false, parent);
+SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *parent) {
+  const QString filtroNaoHa = (mostrarNaoHa) ? "" : " AND idProfissional NOT IN (1)";
 
-  sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2",     "comissaoLoja",  "desativado", "email", "idFornecedor", "idNextel", "inscEstadual", "nextel",    "representacao", "st", "tel",
-                             "telCel",     "telCom",    "especialidade", "fretePagoLoja", "vemDoSul",   "banco", "agencia",      "cc",       "poupanca",     "nomeBanco", "cnpjBanco"});
+  SearchDialog *sdProfissional =
+      new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, "nome_razao", true, parent);
 
-  sdFornecedor->setHeaderData("razaoSocial", "Razão Social");
-  sdFornecedor->setHeaderData("nomeFantasia", "Nome Fantasia");
-  sdFornecedor->setHeaderData("contatoNome", "Nome do Contato");
-  sdFornecedor->setHeaderData("cnpj", "CNPJ");
-  sdFornecedor->setHeaderData("contatoCPF", "CPF do Contato");
-  sdFornecedor->setHeaderData("contatoApelido", "Apelido do Contato");
-  sdFornecedor->setHeaderData("contatoRG", "RG do Contato");
-  sdFornecedor->setHeaderData("validadeProdutos", "Validade Produtos");
+  sdProfissional->hideColumns({"idLoja", "idUsuarioRel", "idProfissional", "inscEstadual", "contatoNome", "contatoCPF", "contatoApelido", "contatoRG", "banco", "agencia", "cc", "nomeBanco",
+                               "cpfBanco", "desativado", "comissao", "poupanca", "cnpjBanco"});
 
-  sdFornecedor->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia/CNPJ/CPF do Contato");
+  sdProfissional->setHeaderData("pfpj", "Tipo");
+  sdProfissional->setHeaderData("nome_razao", "Profissional");
+  sdProfissional->setHeaderData("nomeFantasia", "Fantasia/Apelido");
+  sdProfissional->setHeaderData("cpf", "CPF");
+  sdProfissional->setHeaderData("cnpj", "CNPJ");
+  sdProfissional->setHeaderData("tel", "Tel.");
+  sdProfissional->setHeaderData("telCel", "Tel. Cel.");
+  sdProfissional->setHeaderData("telCom", "Tel. Com.");
+  sdProfissional->setHeaderData("idNextel", "id Nextel");
+  sdProfissional->setHeaderData("nextel", "Nextel");
+  sdProfissional->setHeaderData("email", "E-mail");
+  sdProfissional->setHeaderData("tipoProf", "Profissão");
 
-  return sdFornecedor;
+  sdProfissional->ui->lineEditBusca->setPlaceholderText("Profissional/Profissão");
+
+  return sdProfissional;
 }
 
 SearchDialog *SearchDialog::transportadora(QWidget *parent) {
@@ -368,6 +424,21 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
   return sdTransportadora;
 }
 
+SearchDialog *SearchDialog::usuario(QWidget *parent) {
+  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", "nome", false, parent);
+
+  sdUsuario->hideColumns({"idLoja", "idUsuario", "user", "passwd", "especialidade", "desativado"});
+
+  sdUsuario->setHeaderData("descricao", "Loja");
+  sdUsuario->setHeaderData("tipo", "Função");
+  sdUsuario->setHeaderData("nome", "Nome");
+  sdUsuario->setHeaderData("email", "E-mail");
+
+  sdUsuario->ui->lineEditBusca->setPlaceholderText("Função/Nome");
+
+  return sdUsuario;
+}
+
 SearchDialog *SearchDialog::veiculo(QWidget *parent) {
   SearchDialog *sdVeiculo =
       new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", "razaoSocial", false, parent);
@@ -382,21 +453,6 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
   sdVeiculo->ui->lineEditBusca->setPlaceholderText("Transportadora/Modelo/Placa");
 
   return sdVeiculo;
-}
-
-SearchDialog *SearchDialog::usuario(QWidget *parent) {
-  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", "nome", false, parent);
-
-  sdUsuario->hideColumns({"idLoja", "idUsuario", "user", "passwd", "especialidade", "desativado"});
-
-  sdUsuario->setHeaderData("descricao", "Loja");
-  sdUsuario->setHeaderData("tipo", "Função");
-  sdUsuario->setHeaderData("nome", "Nome");
-  sdUsuario->setHeaderData("email", "E-mail");
-
-  sdUsuario->ui->lineEditBusca->setPlaceholderText("Função/Nome");
-
-  return sdUsuario;
 }
 
 SearchDialog *SearchDialog::vendedor(QWidget *parent) {
@@ -435,62 +491,6 @@ SearchDialog *SearchDialog::getCacheLoja() {
   }
 
   return cacheLoja;
-}
-
-SearchDialog *SearchDialog::conta(QWidget *parent) {
-  SearchDialog *sdConta = new SearchDialog("Buscar Conta", "loja_has_conta", "idConta", {"banco", "agencia", "conta"}, {}, "", "banco", false, parent);
-
-  sdConta->hideColumns({"idConta", "idLoja", "desativado"});
-
-  sdConta->setHeaderData("banco", "Banco");
-  sdConta->setHeaderData("agencia", "Agência");
-  sdConta->setHeaderData("conta", "Conta");
-
-  return sdConta;
-}
-
-SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
-  SearchDialog *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", "", false, parent);
-
-  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "desativado"});
-
-  sdEndereco->setHeaderData("descricao", "Descrição");
-  sdEndereco->setHeaderData("cep", "CEP");
-  sdEndereco->setHeaderData("logradouro", "Logradouro");
-  sdEndereco->setHeaderData("numero", "Número");
-  sdEndereco->setHeaderData("complemento", "Comp.");
-  sdEndereco->setHeaderData("bairro", "Bairro");
-  sdEndereco->setHeaderData("cidade", "Cidade");
-  sdEndereco->setHeaderData("uf", "UF");
-
-  return sdEndereco;
-}
-
-SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *parent) {
-  const QString filtroNaoHa = (mostrarNaoHa) ? "" : " AND idProfissional NOT IN (1)";
-
-  SearchDialog *sdProfissional =
-      new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, "nome_razao", true, parent);
-
-  sdProfissional->hideColumns({"idLoja", "idUsuarioRel", "idProfissional", "inscEstadual", "contatoNome", "contatoCPF", "contatoApelido", "contatoRG", "banco", "agencia", "cc", "nomeBanco",
-                               "cpfBanco", "desativado", "comissao", "poupanca", "cnpjBanco"});
-
-  sdProfissional->setHeaderData("pfpj", "Tipo");
-  sdProfissional->setHeaderData("nome_razao", "Profissional");
-  sdProfissional->setHeaderData("nomeFantasia", "Fantasia/Apelido");
-  sdProfissional->setHeaderData("cpf", "CPF");
-  sdProfissional->setHeaderData("cnpj", "CNPJ");
-  sdProfissional->setHeaderData("tel", "Tel.");
-  sdProfissional->setHeaderData("telCel", "Tel. Cel.");
-  sdProfissional->setHeaderData("telCom", "Tel. Com.");
-  sdProfissional->setHeaderData("idNextel", "id Nextel");
-  sdProfissional->setHeaderData("nextel", "Nextel");
-  sdProfissional->setHeaderData("email", "E-mail");
-  sdProfissional->setHeaderData("tipoProf", "Profissão");
-
-  sdProfissional->ui->lineEditBusca->setPlaceholderText("Profissional/Profissão");
-
-  return sdProfissional;
 }
 
 void SearchDialog::setFornecedorRep(const QString &newFornecedorRep) { fornecedorRep = newFornecedorRep.isEmpty() ? "" : " AND fornecedor = '" + newFornecedorRep + "'"; }

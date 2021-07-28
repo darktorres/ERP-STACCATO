@@ -79,7 +79,7 @@ void WidgetLogisticaCalendario::updateFilter() {
   updateCalendar(date.addDays(date.dayOfWeek() * -1));
 }
 
-void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
+void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
   ui->tableWidget->clearContents();
 
   ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
@@ -171,13 +171,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">
            <a href="https://www.google.com/maps/dir/?api=1&amp;origin=Rua+Sales&oacute;polis,27,Barueri,SP&amp;destination=%7&amp;
            travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
-                .arg(query.value("kg").toString())
-                .arg(query.value("caixas").toString())
-                .arg(query.value("idVenda").toString())
-                .arg(query.value("bairro").toString() + " - " + query.value("cidade").toString())
-                .arg(produtosList)
-                .arg(query.value("status").toString())
-                .arg(destino);
+                .arg(query.value("kg").toString(), query.value("caixas").toString(), query.value("idVenda").toString(), query.value("bairro").toString() + " - " + query.value("cidade").toString(),
+                     produtosList, query.value("status").toString(), destino);
 
     widget->setHtml(text);
     ui->tableWidget->setCellWidget(row, diaSemana, widget);

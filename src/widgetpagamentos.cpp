@@ -302,7 +302,7 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
   }
 }
 
-void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
+void WidgetPagamentos::setTipo(const Tipo novoTipo) {
   if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;

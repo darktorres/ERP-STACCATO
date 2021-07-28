@@ -47,7 +47,7 @@ void WidgetNfeEntrada::updateTables() {
   modelViewNFeEntrada.select();
 }
 
-void WidgetNfeEntrada::delayFiltro() { timer.start(500); }
+void WidgetNfeEntrada::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 

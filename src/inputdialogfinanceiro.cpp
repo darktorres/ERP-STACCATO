@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
+InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -738,7 +738,7 @@ void InputDialogFinanceiro::cadastrar() {
   modelFluxoCaixa.submitAll();
 }
 
-void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate &date) {
+void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
@@ -772,7 +772,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
   ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate &) { montarFluxoCaixa(false); }
+void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate) { montarFluxoCaixa(false); }
 
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
@@ -849,7 +849,7 @@ void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &
   for (auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
 }
 
-void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate &) {
+void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate) {
   const auto match = modelFluxoCaixa.match("tipo", "FRETE", 1, Qt::MatchExactly);
 
   if (match.isEmpty()) { return; }

@@ -333,7 +333,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
+void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
   if (resposta.contains("Rejeição:")) {
     qDebug() << "rejeicao";
 
@@ -392,7 +392,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   close();
 }
 
-void CadastrarNFe::cadastrar(const int &idNFe) {
+void CadastrarNFe::cadastrar(const int idNFe) {
   SqlQuery queryNFe;
   queryNFe.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
   queryNFe.bindValue(":xml", xml);
@@ -793,7 +793,7 @@ void CadastrarNFe::writeComplemento(QTextStream &stream) const {
   }
 }
 
-void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
+void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex &index) {
   unsetConnections();
 
   try {

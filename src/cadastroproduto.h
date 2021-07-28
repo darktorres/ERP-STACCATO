@@ -26,8 +26,8 @@ private:
   auto calcularMarkup() -> void;
   auto clearFields() -> void final;
   auto on_checkBoxValidade_stateChanged(const int state) -> void;
-  auto on_doubleSpinBoxCusto_valueChanged(const double &) -> void;
-  auto on_doubleSpinBoxVenda_valueChanged(const double &) -> void;
+  auto on_doubleSpinBoxCusto_valueChanged(const double) -> void;
+  auto on_doubleSpinBoxVenda_valueChanged(const double) -> void;
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;

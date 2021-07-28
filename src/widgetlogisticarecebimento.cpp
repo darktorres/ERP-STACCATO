@@ -48,7 +48,7 @@ void WidgetLogisticaRecebimento::updateTables() {
   modelViewRecebimento.select();
 }
 
-void WidgetLogisticaRecebimento::delayFiltro() { timer.start(500); }
+void WidgetLogisticaRecebimento::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
 
@@ -90,7 +90,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   ui->table->hideColumn("idNFe");
 }
 
-void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) {
+void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) {
   SqlQuery query1;
   query1.prepare("UPDATE estoque SET status = 'ESTOQUE', bloco = :bloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
@@ -217,7 +217,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) {
+void WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate dataPrevReceb) {
   SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevReceb = :dataPrevReceb WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM RECEBIMENTO'");

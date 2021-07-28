@@ -96,7 +96,7 @@ void WidgetEstoques::updateTables() {
   model.select();
 }
 
-void WidgetEstoques::delayFiltro() { timer.start(500); }
+void WidgetEstoques::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetEstoques::resetTables() { modelIsSet = false; }
 

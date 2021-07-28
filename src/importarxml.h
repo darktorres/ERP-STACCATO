@@ -38,7 +38,7 @@ public:
   };
   Q_ENUM(FieldColors)
 
-  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent);
+  explicit ImportarXML(const QStringList &idsCompra, const QDate dataFaturamento, QWidget *parent);
   ~ImportarXML();
 
 private:

@@ -146,9 +146,7 @@ void Contas::preencher(const QModelIndex &index) {
           if (modelPendentes.data(rowMatch, "status").toString() == "CANCELADO") { continue; }
 
           if (queryConta.first()) {
-            const int idConta = queryConta.value("idConta").toInt();
-
-            if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", idConta); }
+            if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", queryConta.value("idConta")); }
           }
 
           modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"));
@@ -162,7 +160,7 @@ void Contas::preencher(const QModelIndex &index) {
 
       // buscar linha da taxa cartao e alterar a conta para ser igual
       if (index.column() == ui->tablePendentes->columnIndex("idConta")) {
-        if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
+        if (index.data().toInt() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
 
         const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
@@ -170,7 +168,7 @@ void Contas::preencher(const QModelIndex &index) {
       }
 
       if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {
-        if (index.data() == 0) { return; }
+        if (index.data().toInt() == 0) { return; }
 
         modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"));
       }

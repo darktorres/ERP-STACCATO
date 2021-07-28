@@ -41,7 +41,7 @@ void WidgetHistoricoCompra::updateTables() {
   modelViewComprasFinanceiro.select();
 }
 
-void WidgetHistoricoCompra::delayFiltro() { timer.start(500); }
+void WidgetHistoricoCompra::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
 

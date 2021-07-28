@@ -77,7 +77,7 @@ QModelIndexList SqlTableModel::match(const QString &column, const QVariant &valu
   return QSqlTableModel::match(QSqlTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }
 
-QVector<int> SqlTableModel::multiMatch(const QVector<Condition> conditions, bool allHits) const {
+QVector<int> SqlTableModel::multiMatch(const QVector<Condition> &conditions, bool allHits) const {
   QVector<int> result;
 
   for (int row = 0; row < rowCount(); ++row) {

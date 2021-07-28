@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class NoEditDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit NoEditDelegate(QObject *parent);

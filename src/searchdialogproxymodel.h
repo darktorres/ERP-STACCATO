@@ -7,6 +7,7 @@
 #include <QSqlQueryModel>
 
 class SearchDialogProxyModel final : public SortFilterProxyModel {
+  Q_OBJECT
 
 public:
   explicit SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent);
@@ -15,13 +16,15 @@ public:
 
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
-private:
-  int const descontinuadoColumn = -1;
-  int const estoqueColumn = -1;
-  int const promocaoColumn = -1;
-  int const validadeColumn = -1;
-
   // QSortFilterProxyModel interface
 protected:
   auto lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const -> bool final;
+
+private:
+  // attributes
+  int const descontinuadoColumn;
+  int const estoqueColumn;
+  int const promocaoColumn;
+  int const validadeColumn;
+  // methods
 };

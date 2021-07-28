@@ -58,6 +58,6 @@ int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const
   return field;
 }
 
-void SqlQueryModel::sort(int column, Qt::SortOrder order) { select(base_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }
+void SqlQueryModel::sort(const int column, const Qt::SortOrder order) { select(base_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }
 
-void SqlQueryModel::sort(QString column, Qt::SortOrder order) { select(base_query + " ORDER BY " + column + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }
+void SqlQueryModel::sort(const QString &column, const Qt::SortOrder order) { select(base_query + " ORDER BY " + column + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }

@@ -29,7 +29,7 @@ void ValidadeDialog::on_pushButtonSalvar_clicked() {
 
 void ValidadeDialog::on_spinBox_valueChanged(const int dias) { ui->dateEdit->setDate(qApp->serverDate().addDays(dias)); }
 
-void ValidadeDialog::on_dateEdit_dateChanged(const QDate &date) { ui->spinBoxDias->setValue(static_cast<int>(qApp->serverDate().daysTo(date))); }
+void ValidadeDialog::on_dateEdit_dateChanged(const QDate date) { ui->spinBoxDias->setValue(static_cast<int>(qApp->serverDate().daysTo(date))); }
 
 int ValidadeDialog::getValidade() { return ui->checkBoxSemValidade->isChecked() ? -1 : ui->spinBoxDias->value(); }
 

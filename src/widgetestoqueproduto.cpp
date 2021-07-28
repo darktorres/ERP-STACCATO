@@ -1,6 +1,7 @@
 #include "widgetestoqueproduto.h"
 #include "ui_widgetestoqueproduto.h"
 
+#include "application.h"
 #include "searchdialogproxymodel.h"
 
 #include <QDebug>
@@ -74,7 +75,7 @@ void WidgetEstoqueProduto::updateTables() {
   modelProdutos.select();
 }
 
-void WidgetEstoqueProduto::delayFiltro() { timer.start(500); }
+void WidgetEstoqueProduto::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetEstoqueProduto::resetTables() { modelIsSet = false; }
 

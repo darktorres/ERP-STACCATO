@@ -4,6 +4,7 @@
 #include <QSqlQueryModel>
 
 class FinanceiroProxyModel final : public QIdentityProxyModel {
+  Q_OBJECT
 
 public:
   explicit FinanceiroProxyModel(QSqlQueryModel *model, QObject *parent);

@@ -8,7 +8,7 @@ class PalletItem final : public QGraphicsObject {
   Q_OBJECT
 
 public:
-  explicit PalletItem(const QRectF size, QGraphicsItem *parent = nullptr);
+  explicit PalletItem(const QRectF &size, QGraphicsItem *parent = nullptr);
 
   auto boundingRect() const -> QRectF override;
   auto getFlagHighlight() const -> bool;
@@ -25,17 +25,6 @@ signals:
   void save();
   void unselectOthers();
 
-private:
-  // attributes
-  bool flagTooltip = false;
-  bool flagHighlight = false;
-  bool selected = false;
-  QRectF size;
-  QString label;
-  QString text;
-  // methods
-  auto select() -> void;
-
 protected:
   auto dragEnterEvent(QGraphicsSceneDragDropEvent *event) -> void override;
   auto dragLeaveEvent(QGraphicsSceneDragDropEvent *event) -> void override;
@@ -48,4 +37,15 @@ protected:
   auto mouseMoveEvent(QGraphicsSceneMouseEvent *event) -> void override;
   auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void override;
   auto mouseReleaseEvent(QGraphicsSceneMouseEvent *event) -> void override;
+
+private:
+  // attributes
+  bool flagTooltip = false;
+  bool flagHighlight = false;
+  bool selected = false;
+  QRectF size;
+  QString label;
+  QString text;
+  // methods
+  auto select() -> void;
 };

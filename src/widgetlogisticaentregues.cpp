@@ -48,7 +48,7 @@ void WidgetLogisticaEntregues::updateTables() {
   modelProdutos.select();
 }
 
-void WidgetLogisticaEntregues::delayFiltro() { timer.start(500); }
+void WidgetLogisticaEntregues::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
 

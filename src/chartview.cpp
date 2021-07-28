@@ -87,7 +87,7 @@ void ChartView::resizeEvent(QResizeEvent *event) {
     m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height() - 30);
     m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height() - 30);
 
-    for (auto tooltip : m_tooltips) { tooltip->updateGeometry(); }
+    for (auto tooltip : qAsConst(m_tooltips)) { tooltip->updateGeometry(); }
   }
 
   QGraphicsView::resizeEvent(event);
@@ -108,8 +108,10 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
 
   QVector<QPointF> vec;
 
-  for (const auto series : m_chart->series()) {
-    const auto xySeries = dynamic_cast<QXYSeries *>(series);
+  const auto seriesList = m_chart->series();
+
+  for (const auto series : seriesList) {
+    const auto xySeries = qobject_cast<QXYSeries *>(series);
     if (xySeries) { vec << xySeries->pointsVector(); }
   }
 
@@ -118,12 +120,12 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
   const auto axisX = m_chart->axes(Qt::Horizontal).at(0);
 
   if (axisX) {
-    QVariant min_x = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF &a, const QPointF &b) { return a.x() > b.x(); })->x();
-    QVariant max_x = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF &a, const QPointF &b) { return a.x() < b.x(); })->x();
+    QVariant min_x = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.x() > b.x(); })->x();
+    QVariant max_x = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.x() < b.x(); })->x();
 
-    if (dynamic_cast<QBarCategoryAxis *>(axisX)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
+    if (qobject_cast<QBarCategoryAxis *>(axisX)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
 
-    if (dynamic_cast<QDateTimeAxis *>(axisX)) {
+    if (qobject_cast<QDateTimeAxis *>(axisX)) {
       min_x = QDateTime::fromMSecsSinceEpoch(min_x.toReal());
       max_x = QDateTime::fromMSecsSinceEpoch(max_x.toReal());
     }
@@ -138,12 +140,12 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
   const auto axisY = m_chart->axes(Qt::Vertical).at(0);
 
   if (axisY) {
-    QVariant min_y = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF &a, const QPointF &b) { return a.y() > b.y(); })->y();
-    QVariant max_y = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF &a, const QPointF &b) { return a.y() < b.y(); })->y();
+    QVariant min_y = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.y() > b.y(); })->y();
+    QVariant max_y = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.y() < b.y(); })->y();
 
-    if (dynamic_cast<QBarCategoryAxis *>(axisY)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
+    if (qobject_cast<QBarCategoryAxis *>(axisY)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
 
-    if (dynamic_cast<QDateTimeAxis *>(axisY)) {
+    if (qobject_cast<QDateTimeAxis *>(axisY)) {
       min_y = QDateTime::fromMSecsSinceEpoch(min_y.toReal());
       max_y = QDateTime::fromMSecsSinceEpoch(max_y.toReal());
     }

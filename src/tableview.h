@@ -39,5 +39,5 @@ private:
   auto redoView() -> void;
   auto resizeColumnsToContents() -> void;
   auto setConnections() -> void;
-  auto showContextMenu(const QPoint &pos) -> void;
+  auto showContextMenu(const QPoint pos) -> void;
 };

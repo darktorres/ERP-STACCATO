@@ -32,9 +32,9 @@ private:
   auto calcularPreco() -> void;
   auto cancelar(const QModelIndexList &list) -> void;
   auto enviarEmail(const QString &razaoSocial, const QString &anexo) -> void;
-  auto gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) -> void;
-  auto gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) -> QString;
-  auto getDates(const QList<QModelIndex> &list) -> std::tuple<QDate, QDate>;
+  auto gerarCompra(const QModelIndexList &list, const QDate dataCompra, const QDate dataPrevista, const int ordemCompra) -> void;
+  auto gerarExcel(const QModelIndexList &list, const int ordemCompra, const bool isRepresentacao) -> QString;
+  auto getDates(const QModelIndexList &list) -> std::tuple<QDate, QDate>;
   auto getOrdemCompra() -> int;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
@@ -43,5 +43,5 @@ private:
   auto on_tableResumo_clicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto verificaRepresentacao(const QList<QModelIndex> &list) -> bool;
+  auto verificaRepresentacao(const QModelIndexList &list) -> bool;
 };

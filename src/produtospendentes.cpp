@@ -217,7 +217,7 @@ void ProdutosPendentes::setupTables() {
   ui->tableCompra->hideColumn("dataRealEnt");
 }
 
-void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
+void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate dataPrevista) {
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -400,7 +400,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   recarregarTabelas();
 }
 
-void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) {
+void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate dataPrevista) {
   const double excedente = ui->doubleSpinBoxComprar->value() - ui->doubleSpinBoxQuantTotal->value();
 
   if (excedente > 0.) { // TODO: replace query with model so values can be correctly rounded (Application::roundDouble)
@@ -428,7 +428,7 @@ void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
   }
 }
 
-void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
+void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate dataPrevista) {
   SqlTableModel model;
   model.setTable("pedido_fornecedor_has_produto");
 

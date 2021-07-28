@@ -2,7 +2,7 @@
 
 ReaisDelegate::ReaisDelegate(const int decimais, const bool readOnly, QObject *parent) : QStyledItemDelegate(parent), readOnly(readOnly), decimais(decimais) {}
 
-ReaisDelegate::ReaisDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+ReaisDelegate::ReaisDelegate(QObject *parent) : QStyledItemDelegate(parent), readOnly(false), decimais(2) {}
 
 QString ReaisDelegate::displayText(const QVariant &value, const QLocale &locale) const {
   return (value.userType() == QMetaType::Double) ? "R$ " + QLocale(QLocale::Portuguese).toString(value.toDouble(), 'f', decimais) : QStyledItemDelegate::displayText(value, locale);

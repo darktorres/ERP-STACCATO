@@ -22,7 +22,7 @@ public:
   ~WidgetFinanceiroContas();
 
   auto resetTables() -> void;
-  auto setTipo(const Tipo &novoTipo) -> void;
+  auto setTipo(const Tipo novoTipo) -> void;
   auto updateTables() -> void;
 
 private:
@@ -39,8 +39,8 @@ private:
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
-  auto on_dateEditVencimentoDe_dateChanged(const QDate &date) -> void;
-  auto on_dateEditRealizadoDe_dateChanged(const QDate &date) -> void;
+  auto on_dateEditRealizadoDe_dateChanged(const QDate date) -> void;
+  auto on_dateEditVencimentoDe_dateChanged(const QDate date) -> void;
   auto on_doubleSpinBoxDe_valueChanged(const double value) -> void;
   auto on_groupBoxRealizado_toggled(const bool enabled) -> void;
   auto on_groupBoxVencimento_toggled(const bool enabled) -> void;

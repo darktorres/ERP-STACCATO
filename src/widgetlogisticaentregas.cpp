@@ -161,7 +161,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
+void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate dataPrevEnt) {
   SqlQuery query1;
   query1.prepare("UPDATE venda_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
@@ -270,7 +270,7 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->pushButtonConsultarNFe->setEnabled(isValid);
 }
 
-void WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) {
+void WidgetLogisticaEntregas::confirmarEntrega(const QDate dataRealEnt, const QString &entregou, const QString &recebeu) {
   SqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
@@ -302,7 +302,7 @@ void WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const Q
   }
 }
 
-void WidgetLogisticaEntregas::delayFiltro() { timer.start(500); }
+void WidgetLogisticaEntregas::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();

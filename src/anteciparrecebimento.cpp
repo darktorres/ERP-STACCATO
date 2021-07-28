@@ -410,7 +410,7 @@ void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString
   montaFiltro();
 }
 
-void AnteciparRecebimento::delayFiltro() { timer.start(500); }
+void AnteciparRecebimento::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void AnteciparRecebimento::selecionarTaxa() {
   if (ui->comboBoxPagamento->currentText() == "COMISSÃO") { return calcularTotais(); }

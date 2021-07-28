@@ -21,10 +21,7 @@
 
 #include "application.h"
 
-#include <QHash>
-#include <QSqlQueryModel>
 #include <QSqlRecord>
-#include <QVector>
 
 class SqlTreeModelNode {
 public:

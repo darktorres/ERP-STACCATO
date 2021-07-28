@@ -17,6 +17,7 @@ public:
   auto setModel(QAbstractItemModel *model) -> void final;
 
 protected:
+  auto drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const -> void override;
   auto mousePressEvent(QMouseEvent *event) -> void final;
 
 private:
@@ -31,10 +32,6 @@ private:
   auto resizeAllColumns() -> void;
   auto setAutoResize(const bool value) -> void;
   auto setConnections() -> void;
-  auto showContextMenu(const QPoint &pos) -> void;
+  auto showContextMenu(const QPoint pos) -> void;
   auto unsetConnections() -> void;
-
-  // QTreeView interface
-protected:
-  virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const override;
 };

@@ -5,6 +5,8 @@
 #include <QDialog>
 
 class ImportaTabelaIBPT final : public QDialog {
+  Q_OBJECT
+
 public:
   explicit ImportaTabelaIBPT(QWidget *parent);
   ~ImportaTabelaIBPT() = default;

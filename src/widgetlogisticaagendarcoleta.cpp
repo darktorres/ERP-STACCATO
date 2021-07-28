@@ -159,7 +159,7 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
   ui->doubleSpinBoxPeso->setSuffix(" Kg (" + QString::number(caixas) + " Cx.)");
 }
 
-void WidgetLogisticaAgendarColeta::delayFiltro() { timer.start(500); }
+void WidgetLogisticaAgendarColeta::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaAgendarColeta::updateTables() {
   if (not isSet) {
@@ -242,7 +242,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   qApp->enqueueInformation("Agendado com sucesso!", this);
 }
 
-void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga) {
+void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga) {
   SqlQuery queryTemp;
   queryTemp.prepare("SELECT codComercial FROM estoque WHERE idEstoque = :idEstoque");
 
@@ -384,7 +384,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged() { montaFiltro(); }
 
-void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date) {
+void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");

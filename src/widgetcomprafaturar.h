@@ -26,7 +26,7 @@ private:
   SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
-  auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> void;
+  auto faturarRepresentacao(const QDate dataReal, const QStringList &idsCompra) -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxRepresentacao_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;

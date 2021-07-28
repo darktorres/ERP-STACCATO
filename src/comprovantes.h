@@ -10,6 +10,7 @@ class Comprovantes;
 }
 
 class CustomDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit CustomDelegate(QObject *parent);

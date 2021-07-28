@@ -133,4 +133,4 @@ void PrecoEstoque::on_lineEditBusca_textChanged() {
   modelProduto.setFilter(filtros.join(" AND "));
 }
 
-void PrecoEstoque::delayFiltro() { timer.start(500); }
+void PrecoEstoque::delayFiltro() { timer.start(qApp->delayedTimer); }

@@ -38,8 +38,8 @@ private:
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) -> void;
-  auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> void;
+  auto processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) -> void;
+  auto reagendar(const QModelIndexList &list, const QDate dataPrevReceb) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

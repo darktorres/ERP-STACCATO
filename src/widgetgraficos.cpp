@@ -162,7 +162,9 @@ void WidgetGraficos::toggleMarker(QLegendMarker *marker) const {
 }
 
 void WidgetGraficos::on_checkBox_toggled() {
-  for (const auto marker : chart.legend()->markers()) { toggleMarker(marker); }
+  const auto markers = chart.legend()->markers();
+
+  for (const auto marker : markers) { toggleMarker(marker); }
 }
 
 void WidgetGraficos::on_comboBox_currentIndexChanged(const int index) { chartView->setTheme(static_cast<QChart::ChartTheme>(index)); }

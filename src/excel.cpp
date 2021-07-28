@@ -130,7 +130,7 @@ void Excel::gerarExcel() {
 
     if (queryPgt.value("valor") == 0) { continue; }
 
-    const QString pagEm = (queryPgt.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ");
+    const QString pagEm = (queryPgt.value("parcelas").toInt() == 1 ? " - pag. em: " : " - 1° pag. em: ");
     const QString observacao = queryPgt.value("observacao").toString();
 
     const QString pgt = queryPgt.value("tipo").toString() + " - " + queryPgt.value("parcelas").toString() + "x de R$ " + locale.toString(queryPgt.value("valor").toDouble(), 'f', 2) + pagEm +

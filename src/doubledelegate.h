@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class DoubleDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit DoubleDelegate(const int decimais, QObject *parent);

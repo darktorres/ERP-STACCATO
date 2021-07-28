@@ -774,7 +774,7 @@ void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
   }
 
   if (queryExiste.first()) {
-    if (queryExiste.value("nsu") == 0) { return; }
+    if (queryExiste.value("nsu").toInt() == 0) { return; }
 
     const QString statusDistribuicao = queryExiste.value("statusDistribuicao").toString();
 
@@ -826,3 +826,4 @@ bool NFeDistribuicao::houveConsultaEmOutroPc() {
 
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario
 // TODO: lidar com mais de um pc tentando baixar nfes (usar maintenance.lastDistribuicao)
+// TODO: autoconfirmar nfes com mais de x dias para evitar perder o prazo e ser multado

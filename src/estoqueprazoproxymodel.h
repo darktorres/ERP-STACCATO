@@ -4,6 +4,7 @@
 #include <QSqlQueryModel>
 
 class EstoquePrazoProxyModel final : public QIdentityProxyModel {
+  Q_OBJECT
 
 public:
   explicit EstoquePrazoProxyModel(QSqlQueryModel *model, QObject *parent);

@@ -34,7 +34,7 @@ void WidgetFinanceiroCompra::updateTables() {
   model.select();
 }
 
-void WidgetFinanceiroCompra::delayFiltro() { timer.start(500); }
+void WidgetFinanceiroCompra::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
 

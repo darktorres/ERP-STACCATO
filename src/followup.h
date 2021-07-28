@@ -27,7 +27,7 @@ private:
   Tipo const tipo;
   Ui::FollowUp *ui;
   // methods
-  auto on_dateFollowup_dateChanged(const QDate &date) -> void;
+  auto on_dateFollowup_dateChanged(const QDate date) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;

@@ -64,7 +64,7 @@ void SearchDialog::setConnections() {
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked, connectionType);
 }
 
-void SearchDialog::delayFiltro() { timer.start(500); }
+void SearchDialog::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void SearchDialog::setupTables(const QString &table, const QString &sortColumn) {
   model.setTable(table);
@@ -107,7 +107,9 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
   QStringList filtroLike;
 
-  for (const auto &ftIndex : fullTextIndex.split(", ", Qt::SkipEmptyParts)) {
+  const auto ftKeys = fullTextIndex.split(", ", Qt::SkipEmptyParts);
+
+  for (const auto &ftIndex : ftKeys) {
     QStringList parteFiltro;
 
     for (const auto &palavra : textStrings) { parteFiltro << ftIndex + " LIKE '%" + palavra + "%'"; }
@@ -170,8 +172,8 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 }
 
 QString SearchDialog::getText(const QVariant &id) {
-  if (id == 0) { return QString(); }
-  if (model.tableName().contains("endereco") and id == 1) { return "NÃO HÁ/RETIRA"; }
+  if (id.toInt() == 0) { return QString(); }
+  if (model.tableName().contains("endereco") and id.toInt() == 1) { return "NÃO HÁ/RETIRA"; }
 
   QString queryText;
 

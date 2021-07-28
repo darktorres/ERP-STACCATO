@@ -134,7 +134,7 @@ void WidgetCompraGerar::updateTables() {
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
-void WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) {
+void WidgetCompraGerar::gerarCompra(const QModelIndexList &list, const QDate dataCompra, const QDate dataPrevista, const int ordemCompra) {
   SqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
@@ -258,7 +258,7 @@ void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &a
   }
 }
 
-std::tuple<QDate, QDate> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
+std::tuple<QDate, QDate> WidgetCompraGerar::getDates(const QModelIndexList &list) {
   QStringList ids;
 
   for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido1").toString(); }
@@ -312,7 +312,7 @@ int WidgetCompraGerar::getOrdemCompra() {
   return oc;
 }
 
-bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
+bool WidgetCompraGerar::verificaRepresentacao(const QModelIndexList &list) {
   const int row = list.first().row();
   const QString fornecedor = modelProdutos.data(row, "fornecedor").toString();
 
@@ -342,7 +342,7 @@ bool WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
   return isRepresentacao;
 }
 
-QString WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int ordemCompra, const bool isRepresentacao) {
+QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ordemCompra, const bool isRepresentacao) {
   const int firstRow = list.first().row();
   const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
   const QString folderKey = User::getSetting("User/ComprasFolder").toString();

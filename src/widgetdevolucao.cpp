@@ -28,7 +28,7 @@ void WidgetDevolucao::updateTables() {
   model.select();
 }
 
-void WidgetDevolucao::delayFiltro() { timer.start(500); }
+void WidgetDevolucao::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetDevolucao::montaFiltro() {
   QStringList filtros;

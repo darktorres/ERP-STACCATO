@@ -32,6 +32,6 @@ private:
   auto on_pushButtonProximo_clicked() -> void;
   auto setConnections() -> void;
   auto unsetConnections() -> void;
-  auto updateCalendar(const QDate &startDate) -> void;
+  auto updateCalendar(const QDate startDate) -> void;
   auto updateFilter() -> void;
 };

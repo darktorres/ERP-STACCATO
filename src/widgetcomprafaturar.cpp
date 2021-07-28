@@ -78,7 +78,7 @@ void WidgetCompraFaturar::updateTables() {
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
-void WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
+void WidgetCompraFaturar::faturarRepresentacao(const QDate dataReal, const QStringList &idsCompra) {
   SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 

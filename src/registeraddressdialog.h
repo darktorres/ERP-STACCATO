@@ -5,6 +5,7 @@
 #include "registerdialog.h"
 
 class RegisterAddressDialog : public RegisterDialog {
+  Q_OBJECT
 
 public:
   explicit RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
@@ -12,15 +13,15 @@ public:
 protected:
   // attributes
   int currentRowEnd = -1;
-  QList<QSqlRecord> backupEndereco;
   QDataWidgetMapper mapperEnd;
+  QList<QSqlRecord> backupEndereco;
   SqlTableModel modelEnd;
   // methods
-  auto getCodigoUF(const QString &uf) const -> int;
   auto dataEnd(const QString &key) const -> QVariant;
+  auto getCodigoUF(const QString &uf) const -> int;
+  auto newRegister() -> bool override;
   auto setDataEnd(const QString &key, const QVariant &value) -> void;
   auto verificaEndereco(const QString &cidade, const QString &uf) -> void;
-  virtual auto newRegister() -> bool override;
 
 private:
   // methods

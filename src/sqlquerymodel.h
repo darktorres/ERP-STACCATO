@@ -17,8 +17,8 @@ public:
   auto select() -> void;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setQuery(const QString &query, const QSqlDatabase &db = QSqlDatabase()) -> void;
-  auto sort(QString column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
-  auto sort(int column, Qt::SortOrder order = Qt::AscendingOrder) -> void override;
+  auto sort(const QString &column, const Qt::SortOrder order = Qt::AscendingOrder) -> void;
+  auto sort(const int column, const Qt::SortOrder order = Qt::AscendingOrder) -> void override;
 
   QAbstractProxyModel *proxyModel = nullptr;
 

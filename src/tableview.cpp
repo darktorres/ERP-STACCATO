@@ -37,7 +37,7 @@ void TableView::resizeColumnsToContents() {
 
 int TableView::columnCount() const { return model()->columnCount(); }
 
-void TableView::showContextMenu(const QPoint &pos) {
+void TableView::showContextMenu(const QPoint pos) {
   QMenu contextMenu;
 
   QAction action("Autodimensionar", this);

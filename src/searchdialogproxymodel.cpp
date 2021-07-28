@@ -13,7 +13,7 @@ SearchDialogProxyModel::SearchDialogProxyModel(QSqlQueryModel *model, QObject *p
       promocaoColumn(model->record().indexOf("promocao")), validadeColumn(model->record().indexOf("validadeProdutos")) {}
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")) {}
+    : SortFilterProxyModel(model, parent), descontinuadoColumn(-1), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")), validadeColumn(-1) {}
 
 QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

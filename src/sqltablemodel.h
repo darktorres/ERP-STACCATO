@@ -25,7 +25,7 @@ public:
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
   auto insertRowAtEnd() -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
-  auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
+  auto multiMatch(const QVector<Condition> &conditions, bool allHits = true) const -> QVector<int>;
   auto removeSelection(const QModelIndexList &selection) -> void;
   auto select() -> bool;
   auto setData(const int row, const QString &column, const QVariant &value, const bool adjustValue = true) -> void;
@@ -40,15 +40,15 @@ public:
   QAbstractProxyModel *proxyModel = nullptr;
 
 private:
+  // make these hidden
   using QSqlTableModel::data;
   using QSqlTableModel::match;
   using QSqlTableModel::setData;
   using QSqlTableModel::setHeaderData;
   using QSqlTableModel::setSort;
 
-protected:
   // attributes
-  int const limit = 0;
+  int const limit;
   // methods
   auto selectStatement() const -> QString final;
 };

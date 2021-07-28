@@ -9,7 +9,7 @@
 #include <QThread>
 #include <QUrl>
 
-ACBr::ACBr() : QObject(), progressDialog(new QProgressDialog()) {
+ACBr::ACBr(QObject *parent) : QObject(parent), progressDialog(new QProgressDialog()) {
   progressDialog->reset();
   progressDialog->setCancelButton(nullptr);
   progressDialog->setLabelText("Esperando ACBr...");

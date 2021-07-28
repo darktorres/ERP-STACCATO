@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-File::File(const QString &name) : QFile(name) {}
+File::File(const QString &name, QObject *parent) : QFile(name, parent) {}
 
 bool File::open(QIODevice::OpenMode mode) {
   if (mode & (QFile::WriteOnly)) {

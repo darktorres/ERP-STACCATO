@@ -47,7 +47,7 @@ void WidgetLogisticaColeta::updateTables() {
   modelViewColeta.select();
 }
 
-void WidgetLogisticaColeta::delayFiltro() { timer.start(500); }
+void WidgetLogisticaColeta::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
@@ -114,7 +114,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
   qApp->enqueueInformation("Confirmado coleta!", this);
 }
 
-void WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) {
+void WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate dataColeta, const QDate dataPrevReceb) {
   SqlQuery query1;
   query1.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
@@ -184,7 +184,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) {
+void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate dataPrevColeta) {
   SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM COLETA'");

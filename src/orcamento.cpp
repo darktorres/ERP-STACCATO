@@ -1529,7 +1529,7 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
   // frete = (pesoProduto(ton.) * 180) + (pesoProduto < 2ton. ? dist. * 1.5 : pesoProduto < 4.5 ? dist. * 2 : fracionar cargas)
 }
 
-void Orcamento::on_dataEmissao_dateChanged(const QDate &date) { ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day()); }
+void Orcamento::on_dataEmissao_dateChanged(const QDate date) { ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day()); }
 
 void Orcamento::verificaDisponibilidadeEstoque() {
   SqlQuery query;

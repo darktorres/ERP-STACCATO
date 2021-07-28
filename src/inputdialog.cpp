@@ -11,7 +11,7 @@
 #include <QDebug>
 #include <QSqlError>
 
-InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
+InputDialog::InputDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -112,7 +112,7 @@ QDate InputDialog::getNextDate() const { return ui->dateEditProximo->date(); }
 
 QString InputDialog::getObservacao() const { return ui->lineEditObservacao->text(); }
 
-void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
+void InputDialog::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 

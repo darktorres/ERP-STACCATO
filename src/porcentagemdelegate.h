@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class PorcentagemDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit PorcentagemDelegate(const bool multiplicar, QObject *parent);

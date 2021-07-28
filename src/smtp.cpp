@@ -25,7 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <QFileInfo>
 #include <QResource>
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), port(port), host(host), pass(pass), user(user) {
+Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout, QObject *parent)
+    : QObject(parent), timeout(timeout), port(port), host(host), pass(pass), user(user) {
   socket = new QSslSocket(this);
 
   setConnections();

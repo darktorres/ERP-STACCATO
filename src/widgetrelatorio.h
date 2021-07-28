@@ -31,7 +31,7 @@ private:
   // methods
   auto calcularTotalGeral() -> void;
   auto calcularTotalVendedor() -> void;
-  auto dateEditMes_dateChanged(const QDate &) -> void;
+  auto dateEditMes_dateChanged(const QDate) -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName) -> void;
   auto on_pushButtonExcel_clicked() -> void;
   auto setConnections() -> void;

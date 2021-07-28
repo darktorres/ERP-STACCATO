@@ -29,7 +29,7 @@ private:
   Ui::WidgetCompraConsumos *ui;
   // methods
   auto delayFiltro() -> void;
-  auto desfazerConsumo(const QList<QModelIndex> &list) -> void;
+  auto desfazerConsumo(const QModelIndexList &list) -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;

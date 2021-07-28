@@ -4,8 +4,12 @@
 #include <QSqlQueryModel>
 
 class OrcamentoProxyModel final : public QIdentityProxyModel {
+  Q_OBJECT
 
 public:
+  enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
+  Q_ENUM(FieldColors)
+
   explicit OrcamentoProxyModel(QSqlQueryModel *model, QObject *parent);
   ~OrcamentoProxyModel() final = default;
 
@@ -16,7 +20,4 @@ private:
   int const followupIndex;
   int const semaforoIndex;
   int const statusIndex;
-
-  enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
-  Q_ENUM(FieldColors)
 };

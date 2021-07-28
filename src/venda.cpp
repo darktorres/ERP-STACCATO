@@ -577,7 +577,7 @@ bool Venda::viewRegister() {
 
     setTreeView();
 
-    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE");
+    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE");
 
     modelFluxoCaixa.select();
 
@@ -588,7 +588,7 @@ bool Venda::viewRegister() {
 
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
-      modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND (comissao = TRUE OR taxa = TRUE) AND desativado = FALSE");
+      modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND (comissao = TRUE OR taxa = TRUE) AND desativado = FALSE");
 
       modelFluxoCaixa2.select();
 

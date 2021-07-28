@@ -7,7 +7,7 @@
 #include "followup.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 
 #include <QSqlError>
 

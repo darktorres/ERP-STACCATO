@@ -6,13 +6,13 @@
 
 #include <QSqlQueryModel>
 
-class SearchDialogProxyModel final : public SortFilterProxyModel {
+class ProdutoProxyModel final : public SortFilterProxyModel {
   Q_OBJECT
 
 public:
-  explicit SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent);
-  explicit SearchDialogProxyModel(SqlTreeModel *model, QObject *parent);
-  ~SearchDialogProxyModel() final = default;
+  explicit ProdutoProxyModel(QSqlQueryModel *model, QObject *parent);
+  explicit ProdutoProxyModel(SqlTreeModel *model, QObject *parent);
+  ~ProdutoProxyModel() final = default;
 
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 

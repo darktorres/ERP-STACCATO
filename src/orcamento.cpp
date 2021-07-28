@@ -13,7 +13,7 @@
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 #include "user.h"
 #include "venda.h"
 
@@ -805,7 +805,7 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
 
-  modelItem.proxyModel = new SearchDialogProxyModel(&modelItem, this);
+  modelItem.proxyModel = new ProdutoProxyModel(&modelItem, this);
 
   ui->tableProdutos->setModel(&modelItem);
 

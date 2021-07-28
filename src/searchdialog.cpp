@@ -6,7 +6,7 @@
 #include "file.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 #include "user.h"
 #include "xml.h"
 
@@ -73,7 +73,7 @@ void SearchDialog::setupTables(const QString &table, const QString &sortColumn) 
   if (naoListarBuscaVazia) { model.setFilter("0"); }
   if (table == "profissional") { model.setFilter("idProfissional = 1"); }
 
-  if (table == "view_produto") { model.proxyModel = new SearchDialogProxyModel(&model, this); }
+  if (table == "view_produto") { model.proxyModel = new ProdutoProxyModel(&model, this); }
 
   ui->table->setModel(&model);
 

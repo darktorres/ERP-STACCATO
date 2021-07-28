@@ -68,7 +68,7 @@ private:
   Produto produto;
   QHash<QString, int> hashModel;
   QMap<QString, int> fornecedores;
-  QProgressDialog *progressDialog;
+  QProgressDialog progressDialog;
   QString file;
   QString fornecedor;
   QString idsFornecedor;

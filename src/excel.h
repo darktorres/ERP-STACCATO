@@ -10,6 +10,7 @@ public:
 
   Excel(const QString &id, const Tipo tipo, QWidget *parent);
 
+  // TODO: make private?
   bool mostrarRT = false;
   bool anexoCompra = false;
   int ordemCompra;

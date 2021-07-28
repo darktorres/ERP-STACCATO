@@ -11,6 +11,8 @@ namespace Ui {
 class NFeDistribuicao;
 }
 
+using namespace std::chrono_literals;
+
 class NFeDistribuicao : public QWidget {
   Q_OBJECT
 
@@ -23,9 +25,9 @@ public:
 
 private:
   // attributes
+  auto inline static tempoTimer = 15min;
   bool isSet = false;
   bool modelIsSet = false;
-  int tempoTimer = 1000 * 60 * 15; // msec * 15min
   int maximoNSU;
   int ultimoNSU;
   ACBr acbrRemoto;

@@ -43,7 +43,6 @@ void NFeDistribuicao::downloadAutomatico() {
 
   //-----------------------------------------------------------------
 
-  qDebug() << "timer restart: " << tempoTimer / 1000 / 60 << "m";
   timer.start(tempoTimer);
 }
 
@@ -199,10 +198,10 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   qDebug() << "pesquisar nsu: " << ultimoNSU;
   const QString resposta = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + cnpjDest + "\", " + QString::number(ultimoNSU) + ")");
 
-  if (resposta.contains("Consumo Indevido")) { tempoTimer = 1000 * 60 * 60; } // 1h
+  if (resposta.contains("Consumo Indevido")) { tempoTimer = 1h; }
   if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
 
-  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado")) ? 1000 * 60 * 60 : 1000 * 60 * 15; // 1h : 15min
+  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado")) ? 1h : 15min;
 
   //----------------------------------------------------------
 

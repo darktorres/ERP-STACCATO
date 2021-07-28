@@ -2,7 +2,7 @@
 #include "ui_cadastroStaccatoOff.h"
 
 #include "application.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -66,7 +66,7 @@ void CadastroStaccatoOff::setupTables() {
   model.setHeaderData("validade", "Validade");
   model.setHeaderData("ui", "UI");
 
-  model.proxyModel = new SearchDialogProxyModel(&model, this);
+  model.proxyModel = new ProdutoProxyModel(&model, this);
 
   ui->tableView->setModel(&model);
 

@@ -1,4 +1,4 @@
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 
 #include "application.h"
 #include "user.h"
@@ -8,14 +8,14 @@
 #include <QDebug>
 #include <QSqlRecord>
 
-SearchDialogProxyModel::SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent)
+ProdutoProxyModel::ProdutoProxyModel(QSqlQueryModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), descontinuadoColumn(model->record().indexOf("descontinuado")), estoqueColumn(model->record().indexOf("estoque")),
       promocaoColumn(model->record().indexOf("promocao")) {}
 
-SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *parent)
+ProdutoProxyModel::ProdutoProxyModel(SqlTreeModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), descontinuadoColumn(model->fieldIndex("descontinuado")), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")) {}
 
-QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
+QVariant ProdutoProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
     const bool isChild = not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid();
 
@@ -68,7 +68,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
   return SortFilterProxyModel::data(proxyIndex, role);
 }
 
-bool SearchDialogProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const {
+bool ProdutoProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const {
   if (source_left.parent().isValid()) { return false; } // disable sorting for childs
 
   return QSortFilterProxyModel::lessThan(source_left, source_right);

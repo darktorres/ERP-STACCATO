@@ -2,7 +2,7 @@
 #include "ui_widgetestoqueproduto.h"
 
 #include "application.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 
 #include <QDebug>
 
@@ -25,7 +25,7 @@ void WidgetEstoqueProduto::setupTables() {
 
   modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 
-  modelProdutos.proxyModel = new SearchDialogProxyModel(&modelProdutos, this);
+  modelProdutos.proxyModel = new ProdutoProxyModel(&modelProdutos, this);
 
   modelProdutos.select();
 

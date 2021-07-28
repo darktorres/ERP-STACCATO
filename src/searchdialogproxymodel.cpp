@@ -10,14 +10,16 @@
 
 SearchDialogProxyModel::SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), descontinuadoColumn(model->record().indexOf("descontinuado")), estoqueColumn(model->record().indexOf("estoque")),
-      promocaoColumn(model->record().indexOf("promocao")), validadeColumn(model->record().indexOf("validadeProdutos")) {}
+      promocaoColumn(model->record().indexOf("promocao")) {}
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), descontinuadoColumn(-1), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")), validadeColumn(-1) {}
+    : SortFilterProxyModel(model, parent), descontinuadoColumn(model->fieldIndex("descontinuado")), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")) {}
 
 QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
-    if (not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid()) {
+    const bool isChild = not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid();
+
+    if (isChild) {
       const QString tema = User::getSetting("User/tema").toString();
 
       if (role == Qt::BackgroundRole) { return (tema == "escuro") ? QBrush(Qt::darkGray) : QBrush(Qt::gray); }
@@ -37,40 +39,33 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
       const bool estoque = proxyIndex.siblingAtColumn(estoqueColumn).data().toBool();
       const int promocao = proxyIndex.siblingAtColumn(promocaoColumn).data().toInt();
 
+      // estoque
       if (estoque and promocao == 0) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::yellow); }
         if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
       }
 
+      // STACCATO OFF
       if (estoque and promocao == 2) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // STACCATO OFF
+        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); }
         if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
       }
 
+      // promocao
       if (not estoque and promocao == 1) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
+        if (role == Qt::BackgroundRole) { return QBrush(Qt::green); }
         if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
       }
-    }
-
-    if (proxyIndex.column() == validadeColumn) {
-      const QDate validade = proxyIndex.siblingAtColumn(validadeColumn).data().toDate();
-      const bool expirado = validade < qApp->serverDate();
-
-      if (validade.isValid() and expirado) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }
-        if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
-      }
-    }
-
-    if (role == Qt::ForegroundRole) {
-      const QString tema = User::getSetting("User/tema").toString();
-
-      return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }
   }
 
-  return QSortFilterProxyModel::data(proxyIndex, role);
+  if (role == Qt::ForegroundRole) {
+    const QString tema = User::getSetting("User/tema").toString();
+
+    return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
+  }
+
+  return SortFilterProxyModel::data(proxyIndex, role);
 }
 
 bool SearchDialogProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const {

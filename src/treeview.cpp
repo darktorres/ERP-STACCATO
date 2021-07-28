@@ -47,7 +47,7 @@ void TreeView::unsetConnections() {
   disconnect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TreeView::resizeAllColumns);
 }
 
-void TreeView::showContextMenu(const QPoint &pos) {
+void TreeView::showContextMenu(const QPoint pos) {
   QMenu contextMenu;
 
   QAction actionExpand("Expandir tudo", this);

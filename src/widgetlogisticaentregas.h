@@ -31,7 +31,7 @@ private:
   Ui::WidgetLogisticaEntregas *ui;
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> void;
-  auto confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
+  auto confirmarEntrega(const QDate dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
   auto delayFiltro() -> void;
   auto gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
                       const SqlQueryModel &modelProdutosAgrupado) -> QString;
@@ -50,7 +50,7 @@ private:
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
   auto processarConsultaNFe(const int idNFe, const QString &xml) -> void;
-  auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> void;
+  auto reagendar(const QModelIndexList &list, const QDate dataPrevEnt) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

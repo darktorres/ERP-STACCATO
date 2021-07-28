@@ -13,7 +13,7 @@
 #include <QSqlError>
 #include <QToolTip>
 
-PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsObject(parent), size(size) {
+PalletItem::PalletItem(const QRectF &size, QGraphicsItem *parent) : QGraphicsObject(parent), size(size) {
   setAcceptHoverEvents(true);
   setAcceptDrops(true);
 }
@@ -46,7 +46,7 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 }
 
 void PalletItem::setText(const QString &value) {
-  auto lines = value.split("\n", Qt::SkipEmptyParts);
+  const auto lines = value.split("\n", Qt::SkipEmptyParts);
 
   int pos = 15;
 
@@ -74,7 +74,9 @@ void PalletItem::setFlagHighlight(bool value) { flagHighlight = value; }
 void PalletItem::reorderChildren() {
   int pos = 15;
 
-  for (auto estoque : childItems()) {
+  const auto children = childItems();
+
+  for (const auto estoque : children) {
     estoque->setPos(mapFromScene(680, pos));
     pos += 15;
   }
@@ -86,7 +88,10 @@ void PalletItem::unselect() {
   selected = false;
 
   prepareGeometryChange();
-  for (auto estoque : childItems()) { estoque->setVisible(false); }
+
+  const auto children = childItems();
+
+  for (const auto estoque : children) { estoque->setVisible(false); }
 }
 
 void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
@@ -103,7 +108,10 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   selected = not selected;
 
   prepareGeometryChange();
-  for (auto estoque : childItems()) { estoque->setVisible(not estoque->isVisible()); }
+
+  const auto children = childItems();
+
+  for (const auto estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 
   QGraphicsItem::mousePressEvent(event);
 }
@@ -121,7 +129,7 @@ void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseDoubleClickEvent(event); }
 
 void PalletItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
-  if (childItems().contains(dynamic_cast<EstoqueItem *>(event->mimeData()->parent()))) {
+  if (childItems().contains(qobject_cast<EstoqueItem *>(event->mimeData()->parent()))) {
     event->ignore();
     return;
   }
@@ -136,7 +144,7 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
 
-  QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
+  const QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
 
   if (text.isEmpty()) { return; }
 
@@ -151,7 +159,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
     throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
   }
 
-  EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());
+  EstoqueItem *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
   item->setParentItem(this);
   item->setVisible(false);
   reorderChildren();
@@ -163,5 +171,8 @@ void PalletItem::select() {
   selected = not selected;
 
   prepareGeometryChange();
-  for (auto estoque : childItems()) { estoque->setVisible(not estoque->isVisible()); }
+
+  const auto children = childItems();
+
+  for (const auto estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 }

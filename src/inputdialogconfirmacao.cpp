@@ -124,7 +124,7 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate &date) {
+void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
@@ -389,7 +389,7 @@ void InputDialogConfirmacao::dividirRecebimento(const int row, const double caix
   // recalcular valores
 }
 
-void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, const double caixasDefeito, const QString obs, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, const double caixasDefeito, const QString &obs, const int novoIdVendaProduto2) {
   // NOTE: na tabela veiculo_has_produto é separado a linha em 2:
   // -linha original mantem a quant. entregue
   // -linha nova mostra a quant. quebrada
@@ -464,7 +464,7 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   modelCliente.submitAll();
 }
 
-void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString obs, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString &obs, const int novoIdVendaProduto2) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto2
 
@@ -736,7 +736,7 @@ void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
   modelVeiculo.submitAll();
 }
 
-void InputDialogConfirmacao::dividirConsumo(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
+void InputDialogConfirmacao::dividirConsumo(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString &idVendaProduto2) {
   SqlTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
 
@@ -827,7 +827,7 @@ void InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   modelConsumo.submitAll();
 }
 
-void InputDialogConfirmacao::dividirCompra(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) {
+void InputDialogConfirmacao::dividirCompra(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString &idVendaProduto2) {
   SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 

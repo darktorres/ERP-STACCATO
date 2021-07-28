@@ -80,7 +80,7 @@ void WidgetNfeSaida::updateTables() {
   modelViewNFeSaida.select();
 }
 
-void WidgetNfeSaida::delayFiltro() { timer.start(500); }
+void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 

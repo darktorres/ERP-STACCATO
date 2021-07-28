@@ -40,7 +40,7 @@ void WidgetLogisticaRepresentacao::updateTables() {
   modelViewLogisticaRepresentacao.select();
 }
 
-void WidgetLogisticaRepresentacao::delayFiltro() { timer.start(500); }
+void WidgetLogisticaRepresentacao::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
@@ -104,7 +104,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   qApp->enqueueInformation("Entrega confirmada!", this);
 }
 
-void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {
+void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate dataEntrega, const QString &recebeu) {
   SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 

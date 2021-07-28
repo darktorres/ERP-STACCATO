@@ -14,7 +14,7 @@ public:
   ~CollapsibleWidget();
 
   auto getHtml() -> QString;
-  auto setHtml(const QString text) -> void;
+  auto setHtml(const QString &text) -> void;
 
 signals:
   void toggled();

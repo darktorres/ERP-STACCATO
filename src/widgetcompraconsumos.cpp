@@ -32,7 +32,7 @@ void WidgetCompraConsumos::updateTables() {
   modelProduto.select();
 }
 
-void WidgetCompraConsumos::delayFiltro() { timer.start(500); }
+void WidgetCompraConsumos::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetCompraConsumos::resetTables() { modelIsSet = false; }
 
@@ -126,7 +126,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-void WidgetCompraConsumos::desfazerConsumo(const QList<QModelIndex> &list) {
+void WidgetCompraConsumos::desfazerConsumo(const QModelIndexList &list) {
   for (auto &index : list) {
     const int idVendaProduto2 = modelProduto.data(index.row(), "idVendaProduto2").toInt();
 

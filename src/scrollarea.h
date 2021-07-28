@@ -3,9 +3,10 @@
 #include <QScrollArea>
 
 class ScrollArea final : public QScrollArea {
+  Q_OBJECT
 
 public:
   explicit ScrollArea(QWidget *parent);
 
-  virtual QSize sizeHint() const override;
+  auto sizeHint() const -> QSize override;
 };

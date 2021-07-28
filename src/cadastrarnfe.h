@@ -48,7 +48,7 @@ private:
   // methods
   auto alterarCertificado(const QString &text) -> void;
   auto buscarAliquotas() -> void;
-  auto cadastrar(const int &idNFe) -> void;
+  auto cadastrar(const int idNFe) -> void;
   auto calculaCofins() -> void;
   auto calculaDigitoVerificador(QString &chave) -> void;
   auto calculaIcms() -> void;
@@ -93,7 +93,7 @@ private:
   auto on_pushButtonConsultarCadastro_clicked() -> void;
   auto on_pushButtonEnviarNFE_clicked() -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
-  auto on_tableItens_dataChanged(const QModelIndex index) -> void;
+  auto on_tableItens_dataChanged(const QModelIndex &index) -> void;
   auto preCadastrarNota() -> int;
   auto preencherDadosNFe() -> void;
   auto preencherDestinatario() -> void;
@@ -103,7 +103,7 @@ private:
   auto preencherTotais() -> void;
   auto preencherTransporte() -> void;
   auto prepararNFe(const QStringList &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> void;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

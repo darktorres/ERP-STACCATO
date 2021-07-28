@@ -261,7 +261,7 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
-void WidgetVenda::delayFiltro() { timer.start(500); }
+void WidgetVenda::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetVenda::updateTables() {
   if (not isSet) {
@@ -347,7 +347,7 @@ void WidgetVenda::fillComboBoxFornecedor() {
   setConnections();
 }
 
-void WidgetVenda::on_table_activated(const QModelIndex index) {
+void WidgetVenda::on_table_activated(const QModelIndex &index) {
   auto *venda = new Venda(this);
   venda->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { venda->setFinanceiro(); }
@@ -429,13 +429,13 @@ void WidgetVenda::on_radioButtonProprios_toggled(bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetVenda::on_dateEditDia_dateChanged(const QDate &) {
+void WidgetVenda::on_dateEditDia_dateChanged(const QDate) {
   if (not ui->checkBoxDia->isChecked()) { return; }
 
   montaFiltro();
 }
 
-void WidgetVenda::on_dateEditMes_dateChanged(const QDate &) {
+void WidgetVenda::on_dateEditMes_dateChanged(const QDate) {
   if (not ui->checkBoxMes->isChecked()) { return; }
 
   montaFiltro();

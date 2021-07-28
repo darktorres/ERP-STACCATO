@@ -177,7 +177,7 @@ void WidgetGalpao::salvarPallets() {
   }
 }
 
-void WidgetGalpao::on_dateTimeEdit_dateChanged(const QDate &) {
+void WidgetGalpao::on_dateTimeEdit_dateChanged(const QDate) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   setFilter();

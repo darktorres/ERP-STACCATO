@@ -4,8 +4,12 @@
 #include <QSqlQueryModel>
 
 class FollowUpProxyModel final : public QIdentityProxyModel {
+  Q_OBJECT
 
 public:
+  enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
+  Q_ENUM(FieldColors)
+
   explicit FollowUpProxyModel(QSqlQueryModel *model, QObject *parent);
   ~FollowUpProxyModel() final = default;
 
@@ -13,6 +17,4 @@ public:
 
 private:
   int const semaforoColumn;
-  enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
-  Q_ENUM(FieldColors)
 };

@@ -28,7 +28,7 @@ signals:
   void idChanged(const QVariant &changedId);
 
 private:
-  Q_PROPERTY(QVariant id READ getId WRITE setId STORED false)
+  Q_PROPERTY(QVariant id READ getId WRITE setId NOTIFY idChanged STORED false)
   // attributes
   bool readOnlyItemBox = false;
   QPushButton *plusButton;

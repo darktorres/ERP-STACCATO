@@ -30,7 +30,7 @@ private:
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto delayFiltro() -> void;
-  auto insere(const QDate &dataPrevista) -> void;
+  auto insere(const QDate dataPrevista) -> void;
   auto montaFiltro() -> void;
   auto on_doubleSpinBoxAvulsoCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxAvulsoQuant_valueChanged(const double quant) -> void;

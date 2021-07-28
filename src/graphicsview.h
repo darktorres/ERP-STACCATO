@@ -3,13 +3,14 @@
 #include <QGraphicsView>
 
 class GraphicsView : public QGraphicsView {
+  Q_OBJECT
 
 public:
   explicit GraphicsView(QWidget *parent = nullptr);
 
 protected:
-  virtual void mouseMoveEvent(QMouseEvent *event) override;
-  virtual void mousePressEvent(QMouseEvent *event) override;
-  virtual void mouseReleaseEvent(QMouseEvent *event) override;
-  virtual void resizeEvent(QResizeEvent *event) override;
+  auto mouseMoveEvent(QMouseEvent *event) -> void override;
+  auto mousePressEvent(QMouseEvent *event) -> void override;
+  auto mouseReleaseEvent(QMouseEvent *event) -> void override;
+  auto resizeEvent(QResizeEvent *event) -> void override;
 };

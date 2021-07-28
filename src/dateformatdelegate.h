@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class DateFormatDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit DateFormatDelegate(const int vencimentoColumn, const int tipoColumn, const bool recebimento, QObject *parent);
@@ -11,9 +12,9 @@ public:
 
 private:
   // attributes
-  bool const recebimento = false;
-  int const tipoColumn = -1;
-  int const vencimentoColumn = -1;
+  bool const recebimento;
+  int const tipoColumn;
+  int const vencimentoColumn;
   // methods
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * final;
   auto displayText(const QVariant &value, const QLocale &) const -> QString final;

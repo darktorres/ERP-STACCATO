@@ -18,7 +18,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent)
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate dataFaturamento, QWidget *parent)
     : QDialog(parent), dataFaturamento(dataFaturamento), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
@@ -644,9 +644,9 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   if (query.first()) {
     if (query.value("utilizada").toBool()) { throw RuntimeError("Nota já utilizada!", this); }
 
-    if (query.value("status") == "CANCELADA") { throw RuntimeError("Nota cancelada!", this); }
+    if (query.value("status").toString() == "CANCELADA") { throw RuntimeError("Nota cancelada!", this); }
 
-    if (query.value("status") == "RESUMO") {
+    if (query.value("status").toString() == "RESUMO") {
       SqlQuery queryAtualiza;
       queryAtualiza.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso");
       queryAtualiza.bindValue(":xml", xml.fileContent);
@@ -699,7 +699,7 @@ void ImportarXML::usarXMLInutilizado() {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (query.value("status") != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
+  if (query.value("status").toString() != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
 
   const auto fileContent = query.value("xml").toByteArray();
 

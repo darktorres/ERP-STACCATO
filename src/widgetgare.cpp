@@ -54,7 +54,7 @@ void WidgetGare::updateTables() {
   model.select();
 }
 
-void WidgetGare::delayFiltro() { timer.start(500); }
+void WidgetGare::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetGare::habilitarBotoes() {
   const bool desabilitar = ui->radioButtonPago->isChecked();

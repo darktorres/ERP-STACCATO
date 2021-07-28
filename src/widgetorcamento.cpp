@@ -126,7 +126,7 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
 }
 
-void WidgetOrcamento::delayFiltro() { timer.start(500); }
+void WidgetOrcamento::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetOrcamento::fillComboBoxVendedor() {
   unsetConnections();
@@ -390,7 +390,7 @@ void WidgetOrcamento::on_radioButtonProprios_toggled(bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetOrcamento::on_dateEditMes_dateChanged(const QDate &) {
+void WidgetOrcamento::on_dateEditMes_dateChanged(const QDate) {
   if (not ui->checkBoxMes->isChecked()) { return; }
 
   montaFiltro();

@@ -4,6 +4,8 @@
 
 // TODO: why is this not derived from QChartView
 class ChartView : public QGraphicsView {
+  Q_OBJECT
+
 public:
   explicit ChartView(QChart *chart, QWidget *parent);
 
@@ -14,8 +16,8 @@ public:
   auto setFormatY(const QString &newFormatY) -> void;
   auto setLabelX(const QString &newLabelX) -> void;
   auto setLabelY(const QString &newLabelY) -> void;
-  auto tooltip(const QPointF point, const bool state) -> void;
   auto setTheme(const QChart::ChartTheme theme) -> void;
+  auto tooltip(const QPointF point, const bool state) -> void;
 
 protected:
   auto mouseMoveEvent(QMouseEvent *event) -> void override;

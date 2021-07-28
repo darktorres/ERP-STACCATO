@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class EditDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit EditDelegate(QObject *parent);

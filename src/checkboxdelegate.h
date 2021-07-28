@@ -3,6 +3,7 @@
 #include <QStyledItemDelegate>
 
 class CheckBoxDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   explicit CheckBoxDelegate(const bool readOnly, QObject *parent);

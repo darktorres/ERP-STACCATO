@@ -16,7 +16,7 @@ public:
   enum class Tipo { GerarCompra, Faturamento };
   Q_ENUM(Tipo)
 
-  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent);
+  explicit InputDialogProduto(const Tipo tipo, QWidget *parent);
   ~InputDialogProduto();
 
   auto getDate() const -> QDate;
@@ -33,7 +33,7 @@ private:
   auto cadastrar() -> void;
   auto calcularTotal() -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
-  auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
+  auto on_dateEditEvento_dateChanged(const QDate date) -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(double aliquota) -> void;
   auto on_doubleSpinBoxST_valueChanged(double valueSt) -> void;
   auto on_lineEditCodRep_textEdited(const QString &text) -> void;

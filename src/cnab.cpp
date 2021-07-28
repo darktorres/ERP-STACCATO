@@ -32,7 +32,7 @@ void CNAB::writeNumber(QTextStream &stream, const ulong number, const int count)
   stream << QString("%1").arg(number, count, 10, QChar('0')); // pad number with count zeros to the left
 }
 
-QString CNAB::remessaGareItau240(QVector<Gare> gares) {
+QString CNAB::remessaGareItau240(const QVector<Gare> &gares) {
   QString arquivo;
 
   QTextStream stream(&arquivo);
@@ -220,11 +220,11 @@ QString CNAB::remessaGareItau240(QVector<Gare> gares) {
   return query2.lastInsertId().toString();
 }
 
-QString CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
+QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos) {
   QVector<CNAB::Pagamento> pagamentosSalario;
   QVector<CNAB::Pagamento> pagamentosFornecedor;
 
-  for (auto pagamento : pagamentos) {
+  for (const auto &pagamento : pagamentos) {
     if (pagamento.tipo == CNAB::Pagamento::Tipo::Salario) { pagamentosSalario << pagamento; }
     if (pagamento.tipo == CNAB::Pagamento::Tipo::Fornecedor) { pagamentosFornecedor << pagamento; }
   }

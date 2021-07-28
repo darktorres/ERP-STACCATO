@@ -132,7 +132,7 @@ void WidgetCompraPendentes::updateTables() {
   modelViewVendaProduto.select();
 }
 
-void WidgetCompraPendentes::delayFiltro() { timer.start(500); }
+void WidgetCompraPendentes::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
 
@@ -258,7 +258,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
   ui->itemBoxProduto->clear();
 }
 
-void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
+void WidgetCompraPendentes::insere(const QDate dataPrevista) {
   SqlTableModel model;
   model.setTable("pedido_fornecedor_has_produto");
 

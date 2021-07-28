@@ -15,7 +15,7 @@ public:
   explicit PagamentosDia(QWidget *parent);
   ~PagamentosDia();
 
-  auto setFilter(const QDate &date, const QString &idConta) -> void;
+  auto setFilter(const QDate date, const QString &idConta) -> void;
 
 private:
   // attributes

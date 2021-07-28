@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -280,7 +280,7 @@ void InputDialogProduto::cadastrar() {
   qApp->endTransaction();
 }
 
-void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
+void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 

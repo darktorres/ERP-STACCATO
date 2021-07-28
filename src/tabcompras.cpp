@@ -32,7 +32,7 @@ void TabCompras::updateTables() {
   if (currentTab == "Histórico") { ui->widgetHistorico->updateTables(); }
 }
 
-void TabCompras::on_tabWidget_currentChanged(const int &) { updateTables(); }
+void TabCompras::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void TabCompras::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);

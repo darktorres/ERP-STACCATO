@@ -28,7 +28,7 @@ private:
   SqlTableModel modelViewColeta;
   Ui::WidgetLogisticaColeta *ui;
   // methods
-  auto cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) -> void;
+  auto cadastrar(const QModelIndexList &list, const QDate dataColeta, const QDate dataPrevReceb) -> void;
   auto cancelar(const QModelIndexList &list) -> void;
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
@@ -39,7 +39,7 @@ private:
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
-  auto reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) -> void;
+  auto reagendar(const QModelIndexList &list, const QDate dataPrevColeta) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

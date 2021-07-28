@@ -103,7 +103,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   updateTables();
 }
 
-void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
+void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate dataPrevista, const QDate dataConf) {
   SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 IN (SELECT "
                      "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE)");

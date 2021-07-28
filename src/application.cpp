@@ -207,7 +207,7 @@ void Application::runSqlJobs() {
 void Application::startSqlPing() {
   auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
-  timer->start(60000); // 1min
+  timer->start(1min);
 
   // TODO: se ping falhar marcar 'desconectado'?
 }
@@ -215,7 +215,7 @@ void Application::startSqlPing() {
 void Application::startUpdaterPing() {
   auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
-  timer->start(600000); // 10min
+  timer->start(10min);
 }
 
 void Application::darkTheme() {
@@ -485,7 +485,7 @@ int Application::reservarIdPedido2() {
   return id;
 }
 
-QDate Application::ajustarDiaUtil(const QDate &date) {
+QDate Application::ajustarDiaUtil(const QDate date) {
   // TODO: adicionar feriados bancarios
 
   QDate newDate = date;

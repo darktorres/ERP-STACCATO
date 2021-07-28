@@ -39,7 +39,7 @@ void RegisterDialog::setConnections() {
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
-  if (model.tableName() == "profissional" and id == "1") { // não permitir alterar o cadastro do 'NÃO HÁ'
+  if (model.tableName() == "profissional" and id.toString() == "1") { // não permitir alterar o cadastro do 'NÃO HÁ'
     newRegister();
     return false;
   }

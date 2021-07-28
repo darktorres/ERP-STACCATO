@@ -122,7 +122,7 @@ void WidgetFinanceiroContas::updateTables() {
   if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 }
 
-void WidgetFinanceiroContas::delayFiltro() { timer.start(500); }
+void WidgetFinanceiroContas::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 
@@ -340,11 +340,11 @@ void WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked() {
 
 void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value) { ui->doubleSpinBoxAte->setValue(value); }
 
-void WidgetFinanceiroContas::on_dateEditVencimentoDe_dateChanged(const QDate &date) { ui->dateEditVencimentoAte->setDate(date); }
+void WidgetFinanceiroContas::on_dateEditVencimentoDe_dateChanged(const QDate date) { ui->dateEditVencimentoAte->setDate(date); }
 
-void WidgetFinanceiroContas::on_dateEditRealizadoDe_dateChanged(const QDate &date) { ui->dateEditRealizadoAte->setDate(date); }
+void WidgetFinanceiroContas::on_dateEditRealizadoDe_dateChanged(const QDate date) { ui->dateEditRealizadoAte->setDate(date); }
 
-void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
+void WidgetFinanceiroContas::setTipo(const Tipo novoTipo) {
   if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;

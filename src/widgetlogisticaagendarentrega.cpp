@@ -164,7 +164,7 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   ui->doubleSpinBoxPeso->setStyleSheet((ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) ? "color: rgb(255, 0, 0);" : "");
 }
 
-void WidgetLogisticaAgendarEntrega::delayFiltro() { timer.start(500); }
+void WidgetLogisticaAgendarEntrega::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaAgendarEntrega::setConnections() {
   if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
@@ -341,7 +341,9 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   QStringList status;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"))) {
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (const auto &child : children) {
     if (child->isChecked()) { status << "'" + child->text().toUpper() + "'"; }
   }
 
@@ -582,7 +584,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
   ui->doubleSpinBoxDisponivel->setValue(capacidade - peso);
 }
 
-void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &date) {
+void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
@@ -877,7 +879,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) {
+void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const QDate dataPrev, const QString &observacao) {
   SqlQuery query1;
   query1.prepare("UPDATE venda SET novoPrazoEntrega = :novoPrazoEntrega WHERE idVenda = :idVenda");
 

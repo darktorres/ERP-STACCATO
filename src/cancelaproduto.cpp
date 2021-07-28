@@ -8,7 +8,7 @@
 
 #include <QSqlError>
 
-CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
+CancelaProduto::CancelaProduto(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
 
   setWindowModality(Qt::NonModal);

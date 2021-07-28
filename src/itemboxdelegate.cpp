@@ -40,7 +40,7 @@ QString ItemBoxDelegate::displayText(const QVariant &value, const QLocale &local
   Q_UNUSED(value)
   Q_UNUSED(locale)
 
-  if (value.isNull() or value == 0 or value == "0") { return QString(); }
+  if (value.isNull() or value.toInt() == 0 or value.toString() == "0") { return QString(); }
 
   QString dispText;
 

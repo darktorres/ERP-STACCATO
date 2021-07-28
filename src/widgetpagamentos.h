@@ -28,7 +28,7 @@ public:
   auto setFretePagoLoja() -> void;
   auto setIdOrcamento(const QString &value) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
-  auto setTipo(const Tipo &novoTipo) -> void;
+  auto setTipo(const Tipo novoTipo) -> void;
   auto setTotal(double value) -> void;
   auto verifyFields() -> void;
 

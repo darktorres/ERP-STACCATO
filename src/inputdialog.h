@@ -13,7 +13,7 @@ public:
   enum class Tipo { Carrinho, Faturamento, AgendarColeta, Coleta, AgendarRecebimento, AgendarEntrega, ReagendarPedido };
   Q_ENUM(Tipo)
 
-  explicit InputDialog(const Tipo &tipo, QWidget *parent);
+  explicit InputDialog(const Tipo tipo, QWidget *parent);
   ~InputDialog();
 
   auto getDate() const -> QDate;
@@ -25,7 +25,7 @@ private:
   Tipo const tipo;
   Ui::InputDialog *ui;
   // methods
-  auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
+  auto on_dateEditEvento_dateChanged(const QDate date) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;
 };

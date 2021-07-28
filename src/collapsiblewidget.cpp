@@ -18,7 +18,7 @@ void CollapsibleWidget::setConnections() {
   connect(ui->pushButton, &QPushButton::clicked, this, &CollapsibleWidget::on_pushButton_clicked, connectionType);
 }
 
-void CollapsibleWidget::setHtml(const QString text) { ui->textBrowser->setHtml(text); }
+void CollapsibleWidget::setHtml(const QString &text) { ui->textBrowser->setHtml(text); }
 
 QString CollapsibleWidget::getHtml() {
   if (ui->textBrowser->toPlainText().isEmpty()) { return QString(); }

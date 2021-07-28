@@ -36,7 +36,7 @@ private:
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxEstoque_toggled() -> void;
-  auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;
+  auto on_dateTimeEdit_dateChanged(const QDate date) -> void;
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonAdicionarProduto_clicked() -> void;
@@ -47,7 +47,7 @@ private:
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false) -> void;
+  auto processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga = false) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

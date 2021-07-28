@@ -147,7 +147,7 @@ void WidgetGalpao::carregarPallets() {
     strings.removeFirst();
     strings.removeFirst();
 
-    auto *pallet = new PalletItem(QRect(0, 0, tamanho.at(0).toDouble(), tamanho.at(1).toDouble()));
+    auto *pallet = new PalletItem(QRectF(0, 0, tamanho.at(0).toDouble(), tamanho.at(1).toDouble()));
     pallet->setPos(posicao.at(0).toDouble(), posicao.at(1).toDouble());
     pallet->setLabel(iterator.key());
     pallet->setText(strings.join("\n"));

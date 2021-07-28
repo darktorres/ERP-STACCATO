@@ -16,8 +16,8 @@
 #include "orcamento.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
 #include "produtoproxymodel.h"
+#include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
 #include "xml_viewer.h"
@@ -789,7 +789,7 @@ void Venda::montarFluxoCaixa() {
     const bool pula1Mes = query2.value("pula1Mes").toInt();
     const bool ajustaDiaUtil = query2.value("ajustaDiaUtil").toBool();
     const bool dMaisUm = query2.value("dMaisUm").toBool();
-    const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
+    const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
     const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
 
     //-----------------------------------------------------------------
@@ -824,15 +824,12 @@ void Venda::montarFluxoCaixa() {
 
       modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
 
-      double val;
+      const bool primeiraParcela = (parcela == 0);
+      const bool ultimaParcela = (parcela == parcelas - 1);
 
-      if (centavoSobressalente and parcela == 0) {
-        val = valorParcela + restoParcela;
-      } else if (not centavoSobressalente and parcela == parcelas - 1) {
-        val = valorParcela + restoParcela;
-      } else {
-        val = valorParcela;
-      }
+      double val = valorParcela;
+
+      if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
 
       modelFluxoCaixa.setData(row, "valor", val);
       modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);
@@ -858,15 +855,9 @@ void Venda::montarFluxoCaixa() {
         modelFluxoCaixa2.setData(rowTaxa, "idLoja", idLoja);
         modelFluxoCaixa2.setData(rowTaxa, "dataPagamento", dataPgt);
 
-        double val1;
+        double val1 = parcelaTaxa;
 
-        if (centavoSobressalente and parcela == 0) {
-          val1 = parcelaTaxa + restoTaxa;
-        } else if (not centavoSobressalente and parcela == parcelas - 1) {
-          val1 = parcelaTaxa + restoTaxa;
-        } else {
-          val1 = parcelaTaxa;
-        }
+        if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val1 += restoTaxa; }
 
         modelFluxoCaixa2.setData(rowTaxa, "valor", val1);
         modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pagamento + 1) + ". Taxa Cartão");
@@ -1620,7 +1611,7 @@ void Venda::calcularPesoTotal() {
     }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
-    total += modelItem.data(row, "caixas").toInt() * kgcx;
+    total += modelItem.data(row, "caixas").toDouble() * kgcx;
   }
 
   ui->spinBoxPesoTotal->setValue(total);

@@ -18,25 +18,20 @@ WidgetGalpaoPeso::~WidgetGalpaoPeso() { delete ui; }
 void WidgetGalpaoPeso::resetTables() { modelIsSet = false; }
 
 void WidgetGalpaoPeso::setChart() {
-  axisX = new QDateTimeAxis;
-  axisX->setFormat("dd-MM-yyyy");
+  axisX.setFormat("dd-MM-yyyy");
 
-  axisY = new QValueAxis;
+  chart.legend()->hide();
+  chart.setLocalizeNumbers(true);
 
-  chart = new QChart;
-  chart->legend()->hide();
-  chart->setLocalizeNumbers(true);
+  chart.addAxis(&axisX, Qt::AlignBottom);
+  chart.addAxis(&axisY, Qt::AlignLeft);
 
-  chart->addAxis(axisX, Qt::AlignBottom);
-  chart->addAxis(axisY, Qt::AlignLeft);
+  chart.addSeries(&series);
 
-  series = new QLineSeries;
-  chart->addSeries(series);
+  series.attachAxis(&axisX);
+  series.attachAxis(&axisY);
 
-  series->attachAxis(axisX);
-  series->attachAxis(axisY);
-
-  chartView = new ChartView(chart, this);
+  chartView = new ChartView(&chart, this);
   chartView->setTheme(QChart::ChartThemeBlueCerulean);
   chartView->setLabelX("Dia");
   chartView->setLabelY("Kg");
@@ -52,13 +47,13 @@ void WidgetGalpaoPeso::setChart() {
 }
 
 void WidgetGalpaoPeso::updateChart() {
-  series->clear();
+  series.clear();
 
   for (int row = 0; row < model.rowCount(); ++row) {
     const QDateTime xValue = model.data(row, "data").toDateTime();
     const qreal yValue = model.data(row, "kg").toReal();
 
-    series->append(xValue.toMSecsSinceEpoch(), yValue);
+    series.append(xValue.toMSecsSinceEpoch(), yValue);
   }
 
   chartView->resetRange(false, true);

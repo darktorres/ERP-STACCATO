@@ -43,7 +43,7 @@ private:
   States state;
   int const timeout;
   quint16 const port;
-  QSslSocket *socket;
+  QSslSocket *socket = nullptr;
   QString const host;
   QString const pass;
   QString const user;

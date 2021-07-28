@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  QProgressDialog *progress;
+  QProgressDialog *progress = nullptr;
   QString const fornecedor;
   QStringList files;
   Tipo tipo;

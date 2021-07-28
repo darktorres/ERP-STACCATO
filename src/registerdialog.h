@@ -53,7 +53,7 @@ private:
   // attributes
   QStringList textKeys;
   QDataWidgetMapper mapper;
-  QWidget *parent;
+  QWidget *parent = nullptr;
   // methods
   auto getTextKeys() const -> QStringList;
   auto requiredStyle() -> QString;

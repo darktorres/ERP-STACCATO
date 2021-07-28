@@ -20,7 +20,7 @@ public:
 private:
   // attributes
   Ui::MainWindow *ui;
-  QPushButton *pushButtonStatus;
+  QPushButton *pushButtonStatus = nullptr;
   // methods
   auto event(QEvent *event) -> bool override;
   auto on_actionCadastrarCliente_triggered() -> void;

@@ -23,7 +23,7 @@ private:
   // attributes
   QString const id;
   QString fileName;
-  QWidget *parent;
+  QWidget *parent = nullptr;
   SqlQuery query;
   SqlQuery queryCliente;
   SqlQuery queryEndEnt;

@@ -23,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  QGraphicsScene *scene;
+  QGraphicsScene *scene = nullptr;
   SqlTableModel modelTranspAgend;
   Ui::WidgetGalpao *ui;
   // methods

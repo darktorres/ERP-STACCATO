@@ -38,7 +38,7 @@ public:
 
 private:
   // attributes
-  QWidget *parent;
+  QWidget *parent = nullptr;
   // methods
   auto decodeCodeItau(const QString &code) -> QString;
   auto writeBlanks(QTextStream &stream, const int count) -> void;

@@ -26,16 +26,14 @@ void WidgetGraficos::setChart() {
   chart.legend()->setAlignment(Qt::AlignBottom);
   chart.setLocalizeNumbers(true);
 
-  axisX = new QValueAxis;
-  axisX->setTickCount(31);
-  axisX->setLabelFormat("%.0f");
+  axisX.setTickCount(31);
+  axisX.setLabelFormat("%.0f");
 
-  axisY = new QValueAxis;
-  axisY->setTickCount(10);
-  axisY->setLabelFormat("R$ %.0f");
+  axisY.setTickCount(10);
+  axisY.setLabelFormat("R$ %.0f");
 
-  chart.addAxis(axisX, Qt::AlignBottom);
-  chart.addAxis(axisY, Qt::AlignLeft);
+  chart.addAxis(&axisX, Qt::AlignBottom);
+  chart.addAxis(&axisY, Qt::AlignLeft);
 
   const QDate now = qApp->serverDate();
   const QVector<QPen> colors = {QPen(QBrush(QColor(255, 70, 70)), 2), QPen(QBrush(QColor(255, 100, 0)), 2), QPen(QBrush(QColor(255, 170, 0)), 2), QPen(QBrush(QColor(255, 255, 0)), 2),
@@ -51,8 +49,8 @@ void WidgetGraficos::setChart() {
 
     chart.addSeries(serie);
 
-    serie->attachAxis(axisX);
-    serie->attachAxis(axisY);
+    serie->attachAxis(&axisX);
+    serie->attachAxis(&axisY);
 
     series << serie;
   }
@@ -61,7 +59,7 @@ void WidgetGraficos::setChart() {
 
   for (const auto marker : markers) { connect(marker, &QLegendMarker::clicked, this, &WidgetGraficos::handleMarkerClicked); }
 
-  chartView = new ChartView(&chart, this);
+  if (not chartView) { chartView = new ChartView(&chart, this); }
   chartView->setLabelX("Dia");
   chartView->setLabelY("R$");
   chartView->setFormatX("QString");

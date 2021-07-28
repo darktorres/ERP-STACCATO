@@ -22,8 +22,8 @@ private:
   bool isSet = false;
   ChartView *chartView = nullptr;
   QChart chart;
-  QValueAxis *axisX = nullptr;
-  QValueAxis *axisY = nullptr;
+  QValueAxis axisX;
+  QValueAxis axisY;
   QVector<QLineSeries *> series;
   Ui::WidgetGraficos *ui;
   // methods

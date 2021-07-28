@@ -25,11 +25,11 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   ChartView *chartView = nullptr;
-  QChart *chart = nullptr;
-  QDateTimeAxis *axisX = nullptr;
-  QLineSeries *series = nullptr;
+  QChart chart;
+  QDateTimeAxis axisX;
+  QLineSeries series;
   QProgressDialog progressDialog;
-  QValueAxis *axisY = nullptr;
+  QValueAxis axisY;
   SqlTableModel model;
   Ui::WidgetGalpaoPeso *ui;
   // methods

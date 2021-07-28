@@ -20,10 +20,10 @@ public:
 private:
   // attributes
   bool isSet = false;
-  ChartView *chartView;
+  ChartView *chartView = nullptr;
   QChart chart;
-  QValueAxis *axisX;
-  QValueAxis *axisY;
+  QValueAxis *axisX = nullptr;
+  QValueAxis *axisY = nullptr;
   QVector<QLineSeries *> series;
   Ui::WidgetGraficos *ui;
   // methods

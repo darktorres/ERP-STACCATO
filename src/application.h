@@ -77,7 +77,7 @@ signals:
 private:
   struct Message {
     QString message;
-    QWidget *widget = nullptr;
+    QWidget *widget;
   };
 
   // attributes

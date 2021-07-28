@@ -77,8 +77,8 @@ private:
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table, const QString &sortColumn) -> void;
 
-  inline static SearchDialog *cacheLoja;
-  inline static SearchDialog *cacheConta;
+  inline static SearchDialog *cacheLoja = nullptr;
+  inline static SearchDialog *cacheConta = nullptr;
 
   inline static QHash<QString, QString> cacheSearchDialog;
 };

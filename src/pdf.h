@@ -21,7 +21,7 @@ public:
 private:
   // attributes
   QString const id;
-  QWidget *parent;
+  QWidget *parent = nullptr;
   SqlQuery query;
   SqlQuery queryCliente;
   SqlQuery queryEndEnt;

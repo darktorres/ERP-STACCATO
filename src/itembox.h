@@ -31,8 +31,8 @@ private:
   Q_PROPERTY(QVariant id READ getId WRITE setId NOTIFY idChanged STORED false)
   // attributes
   bool readOnlyItemBox = false;
-  QPushButton *plusButton;
-  QPushButton *searchButton;
+  QPushButton *plusButton = nullptr;
+  QPushButton *searchButton = nullptr;
   QString registerDialogType;
   QVariant id;
   RegisterDialog *registerDialog = nullptr;

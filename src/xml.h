@@ -114,7 +114,7 @@ private:
   // attributes
   Produto produto;
   Tipo const tipo;
-  QWidget *parent;
+  QWidget *parent = nullptr;
   // methods
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;

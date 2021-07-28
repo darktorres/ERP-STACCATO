@@ -76,7 +76,7 @@ protected:
 
 private:
   // attributes
-  SqlTreeModelPrivate *d;
+  SqlTreeModelPrivate *d = nullptr;
   // methods
   auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) -> bool override;
   auto setRawData(const int level, const int row, const int column, const QVariant &value, const int role = Qt::DisplayRole) -> bool;

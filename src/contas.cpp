@@ -341,7 +341,7 @@ void Contas::viewContaPagarData(const QString &dataPagamento) {
 
   modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
-  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO', 'CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
   // -------------------------------------------------------------------------
 
@@ -367,7 +367,7 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
-  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO', 'CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
+  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
   // -------------------------------------------------------------------------
 
@@ -396,8 +396,8 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   // -------------------------------------------------------------------------
 
-  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                               : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                               : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
   // -------------------------------------------------------------------------
 

@@ -17,7 +17,7 @@
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxymodel.h"
+#include "produtoproxymodel.h"
 #include "sql.h"
 #include "user.h"
 #include "xml_viewer.h"
@@ -100,7 +100,7 @@ void Venda::setTreeView() {
   modelTree.setHeaderData("dataPrevEnt", "Prev. Ent.");
   modelTree.setHeaderData("dataRealEnt", "Data Ent.");
 
-  modelTree.proxyModel = new SearchDialogProxyModel(&modelTree, this);
+  modelTree.proxyModel = new ProdutoProxyModel(&modelTree, this);
 
   ui->treeView->setModel(&modelTree);
 

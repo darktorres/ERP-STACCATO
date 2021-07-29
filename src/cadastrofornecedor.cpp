@@ -21,8 +21,8 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   newRegister();
 
   if (not User::isAdministrativo()) {
-    ui->pushButtonRemover->setDisabled(true);
-    ui->pushButtonRemoverEnd->setDisabled(true);
+    ui->pushButtonDesativar->setDisabled(true);
+    ui->pushButtonDesativarEnd->setDisabled(true);
   }
 
   setConnections();
@@ -44,9 +44,9 @@ void CadastroFornecedor::setConnections() {
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizarEnd_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonDesativar_clicked, connectionType);
+  connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked, connectionType);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked, connectionType);
   connect(ui->pushButtonSalvarPrazos, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonSalvarPrazos_clicked, connectionType);
   connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked, connectionType);
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastroFornecedor::on_tabWidget_currentChanged, connectionType);
@@ -94,7 +94,7 @@ void CadastroFornecedor::clearEndereco() {
 void CadastroFornecedor::novoEndereco() {
   ui->pushButtonAtualizarEnd->hide();
   ui->pushButtonAdicionarEnd->show();
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
 }
@@ -199,16 +199,16 @@ void CadastroFornecedor::setupMapper() {
 void CadastroFornecedor::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
   ui->pushButtonValidade->hide();
 
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
 }
 
 void CadastroFornecedor::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 void CadastroFornecedor::cadastrar() {
@@ -261,7 +261,7 @@ void CadastroFornecedor::on_pushButtonBuscar_clicked() {
 
 void CadastroFornecedor::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroFornecedor::on_pushButtonRemover_clicked() { remove(); }
+void CadastroFornecedor::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroFornecedor::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(text) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)" : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
@@ -326,11 +326,11 @@ void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
   const bool desativado = dataEnd("desativado").toBool();
 
   ui->pushButtonAtualizarEnd->setEnabled(desativado);
-  ui->pushButtonRemoverEnd->setDisabled(desativado);
+  ui->pushButtonDesativarEnd->setDisabled(desativado);
 
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
-  ui->pushButtonRemoverEnd->show();
+  ui->pushButtonDesativarEnd->show();
 
   //------------------------------------------
   disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
@@ -358,7 +358,7 @@ bool CadastroFornecedor::viewRegister() {
   return true;
 }
 
-void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
+void CadastroFornecedor::on_pushButtonDesativarEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     setDataEnd("desativado", true);
 

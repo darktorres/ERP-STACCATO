@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1182</width>
-    <height>534</height>
+    <height>536</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1349,7 +1349,7 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonRemover">
+      <widget class="QPushButton" name="pushButtonDesativar">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -1436,7 +1436,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
+  <tabstop>pushButtonDesativar</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

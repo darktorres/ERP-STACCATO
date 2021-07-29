@@ -24,7 +24,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
   ui->itemBoxFornecedor->setRegisterDialog("CadastroFornecedor");
 
-  if (not User::isAdministrativo()) { ui->pushButtonRemover->setDisabled(true); }
+  if (not User::isAdministrativo()) { ui->pushButtonDesativar->setDisabled(true); }
 
   setConnections();
 }
@@ -53,13 +53,13 @@ void CadastroProduto::clearFields() {
 void CadastroProduto::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 void CadastroProduto::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 }
 
 void CadastroProduto::verifyFields() {
@@ -176,7 +176,7 @@ void CadastroProduto::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroProduto::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroProduto::on_pushButtonRemover_clicked() { remove(); }
+void CadastroProduto::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroProduto::on_doubleSpinBoxVenda_valueChanged(const double) { calcularMarkup(); }
 
@@ -227,8 +227,8 @@ void CadastroProduto::setConnections() {
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonDesativar_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked, connectionType);
 }
 
 void CadastroProduto::unsetConnections() {
@@ -239,8 +239,8 @@ void CadastroProduto::unsetConnections() {
   disconnect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
   disconnect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
   disconnect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
+  disconnect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonDesativar_clicked);
   disconnect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
-  disconnect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
 }
 
 bool CadastroProduto::viewRegister() {

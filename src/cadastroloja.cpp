@@ -19,8 +19,8 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   newRegister();
 
   if (not User::isAdministrativo()) {
-    ui->pushButtonRemover->setDisabled(true);
-    ui->pushButtonRemoverEnd->setDisabled(true);
+    ui->pushButtonDesativar->setDisabled(true);
+    ui->pushButtonDesativarEnd->setDisabled(true);
   }
 
   setConnections();
@@ -43,10 +43,10 @@ void CadastroLoja::setConnections() {
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarEnd_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonDesativar_clicked, connectionType);
+  connect(ui->pushButtonDesativarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonDesativarConta_clicked, connectionType);
+  connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemover_clicked, connectionType);
-  connect(ui->pushButtonRemoverConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverConta_clicked, connectionType);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverEnd_clicked, connectionType);
   connect(ui->tableConta, &TableView::clicked, this, &CadastroLoja::on_tableConta_clicked, connectionType);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroLoja::on_tableEndereco_clicked, connectionType);
 }
@@ -124,11 +124,11 @@ void CadastroLoja::savingProcedures() {
 void CadastroLoja::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
 
-  ui->pushButtonRemoverConta->hide();
+  ui->pushButtonDesativarConta->hide();
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), false);
 }
@@ -136,7 +136,7 @@ void CadastroLoja::registerMode() {
 void CadastroLoja::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 void CadastroLoja::setupMapper() {
@@ -177,7 +177,7 @@ void CadastroLoja::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroLoja::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroLoja::on_pushButtonRemover_clicked() { remove(); }
+void CadastroLoja::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroLoja::on_pushButtonBuscar_clicked() {
   if (not confirmationMessage()) { return; }
@@ -197,7 +197,7 @@ void CadastroLoja::on_pushButtonAtualizarEnd_clicked() {
   if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
 }
 
-void CadastroLoja::on_pushButtonRemoverEnd_clicked() {
+void CadastroLoja::on_pushButtonDesativarEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     setDataEnd("desativado", true);
 
@@ -243,7 +243,7 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
 void CadastroLoja::novoEndereco() {
   ui->pushButtonAtualizarEnd->hide();
   ui->pushButtonAdicionarEnd->show();
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
 }
@@ -282,11 +282,11 @@ void CadastroLoja::on_tableEndereco_clicked(const QModelIndex &index) {
   const bool desativado = dataEnd("desativado").toBool();
 
   ui->pushButtonAtualizarEnd->setEnabled(desativado);
-  ui->pushButtonRemoverEnd->setDisabled(desativado);
+  ui->pushButtonDesativarEnd->setDisabled(desativado);
 
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
-  ui->pushButtonRemoverEnd->show();
+  ui->pushButtonDesativarEnd->show();
 
   //------------------------------------------
   disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroLoja::on_lineEditCEP_textChanged);
@@ -380,7 +380,7 @@ void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
 
   ui->pushButtonAtualizarConta->show();
   ui->pushButtonAdicionarConta->hide();
-  ui->pushButtonRemoverConta->show();
+  ui->pushButtonDesativarConta->show();
 }
 
 bool CadastroLoja::newRegister() {
@@ -410,7 +410,7 @@ bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
 void CadastroLoja::novaConta() {
   ui->pushButtonAtualizarConta->hide();
   ui->pushButtonAdicionarConta->show();
-  ui->pushButtonRemoverConta->hide();
+  ui->pushButtonDesativarConta->hide();
   ui->tableConta->clearSelection();
   clearConta();
 }
@@ -430,7 +430,7 @@ void CadastroLoja::on_pushButtonAtualizarConta_clicked() {
   if (cadastrarConta(Tipo::Atualizar)) { novaConta(); }
 }
 
-void CadastroLoja::on_pushButtonRemoverConta_clicked() {
+void CadastroLoja::on_pushButtonDesativarConta_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     modelConta.setData(mapperConta.currentIndex(), "desativado", true);
 

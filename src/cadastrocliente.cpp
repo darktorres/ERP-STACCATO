@@ -71,9 +71,9 @@ void CadastroCliente::setConnections() {
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizarEnd_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonDesativar_clicked, connectionType);
+  connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemover_clicked, connectionType);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemoverEnd_clicked, connectionType);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroCliente::on_radioButtonPF_toggled, connectionType);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroCliente::on_tableEndereco_clicked, connectionType);
 }
@@ -217,9 +217,9 @@ void CadastroCliente::setupMapper() {
 void CadastroCliente::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
 
   ui->lineEditCliente->setReadOnly(false);
   ui->lineEditCPF->setReadOnly(false);
@@ -232,7 +232,7 @@ void CadastroCliente::registerMode() {
 void CadastroCliente::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 bool CadastroCliente::verificaVinculo() {
@@ -291,7 +291,7 @@ void CadastroCliente::on_pushButtonCadastrar_clicked() { save(); }
 
 void CadastroCliente::on_pushButtonAtualizar_clicked() { save(); }
 
-void CadastroCliente::on_pushButtonRemover_clicked() { remove(); }
+void CadastroCliente::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroCliente::on_pushButtonNovoCad_clicked() { newRegister(); }
 
@@ -439,7 +439,7 @@ void CadastroCliente::clearEndereco() {
 void CadastroCliente::novoEndereco() {
   ui->pushButtonAdicionarEnd->show();
   ui->pushButtonAtualizarEnd->hide();
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
   setEnderecoReadOnly(false);
@@ -463,13 +463,13 @@ void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
   const bool desativado = dataEnd("desativado").toBool();
 
   ui->pushButtonAtualizarEnd->setEnabled(desativado);
-  ui->pushButtonRemoverEnd->setDisabled(desativado);
+  ui->pushButtonDesativarEnd->setDisabled(desativado);
 
   setEnderecoReadOnly(verificaVinculo());
 
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
-  ui->pushButtonRemoverEnd->show();
+  ui->pushButtonDesativarEnd->show();
 
   //------------------------------------------
   disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged);
@@ -524,7 +524,7 @@ void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.select();
 }
 
-void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
+void CadastroCliente::on_pushButtonDesativarEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     setDataEnd("desativado", true);
 

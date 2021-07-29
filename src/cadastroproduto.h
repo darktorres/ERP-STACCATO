@@ -30,8 +30,8 @@ private:
   auto on_doubleSpinBoxVenda_valueChanged(const double) -> void;
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonDesativar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
-  auto on_pushButtonRemover_clicked() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;

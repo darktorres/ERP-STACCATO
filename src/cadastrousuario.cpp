@@ -36,8 +36,8 @@ void CadastroUsuario::setConnections() {
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonDesativar_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked, connectionType);
 }
 
 void CadastroUsuario::setupTables() {
@@ -80,7 +80,7 @@ void CadastroUsuario::modificarUsuario() {
 
   ui->pushButtonBuscar->hide();
   ui->pushButtonNovoCad->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 
   ui->lineEditNome->setDisabled(true);
   ui->lineEditUser->setDisabled(true);
@@ -127,7 +127,7 @@ void CadastroUsuario::registerMode() {
   ui->pushButtonCadastrar->show();
 
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 }
 
 void CadastroUsuario::updateMode() {
@@ -136,7 +136,7 @@ void CadastroUsuario::updateMode() {
   ui->pushButtonCadastrar->hide();
 
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 void CadastroUsuario::savingProcedures() {
@@ -206,7 +206,7 @@ void CadastroUsuario::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroUsuario::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroUsuario::on_pushButtonRemover_clicked() { remove(); }
+void CadastroUsuario::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroUsuario::on_pushButtonBuscar_clicked() {
   if (not confirmationMessage()) { return; }

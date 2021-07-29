@@ -51,6 +51,10 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->labelUn->hide();
   ui->lineEditUn->hide();
 
+  ui->splitter->setStretchFactor(0, 1);
+  ui->splitter->setStretchFactor(1, 255);
+  ui->splitter->setStretchFactor(2, 1);
+
   setConnections();
 }
 

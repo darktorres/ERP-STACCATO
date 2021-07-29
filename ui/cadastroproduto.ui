@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1258</width>
-    <height>763</height>
+    <width>1182</width>
+    <height>534</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -956,7 +956,7 @@ color: rgb(0, 0, 0);</string>
                   </widget>
                  </item>
                  <item row="2" column="4">
-                  <widget class="ComboBox" name="comboBoxOrigem">
+                  <widget class="QComboBox" name="comboBoxOrigem">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
@@ -1225,10 +1225,16 @@ color: rgb(0, 0, 0);</string>
             </item>
             <item row="2" column="0">
              <widget class="QTextEdit" name="textEditObserv">
-              <property name="minimumSize">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
                <size>
-                <width>250</width>
-                <height>0</height>
+                <width>16777215</width>
+                <height>72</height>
                </size>
               </property>
               <property name="accessibleName">
@@ -1395,11 +1401,6 @@ color: rgb(0, 0, 0);</string>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

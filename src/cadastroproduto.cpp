@@ -243,6 +243,14 @@ void CadastroProduto::unsetConnections() {
   disconnect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
 }
 
+bool CadastroProduto::viewRegister() {
+  if (not RegisterDialog::viewRegister()) { return false; }
+
+  ui->checkBoxValidade->setChecked(not data("validade").isNull());
+
+  return true;
+}
+
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
 // TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
@@ -252,4 +260,4 @@ void CadastroProduto::unsetConnections() {
 // TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto
 
-// TODO: change 'icms' from lineEdit to doubleSpinBox
+// TODO: change 'icms' from lineEdit to doubleSpinBox and add suffix %

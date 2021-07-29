@@ -6,6 +6,7 @@
 #include "file.h"
 #include "user.h"
 
+#include <QDebug>
 #include <QSqlError>
 #include <QTransposeProxyModel>
 
@@ -197,8 +198,6 @@ void CadastroUsuario::fillComboBoxLoja() {
   if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-
-  ui->comboBoxLoja->setCurrentValue(User::idLoja);
 }
 
 void CadastroUsuario::on_pushButtonCadastrar_clicked() { save(); }

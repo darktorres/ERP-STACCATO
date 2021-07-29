@@ -91,7 +91,7 @@ void CadastroProduto::verifyFields() {
 
 void CadastroProduto::setupMapper() {
   addMapping(ui->comboBoxCST, "cst");
-  addMapping(ui->comboBoxOrigem, "origem");
+  addMapping(ui->comboBoxOrigem, "origem", "currentIndex");
   addMapping(ui->comboBoxUn, "un");
   addMapping(ui->dateEditValidade, "validade");
   addMapping(ui->doubleSpinBoxComissao, "comissao");

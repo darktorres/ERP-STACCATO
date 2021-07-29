@@ -48,9 +48,9 @@ void CadastroProfissional::setConnections() {
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonAtualizarEnd_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonDesativar_clicked, connectionType);
+  connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemover_clicked, connectionType);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemoverEnd_clicked, connectionType);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled, connectionType);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked, connectionType);
 }
@@ -132,15 +132,15 @@ void CadastroProfissional::setupMapper() {
 void CadastroProfissional::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
 }
 
 void CadastroProfissional::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 bool CadastroProfissional::verificaVinculo() {
@@ -178,7 +178,7 @@ bool CadastroProfissional::viewRegister() {
   ui->lineEditCNPJ->setReadOnly(bloquear);
 
   ui->groupBoxPFPJ->setDisabled(bloquear);
-  ui->pushButtonRemover->setDisabled(bloquear);
+  ui->pushButtonDesativar->setDisabled(bloquear);
 
   return true;
 }
@@ -273,7 +273,7 @@ void CadastroProfissional::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroProfissional::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroProfissional::on_pushButtonRemover_clicked() { remove(); }
+void CadastroProfissional::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroProfissional::clearFields() {
   RegisterDialog::clearFields();
@@ -287,7 +287,7 @@ void CadastroProfissional::clearFields() {
 void CadastroProfissional::novoEndereco() {
   ui->pushButtonAdicionarEnd->show();
   ui->pushButtonAtualizarEnd->hide();
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
 }
@@ -369,11 +369,11 @@ void CadastroProfissional::on_tableEndereco_clicked(const QModelIndex &index) {
   const bool desativado = dataEnd("desativado").toBool();
 
   ui->pushButtonAtualizarEnd->setEnabled(desativado);
-  ui->pushButtonRemoverEnd->setDisabled(desativado);
+  ui->pushButtonDesativarEnd->setDisabled(desativado);
 
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
-  ui->pushButtonRemoverEnd->show();
+  ui->pushButtonDesativarEnd->show();
 
   //------------------------------------------
   disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroProfissional::on_lineEditCEP_textChanged);
@@ -392,7 +392,7 @@ void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked
   modelEnd.select();
 }
 
-void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
+void CadastroProfissional::on_pushButtonDesativarEnd_clicked() {
   // TODO: se já estiver desativado apenas retornar
 
   if (removeBox() == QMessageBox::Yes) {

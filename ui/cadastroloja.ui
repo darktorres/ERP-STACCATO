@@ -543,7 +543,7 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonRemoverEnd">
+          <widget class="QPushButton" name="pushButtonDesativarEnd">
            <property name="text">
             <string>Desativar End.</string>
            </property>
@@ -619,7 +619,7 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonRemoverConta">
+          <widget class="QPushButton" name="pushButtonDesativarConta">
            <property name="text">
             <string>Desativar Conta</string>
            </property>
@@ -906,7 +906,7 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonRemover">
+      <widget class="QPushButton" name="pushButtonDesativar">
        <property name="text">
         <string>Desativar</string>
        </property>
@@ -962,7 +962,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableConta</tabstop>
   <tabstop>pushButtonAdicionarConta</tabstop>
   <tabstop>pushButtonAtualizarConta</tabstop>
-  <tabstop>pushButtonRemoverConta</tabstop>
+  <tabstop>pushButtonDesativarConta</tabstop>
   <tabstop>checkBoxMostrarInativosConta</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
   <tabstop>lineEditCEP</tabstop>
@@ -975,7 +975,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonRemoverEnd</tabstop>
+  <tabstop>pushButtonDesativarEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>doubleSpinBoxValorMinimoFrete</tabstop>
@@ -988,7 +988,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
+  <tabstop>pushButtonDesativar</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

@@ -70,7 +70,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonRemover">
+      <widget class="QPushButton" name="pushButtonDesativar">
        <property name="text">
         <string>Desativar</string>
        </property>
@@ -456,7 +456,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
+  <tabstop>pushButtonDesativar</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

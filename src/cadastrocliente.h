@@ -40,9 +40,9 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonDesativarEnd_clicked() -> void;
+  auto on_pushButtonDesativar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
-  auto on_pushButtonRemoverEnd_clicked() -> void;
-  auto on_pushButtonRemover_clicked() -> void;
   auto on_radioButtonPF_toggled(const bool checked) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;

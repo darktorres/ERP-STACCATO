@@ -301,7 +301,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButtonRemoverEnd">
+             <widget class="QPushButton" name="pushButtonDesativarEnd">
               <property name="text">
                <string>Desativar End.</string>
               </property>
@@ -1022,7 +1022,7 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonRemover">
+      <widget class="QPushButton" name="pushButtonDesativar">
        <property name="text">
         <string>Desativar</string>
        </property>
@@ -1052,6 +1052,11 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>LineEditCEP</class>
    <extends>QLineEdit</extends>
    <header>src/lineeditcep.h</header>
@@ -1060,11 +1065,6 @@ color: rgb(0, 0, 0);</string>
    <class>LineEditTel</class>
    <extends>QLineEdit</extends>
    <header>src/lineedittel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1101,7 +1101,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonRemoverEnd</tabstop>
+  <tabstop>pushButtonDesativarEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>lineEditNomeBancario</tabstop>
   <tabstop>lineEditCPFBancario</tabstop>
@@ -1114,7 +1114,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
+  <tabstop>pushButtonDesativar</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

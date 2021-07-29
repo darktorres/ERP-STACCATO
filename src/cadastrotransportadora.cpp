@@ -21,8 +21,8 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   newRegister();
 
   if (not User::isAdministrativo()) {
-    ui->pushButtonRemover->setDisabled(true);
-    ui->pushButtonRemoverEnd->setDisabled(true);
+    ui->pushButtonDesativar->setDisabled(true);
+    ui->pushButtonDesativarEnd->setDisabled(true);
   }
 
   setConnections();
@@ -45,10 +45,10 @@ void CadastroTransportadora::setConnections() {
   connect(ui->pushButtonAtualizarVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonDesativar_clicked, connectionType);
+  connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonDesativarEnd_clicked, connectionType);
+  connect(ui->pushButtonDesativarVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonDesativarVeiculo_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemover_clicked, connectionType);
-  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemoverEnd_clicked, connectionType);
-  connect(ui->pushButtonRemoverVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked, connectionType);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroTransportadora::on_tableEndereco_clicked, connectionType);
   connect(ui->tableVeiculo, &TableView::clicked, this, &CadastroTransportadora::on_tableVeiculo_clicked, connectionType);
 }
@@ -134,17 +134,17 @@ void CadastroTransportadora::setupMapper() {
 void CadastroTransportadora::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
-  ui->pushButtonRemover->hide();
+  ui->pushButtonDesativar->hide();
 
-  ui->pushButtonRemoverVeiculo->hide();
+  ui->pushButtonDesativarVeiculo->hide();
 
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
 }
 
 void CadastroTransportadora::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
-  ui->pushButtonRemover->show();
+  ui->pushButtonDesativar->show();
 }
 
 void CadastroTransportadora::on_pushButtonCadastrar_clicked() { save(); }
@@ -155,7 +155,7 @@ void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 // TODO: antes de remover verificar se existem agendamentos em aberto e avisar usuario
 // TODO: ao desativar uma transportadora desativar cada um de seus veiculos senao eles continuam a aparecer no SearchDialog/Calendario
-void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
+void CadastroTransportadora::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroTransportadora::on_pushButtonBuscar_clicked() {
   if (not confirmationMessage()) { return; }
@@ -175,7 +175,7 @@ void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
   if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
 }
 
-void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
+void CadastroTransportadora::on_pushButtonDesativarEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     setDataEnd("desativado", true);
 
@@ -219,7 +219,7 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
 void CadastroTransportadora::novoEndereco() {
   ui->pushButtonAtualizarEnd->hide();
   ui->pushButtonAdicionarEnd->show();
-  ui->pushButtonRemoverEnd->hide();
+  ui->pushButtonDesativarEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
 }
@@ -258,11 +258,11 @@ void CadastroTransportadora::on_tableEndereco_clicked(const QModelIndex &index) 
   const bool desativado = dataEnd("desativado").toBool();
 
   ui->pushButtonAtualizarEnd->setEnabled(desativado);
-  ui->pushButtonRemoverEnd->setDisabled(desativado);
+  ui->pushButtonDesativarEnd->setDisabled(desativado);
 
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
-  ui->pushButtonRemoverEnd->show();
+  ui->pushButtonDesativarEnd->show();
 
   //------------------------------------------
   disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroTransportadora::on_lineEditCEP_textChanged);
@@ -342,7 +342,7 @@ void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
 void CadastroTransportadora::novoVeiculo() {
   ui->pushButtonAtualizarVeiculo->hide();
   ui->pushButtonAdicionarVeiculo->show();
-  ui->pushButtonRemoverVeiculo->hide();
+  ui->pushButtonDesativarVeiculo->hide();
   ui->tableVeiculo->clearSelection();
   clearVeiculo();
 }
@@ -354,7 +354,7 @@ void CadastroTransportadora::clearVeiculo() {
   ui->lineEditUfPlaca->clear();
 }
 
-void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
+void CadastroTransportadora::on_pushButtonDesativarVeiculo_clicked() {
   if (removeBox() == QMessageBox::Yes) {
     modelVeiculo.setData(currentRowVeiculo, "desativado", true);
 
@@ -427,7 +427,7 @@ void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
 
   ui->pushButtonAtualizarVeiculo->show();
   ui->pushButtonAdicionarVeiculo->hide();
-  ui->pushButtonRemoverVeiculo->show();
+  ui->pushButtonDesativarVeiculo->show();
 }
 
 bool CadastroTransportadora::newRegister() {

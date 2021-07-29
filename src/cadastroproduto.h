@@ -41,4 +41,5 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verifyFields() -> void final;
+  auto viewRegister() -> bool final;
 };

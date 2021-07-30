@@ -565,7 +565,9 @@ double ImportarXML::buscarCaixas(const int rowEstoque) {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto " + modelEstoque.data(rowEstoque, "descricao").toString() + ": " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando produto " + modelEstoque.data(rowEstoque, "descricao").toString() + ": " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelEstoque.data(rowEstoque, "idProduto").toString()); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
@@ -695,9 +697,11 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 void ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
-  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
+  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'")) {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
+
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com chave: " + ui->itemBoxNFe->text()); }
 
   if (query.value("status").toString() != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
 
@@ -927,7 +931,9 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   queryProduto.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   queryProduto.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
-  if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
+  if (not queryProduto.exec()) { throw RuntimeException("Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
+
+  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelCompra.data(rowCompra, "idProduto").toString()); }
 
   const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
   const double caixas = quantConsumo / quantCaixa;

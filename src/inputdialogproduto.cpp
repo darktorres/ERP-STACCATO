@@ -181,7 +181,9 @@ void InputDialogProduto::setFilter(const QStringList &ids) {
   query.prepare("SELECT aliquotaSt, st, representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: " + modelPedidoFornecedor.data(0, "fornecedor").toString()); }
 
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());

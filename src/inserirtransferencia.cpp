@@ -175,9 +175,11 @@ void InserirTransferencia::buscarCreditoCliente() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT credito FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString()) or not query.first()) {
+  if (not query.exec("SELECT credito FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
     throw RuntimeException("Erro buscando crédito do cliente: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Dados do cliente não encontrados!"); }
 
   const bool deCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES");
   const double credito = query.value("credito").toDouble();

@@ -106,7 +106,9 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + modelViewNFeSaida.data(index.row(), "idNFe").toString()); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -256,7 +258,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
                 "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Não foram encontrado dados para a data: " + ui->dateEdit->date().toString("yyyy-MM")); }
 
   dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
@@ -301,7 +305,9 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe com chave: " + chaveAcesso); }
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 

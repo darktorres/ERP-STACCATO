@@ -268,7 +268,9 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
     query.bindValue(":idConta", ui->itemBoxConta->getId());
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando 'banco': " + query.lastError().text()); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando 'banco': " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Banco não encontrado da conta com id: " + ui->itemBoxConta->getId().toString()); }
 
     if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
       const int rowPagar1 = modelContaPagar.insertRowAtEnd();

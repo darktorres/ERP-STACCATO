@@ -58,7 +58,9 @@ QVariant User::fromLoja(const QString &parameter, const QString &user) {
   queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
   queryLoja.bindValue(":nome", user);
 
-  if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeException("Erro na query loja: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec()) { throw RuntimeException("Erro na query loja: " + queryLoja.lastError().text()); }
+
+  if (not queryLoja.first()) { throw RuntimeException("Dados da loja/usuário não encontrados para o usuário: " + user); }
 
   return queryLoja.value(0);
 }

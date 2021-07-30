@@ -57,7 +57,9 @@ void ImportaProdutos::verificaSeRepresentacao() {
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
+  if (not queryFornecedor.exec()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
+
+  if (not queryFornecedor.first()) { throw RuntimeException("Dados não encontrados para fornecedor: " + fornecedor); }
 
   ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
 }

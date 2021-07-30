@@ -137,9 +137,9 @@ void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 void WidgetCompraGerar::gerarCompra(const QModelIndexList &list, const QDate dataCompra, const QDate dataPrevista, const int ordemCompra) {
   SqlQuery queryId;
 
-  if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-    throw RuntimeException("Erro buscando idCompra: " + queryId.lastError().text());
-  }
+  if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto")) { throw RuntimeException("Erro buscando idCompra: " + queryId.lastError().text()); }
+
+  if (not queryId.first()) { throw RuntimeException("Erro buscando idCompra!"); }
 
   const int idCompra = queryId.value("idCompra").toInt();
 
@@ -274,7 +274,11 @@ std::tuple<QDate, QDate> WidgetCompraGerar::getDates(const QModelIndexList &list
 int WidgetCompraGerar::getOrdemCompra() {
   SqlQuery queryOC;
 
-  if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) { throw RuntimeException("Erro buscando próximo O.C.!"); }
+  if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto")) {
+    throw RuntimeException("Erro buscando próxima OC: " + queryOC.lastError().text());
+  }
+
+  if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima O.C.!"); }
 
   bool ok;
 
@@ -320,7 +324,9 @@ bool WidgetCompraGerar::verificaRepresentacao(const QModelIndexList &list) {
   query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", fornecedor);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do fornecedor: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados do fornecedor: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: " + fornecedor); }
 
   const bool isRepresentacao = query.value("representacao").toBool();
 

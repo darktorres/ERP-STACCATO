@@ -69,6 +69,24 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
+  if (tipo == Tipo::Compra) {
+    query.prepare("INSERT INTO pedido_fornecedor_has_followup (ordemCompra, idLoja, idUsuario, observacao, dataFollowup) VALUES (:ordemCompra, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.bindValue(":ordemCompra", id);
+    query.bindValue(":idLoja", User::idLoja);
+    query.bindValue(":idUsuario", User::idUsuario);
+    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
+  }
+
+  if (tipo == Tipo::Estoque) {
+    query.prepare("INSERT INTO estoque_has_followup (idEstoque, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idEstoque, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.bindValue(":idEstoque", id);
+    query.bindValue(":idLoja", User::idLoja);
+    query.bindValue(":idUsuario", User::idUsuario);
+    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
+  }
+
   if (not query.exec()) { throw RuntimeException("Erro salvando followup: " + query.lastError().text(), this); }
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);

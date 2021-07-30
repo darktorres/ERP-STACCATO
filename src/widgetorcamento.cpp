@@ -329,9 +329,9 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString codigo = modelViewOrcamento.data(list.first().row(), "Código").toString();
+  const QString idOrcamento = modelViewOrcamento.data(list.first().row(), "Código").toString();
 
-  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Orcamento, this);
+  FollowUp *followup = new FollowUp(idOrcamento, FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

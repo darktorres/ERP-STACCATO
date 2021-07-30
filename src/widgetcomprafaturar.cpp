@@ -208,9 +208,9 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString idEstoque = modelViewFaturamento.data(selection.first().row(), "OC").toString();
+  const QString ordemCompra = modelViewFaturamento.data(selection.first().row(), "OC").toString();
 
-  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Compra, this);
+  FollowUp *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

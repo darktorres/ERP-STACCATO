@@ -34,7 +34,9 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   query.prepare("SELECT UPPER(un) AS un, quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: " + ui->itemBoxProduto->getId().toString()); }
 
   const QString un = query.value("un").toString();
   const double quantCaixa = query.value("quantCaixa").toDouble();
@@ -268,7 +270,9 @@ void WidgetCompraPendentes::insere(const QDate dataPrevista) {
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: " + ui->itemBoxProduto->getId().toString()); }
 
   model.setData(newRow, "fornecedor", query.value("fornecedor"));
   model.setData(newRow, "idProduto", query.value("idProduto"));

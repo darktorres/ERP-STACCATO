@@ -293,7 +293,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         query2.bindValue(":pagamento", tipoPgt);
         query2.bindValue(":parcela", parcelas);
 
-        if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+        if (not query2.exec()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+
+        if (not query2.first()) { throw RuntimeException("Dados não encontrados para o pagamento: " + tipoPgt); }
 
         const int idConta = query2.value("idConta").toInt();
         const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
@@ -638,7 +640,9 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando se é representacao: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando se é representacao: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Erro buscando se é representacao!"); }
 
   representacao = query.value("representacao").toBool();
 

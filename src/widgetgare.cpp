@@ -212,7 +212,9 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe de id: " + model.data(index.row(), "idNFe").toString()); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

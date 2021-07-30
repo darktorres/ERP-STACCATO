@@ -446,7 +446,9 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-  if (not queryPagamento.exec() or not queryPagamento.first()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+  if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+
+  if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: " + model.data(list.first().row(), "idPagamento").toString()); }
 
   if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
 
@@ -502,15 +504,19 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 
     SqlQuery queryLoja;
 
-    if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.readValue(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
+    if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.readValue(rowExcel, 2).toString() + "'")) {
       throw RuntimeException("Erro buscando idLoja: " + queryLoja.lastError().text());
     }
 
+    if (not queryLoja.first()) { throw RuntimeError("Loja não encontrada no banco de dados: " + xlsx.readValue(rowExcel, 2).toString()); }
+
     SqlQuery queryConta;
 
-    if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.readValue(rowExcel, 7).toString() + "'") or not queryConta.first()) {
+    if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.readValue(rowExcel, 7).toString() + "'")) {
       throw RuntimeException("Erro buscando idConta: " + queryConta.lastError().text());
     }
+
+    if (not queryConta.first()) { throw RuntimeError("Conta não encontrada no banco de dados: " + xlsx.readValue(rowExcel, 7).toString()); }
 
     const int rowModel = modelImportar.insertRowAtEnd();
 

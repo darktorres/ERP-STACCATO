@@ -357,9 +357,11 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra) or not query.first()) {
+  if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra)) {
     throw RuntimeException("Erro buscando OC: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado idCompra da OC: " + ordemCompra); }
 
   const QString idCompra = query.value("idCompra").toString();
 
@@ -381,7 +383,9 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
   query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", idPagamento);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: " + idPagamento); }
 
   const QString idVenda = query.value("idVenda").toString();
 

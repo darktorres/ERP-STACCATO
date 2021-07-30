@@ -521,7 +521,9 @@ void Orcamento::generateId() {
         "AND idOrcamento LIKE :idOrcamento");
     query.bindValue(":idOrcamento", replica.left(11) + "%");
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando próxima revisão disponível: " + query.lastError().text()); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando próxima revisão disponível: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Erro buscando próxima revisão disponível!"); }
 
     id = replica.left(replica.indexOf("-REV")) + "-REV" + query.value("revisao").toString();
   }
@@ -1019,7 +1021,9 @@ void Orcamento::setarParametrosProduto() {
   query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro na busca do produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro na busca do produto: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados do produto com id: " + ui->itemBoxProduto->getId().toString()); }
 
   // -------------------------------------------------------------------------
 
@@ -1102,9 +1106,11 @@ void Orcamento::on_itemBoxProfissional_idChanged(const QVariant &) {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT comissao FROM profissional WHERE idProfissional = " + idProfissional.toString()) or not query.first()) {
+  if (not query.exec("SELECT comissao FROM profissional WHERE idProfissional = " + idProfissional.toString())) {
     throw RuntimeException("Erro buscando dados do profissional: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Dados do profissional não encontrados!"); }
 
   ui->itemBoxProfissional->setStyleSheet(query.value("comissao").toDouble() > 5 ? "background-color: rgb(255, 255, 127); color: rgb(0, 0, 0);" : "");
 }
@@ -1117,7 +1123,9 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
   queryCliente.prepare("SELECT idProfissionalRel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro ao buscar cliente: " + queryCliente.lastError().text()); }
+  if (not queryCliente.exec()) { throw RuntimeException("Erro ao buscar cliente: " + queryCliente.lastError().text()); }
+
+  if (not queryCliente.first()) { throw RuntimeException("Dados do cliente não encontrados!"); }
 
   ui->itemBoxProfissional->setId(queryCliente.value("idProfissionalRel"));
   ui->itemBoxEndereco->setEnabled(true);
@@ -1168,7 +1176,9 @@ void Orcamento::on_pushButtonReplicar_clicked() {
     if (not isEstoque) {
       queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-      if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+      if (not queryProduto.exec()) { throw RuntimeException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+
+      if (not queryProduto.first()) { throw RuntimeException("Dados do produto não encontrado!"); }
 
       if (queryProduto.value("invalido").toBool()) {
         queryEquivalente.bindValue(":fornecedor", modelItem.data(row, "fornecedor"));
@@ -1283,9 +1293,11 @@ void Orcamento::cadastrar() {
 void Orcamento::verificaCadastroCliente() {
   SqlQuery queryCadastro;
 
-  if (not queryCadastro.exec("SELECT incompleto FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString()) or not queryCadastro.first()) {
+  if (not queryCadastro.exec("SELECT incompleto FROM cliente WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
     throw RuntimeException("Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text());
   }
+
+  if (not queryCadastro.first()) { throw RuntimeException("Dados do cliente não encontrado!"); }
 
   const bool incompleto = queryCadastro.value("incompleto").toBool();
 
@@ -1496,14 +1508,18 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
 
     peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
   }
 
-  if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'") or not query.first()) {
+  if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'")) {
     throw RuntimeException("Erro buscando parâmetros: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Dados da loja 'Geral' não encontrados!"); }
 
   const double custoTon = query.value("custoTransporteTon").toDouble();
   const double custo1 = query.value("custoTransporte1").toDouble();
@@ -1610,9 +1626,11 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
 double Orcamento::calcularPeso() {
   SqlQuery queryProduto;
 
-  if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + ui->itemBoxProduto->getId().toString()) or not queryProduto.first()) {
+  if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + ui->itemBoxProduto->getId().toString())) {
     throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
   }
+
+  if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + ui->itemBoxProduto->getId().toString()); }
 
   return ui->doubleSpinBoxCaixas->value() * queryProduto.value("kgcx").toDouble();
 }
@@ -1625,9 +1643,11 @@ void Orcamento::calcularPesoTotal() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
 
-    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString()) or not queryProduto.first()) {
+    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString())) {
       throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
     }
+
+    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
     total += modelItem.data(row, "caixas").toDouble() * kgcx;
@@ -1641,9 +1661,11 @@ void Orcamento::verificaSeFoiAlterado() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT lastUpdated FROM orcamento WHERE idOrcamento = '" + data("idOrcamento").toString() + "'") or not query.first()) {
+  if (not query.exec("SELECT lastUpdated FROM orcamento WHERE idOrcamento = '" + data("idOrcamento").toString() + "'")) {
     throw RuntimeException("Erro verificando se orçamento foi alterado: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Erro verificando se orçamento foi alterado!"); }
 
   const QDateTime serverLastUpdated = query.value("lastUpdated").toDateTime();
   const QDateTime currentLastUpdated = data("lastUpdated").toDateTime();

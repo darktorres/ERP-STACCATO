@@ -126,7 +126,9 @@ void Excel::gerarExcel() {
 
     SqlQuery queryPgt;
 
-    if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
+    if (not queryPgt.exec(pgtQuery.arg(current))) { throw RuntimeException("Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
+
+    if (not queryPgt.first()) { throw RuntimeException("Pagamento não encontrado!"); }
 
     if (qFuzzyIsNull(queryPgt.value("valor").toDouble())) { continue; }
 
@@ -150,7 +152,9 @@ void Excel::gerarExcel() {
   do {
     queryUi.bindValue(":idProduto", queryProduto.value("idProduto"));
 
-    if (not queryUi.exec() or not queryUi.first()) { throw RuntimeException("Erro buscando dados do produto: " + queryUi.lastError().text()); }
+    if (not queryUi.exec()) { throw RuntimeException("Erro buscando dados do produto: " + queryUi.lastError().text()); }
+
+    if (not queryUi.first()) { throw RuntimeException("Dados não encontrados do produto com id: " + queryProduto.value("idProduto").toString()); }
 
     const QString loes = queryUi.value("ui").toString().contains("- L") ? " LOES" : "";
 
@@ -211,58 +215,76 @@ void Excel::setQuerys() {
     queryProduto.bindValue(":idVenda", id);
   }
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados da venda/orçamento: " + id); }
 
   //------------------------------------------------------------------------
 
-  if (not queryProduto.exec() or not queryProduto.first()) { throw RuntimeException("Erro buscando dados dos produtos: " + queryProduto.lastError().text()); }
+  if (not queryProduto.exec()) { throw RuntimeException("Erro buscando dados dos produtos: " + queryProduto.lastError().text()); }
+
+  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados da Venda: " + id); }
 
   //------------------------------------------------------------------------
 
   queryCliente.prepare("SELECT nome_razao, email, cpf, cnpj, pfpj, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
-  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro buscando cliente: " + queryCliente.lastError().text()); }
+  if (not queryCliente.exec()) { throw RuntimeException("Erro buscando cliente: " + queryCliente.lastError().text()); }
+
+  if (not queryCliente.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + query.value("idCliente").toString()); }
 
   //------------------------------------------------------------------------
 
   queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
-  if (not queryEndEnt.exec() or not queryEndEnt.first()) { throw RuntimeException("Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
+  if (not queryEndEnt.exec()) { throw RuntimeException("Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
+
+  if (not queryEndEnt.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + query.value("idEnderecoEntrega").toString()); }
 
   //------------------------------------------------------------------------
 
   queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
-  if (not queryEndFat.exec() or not queryEndFat.first()) { throw RuntimeException("Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
+  if (not queryEndFat.exec()) { throw RuntimeException("Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
+
+  if (not queryEndFat.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega").toString()); }
 
   //------------------------------------------------------------------------
 
   queryProfissional.prepare("SELECT nome_razao, tel, email FROM profissional WHERE idProfissional = :idProfissional");
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
-  if (not queryProfissional.exec() or not queryProfissional.first()) { throw RuntimeException("Erro buscando profissional: " + queryProfissional.lastError().text()); }
+  if (not queryProfissional.exec()) { throw RuntimeException("Erro buscando profissional: " + queryProfissional.lastError().text()); }
+
+  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados do profissional com id: " + query.value("idProfissional").toString()); }
 
   //------------------------------------------------------------------------
 
   queryVendedor.prepare("SELECT nome, email FROM usuario WHERE idUsuario = :idUsuario");
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
-  if (not queryVendedor.exec() or not queryVendedor.first()) { throw RuntimeException("Erro buscando vendedor: " + queryVendedor.lastError().text()); }
+  if (not queryVendedor.exec()) { throw RuntimeException("Erro buscando vendedor: " + queryVendedor.lastError().text()); }
+
+  if (not queryVendedor.first()) { throw RuntimeException("Dados não encontrados do vendedor com id: " + query.value("idUsuario").toString()); }
 
   //------------------------------------------------------------------------
 
   queryLoja.prepare("SELECT tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }
+
+  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + query.value("idLoja").toString()); }
 
   //------------------------------------------------------------------------
 
   queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { throw RuntimeException("Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
+  if (not queryLojaEnd.exec()) { throw RuntimeException("Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
+
+  if (not queryLojaEnd.first()) { throw RuntimeException("Endereço não encontrado da loja com id: " + query.value("idLoja").toString()); }
 }

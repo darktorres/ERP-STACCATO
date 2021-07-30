@@ -39,9 +39,11 @@ QString CNAB::remessaGareItau240(const QVector<Gare> &gares) {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT MAX(sequencial) + 1 AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
+  if (not query.exec("SELECT MAX(sequencial) + 1 AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'")) {
     throw RuntimeException("Erro buscando sequencial CNAB: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado próximo número do CNAB!"); }
 
   // header arquivo pag 11
 
@@ -235,9 +237,11 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
   SqlQuery query;
 
-  if (not query.exec("SELECT MAX(sequencial) + 1 AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
+  if (not query.exec("SELECT MAX(sequencial) + 1 AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'")) {
     throw RuntimeException("Erro buscando sequencial CNAB: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado próximo número do CNAB!"); }
 
   // header arquivo pag 12
 
@@ -570,9 +574,9 @@ void CNAB::retornoGareItau240(const QString &filePath) {
       if (segmentoN.contains("PAGAMENTO EFETUADO")) {
         SqlQuery query1;
 
-        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj) or not query1.first()) {
-          throw RuntimeException("Erro dando baixa na GARE: " + query1.lastError().text());
-        }
+        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj)) { throw RuntimeException("Erro buscando id da NFe: " + query1.lastError().text()); }
+
+        if (not query1.first()) { throw RuntimeException("Não encontrado id da NFe: " + nfe); }
 
         SqlQuery query2;
 

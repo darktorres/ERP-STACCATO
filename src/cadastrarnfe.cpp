@@ -453,15 +453,19 @@ void CadastrarNFe::preencherNumeroNFe() {
   queryCnpj.prepare("SELECT cnpj FROM loja WHERE idLoja = :idLoja");
   queryCnpj.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-  if (not queryCnpj.exec() or not queryCnpj.first()) { throw RuntimeException("Erro buscando CNPJ: " + queryCnpj.lastError().text(), this); }
+  if (not queryCnpj.exec()) { throw RuntimeException("Erro buscando CNPJ: " + queryCnpj.lastError().text(), this); }
+
+  if (not queryCnpj.first()) { throw RuntimeException("CNPJ não encontrado da loja com id: " + ui->itemBoxLoja->getId().toString()); }
 
   const QString cnpj = clearStr(queryCnpj.value("cnpj").toString());
 
   SqlQuery queryNfe;
 
-  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE cnpjOrig = '" + cnpj + "'") or not queryNfe.first()) {
+  if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE cnpjOrig = '" + cnpj + "'")) {
     throw RuntimeException("Erro buscando idNFe: " + queryNfe.lastError().text(), this);
   }
+
+  if (not queryNfe.first()) { throw RuntimeException("Número da NFe não encontrado!"); }
 
   const int numeroNFe = queryNfe.value("numeroNFe").toInt();
 
@@ -542,7 +546,9 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
                   "vp2.idVendaProduto2 = :idVendaProduto2)");
     query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando NFe referenciada!", this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
+
+    if (not query.first()) { throw RuntimeException("NFe referenciada não encontrada!"); }
 
     stream << "[NFRef001]\n";
     stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
@@ -553,7 +559,9 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
     query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2)");
     query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando NFe referenciada!", this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
+
+    if (not query.first()) { throw RuntimeException("NFe referenciada não encontrada!"); }
 
     stream << "[NFRef001]\n";
     stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
@@ -1031,9 +1039,9 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
-  if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-    throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this);
-  }
+  if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this); }
+
+  if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Endereço do cliente não encontrado!"); }
 
   ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
   ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
@@ -1059,9 +1067,9 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getId());
 
-  if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-    throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this);
-  }
+  if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this); }
+
+  if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + ui->itemBoxEnderecoEntrega->getId().toString()); }
 
   ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
   ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
@@ -1259,7 +1267,9 @@ void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
                       "t.idTransportadora WHERE thv.idVeiculo = :idVeiculo");
   queryTransp.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
+  if (not queryTransp.exec()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
+
+  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do veículo com id: " + ui->itemBoxVeiculo->getId().toString()); }
 
   const QString endereco = queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " + queryTransp.value("complemento").toString() + " - " +
                            queryTransp.value("bairro").toString();
@@ -1281,7 +1291,9 @@ void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
   query.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do cliente: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados do cliente: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + ui->itemBoxCliente->getId().toString()); }
 
   ui->lineEditDestinatarioNomeRazao->setText(query.value("nome_razao").toString());
   ui->lineEditDestinatarioCPFCNPJ->setText(query.value((query.value("pfpj").toString() == "PF") ? "cpf" : "cnpj").toString());
@@ -1433,7 +1445,9 @@ void CadastrarNFe::buscarAliquotas() {
   queryPartilhaInter.bindValue(":origem", ui->lineEditEmitenteUF->text());
   queryPartilhaInter.bindValue(":destino", ui->lineEditDestinatarioUF->text());
 
-  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) { throw RuntimeException("Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text()); }
+  if (not queryPartilhaInter.exec()) { throw RuntimeException("Erro buscando partilha ICMS inter: " + queryPartilhaInter.lastError().text()); }
+
+  if (not queryPartilhaInter.first()) { throw RuntimeException("Partilha ICMS inter não encontrada!"); }
 
   // -------------------------------------------------------------------------
 
@@ -1441,7 +1455,9 @@ void CadastrarNFe::buscarAliquotas() {
   queryPartilhaIntra.bindValue(":origem", ui->lineEditDestinatarioUF->text());
   queryPartilhaIntra.bindValue(":destino", ui->lineEditDestinatarioUF->text());
 
-  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) { throw RuntimeException("Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text()); }
+  if (not queryPartilhaIntra.exec()) { throw RuntimeException("Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text()); }
+
+  if (not queryPartilhaIntra.first()) { throw RuntimeException("Partilha ICMS intra não encontrada!"); }
 }
 
 void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
@@ -1683,7 +1699,9 @@ void CadastrarNFe::preencherEmitente() {
   queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-  if (not queryEmitente.exec() or not queryEmitente.first()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
+  if (not queryEmitente.exec()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
+
+  if (not queryEmitente.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
 
   ui->lineEditEmitenteNomeRazao->setText(queryEmitente.value("razaoSocial").toString());
   ui->lineEditEmitenteFantasia->setText(queryEmitente.value("nomeFantasia").toString());
@@ -1698,7 +1716,9 @@ void CadastrarNFe::preencherEmitente() {
   queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-  if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
+  if (not queryEmitenteEndereco.exec()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
+
+  if (not queryEmitenteEndereco.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
 
   ui->lineEditEmitenteLogradouro->setText(queryEmitenteEndereco.value("logradouro").toString());
   ui->lineEditEmitenteNumero->setText(queryEmitenteEndereco.value("numero").toString());
@@ -1762,7 +1782,9 @@ void CadastrarNFe::preencherDestinatario() {
     queryDestinatario.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
     queryDestinatario.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
 
-    if (not queryDestinatario.exec() or not queryDestinatario.first()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
+    if (not queryDestinatario.exec()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
+
+    if (not queryDestinatario.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + modelVenda.data(0, "idCliente").toString()); }
 
     ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("nome_razao").toString());
     ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value(queryDestinatario.value("pfpj").toString() == "PF" ? "cpf" : "cnpj").toString());
@@ -1781,9 +1803,9 @@ void CadastrarNFe::preencherDestinatario() {
     queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
     queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
 
-    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
-    }
+    if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this); }
+
+    if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoFaturamento").toString()); }
 
     ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
     ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
@@ -1801,9 +1823,9 @@ void CadastrarNFe::preencherDestinatario() {
     queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
     queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
 
-    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
-      throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this);
-    }
+    if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this); }
+
+    if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoEntrega").toString()); }
 
     ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
     ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
@@ -1994,9 +2016,11 @@ void CadastrarNFe::preencherTransporte() {
         "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
 
     const QString coluna = (tipo == Tipo::Entrada) ? "idRelacionado" : "idVendaProduto2";
-    queryTransp.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, coluna).toInt());
+    queryTransp.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, coluna));
 
-    if (not queryTransp.exec() or not queryTransp.first()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
+    if (not queryTransp.exec()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
+
+    if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do id: " + modelViewProdutoEstoque.data(0, coluna).toString()); }
 
     const QString endereco = queryTransp.value("logradouro").toString().isEmpty() ? ""
                                                                                   : queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " +

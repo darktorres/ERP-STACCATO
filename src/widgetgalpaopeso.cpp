@@ -86,9 +86,11 @@ void WidgetGalpaoPeso::on_pushButtonAtualizar_clicked() {
 
     const int row = model.insertRowAtEnd();
 
-    if (not query.exec("SELECT CURDATE() + INTERVAL - " + QString::number(dia) + " DAY AS data, kg_dia(CURDATE() + INTERVAL - " + QString::number(dia) + " DAY) AS kg") or not query.first()) {
+    if (not query.exec("SELECT CURDATE() + INTERVAL - " + QString::number(dia) + " DAY AS data, kg_dia(CURDATE() + INTERVAL - " + QString::number(dia) + " DAY) AS kg")) {
       throw RuntimeException("Erro calculando peso do estoque: " + query.lastError().text());
     }
+
+    if (not query.first()) { throw RuntimeException("Peso não encontrado!"); }
 
     model.setData(row, "data", query.value("data"));
     model.setData(row, "kg", query.value("kg"));

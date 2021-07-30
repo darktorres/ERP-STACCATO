@@ -526,7 +526,9 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
                        "v.idCliente = c.idCliente LEFT JOIN profissional p ON v.idProfissional = p.idProfissional WHERE v.idVenda = :idVenda");
   queryCliente.bindValue(":idVenda", idVenda);
 
-  if (not queryCliente.exec() or not queryCliente.first()) { throw RuntimeException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
+  if (not queryCliente.exec()) { throw RuntimeException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
+
+  if (not queryCliente.first()) { throw RuntimeException("Não foram encontrados dados para a Venda: " + idVenda); }
 
   const QString cliente = queryCliente.value("nome_razao").toString();
 

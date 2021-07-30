@@ -303,7 +303,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+  if (not queryOrc.exec()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+
+  if (not queryOrc.first()) { throw RuntimeException("Orçamento não encontrado: " + idOrcamento); }
 
   ui->itemBoxVendedor->setId(queryOrc.value("idUsuario"));
   ui->itemBoxConsultor->setId(queryOrc.value("idUsuarioConsultor"));
@@ -339,7 +341,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja);
 
-  if (not queryFrete.exec() or not queryFrete.first()) { throw RuntimeException("Erro buscando parâmetros do frete: " + queryFrete.lastError().text()); }
+  if (not queryFrete.exec()) { throw RuntimeException("Erro buscando parâmetros do frete: " + queryFrete.lastError().text()); }
+
+  if (not queryFrete.first()) { throw RuntimeException("Dados do frete não encontrado!"); }
 
   minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
   porcFrete = queryFrete.value("porcentagemFrete").toDouble();
@@ -352,7 +356,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryCredito.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryCredito.bindValue(":idCliente", queryOrc.value("idCliente"));
 
-  if (not queryCredito.exec() or not queryCredito.first()) { throw RuntimeException("Erro buscando crédito cliente: " + queryCredito.lastError().text()); }
+  if (not queryCredito.exec()) { throw RuntimeException("Erro buscando crédito cliente: " + queryCredito.lastError().text()); }
+
+  if (not queryCredito.first()) { throw RuntimeException("Crédito do cliente não encontrado!"); }
 
   ui->widgetPgts->setCredito(queryCredito.value("credito").toDouble());
 
@@ -698,10 +704,13 @@ void Venda::verificaDisponibilidadeEstoque() {
 
 void Venda::verificaFreteLoja() {
   SqlQuery queryFornecedor;
+  // TODO: e se tiver mais de um fornecedor?
   queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor f LEFT JOIN produto p ON f.idFornecedor = p.idFornecedor WHERE p.idProduto = :idProduto");
   queryFornecedor.bindValue(":idProduto", modelItem.data(0, "idProduto"));
 
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+  if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+
+  if (not queryFornecedor.first()) { throw RuntimeException("Frete não encontrado para o produto com id: " + modelItem.data(0, "idProduto").toString()); }
 
   const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
 
@@ -741,7 +750,9 @@ void Venda::montarFluxoCaixa() {
   query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query1.bindValue(":razaoSocial", fornecedor);
 
-  if (not query1.exec() or not query1.first()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
+  if (not query1.exec()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
+
+  if (not query1.first()) { throw RuntimeException("Dados não encontrados do fornecedor: " + fornecedor); }
 
   const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
 
@@ -787,7 +798,9 @@ void Venda::montarFluxoCaixa() {
     query2.bindValue(":pagamento", tipoPgt);
     query2.bindValue(":parcela", parcelas);
 
-    if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+
+    if (not query2.first()) { throw RuntimeException("Dados do pagamento não encontrado!"); }
 
     const int idConta = query2.value("idConta").toInt();
     const bool pula1Mes = query2.value("pula1Mes").toInt();
@@ -1393,13 +1406,13 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
 }
 
 void Venda::on_pushButtonCorrigirFluxo_clicked() {
-  // TODO: usar um delegate para colocar o texto das linhas substituidas como tachado
-
   SqlQuery queryPag;
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));
 
-  if (not queryPag.exec() or not queryPag.first()) { throw RuntimeException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { throw RuntimeException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
+
+  if (not queryPag.first()) { throw RuntimeException("Crédito não encontrado do cliente com id: " + data("idCliente").toString()); }
 
   double credito = queryPag.value("credito").toDouble();
 
@@ -1426,7 +1439,9 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
     query.bindValue(":idProfissional", ui->itemBoxProfissional->getId());
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando pontuação: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando pontuação: " + query.lastError().text(), this); }
+
+    if (not query.first()) { throw RuntimeException("Pontuação não encontrada!"); }
 
     double comissao = query.value("comissao").toDouble();
 
@@ -1491,10 +1506,11 @@ void Venda::copiaProdutosOrcamento() {
     if (modelItem.data(rowItem, "estoque").toInt() > 0) {
       SqlQuery queryStatus;
 
-      if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString()) or
-          not queryStatus.first()) {
+      if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString())) {
         throw RuntimeException("Erro buscando status do estoque: " + queryStatus.lastError().text());
       }
+
+      if (not queryStatus.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelItem.data(rowItem, "idProduto").toString()); }
 
       modelItem.setData(rowItem, "status", queryStatus.value("status"));
     } else {
@@ -1610,9 +1626,11 @@ void Venda::calcularPesoTotal() {
   SqlQuery queryProduto;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString()) or not queryProduto.first()) {
+    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString())) {
       throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
     }
+
+    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
     total += modelItem.data(row, "caixas").toDouble() * kgcx;

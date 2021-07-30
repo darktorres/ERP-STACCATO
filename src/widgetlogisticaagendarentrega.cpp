@@ -152,7 +152,9 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   for (const auto &index : selectedRows) {
     query.bindValue(":idProduto", modelProdutos.data(index.row(), "idProduto"));
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text(), this); }
+
+    if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto de id: " + modelProdutos.data(index.row(), "idProduto").toString()); }
 
     const double kg = query.value("kgcx").toDouble();
     const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
@@ -424,9 +426,11 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 
   SqlQuery queryEvento;
 
-  if (not queryEvento.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not queryEvento.first()) {
-    throw RuntimeException("Erro comunicando com o banco de dados: " + queryEvento.lastError().text());
+  if (not queryEvento.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto")) {
+    throw RuntimeException("Erro buscando número do evento para o agendamento: " + queryEvento.lastError().text());
   }
+
+  if (not queryEvento.first()) { throw RuntimeException("Erro buscando número do evento para o agendamento!"); }
 
   const int idEvento = queryEvento.value(0).toInt();
 
@@ -444,11 +448,13 @@ void WidgetLogisticaAgendarEntrega::processRows() {
     modelTranspAtual.setData(row, "data", dataPrevEnt);
     modelTranspAtual.setData(row, "idEvento", idEvento);
 
-    const int idVendaProduto2 = modelTranspAtual.data(row, "idVendaProduto2").toInt();
+    const auto idVendaProduto2 = modelTranspAtual.data(row, "idVendaProduto2");
 
     querySelecao.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not querySelecao.exec() or not querySelecao.first()) { throw RuntimeException("Erro buscando dados do produto: " + querySelecao.lastError().text()); }
+    if (not querySelecao.exec()) { throw RuntimeException("Erro buscando dados do produto: " + querySelecao.lastError().text()); }
+
+    if (not querySelecao.first()) { throw RuntimeException("Dados do produto não encontrado para o produto com id: " + idVendaProduto2.toString()); }
 
     queryCompra.bindValue(":dataPrevEnt", dataPrevEnt);
     queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
@@ -473,7 +479,9 @@ void WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const 
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto com id: " + modelProdutos.data(row, "idProduto").toString()); }
 
   const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
   const double kg = query.value("kgcx").toDouble();
@@ -553,7 +561,9 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Capacidade não encontrado para o veículo com id: " + ui->itemBoxVeiculo->getId().toString()); }
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 

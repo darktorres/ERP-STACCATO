@@ -925,7 +925,9 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
 
     if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-    FollowUp *followup = new FollowUp(modelVendas.data(list.first().row(), "idVenda").toString(), FollowUp::Tipo::Venda, this);
+    const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
+
+    FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
     followup->setAttribute(Qt::WA_DeleteOnClose);
     followup->show();
   }
@@ -1026,9 +1028,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString codigo = modelVendas.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

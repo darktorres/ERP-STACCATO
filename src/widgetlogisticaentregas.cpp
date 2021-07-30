@@ -690,9 +690,9 @@ void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString codigo = modelCarga.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
+  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

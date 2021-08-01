@@ -356,6 +356,8 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
   auto *layout = new QHBoxLayout(frame);
   frame->setLayout(layout);
 
+  layout->setContentsMargins(0, 0, 0, 0);
+
   labelPagamento(layout);
 
   QComboBox *comboBox = nullptr;

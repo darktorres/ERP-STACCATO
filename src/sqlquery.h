@@ -6,8 +6,6 @@
 class SqlQuery final : public QSqlQuery {
 
 public:
-  explicit SqlQuery();
-
   auto value(const QString &name) const -> QVariant;
   auto value(int i) const -> QVariant;
 };

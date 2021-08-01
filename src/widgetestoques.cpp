@@ -132,7 +132,7 @@ QString WidgetEstoques::getMatch() const {
 
   if (textoBusca.isEmpty()) { return QString(); }
 
-  const QString filtroBusca =
+  QString filtroBusca =
       " AND (e.idEstoque LIKE '%" + textoBusca + "%' OR e.descricao LIKE '%" + textoBusca + "%' OR e.codComercial LIKE '%" + textoBusca + "%' OR p.fornecedor LIKE '%" + textoBusca + "%')";
 
   return filtroBusca;
@@ -206,7 +206,7 @@ void WidgetEstoques::on_pushButtonFollowup_clicked() {
 
   const QString idEstoque = model.data(selection.first().row(), "idEstoque").toString();
 
-  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

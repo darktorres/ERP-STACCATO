@@ -164,8 +164,8 @@ void WidgetGalpao::carregarPallets() {
 void WidgetGalpao::salvarPallets() {
   auto items = scene->items();
 
-  for (auto item : items) {
-    if (auto pallet = dynamic_cast<PalletItem *>(item)) {
+  for (auto *item : items) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
       QString pos = QString::number(pallet->scenePos().x()) + "," + QString::number(pallet->scenePos().y());
 
       SqlQuery query;
@@ -177,13 +177,13 @@ void WidgetGalpao::salvarPallets() {
   }
 }
 
-void WidgetGalpao::on_dateTimeEdit_dateChanged(const QDate) {
+void WidgetGalpao::on_dateTimeEdit_dateChanged() {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   setFilter();
 }
 
-void WidgetGalpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
+void WidgetGalpao::on_itemBoxVeiculo_textChanged() { setFilter(); }
 
 void WidgetGalpao::setFilter() {
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
@@ -196,8 +196,8 @@ void WidgetGalpao::setFilter() {
 void WidgetGalpao::on_table_selectionChanged() {
   auto items = scene->items();
 
-  for (auto item : items) {
-    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlagHighlight(false); }
+  for (auto *item : items) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlagHighlight(false); }
   }
 
   const auto list = ui->tableTranspAgend->selectionModel()->selectedRows();
@@ -205,12 +205,12 @@ void WidgetGalpao::on_table_selectionChanged() {
   for (auto index : list) {
     const int idVendaProduto2 = modelTranspAgend.data(index.row(), "idVendaProduto2").toInt();
 
-    for (auto item : items) {
-      if (auto pallet = dynamic_cast<PalletItem *>(item)) {
+    for (auto *item : items) {
+      if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
         auto palletItems = pallet->childItems();
 
-        for (auto palletItem : palletItems) {
-          if (auto estoque = dynamic_cast<EstoqueItem *>(palletItem)) {
+        for (auto *palletItem : palletItems) {
+          if (auto *estoque = dynamic_cast<EstoqueItem *>(palletItem)) {
             if (idVendaProduto2 == estoque->idVendaProduto2) { pallet->setFlagHighlight(true); }
           }
         }
@@ -224,8 +224,8 @@ void WidgetGalpao::on_table_selectionChanged() {
 void WidgetGalpao::unselectOthers() {
   auto items = scene->items();
 
-  for (auto item : items) {
-    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->unselect(); }
+  for (auto *item : items) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->unselect(); }
   }
 }
 
@@ -237,11 +237,11 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   //
 }
 
-void WidgetGalpao::on_groupBoxEdicao_toggled(bool checked) {
+void WidgetGalpao::on_groupBoxEdicao_toggled(const bool checked) {
   auto items = scene->items();
 
-  for (auto item : items) {
-    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
+  for (auto *item : items) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
   }
 
   if (checked) { unselectOthers(); }

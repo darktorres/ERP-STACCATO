@@ -51,7 +51,7 @@ void PalletItem::setText(const QString &value) {
   int pos = 15;
 
   for (const auto &line : lines) {
-    auto estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
+    auto *estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
     estoque->setVisible(false);
     estoque->setPos(mapFromScene(680, pos));
     estoque->setBrush(QBrush(QColor(Qt::red)));
@@ -76,7 +76,7 @@ void PalletItem::reorderChildren() {
 
   const auto children = childItems();
 
-  for (const auto estoque : children) {
+  for (auto *const estoque : children) {
     estoque->setPos(mapFromScene(680, pos));
     pos += 15;
   }
@@ -91,7 +91,7 @@ void PalletItem::unselect() {
 
   const auto children = childItems();
 
-  for (const auto estoque : children) { estoque->setVisible(false); }
+  for (auto *const estoque : children) { estoque->setVisible(false); }
 }
 
 void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
@@ -111,7 +111,7 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
   const auto children = childItems();
 
-  for (const auto estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 
   QGraphicsItem::mousePressEvent(event);
 }
@@ -148,7 +148,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
 
   if (text.isEmpty()) { return; }
 
-  const QString id = text.at(0);
+  const QString &id = text.at(0);
   const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
   const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
 
@@ -159,7 +159,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
     throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
   }
 
-  EstoqueItem *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
+  auto *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
   item->setParentItem(this);
   item->setVisible(false);
   reorderChildren();
@@ -174,5 +174,5 @@ void PalletItem::select() {
 
   const auto children = childItems();
 
-  for (const auto estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 }

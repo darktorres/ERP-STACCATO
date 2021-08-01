@@ -316,7 +316,7 @@ void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
   const double quantVenda = modelViewProdutos.data(rowProduto, "quant").toDouble();
   const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
 
-  bool ok;
+  bool ok = false;
 
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantCompra), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
@@ -376,7 +376,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const double quantVenda = modelViewProdutos.data(rowProduto, "quant").toDouble();
   const double quantEstoque = modelEstoque.data(rowEstoque, "restante").toDouble();
 
-  bool ok;
+  bool ok = false;
 
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());

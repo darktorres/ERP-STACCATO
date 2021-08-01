@@ -251,7 +251,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 }
 
 void WidgetPagamentos::resetarPagamentos() {
-  for (auto item : ui->scrollArea->widget()->children()) {
+  for (auto *item : ui->scrollArea->widget()->children()) {
     if (qobject_cast<QFrame *>(item)) { delete item; }
   }
 
@@ -332,7 +332,7 @@ double WidgetPagamentos::getCredito() const { return credito; }
 void WidgetPagamentos::calcularTotal() {
   const double sumWithoutLast = std::accumulate(listValorPgt.cbegin(), listValorPgt.cend() - 1, 0., [=](double accum, const QDoubleSpinBox *spinbox) { return accum += spinbox->value(); });
 
-  auto lastSpinBox = listValorPgt.last();
+  auto *lastSpinBox = listValorPgt.constLast();
 
   lastSpinBox->blockSignals(true);
   lastSpinBox->setValue(total - sumWithoutLast);
@@ -374,7 +374,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
 
   comboBoxParc(layout);
   doubleSpinBoxPgt(layout);
-  auto dateEdit = dateEditPgt(layout);
+  auto *dateEdit = dateEditPgt(layout);
   lineEditPgt(layout);
 
   if (tipo == Tipo::Compra) {
@@ -417,7 +417,7 @@ void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
 
   if (dialog.exec() == QDialog::Rejected) { return; }
 
-  for (auto item : std::as_const(listCheckBoxRep)) { item->setChecked(false); }
+  for (auto *item : std::as_const(listCheckBoxRep)) { item->setChecked(false); }
 }
 
 void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {

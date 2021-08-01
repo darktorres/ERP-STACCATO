@@ -10,7 +10,7 @@
 #if defined(qApp)
 #undef qApp
 #endif
-#define qApp (static_cast<Application *>(QCoreApplication::instance()))
+#define qApp (dynamic_cast<Application *>(QCoreApplication::instance()))
 
 class RuntimeException : public std::runtime_error {
 public:
@@ -30,7 +30,7 @@ class Application final : public QApplication {
   Q_OBJECT
 
 public:
-  Application(int &argc, char **argv, int = ApplicationFlags);
+  Application(int &argc, char **argv);
   ~Application();
 
   auto ajustarDiaUtil(const QDate date) -> QDate;

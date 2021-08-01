@@ -137,7 +137,7 @@ void WidgetRelatorio::setFilterRelatorio() {
   modelViewRelatorio.select();
 }
 
-void WidgetRelatorio::dateEditMes_dateChanged(const QDate) { updateTables(); }
+void WidgetRelatorio::dateEditMes_dateChanged() { updateTables(); }
 
 void WidgetRelatorio::updateTables() {
   if (not isSet) {

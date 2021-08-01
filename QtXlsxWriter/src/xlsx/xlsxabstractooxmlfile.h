@@ -37,6 +37,7 @@ class AbstractOOXmlFilePrivate;
 
 class Q_XLSX_EXPORT AbstractOOXmlFile {
   Q_DECLARE_PRIVATE(AbstractOOXmlFile)
+
 public:
   enum CreateFlag { F_NewFromScratch, F_LoadFromExists };
 
@@ -58,6 +59,7 @@ protected:
   explicit AbstractOOXmlFile(AbstractOOXmlFilePrivate *d);
 
   AbstractOOXmlFilePrivate *d_ptr;
+  Q_DISABLE_COPY(AbstractOOXmlFile)
 };
 
 QT_END_NAMESPACE_XLSX

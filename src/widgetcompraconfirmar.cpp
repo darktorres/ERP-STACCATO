@@ -130,7 +130,7 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
+  auto *cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
   cancelaProduto->setFilter(modelViewCompras.data(list.first().row(), "OC").toString());
 }
@@ -142,7 +142,7 @@ void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
 
   const QString ordemCompra = modelViewCompras.data(selection.first().row(), "OC").toString();
 
-  FollowUp *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
+  auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

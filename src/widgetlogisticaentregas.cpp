@@ -580,7 +580,7 @@ QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const 
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do protocolo!", this); }
 
-  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
+  QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
 
   File file(fileName);
 
@@ -637,7 +637,7 @@ QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const 
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do checklist!", this); }
 
-  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + "_checklist.xlsx";
+  QString fileName = folderKey + "/" + idEvento + "_" + idVenda + "_checklist.xlsx";
 
   File file(fileName);
 
@@ -692,7 +692,7 @@ void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

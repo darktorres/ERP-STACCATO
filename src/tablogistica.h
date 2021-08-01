@@ -25,5 +25,5 @@ private:
   // methods
   auto setConnections() -> void;
   auto on_tableForn_clicked(const QModelIndex &index) -> void;
-  auto on_tabWidgetLogistica_currentChanged(const int) -> void;
+  auto on_tabWidgetLogistica_currentChanged() -> void;
 };

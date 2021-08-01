@@ -79,7 +79,7 @@ void TabLogistica::on_tableForn_clicked(const QModelIndex &index) {
   if (currentTab == "Representação") { ui->widgetRepresentacao->tableFornLogistica_clicked(fornecedor); }
 }
 
-void TabLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }
+void TabLogistica::on_tabWidgetLogistica_currentChanged() { updateTables(); }
 
 // TODO: 1followup das entregas (no lugar de followup colocar campo observacao no inputDialog?)
 // TODO: 5colocar aba para fazer cotacao frete, puxar os orcamentos abertos com o peso das caixas para calcular frete

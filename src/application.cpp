@@ -18,7 +18,7 @@ RuntimeException::RuntimeException(const QString &message, QWidget *parent) : st
 
 RuntimeError::RuntimeError(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message, parent); }
 
-Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
+Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
@@ -205,7 +205,7 @@ void Application::runSqlJobs() {
 }
 
 void Application::startSqlPing() {
-  auto timer = new QTimer(this);
+  auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
   timer->start(1min);
 
@@ -213,7 +213,7 @@ void Application::startSqlPing() {
 }
 
 void Application::startUpdaterPing() {
-  auto timer = new QTimer(this);
+  auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
   timer->start(10min);
 }

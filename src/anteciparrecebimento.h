@@ -31,7 +31,7 @@ private:
   auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;
   auto on_comboBoxPagamento_currentTextChanged(const QString &text) -> void;
-  auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
+  auto on_doubleSpinBoxValorPresente_valueChanged() -> void;
   auto on_pushButtonGerar_clicked() -> void;
   auto selecionarTaxa() -> void;
   auto setConnections() -> void;

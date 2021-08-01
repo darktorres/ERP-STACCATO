@@ -66,6 +66,8 @@ typedef QScriptValue ScriptValueType;
 
 class IScriptEngineManager {
 public:
+  IScriptEngineManager() = default;
+
   virtual ScriptEngineType *scriptEngine() = 0;
 #ifdef USE_QTSCRIPTENGINE
   virtual bool addFunction(const QString &name, ScriptEngineType::FunctionSignature function, const QString &category = "", const QString &description = "") = 0;
@@ -74,6 +76,7 @@ public:
   virtual const QString &lastError() const = 0;
   virtual ScriptValueType moveQObjectToScript(QObject *object, const QString objectName) = 0;
   virtual ~IScriptEngineManager() {}
+  Q_DISABLE_COPY(IScriptEngineManager)
 };
 
 } // namespace LimeReport

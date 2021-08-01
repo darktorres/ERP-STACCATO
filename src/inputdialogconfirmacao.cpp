@@ -636,7 +636,7 @@ double InputDialogConfirmacao::getCaixasDefeito(const int row) {
     caixas = modelVeiculo.data(row, "caixas").toDouble();
   }
 
-  bool ok;
+  bool ok = false;
 
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 

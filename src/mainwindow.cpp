@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setWindowIcon(QIcon("Staccato.ico"));
   setWindowTitle("ERP Staccato");
 
-  QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
+  auto *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
   const QString hostname = User::getSetting("Login/hostname").toString();
@@ -203,7 +203,7 @@ bool MainWindow::event(QEvent *event) {
   return QMainWindow::event(event);
 }
 
-void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
+void MainWindow::on_tabWidget_currentChanged() { updateTables(); }
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);

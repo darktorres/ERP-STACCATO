@@ -7,7 +7,10 @@
 
 LineEditDelegate::LineEditDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
-QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
+QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(option)
+  Q_UNUSED(index)
+
   auto *editor = new QLineEdit(parent);
 
   auto *model = new SqlQueryModel(parent);
@@ -27,4 +30,8 @@ QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   return editor;
 }
 
-void LineEditDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect.adjusted(0, 0, 200, 0)); }
+void LineEditDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(index)
+
+  editor->setGeometry(option.rect.adjusted(0, 0, 200, 0));
+}

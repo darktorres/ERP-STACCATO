@@ -76,8 +76,8 @@ Chart::Chart(AbstractSheet *parent, CreateFlag flag) : AbstractOOXmlFile(new Cha
 void Chart::addSeries(const CellRange &range, AbstractSheet *sheet) {
   Q_D(Chart);
   if (not range.isValid()) return;
-  if (sheet and sheet->sheetType() != AbstractSheet::ST_WorkSheet) return;
-  if (not sheet and d->sheet->sheetType() != AbstractSheet::ST_WorkSheet) return;
+  if (sheet and sheet->sheetType() != AbstractSheet::SheetType::ST_WorkSheet) return;
+  if (not sheet and d->sheet->sheetType() != AbstractSheet::SheetType::ST_WorkSheet) return;
 
   QString sheetName = sheet ? sheet->sheetName() : d->sheet->sheetName();
   // In case sheetName contains space or '

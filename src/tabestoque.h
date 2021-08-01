@@ -20,6 +20,6 @@ private:
   // attributes
   Ui::TabEstoque *ui;
   // methods
-  auto on_tabWidget_currentChanged(const int) -> void;
+  auto on_tabWidget_currentChanged() -> void;
   auto setConnections() -> void;
 };

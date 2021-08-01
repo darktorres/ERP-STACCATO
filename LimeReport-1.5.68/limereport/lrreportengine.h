@@ -124,10 +124,14 @@ private:
 };
 
 class ItemBuilder {
+public:
+  ItemBuilder() = default;
+
   virtual void setProperty(QString name, QVariant value) = 0;
   virtual QVariant property(QString name) = 0;
   virtual void setGeometry(ItemGeometry geometry) = 0;
   virtual ItemGeometry geometry() = 0;
+  Q_DISABLE_COPY(ItemBuilder)
 };
 
 class DataSourceManager;

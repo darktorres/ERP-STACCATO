@@ -138,7 +138,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelViewLogisticaRepresentacao.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

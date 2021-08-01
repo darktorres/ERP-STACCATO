@@ -37,7 +37,7 @@ private:
   auto montaFiltro() -> void;
   auto on_checkBoxEstoque_toggled() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate date) -> void;
-  auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
+  auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonAdicionarProduto_clicked() -> void;
   auto on_pushButtonAgendarColeta_clicked() -> void;

@@ -36,10 +36,10 @@ class Drawing;
 class AbstractSheetPrivate;
 class Q_XLSX_EXPORT AbstractSheet : public AbstractOOXmlFile {
   Q_DECLARE_PRIVATE(AbstractSheet)
-public:
-  enum SheetType { ST_WorkSheet, ST_ChartSheet, ST_DialogSheet, ST_MacroSheet };
 
-  enum SheetState { SS_Visible, SS_Hidden, SS_VeryHidden };
+public:
+  enum class SheetType { ST_WorkSheet, ST_ChartSheet, ST_DialogSheet, ST_MacroSheet };
+  enum class SheetState { SS_Visible, SS_Hidden, SS_VeryHidden };
 
   QString sheetName() const;
   SheetType sheetType() const;
@@ -61,6 +61,7 @@ protected:
   int sheetId() const;
 
   Drawing *drawing() const;
+  Q_DISABLE_COPY(AbstractSheet)
 };
 
 QT_END_NAMESPACE_XLSX

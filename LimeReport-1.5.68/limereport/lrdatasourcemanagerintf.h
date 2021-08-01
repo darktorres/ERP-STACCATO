@@ -41,13 +41,18 @@ namespace LimeReport {
 
 class IDbCredentialsProvider {
 public:
+  IDbCredentialsProvider() = default;
+
   virtual ~IDbCredentialsProvider() {}
   virtual QString getUserName(const QString &connectionName) = 0;
   virtual QString getPassword(const QString &connectionName) = 0;
+  Q_DISABLE_COPY(IDbCredentialsProvider)
 };
 
 class IDataSourceManager {
 public:
+  IDataSourceManager() = default;
+
   virtual ~IDataSourceManager() {}
   virtual void setReportVariable(const QString &name, const QVariant &value) = 0;
   virtual void setDefaultDatabasePath(const QString &defaultDatabasePath) = 0;
@@ -66,6 +71,7 @@ public:
   virtual bool variableIsSystem(const QString &name) = 0;
   virtual IDataSource *dataSource(const QString &name) = 0;
   virtual IDataSourceHolder *dataSourceHolder(const QString &name) = 0;
+  Q_DISABLE_COPY(IDataSourceManager)
 };
 
 } // namespace LimeReport

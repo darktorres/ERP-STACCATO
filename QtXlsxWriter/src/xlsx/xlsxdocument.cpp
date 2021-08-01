@@ -227,7 +227,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
   DocPropsCore docPropsCore(DocPropsCore::F_NewFromScratch);
 
   // save worksheet xml files
-  auto worksheets = workbook->getSheetsByTypes(AbstractSheet::ST_WorkSheet);
+  auto worksheets = workbook->getSheetsByTypes(AbstractSheet::SheetType::ST_WorkSheet);
 
   if (not worksheets.isEmpty()) { docPropsApp.addHeadingPair(QStringLiteral("Worksheets"), worksheets.size()); }
 
@@ -243,7 +243,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
   }
 
   // save chartsheet xml files
-  auto chartsheets = workbook->getSheetsByTypes(AbstractSheet::ST_ChartSheet);
+  auto chartsheets = workbook->getSheetsByTypes(AbstractSheet::SheetType::ST_ChartSheet);
 
   if (not chartsheets.isEmpty()) { docPropsApp.addHeadingPair(QStringLiteral("Chartsheets"), chartsheets.size()); }
 
@@ -850,11 +850,11 @@ AbstractSheet *Document::currentSheet() const {
 
 /*!
  * \brief Return pointer of current worksheet.
- * If the type of sheet is not AbstractSheet::ST_WorkSheet, then 0 will be returned.
+ * If the type of sheet is not AbstractSheet::SheetType::ST_WorkSheet, then 0 will be returned.
  */
 Worksheet *Document::currentWorksheet() const {
   AbstractSheet *st = currentSheet();
-  if (st and st->sheetType() == AbstractSheet::ST_WorkSheet)
+  if (st and st->sheetType() == AbstractSheet::SheetType::ST_WorkSheet)
     return static_cast<Worksheet *>(st);
   else
     return nullptr;

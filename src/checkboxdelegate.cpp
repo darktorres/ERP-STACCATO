@@ -7,7 +7,10 @@ CheckBoxDelegate::CheckBoxDelegate(const bool readOnly, QObject *parent) : QStyl
 
 CheckBoxDelegate::CheckBoxDelegate(QObject *parent) : CheckBoxDelegate(false, parent) {}
 
-QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
+QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(option)
+  Q_UNUSED(index)
+
   auto *editor = new QCheckBox(parent);
   if (readOnly) { editor->setDisabled(true); }
 
@@ -24,9 +27,18 @@ void CheckBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
   if (auto *cb = qobject_cast<QCheckBox *>(editor)) { model->setData(index, cb->isChecked(), Qt::EditRole); }
 }
 
-void CheckBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }
+void CheckBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(index)
 
-QString CheckBoxDelegate::displayText(const QVariant &, const QLocale &) const { return QString(); }
+  editor->setGeometry(option.rect);
+}
+
+QString CheckBoxDelegate::displayText(const QVariant &value, const QLocale &locale) const {
+  Q_UNUSED(value)
+  Q_UNUSED(locale)
+
+  return QString();
+}
 
 void CheckBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());

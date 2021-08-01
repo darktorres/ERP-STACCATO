@@ -365,7 +365,7 @@ void WidgetCompraPendentes::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

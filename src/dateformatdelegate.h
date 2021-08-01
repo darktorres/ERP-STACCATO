@@ -17,5 +17,5 @@ private:
   int const vencimentoColumn;
   // methods
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * final;
-  auto displayText(const QVariant &value, const QLocale &) const -> QString final;
+  auto displayText(const QVariant &value, const QLocale &locale) const -> QString final;
 };

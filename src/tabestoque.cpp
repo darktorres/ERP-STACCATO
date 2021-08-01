@@ -16,7 +16,7 @@ void TabEstoque::setConnections() {
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabEstoque::on_tabWidget_currentChanged, connectionType);
 }
 
-void TabEstoque::on_tabWidget_currentChanged(const int) { updateTables(); }
+void TabEstoque::on_tabWidget_currentChanged() { updateTables(); }
 
 void TabEstoque::updateTables() {
   const QString currenTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());

@@ -9,9 +9,15 @@ DateFormatDelegate::DateFormatDelegate(const int vencimentoColumn, const int tip
 
 DateFormatDelegate::DateFormatDelegate(QObject *parent) : DateFormatDelegate(-1, -1, false, parent) {}
 
-QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toDate().toString("dd/MM/yyyy"); }
+QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &locale) const {
+  Q_UNUSED(locale)
 
-QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const {
+  return value.toDate().toString("dd/MM/yyyy");
+}
+
+QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(option)
+
   auto *editor = new QDateEdit(parent);
   editor->setDate(qApp->serverDate());
   editor->setDisplayFormat("dd/MM/yy");

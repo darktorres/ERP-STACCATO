@@ -29,8 +29,8 @@
 QT_BEGIN_NAMESPACE_XLSX
 
 AbstractSheetPrivate::AbstractSheetPrivate(AbstractSheet *p, AbstractSheet::CreateFlag flag) : AbstractOOXmlFilePrivate(p, flag) {
-  type = AbstractSheet::ST_WorkSheet;
-  sheetState = AbstractSheet::SS_Visible;
+  type = AbstractSheet::SheetType::ST_WorkSheet;
+  sheetState = AbstractSheet::SheetState::SS_Visible;
 }
 
 /*!
@@ -129,7 +129,7 @@ void AbstractSheet::setSheetState(SheetState state) {
  */
 bool AbstractSheet::isHidden() const {
   Q_D(const AbstractSheet);
-  return d->sheetState != SS_Visible;
+  return d->sheetState != SheetState::SS_Visible;
 }
 
 /*!
@@ -144,7 +144,7 @@ void AbstractSheet::setHidden(bool hidden) {
   Q_D(AbstractSheet);
   if (hidden == isHidden()) return;
 
-  d->sheetState = hidden ? SS_Hidden : SS_Visible;
+  d->sheetState = hidden ? SheetState::SS_Hidden : SheetState::SS_Visible;
 }
 
 /*!

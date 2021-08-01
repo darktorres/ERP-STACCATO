@@ -29,15 +29,14 @@ void PDF::gerarPdf() {
 
   setQuerys();
 
-  auto *report = new LimeReport::ReportEngine(parent);
+  LimeReport::ReportEngine report;
+  auto *dataManager = report.dataManager();
 
-  auto dataManager = report->dataManager();
-
-  dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
+  dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, false);
 
   const QString modelo = QDir::currentPath() + "/modelos/" + ((tipo == Tipo::Orcamento) ? "orcamento" : "venda") + ".lrxml";
 
-  if (not report->loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
+  if (not report.loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
 
   dataManager->setReportVariable("Loja", queryLoja.value("descricao"));
   dataManager->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" + queryLojaEnd.value("bairro").toString() + "\n" +
@@ -138,7 +137,7 @@ void PDF::gerarPdf() {
 
   file.close();
 
-  if (not report->printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report->lastError()); }
+  if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report.lastError()); }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
 

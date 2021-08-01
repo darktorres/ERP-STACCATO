@@ -9,5 +9,5 @@ public:
   explicit NoEditDelegate(QObject *parent);
 
 private:
-  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const -> QWidget * final;
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * final;
 };

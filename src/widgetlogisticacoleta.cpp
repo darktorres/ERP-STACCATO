@@ -300,7 +300,7 @@ void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
 
   const QString idEstoque = modelViewColeta.data(selection.first().row(), "idEstoque").toString();
 
-  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

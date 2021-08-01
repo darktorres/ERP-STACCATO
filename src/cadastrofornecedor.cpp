@@ -393,7 +393,7 @@ void CadastroFornecedor::ajustarValidade(const int novaValidade) {
 }
 
 void CadastroFornecedor::on_pushButtonValidade_clicked() {
-  bool ok;
+  bool ok = false;
 
   const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, -1, 1000, 1, &ok);
 

@@ -21,22 +21,21 @@
 
 #include "application.h"
 
+#include <QDebug>
 #include <QSqlRecord>
 
 class SqlTreeModelNode {
 public:
-  SqlTreeModelNode(int index = 0) : m_index(index) {}
+  explicit SqlTreeModelNode(const int index = 0) : m_index(index) {}
 
-public:
-  int m_index;
   QList<int> m_levels;
   QList<int> m_rows;
+  int m_index;
 };
 
 class SqlTreeModelLevel {
 public:
-  SqlTreeModelLevel(QSqlQueryModel *model, int parentLevel) : m_model(model), m_parentLevel(parentLevel) {}
-
+  explicit SqlTreeModelLevel(QSqlQueryModel *model, int parentLevel) : m_model(model), m_parentLevel(parentLevel) {}
   ~SqlTreeModelLevel() { clear(); }
 
   void clear() {
@@ -45,39 +44,32 @@ public:
     m_nodes.clear();
   }
 
-public:
-  QSqlQueryModel *m_model;
-
-  int m_parentLevel;
-
+  QHash<int, SqlTreeModelNode *> m_nodes;
   QList<int> m_columnMapping;
-
+  QSqlQueryModel *m_model;
   QVector<int> m_ids;
   QVector<int> m_parentIds;
-  QHash<int, SqlTreeModelNode *> m_nodes;
+  int m_parentLevel;
+
+  Q_DISABLE_COPY_MOVE(SqlTreeModelLevel)
 };
 
 class SqlTreeModelPrivate {
 public:
-  explicit SqlTreeModelPrivate(SqlTreeModel *model) : q(model), m_columns(-1), m_sortColumn(-1), m_sortOrder(Qt::AscendingOrder) {}
-
+  explicit SqlTreeModelPrivate(SqlTreeModel *model) : m_sortOrder(Qt::AscendingOrder), q(model), m_columns(-1), m_sortColumn(-1) {}
   ~SqlTreeModelPrivate() { qDeleteAll(m_levelData); }
 
-public:
-  const SqlTreeModelNode *findNode(const QModelIndex &parent) const;
-
-public:
-  SqlTreeModel *q;
+  [[nodiscard]] SqlTreeModelNode *findNode(const QModelIndex &parent);
 
   QList<SqlTreeModelLevel *> m_levelData;
-
-  int m_columns;
   QVector<QHash<int, QVariant>> m_headers;
-
-  int m_sortColumn;
   Qt::SortOrder m_sortOrder;
-
+  SqlTreeModel *q;
   SqlTreeModelNode m_root;
+  int m_columns;
+  int m_sortColumn;
+
+  Q_DISABLE_COPY_MOVE(SqlTreeModelPrivate)
 };
 
 SqlTreeModel::SqlTreeModel(QObject *parent) : QAbstractItemModel(parent), d(new SqlTreeModelPrivate(this)) {}
@@ -157,7 +149,7 @@ void SqlTreeModel::updateData() {
       int id = model->data(model->index(row, 0)).toInt();
       levelData->m_ids[row] = id;
 
-      SqlTreeModelNode *node;
+      SqlTreeModelNode *node = nullptr;
 
       if (levelData->m_parentLevel < 0) {
         node = &d->m_root;
@@ -198,7 +190,7 @@ void SqlTreeModel::updateData() {
 int SqlTreeModel::levelOf(const QModelIndex &index) const {
   if (not index.isValid()) { return -1; }
 
-  SqlTreeModelNode *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
+  auto *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
   if (not node) { return -1; }
 
   return node->m_levels.value(index.row(), -1);
@@ -207,7 +199,7 @@ int SqlTreeModel::levelOf(const QModelIndex &index) const {
 int SqlTreeModel::mappedRow(const QModelIndex &index) const {
   if (not index.isValid()) { return -1; }
 
-  SqlTreeModelNode *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
+  auto *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
   if (not node) { return -1; }
 
   return node->m_rows.value(index.row(), -1);
@@ -272,7 +264,7 @@ QModelIndex SqlTreeModel::findIndex(int level, int id, int column) const {
   int row = levelData->m_ids.indexOf(id);
   if (row < 0) { return QModelIndex(); }
 
-  const SqlTreeModelNode *node;
+  SqlTreeModelNode *node = nullptr;
 
   if (levelData->m_parentLevel < 0) {
     node = &d->m_root;
@@ -289,13 +281,13 @@ QModelIndex SqlTreeModel::findIndex(int level, int id, int column) const {
   }
 
   for (int i = 0; i < node->m_rows.count(); i++) {
-    if (node->m_rows.at(i) == row and node->m_levels.at(i) == level) { return createIndex(i, column, static_cast<void *>(const_cast<SqlTreeModelNode *>(node))); }
+    if (node->m_rows.at(i) == row and node->m_levels.at(i) == level) { return createIndex(i, column, static_cast<void *>(node)); }
   }
 
   return QModelIndex();
 }
 
-const SqlTreeModelNode *SqlTreeModelPrivate::findNode(const QModelIndex &parent) const {
+SqlTreeModelNode *SqlTreeModelPrivate::findNode(const QModelIndex &parent) {
   if (not parent.isValid()) { return &m_root; }
 
   int level = q->levelOf(parent);
@@ -317,15 +309,17 @@ int SqlTreeModel::rowCount(const QModelIndex &parent) const {
 }
 
 QModelIndex SqlTreeModel::index(int row, int column, const QModelIndex &parent) const {
-  const SqlTreeModelNode *node = d->findNode(parent);
+  SqlTreeModelNode *node = d->findNode(parent);
+
   if (not node or row < 0 or row >= node->m_rows.count()) { return QModelIndex(); }
-  return createIndex(row, column, static_cast<void *>(const_cast<SqlTreeModelNode *>(node)));
+
+  return createIndex(row, column, static_cast<void *>(node));
 }
 
 QModelIndex SqlTreeModel::parent(const QModelIndex &index) const {
   if (not index.isValid()) { return QModelIndex(); }
 
-  SqlTreeModelNode *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
+  auto *node = static_cast<SqlTreeModelNode *>(index.internalPointer());
   if (not node) { return QModelIndex(); }
 
   int level = node->m_levels.value(index.row(), -1);
@@ -337,7 +331,7 @@ QModelIndex SqlTreeModel::parent(const QModelIndex &index) const {
 
   SqlTreeModelLevel *parentLevelData = d->m_levelData.at(levelData->m_parentLevel);
 
-  SqlTreeModelNode *parentNode;
+  SqlTreeModelNode *parentNode = nullptr;
 
   if (parentLevelData->m_parentLevel < 0) {
     parentNode = &d->m_root;
@@ -386,7 +380,7 @@ QVariant SqlTreeModel::headerData(int section, Qt::Orientation orientation, int 
 
     if (value.isValid()) { return value; }
 
-    const SqlTreeModelLevel *levelData = d->m_levelData.first();
+    const SqlTreeModelLevel *levelData = d->m_levelData.constFirst();
     const int column = levelData->m_columnMapping.value(section, -1);
     if (column >= 0) { return levelData->m_model->headerData(column, Qt::Horizontal, role); }
   }

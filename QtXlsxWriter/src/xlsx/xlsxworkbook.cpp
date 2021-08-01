@@ -187,9 +187,9 @@ AbstractSheet *Workbook::addSheet(const QString &name, int sheetId, AbstractShee
   Q_D(Workbook);
   if (sheetId > d->last_sheet_id) d->last_sheet_id = sheetId;
   AbstractSheet *sheet = nullptr;
-  if (type == AbstractSheet::ST_WorkSheet) {
+  if (type == AbstractSheet::SheetType::ST_WorkSheet) {
     sheet = new Worksheet(name, sheetId, this, F_LoadFromExists);
-  } else if (type == AbstractSheet::ST_ChartSheet) {
+  } else if (type == AbstractSheet::SheetType::ST_ChartSheet) {
     sheet = new Chartsheet(name, sheetId, this, F_LoadFromExists);
   } else {
     qWarning("unsupported sheet type.");
@@ -207,12 +207,12 @@ AbstractSheet *Workbook::insertSheet(int index, const QString &name, AbstractShe
     // If user given an already in-used name, we should not continue any more!
     if (d->sheetNames.contains(sheetName)) return nullptr;
   } else {
-    if (type == AbstractSheet::ST_WorkSheet) {
+    if (type == AbstractSheet::SheetType::ST_WorkSheet) {
       do {
         ++d->last_worksheet_index;
         sheetName = QStringLiteral("Sheet%1").arg(d->last_worksheet_index);
       } while (d->sheetNames.contains(sheetName));
-    } else if (type == AbstractSheet::ST_ChartSheet) {
+    } else if (type == AbstractSheet::SheetType::ST_ChartSheet) {
       do {
         ++d->last_chartsheet_index;
         sheetName = QStringLiteral("Chart%1").arg(d->last_chartsheet_index);
@@ -225,7 +225,7 @@ AbstractSheet *Workbook::insertSheet(int index, const QString &name, AbstractShe
 
   ++d->last_sheet_id;
   AbstractSheet *sheet;
-  if (type == AbstractSheet::ST_WorkSheet)
+  if (type == AbstractSheet::SheetType::ST_WorkSheet)
     sheet = new Worksheet(sheetName, d->last_sheet_id, this, F_NewFromScratch);
   else
     sheet = new Chartsheet(sheetName, d->last_sheet_id, this, F_NewFromScratch);
@@ -433,12 +433,12 @@ void Workbook::saveToXmlFile(QIODevice *device) const {
     writer.writeEmptyElement(QStringLiteral("sheet"));
     writer.writeAttribute(QStringLiteral("name"), sheet->sheetName());
     writer.writeAttribute(QStringLiteral("sheetId"), QString::number(sheet->sheetId()));
-    if (sheet->sheetState() == AbstractSheet::SS_Hidden)
+    if (sheet->sheetState() == AbstractSheet::SheetState::SS_Hidden)
       writer.writeAttribute(QStringLiteral("state"), QStringLiteral("hidden"));
-    else if (sheet->sheetState() == AbstractSheet::SS_VeryHidden)
+    else if (sheet->sheetState() == AbstractSheet::SheetState::SS_VeryHidden)
       writer.writeAttribute(QStringLiteral("state"), QStringLiteral("veryHidden"));
 
-    if (sheet->sheetType() == AbstractSheet::ST_WorkSheet)
+    if (sheet->sheetType() == AbstractSheet::SheetType::ST_WorkSheet)
       d->relationships->addDocumentRelationship(QStringLiteral("/worksheet"), QStringLiteral("worksheets/sheet%1.xml").arg(++worksheetIndex));
     else
       d->relationships->addDocumentRelationship(QStringLiteral("/chartsheet"), QStringLiteral("chartsheets/sheet%1.xml").arg(++chartsheetIndex));
@@ -503,23 +503,23 @@ bool Workbook::loadFromXmlFile(QIODevice *device) {
         int sheetId = attributes.value(QLatin1String("sheetId")).toString().toInt();
         const QString rId = attributes.value(QLatin1String("r:id")).toString();
         const QStringRef &stateString = attributes.value(QLatin1String("state"));
-        AbstractSheet::SheetState state = AbstractSheet::SS_Visible;
+        AbstractSheet::SheetState state = AbstractSheet::SheetState::SS_Visible;
         if (stateString == QLatin1String("hidden"))
-          state = AbstractSheet::SS_Hidden;
+          state = AbstractSheet::SheetState::SS_Hidden;
         else if (stateString == QLatin1String("veryHidden"))
-          state = AbstractSheet::SS_VeryHidden;
+          state = AbstractSheet::SheetState::SS_VeryHidden;
 
         XlsxRelationship relationship = d->relationships->getRelationshipById(rId);
 
-        AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet;
+        AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet;
         if (relationship.type.endsWith(QLatin1String("/worksheet")))
-          type = AbstractSheet::ST_WorkSheet;
+          type = AbstractSheet::SheetType::ST_WorkSheet;
         else if (relationship.type.endsWith(QLatin1String("/chartsheet")))
-          type = AbstractSheet::ST_ChartSheet;
+          type = AbstractSheet::SheetType::ST_ChartSheet;
         else if (relationship.type.endsWith(QLatin1String("/dialogsheet")))
-          type = AbstractSheet::ST_DialogSheet;
+          type = AbstractSheet::SheetType::ST_DialogSheet;
         else if (relationship.type.endsWith(QLatin1String("/xlMacrosheet")))
-          type = AbstractSheet::ST_MacroSheet;
+          type = AbstractSheet::SheetType::ST_MacroSheet;
         else
           qWarning("unknown sheet type");
 

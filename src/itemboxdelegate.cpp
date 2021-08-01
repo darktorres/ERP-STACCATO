@@ -6,7 +6,10 @@
 
 ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), readOnly(isReadOnly), tipo(tipo) {}
 
-QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
+QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(option)
+  Q_UNUSED(index)
+
   if (readOnly) { return nullptr; }
 
   auto *editor = new ItemBox(parent);
@@ -27,7 +30,11 @@ void ItemBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, c
   if (auto *box = qobject_cast<ItemBox *>(editor)) { model->setData(index, box->getId(), Qt::EditRole); }
 }
 
-void ItemBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }
+void ItemBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(index)
+
+  editor->setGeometry(option.rect);
+}
 
 void ItemBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());

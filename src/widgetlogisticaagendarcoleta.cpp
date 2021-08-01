@@ -294,7 +294,7 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
   modelTranspAtual.submitAll();
 }
 
-void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &) {
+void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged() {
   SqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
@@ -445,7 +445,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked() {
 
   const QString idEstoque = modelEstoque.data(selection.first().row(), "idEstoque").toString();
 
-  FollowUp *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

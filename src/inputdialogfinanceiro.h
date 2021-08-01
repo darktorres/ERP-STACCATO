@@ -26,7 +26,7 @@ public:
 
 private:
   // attributes
-  bool representacao;
+  bool representacao = false;
   QStack<int> blockingSignals;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelPedidoFornecedor2;
@@ -42,13 +42,13 @@ private:
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxDataFrete_toggled(const bool checked) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
-  auto on_checkBoxParcelarSt_toggled(const bool) -> void;
+  auto on_checkBoxParcelarSt_toggled() -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate date) -> void;
-  auto on_dateEditFrete_dateChanged(const QDate) -> void;
-  auto on_dateEditPgtSt_dateChanged(const QDate) -> void;
+  auto on_dateEditFrete_dateChanged() -> void;
+  auto on_dateEditPgtSt_dateChanged() -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
-  auto on_doubleSpinBoxFrete_valueChanged(const double) -> void;
+  auto on_doubleSpinBoxFrete_valueChanged() -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
   auto on_lineEditCodFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;

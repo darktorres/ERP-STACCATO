@@ -178,7 +178,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 
   //-------------------------------------------
 
-  const QString filePath = respostaSplit.at(0);
+  QString filePath = respostaSplit.at(0);
   xml = respostaSplit.at(1);
 
   return filePath;
@@ -935,11 +935,11 @@ void CadastrarNFe::calculaSt() {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) { calculaSt(); }
+void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged() { calculaSt(); }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) { calculaSt(); }
+void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged() { calculaSt(); }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(const double) { calculaSt(); }
+void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged() { calculaSt(); }
 
 void CadastrarNFe::calculaIcms() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
@@ -966,11 +966,11 @@ void CadastrarNFe::calculaIcms() {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged(const double) { calculaIcms(); }
+void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged() { calculaIcms(); }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) { calculaIcms(); }
+void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged() { calculaIcms(); }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(const double) { calculaIcms(); }
+void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged() { calculaIcms(); }
 
 void CadastrarNFe::calculaPis() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
@@ -997,11 +997,11 @@ void CadastrarNFe::calculaPis() {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) { calculaPis(); }
+void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged() { calculaPis(); }
 
-void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) { calculaPis(); }
+void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged() { calculaPis(); }
 
-void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(const double) { calculaPis(); }
+void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged() { calculaPis(); }
 
 void CadastrarNFe::calculaCofins() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
@@ -1028,13 +1028,13 @@ void CadastrarNFe::calculaCofins() {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) { calculaCofins(); }
+void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged() { calculaCofins(); }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) { calculaCofins(); }
+void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged() { calculaCofins(); }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) { calculaCofins(); }
+void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged() { calculaCofins(); }
 
-void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
+void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged() {
   SqlQuery queryDestinatarioEndereco;
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
@@ -1062,7 +1062,7 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   buscarAliquotas();
 }
 
-void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
+void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged() {
   SqlQuery queryDestinatarioEndereco;
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getId());
@@ -1204,15 +1204,17 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
 
   if (list.isEmpty()) { return; }
 
+  const int row = list.first().row();
+
   unsetConnections();
 
   try {
-    modelViewProdutoEstoque.setData(list.first().row(), "modBC", index - 1);
+    modelViewProdutoEstoque.setData(row, "modBC", index - 1);
 
     if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
-      ui->doubleSpinBoxICMSvbc->setValue(modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble());
-      modelViewProdutoEstoque.setData(list.first().row(), "vBC", modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble());
-      modelViewProdutoEstoque.setData(list.first().row(), "pICMS", 7);
+      ui->doubleSpinBoxICMSvbc->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
+      modelViewProdutoEstoque.setData(row, "vBC", modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
+      modelViewProdutoEstoque.setData(row, "pICMS", 7);
       calculaIcms();
       // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
     }
@@ -1260,7 +1262,7 @@ void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) 
   modelViewProdutoEstoque.setData(list.first().row(), "cstCOFINS", text.left(2));
 }
 
-void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
+void CadastrarNFe::on_itemBoxVeiculo_textChanged() {
   SqlQuery queryTransp;
   queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
                       "transportadora_has_veiculo thv LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT JOIN transportadora_has_endereco the ON the.idTransportadora = "
@@ -1286,7 +1288,7 @@ void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
   ui->lineEditTransportadorUfPlaca->setText(queryTransp.value("ufPlaca").toString());
 }
 
-void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
+void CadastrarNFe::on_itemBoxCliente_textChanged() {
   SqlQuery query;
   query.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
@@ -1632,7 +1634,7 @@ void CadastrarNFe::listarCfop() {
 
 void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabWidget_4->setTabEnabled(4, text == "2 Operação interestadual"); }
 
-void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
+void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
   ui->doubleSpinBoxValorFrete->setEnabled(checked);
 
   const double frete = ui->doubleSpinBoxValorFrete->value();
@@ -1845,7 +1847,7 @@ void CadastrarNFe::preencherDestinatario() {
   if (not queryIBGEEmit.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
 
   if (not queryIBGEEmit.first()) {
-    CadastroCliente *cliente = new CadastroCliente(nullptr);
+    auto *cliente = new CadastroCliente(nullptr); // TODO: why are these nullptr?
     cliente->viewRegisterById(ui->itemBoxCliente->getId());
     cliente->show();
     throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!");
@@ -1860,7 +1862,7 @@ void CadastrarNFe::preencherDestinatario() {
   if (not queryIBGEDest.exec()) { throw RuntimeException("Erro buscando código do munícipio!", this); }
 
   if (not queryIBGEDest.first()) {
-    CadastroCliente *cliente = new CadastroCliente(nullptr);
+    auto *cliente = new CadastroCliente(nullptr);
     cliente->viewRegisterById(ui->itemBoxCliente->getId());
     cliente->show();
     throw RuntimeError("Não foi encontrado o código do munícipio, verifique se cidade/estado estão cadastrados corretamente!");

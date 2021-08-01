@@ -58,12 +58,12 @@ private:
   auto on_doubleSpinBoxDesconto_valueChanged(const double desconto) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
-  auto on_doubleSpinBoxTotalItem_valueChanged(const double) -> void;
+  auto on_doubleSpinBoxTotalItem_valueChanged() -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
-  auto on_itemBoxCliente_textChanged(const QString &) -> void;
-  auto on_itemBoxProduto_idChanged(const QVariant &) -> void;
-  auto on_itemBoxProfissional_idChanged(const QVariant &) -> void;
-  auto on_itemBoxVendedor_textChanged(const QString &) -> void;
+  auto on_itemBoxCliente_textChanged() -> void;
+  auto on_itemBoxProduto_idChanged() -> void;
+  auto on_itemBoxProfissional_idChanged() -> void;
+  auto on_itemBoxVendedor_textChanged() -> void;
   auto on_pushButtonAdicionarItem_clicked() -> void;
   auto on_pushButtonApagarOrc_clicked() -> void;
   auto on_pushButtonAtualizarItem_clicked() -> void;

@@ -491,9 +491,9 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   if (produto.ui.isEmpty()) { produto.ui = "0"; }
 
-  if (produto.codBarras == "0") { produto.codBarras = QString(); }
+  if (produto.codBarras == "0") { produto.codBarras.clear(); }
 
-  if (produto.ncm == "0") { produto.ncm = QString(); }
+  if (produto.ncm == "0") { produto.ncm.clear(); }
 
   if (produto.ncm.length() == 6) { produto.ncm.append("00"); }
 
@@ -521,8 +521,9 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
   bool changed = false;
 
   // TODO: trocar esses códigos repetidos por um for() dos membros de 'produto'
+  // TODO: change double comparisons to qFuzzyCompare?
 
-  if (modelProduto.data(row, "fornecedor") != produto.fornecedor) {
+  if (modelProduto.data(row, "fornecedor").toString() != produto.fornecedor) {
     modelProduto.setData(row, "fornecedor", produto.fornecedor);
     modelProduto.setData(row, "fornecedorUpd", yellow);
     changed = true;
@@ -530,7 +531,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "fornecedorUpd", white);
   }
 
-  if (modelProduto.data(row, "descricao") != produto.descricao) {
+  if (modelProduto.data(row, "descricao").toString() != produto.descricao) {
     modelProduto.setData(row, "descricao", produto.descricao);
     modelProduto.setData(row, "descricaoUpd", yellow);
     changed = true;
@@ -538,7 +539,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "descricaoUpd", white);
   }
 
-  if (modelProduto.data(row, "un") != produto.un) {
+  if (modelProduto.data(row, "un").toString() != produto.un) {
     modelProduto.setData(row, "un", produto.un);
     modelProduto.setData(row, "unUpd", yellow);
     changed = true;
@@ -546,7 +547,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "unUpd", white);
   }
 
-  if (modelProduto.data(row, "colecao") != produto.colecao) {
+  if (modelProduto.data(row, "colecao").toString() != produto.colecao) {
     modelProduto.setData(row, "colecao", produto.colecao);
     modelProduto.setData(row, "colecaoUpd", yellow);
     changed = true;
@@ -554,7 +555,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "colecaoUpd", white);
   }
 
-  if (modelProduto.data(row, "m2cx") != produto.m2cx) {
+  if (modelProduto.data(row, "m2cx").toDouble() != produto.m2cx) {
     modelProduto.setData(row, "m2cx", produto.m2cx);
     modelProduto.setData(row, "m2cxUpd", yellow);
     changed = true;
@@ -562,7 +563,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "m2cxUpd", white);
   }
 
-  if (modelProduto.data(row, "pccx") != produto.pccx) {
+  if (modelProduto.data(row, "pccx").toDouble() != produto.pccx) {
     modelProduto.setData(row, "pccx", produto.pccx);
     modelProduto.setData(row, "pccxUpd", yellow);
     changed = true;
@@ -570,7 +571,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "pccxUpd", white);
   }
 
-  if (modelProduto.data(row, "kgcx") != produto.kgcx) {
+  if (modelProduto.data(row, "kgcx").toDouble() != produto.kgcx) {
     modelProduto.setData(row, "kgcx", produto.kgcx);
     modelProduto.setData(row, "kgcxUpd", yellow);
     changed = true;
@@ -578,7 +579,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "kgcxUpd", white);
   }
 
-  if (modelProduto.data(row, "formComercial") != produto.formComercial) {
+  if (modelProduto.data(row, "formComercial").toString() != produto.formComercial) {
     modelProduto.setData(row, "formComercial", produto.formComercial);
     modelProduto.setData(row, "formComercialUpd", yellow);
     changed = true;
@@ -586,7 +587,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "formComercialUpd", white);
   }
 
-  if (modelProduto.data(row, "codComercial") != produto.codComercial) {
+  if (modelProduto.data(row, "codComercial").toString() != produto.codComercial) {
     modelProduto.setData(row, "codComercial", produto.codComercial);
     modelProduto.setData(row, "codComercialUpd", yellow);
     changed = true;
@@ -594,7 +595,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "codComercialUpd", white);
   }
 
-  if (modelProduto.data(row, "codBarras") != produto.codBarras) {
+  if (modelProduto.data(row, "codBarras").toString() != produto.codBarras) {
     modelProduto.setData(row, "codBarras", produto.codBarras);
     modelProduto.setData(row, "codBarrasUpd", yellow);
     changed = true;
@@ -602,7 +603,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "codBarrasUpd", white);
   }
 
-  if (modelProduto.data(row, "ncm") != produto.ncm) {
+  if (modelProduto.data(row, "ncm").toString() != produto.ncm) {
     modelProduto.setData(row, "ncm", produto.ncm);
     modelProduto.setData(row, "ncmUpd", yellow);
     changed = true;
@@ -610,7 +611,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "ncmUpd", white);
   }
 
-  if (modelProduto.data(row, "qtdPallet") != produto.qtdPallet) {
+  if (modelProduto.data(row, "qtdPallet").toDouble() != produto.qtdPallet) {
     modelProduto.setData(row, "qtdPallet", produto.qtdPallet);
     modelProduto.setData(row, "qtdPalletUpd", yellow);
     changed = true;
@@ -618,7 +619,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "qtdPalletUpd", white);
   }
 
-  if (modelProduto.data(row, "custo") != produto.custo) {
+  if (modelProduto.data(row, "custo").toDouble() != produto.custo) {
     modelProduto.setData(row, "custo", produto.custo);
     modelProduto.setData(row, "custoUpd", yellow);
     changed = true;
@@ -626,7 +627,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "custoUpd", white);
   }
 
-  if (modelProduto.data(row, "precoVenda") != produto.precoVenda) {
+  if (modelProduto.data(row, "precoVenda").toDouble() != produto.precoVenda) {
     modelProduto.setData(row, "precoVenda", produto.precoVenda);
     modelProduto.setData(row, "precoVendaUpd", yellow);
     changed = true;
@@ -634,7 +635,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "precoVendaUpd", white);
   }
 
-  if (modelProduto.data(row, "ui") != produto.ui) {
+  if (modelProduto.data(row, "ui").toString() != produto.ui) {
     modelProduto.setData(row, "ui", produto.ui);
     modelProduto.setData(row, "uiUpd", yellow);
     changed = true;
@@ -642,7 +643,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "uiUpd", white);
   }
 
-  if (modelProduto.data(row, "un2") != produto.un2) {
+  if (modelProduto.data(row, "un2").toString() != produto.un2) {
     modelProduto.setData(row, "un2", produto.un2);
     modelProduto.setData(row, "un2Upd", yellow);
     changed = true;
@@ -650,7 +651,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "un2Upd", white);
   }
 
-  if (modelProduto.data(row, "minimo") != produto.minimo) {
+  if (modelProduto.data(row, "minimo").toDouble() != produto.minimo) {
     modelProduto.setData(row, "minimo", produto.minimo);
     modelProduto.setData(row, "minimoUpd", yellow);
     changed = true;
@@ -658,7 +659,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "minimoUpd", white);
   }
 
-  if (modelProduto.data(row, "mva") != produto.mva) {
+  if (modelProduto.data(row, "mva").toDouble() != produto.mva) {
     modelProduto.setData(row, "mva", produto.mva);
     modelProduto.setData(row, "mvaUpd", yellow);
     changed = true;
@@ -666,7 +667,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "mvaUpd", white);
   }
 
-  if (modelProduto.data(row, "st") != produto.st) {
+  if (modelProduto.data(row, "st").toDouble() != produto.st) {
     modelProduto.setData(row, "st", produto.st);
     modelProduto.setData(row, "stUpd", yellow);
     changed = true;
@@ -674,7 +675,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "stUpd", white);
   }
 
-  if (modelProduto.data(row, "sticms") != produto.sticms) {
+  if (modelProduto.data(row, "sticms").toDouble() != produto.sticms) {
     modelProduto.setData(row, "sticms", produto.sticms);
     modelProduto.setData(row, "sticmsUpd", yellow);
     changed = true;
@@ -682,7 +683,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "sticmsUpd", white);
   }
 
-  if (modelProduto.data(row, "quantCaixa") != produto.quantCaixa) {
+  if (modelProduto.data(row, "quantCaixa").toDouble() != produto.quantCaixa) {
     modelProduto.setData(row, "quantCaixa", produto.quantCaixa);
     modelProduto.setData(row, "quantCaixaUpd", yellow);
     changed = true;
@@ -690,7 +691,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "quantCaixaUpd", white);
   }
 
-  if (modelProduto.data(row, "markup") != produto.markup) {
+  if (modelProduto.data(row, "markup").toDouble() != produto.markup) {
     modelProduto.setData(row, "markup", produto.markup);
     modelProduto.setData(row, "markupUpd", yellow);
     changed = true;

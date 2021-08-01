@@ -178,7 +178,7 @@ void WidgetHistoricoCompra::on_pushButtonFollowup_clicked() {
 
   const QString ordemCompra = modelViewComprasFinanceiro.data(selection.first().row(), "OC").toString();
 
-  FollowUp *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
+  auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

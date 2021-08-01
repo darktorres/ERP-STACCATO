@@ -26,4 +26,4 @@ void TabGalpao::resetTables() {
   ui->widgetGalpaoPeso->resetTables();
 }
 
-void TabGalpao::on_tabWidget_currentChanged(const int) { updateTables(); }
+void TabGalpao::on_tabWidget_currentChanged() { updateTables(); }

@@ -28,4 +28,4 @@ void TabNFe::resetTables() {
   ui->widgetDistribuicao->resetTables();
 }
 
-void TabNFe::on_tabWidgetNfe_currentChanged(const int) { updateTables(); }
+void TabNFe::on_tabWidgetNfe_currentChanged() { updateTables(); }

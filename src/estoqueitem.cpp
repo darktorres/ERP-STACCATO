@@ -23,13 +23,13 @@ void EstoqueItem::startDrag(QPointF pos) {
 
   QPixmap pixmap = QPixmap("://box_medium.png");
 
-  const auto pallet = dynamic_cast<PalletItem *>(parentItem());
+  auto *const pallet = dynamic_cast<PalletItem *>(parentItem());
 
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
   mimeData->setText(text());
   mimeData->setParent(this);
 
-  QDrag *drag = new QDrag(this);
+  auto *drag = new QDrag(this);
   drag->setMimeData(mimeData);
   drag->setPixmap(pixmap);
 

@@ -98,7 +98,7 @@ void CalculoFrete::handleNetworkData(QNetworkReply *networkReply) {
   getDistancia();
 }
 
-void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
+void CalculoFrete::on_itemBoxCliente_textChanged() {
   ui->comboBoxOrigem->clear();
   ui->comboBoxDestino->clear();
   ui->lineEditDistancia->clear();

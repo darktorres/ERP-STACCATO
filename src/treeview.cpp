@@ -90,7 +90,7 @@ void TreeView::hideColumn(const QString &column) { QTreeView::hideColumn(columnI
 void TreeView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTreeView::setItemDelegateForColumn(columnIndex(column), delegate); }
 
 void TreeView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlTreeModel *>(model); temp and temp->proxyModel) {
+  if (auto *temp = qobject_cast<SqlTreeModel *>(model); temp and temp->proxyModel) {
     QTreeView::setModel(temp->proxyModel);
   } else {
     QTreeView::setModel(model);

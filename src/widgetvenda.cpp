@@ -396,7 +396,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelViewVenda.data(list.first().row(), "Código").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
@@ -421,21 +421,21 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   montaFiltro();
 }
 
-void WidgetVenda::on_radioButtonTodos_toggled(bool checked) {
+void WidgetVenda::on_radioButtonTodos_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetVenda::on_radioButtonProprios_toggled(bool checked) {
+void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetVenda::on_dateEditDia_dateChanged(const QDate) {
+void WidgetVenda::on_dateEditDia_dateChanged() {
   if (not ui->checkBoxDia->isChecked()) { return; }
 
   montaFiltro();
 }
 
-void WidgetVenda::on_dateEditMes_dateChanged(const QDate) {
+void WidgetVenda::on_dateEditMes_dateChanged() {
   if (not ui->checkBoxMes->isChecked()) { return; }
 
   montaFiltro();

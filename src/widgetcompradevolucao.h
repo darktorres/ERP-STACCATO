@@ -29,8 +29,8 @@ private:
   auto on_pushButtonDevolucaoFornecedor_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonRetornarEstoque_clicked() -> void;
-  auto on_radioButtonFiltroDevolvido_clicked(const bool) -> void;
-  auto on_radioButtonFiltroPendente_clicked(const bool) -> void;
+  auto on_radioButtonFiltroDevolvido_clicked() -> void;
+  auto on_radioButtonFiltroPendente_clicked() -> void;
   auto on_table_selectionChanged() -> void;
   auto retornarEstoque(const QModelIndexList &list) -> void;
   auto retornarFornecedor(const QModelIndexList &list) -> void;

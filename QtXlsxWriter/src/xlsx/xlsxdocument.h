@@ -108,8 +108,8 @@ public:
   QStringList documentPropertyNames() const;
 
   QStringList sheetNames() const;
-  bool addSheet(const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
-  bool insertSheet(int index, const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
+  bool addSheet(const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet);
+  bool insertSheet(int index, const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet);
   bool selectSheet(const QString &name);
   bool renameSheet(const QString &oldName, const QString &newName);
   bool copySheet(const QString &srcName, const QString &distName = QString());

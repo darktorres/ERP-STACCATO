@@ -196,7 +196,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   buscarNSU();
 
   qDebug() << "pesquisar nsu: " << ultimoNSU;
-  const QString resposta = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + cnpjDest + "\", " + QString::number(ultimoNSU) + ")");
+  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + "\", " + QString::number(ultimoNSU) + ")");
 
   if (resposta.contains("Consumo Indevido")) { tempoTimer = 1h; }
   if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
@@ -241,7 +241,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 void NFeDistribuicao::confirmar(const bool silent) {
   auto match = model.multiMatch({{"confirmar", true}});
 
-  while (match.size() > 0) { // select up to 20 rows
+  while (not match.isEmpty()) { // select up to 20 rows
     qDebug() << "confirmar_size: " << match.size();
     const auto selection = match.mid(0, 20);
 
@@ -256,7 +256,7 @@ void NFeDistribuicao::confirmar(const bool silent) {
 void NFeDistribuicao::desconhecer(const bool silent) {
   auto match = model.multiMatch({{"desconhecer", true}});
 
-  while (match.size() > 0) { // select up to 20 rows
+  while (not match.isEmpty()) { // select up to 20 rows
     qDebug() << "desconhecer_size: " << match.size();
     const auto selection = match.mid(0, 20);
 
@@ -271,7 +271,7 @@ void NFeDistribuicao::desconhecer(const bool silent) {
 void NFeDistribuicao::naoRealizar(const bool silent) {
   auto match = model.multiMatch({{"naoRealizar", true}});
 
-  while (match.size() > 0) { // select up to 20 rows
+  while (not match.isEmpty()) { // select up to 20 rows
     qDebug() << "naoRealizar_size: " << match.size();
     const auto selection = match.mid(0, 20);
 
@@ -286,7 +286,7 @@ void NFeDistribuicao::naoRealizar(const bool silent) {
 void NFeDistribuicao::darCiencia(const bool silent) {
   auto match = model.multiMatch({{"ciencia", true}});
 
-  while (match.size() > 0) { // select up to 20 rows
+  while (not match.isEmpty()) { // select up to 20 rows
     qDebug() << "ciencia_size: " << match.size();
     const auto selection = match.mid(0, 20);
 
@@ -315,7 +315,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
 
   //----------------------------------------------------------
 
-  for (auto &index : selection) {
+  for (const auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
 
     if (statusDistribuicao == "CANCELADA") { continue; }
@@ -335,7 +335,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 
   //----------------------------------------------------------
 
-  for (auto &index : selection) {
+  for (const auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
 
     if (statusDistribuicao == "CANCELADA") { continue; }
@@ -355,7 +355,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
 
   //----------------------------------------------------------
 
-  for (auto &index : selection) {
+  for (const auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
 
     if (statusDistribuicao == "CANCELADA") { continue; }
@@ -375,7 +375,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 
   //----------------------------------------------------------
 
-  for (auto &index : selection) {
+  for (const auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
 
     if (statusDistribuicao == "CANCELADA") { continue; }

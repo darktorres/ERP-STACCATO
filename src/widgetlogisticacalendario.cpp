@@ -114,7 +114,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
   const int diasMes = date.addDays(date.dayOfWeek() * -1).daysInMonth();
 
   for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
-    const auto item = ui->tableWidget->horizontalHeaderItem(col);
+    auto *const item = ui->tableWidget->horizontalHeaderItem(col);
     item->setText(QString::number(dia) + " " + item->text());
     dia++;
     if (dia > diasMes) { dia = 1; }
@@ -143,7 +143,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
 
     const int diaSemana = query.value("data").toDate().dayOfWeek();
 
-    auto *widget = ui->tableWidget->cellWidget(row, diaSemana) ? static_cast<CollapsibleWidget *>(ui->tableWidget->cellWidget(row, diaSemana)) : new CollapsibleWidget(this);
+    auto *widget = (ui->tableWidget->cellWidget(row, diaSemana)) ? dynamic_cast<CollapsibleWidget *>(ui->tableWidget->cellWidget(row, diaSemana)) : new CollapsibleWidget(this);
 
     const QString oldText = widget->getHtml();
 

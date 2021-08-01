@@ -120,6 +120,7 @@ Q_FLAGS(PreviewHints)
 class ReportError : public std::runtime_error {
 public:
   ReportError(const QString &message);
+  Q_DISABLE_COPY(ReportError)
 };
 
 class ReportSettings {
@@ -135,14 +136,20 @@ private:
 
 class IExternalPainter {
 public:
+  IExternalPainter() = default;
+
   virtual void paintByExternalPainter(const QString &objectName, QPainter *painter, const QStyleOptionGraphicsItem *options) = 0;
   virtual ~IExternalPainter();
+  Q_DISABLE_COPY(IExternalPainter)
 };
 
 class IPainterProxy {
 public:
+  IPainterProxy() = default;
+
   virtual void setExternalPainter(IExternalPainter *externalPainter) = 0;
   virtual ~IPainterProxy();
+  Q_DISABLE_COPY(IPainterProxy)
 };
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

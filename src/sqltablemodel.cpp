@@ -62,9 +62,9 @@ void SqlTableModel::removeSelection(const QModelIndexList &selection) {
 
   QList<int> selectedRows;
 
-  for (auto &index : selection) { selectedRows.append(index.row()); }
+  for (const auto &index : selection) { selectedRows.append(index.row()); }
 
-  std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+  std::sort(selectedRows.begin(), selectedRows.end(), std::greater<>());
 
   for (auto row : selectedRows) { removeRow(row); }
 }

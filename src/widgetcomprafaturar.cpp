@@ -158,7 +158,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
-  auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
+  auto *cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
   cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "OC").toString());
 }
@@ -210,7 +210,7 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
   const QString ordemCompra = modelViewFaturamento.data(selection.first().row(), "OC").toString();
 
-  FollowUp *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
+  auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

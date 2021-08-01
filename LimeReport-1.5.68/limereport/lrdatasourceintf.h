@@ -6,6 +6,8 @@ namespace LimeReport {
 
 class IDataSource {
 public:
+  IDataSource() = default;
+
   enum DatasourceMode { DESIGN_MODE, RENDER_MODE };
   typedef QSharedPointer<IDataSource> Ptr;
   virtual ~IDataSource() {}
@@ -25,10 +27,13 @@ public:
   virtual bool isInvalid() const = 0;
   virtual QString lastError() = 0;
   virtual QAbstractItemModel *model() = 0;
+  Q_DISABLE_COPY(IDataSource)
 };
 
 class IDataSourceHolder {
 public:
+  IDataSourceHolder() = default;
+
   virtual ~IDataSourceHolder() {}
   virtual IDataSource *dataSource(IDataSource::DatasourceMode mode = IDataSource::RENDER_MODE) = 0;
   virtual QString lastError() const = 0;
@@ -39,6 +44,7 @@ public:
   virtual void invalidate(IDataSource::DatasourceMode mode, bool dbWillBeClosed = false) = 0;
   virtual void update() = 0;
   virtual void clearErrors() = 0;
+  Q_DISABLE_COPY(IDataSourceHolder)
 };
 
 } // namespace LimeReport

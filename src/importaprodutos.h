@@ -13,6 +13,7 @@ class ImportaProdutos;
 class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
+private:
   struct Produto {
     int idFornecedor;
     QString fornecedor;
@@ -64,7 +65,7 @@ private:
   int itensImported = 0;
   int itensNotChanged = 0;
   int itensUpdated = 0;
-  int validade;
+  int validade = 0;
   Produto produto;
   QHash<QString, int> hashModel;
   QMap<QString, int> fornecedores;

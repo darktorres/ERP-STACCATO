@@ -1354,7 +1354,7 @@ void Venda::on_pushButtonDevolucao_clicked() {
   devolucao->show();
 }
 
-void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { ui->widgetPgts->resetarPagamentos(); }
+void Venda::on_dateTimeEdit_dateTimeChanged() { ui->widgetPgts->resetarPagamentos(); }
 
 void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
@@ -1473,7 +1473,7 @@ void Venda::on_checkBoxRT_toggled(bool checked) {
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");
 }
 
-void Venda::on_itemBoxProfissional_textChanged(const QString &) {
+void Venda::on_itemBoxProfissional_textChanged() {
   const bool naoHa = (ui->itemBoxProfissional->text() == "NÃO HÁ");
 
   ui->frameRT->setDisabled(naoHa);
@@ -1578,7 +1578,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
     authenticator->setPassword(User::senha);
   });
 
-  auto reply = manager->get(QNetworkRequest(QUrl(url)));
+  auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
@@ -1621,7 +1621,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 }
 
 void Venda::calcularPesoTotal() {
-  int total = 0;
+  double total = 0;
 
   SqlQuery queryProduto;
 

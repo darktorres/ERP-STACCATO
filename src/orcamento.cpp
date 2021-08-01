@@ -970,7 +970,7 @@ void Orcamento::resizeSpinBoxes() {
   ui->doubleSpinBoxEstoque->resizeToContent();
 }
 
-void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
+void Orcamento::on_itemBoxProduto_idChanged() {
   if (ui->itemBoxProduto->text().isEmpty()) { return; }
 
   // -------------------------------------------------------------------------
@@ -1101,7 +1101,7 @@ void Orcamento::setarParametrosProduto() {
   ui->doubleSpinBoxQuantCx->setSuffix(" " + ui->lineEditUn->text());
 }
 
-void Orcamento::on_itemBoxProfissional_idChanged(const QVariant &) {
+void Orcamento::on_itemBoxProfissional_idChanged() {
   const auto idProfissional = ui->itemBoxProfissional->getId();
 
   SqlQuery query;
@@ -1115,7 +1115,7 @@ void Orcamento::on_itemBoxProfissional_idChanged(const QVariant &) {
   ui->itemBoxProfissional->setStyleSheet(query.value("comissao").toDouble() > 5 ? "background-color: rgb(255, 255, 127); color: rgb(0, 0, 0);" : "");
 }
 
-void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
+void Orcamento::on_itemBoxCliente_textChanged() {
   const QString idCliente = QString::number(ui->itemBoxCliente->getId().toInt());
   ui->itemBoxEndereco->setFilter("(idCliente = " + idCliente + " OR idEndereco = 1) AND desativado = FALSE");
 
@@ -1385,7 +1385,7 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
   setConnections();
 }
 
-void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
+void Orcamento::on_itemBoxVendedor_textChanged() {
   if (ui->itemBoxVendedor->text().isEmpty()) { return; }
 
   buscarParametrosFrete();
@@ -1465,7 +1465,7 @@ void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
   setConnections();
 }
 
-void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
+void Orcamento::on_doubleSpinBoxTotalItem_valueChanged() {
   if (ui->itemBoxProduto->text().isEmpty()) { return; }
 
   const double quant = ui->doubleSpinBoxQuant->value();
@@ -1600,7 +1600,7 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
     authenticator->setPassword(User::senha);
   });
 
-  auto reply = manager->get(QNetworkRequest(QUrl(url)));
+  auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {
@@ -1636,7 +1636,7 @@ double Orcamento::calcularPeso() {
 }
 
 void Orcamento::calcularPesoTotal() {
-  int total = 0;
+  double total = 0;
 
   SqlQuery queryProduto;
 

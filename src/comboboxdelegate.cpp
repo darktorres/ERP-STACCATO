@@ -10,7 +10,10 @@
 
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
-QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
+QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(option)
+  Q_UNUSED(index)
+
   auto *editor = new QComboBox(parent);
 
   // TODO: cache querys below
@@ -96,4 +99,8 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
   QStyledItemDelegate::setModelData(editor, model, index);
 }
 
-void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }
+void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  Q_UNUSED(index)
+
+  editor->setGeometry(option.rect);
+}

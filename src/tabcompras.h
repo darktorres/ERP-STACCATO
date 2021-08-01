@@ -20,6 +20,6 @@ private:
   // attributes
   Ui::TabCompras *ui;
   // methods
-  auto on_tabWidget_currentChanged(const int) -> void;
+  auto on_tabWidget_currentChanged() -> void;
   auto setConnections() -> void;
 };

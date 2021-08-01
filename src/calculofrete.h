@@ -24,7 +24,7 @@ private:
   Ui::CalculoFrete *ui;
   // methods
   auto handleNetworkData(QNetworkReply *networkReply) -> void;
-  auto on_itemBoxCliente_textChanged(const QString &) -> void;
+  auto on_itemBoxCliente_textChanged() -> void;
   auto on_pushButton_clicked() -> void;
   auto setConnections() -> void;
 };

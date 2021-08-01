@@ -25,8 +25,8 @@ private:
 class ACBrLib {
 
 public:
-  static auto gerarDanfe(const int) -> void;
-  static auto gerarDanfe(const QByteArray &, const bool = true) -> void;
+  static auto gerarDanfe(const int idNFe) -> void;
+  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> void;
 };
 
 #endif

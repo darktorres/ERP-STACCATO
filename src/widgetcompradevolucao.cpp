@@ -205,9 +205,9 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   qApp->enqueueInformation("Retornado para estoque!", this);
 }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked(const bool) { montaFiltro(); }
+void WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked() { montaFiltro(); }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked(const bool) { montaFiltro(); }
+void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked() { montaFiltro(); }
 
 void WidgetCompraDevolucao::montaFiltro() {
   const bool isPendente = ui->radioButtonFiltroPendente->isChecked();
@@ -241,7 +241,7 @@ void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

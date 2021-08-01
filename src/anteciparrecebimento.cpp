@@ -221,7 +221,7 @@ void AnteciparRecebimento::montaFiltro() {
   modelContaReceber.setFilter(filtros.join(" AND "));
 }
 
-void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
+void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged() {
   const double presente = ui->doubleSpinBoxValorPresente->value();
   const double liquido = ui->doubleSpinBoxValorLiquido->value();
   const double descTotal = 1 - (presente / liquido);

@@ -175,43 +175,43 @@ void RegisterDialog::save(const bool silent) {
 void RegisterDialog::clearFields() {
   const auto lineEdits = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &lineEdit : lineEdits) {
+  for (auto *const lineEdit : lineEdits) {
     if (lineEdit->objectName().startsWith("lineEdit")) { lineEdit->clear(); }
   }
 
   const auto itemBoxes = findChildren<ItemBox *>(QRegularExpression("itemBox"));
 
-  for (const auto &itemBox : itemBoxes) {
+  for (auto *const itemBox : itemBoxes) {
     if (itemBox->objectName().startsWith("itemBox")) { itemBox->clear(); }
   }
 
   const auto doubleSpinBoxes = findChildren<QDoubleSpinBox *>(QRegularExpression("doubleSpinBox"));
 
-  for (const auto &doubleSpinBox : doubleSpinBoxes) {
+  for (auto *const doubleSpinBox : doubleSpinBoxes) {
     if (doubleSpinBox->objectName().startsWith("doubleSpinBox")) { doubleSpinBox->setValue(0); }
   }
 
   const auto spinBoxes = findChildren<QSpinBox *>(QRegularExpression("spinBox"));
 
-  for (const auto &spinBox : spinBoxes) {
+  for (auto *const spinBox : spinBoxes) {
     if (spinBox->objectName().startsWith("spinBox")) { spinBox->setValue(0); }
   }
 
   const auto radioButtons = findChildren<QRadioButton *>(QRegularExpression("radioButton"));
 
-  for (const auto radioButton : radioButtons) {
+  for (auto *const radioButton : radioButtons) {
     if (radioButton->objectName().startsWith("radioButton")) { radioButton->setChecked(false); }
   }
 
   const auto checkBoxes = findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
-  for (const auto checkBox : checkBoxes) {
+  for (auto *const checkBox : checkBoxes) {
     if (checkBox->objectName().startsWith("checkBox")) { checkBox->setChecked(false); }
   }
 
   const auto comboBoxes = findChildren<QComboBox *>(QRegularExpression("comboBox"));
 
-  for (const auto comboBox : comboBoxes) {
+  for (auto *const comboBox : comboBoxes) {
     if (comboBox->objectName().startsWith("comboBox")) { comboBox->setCurrentIndex(0); }
   }
 }

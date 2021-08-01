@@ -593,8 +593,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
 
       if (contaDac.size() != 2) { throw RuntimeError("Conta corrente formatada errada! Deve seguir o formato XXXXX-X!\nFuncionário: " + contraParte); }
 
-      const QString conta = contaDac.at(0);
-      const QString dac = contaDac.at(1);
+      const QString &conta = contaDac.at(0);
+      const QString &dac = contaDac.at(1);
 
       pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
       pagamento.codBanco = codBanco;
@@ -627,8 +627,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
 
       if (contaDac.size() != 2) { throw RuntimeError("Conta corrente formatada errada! Deve seguir o formato XXXXX-X!\nFornecedor: " + contraParte); }
 
-      const QString conta = contaDac.at(0);
-      const QString dac = contaDac.at(1);
+      const QString &conta = contaDac.at(0);
+      const QString &dac = contaDac.at(1);
 
       pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
       pagamento.codBanco = codBanco;

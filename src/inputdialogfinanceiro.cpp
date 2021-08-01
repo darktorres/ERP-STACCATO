@@ -728,7 +728,7 @@ void InputDialogFinanceiro::verifyFields() {
 
   if (not representacao) {
     if (tipo == Tipo::ConfirmarCompra) {
-      for (auto &index : selection) {
+      for (const auto &index : selection) {
         if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
       }
 
@@ -796,14 +796,14 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(const double) {
+void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() {
   if (tipo == Tipo::ConfirmarCompra) { calcularTotal(); }
   if (tipo == Tipo::Financeiro) { calcularTotalPag(); }
 
   montarFluxoCaixa();
 }
 
-void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate) { montarFluxoCaixa(false); }
+void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged() { montarFluxoCaixa(false); }
 
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
@@ -872,7 +872,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
   montarFluxoCaixa();
 }
 
-void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(const bool) { montarFluxoCaixa(); }
+void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled() { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &text) {
   unsetConnections();
@@ -880,7 +880,7 @@ void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &
   try {
     const auto selection = ui->table->selectionModel()->selectedRows();
 
-    for (auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
+    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -889,7 +889,7 @@ void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &
   setConnections();
 }
 
-void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate) {
+void InputDialogFinanceiro::on_dateEditFrete_dateChanged() {
   const auto match = modelFluxoCaixa.match("tipo", "FRETE", 1, Qt::MatchExactly);
 
   if (match.isEmpty()) { return; }

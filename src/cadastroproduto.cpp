@@ -178,9 +178,9 @@ void CadastroProduto::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroProduto::on_pushButtonDesativar_clicked() { remove(); }
 
-void CadastroProduto::on_doubleSpinBoxVenda_valueChanged(const double) { calcularMarkup(); }
+void CadastroProduto::on_doubleSpinBoxVenda_valueChanged() { calcularMarkup(); }
 
-void CadastroProduto::on_doubleSpinBoxCusto_valueChanged(const double) { calcularMarkup(); }
+void CadastroProduto::on_doubleSpinBoxCusto_valueChanged() { calcularMarkup(); }
 
 void CadastroProduto::calcularMarkup() {
   const double markup = ((ui->doubleSpinBoxVenda->value() / ui->doubleSpinBoxCusto->value()) - 1.) * 100.;

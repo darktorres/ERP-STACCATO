@@ -140,7 +140,7 @@ void InserirTransferencia::setupTables() {
   modelPara.setTable("conta_a_receber_has_pagamento");
 }
 
-void InserirTransferencia::on_itemBoxDe_textChanged(const QString &) {
+void InserirTransferencia::on_itemBoxDe_textChanged() {
   ui->itemBoxCliente->clear();
 
   const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
@@ -150,7 +150,7 @@ void InserirTransferencia::on_itemBoxDe_textChanged(const QString &) {
   ui->doubleSpinBoxValor->setMaximum(999999.990000);
 }
 
-void InserirTransferencia::on_itemBoxPara_textChanged(const QString &) {
+void InserirTransferencia::on_itemBoxPara_textChanged() {
   ui->itemBoxCliente->clear();
 
   const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");

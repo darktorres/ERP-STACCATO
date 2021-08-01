@@ -49,6 +49,7 @@ public:
   enum NodeType { Root, Connection, DataSources, Query, SubQuery, Model, Field, Variables, Variable };
   DataNode(const QString &name = "", NodeType type = Root, DataNode *parent = 0, const QIcon &icon = QIcon()) : m_name(name), m_icon(icon), m_type(type), m_parent(parent) {}
   virtual ~DataNode();
+
   int childCount() { return m_childs.count(); }
   DataNode *child(int index) { return m_childs[index]; }
   DataNode *parent() { return m_parent; }
@@ -81,6 +82,7 @@ public:
   int columnCount(const QModelIndex &parent) const;
   QVariant data(const QModelIndex &index, int role) const;
   void setDataSourceManager(DataSourceManager *dataManager);
+
 private slots:
   void slotDatasourcesChanged();
 
@@ -89,7 +91,6 @@ private:
   void fillFields(DataNode *parent);
   void updateModel();
 
-private:
   DataSourceManager *m_dataManager;
   DataNode *m_rootNode;
 };
@@ -117,34 +118,34 @@ public:
   void addSubQuery(const QString &name, const QString &sqlText, const QString &connectionName, const QString &masterDatasource);
   void addProxy(const QString &name, const QString &master, const QString &detail, QList<FieldsCorrelation> fields);
   void addCSV(const QString &name, const QString &csvText, const QString &separator, bool firstRowIsHeader);
-  bool addModel(const QString &name, QAbstractItemModel *model, bool owned);
-  void removeModel(const QString &name);
-  ICallbackDatasource *createCallbackDatasource(const QString &name);
-  void registerDbCredentialsProvider(IDbCredentialsProvider *provider);
+  bool addModel(const QString &name, QAbstractItemModel *model, bool owned) override;
+  void removeModel(const QString &name) override;
+  ICallbackDatasource *createCallbackDatasource(const QString &name) override;
+  void registerDbCredentialsProvider(IDbCredentialsProvider *provider) override;
   void addCallbackDatasource(ICallbackDatasource *datasource, const QString &name);
-  void setReportVariable(const QString &name, const QVariant &value);
-  void deleteVariable(const QString &name);
-  bool containsVariable(const QString &variableName);
-  void clearUserVariables();
-  void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type = VarDesc::User, RenderPass pass = FirstPass);
-  void changeVariable(const QString &name, const QVariant &value);
-  QVariant variable(const QString &variableName);
-  RenderPass variablePass(const QString &name);
-  QStringList variableNames();
+  void setReportVariable(const QString &name, const QVariant &value) override;
+  void deleteVariable(const QString &name) override;
+  bool containsVariable(const QString &variableName) override;
+  void clearUserVariables() override;
+  void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type = VarDesc::User, RenderPass pass = FirstPass) override;
+  void changeVariable(const QString &name, const QVariant &value) override;
+  QVariant variable(const QString &variableName) override;
+  RenderPass variablePass(const QString &name) override;
+  QStringList variableNames() override;
   QStringList variableNamesByRenderPass(RenderPass pass);
   QStringList userVariableNames();
-  VarDesc::VarType variableType(const QString &name);
-  VariableDataType variableDataType(const QString &name);
-  void setVariableDataType(const QString &name, VariableDataType value);
-  bool variableIsSystem(const QString &name);
-  bool variableIsMandatory(const QString &name);
-  void setVarableMandatory(const QString &name, bool value);
+  VarDesc::VarType variableType(const QString &name) override;
+  VariableDataType variableDataType(const QString &name) override;
+  void setVariableDataType(const QString &name, VariableDataType value) override;
+  bool variableIsSystem(const QString &name) override;
+  bool variableIsMandatory(const QString &name) override;
+  void setVarableMandatory(const QString &name, bool value) override;
   QString queryText(const QString &dataSourceName);
   QString connectionName(const QString &dataSourceName);
   void removeDatasource(const QString &name);
   void removeConnection(const QString &connectionName);
   bool isQuery(const QString &dataSourceName);
-  bool containsDatasource(const QString &dataSourceName);
+  bool containsDatasource(const QString &dataSourceName) override;
   bool isSubQuery(const QString &dataSourceName);
   bool isProxy(const QString &dataSourceName);
   bool isCSV(const QString &datasourceName);
@@ -166,8 +167,8 @@ public:
 
   QList<ConnectionDesc *> &conections();
   bool dataSourceIsValid(const QString &name);
-  IDataSource *dataSource(const QString &name);
-  IDataSourceHolder *dataSourceHolder(const QString &name);
+  IDataSource *dataSource(const QString &name) override;
+  IDataSourceHolder *dataSourceHolder(const QString &name) override;
   QStringList dataSourceNames();
   QStringList dataSourceNames(const QString &connectionName);
   QStringList connectionNames();
@@ -213,7 +214,7 @@ public:
   void updateDatasourceModel();
   bool isNeedUpdateDatasourceModel() { return m_needUpdate; }
   QString defaultDatabasePath() const;
-  void setDefaultDatabasePath(const QString &defaultDatabasePath);
+  void setDefaultDatabasePath(const QString &defaultDatabasePath) override;
 
   QString putGroupFunctionsExpressions(QString expression);
   void clearGroupFuntionsExpressions();
@@ -224,6 +225,7 @@ public:
 
   bool hasChanges() { return m_hasChanges; }
   void dropChanges() { m_hasChanges = false; }
+
 signals:
   void loadCollectionFinished(const QString &collectionName);
   void cleared();
@@ -240,16 +242,17 @@ protected:
   QList<QString> childDatasources(const QString &datasourceName);
   void invalidateChildren(const QString &parentDatasourceName);
   // ICollectionContainer
-  virtual QObject *createElement(const QString &collectionName, const QString &);
-  virtual int elementsCount(const QString &collectionName);
-  virtual QObject *elementAt(const QString &collectionName, int index);
-  virtual void collectionLoadFinished(const QString &collectionName);
+  virtual QObject *createElement(const QString &collectionName, const QString &) override;
+  virtual int elementsCount(const QString &collectionName) override;
+  virtual QObject *elementAt(const QString &collectionName, int index) override;
+  virtual void collectionLoadFinished(const QString &collectionName) override;
 
   void setSystemVariable(const QString &name, const QVariant &value, RenderPass pass);
   void setLastError(const QString &value);
   void invalidateLinkedDatasources(QString datasourceName);
   bool checkConnection(QSqlDatabase db);
   void invalidateQueriesContainsVariable(const QString &variableName);
+
 private slots:
   void slotConnectionRenamed(const QString &oldName, const QString &newName);
   void slotQueryTextChanged(const QString &queryName, const QString &queryText);
@@ -261,7 +264,7 @@ private:
   explicit DataSourceManager(QObject *parent = 0);
   bool initAndOpenDB(QSqlDatabase &db, ConnectionDesc &connectionDesc);
   Q_DISABLE_COPY(DataSourceManager)
-private:
+
   QList<ConnectionDesc *> m_connections;
   QList<QueryDesc *> m_queries;
   QList<SubQueryDesc *> m_subqueries;

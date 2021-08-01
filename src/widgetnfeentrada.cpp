@@ -115,7 +115,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { throw RuntimeError("NFe não utilizada!", this); }
+  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0 and not modelViewNFeEntrada.data(row, "utilizada").toBool()) { throw RuntimeError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 

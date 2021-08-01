@@ -331,7 +331,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 
   const QString idOrcamento = modelViewOrcamento.data(list.first().row(), "Código").toString();
 
-  FollowUp *followup = new FollowUp(idOrcamento, FollowUp::Tipo::Orcamento, this);
+  auto *followup = new FollowUp(idOrcamento, FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
@@ -390,7 +390,7 @@ void WidgetOrcamento::on_radioButtonProprios_toggled(bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetOrcamento::on_dateEditMes_dateChanged(const QDate) {
+void WidgetOrcamento::on_dateEditMes_dateChanged() {
   if (not ui->checkBoxMes->isChecked()) { return; }
 
   montaFiltro();

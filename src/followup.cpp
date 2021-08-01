@@ -137,14 +137,14 @@ void FollowUp::setupTables() {
 
   ui->table->setModel(&modelViewFollowup);
 
-  if (tipo == Tipo::Orcamento) { ui->table->hideColumn("semaforo"); }
-
   if (tipo == Tipo::Orcamento) {
     modelOrcamento.setTable("orcamento");
 
     modelOrcamento.setFilter("idOrcamento = '" + id + "'");
 
     modelOrcamento.select();
+
+    ui->table->hideColumn("semaforo");
 
     const QString motivoCancelamento = modelOrcamento.data(0, "motivoCancelamento").toString();
     const QString observacaoCancelamento = modelOrcamento.data(0, "observacaoCancelamento").toString();

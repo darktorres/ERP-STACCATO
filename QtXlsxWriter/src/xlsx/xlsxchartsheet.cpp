@@ -48,7 +48,7 @@ ChartsheetPrivate::ChartsheetPrivate(Chartsheet *p, Chartsheet::CreateFlag flag)
  * \internal
  */
 Chartsheet::Chartsheet(const QString &name, int id, Workbook *workbook, CreateFlag flag) : AbstractSheet(name, id, workbook, new ChartsheetPrivate(this, flag)) {
-  setSheetType(ST_ChartSheet);
+  setSheetType(SheetType::ST_ChartSheet);
 
   if (flag == Chartsheet::F_NewFromScratch) {
     d_func()->drawing = QSharedPointer<Drawing>(new Drawing(this, flag));

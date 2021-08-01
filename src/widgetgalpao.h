@@ -28,9 +28,9 @@ private:
   Ui::WidgetGalpao *ui;
   // methods
   auto carregarPallets() -> void;
-  auto on_dateTimeEdit_dateChanged(const QDate) -> void;
-  auto on_groupBoxEdicao_toggled(bool checked) -> void;
-  auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
+  auto on_dateTimeEdit_dateChanged() -> void;
+  auto on_groupBoxEdicao_toggled(const bool checked) -> void;
+  auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_pushButtonCriarPallet_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
   auto on_table_selectionChanged() -> void;

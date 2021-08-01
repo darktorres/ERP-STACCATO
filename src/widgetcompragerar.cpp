@@ -280,7 +280,7 @@ int WidgetCompraGerar::getOrdemCompra() {
 
   if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima O.C.!"); }
 
-  bool ok;
+  bool ok = false;
 
   int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
 
@@ -305,7 +305,7 @@ int WidgetCompraGerar::getOrdemCompra() {
 
       if (choice == QMessageBox::Yes) { break; }
 
-      bool ok2;
+      bool ok2 = false;
 
       oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
 
@@ -357,7 +357,7 @@ QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ord
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
-    const QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
+    QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
 
     Excel excel(idVenda, Excel::Tipo::Venda, this);
     excel.ordemCompra = ordemCompra;
@@ -382,7 +382,7 @@ QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ord
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
-  const QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
+  QString fileName = folderKey + "/" + QString::number(ordemCompra) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   File file(fileName);
 
@@ -519,7 +519,7 @@ void WidgetCompraGerar::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

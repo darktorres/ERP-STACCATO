@@ -110,7 +110,7 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   QStringList nfes;
 
-  for (auto &index : list) { nfes << model.data(index.row(), "idNFeSaida").toString(); }
+  for (const auto &index : list) { nfes << model.data(index.row(), "idNFeSaida").toString(); }
 
   nfes.removeDuplicates();
 
@@ -122,7 +122,7 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   QStringList lista;
 
-  for (auto &index : list) { lista << model.data(index.row(), "idVendaProduto2").toString(); }
+  for (const auto &index : list) { lista << model.data(index.row(), "idVendaProduto2").toString(); }
 
   lista.removeDuplicates();
 

@@ -556,7 +556,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
   modelTranspAtual.removeSelection(selection);
 }
 
-void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
+void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged() {
   SqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
@@ -643,7 +643,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   // perguntar quantidade
   const double caixasTotal = modelProdutos.data(row, "caixas").toDouble();
 
-  bool ok;
+  bool ok = false;
 
   const double caixasAgendar = QInputDialog::getDouble(this, "Agendar", "Quantidade de caixas: ", caixasTotal, 0, caixasTotal, 1, &ok);
 
@@ -927,7 +927,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
 
     const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
 
-    FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+    auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
     followup->setAttribute(Qt::WA_DeleteOnClose);
     followup->show();
   }
@@ -1030,7 +1030,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {
 
   const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
 
-  FollowUp *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

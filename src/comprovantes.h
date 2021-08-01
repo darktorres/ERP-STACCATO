@@ -17,7 +17,7 @@ public:
   ~CustomDelegate() = default;
 
 private:
-  auto displayText(const QVariant &value, const QLocale &) const -> QString final;
+  auto displayText(const QVariant &value, const QLocale &locale) const -> QString final;
 };
 
 class Comprovantes : public QDialog {

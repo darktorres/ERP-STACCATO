@@ -87,7 +87,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   //------------------------------------
 
-  for (auto &index : list) {
+  for (const auto &index : list) {
     const int row = index.row();
 
     const QString status = modelProduto.data(row, "status").toString();
@@ -127,7 +127,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 }
 
 void WidgetCompraConsumos::desfazerConsumo(const QModelIndexList &list) {
-  for (auto &index : list) {
+  for (const auto &index : list) {
     const int idVendaProduto2 = modelProduto.data(index.row(), "idVendaProduto2").toInt();
 
     Estoque::desfazerConsumo(idVendaProduto2);

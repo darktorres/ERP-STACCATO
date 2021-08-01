@@ -13,7 +13,7 @@ public:
   // TODO: make private?
   bool mostrarRT = false;
   bool anexoCompra = false;
-  int ordemCompra;
+  int ordemCompra = 0;
   QString customFileName;
 
   auto gerarExcel() -> void;

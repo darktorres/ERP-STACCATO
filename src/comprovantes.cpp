@@ -14,7 +14,11 @@
 
 CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
-QString CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
+QString CustomDelegate::displayText(const QVariant &value, const QLocale &locale) const {
+  Q_UNUSED(locale)
+
+  return value.toString().split("/").last();
+}
 
 // --------------------------------------------------------------------------
 
@@ -67,7 +71,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
     authenticator->setPassword(User::senha);
   });
 
-  auto reply = manager->get(QNetworkRequest(QUrl(url)));
+  auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
   connect(reply, &QNetworkReply::finished, this, [=] {
     if (reply->error() != QNetworkReply::NoError) {

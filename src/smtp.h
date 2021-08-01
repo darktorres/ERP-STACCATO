@@ -36,11 +36,11 @@ public:
       -> void;
 
 signals:
-  void status(const QString &);
+  void status(const QString &); // TODO: is this used?
 
 private:
   // attributes
-  States state;
+  States state = States::Close;
   int const timeout;
   quint16 const port;
   QSslSocket *socket = nullptr;

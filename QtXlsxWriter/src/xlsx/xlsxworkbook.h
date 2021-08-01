@@ -57,8 +57,8 @@ public:
   int sheetCount() const;
   AbstractSheet *sheet(int index) const;
 
-  AbstractSheet *addSheet(const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
-  AbstractSheet *insertSheet(int index, const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
+  AbstractSheet *addSheet(const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet);
+  AbstractSheet *insertSheet(int index, const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet);
   bool renameSheet(int index, const QString &name);
   bool deleteSheet(int index);
   bool copySheet(int index, const QString &newName = QString());
@@ -105,7 +105,7 @@ private:
   QList<Drawing *> drawings();
   QList<QSharedPointer<AbstractSheet>> getSheetsByTypes(AbstractSheet::SheetType type) const;
   QStringList worksheetNames() const;
-  AbstractSheet *addSheet(const QString &name, int sheetId, AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
+  AbstractSheet *addSheet(const QString &name, int sheetId, AbstractSheet::SheetType type = AbstractSheet::SheetType::ST_WorkSheet);
 };
 
 QT_END_NAMESPACE_XLSX

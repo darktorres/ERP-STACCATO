@@ -28,8 +28,8 @@ private:
   auto inline static tempoTimer = 15min;
   bool isSet = false;
   bool modelIsSet = false;
-  int maximoNSU;
-  int ultimoNSU;
+  int maximoNSU = 0;
+  int ultimoNSU = 0;
   ACBr acbrRemoto;
   QStack<int> blockingSignals;
   QString cnpjDest;

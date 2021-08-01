@@ -238,7 +238,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   file.close();
 
   LimeReport::ReportEngine report;
-  auto dataManager = report.dataManager();
+  auto *dataManager = report.dataManager();
 
   SqlTableModel view;
   view.setTable("view_relatorio_nfe");
@@ -248,7 +248,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   view.select();
 
-  dataManager->addModel("view", &view, true);
+  dataManager->addModel("view", &view, false);
 
   if (not report.loadFromFile(QDir::currentPath() + "/modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 

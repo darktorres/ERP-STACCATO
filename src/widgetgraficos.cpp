@@ -42,7 +42,7 @@ void WidgetGraficos::setChart() {
                                 QPen(QBrush(QColor(255, 40, 40)), 3)};
 
   for (int i = 0; i < 13; ++i) {
-    const auto serie = new QLineSeries(this);
+    auto *const serie = new QLineSeries(this);
 
     serie->setName(now.addMonths(i - 12).toString("MMM"));
     serie->setPen(colors.at(i));
@@ -57,7 +57,7 @@ void WidgetGraficos::setChart() {
 
   const auto markers = chart.legend()->markers();
 
-  for (const auto marker : markers) { connect(marker, &QLegendMarker::clicked, this, &WidgetGraficos::handleMarkerClicked); }
+  for (auto *const marker : markers) { connect(marker, &QLegendMarker::clicked, this, &WidgetGraficos::handleMarkerClicked); }
 
   if (not chartView) { chartView = new ChartView(&chart, this); }
   chartView->setLabelX("Dia");
@@ -162,7 +162,7 @@ void WidgetGraficos::toggleMarker(QLegendMarker *marker) const {
 void WidgetGraficos::on_checkBox_toggled() {
   const auto markers = chart.legend()->markers();
 
-  for (const auto marker : markers) { toggleMarker(marker); }
+  for (auto *const marker : markers) { toggleMarker(marker); }
 }
 
 void WidgetGraficos::on_comboBox_currentIndexChanged(const int index) { chartView->setTheme(static_cast<QChart::ChartTheme>(index)); }

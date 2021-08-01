@@ -124,8 +124,17 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 
 #include "application.h"
 
-void ACBrLib::gerarDanfe(const int) { throw RuntimeException("Não implementado para linux!"); }
+void ACBrLib::gerarDanfe(const int idNFe) {
+  Q_UNUSED(idNFe)
 
-void ACBrLib::gerarDanfe(const QByteArray &, const bool) { throw RuntimeException("Não implementado para linux!"); }
+  throw RuntimeException("Não implementado para linux!");
+}
+
+void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
+  Q_UNUSED(fileContent)
+  Q_UNUSED(openFile)
+
+  throw RuntimeException("Não implementado para linux!");
+}
 
 #endif

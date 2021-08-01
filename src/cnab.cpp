@@ -105,7 +105,7 @@ QString CNAB::remessaGareItau240(const QVector<Gare> &gares) {
   int registro = 0;
   ulong total = 0;
 
-  for (auto &gare : gares) {
+  for (const auto &gare : gares) {
     total += gare.valor;
 
     // lote Segmento N pag 35 e 68

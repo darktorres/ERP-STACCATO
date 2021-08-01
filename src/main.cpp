@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     if (dialog.exec() == QDialog::Rejected) { exit(1); }
 
-    MainWindow *window = new MainWindow;
+    auto *window = new MainWindow;
 #ifdef DEPLOY
     window->showMaximized();
 #else

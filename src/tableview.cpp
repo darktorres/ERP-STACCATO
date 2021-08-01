@@ -87,8 +87,13 @@ void TableView::redoView() {
   if (persistentColumns.isEmpty()) { return; }
   if (rowCount() == 0) { return; }
 
-  const int firstRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().y() + 5)).row();
-  int lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5)).row();
+  const QRect rect = viewport()->rect();
+  const int x = rect.x() + 5;
+  const int y = rect.y() + 5;
+  const int height = rect.height() - 5;
+
+  const int firstRowIndex = indexAt(QPoint(x, y)).row();
+  int lastRowIndex = indexAt(QPoint(x, height)).row();
 
   if (firstRowIndex == -1) { return; }
 
@@ -96,8 +101,8 @@ void TableView::redoView() {
 
   // subtrair uma linha de altura por vez até achar uma linha
   while (lastRowIndex == -1) {
-    int xpos = viewport()->rect().x() + 5;
-    int ypos = viewport()->rect().height() - 5 - rowHeight(0) * count;
+    int xpos = x;
+    int ypos = height - (rowHeight(0) * count);
 
     if (ypos < 0) { return; }
 
@@ -111,9 +116,9 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
+  if (auto *queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
     QTableView::setModel(queryModel->proxyModel);
-  } else if (auto tableModel = qobject_cast<SqlTableModel *>(model); tableModel and tableModel->proxyModel) {
+  } else if (auto *tableModel = qobject_cast<SqlTableModel *>(model); tableModel and tableModel->proxyModel) {
     QTableView::setModel(tableModel->proxyModel);
   } else {
     QTableView::setModel(model);

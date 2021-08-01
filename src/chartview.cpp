@@ -12,10 +12,13 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphi
   setRenderHint(QPainter::Antialiasing);
   scene()->addItem(m_chart);
 
+  const double width = m_chart->size().width();
+  const double height = m_chart->size().height();
+
   m_coordX = new QGraphicsSimpleTextItem(m_chart);
-  m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height());
+  m_coordX->setPos(width / 2 - 50, height);
   m_coordY = new QGraphicsSimpleTextItem(m_chart);
-  m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height());
+  m_coordY->setPos(width / 2 + 50, height);
 
   //  for (const auto &abstractSerie : chart->series()) {
   //    const auto serie = static_cast<QLineSeries *>(abstractSerie);
@@ -84,10 +87,14 @@ void ChartView::resizeEvent(QResizeEvent *event) {
   if (scene()) {
     scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
     m_chart->resize(event->size());
-    m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height() - 30);
-    m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height() - 30);
 
-    for (auto tooltip : qAsConst(m_tooltips)) { tooltip->updateGeometry(); }
+    const double width = m_chart->size().width();
+    const double height = m_chart->size().height();
+
+    m_coordX->setPos(width / 2 - 50, height - 30);
+    m_coordY->setPos(width / 2 + 50, height - 30);
+
+    for (auto *tooltip : qAsConst(m_tooltips)) { tooltip->updateGeometry(); }
   }
 
   QGraphicsView::resizeEvent(event);
@@ -110,14 +117,14 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
 
   const auto seriesList = m_chart->series();
 
-  for (const auto series : seriesList) {
-    const auto xySeries = qobject_cast<QXYSeries *>(series);
+  for (auto *const series : seriesList) {
+    auto *const xySeries = qobject_cast<QXYSeries *>(series);
     if (xySeries) { vec << xySeries->pointsVector(); }
   }
 
   // ---------------------------------------------------------------
 
-  const auto axisX = m_chart->axes(Qt::Horizontal).at(0);
+  auto *const axisX = m_chart->axes(Qt::Horizontal).at(0);
 
   if (axisX) {
     QVariant min_x = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.x() > b.x(); })->x();
@@ -137,7 +144,7 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
 
   // ---------------------------------------------------------------
 
-  const auto axisY = m_chart->axes(Qt::Vertical).at(0);
+  auto *const axisY = m_chart->axes(Qt::Vertical).at(0);
 
   if (axisY) {
     QVariant min_y = std::max_element(vec.cbegin(), vec.cend(), [](const QPointF a, const QPointF b) { return a.y() > b.y(); })->y();

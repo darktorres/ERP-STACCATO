@@ -20,6 +20,6 @@ private:
   // attributes
   Ui::TabNFe *ui;
   // methods
-  auto on_tabWidgetNfe_currentChanged(const int) -> void;
+  auto on_tabWidgetNfe_currentChanged() -> void;
   auto setConnections() -> void;
 };

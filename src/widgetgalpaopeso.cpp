@@ -38,9 +38,9 @@ void WidgetGalpaoPeso::setChart() {
   chartView->setFormatX("QDateTime");
   chartView->setFormatY("QString");
 
-  const auto gridLayout = static_cast<QGridLayout *>(ui->frame->layout());
+  auto *const gridLayout = dynamic_cast<QGridLayout *>(ui->frame->layout());
 
-  const auto horizontalLayout = gridLayout->takeAt(0);
+  auto *const horizontalLayout = gridLayout->takeAt(0);
 
   gridLayout->addWidget(chartView, 0, 0);
   gridLayout->addItem(horizontalLayout, 1, 0);

@@ -52,7 +52,7 @@ class XLSX_AUTOTEST_EXPORT ZipReader {
 public:
   explicit ZipReader(const QString &fileName);
   explicit ZipReader(QIODevice *device);
-  ~ZipReader();
+  ~ZipReader() = default;
   bool exists() const;
   QStringList filePaths() const;
   QByteArray fileData(const QString &fileName) const;

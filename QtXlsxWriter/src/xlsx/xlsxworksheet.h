@@ -57,6 +57,7 @@ class Chart;
 class WorksheetPrivate;
 class Q_XLSX_EXPORT Worksheet : public AbstractSheet {
   Q_DECLARE_PRIVATE(Worksheet)
+
 public:
   bool write(const CellReference &row_column, const QVariant &value, const Format &format = Format());
   bool write(int row, int column, const QVariant &value, const Format &format = Format());
@@ -161,6 +162,7 @@ private:
 
   void saveToXmlFile(QIODevice *device) const;
   bool loadFromXmlFile(QIODevice *device);
+  Q_DISABLE_COPY(Worksheet)
 };
 
 QT_END_NAMESPACE_XLSX

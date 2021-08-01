@@ -52,6 +52,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
     ui->widgetPgts->show();
 
     ui->treeView->hide();
+
+    ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
   }
 
   if (tipo == Tipo::Financeiro) {
@@ -61,6 +63,9 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
     ui->frameAdicionais->hide();
 
     ui->treeView->hide();
+
+    ui->table->setSelectionMode(QTableView::NoSelection);
+    ui->tableFluxoCaixa->setSelectionMode(QTableView::MultiSelection);
   }
 
   setConnections();
@@ -93,6 +98,7 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
+  connect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotalPag, connectionType);
 }
 
 void InputDialogFinanceiro::unsetConnections() {
@@ -112,6 +118,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
+  disconnect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotalPag);
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
@@ -237,6 +244,8 @@ void InputDialogFinanceiro::setupTables() {
   modelFluxoCaixa.setHeaderData("observacao", "Obs.");
   modelFluxoCaixa.setHeaderData("status", "Status");
 
+  modelFluxoCaixa.proxyModel = new SortFilterProxyModel(&modelFluxoCaixa, this);
+
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
   ui->tableFluxoCaixa->hideColumn("idVenda");
@@ -259,9 +268,11 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->hideColumn("subGrupo");
   ui->tableFluxoCaixa->hideColumn("desativado");
 
-  ui->tableFluxoCaixa->setItemDelegate(new DoubleDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("dataPagamento", new EditDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 }
 
 void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
@@ -488,6 +499,26 @@ void InputDialogFinanceiro::calcularTotal() {
   setConnections();
 }
 
+void InputDialogFinanceiro::calcularTotalPag() {
+  unsetConnections();
+
+  try {
+    double total = 0;
+
+    const auto list = ui->tableFluxoCaixa->selectionModel()->selectedRows();
+
+    for (const auto &index : list) { total += modelFluxoCaixa.data(index.row(), "valor").toDouble(); }
+
+    ui->doubleSpinBoxTotal->setValue(total);
+    ui->widgetPgts->setTotal(total);
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
 void InputDialogFinanceiro::atualizaPrecosPF1(const int rowPF2) {
   const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(rowPF2, "idPedidoFK"), 1, Qt::MatchExactly);
 
@@ -611,7 +642,6 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   QString filtro = "idCompra IN (" + idCompra + ")";
 
   if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
-  if (tipo == Tipo::Financeiro) { filtro += " AND status != 'CANCELADO'"; }
 
   modelPedidoFornecedor.setFilter(filtro);
 
@@ -623,17 +653,17 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   //  setTreeView();
 
-  if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
-    modelFluxoCaixa.setFilter((tipo == Tipo::ConfirmarCompra) ? "0" : "idCompra IN (" + idCompra + ") AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
+  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("idCompra IN (" + idCompra + ")  AND desativado = FALSE"); }
 
-    modelFluxoCaixa.select();
+  modelFluxoCaixa.select();
 
-    ui->checkBoxMarcarTodos->setChecked(true);
-  }
+  ui->checkBoxMarcarTodos->setChecked(true);
 
   if (tipo == Tipo::Financeiro) {
     ui->comboBoxFinanceiro->setCurrentText(modelPedidoFornecedor.data(0, "statusFinanceiro").toString());
     ui->dateEditEvento->setDate(modelFluxoCaixa.data(0, "dataEmissao").toDate());
+
+    if (modelFluxoCaixa.rowCount() == 0) { ui->pushButtonCorrigirFluxo->setDisabled(true); }
   }
 
   SqlQuery query;
@@ -646,17 +676,13 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   representacao = query.value("representacao").toBool();
 
-  if (representacao and tipo == Tipo::ConfirmarCompra) {
+  if (representacao) {
     ui->framePagamentos->hide();
-    ui->frameAdicionais->hide();
-  }
+    ui->lineEditCodFornecedor->hide();
 
-  if (representacao and tipo == Tipo::Financeiro) {
-    ui->framePagamentos->hide();
-    ui->pushButtonSalvar->hide();
+    if (tipo == Tipo::ConfirmarCompra) { ui->frameAdicionais->hide(); }
+    if (tipo == Tipo::Financeiro) { ui->pushButtonSalvar->hide(); }
   }
-
-  if (representacao) { ui->lineEditCodFornecedor->hide(); }
 
   ui->widgetPgts->setRepresentacao(representacao);
 
@@ -698,25 +724,31 @@ void InputDialogFinanceiro::verifyFields() {
 
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
+  if (tipo == Tipo::ConfirmarCompra and selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
   if (not representacao) {
     if (tipo == Tipo::ConfirmarCompra) {
       for (auto &index : selection) {
         if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
       }
+
+      if (modelFluxoCaixa.rowCount() == 0) {
+        QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
+        msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+        msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+        if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
+      } else {
+        if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
+
+        ui->widgetPgts->verifyFields();
+      }
     }
 
-    if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
+    if (tipo == Tipo::Financeiro) {
+      if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
-    ui->widgetPgts->verifyFields();
-
-    if (modelFluxoCaixa.rowCount() == 0) {
-      QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
-      msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-      msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-      if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
+      ui->widgetPgts->verifyFields();
     }
   }
 }
@@ -746,17 +778,13 @@ void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate date) {
 void InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
 
 void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
-  const auto selection = ui->table->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { throw RuntimeError("Selecione os produtos que terão o fluxo corrigido!", this); }
-
   const auto selection2 = ui->tableFluxoCaixa->selectionModel()->selectedRows();
 
   if (selection2.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
 
   //--------------------------------------------------
 
-  ui->frameAdicionais->show();
+  //  ui->frameAdicionais->show();
   //  ui->framePgtTotal->show();
   //  ui->pushButtonAdicionarPagamento->show();
   ui->widgetPgts->show();
@@ -764,13 +792,15 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   // TODO: 5alterar para que apenas na tela do financeiro compra a opcao de corrigir fluxo percorra todas as linhas
   // (enquanto na confirmacao de pagamento percorre apenas as linhas selecionadas)
 
-  calcularTotal();
+  calcularTotalPag();
   ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
-  calcularTotal();
-  ui->widgetPgts->resetarPagamentos();
+void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(const double) {
+  if (tipo == Tipo::ConfirmarCompra) { calcularTotal(); }
+  if (tipo == Tipo::Financeiro) { calcularTotalPag(); }
+
+  montarFluxoCaixa();
 }
 
 void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate) { montarFluxoCaixa(false); }
@@ -842,12 +872,21 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
   montarFluxoCaixa();
 }
 
-void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(bool) { montarFluxoCaixa(); }
+void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(const bool) { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &text) {
-  const auto selection = ui->table->selectionModel()->selectedRows();
+  unsetConnections();
 
-  for (auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
+  try {
+    const auto selection = ui->table->selectionModel()->selectedRows();
+
+    for (auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
 }
 
 void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate) {
@@ -858,7 +897,7 @@ void InputDialogFinanceiro::on_dateEditFrete_dateChanged(const QDate) {
   modelFluxoCaixa.setData(match.first().row(), "dataPagamento", ui->dateEditFrete->date());
 }
 
-void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(bool checked) { ui->dateEditFrete->setEnabled(checked); }
+void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(const bool checked) { ui->dateEditFrete->setEnabled(checked); }
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
 // TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo

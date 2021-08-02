@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetGalpao;
 }
 
-class WidgetGalpao : public QWidget {
+class WidgetGalpao final : public QWidget {
   Q_OBJECT
 
 public:
@@ -34,7 +34,7 @@ private:
   auto on_pushButtonCriarPallet_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
   auto on_table_selectionChanged() -> void;
-  auto resizeEvent(QResizeEvent *event) -> void override;
+  auto resizeEvent(QResizeEvent *event) -> void final;
   auto salvarPallets() -> void;
   auto setConnections() -> void;
   auto setFilter() -> void;

@@ -24,12 +24,12 @@ public:
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
   auto setCredito(const double creditoCliente) -> void;
-  auto setFrete(double value) -> void;
+  auto setFrete(const double value) -> void;
   auto setFretePagoLoja() -> void;
   auto setIdOrcamento(const QString &value) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setTipo(const Tipo novoTipo) -> void;
-  auto setTotal(double value) -> void;
+  auto setTotal(const double value) -> void;
   auto verifyFields() -> void;
 
   // TODO: make private?

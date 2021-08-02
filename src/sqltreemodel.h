@@ -32,39 +32,39 @@ class SqlTreeModelPrivate;
 // In the following SQL models, the first column must be the primary key
 // and the second column must be the foreign key.
 
-class SqlTreeModel : public QAbstractItemModel {
+class SqlTreeModel final : public QAbstractItemModel {
   Q_OBJECT
 
 public:
   explicit SqlTreeModel(QObject *parent);
   explicit SqlTreeModel();
 
-  ~SqlTreeModel() override;
+  ~SqlTreeModel() final;
 
   auto appendModel(QSqlQueryModel *model) -> void; // Append the SQL model as the next level of the tree.
-  auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int override;
-  auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant override;
+  auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int final;
+  auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant final;
   auto fieldIndex(const QString &fieldName) const -> int;
   auto findIndex(int level, int id, int column) const -> QModelIndex; // Return the index of an item with given level and primary key.
-  auto flags(const QModelIndex &index) const -> Qt::ItemFlags override;
-  auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant override;
-  auto index(int row, int column, const QModelIndex &parent = QModelIndex()) const -> QModelIndex override;
+  auto flags(const QModelIndex &index) const -> Qt::ItemFlags final;
+  auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant final;
+  auto index(int row, int column, const QModelIndex &parent = QModelIndex()) const -> QModelIndex final;
   auto insertModel(QSqlQueryModel *model, int parentLevel = -1) -> void; // Insert the SQL model at the specified parent level.
   auto levelOf(const QModelIndex &index) const -> int;                   // Return the level of the given item.
   auto mappedColumn(const QModelIndex &index) const -> int;              // Return the column number in the SQL model of the given item.
   auto mappedRow(const QModelIndex &index) const -> int;                 // Return the row number in the SQL model of the given item.
   auto modelAt(int level) const -> QSqlQueryModel *;                     // Return the SQL model at the given level.
-  auto parent(const QModelIndex &index) const -> QModelIndex override;
+  auto parent(const QModelIndex &index) const -> QModelIndex final;
   auto rawData(int level, int row, int column, int role = Qt::DisplayRole) const -> QVariant; // Return the data from the SQL model.
-  auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int override;
+  auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int final;
   auto rowId(const QModelIndex &index) const -> int;                         // Return the primary key of the given item.
   auto rowParentId(const QModelIndex &index) const -> int;                   // Return the foreign key of the given item.
   auto setColumnMapping(int level, const QList<int> &columnMapping) -> void; // Map tree model columns to SQL model columns. By default all columns are mapped except the primary and foreign keys.
                                                                              // Use -1 to indicate that a column is calculated.
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
-  auto setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) -> bool override;
+  auto setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) -> bool final;
   auto setSort(int column, Qt::SortOrder order = Qt::AscendingOrder) -> void; // Set the sort order without updating the model.
-  auto sort(int column, Qt::SortOrder order = Qt::AscendingOrder) -> void override;
+  auto sort(int column, Qt::SortOrder order = Qt::AscendingOrder) -> void final;
   auto sortColumn() const -> int;          // Return the index of the current sort column.
   auto sortOrder() const -> Qt::SortOrder; // Return the current sort order.
   auto updateData() -> void;               // Rebuild the tree model after updating SQL models.
@@ -78,6 +78,6 @@ private:
   // attributes
   SqlTreeModelPrivate *d = nullptr;
   // methods
-  auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) -> bool override;
+  auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) -> bool final;
   auto setRawData(const int level, const int row, const int column, const QVariant &value, const int role = Qt::DisplayRole) -> bool;
 };

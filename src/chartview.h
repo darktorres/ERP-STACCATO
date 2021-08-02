@@ -20,8 +20,8 @@ public:
   auto tooltip(const QPointF point, const bool state) -> void;
 
 protected:
-  auto mouseMoveEvent(QMouseEvent *event) -> void override;
-  auto resizeEvent(QResizeEvent *event) -> void override;
+  auto mouseMoveEvent(QMouseEvent *event) -> void final;
+  auto resizeEvent(QResizeEvent *event) -> void final;
 
 private:
   // attributes

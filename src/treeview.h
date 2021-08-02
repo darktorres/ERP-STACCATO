@@ -17,7 +17,7 @@ public:
   auto setModel(QAbstractItemModel *model) -> void final;
 
 protected:
-  auto drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const -> void override;
+  auto drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const -> void final;
   auto mousePressEvent(QMouseEvent *event) -> void final;
 
 private:

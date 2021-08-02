@@ -15,6 +15,6 @@ signals:
   void startDragSignal();
 
 protected:
-  auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void override;
+  auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void final;
   auto startDrag(QPointF pos) -> void;
 };

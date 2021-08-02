@@ -22,7 +22,7 @@ private:
   Ui::MainWindow *ui;
   QPushButton *pushButtonStatus = nullptr;
   // methods
-  auto event(QEvent *event) -> bool override;
+  auto event(QEvent *event) -> bool final;
   auto on_actionCadastrarCliente_triggered() -> void;
   auto on_actionCadastrarFornecedor_triggered() -> void;
   auto on_actionCadastrarProdutos_triggered() -> void;

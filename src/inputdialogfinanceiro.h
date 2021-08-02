@@ -38,7 +38,6 @@ private:
   auto atualizaPrecosPF1(const int rowPF2) -> void;
   auto cadastrar() -> void;
   auto calcularTotal() -> void;
-  auto calcularTotalPag() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxDataFrete_toggled(const bool checked) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
@@ -50,10 +49,12 @@ private:
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged() -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
-  auto on_lineEditCodFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto on_table_selectionChanged() -> void;
+  auto setCodFornecedor() -> void;
   auto setConnections() -> void;
+  auto setMaximumST() -> void;
   auto setTreeView() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

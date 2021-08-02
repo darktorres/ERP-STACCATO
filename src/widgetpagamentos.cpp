@@ -223,7 +223,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
     return;
   }
 
-  listValorPgt.at(index)->setMaximum(total);
+  listValorPgt.at(index)->setMaximum(total); // TODO: it looks like this is not needed anymore since setTotal() update all widgets
 
   SqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
@@ -315,9 +315,13 @@ void WidgetPagamentos::setTipo(const Tipo novoTipo) {
   }
 }
 
-void WidgetPagamentos::setTotal(double value) { total = value; }
+void WidgetPagamentos::setTotal(const double value) {
+  total = value;
 
-void WidgetPagamentos::setFrete(double value) { frete = value; }
+  for (auto *const doubleSpinBoxPgt : listValorPgt) { doubleSpinBoxPgt->setMaximum(total); }
+}
+
+void WidgetPagamentos::setFrete(const double value) { frete = value; }
 
 void WidgetPagamentos::setFretePagoLoja() {
   fretePagoLoja = true;

@@ -70,7 +70,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
   setConnections();
 
-  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });
+  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [&]() { montarFluxoCaixa(true); });
 
   showMaximized();
 }
@@ -94,11 +94,12 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged, connectionType);
   connect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged, connectionType);
-  connect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged, connectionType);
+  connect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::setCodFornecedor, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
-  connect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotalPag, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged, connectionType);
+  connect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal, connectionType);
 }
 
 void InputDialogFinanceiro::unsetConnections() {
@@ -114,16 +115,15 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
-  disconnect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged);
+  disconnect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::setCodFornecedor);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
-  disconnect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotalPag);
+  disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged);
+  disconnect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
-  // FIXME: porcentagem esta limitado a 20% mas valor nao
-
   unsetConnections();
 
   try {
@@ -143,8 +143,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
 
     ui->doubleSpinBoxSt->setValue(valueSt);
 
-    // TODO: adicionar frete/adicionais
-    ui->doubleSpinBoxTotal->setValue(total);
+    calcularTotal();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -231,11 +230,11 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
-  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
-
   //--------------------------------------------------
 
   modelFluxoCaixa.setTable("conta_a_pagar_has_pagamento");
+
+  modelFluxoCaixa.setSort("dataPagamento");
 
   modelFluxoCaixa.setHeaderData("tipo", "Tipo");
   modelFluxoCaixa.setHeaderData("parcela", "Parcela");
@@ -283,6 +282,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   try {
     [=] {
       if (representacao) { return; }
+      if (not ui->widgetPgts->isVisible()) { return; }
 
       modelFluxoCaixa.revertAll();
 
@@ -483,34 +483,40 @@ void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
   try {
+    auto *table = [&] {
+      if (tipo == Tipo::ConfirmarCompra) { return ui->table; }
+      if (tipo == Tipo::Financeiro) { return ui->tableFluxoCaixa; }
+
+      throw RuntimeException("Tipo Nulo!");
+    }();
+
+    auto *model = [&] {
+      if (tipo == Tipo::ConfirmarCompra) { return &modelPedidoFornecedor2; }
+      if (tipo == Tipo::Financeiro) { return &modelFluxoCaixa; }
+
+      throw RuntimeException("Tipo Nulo!");
+    }();
+
+    const QString coluna = [&] {
+      if (tipo == Tipo::ConfirmarCompra) { return "preco"; }
+      if (tipo == Tipo::Financeiro) { return "valor"; }
+
+      throw RuntimeException("Tipo Nulo!");
+    }();
+
     double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+    for (const auto &index : list) { total += model->data(index.row(), coluna).toDouble(); }
+
+    total += ui->doubleSpinBoxFrete->value();
+    total += ui->doubleSpinBoxSt->value();
 
     ui->doubleSpinBoxTotal->setValue(total);
     ui->widgetPgts->setTotal(total);
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
 
-  setConnections();
-}
-
-void InputDialogFinanceiro::calcularTotalPag() {
-  unsetConnections();
-
-  try {
-    double total = 0;
-
-    const auto list = ui->tableFluxoCaixa->selectionModel()->selectedRows();
-
-    for (const auto &index : list) { total += modelFluxoCaixa.data(index.row(), "valor").toDouble(); }
-
-    ui->doubleSpinBoxTotal->setValue(total);
-    ui->widgetPgts->setTotal(total);
+    montarFluxoCaixa();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -732,7 +738,7 @@ void InputDialogFinanceiro::verifyFields() {
         if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
       }
 
-      if (modelFluxoCaixa.rowCount() == 0) {
+      if (ui->widgetPgts->pagamentos == 0) {
         QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
         msgBox.setButtonText(QMessageBox::Yes, "Continuar");
         msgBox.setButtonText(QMessageBox::No, "Voltar");
@@ -778,11 +784,20 @@ void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate date) {
 void InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
 
 void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
-  const auto selection2 = ui->tableFluxoCaixa->selectionModel()->selectedRows();
+  const auto selection = ui->tableFluxoCaixa->selectionModel()->selectedRows();
 
-  if (selection2.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
+
+  for (const auto &index : selection) {
+    if (modelFluxoCaixa.data(index.row(), "status").toString() == "SUBSTITUIDO") { throw RuntimeError("Selecionado linhas já substituídas!", this); };
+  }
 
   //--------------------------------------------------
+
+  ui->pushButtonCorrigirFluxo->setDisabled(true);
+  ui->tableFluxoCaixa->setDisabled(true);
+
+  for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
 
   //  ui->frameAdicionais->show();
   //  ui->framePgtTotal->show();
@@ -792,13 +807,12 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   // TODO: 5alterar para que apenas na tela do financeiro compra a opcao de corrigir fluxo percorra todas as linhas
   // (enquanto na confirmacao de pagamento percorre apenas as linhas selecionadas)
 
-  calcularTotalPag();
-  ui->widgetPgts->resetarPagamentos();
+  //  calcularTotal();
+  //  ui->widgetPgts->resetarPagamentos();
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() {
-  if (tipo == Tipo::ConfirmarCompra) { calcularTotal(); }
-  if (tipo == Tipo::Financeiro) { calcularTotalPag(); }
+  calcularTotal();
 
   montarFluxoCaixa();
 }
@@ -821,7 +835,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
     for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
 
-    ui->doubleSpinBoxTotal->setValue(total);
+    calcularTotal();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -856,12 +870,18 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
       ui->dateEditPgtSt->show();
     }
 
+    setMaximumST();
+
+    on_doubleSpinBoxAliquota_valueChanged(ui->doubleSpinBoxAliquota->value());
+
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
       modelPedidoFornecedor2.setData(index.row(), "st", text);
       modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
     }
+
+    calcularTotal();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -874,21 +894,6 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 
 void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled() { montarFluxoCaixa(); }
 
-void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &text) {
-  unsetConnections();
-
-  try {
-    const auto selection = ui->table->selectionModel()->selectedRows();
-
-    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text); }
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
-
-  setConnections();
-}
-
 void InputDialogFinanceiro::on_dateEditFrete_dateChanged() {
   const auto match = modelFluxoCaixa.match("tipo", "FRETE", 1, Qt::MatchExactly);
 
@@ -899,6 +904,41 @@ void InputDialogFinanceiro::on_dateEditFrete_dateChanged() {
 
 void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(const bool checked) { ui->dateEditFrete->setEnabled(checked); }
 
+void InputDialogFinanceiro::setMaximumST() {
+  const double maximoST = ui->doubleSpinBoxTotal->value() * ui->doubleSpinBoxAliquota->maximum() / 100;
+
+  ui->doubleSpinBoxSt->setMaximum(maximoST);
+}
+
+void InputDialogFinanceiro::setCodFornecedor() {
+  unsetConnections();
+
+  try {
+    // clean codFornecedor on unselected rows
+    for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { modelPedidoFornecedor2.setData(row, "codFornecedor", QVariant()); }
+
+    //-----------------------------------------------
+
+    // set again on selected rows
+    const auto selection = ui->table->selectionModel()->selectedRows();
+
+    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "codFornecedor", ui->lineEditCodFornecedor->text()); }
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
+void InputDialogFinanceiro::on_table_selectionChanged() {
+  setCodFornecedor();
+
+  calcularTotal();
+
+  setMaximumST();
+}
+
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
 // TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo
 
@@ -907,3 +947,4 @@ void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(const bool checked) { u
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 // TODO: gerar lancamentos da st por produto
 // TODO: colocar checkbox para dizer se a ST vai ser na data do primeiro pagamento ou vai ser dividida junto com as parcelas
+// TODO: colocar um checkbox para dizer se mostra ou não os pagamentos substituidos/cancelados

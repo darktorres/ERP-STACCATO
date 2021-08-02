@@ -19,14 +19,14 @@ public:
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
-  auto setModel(QAbstractItemModel *model) -> void;
+  auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 
 protected:
   auto keyPressEvent(QKeyEvent *event) -> void final;
-  auto mousePressEvent(QMouseEvent *event) -> void final;
+  //  auto mousePressEvent(QMouseEvent *event) -> void final;
   auto resizeEvent(QResizeEvent *event) -> void final;
 
 private:

@@ -52,7 +52,7 @@ public:
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
   auto lightTheme() -> void;
-  auto notify(QObject *receiver, QEvent *event) -> bool override;
+  auto notify(QObject *receiver, QEvent *event) -> bool final;
   auto removerDiacriticos(const QString &s, const bool removerSimbolos = false) -> QString;
   auto reservarIdEstoque() -> int;
   auto reservarIdNFe() -> int;

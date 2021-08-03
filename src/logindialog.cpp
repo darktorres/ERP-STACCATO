@@ -106,7 +106,9 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 void LoginDialog::verificaManutencao() {
   SqlQuery query;
 
-  if (not query.exec("SELECT emManutencao FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando se em manutenção: " + query.lastError().text()); }
+  if (not query.exec("SELECT emManutencao FROM maintenance")) { throw RuntimeException("Erro verificando se em manutenção: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Erro verificando se em manutenção!"); }
 
   if (query.value("emManutencao").toBool()) { throw RuntimeException("Sistema em manutenção!"); }
 }
@@ -114,7 +116,9 @@ void LoginDialog::verificaManutencao() {
 void LoginDialog::verificaVersao() {
   SqlQuery query;
 
-  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
+  if (not query.exec("SELECT versaoAtual FROM versao_erp")) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Versão atual não encontrada!"); }
 
   QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());

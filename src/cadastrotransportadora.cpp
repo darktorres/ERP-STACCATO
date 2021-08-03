@@ -413,7 +413,7 @@ void CadastroTransportadora::cadastrar() {
   }
 }
 
-void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {
+void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(const bool checked) {
   if (currentRow == -1) { return; }
 
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));

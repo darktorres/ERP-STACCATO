@@ -33,7 +33,7 @@ void ValidadeDialog::on_dateEdit_dateChanged(const QDate date) { ui->spinBoxDias
 
 int ValidadeDialog::getValidade() { return ui->checkBoxSemValidade->isChecked() ? -1 : ui->spinBoxDias->value(); }
 
-void ValidadeDialog::on_checkBoxSemValidade_toggled(bool checked) {
+void ValidadeDialog::on_checkBoxSemValidade_toggled(const bool checked) {
   ui->dateEdit->setEnabled(not checked);
   ui->spinBoxDias->setEnabled(not checked);
 }

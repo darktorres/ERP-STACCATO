@@ -69,7 +69,7 @@ QString PalletItem::getText() const { return text; }
 
 bool PalletItem::getFlagHighlight() const { return flagHighlight; }
 
-void PalletItem::setFlagHighlight(bool value) { flagHighlight = value; }
+void PalletItem::setFlagHighlight(const bool value) { flagHighlight = value; }
 
 void PalletItem::reorderChildren() {
   int pos = 15;

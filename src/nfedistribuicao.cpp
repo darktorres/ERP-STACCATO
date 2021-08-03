@@ -73,9 +73,9 @@ void NFeDistribuicao::buscarNSU() {
 
   SqlQuery queryLoja;
 
-  if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja) or not queryLoja.first()) {
-    throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this);
-  }
+  if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this); }
+
+  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja, this); }
 
   maximoNSU = queryLoja.value("maximoNSU").toInt();
   ultimoNSU = queryLoja.value("ultimoNSU").toInt();
@@ -576,13 +576,14 @@ void NFeDistribuicao::montaFiltro() {
   //-------------------------------------
 
   const QString lojaNome = ui->itemBoxLoja->text();
+  const QString idLoja = ui->itemBoxLoja->getId().toString();
 
   if (not lojaNome.isEmpty()) {
     QSqlQuery queryLoja;
 
-    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + ui->itemBoxLoja->getId().toString()) or not queryLoja.first()) {
-      throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text());
-    }
+    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
+
+    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
 
     filtros << "cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
   }
@@ -816,9 +817,11 @@ void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
 bool NFeDistribuicao::houveConsultaEmOutroPc() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM maintenance") or not query.first()) {
+  if (not query.exec("SELECT timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM maintenance")) {
     throw RuntimeException("Erro buscando última consulta: " + query.lastError().text(), this);
   }
+
+  if (not query.first()) { throw RuntimeException("Última consulta não encontrada!", this); }
 
   return query.value("tempo").toInt() < 60;
 }

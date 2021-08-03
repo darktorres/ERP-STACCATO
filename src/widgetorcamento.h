@@ -41,8 +41,8 @@ private:
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCriarOrc_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
-  auto on_radioButtonProprios_toggled(bool checked) -> void;
-  auto on_radioButtonTodos_toggled(bool checked) -> void;
+  auto on_radioButtonProprios_toggled(const bool checked) -> void;
+  auto on_radioButtonTodos_toggled(const bool checked) -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setWidgets() -> void;

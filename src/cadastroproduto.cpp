@@ -162,7 +162,9 @@ void CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrou fornecedor de id: " + ui->itemBoxFornecedor->getId().toString()); }
 
   const bool representacao = query.value("representacao").toBool();
 

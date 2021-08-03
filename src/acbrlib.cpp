@@ -17,13 +17,15 @@ typedef int (*NFE_CarregarXML)(const char *eArquivoOuXML);
 typedef int (*NFE_ImprimirPDF)();
 
 void ACBrLib::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) { throw RuntimeError("Produto não possui nota!"); }
+  if (idNFe == 0) { throw RuntimeError("Produto não possui NFe!"); }
 
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando chaveAcesso: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
 
   gerarDanfe(query.value("xml").toByteArray(), true);
 }
@@ -35,7 +37,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   NFE_Inicializar method_inicializar = reinterpret_cast<NFE_Inicializar>(GetProcAddress(nHandler, "NFE_Inicializar"));
 
-  if (not method_inicializar) { throw RuntimeException("Erro carregando ACBrLib!"); }
+  if (not method_inicializar) { throw RuntimeException("Erro ACBrLib NFE_Inicializar!"); }
 
   int ret;
 
@@ -47,7 +49,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   NFE_CarregarXML method_carregar_xml = reinterpret_cast<NFE_CarregarXML>(GetProcAddress(nHandler, "NFE_CarregarXML"));
 
-  if (not method_carregar_xml) { throw RuntimeException("Erro carregando ACBrLib!"); }
+  if (not method_carregar_xml) { throw RuntimeException("Erro ACBrLib NFE_CarregarXML!"); }
 
   ret = method_carregar_xml(fileContent);
 
@@ -57,7 +59,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   NFE_ImprimirPDF method_imprimir_pdf = reinterpret_cast<NFE_ImprimirPDF>(GetProcAddress(nHandler, "NFE_ImprimirPDF"));
 
-  if (not method_imprimir_pdf) { throw RuntimeException("Erro carregando ACBrLib!"); }
+  if (not method_imprimir_pdf) { throw RuntimeException("Erro ACBrLib NFE_ImprimirPDF!"); }
 
   ret = method_imprimir_pdf();
 
@@ -67,7 +69,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   NFE_Finalizar method_finalizar = reinterpret_cast<NFE_Finalizar>(GetProcAddress(nHandler, "NFE_Finalizar"));
 
-  if (not method_finalizar) { throw RuntimeException("Erro carregando ACBrLib!"); }
+  if (not method_finalizar) { throw RuntimeException("Erro ACBrLib NFE_Finalizar!"); }
 
   ret = method_finalizar();
 
@@ -99,7 +101,7 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 
   NFE_UltimoRetorno method = reinterpret_cast<NFE_UltimoRetorno>(GetProcAddress(nHandler, "NFE_UltimoRetorno"));
 
-  if (not method) { throw RuntimeException("Erro carregando ACBrLib!"); }
+  if (not method) { throw RuntimeException("Erro ACBrLib NFE_UltimoRetorno!"); }
 
   method(buffer.c_str(), &bufferLen);
 

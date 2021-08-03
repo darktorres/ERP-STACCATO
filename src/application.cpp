@@ -188,7 +188,9 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
 void Application::runSqlJobs() {
   SqlQuery query;
 
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
+  if (not query.exec("SELECT lastInvalidated FROM maintenance")) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Erro verificando lastInvalidated!"); }
 
   if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
     if (not query.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
@@ -380,14 +382,16 @@ QString Application::removerDiacriticos(const QString &s, const bool removerSimb
 
 bool Application::getSilent() const { return silent; }
 
-void Application::setSilent(bool value) { silent = value; }
+void Application::setSilent(const bool value) { silent = value; }
 
 bool Application::getInTransaction() const { return inTransaction; }
 
 QDateTime Application::serverDateTime() {
   SqlQuery query;
 
-  if (not query.exec("SELECT NOW()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
+  if (not query.exec("SELECT NOW()")) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Erro buscando data/hora!"); }
 
   return query.value("NOW()").toDateTime();
 }
@@ -396,7 +400,9 @@ QDate Application::serverDate() {
   if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
     SqlQuery query;
 
-    if (not query.exec("SELECT CURDATE()") or not query.first()) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
+    if (not query.exec("SELECT CURDATE()")) { throw RuntimeException("Erro buscando data/hora: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Erro buscando data/hora!"); }
 
     systemDate = QDate::currentDate();
     serverDateCache = query.value("CURDATE()").toDate();
@@ -426,13 +432,15 @@ int Application::reservarIdEstoque() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'estoque'") or not query.first()) {
-    throw RuntimeException("Erro reservar id estoque: " + query.lastError().text());
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'estoque'")) {
+    throw RuntimeException("Erro reservando idEstoque: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Erro reservando idEstoque!"); }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id estoque: " + query.lastError().text()); }
+  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservando idEstoque: " + query.lastError().text()); }
 
   return id;
 }
@@ -442,13 +450,15 @@ int Application::reservarIdVendaProduto2() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    throw RuntimeException("Erro reservar id venda: " + query.lastError().text());
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'venda_has_produto2'")) {
+    throw RuntimeException("Erro reservando idVenda: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Erro reservando idVenda!"); }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id venda: " + query.lastError().text()); }
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservando idVenda: " + query.lastError().text()); }
 
   return id;
 }
@@ -458,13 +468,15 @@ int Application::reservarIdNFe() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'nfe'") or not query.first()) {
-    throw RuntimeException("Erro reservar id nfe: " + query.lastError().text());
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'nfe'")) {
+    throw RuntimeException("Erro reservando idNFe: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Erro reservando idNFe!"); }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id nfe: " + query.lastError().text()); }
+  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservando idNFe: " + query.lastError().text()); }
 
   return id;
 }
@@ -474,13 +486,15 @@ int Application::reservarIdPedido2() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
-    throw RuntimeException("Erro reservar id compra: " + query.lastError().text());
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'pedido_fornecedor_has_produto2'")) {
+    throw RuntimeException("Erro reservando idPedido2: " + query.lastError().text());
   }
+
+  if (not query.first()) { throw RuntimeException("Erro reservando idPedido2!"); }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id compra: " + query.lastError().text()); }
+  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservando idPedido2: " + query.lastError().text()); }
 
   return id;
 }

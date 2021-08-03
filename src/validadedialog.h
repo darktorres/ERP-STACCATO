@@ -19,7 +19,7 @@ private:
   // attributes
   Ui::ValidadeDialog *ui;
   // methods
-  auto on_checkBoxSemValidade_toggled(bool checked) -> void;
+  auto on_checkBoxSemValidade_toggled(const bool checked) -> void;
   auto on_dateEdit_dateChanged(const QDate date) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_spinBox_valueChanged(const int dias) -> void;

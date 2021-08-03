@@ -198,7 +198,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
+void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(const bool checked) {
   ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
   montaFiltro();
 }

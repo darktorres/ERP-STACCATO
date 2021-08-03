@@ -34,8 +34,8 @@ private:
   auto calcularTotal() -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate date) -> void;
-  auto on_doubleSpinBoxAliquota_valueChanged(double aliquota) -> void;
-  auto on_doubleSpinBoxST_valueChanged(double valueSt) -> void;
+  auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
+  auto on_doubleSpinBoxST_valueChanged(const double valueSt) -> void;
   auto on_lineEditCodRep_textEdited(const QString &text) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;

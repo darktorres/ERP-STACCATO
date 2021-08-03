@@ -86,7 +86,7 @@ void WidgetEstoqueProduto::montaFiltro() {
                           "%')");
 }
 
-void WidgetEstoqueProduto::on_radioButtonTodos_toggled(bool checked) {
+void WidgetEstoqueProduto::on_radioButtonTodos_toggled(const bool checked) {
   if (not checked) { return; }
 
   modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
@@ -94,7 +94,7 @@ void WidgetEstoqueProduto::on_radioButtonTodos_toggled(bool checked) {
   modelProdutos.select();
 }
 
-void WidgetEstoqueProduto::on_radioButtonStaccatoOFF_toggled(bool checked) {
+void WidgetEstoqueProduto::on_radioButtonStaccatoOFF_toggled(const bool checked) {
   if (not checked) { return; }
 
   modelProdutos.setFilter("estoque = TRUE AND promocao = 2 AND descontinuado = FALSE AND desativado = FALSE");
@@ -102,7 +102,7 @@ void WidgetEstoqueProduto::on_radioButtonStaccatoOFF_toggled(bool checked) {
   modelProdutos.select();
 }
 
-void WidgetEstoqueProduto::on_radioButtonEstoque_toggled(bool checked) {
+void WidgetEstoqueProduto::on_radioButtonEstoque_toggled(const bool checked) {
   if (not checked) { return; }
 
   modelProdutos.setFilter("estoque = TRUE AND promocao = 0 AND descontinuado = FALSE AND desativado = FALSE");

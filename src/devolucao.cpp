@@ -375,7 +375,9 @@ void Devolucao::criarDevolucao() {
   query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
   query2.bindValue(":idVenda", idVenda + "D%");
 
-  if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro determinando próximo id: " + query2.lastError().text()); }
+  if (not query2.exec()) { throw RuntimeException("Erro determinando próximo id: " + query2.lastError().text()); }
+
+  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: " + idVenda); }
 
   idDevolucao = idVenda + "D" + query2.value("number").toString();
 
@@ -449,15 +451,17 @@ void Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 
 void Devolucao::criarComissaoProfissional(const int currentRow) {
   const QDate date = qApp->serverDate();
+  const QString idVendaProduto2 = modelProdutos2.data(currentRow, "idVendaProduto2").toString();
 
   SqlQuery queryProfissional;
 
   if (not queryProfissional.exec("SELECT p.nome_razao, v.rt FROM profissional p LEFT JOIN venda v ON p.idProfissional = v.idProfissional LEFT JOIN venda_has_produto2 vp2 ON v.idVenda = vp2.idVenda "
                                  "WHERE vp2.idVendaProduto2 = " +
-                                 QString::number(modelProdutos2.data(currentRow, "idVendaProduto2").toInt())) or
-      not queryProfissional.first()) {
+                                 idVendaProduto2)) {
     throw RuntimeException("Erro buscando dados do profissional: " + queryProfissional.lastError().text());
   }
+
+  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados para profissional com id: " + idVendaProduto2); }
 
   const double rt = queryProfissional.value("rt").toDouble() / 100;
   const double valor = modelProdutos2.data(currentRow, "total").toDouble() * -1 * rt;
@@ -591,7 +595,9 @@ void Devolucao::atualizarDevolucao() {
   query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto2 WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idDevolucao);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados da devolução: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados da devolução: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para devolução com id: " + idDevolucao); }
 
   SqlQuery query2;
   query2.prepare("UPDATE venda SET subTotalBru = :subTotalBru, subTotalLiq = :subTotalLiq, total = :total WHERE idVenda = :idVenda");
@@ -664,9 +670,11 @@ void Devolucao::atualizarIdRelacionado(const int currentRow) {
 
   SqlQuery queryBusca;
 
-  if (not queryBusca.exec("SELECT idVendaProduto2 FROM venda_has_produto2 WHERE idVendaProdutoFK = " + idVendaProduto1_Devolucao) or not queryBusca.first()) {
+  if (not queryBusca.exec("SELECT idVendaProduto2 FROM venda_has_produto2 WHERE idVendaProdutoFK = " + idVendaProduto1_Devolucao)) {
     throw RuntimeException("Erro buscando idVendaProduto2: " + queryBusca.lastError().text());
   }
+
+  if (not queryBusca.first()) { throw RuntimeException("Dados não encontrados para id: " + idVendaProduto1_Devolucao); }
 
   //------------------------------------
 

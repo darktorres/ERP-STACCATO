@@ -260,8 +260,9 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
     if (montarCarga) {
       SqlQuery query;
-      query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto");
-      query.first();
+      if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto")) { throw RuntimeException("Erro buscando próximo idEvento: " + query.lastError().text()); }
+
+      if (not query.first()) { throw RuntimeException("Erro buscando próximo idEvento!"); }
 
       const int idEvento = query.value(0).toInt();
 
@@ -272,7 +273,9 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       queryTemp.bindValue(":idEstoque", idEstoque);
 
-      if (not queryTemp.exec() or not queryTemp.first()) { throw RuntimeException("Erro buscando codComercial: " + queryTemp.lastError().text()); }
+      if (not queryTemp.exec()) { throw RuntimeException("Erro buscando codComercial do estoque: " + queryTemp.lastError().text()); }
+
+      if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: " + QString::number(idEstoque)); }
 
       codComercial = queryTemp.value("codComercial").toString();
     } else {
@@ -299,7 +302,9 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged() {
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados do veículo: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para veículo de id: " + ui->itemBoxVeiculo->getId().toString(), this); }
 
   modelTranspAtual.select();
 

@@ -34,7 +34,7 @@ private:
   auto montaFiltro() -> void;
   auto on_doubleSpinBoxAvulsoCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxAvulsoQuant_valueChanged(const double quant) -> void;
-  auto on_groupBoxStatus_toggled(bool enabled) -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonComprarAvulso_clicked() -> void;
   auto on_pushButtonExcel_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;

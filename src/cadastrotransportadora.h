@@ -32,7 +32,7 @@ private:
   auto newRegister() -> bool final;
   auto novoEndereco() -> void;
   auto novoVeiculo() -> void;
-  auto on_checkBoxMostrarInativosVeiculo_toggled(bool checked) -> void;
+  auto on_checkBoxMostrarInativosVeiculo_toggled(const bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;

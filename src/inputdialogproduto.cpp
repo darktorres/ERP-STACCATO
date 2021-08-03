@@ -286,7 +286,7 @@ void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
-void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
+void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
   unsetConnections();
 
   try {
@@ -309,7 +309,7 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
   setConnections();
 }
 
-void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
+void InputDialogProduto::on_doubleSpinBoxST_valueChanged(const double valueSt) {
   unsetConnections();
 
   try {

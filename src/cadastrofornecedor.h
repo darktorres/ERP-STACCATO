@@ -43,7 +43,7 @@ private:
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonSalvarPrazos_clicked() -> void;
   auto on_pushButtonValidade_clicked() -> void;
-  auto on_tabWidget_currentChanged(int index) -> void;
+  auto on_tabWidget_currentChanged(const int index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;

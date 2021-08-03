@@ -16,7 +16,7 @@ public:
   auto getText() const -> QString;
   auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void final;
   auto reorderChildren() -> void;
-  auto setFlagHighlight(bool value) -> void;
+  auto setFlagHighlight(const bool value) -> void;
   auto setLabel(const QString &value) -> void;
   auto setText(const QString &value) -> void;
   auto unselect() -> void;

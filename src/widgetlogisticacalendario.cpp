@@ -188,7 +188,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
   ui->lineEditRange->setText(range);
 }
 
-void WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled(bool checked) {
+void WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled(const bool checked) {
   ui->calendarWidget->setVisible(checked);
   ui->groupBoxVeiculos->setVisible(checked);
 }

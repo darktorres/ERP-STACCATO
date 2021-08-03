@@ -1433,7 +1433,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   correcao = true;
 }
 
-void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
+void Venda::on_checkBoxPontuacaoPadrao_toggled(const bool checked) {
   if (checked) {
     SqlQuery query;
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
@@ -1457,7 +1457,7 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
   // TODO: 5criar linha em contas_pagar de comissao/rt
 }
 
-void Venda::on_checkBoxPontuacaoIsento_toggled(bool checked) {
+void Venda::on_checkBoxPontuacaoIsento_toggled(const bool checked) {
   if (checked) {
     ui->checkBoxPontuacaoPadrao->setChecked(false);
     ui->doubleSpinBoxPontuacao->setValue(0);
@@ -1467,7 +1467,7 @@ void Venda::on_checkBoxPontuacaoIsento_toggled(bool checked) {
   }
 }
 
-void Venda::on_checkBoxRT_toggled(bool checked) {
+void Venda::on_checkBoxRT_toggled(const bool checked) {
   for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(checked); }
 
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");

@@ -1035,21 +1035,21 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged() { calculaCofins(
 void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged() { calculaCofins(); }
 
 void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged() {
-  SqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
+  SqlQuery queryEndereco;
+  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
-  if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this); }
+  if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryEndereco.lastError().text(), this); }
 
-  if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Endereço do cliente não encontrado!"); }
+  if (not queryEndereco.first()) { throw RuntimeException("Endereço do cliente não encontrado!"); }
 
-  ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
-  ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
-  ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
-  ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
-  ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
-  ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
-  ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+  ui->lineEditDestinatarioLogradouro->setText(queryEndereco.value("logradouro").toString());
+  ui->lineEditDestinatarioNumero->setText(queryEndereco.value("numero").toString());
+  ui->lineEditDestinatarioComplemento->setText(queryEndereco.value("complemento").toString());
+  ui->lineEditDestinatarioBairro->setText(queryEndereco.value("bairro").toString());
+  ui->lineEditDestinatarioCidade->setText(queryEndereco.value("cidade").toString());
+  ui->lineEditDestinatarioUF->setText(queryEndereco.value("uf").toString());
+  ui->lineEditDestinatarioCEP->setText(queryEndereco.value("cep").toString());
 
   // ------------------------------------------------------------
 
@@ -1063,21 +1063,21 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged() {
 }
 
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged() {
-  SqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getId());
+  SqlQuery queryEndereco;
+  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getId());
 
-  if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text(), this); }
+  if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryEndereco.lastError().text(), this); }
 
-  if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + ui->itemBoxEnderecoEntrega->getId().toString()); }
+  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + ui->itemBoxEnderecoEntrega->getId().toString()); }
 
-  ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
-  ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
-  ui->lineEditDestinatarioComplemento_2->setText(queryDestinatarioEndereco.value("complemento").toString());
-  ui->lineEditDestinatarioBairro_2->setText(queryDestinatarioEndereco.value("bairro").toString());
-  ui->lineEditDestinatarioCidade_2->setText(queryDestinatarioEndereco.value("cidade").toString());
-  ui->lineEditDestinatarioUF_2->setText(queryDestinatarioEndereco.value("uf").toString());
-  ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
+  ui->lineEditDestinatarioLogradouro_2->setText(queryEndereco.value("logradouro").toString());
+  ui->lineEditDestinatarioNumero_2->setText(queryEndereco.value("numero").toString());
+  ui->lineEditDestinatarioComplemento_2->setText(queryEndereco.value("complemento").toString());
+  ui->lineEditDestinatarioBairro_2->setText(queryEndereco.value("bairro").toString());
+  ui->lineEditDestinatarioCidade_2->setText(queryEndereco.value("cidade").toString());
+  ui->lineEditDestinatarioUF_2->setText(queryEndereco.value("uf").toString());
+  ui->lineEditDestinatarioCEP_2->setText(queryEndereco.value("cep").toString());
 
   updateComplemento();
 }
@@ -1714,21 +1714,21 @@ void CadastrarNFe::preencherEmitente() {
 
   // endereço do emitente
 
-  SqlQuery queryEmitenteEndereco;
-  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
+  SqlQuery queryEndereco;
+  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-  if (not queryEmitenteEndereco.exec()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text(), this); }
+  if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEndereco.lastError().text(), this); }
 
-  if (not queryEmitenteEndereco.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
+  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
 
-  ui->lineEditEmitenteLogradouro->setText(queryEmitenteEndereco.value("logradouro").toString());
-  ui->lineEditEmitenteNumero->setText(queryEmitenteEndereco.value("numero").toString());
-  ui->lineEditEmitenteComplemento->setText(queryEmitenteEndereco.value("complemento").toString());
-  ui->lineEditEmitenteBairro->setText(queryEmitenteEndereco.value("bairro").toString());
-  ui->lineEditEmitenteCidade->setText(queryEmitenteEndereco.value("cidade").toString());
-  ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
-  ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
+  ui->lineEditEmitenteLogradouro->setText(queryEndereco.value("logradouro").toString());
+  ui->lineEditEmitenteNumero->setText(queryEndereco.value("numero").toString());
+  ui->lineEditEmitenteComplemento->setText(queryEndereco.value("complemento").toString());
+  ui->lineEditEmitenteBairro->setText(queryEndereco.value("bairro").toString());
+  ui->lineEditEmitenteCidade->setText(queryEndereco.value("cidade").toString());
+  ui->lineEditEmitenteUF->setText(queryEndereco.value("uf").toString());
+  ui->lineEditEmitenteCEP->setText(queryEndereco.value("cep").toString());
 }
 
 void CadastrarNFe::preencherDestinatario() {
@@ -1801,41 +1801,41 @@ void CadastrarNFe::preencherDestinatario() {
     ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
     ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
 
-    SqlQuery queryDestinatarioEndereco;
-    queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-    queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
+    SqlQuery queryEndereco;
+    queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
 
-    if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this); }
+    if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryEndereco.lastError().text(), this); }
 
-    if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoFaturamento").toString()); }
+    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoFaturamento").toString()); }
 
-    ui->lineEditDestinatarioLogradouro->setText(queryDestinatarioEndereco.value("logradouro").toString());
-    ui->lineEditDestinatarioNumero->setText(queryDestinatarioEndereco.value("numero").toString());
-    ui->lineEditDestinatarioComplemento->setText(queryDestinatarioEndereco.value("complemento").toString());
-    ui->lineEditDestinatarioBairro->setText(queryDestinatarioEndereco.value("bairro").toString());
-    ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
-    ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
-    ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+    ui->lineEditDestinatarioLogradouro->setText(queryEndereco.value("logradouro").toString());
+    ui->lineEditDestinatarioNumero->setText(queryEndereco.value("numero").toString());
+    ui->lineEditDestinatarioComplemento->setText(queryEndereco.value("complemento").toString());
+    ui->lineEditDestinatarioBairro->setText(queryEndereco.value("bairro").toString());
+    ui->lineEditDestinatarioCidade->setText(queryEndereco.value("cidade").toString());
+    ui->lineEditDestinatarioUF->setText(queryEndereco.value("uf").toString());
+    ui->lineEditDestinatarioCEP->setText(queryEndereco.value("cep").toString());
 
     // endereco entrega
 
     ui->itemBoxEnderecoEntrega->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
     ui->itemBoxEnderecoEntrega->setId(modelVenda.data(0, "idEnderecoEntrega"));
 
-    queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-    queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
+    queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
 
-    if (not queryDestinatarioEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryDestinatarioEndereco.lastError().text(), this); }
+    if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryEndereco.lastError().text(), this); }
 
-    if (not queryDestinatarioEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoEntrega").toString()); }
+    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoEntrega").toString()); }
 
-    ui->lineEditDestinatarioLogradouro_2->setText(queryDestinatarioEndereco.value("logradouro").toString());
-    ui->lineEditDestinatarioNumero_2->setText(queryDestinatarioEndereco.value("numero").toString());
-    ui->lineEditDestinatarioComplemento_2->setText(queryDestinatarioEndereco.value("complemento").toString());
-    ui->lineEditDestinatarioBairro_2->setText(queryDestinatarioEndereco.value("bairro").toString());
-    ui->lineEditDestinatarioCidade_2->setText(queryDestinatarioEndereco.value("cidade").toString());
-    ui->lineEditDestinatarioUF_2->setText(queryDestinatarioEndereco.value("uf").toString());
-    ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
+    ui->lineEditDestinatarioLogradouro_2->setText(queryEndereco.value("logradouro").toString());
+    ui->lineEditDestinatarioNumero_2->setText(queryEndereco.value("numero").toString());
+    ui->lineEditDestinatarioComplemento_2->setText(queryEndereco.value("complemento").toString());
+    ui->lineEditDestinatarioBairro_2->setText(queryEndereco.value("bairro").toString());
+    ui->lineEditDestinatarioCidade_2->setText(queryEndereco.value("cidade").toString());
+    ui->lineEditDestinatarioUF_2->setText(queryEndereco.value("uf").toString());
+    ui->lineEditDestinatarioCEP_2->setText(queryEndereco.value("cep").toString());
   }
 
   // -------------------------------------------------------------------------

@@ -382,11 +382,11 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
   setConnections();
 }
 
-void WidgetOrcamento::on_radioButtonTodos_toggled(bool checked) {
+void WidgetOrcamento::on_radioButtonTodos_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 
-void WidgetOrcamento::on_radioButtonProprios_toggled(bool checked) {
+void WidgetOrcamento::on_radioButtonProprios_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 

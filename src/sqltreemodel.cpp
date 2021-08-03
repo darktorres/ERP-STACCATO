@@ -80,14 +80,14 @@ SqlTreeModel::~SqlTreeModel() { delete d; }
 
 void SqlTreeModel::appendModel(QSqlQueryModel *model) { insertModel(model, d->m_levelData.count() - 1); }
 
-void SqlTreeModel::insertModel(QSqlQueryModel *model, int parentLevel) {
+void SqlTreeModel::insertModel(QSqlQueryModel *model, const int parentLevel) {
   d->m_levelData.append(new SqlTreeModelLevel(model, parentLevel));
   d->m_columns = -1;
 }
 
-QSqlQueryModel *SqlTreeModel::modelAt(int level) const { return d->m_levelData.at(level)->m_model; }
+QSqlQueryModel *SqlTreeModel::modelAt(const int level) const { return d->m_levelData.at(level)->m_model; }
 
-void SqlTreeModel::setColumnMapping(int level, const QList<int> &columnMapping) {
+void SqlTreeModel::setColumnMapping(const int level, const QList<int> &columnMapping) {
   SqlTreeModelLevel *levelData = d->m_levelData.at(level);
   if (levelData->m_columnMapping != columnMapping) {
     levelData->m_columnMapping = columnMapping;
@@ -238,7 +238,7 @@ int SqlTreeModel::rowParentId(const QModelIndex &index) const {
   return levelData->m_parentIds.at(row);
 }
 
-QVariant SqlTreeModel::rawData(int level, int row, int column, int role) const {
+QVariant SqlTreeModel::rawData(const int level, const int row, const int column, const int role) const {
   if (level < 0 or row < 0 or column < 0) { return QVariant(); }
 
   SqlTreeModelLevel *levelData = d->m_levelData.at(level);
@@ -256,7 +256,7 @@ bool SqlTreeModel::setRawData(const int level, const int row, const int column, 
   return model->setData(model->index(row, column), value, role);
 }
 
-QModelIndex SqlTreeModel::findIndex(int level, int id, int column) const {
+QModelIndex SqlTreeModel::findIndex(const int level, const int id, const int column) const {
   if (level < 0 or id < 0 or column < 0) { return QModelIndex(); }
 
   SqlTreeModelLevel *levelData = d->m_levelData.at(level);
@@ -308,7 +308,7 @@ int SqlTreeModel::rowCount(const QModelIndex &parent) const {
   return node ? node->m_rows.count() : 0;
 }
 
-QModelIndex SqlTreeModel::index(int row, int column, const QModelIndex &parent) const {
+QModelIndex SqlTreeModel::index(const int row, const int column, const QModelIndex &parent) const {
   SqlTreeModelNode *node = d->findNode(parent);
 
   if (not node or row < 0 or row >= node->m_rows.count()) { return QModelIndex(); }
@@ -354,11 +354,11 @@ QModelIndex SqlTreeModel::parent(const QModelIndex &index) const {
   return QModelIndex();
 }
 
-QVariant SqlTreeModel::data(const QModelIndex &index, int role) const { return rawData(levelOf(index), mappedRow(index), mappedColumn(index), role); }
+QVariant SqlTreeModel::data(const QModelIndex &index, const int role) const { return rawData(levelOf(index), mappedRow(index), mappedColumn(index), role); }
 
-bool SqlTreeModel::setData(const QModelIndex &index, const QVariant &value, int role) { return setRawData(levelOf(index), mappedRow(index), mappedColumn(index), value, role); }
+bool SqlTreeModel::setData(const QModelIndex &index, const QVariant &value, const int role) { return setRawData(levelOf(index), mappedRow(index), mappedColumn(index), value, role); }
 
-bool SqlTreeModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
+bool SqlTreeModel::setHeaderData(const int section, const Qt::Orientation orientation, const QVariant &value, const int role) {
   if (orientation != Qt::Horizontal or section < 0) { return false; }
 
   if (d->m_headers.size() <= section) { d->m_headers.resize(qMax(section + 1, 16)); }
@@ -372,7 +372,7 @@ bool SqlTreeModel::setHeaderData(int section, Qt::Orientation orientation, const
 
 bool SqlTreeModel::setHeaderData(const QString &column, const QVariant &value) { return setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 
-QVariant SqlTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant SqlTreeModel::headerData(const int section, const Qt::Orientation orientation, const int role) const {
   if (orientation == Qt::Horizontal) {
     QVariant value = d->m_headers.value(section).value(role);
 
@@ -388,7 +388,7 @@ QVariant SqlTreeModel::headerData(int section, Qt::Orientation orientation, int 
   return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-void SqlTreeModel::setSort(int column, Qt::SortOrder order) {
+void SqlTreeModel::setSort(const int column, const Qt::SortOrder order) {
   d->m_sortColumn = column;
   d->m_sortOrder = order;
 }
@@ -397,7 +397,7 @@ int SqlTreeModel::sortColumn() const { return d->m_sortColumn; }
 
 Qt::SortOrder SqlTreeModel::sortOrder() const { return d->m_sortOrder; }
 
-void SqlTreeModel::sort(int column, Qt::SortOrder order) {
+void SqlTreeModel::sort(const int column, const Qt::SortOrder order) {
   if (d->m_sortColumn != column or d->m_sortOrder != order) {
     setSort(column, order);
     updateQueries();

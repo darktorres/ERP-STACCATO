@@ -220,7 +220,9 @@ void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelEstoque.data(rowEstoque, "idProduto").toString()); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double caixas = quant / quantCaixa;
@@ -304,7 +306,9 @@ void Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando idVenda: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando idVenda: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para id: " + QString::number(idVendaProduto2)); }
 
   const int row = 0;
   const double quantCompra = modelCompra.data(row, "quant").toDouble();

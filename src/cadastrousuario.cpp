@@ -150,9 +150,11 @@ void CadastroUsuario::savingProcedures() {
   if (ui->lineEditPasswd->text() != "********") {
     SqlQuery query;
 
-    if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "'), SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) {
-      throw RuntimeException("Erro guardando senha: " + query.lastError().text());
+    if (not query.exec("SELECT SHA_PASSWORD('" + ui->lineEditPasswd->text() + "'), SHA1_PASSWORD('" + ui->lineEditPasswd->text() + "')")) {
+      throw RuntimeException("Erro criptografando senha: " + query.lastError().text());
     }
+
+    if (not query.first()) { throw RuntimeException("Erro criptografando senha!"); }
 
     setData("password", query.value(0), false);
     setData("passwd", query.value(1), false);

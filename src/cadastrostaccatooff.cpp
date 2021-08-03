@@ -88,7 +88,7 @@ void CadastroStaccatoOff::on_itemBoxFornecedor_textChanged(const QString &text) 
   model.select();
 }
 
-void CadastroStaccatoOff::on_radioButtonTodos_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonTodos_toggled(const bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";
@@ -98,7 +98,7 @@ void CadastroStaccatoOff::on_radioButtonTodos_toggled(bool checked) {
   model.select();
 }
 
-void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(const bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";
@@ -108,7 +108,7 @@ void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(bool checked) {
   model.select();
 }
 
-void CadastroStaccatoOff::on_radioButtonEstoque_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonEstoque_toggled(const bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";

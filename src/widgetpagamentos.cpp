@@ -182,7 +182,9 @@ void WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+  if (not queryOrc.exec()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+
+  if (not queryOrc.first()) { throw RuntimeException("Não encontrou dados do orçamento: " + idOrcamento); }
 
   SqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = :apenasRepresentacao");
@@ -229,7 +231,9 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listTipoPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrou dados do pagamento: " + listTipoPgt.at(index)->currentText()); }
 
   const int parcelas = query.value("parcelas").toInt();
 

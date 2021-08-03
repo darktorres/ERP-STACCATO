@@ -64,7 +64,7 @@ public:
   auto sanitizeSQL(const QString &string) -> QString;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
-  auto setSilent(bool value) -> void;
+  auto setSilent(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;

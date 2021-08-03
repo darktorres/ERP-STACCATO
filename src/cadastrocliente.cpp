@@ -539,7 +539,7 @@ void CadastroCliente::successMessage() {
   emit registerUpdated(primaryId);
 }
 
-void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
+void CadastroCliente::on_checkBoxInscEstIsento_toggled(const bool checked) {
   if (checked) {
     ui->lineEditInscEstadual->setValidator(nullptr);
     ui->lineEditInscEstadual->setText("ISENTO");

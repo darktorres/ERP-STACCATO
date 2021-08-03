@@ -29,7 +29,7 @@ private:
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
   auto on_checkBoxDataNasc_stateChanged(const int state) -> void;
-  auto on_checkBoxInscEstIsento_toggled(bool checked) -> void;
+  auto on_checkBoxInscEstIsento_toggled(const bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;

@@ -33,7 +33,7 @@ private:
   auto newRegister() -> bool final;
   auto novaConta() -> void;
   auto novoEndereco() -> void;
-  auto on_checkBoxMostrarInativosConta_clicked(bool checked) -> void;
+  auto on_checkBoxMostrarInativosConta_clicked(const bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;

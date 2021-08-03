@@ -7,5 +7,5 @@ class SqlQuery final : public QSqlQuery {
 
 public:
   auto value(const QString &name) const -> QVariant;
-  auto value(int i) const -> QVariant;
+  auto value(const int i) const -> QVariant;
 };

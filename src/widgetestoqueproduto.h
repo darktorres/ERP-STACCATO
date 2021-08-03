@@ -29,9 +29,9 @@ private:
   // methods
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
-  auto on_radioButtonEstoque_toggled(bool checked) -> void;
-  auto on_radioButtonStaccatoOFF_toggled(bool checked) -> void;
-  auto on_radioButtonTodos_toggled(bool checked) -> void;
+  auto on_radioButtonEstoque_toggled(const bool checked) -> void;
+  auto on_radioButtonStaccatoOFF_toggled(const bool checked) -> void;
+  auto on_radioButtonTodos_toggled(const bool checked) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

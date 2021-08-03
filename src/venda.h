@@ -51,9 +51,10 @@ private:
   auto generateId() -> void;
   auto montarFluxoCaixa() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
-  auto on_checkBoxPontuacaoIsento_toggled(bool checked) -> void;
-  auto on_checkBoxPontuacaoPadrao_toggled(bool checked) -> void;
-  auto on_checkBoxRT_toggled(bool checked) -> void;
+  auto on_checkBoxMostrarSubstituidos_toggled(const bool checked) -> void;
+  auto on_checkBoxPontuacaoIsento_toggled(const bool checked) -> void;
+  auto on_checkBoxPontuacaoPadrao_toggled(const bool checked) -> void;
+  auto on_checkBoxRT_toggled(const bool checked) -> void;
   auto on_dateTimeEdit_dateTimeChanged() -> void;
   auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
   auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;

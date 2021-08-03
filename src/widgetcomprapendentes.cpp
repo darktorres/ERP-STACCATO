@@ -191,7 +191,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   produtos->show();
 }
 
-void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
+void WidgetCompraPendentes::on_groupBoxStatus_toggled(const bool enabled) {
   const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : container) {

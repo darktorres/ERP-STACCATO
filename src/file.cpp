@@ -7,7 +7,7 @@
 
 File::File(const QString &name, QObject *parent) : QFile(name, parent) {}
 
-bool File::open(QIODevice::OpenMode mode) {
+bool File::open(const OpenMode mode) {
   if (mode & (QFile::WriteOnly)) {
     const QFileInfo info(fileName());
     const QDir dir = info.absoluteDir();

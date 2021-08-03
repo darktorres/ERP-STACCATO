@@ -440,7 +440,7 @@ void CadastroLoja::on_pushButtonDesativarConta_clicked() {
   }
 }
 
-void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
+void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(const bool checked) {
   if (currentRow == -1) { return; }
 
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));

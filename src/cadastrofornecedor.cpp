@@ -435,7 +435,7 @@ void CadastroFornecedor::on_pushButtonSalvarPrazos_clicked() {
   qApp->enqueueInformation("Prazos atualizados com sucesso!", this);
 }
 
-void CadastroFornecedor::on_tabWidget_currentChanged(int index) {
+void CadastroFornecedor::on_tabWidget_currentChanged(const int index) {
   if (ui->tabWidget->tabText(index) == "Parâmetros") {
     QSqlQuery query;
 

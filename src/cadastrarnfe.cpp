@@ -354,7 +354,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
 
-  if (resposta.contains("Autorizado o uso da NF-e")) { return carregarArquivo(acbrRemoto, filePath); }
+  if (resposta.contains("Autorizado o uso da NF-e") or resposta.contains("Uso Denegado")) { return carregarArquivo(acbrRemoto, filePath); }
 
   throw RuntimeException("Resposta não tratada:\n" + resposta);
 }
@@ -394,11 +394,14 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
 void CadastrarNFe::cadastrar(const int idNFe) {
   SqlQuery queryNFe;
-  queryNFe.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
+  queryNFe.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
   queryNFe.bindValue(":xml", xml);
   queryNFe.bindValue(":idNFe", idNFe);
 
-  if (not queryNFe.exec()) { throw RuntimeException("Erro marcando nota como 'AUTORIZADO': " + queryNFe.lastError().text()); }
+  if (xml.contains("Autorizado o uso da NF-e")) { queryNFe.bindValue(":status", "AUTORIZADO"); }
+  if (xml.contains("Uso Denegado")) { queryNFe.bindValue(":status", "DENEGADA"); }
+
+  if (not queryNFe.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + queryNFe.lastError().text()); }
 }
 
 void CadastrarNFe::updateTotais() {
@@ -1657,7 +1660,12 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 
   qApp->endTransaction();
 
-  qApp->enqueueInformation("Autorizado o uso da NF-e", this);
+  if (xml.contains("Uso Denegado")) {
+    // TODO: desvincular do pedido para que possa ser feito outra nfe
+    throw RuntimeError(resposta.mid(resposta.indexOf("\r\nMsg=") + 6).split("\r\n").first());
+  }
+
+  qApp->enqueueInformation("Autorizado o uso da NF-e!", this);
 }
 
 void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {

@@ -120,16 +120,16 @@
          <property name="spacing">
           <number>0</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBoxAutorizado">
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBoxPendente">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Autorizado</string>
+            <string>Nota Pendente</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -146,13 +146,26 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBoxPendente">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxAutorizado">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Nota Pendente</string>
+            <string>Autorizado</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="checkBoxDenegada">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Denegada</string>
            </property>
            <property name="checked">
             <bool>false</bool>

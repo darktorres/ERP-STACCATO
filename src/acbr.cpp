@@ -100,7 +100,10 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
     throw RuntimeException("NFe não consta na SEFAZ, removendo do sistema...");
   }
 
-  if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e") and not respostaConsultar.contains("xEvento=Cancelamento registrado")) { throw RuntimeException(respostaConsultar); }
+  if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e") and not respostaConsultar.contains("xEvento=Cancelamento registrado") and
+      not respostaConsultar.contains("XMotivo=Uso Denegado")) {
+    throw RuntimeException(respostaConsultar);
+  }
 
   //-------------------------------------------
 

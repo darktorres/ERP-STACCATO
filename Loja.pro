@@ -104,6 +104,8 @@ linux{
     }
 }
 
+INCLUDEPATH += $$PWD/src
+
 RESOURCES += \
     qrs/resources.qrc
 

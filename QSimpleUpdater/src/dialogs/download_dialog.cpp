@@ -15,8 +15,8 @@
 
 #include <QMutex>
 
-#include "../../src/file.h"
 #include "download_dialog.h"
+#include "file.h"
 #include "ui_download_dialog.h"
 
 DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::DownloadDialog) {

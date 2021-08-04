@@ -44,6 +44,8 @@
 
 #include "qsimpleupdater.h"
 
+#include "application.h"
+
 #include <QVersionNumber>
 
 /*! \internal

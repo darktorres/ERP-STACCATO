@@ -507,9 +507,11 @@ void Orcamento::generateId() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando próximo id disponível: " + query.lastError().text()); }
 
-    const int last = query.first() ? query.value("idOrcamento").toString().remove(id).left(4).toInt() : 0;
+    int last = 0;
 
-    id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
+    if (query.first()) { last = query.value("idOrcamento").toString().mid(7, 4).toInt(); }
+
+    id += QString::number(last + 1).rightJustified(4, '0');
     id += ui->checkBoxRepresentacao->isChecked() ? "R" : "";
     id += "O";
 

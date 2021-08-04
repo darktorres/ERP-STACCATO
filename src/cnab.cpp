@@ -20,16 +20,13 @@ void CNAB::writeZeros(QTextStream &stream, const int count) {
 }
 
 void CNAB::writeText(QTextStream &stream, const QString &text, const int count) {
-  QString temp = qApp->removerDiacriticos(text.left(count).toUpper(), true);
+  const QString temp = qApp->removerDiacriticos(text.left(count).toUpper(), true);
 
-  // pad text with count blanks to the right
-  while (temp.size() < count) { temp.append(' '); }
-
-  stream << temp;
+  stream << temp.leftJustified(count, ' '); // pad text with count blanks to the right
 }
 
 void CNAB::writeNumber(QTextStream &stream, const ulong number, const int count) {
-  stream << QString("%1").arg(number, count, 10, QChar('0')); // pad number with count zeros to the left
+  stream << QString::number(number).rightJustified(count, '0'); // pad number with count zeros to the left
 }
 
 QString CNAB::remessaGareItau240(const QVector<Gare> &gares) {

@@ -5,6 +5,7 @@
 #include "application.h"
 #include "sqlquery.h"
 
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QSqlError>
@@ -31,6 +32,8 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 }
 
 void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
+  if (fileContent.contains("<resNFe")) { throw RuntimeError("XML resumido, não é possível gerar DANFE!"); }
+
   HMODULE nHandler = LoadLibraryW(L"ACBrNFe32.dll");
 
   if (not nHandler) { throw RuntimeException("Erro carregando ACBrLib!"); }
@@ -113,11 +116,13 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 
   trim(buffer);
 
-  const QString errorMessage = QString::fromStdString(buffer);
+  const QString retorno = QString::fromStdString(buffer);
 
-  if (errorMessage.contains("Unable to create file")) { throw RuntimeException("Não foi possível criar o arquivo, verifique se ele não está aberto!"); }
+  if (retorno.contains("0 NFe(s) Carregada(s)")) { throw RuntimeException("Não foi possível ler o XML!"); }
 
-  throw RuntimeException("Erro ACBrLib: " + errorMessage);
+  if (retorno.contains("Unable to create file")) { throw RuntimeException("Não foi possível criar o arquivo, verifique se ele não está aberto!"); }
+
+  throw RuntimeException("Erro ACBrLib: " + retorno);
 }
 
 #else

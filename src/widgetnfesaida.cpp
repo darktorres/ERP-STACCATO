@@ -33,6 +33,7 @@ void WidgetNfeSaida::setConnections() {
   connect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
+  connect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
@@ -51,6 +52,7 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
@@ -390,8 +392,9 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
 
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
   if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CANCELADA"; }
+  if (resposta.contains("XMotivo=Uso Denegado")) { status = "DENEGADA"; }
 
-  if (status.isEmpty()) { throw RuntimeException("Erro status vazio"); }
+  if (status.isEmpty()) { throw RuntimeException("Erro status vazio!"); }
 
   SqlQuery query;
   query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
@@ -399,7 +402,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro atualizando xml da nota: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + query.lastError().text()); }
 }
 
 void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
@@ -407,7 +410,7 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   query.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { throw RuntimeException("Erro marcando nota como cancelada: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro marcando NFe como cancelada: " + query.lastError().text()); }
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
@@ -436,3 +439,4 @@ void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chave
 
 // TODO: 2tela para importar notas de amostra (aba separada)
 // TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)
+// TODO: alterar status das NFes para feminino -> autorizada, pendente, cancelada, denegada

@@ -24,8 +24,8 @@
 ****************************************************************************/
 
 #include "xlsxdocument.h"
-#include "../../src/application.h"
-#include "../../src/file.h"
+#include "application.h"
+#include "file.h"
 #include "xlsxchart.h"
 #include "xlsxcontenttypes_p.h"
 #include "xlsxdocpropsapp_p.h"

@@ -442,7 +442,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
     if (operacao == "CIÊNCIA" and statusDistribuicao != "DESCONHECIDO") { continue; }
 
     const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
-    const QString numEvento = QString("%1").arg(++count, 3, 10, QChar('0')); // padding with zeros
+    const QString numEvento = QString::number(++count).rightJustified(3, '0'); // padding with zeros
 
     comando += "[EVENTO" + numEvento + "]\r\n";
     comando += "cOrgao = 91\r\n";

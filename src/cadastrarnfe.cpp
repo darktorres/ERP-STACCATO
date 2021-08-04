@@ -469,7 +469,7 @@ void CadastrarNFe::preencherNumeroNFe() {
 
   const int numeroNFe = queryNfe.value("numeroNFe").toInt();
 
-  ui->lineEditNumero->setText(QString("%1").arg(numeroNFe, 9, 10, QChar('0')));
+  ui->lineEditNumero->setText(QString::number(numeroNFe).rightJustified(9, '0'));
   ui->lineEditCodigo->setText("12121212");
 }
 
@@ -627,7 +627,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
   double sumFrete = 0;
 
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
+    const QString numProd = QString::number(row + 1).rightJustified(3, '0'); // padding with zeros
+
     stream << "[Produto" + numProd + "]\n";
     stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
     const QString cest = modelViewProdutoEstoque.data(row, "cest").toString();

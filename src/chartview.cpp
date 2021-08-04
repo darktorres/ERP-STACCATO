@@ -39,7 +39,7 @@ void ChartView::tooltip(const QPointF point, const bool state) {
   if (not m_tooltip) { m_tooltip = new ChartTooltip(m_chart); }
 
   if (state) {
-    m_tooltip->setText(QString("%1").arg(point.y()));
+    m_tooltip->setText(QString::number(point.y()));
     m_tooltip->setAnchor(point);
     m_tooltip->setZValue(11);
     m_tooltip->updateGeometry();

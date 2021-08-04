@@ -267,7 +267,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   if (not query.exec()) { throw RuntimeException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
-  if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
+  if (not query.exec("FLUSH PRIVILEGES")) { throw RuntimeException("Erro FLUSH: " + query.lastError().text()); }
 }
 
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }

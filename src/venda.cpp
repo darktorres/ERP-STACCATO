@@ -1337,9 +1337,11 @@ void Venda::generateId() {
 
   if (not query.exec()) { throw RuntimeException("Erro na query: " + query.lastError().text()); }
 
-  const int last = query.first() ? query.value("idVenda").toString().remove(id).left(4).toInt() : 0;
+  int last = 0;
 
-  id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
+  if (query.first()) { last = query.value("idVenda").toString().mid(7, 4).toInt(); }
+
+  id += QString::number(last + 1).rightJustified(4, '0');
 
   if (id.size() != 11) { throw RuntimeException("Ocorreu algum erro ao gerar id: " + id); }
 

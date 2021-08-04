@@ -33,8 +33,6 @@ void XML::montarArvore() {
   readChild(root, rootItem);
 
   lerValores(model.item(0, 0));
-
-  if (produtos.isEmpty()) { throw RuntimeException("Produtos vazio!"); }
 }
 
 void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
@@ -68,8 +66,8 @@ void XML::lerValores(const QStandardItem *item) {
       const QString parentText = child->parent()->text();
       QString text = child->text();
 
-      if (text.contains("infNFe")) { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
-      if (text.contains("nNF -")) { nNF = QString("%1").arg(text.remove("nNF - ").toInt(), 9, 10, QChar('0')); }
+      if (text.contains("chNFe")) { chaveAcesso = text.remove("chNFe -"); }
+      if (text.contains("nNF -")) { nNF = text.remove("nNF - ").rightJustified(9, '0'); }
       if (text.contains("dhEmi -")) { dataHoraEmissao = text.remove("dhEmi - "); }
 
       if (parentText == "emit" and text.contains("xFant -")) { xFant = text.remove("xFant - "); }

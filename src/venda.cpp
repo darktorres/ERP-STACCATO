@@ -146,6 +146,7 @@ void Venda::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Venda::on_checkBoxFreteManual_clicked, connectionType);
+  connect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Venda::on_checkBoxMostrarCancelados_toggled, connectionType);
   connect(ui->checkBoxPontuacaoIsento, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoIsento_toggled, connectionType);
   connect(ui->checkBoxPontuacaoPadrao, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoPadrao_toggled, connectionType);
   connect(ui->checkBoxRT, &QCheckBox::toggled, this, &Venda::on_checkBoxRT_toggled, connectionType);
@@ -174,6 +175,7 @@ void Venda::unsetConnections() {
   blockingSignals.push(0);
 
   disconnect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Venda::on_checkBoxFreteManual_clicked);
+  disconnect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Venda::on_checkBoxMostrarCancelados_toggled);
   disconnect(ui->checkBoxPontuacaoIsento, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoIsento_toggled);
   disconnect(ui->checkBoxPontuacaoPadrao, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoPadrao_toggled);
   disconnect(ui->checkBoxRT, &QCheckBox::toggled, this, &Venda::on_checkBoxRT_toggled);
@@ -823,7 +825,7 @@ void Venda::montarFluxoCaixa() {
     const double parcelaTaxa = qApp->roundDouble(valorTaxa / parcelas, 2);
     const double restoTaxa = qApp->roundDouble(valorTaxa - (parcelaTaxa * parcelas), 2);
 
-    const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
+    const QDate dataEmissao = (correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate());
 
     for (int parcela = 0; parcela < parcelas; ++parcela) {
       const int row = modelFluxoCaixa.insertRowAtEnd();
@@ -939,6 +941,13 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   }
 
   setConnections();
+}
+
+void Venda::on_checkBoxMostrarCancelados_toggled(const bool checked) {
+  const QString filtroCancelado = (checked ? "" : " AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
+
+  modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE" + filtroCancelado);
+  modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND (comissao = TRUE OR taxa = TRUE) AND desativado = FALSE" + filtroCancelado);
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
@@ -1431,6 +1440,8 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   ui->tableFluxoCaixa2->show();
   ui->widgetPgts->show();
   ui->widgetPgts->resetarPagamentos();
+
+  ui->checkBoxMostrarCancelados->setDisabled(true);
 
   correcao = true;
 }

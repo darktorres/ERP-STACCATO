@@ -151,17 +151,17 @@ void TableView::setModel(QAbstractItemModel *model) {
   redoView();
 }
 
-// void TableView::mousePressEvent(QMouseEvent *event) {
-//  const QModelIndex item = indexAt(event->pos());
+void TableView::mousePressEvent(QMouseEvent *event) {
+  const QModelIndex item = indexAt(event->pos());
 
-//  if (not item.isValid()) {
-//    clearSelection();
+  if (not item.isValid()) {
+    clearSelection();
 
-//    emit clicked(item); // QTableView don't emit when index is invalid, emit manually for widgets
-//  }
+    emit clicked(item); // QTableView don't emit when index is invalid, emit manually for widgets
+  }
 
-//  QTableView::mousePressEvent(event);
-//}
+  QTableView::mousePressEvent(event);
+}
 
 void TableView::setAutoResize(const bool value) {
   autoResize = value;

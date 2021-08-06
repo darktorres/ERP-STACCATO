@@ -40,7 +40,7 @@ private:
   SqlQuery queryPartilhaIntra;
   SqlTableModel modelLoja;
   SqlTableModel modelVenda;
-  SqlTableModel modelViewProdutoEstoque;
+  SqlTableModel modelProduto;
   Tipo const tipo;
   Ui::CadastrarNFe *ui;
   // methods

@@ -44,7 +44,7 @@ void WidgetNfeEntrada::updateTables() {
     modelIsSet = true;
   }
 
-  modelViewNFeEntrada.select();
+  model.select();
 }
 
 void WidgetNfeEntrada::delayFiltro() { timer.start(qApp->delayedTimer); }
@@ -52,12 +52,12 @@ void WidgetNfeEntrada::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
 void WidgetNfeEntrada::setupTables() {
-  modelViewNFeEntrada.setTable("view_nfe_entrada");
+  model.setTable("view_nfe_entrada");
 
-  modelViewNFeEntrada.setHeaderData("created", "Importado em");
-  modelViewNFeEntrada.setHeaderData("utilizada", "Utilizada");
+  model.setHeaderData("created", "Importado em");
+  model.setHeaderData("utilizada", "Utilizada");
 
-  ui->table->setModel(&modelViewNFeEntrada);
+  ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
@@ -77,11 +77,11 @@ void WidgetNfeEntrada::setupTables() {
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", modelViewNFeEntrada.data(index.row(), "idNFe"));
+  query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + modelViewNFeEntrada.data(index.row(), "idNFe").toString(), this); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -92,7 +92,7 @@ void WidgetNfeEntrada::on_lineEditBusca_textChanged() { montaFiltro(); }
 void WidgetNfeEntrada::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
+  model.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
@@ -109,7 +109,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
   SqlQuery query;
   query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
-  query.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) { throw RuntimeException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
@@ -117,7 +117,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 
   //--------------------------------------------------------------
 
-  if (modelViewNFeEntrada.data(row, "nsu").toInt() > 0 and not modelViewNFeEntrada.data(row, "utilizada").toBool()) { throw RuntimeError("NFe não utilizada!", this); }
+  if (model.data(row, "nsu").toInt() > 0 and not model.data(row, "utilizada").toBool()) { throw RuntimeError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -143,7 +143,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
       "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
       "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryPedidoFornecedor.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryPedidoFornecedor.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryPedidoFornecedor.exec()) { throw RuntimeException("Erro voltando compra para faturamento: " + queryPedidoFornecedor.lastError().text()); }
 
@@ -154,7 +154,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
       "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
       "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` IN (SELECT "
       "`idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryVendaProduto.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryVendaProduto.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryVendaProduto.exec()) { throw RuntimeException("Erro voltando venda para faturamento: " + queryVendaProduto.lastError().text()); }
 
@@ -162,7 +162,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryEstoque;
   queryEstoque.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
-  queryEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryEstoque.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryEstoque.exec()) { throw RuntimeException("Erro buscando consumos: " + queryEstoque.lastError().text()); }
 
@@ -179,7 +179,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryDeleteCompra;
   queryDeleteCompra.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
-  queryDeleteCompra.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryDeleteCompra.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryDeleteCompra.exec()) { throw RuntimeException("Erro removendo compras: " + queryDeleteCompra.lastError().text()); }
 
@@ -187,7 +187,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryProduto;
   queryProduto.prepare("UPDATE produto SET desativado = TRUE WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  queryProduto.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryProduto.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryProduto.exec()) { throw RuntimeException("Erro removendo produto estoque: " + queryProduto.lastError().text()); }
 
@@ -195,7 +195,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryCancelaEstoque;
   queryCancelaEstoque.prepare("UPDATE estoque SET status = 'CANCELADO', idNFe = NULL WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  queryCancelaEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryCancelaEstoque.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryCancelaEstoque.exec()) { throw RuntimeException("Erro removendo estoque: " + queryCancelaEstoque.lastError().text()); }
 
@@ -203,7 +203,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryCancelaGare;
   queryCancelaGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE idNFe = :idNFe AND status IN ('PENDENTE GARE', 'LIBERADO GARE')");
-  queryCancelaGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryCancelaGare.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryCancelaGare.exec()) { throw RuntimeException("Erro removendo GARE: " + queryCancelaGare.lastError().text()); }
 
@@ -211,7 +211,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryUpdateNFe;
   queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE WHERE idNFe = :idNFe");
-  queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryUpdateNFe.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NFe como não utilizada: " + queryUpdateNFe.lastError().text()); }
 }
@@ -232,11 +232,11 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (modelViewNFeEntrada.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (model.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar XML do MySQL e salvar em arquivo
 
-    const QString chaveAcesso = modelViewNFeEntrada.data(index.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = model.data(index.row(), "chaveAcesso").toString();
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 

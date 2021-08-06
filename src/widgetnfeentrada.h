@@ -24,7 +24,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QTimer timer;
-  SqlTableModel modelViewNFeEntrada;
+  SqlTableModel model;
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto delayFiltro() -> void;

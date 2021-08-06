@@ -26,7 +26,7 @@ public:
 
 protected:
   auto keyPressEvent(QKeyEvent *event) -> void final;
-  //  auto mousePressEvent(QMouseEvent *event) -> void final;
+  auto mousePressEvent(QMouseEvent *event) -> void final;
   auto resizeEvent(QResizeEvent *event) -> void final;
 
 private:

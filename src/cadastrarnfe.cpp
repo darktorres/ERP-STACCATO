@@ -340,7 +340,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     removerNota(idNFe);
 
-    const QString rejeicao = resposta.split("\r\n", Qt::SkipEmptyParts).filter("xMotivo=Rejeição").first();
+    const QString rejeicao = resposta.split("\r\n", Qt::SkipEmptyParts).filter("xMotivo=Rejeição").first().remove("xMotivo=");
 
     manterAberto = true;
     throw RuntimeException(rejeicao, this);

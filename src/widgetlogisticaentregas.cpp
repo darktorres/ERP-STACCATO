@@ -265,7 +265,7 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
-  const bool isValid = nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO";
+  const bool isValid = (nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
 
   ui->pushButtonConsultarNFe->setEnabled(isValid);
 }

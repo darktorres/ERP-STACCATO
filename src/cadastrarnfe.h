@@ -25,8 +25,6 @@ public:
   explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
 
-  auto show() -> void;
-
 private:
   // attributes
   bool manterAberto = false;
@@ -46,11 +44,10 @@ private:
   Tipo const tipo;
   Ui::CadastrarNFe *ui;
   // methods
-  auto alterarCertificado(const QString &text) -> void;
   auto buscarAliquotas() -> void;
   auto cadastrar(const int idNFe) -> void;
   auto calculaCofins() -> void;
-  auto calculaDigitoVerificador(QString &chave) -> void;
+  auto calculaDigitoVerificador() -> void;
   auto calculaIcms() -> void;
   auto calculaPis() -> void;
   auto calculaSt() -> void;
@@ -89,6 +86,7 @@ private:
   auto on_itemBoxCliente_textChanged() -> void;
   auto on_itemBoxEnderecoEntrega_textChanged() -> void;
   auto on_itemBoxEnderecoFaturamento_textChanged() -> void;
+  auto on_itemBoxLoja_textChanged() -> void;
   auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_pushButtonConsultarCadastro_clicked() -> void;
   auto on_pushButtonEnviarNFE_clicked() -> void;
@@ -101,7 +99,9 @@ private:
   auto preencherImpostos() -> void;
   auto preencherNumeroNFe() -> void;
   auto preencherTotais() -> void;
+  auto preencherTransportadora() -> void;
   auto preencherTransporte() -> void;
+  auto preencherVolumes() -> void;
   auto prepararNFe(const QStringList &items) -> void;
   auto processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;
@@ -110,7 +110,8 @@ private:
   auto unsetConnections() -> void;
   auto updateComplemento() -> void;
   auto updateTotais() -> void;
-  auto validar() -> bool;
+  auto validarDados() -> void;
+  auto validarRegras(ACBr &acbrRemoto, const QString &filePath) -> bool;
   auto writeComplemento(QTextStream &stream) const -> void;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;

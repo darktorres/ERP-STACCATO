@@ -320,7 +320,7 @@ void Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
     modelCompra.setData(row, "idVendaProduto2", idVendaProduto2);
   }
 
-  const bool dividir = quant < quantCompra;
+  const bool dividir = (quant < quantCompra);
 
   if (dividir) {
     // NOTE: *quebralinha pedido_fornecedor2

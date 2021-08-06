@@ -39,21 +39,21 @@ void ChartTooltip::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
   if (not m_rect.contains(anchor)) {
     // establish the position of the anchor point in relation to m_rect
-    const bool above = anchor.y() <= m_rect.top();
-    const bool aboveCenter = anchor.y() > m_rect.top() and anchor.y() <= m_rect.center().y();
-    const bool belowCenter = anchor.y() > m_rect.center().y() and anchor.y() <= m_rect.bottom();
-    const bool below = anchor.y() > m_rect.bottom();
+    const bool above = (anchor.y() <= m_rect.top());
+    const bool aboveCenter = (anchor.y() > m_rect.top() and anchor.y() <= m_rect.center().y());
+    const bool belowCenter = (anchor.y() > m_rect.center().y() and anchor.y() <= m_rect.bottom());
+    const bool below = (anchor.y() > m_rect.bottom());
 
-    const bool onLeft = anchor.x() <= m_rect.left();
-    const bool leftOfCenter = anchor.x() > m_rect.left() and anchor.x() <= m_rect.center().x();
-    const bool rightOfCenter = anchor.x() > m_rect.center().x() and anchor.x() <= m_rect.right();
-    const bool onRight = anchor.x() > m_rect.right();
+    const bool onLeft = (anchor.x() <= m_rect.left());
+    const bool leftOfCenter = (anchor.x() > m_rect.left() and anchor.x() <= m_rect.center().x());
+    const bool rightOfCenter = (anchor.x() > m_rect.center().x() and anchor.x() <= m_rect.right());
+    const bool onRight = (anchor.x() > m_rect.right());
 
     // get the nearest m_rect corner.
     const qreal x = (onRight + rightOfCenter) * m_rect.width();
     const qreal y = (below + belowCenter) * m_rect.height();
-    const bool cornerCase = (above and onLeft) or (above and onRight) or (below and onLeft) or (below and onRight);
-    const bool vertical = qAbs(anchor.x() - x) > qAbs(anchor.y() - y);
+    const bool cornerCase = ((above and onLeft) or (above and onRight) or (below and onLeft) or (below and onRight));
+    const bool vertical = (qAbs(anchor.x() - x) > qAbs(anchor.y() - y));
 
     const qreal x1 = x + leftOfCenter * 10 - rightOfCenter * 20 + cornerCase * !vertical * (onLeft * 10 - onRight * 20);
     const qreal y1 = y + aboveCenter * 10 - belowCenter * 20 + cornerCase * vertical * (above * 10 - below * 20);

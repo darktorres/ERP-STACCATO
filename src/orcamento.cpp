@@ -220,7 +220,7 @@ bool Orcamento::viewRegister() {
 
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
-    const bool expirado = ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate();
+    const bool expirado = (ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate());
 
     if (expirado or status != "ATIVO") {
       isReadOnly = true;

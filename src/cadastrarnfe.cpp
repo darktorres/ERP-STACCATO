@@ -95,6 +95,7 @@ void CadastrarNFe::setupTables() {
 
   //----------------------------------------------------------
 
+  // TODO: verificar porque essa view usa ABS() e IF() para não ter valores negativos, como não é feito NFe de devolução porque esse código para valores negativos?
   modelProduto.setTable("view_produto_estoque");
 
   modelProduto.setHeaderData("fornecedor", "Fornecedor");

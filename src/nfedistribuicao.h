@@ -58,8 +58,8 @@ private:
   auto on_table_activated(const QModelIndex &index) -> void;
   auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> void;
   auto processarEventoInformacao(const QString &evento) -> void;
+  auto processarEventoNFe(const QString &evento) -> void;
   auto processarEventoPrincipal(const QString &evento, const QString &idLoja) -> void;
-  auto processarEventoResumoNFe(const QString &evento) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

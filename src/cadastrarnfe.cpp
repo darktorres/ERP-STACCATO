@@ -40,23 +40,23 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   setupTables();
 
-  mapper.setModel(&modelViewProdutoEstoque);
+  mapper.setModel(&modelProduto);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
 
-  mapper.addMapping(ui->doubleSpinBoxICMSvbc, modelViewProdutoEstoque.fieldIndex("vBC"));
-  mapper.addMapping(ui->doubleSpinBoxICMSpicms, modelViewProdutoEstoque.fieldIndex("pICMS"));
-  mapper.addMapping(ui->doubleSpinBoxICMSvicms, modelViewProdutoEstoque.fieldIndex("vICMS"));
-  mapper.addMapping(ui->doubleSpinBoxICMSpmvast, modelViewProdutoEstoque.fieldIndex("pMVAST"));
-  mapper.addMapping(ui->doubleSpinBoxICMSvbcst, modelViewProdutoEstoque.fieldIndex("vBCST"));
-  mapper.addMapping(ui->doubleSpinBoxICMSpicmsst, modelViewProdutoEstoque.fieldIndex("pICMSST"));
-  mapper.addMapping(ui->doubleSpinBoxICMSvicmsst, modelViewProdutoEstoque.fieldIndex("vICMSST"));
-  mapper.addMapping(ui->lineEditIPIcEnq, modelViewProdutoEstoque.fieldIndex("cEnq"));
-  mapper.addMapping(ui->doubleSpinBoxPISvbc, modelViewProdutoEstoque.fieldIndex("vBCPIS"));
-  mapper.addMapping(ui->doubleSpinBoxPISppis, modelViewProdutoEstoque.fieldIndex("pPIS"));
-  mapper.addMapping(ui->doubleSpinBoxPISvpis, modelViewProdutoEstoque.fieldIndex("vPIS"));
-  mapper.addMapping(ui->doubleSpinBoxCOFINSvbc, modelViewProdutoEstoque.fieldIndex("vBCCOFINS"));
-  mapper.addMapping(ui->doubleSpinBoxCOFINSpcofins, modelViewProdutoEstoque.fieldIndex("pCOFINS"));
-  mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelViewProdutoEstoque.fieldIndex("vCOFINS"));
+  mapper.addMapping(ui->doubleSpinBoxICMSvbc, modelProduto.fieldIndex("vBC"));
+  mapper.addMapping(ui->doubleSpinBoxICMSpicms, modelProduto.fieldIndex("pICMS"));
+  mapper.addMapping(ui->doubleSpinBoxICMSvicms, modelProduto.fieldIndex("vICMS"));
+  mapper.addMapping(ui->doubleSpinBoxICMSpmvast, modelProduto.fieldIndex("pMVAST"));
+  mapper.addMapping(ui->doubleSpinBoxICMSvbcst, modelProduto.fieldIndex("vBCST"));
+  mapper.addMapping(ui->doubleSpinBoxICMSpicmsst, modelProduto.fieldIndex("pICMSST"));
+  mapper.addMapping(ui->doubleSpinBoxICMSvicmsst, modelProduto.fieldIndex("vICMSST"));
+  mapper.addMapping(ui->lineEditIPIcEnq, modelProduto.fieldIndex("cEnq"));
+  mapper.addMapping(ui->doubleSpinBoxPISvbc, modelProduto.fieldIndex("vBCPIS"));
+  mapper.addMapping(ui->doubleSpinBoxPISppis, modelProduto.fieldIndex("pPIS"));
+  mapper.addMapping(ui->doubleSpinBoxPISvpis, modelProduto.fieldIndex("vPIS"));
+  mapper.addMapping(ui->doubleSpinBoxCOFINSvbc, modelProduto.fieldIndex("vBCCOFINS"));
+  mapper.addMapping(ui->doubleSpinBoxCOFINSpcofins, modelProduto.fieldIndex("pCOFINS"));
+  mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelProduto.fieldIndex("vCOFINS"));
 
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
@@ -95,25 +95,25 @@ void CadastrarNFe::setupTables() {
 
   //----------------------------------------------------------
 
-  modelViewProdutoEstoque.setTable("view_produto_estoque");
+  modelProduto.setTable("view_produto_estoque");
 
-  modelViewProdutoEstoque.setHeaderData("fornecedor", "Fornecedor");
-  modelViewProdutoEstoque.setHeaderData("produto", "Produto");
-  modelViewProdutoEstoque.setHeaderData("caixas", "Caixas");
-  modelViewProdutoEstoque.setHeaderData("descUnitario", "R$ Unit.");
-  modelViewProdutoEstoque.setHeaderData("quant", "Quant.");
-  modelViewProdutoEstoque.setHeaderData("un", "Un.");
-  modelViewProdutoEstoque.setHeaderData("quantCaixa", "Quant./Cx.");
-  modelViewProdutoEstoque.setHeaderData("codComercial", "Cód. Com.");
-  modelViewProdutoEstoque.setHeaderData("formComercial", "Form. Com.");
-  modelViewProdutoEstoque.setHeaderData("total", "Total");
-  modelViewProdutoEstoque.setHeaderData("reposicaoEntrega", "Reposição?");
-  modelViewProdutoEstoque.setHeaderData("codBarras", "Cód. Barras");
-  modelViewProdutoEstoque.setHeaderData("ncm", "NCM");
-  modelViewProdutoEstoque.setHeaderData("cest", "CEST");
-  modelViewProdutoEstoque.setHeaderData("cfop", "CFOP");
+  modelProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelProduto.setHeaderData("produto", "Produto");
+  modelProduto.setHeaderData("caixas", "Caixas");
+  modelProduto.setHeaderData("descUnitario", "R$ Unit.");
+  modelProduto.setHeaderData("quant", "Quant.");
+  modelProduto.setHeaderData("un", "Un.");
+  modelProduto.setHeaderData("quantCaixa", "Quant./Cx.");
+  modelProduto.setHeaderData("codComercial", "Cód. Com.");
+  modelProduto.setHeaderData("formComercial", "Form. Com.");
+  modelProduto.setHeaderData("total", "Total");
+  modelProduto.setHeaderData("reposicaoEntrega", "Reposição?");
+  modelProduto.setHeaderData("codBarras", "Cód. Barras");
+  modelProduto.setHeaderData("ncm", "NCM");
+  modelProduto.setHeaderData("cest", "CEST");
+  modelProduto.setHeaderData("cfop", "CFOP");
 
-  ui->tableItens->setModel(&modelViewProdutoEstoque);
+  ui->tableItens->setModel(&modelProduto);
 
   ui->tableItens->setPersistentColumns({"reposicaoEntrega"});
 
@@ -217,9 +217,9 @@ int CadastrarNFe::preCadastrarNota() {
     SqlQuery query;
     query.prepare("UPDATE venda_has_produto2 SET idNFeEntrada = :idNFeEntrada WHERE idVendaProduto2 = :idVendaProduto2");
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
       query.bindValue(":idNFeEntrada", idNFe);
-      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      query.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
       if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
     }
@@ -235,21 +235,21 @@ int CadastrarNFe::preCadastrarNota() {
     SqlQuery queryVeiculo;
     queryVeiculo.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      queryCompra.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      queryCompra.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
       if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status do pedido_fornecedor: " + queryCompra.lastError().text()); }
 
       //----------------------------------------
 
       queryVenda.bindValue(":idNFeSaida", idNFe);
-      queryVenda.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      queryVenda.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
       if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text()); }
 
       //----------------------------------------
 
-      queryVeiculo.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      queryVeiculo.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
       queryVeiculo.bindValue(":idNFeSaida", idNFe);
 
       if (not queryVeiculo.exec()) { throw RuntimeException("Erro atualizando carga veiculo: " + queryVeiculo.lastError().text()); }
@@ -262,9 +262,9 @@ int CadastrarNFe::preCadastrarNota() {
     SqlQuery query;
     query.prepare("UPDATE venda_has_produto2 SET idNFeFutura = :idNFeFutura WHERE `idVendaProduto2` = :idVendaProduto2");
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
       query.bindValue(":idNFeFutura", idNFe);
-      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+      query.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
       if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
     }
@@ -308,8 +308,8 @@ void CadastrarNFe::removerNota(const int idNFe) {
     SqlQuery queryCompra;
     queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      queryCompra.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      queryCompra.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
       if (not queryCompra.exec()) { throw RuntimeException("Erro removendo nfe da compra: " + queryCompra.lastError().text()); }
     }
@@ -407,12 +407,12 @@ void CadastrarNFe::updateTotais() {
   double valorCOFINS = 0;
   double valorProdutos = 0;
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    baseICMS += modelViewProdutoEstoque.data(row, "vBC").toDouble();
-    valorICMS += modelViewProdutoEstoque.data(row, "vICMS").toDouble();
-    valorPIS += QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
-    valorCOFINS += QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
-    valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble();
+  for (int row = 0; row < modelProduto.rowCount(); ++row) {
+    baseICMS += modelProduto.data(row, "vBC").toDouble();
+    valorICMS += modelProduto.data(row, "vICMS").toDouble();
+    valorPIS += QString::number(modelProduto.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
+    valorCOFINS += QString::number(modelProduto.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
+    valorProdutos += modelProduto.data(row, "total").toDouble();
   }
 
   const double valorFrete = ui->doubleSpinBoxValorFrete->value();
@@ -471,9 +471,9 @@ void CadastrarNFe::preencherNumeroNFe() {
 }
 
 void CadastrarNFe::prepararNFe(const QStringList &items) {
-  modelViewProdutoEstoque.setFilter("idVendaProduto2 IN (" + items.join(", ") + ")");
+  modelProduto.setFilter("idVendaProduto2 IN (" + items.join(", ") + ")");
 
-  modelViewProdutoEstoque.select();
+  modelProduto.select();
 
   preencherDadosNFe();
   preencherEmitente();
@@ -542,7 +542,7 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
     SqlQuery query;
     query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT vp3.idNFeSaida FROM venda_has_produto2 vp2 LEFT JOIN venda_has_produto2 vp3 ON vp2.idRelacionado = vp3.idVendaProduto2 WHERE "
                   "vp2.idVendaProduto2 = :idVendaProduto2)");
-    query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
+    query.bindValue(":idVendaProduto2", modelProduto.data(0, "idVendaProduto2"));
 
     if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
 
@@ -555,7 +555,7 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
   if (tipo == Tipo::SaidaAposFutura) {
     SqlQuery query;
     query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2)");
-    query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
+    query.bindValue(":idVendaProduto2", modelProduto.data(0, "idVendaProduto2"));
 
     if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
 
@@ -625,34 +625,34 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
 void CadastrarNFe::writeProduto(QTextStream &stream) const {
   double sumFrete = 0;
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+  for (int row = 0; row < modelProduto.rowCount(); ++row) {
     const QString numProd = QString::number(row + 1).rightJustified(3, '0'); // padding with zeros
 
     stream << "[Produto" + numProd + "]\n";
-    stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
+    stream << "CFOP = " + modelProduto.data(row, "cfop").toString() + "\n";
 
-    const QString cest = modelViewProdutoEstoque.data(row, "cest").toString();
+    const QString cest = modelProduto.data(row, "cest").toString();
     if (not cest.isEmpty()) { stream << "CEST = " + cest + "\n"; }
 
-    stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
-    stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
+    stream << "NCM = " + modelProduto.data(row, "ncm").toString() + "\n";
+    stream << "Codigo = " + modelProduto.data(row, "codComercial").toString() + "\n";
 
-    const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();
+    const QString codBarras = modelProduto.data(row, "codBarras").toString();
     if (not codBarras.isEmpty()) { stream << "cEAN = " + codBarras + "\n"; }
     if (not codBarras.isEmpty()) { stream << "cEANTrib = " + codBarras + "\n"; }
 
-    const QString produto = modelViewProdutoEstoque.data(row, "produto").toString();
-    QString formato = modelViewProdutoEstoque.data(row, "formComercial").toString();
+    const QString produto = modelProduto.data(row, "produto").toString();
+    QString formato = modelProduto.data(row, "formComercial").toString();
     formato = (formato.isEmpty() ? "" : " - " + formato);
     const QString descricao = produto + formato;
-    const QString caixas = modelViewProdutoEstoque.data(row, "caixas").toString();
+    const QString caixas = modelProduto.data(row, "caixas").toString();
     stream << "Descricao = " + descricao.left(100).remove("\"") + " (" + caixas + " Cx.)\n";
 
-    stream << "Unidade = " + modelViewProdutoEstoque.data(row, "un").toString() + "\n";
-    stream << "Quantidade = " + modelViewProdutoEstoque.data(row, "quant").toString() + "\n";
-    stream << "ValorUnitario = " + QString::number(modelViewProdutoEstoque.data(row, "descUnitario").toDouble(), 'f', 10) + "\n";
+    stream << "Unidade = " + modelProduto.data(row, "un").toString() + "\n";
+    stream << "Quantidade = " + modelProduto.data(row, "quant").toString() + "\n";
+    stream << "ValorUnitario = " + QString::number(modelProduto.data(row, "descUnitario").toDouble(), 'f', 10) + "\n";
 
-    const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+    const double total = modelProduto.data(row, "total").toDouble();
     stream << "ValorTotal = " + QString::number(total, 'f', 2) + "\n";
 
     const double proporcao = total / ui->doubleSpinBoxValorProdutos->value();
@@ -670,29 +670,29 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     if (tipo == Tipo::Futura) { continue; }
 
     stream << "[ICMS" + numProd + "]\n";
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstICMS").toString() + "\n";
-    stream << "Modalidade = " + modelViewProdutoEstoque.data(row, "modBC").toString() + "\n";
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBC").toString() + "\n";
+    stream << "CST = " + modelProduto.data(row, "cstICMS").toString() + "\n";
+    stream << "Modalidade = " + modelProduto.data(row, "modBC").toString() + "\n";
+    stream << "ValorBase = " + modelProduto.data(row, "vBC").toString() + "\n";
 
-    stream << "Aliquota = " + QString::number(modelViewProdutoEstoque.data(row, "pICMS").toDouble(), 'f', 2) + "\n";
+    stream << "Aliquota = " + QString::number(modelProduto.data(row, "pICMS").toDouble(), 'f', 2) + "\n";
 
-    stream << "Valor = " + modelViewProdutoEstoque.data(row, "vICMS").toString() + "\n";
+    stream << "Valor = " + modelProduto.data(row, "vICMS").toString() + "\n";
 
     stream << "[IPI" + numProd + "]\n";
-    stream << "ClasseEnquadramento = " + modelViewProdutoEstoque.data(row, "cEnq").toString() + "\n";
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstIPI").toString() + "\n";
+    stream << "ClasseEnquadramento = " + modelProduto.data(row, "cEnq").toString() + "\n";
+    stream << "CST = " + modelProduto.data(row, "cstIPI").toString() + "\n";
 
     stream << "[PIS" + numProd + "]\n";
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstPIS").toString() + "\n";
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() + "\n";
-    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pPIS").toString() + "\n";
-    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2) + "\n";
+    stream << "CST = " + modelProduto.data(row, "cstPIS").toString() + "\n";
+    stream << "ValorBase = " + modelProduto.data(row, "vBCPIS").toString() + "\n";
+    stream << "Aliquota = " + modelProduto.data(row, "pPIS").toString() + "\n";
+    stream << "Valor = " + QString::number(modelProduto.data(row, "vPIS").toDouble(), 'f', 2) + "\n";
 
     stream << "[COFINS" + numProd + "]\n";
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstCOFINS").toString() + "\n";
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCCOFINS").toString() + "\n";
-    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pCOFINS").toString() + "\n";
-    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2) + "\n";
+    stream << "CST = " + modelProduto.data(row, "cstCOFINS").toString() + "\n";
+    stream << "ValorBase = " + modelProduto.data(row, "vBCCOFINS").toString() + "\n";
+    stream << "Aliquota = " + modelProduto.data(row, "pCOFINS").toString() + "\n";
+    stream << "Valor = " + QString::number(modelProduto.data(row, "vCOFINS").toDouble(), 'f', 2) + "\n";
 
     // PARTILHA ICMS
 
@@ -700,12 +700,12 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
       stream << "[ICMSUFDest" + numProd + "]\n";
-      stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() + "\n"; // TODO: should be valorProduto + frete + ipi + outros - desconto
+      stream << "vBCUFDest = " + modelProduto.data(row, "vBCPIS").toString() + "\n"; // TODO: should be valorProduto + frete + ipi + outros - desconto
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() + "\n";
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() + "\n";
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
       stream << "pICMSInterPart = 100\n";
       stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) + "\n";
@@ -736,8 +736,8 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
 
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
       totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
     }
@@ -813,23 +813,23 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex &index) {
   unsetConnections();
 
   try {
-    const QString header = modelViewProdutoEstoque.headerData(index.column(), Qt::Horizontal).toString();
+    const QString header = modelProduto.headerData(index.column(), Qt::Horizontal).toString();
     const int row = index.row();
 
-    const double quant = modelViewProdutoEstoque.data(row, "quant").toDouble();
+    const double quant = modelProduto.data(row, "quant").toDouble();
 
     if (header == "R$ Unit.") {
-      const double descUnitario = modelViewProdutoEstoque.data(row, "descUnitario").toDouble();
+      const double descUnitario = modelProduto.data(row, "descUnitario").toDouble();
       const double preco = descUnitario * quant;
 
-      modelViewProdutoEstoque.setData(row, "total", preco);
+      modelProduto.setData(row, "total", preco);
     }
 
     if (header == "Total") {
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double total = modelProduto.data(row, "total").toDouble();
       const double preco = total / quant;
 
-      modelViewProdutoEstoque.setData(row, "descUnitario", preco);
+      modelProduto.setData(row, "descUnitario", preco);
     }
   } catch (std::exception &) {
     setConnections();
@@ -864,24 +864,24 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
     listarCfop();
 
-    ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(row, "cfop").toString(), Qt::MatchStartsWith));
-    ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(row, "orig").toString(), Qt::MatchStartsWith));
-    ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelViewProdutoEstoque.data(row, "cstICMS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelProduto.data(row, "cfop").toString(), Qt::MatchStartsWith));
+    ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelProduto.data(row, "orig").toString(), Qt::MatchStartsWith));
+    ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelProduto.data(row, "cstICMS").toString(), Qt::MatchStartsWith));
 
     on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
 
-    ui->comboBoxICMSModBc->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBC").toInt() + 1);
-    ui->comboBoxICMSModBcSt->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBCST").toInt() + 1);
-    ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelViewProdutoEstoque.data(row, "cstIPI").toString(), Qt::MatchStartsWith));
-    ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelViewProdutoEstoque.data(row, "cstPIS").toString(), Qt::MatchStartsWith));
-    ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelViewProdutoEstoque.data(row, "cstCOFINS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxICMSModBc->setCurrentIndex(modelProduto.data(row, "modBC").toInt() + 1);
+    ui->comboBoxICMSModBcSt->setCurrentIndex(modelProduto.data(row, "modBCST").toInt() + 1);
+    ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelProduto.data(row, "cstIPI").toString(), Qt::MatchStartsWith));
+    ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelProduto.data(row, "cstPIS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelProduto.data(row, "cstCOFINS").toString(), Qt::MatchStartsWith));
 
     SqlQuery queryCfop;
 
     if (ui->comboBoxTipo->currentText() == "0 Entrada") { queryCfop.prepare("SELECT NAT FROM cfop_entr WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop"); }
     if (ui->comboBoxTipo->currentText() == "1 Saída") { queryCfop.prepare("SELECT NAT FROM cfop_sai WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop"); }
 
-    queryCfop.bindValue(":cfop", modelViewProdutoEstoque.data(row, "cfop"));
+    queryCfop.bindValue(":cfop", modelProduto.data(row, "cfop"));
 
     if (not queryCfop.exec()) { throw RuntimeException("Erro buscando CFOP: " + queryCfop.lastError().text(), this); }
 
@@ -894,17 +894,17 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
       ui->frameInterEstadual->setEnabled(true);
 
       ui->doubleSpinBoxPercentualFcpDestino->setValue(2);
-      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelViewProdutoEstoque.data(row, "vBC").toDouble());
+      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelProduto.data(row, "vBC").toDouble());
       ui->doubleSpinBoxAliquotaInternaDestinatario->setValue(queryPartilhaIntra.value("valor").toDouble());
       ui->doubleSpinBoxAliquotaInter->setValue(queryPartilhaInter.value("valor").toDouble());
       ui->doubleSpinBoxPercentualPartilha->setValue(80);
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
       ui->doubleSpinBoxPartilhaDestinatario->setValue(difal * 0.8);
       ui->doubleSpinBoxPartilhaRemetente->setValue(difal * 0.2);
-      ui->doubleSpinBoxFcpDestino->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02);
+      ui->doubleSpinBoxFcpDestino->setValue(modelProduto.data(row, "vBCPIS").toDouble() * 0.02);
     }
 
     // -------------------------------------------------------------------------
@@ -930,9 +930,9 @@ void CadastrarNFe::calculaSt() {
 
     const int row = list.first().row();
 
-    modelViewProdutoEstoque.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value());
-    modelViewProdutoEstoque.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value());
-    modelViewProdutoEstoque.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value());
+    modelProduto.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value());
+    modelProduto.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value());
+    modelProduto.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value());
 
     updateTotais();
   } catch (std::exception &) {
@@ -961,9 +961,9 @@ void CadastrarNFe::calculaIcms() {
 
     const int row = list.first().row();
 
-    modelViewProdutoEstoque.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value());
-    modelViewProdutoEstoque.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value());
-    modelViewProdutoEstoque.setData(row, "vICMS", ui->doubleSpinBoxICMSvicms->value());
+    modelProduto.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value());
+    modelProduto.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value());
+    modelProduto.setData(row, "vICMS", ui->doubleSpinBoxICMSvicms->value());
 
     updateTotais();
   } catch (std::exception &) {
@@ -992,9 +992,9 @@ void CadastrarNFe::calculaPis() {
 
     const int row = list.first().row();
 
-    modelViewProdutoEstoque.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value());
-    modelViewProdutoEstoque.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value());
-    modelViewProdutoEstoque.setData(row, "vPIS", ui->doubleSpinBoxPISvpis->value());
+    modelProduto.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value());
+    modelProduto.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value());
+    modelProduto.setData(row, "vPIS", ui->doubleSpinBoxPISvpis->value());
 
     updateTotais();
   } catch (std::exception &) {
@@ -1023,9 +1023,9 @@ void CadastrarNFe::calculaCofins() {
 
     const int row = list.first().row();
 
-    modelViewProdutoEstoque.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value());
-    modelViewProdutoEstoque.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value());
-    modelViewProdutoEstoque.setData(row, "vCOFINS", ui->doubleSpinBoxCOFINSvcofins->value());
+    modelProduto.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value());
+    modelProduto.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value());
+    modelProduto.setData(row, "vCOFINS", ui->doubleSpinBoxCOFINSvcofins->value());
 
     updateTotais();
   } catch (std::exception &) {
@@ -1143,8 +1143,8 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
 
   tipoICMS += cstICMS;
 
-  modelViewProdutoEstoque.setData(row, "tipoICMS", tipoICMS);
-  modelViewProdutoEstoque.setData(row, "cstICMS", cstICMS);
+  modelProduto.setData(row, "tipoICMS", tipoICMS);
+  modelProduto.setData(row, "cstICMS", cstICMS);
 
   // -------------------------------------------------------------------------
 
@@ -1210,7 +1210,7 @@ void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "orig", index - 1);
+  modelProduto.setData(list.first().row(), "orig", index - 1);
 }
 
 void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
@@ -1227,12 +1227,12 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
   unsetConnections();
 
   try {
-    modelViewProdutoEstoque.setData(row, "modBC", index - 1);
+    modelProduto.setData(row, "modBC", index - 1);
 
     if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
-      ui->doubleSpinBoxICMSvbc->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
-      modelViewProdutoEstoque.setData(row, "vBC", modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
-      modelViewProdutoEstoque.setData(row, "pICMS", 7);
+      ui->doubleSpinBoxICMSvbc->setValue(modelProduto.data(row, "vBCPIS").toDouble());
+      modelProduto.setData(row, "vBC", modelProduto.data(row, "vBCPIS").toDouble());
+      modelProduto.setData(row, "pICMS", 7);
       calculaIcms();
       // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
     }
@@ -1253,7 +1253,7 @@ void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(const int index) {
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "modBCST", index - 1);
+  modelProduto.setData(list.first().row(), "modBCST", index - 1);
 }
 
 void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
@@ -1261,7 +1261,7 @@ void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "cstIPI", text.left(2));
+  modelProduto.setData(list.first().row(), "cstIPI", text.left(2));
 }
 
 void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
@@ -1269,7 +1269,7 @@ void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "cstPIS", text.left(2));
+  modelProduto.setData(list.first().row(), "cstPIS", text.left(2));
 }
 
 void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) {
@@ -1277,7 +1277,7 @@ void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) 
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "cstCOFINS", text.left(2));
+  modelProduto.setData(list.first().row(), "cstCOFINS", text.left(2));
 }
 
 void CadastrarNFe::on_itemBoxVeiculo_textChanged() {
@@ -1369,16 +1369,16 @@ void CadastrarNFe::validarDados() {
 
   // TODO: se preço for zero mostrar mensagem avisando que se produto for reposição colocar 1 centavo
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    if (modelViewProdutoEstoque.data(row, "cfop").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CFOP vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "ncm").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "codComercial").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Código vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "produto").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Descrição vazio!", this); }
-    if (modelViewProdutoEstoque.data(row, "un").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Unidade vazio!", this); }
+  for (int row = 0; row < modelProduto.rowCount(); ++row) {
+    if (modelProduto.data(row, "cfop").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CFOP vazio!", this); }
+    if (modelProduto.data(row, "ncm").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
+    if (modelProduto.data(row, "codComercial").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Código vazio!", this); }
+    if (modelProduto.data(row, "produto").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Descrição vazio!", this); }
+    if (modelProduto.data(row, "un").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Unidade vazio!", this); }
 
-    if (qFuzzyIsNull(modelViewProdutoEstoque.data(row, "quant").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Quantidade = 0!", this); }
-    if (qFuzzyIsNull(modelViewProdutoEstoque.data(row, "descUnitario").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Preço unitário = R$ 0!", this); }
-    if (qFuzzyIsNull(modelViewProdutoEstoque.data(row, "total").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Total produto = R$ 0!", this); }
+    if (qFuzzyIsNull(modelProduto.data(row, "quant").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Quantidade = 0!", this); }
+    if (qFuzzyIsNull(modelProduto.data(row, "descUnitario").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Preço unitário = R$ 0!", this); }
+    if (qFuzzyIsNull(modelProduto.data(row, "total").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Total produto = R$ 0!", this); }
   }
 }
 
@@ -1407,7 +1407,7 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) { return; }
 
-  modelViewProdutoEstoque.setData(list.first().row(), "cfop", text.left(4));
+  modelProduto.setData(list.first().row(), "cfop", text.left(4));
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
@@ -1825,7 +1825,7 @@ void CadastrarNFe::preencherDestinatario() {
 void CadastrarNFe::preencherTotais() {
   double valorProdutos = 0;
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) { valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble(); }
+  for (int row = 0; row < modelProduto.rowCount(); ++row) { valorProdutos += modelProduto.data(row, "total").toDouble(); }
 
   const double frete = modelVenda.data(0, "frete").toDouble();
   const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
@@ -1856,10 +1856,10 @@ void CadastrarNFe::preencherImpostos() {
   if (tipo == Tipo::Entrada) {
     // usar mesmos dados da NFe de saida
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
-        if (modelViewProdutoEstoque.data(row, col).isNull()) {
-          modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      for (int col = 0; col < modelProduto.columnCount(); ++col) {
+        if (modelProduto.data(row, col).isNull()) {
+          modelProduto.setData(row, col, 0); // limpar campos dos imposto
         }
       }
 
@@ -1869,49 +1869,49 @@ void CadastrarNFe::preencherImpostos() {
       // para CFOP de saída 5403/6403 usar CFOP 1411/2411
       // para CFOP de saída 5405/6404 usar CFOP 1411/2411
 
-      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "1411" : "2411");
+      modelProduto.setData(row, "cfop", mesmaUf ? "1411" : "2411");
 
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+      modelProduto.setData(row, "tipoICMS", "ICMS60");
+      modelProduto.setData(row, "cstICMS", "60");
 
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
-      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "cstPIS", "01");
+      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "pPIS", porcentagemPIS);
+      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "cstCOFINS", "01");
+      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
   }
 
   if (tipo == Tipo::Saida) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
-        if (modelViewProdutoEstoque.data(row, col).isNull()) {
-          modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      for (int col = 0; col < modelProduto.columnCount(); ++col) {
+        if (modelProduto.data(row, col).isNull()) {
+          modelProduto.setData(row, col, 0); // limpar campos dos imposto
         }
       }
 
-      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5403" : "6403");
+      modelProduto.setData(row, "cfop", mesmaUf ? "5403" : "6403");
 
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+      modelProduto.setData(row, "tipoICMS", "ICMS60");
+      modelProduto.setData(row, "cstICMS", "60");
 
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
-      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "cstPIS", "01");
+      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "pPIS", porcentagemPIS);
+      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "cstCOFINS", "01");
+      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
   }
 
@@ -1919,39 +1919,39 @@ void CadastrarNFe::preencherImpostos() {
     // https://www.econeteditora.com.br/boletim_icms/bo-icms-pa/pa-12/boletim-11/icms_pa_venda_futura.php
     // não destacar impostos aqui, somente na nota pós-futura
 
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      for (int col = modelProduto.fieldIndex("numeroPedido"); col < modelProduto.columnCount(); ++col) {
+        modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
-      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5117" : "6117");
+      modelProduto.setData(row, "cfop", mesmaUf ? "5117" : "6117");
     }
 
     ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
   }
 
   if (tipo == Tipo::SaidaAposFutura) {
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        modelViewProdutoEstoque.setData(row, col, 0); // limpar campos dos imposto
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      for (int col = modelProduto.fieldIndex("numeroPedido"); col < modelProduto.columnCount(); ++col) {
+        modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
-      modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5922" : "6922");
+      modelProduto.setData(row, "cfop", mesmaUf ? "5922" : "6922");
 
-      modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60");
-      modelViewProdutoEstoque.setData(row, "cstICMS", "60");
+      modelProduto.setData(row, "tipoICMS", "ICMS60");
+      modelProduto.setData(row, "cstICMS", "60");
 
-      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
-      modelViewProdutoEstoque.setData(row, "cstPIS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
-      modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
-      modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "cstPIS", "01");
+      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "pPIS", porcentagemPIS);
+      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "cstCOFINS", "01");
+      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
 
     ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
@@ -1967,11 +1967,11 @@ void CadastrarNFe::preencherTransportadora() {
                       "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
 
   const QString coluna = (tipo == Tipo::Entrada) ? "idRelacionado" : "idVendaProduto2";
-  queryTransp.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, coluna));
+  queryTransp.bindValue(":idVendaProduto2", modelProduto.data(0, coluna));
 
   if (not queryTransp.exec()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
-  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do id: " + modelViewProdutoEstoque.data(0, coluna).toString()); }
+  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do id: " + modelProduto.data(0, coluna).toString()); }
 
   if (queryTransp.value("razaoSocial").toString() == "RETIRA") { return; }
 
@@ -1997,9 +1997,9 @@ void CadastrarNFe::preencherVolumes() {
   double caixas = 0;
   double peso = 0;
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
-    peso += modelViewProdutoEstoque.data(row, "peso").toDouble();
+  for (int row = 0; row < modelProduto.rowCount(); ++row) {
+    caixas += modelProduto.data(row, "caixas").toDouble();
+    peso += modelProduto.data(row, "peso").toDouble();
   }
 
   ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));

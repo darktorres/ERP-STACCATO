@@ -26,7 +26,7 @@ private:
   bool modelIsSet = false;
   QStack<int> blockingSignals;
   QTimer timer;
-  SqlTableModel modelViewNFeSaida;
+  SqlTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
   auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> void;

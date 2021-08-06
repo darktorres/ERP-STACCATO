@@ -79,7 +79,7 @@ void WidgetNfeSaida::updateTables() {
     modelIsSet = true;
   }
 
-  modelViewNFeSaida.select();
+  model.select();
 }
 
 void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
@@ -87,13 +87,13 @@ void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
 void WidgetNfeSaida::setupTables() {
-  modelViewNFeSaida.setTable("view_nfe_saida");
+  model.setTable("view_nfe_saida");
 
-  modelViewNFeSaida.setHeaderData("valor", "R$");
+  model.setHeaderData("valor", "R$");
 
-  modelViewNFeSaida.setSort("Criado em");
+  model.setSort("Criado em");
 
-  ui->table->setModel(&modelViewNFeSaida);
+  ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
@@ -106,11 +106,11 @@ void WidgetNfeSaida::setupTables() {
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
+  query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
   if (not query.exec()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + modelViewNFeSaida.data(index.row(), "idNFe").toString()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + model.data(index.row(), "idNFe").toString()); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -143,7 +143,7 @@ void WidgetNfeSaida::montaFiltro() {
 
   //-------------------------------------
 
-  modelViewNFeSaida.setFilter(filtros.join(" AND "));
+  model.setFilter(filtros.join(" AND "));
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
@@ -181,7 +181,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const int row = list.first().row();
 
-  const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
+  const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
 
   ACBr acbrRemoto;
 
@@ -299,11 +299,11 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (modelViewNFeSaida.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (model.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar XML do MySQL e salvar em arquivo
 
-    const QString chaveAcesso = modelViewNFeSaida.data(index.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = model.data(index.row(), "chaveAcesso").toString();
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
@@ -364,7 +364,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
+  const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
 
   ACBr acbrRemoto;
 
@@ -412,7 +412,7 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 
   if (not query.exec()) { throw RuntimeException("Erro marcando NFe como cancelada: " + query.lastError().text()); }
 
-  const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
+  const int idNFe = model.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);

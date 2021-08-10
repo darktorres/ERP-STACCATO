@@ -87,6 +87,7 @@ void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
 void WidgetNfeSaida::setupTables() {
+  // TODO: mudar view para puxar apenas as NFes com cnpjOrig igual a raiz da staccato
   model.setTable("view_nfe_saida");
 
   model.setHeaderData("valor", "R$");

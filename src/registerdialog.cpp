@@ -24,6 +24,8 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeySt
   setConnections();
 }
 
+void RegisterDialog::setReadOnly(const bool isReadOnly) { readOnly = isReadOnly; }
+
 void RegisterDialog::connectLineEditsToDirty() {
   // TODO: this connect the SearchDialog lineEdit too, fix
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));

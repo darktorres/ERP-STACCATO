@@ -16,6 +16,7 @@ public:
   explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
   ~RegisterDialog() override = default;
 
+  auto setReadOnly(const bool isReadOnly) -> void;
   auto show() -> void;
   virtual auto viewRegisterById(const QVariant &id) -> bool;
 
@@ -25,6 +26,7 @@ signals:
 protected:
   // attributes
   bool isDirty = false;
+  bool readOnly = false;
   int currentRow = -1;
   QString primaryId;
   QString primaryKey;

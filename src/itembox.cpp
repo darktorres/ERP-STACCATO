@@ -61,6 +61,8 @@ void ItemBox::edit() {
   }
 
   if (registerDialog) {
+    registerDialog->setReadOnly(true);
+
     if (not id.isNull()) { registerDialog->viewRegisterById(id); }
 
     registerDialog->show();

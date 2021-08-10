@@ -510,11 +510,12 @@ void InputDialogFinanceiro::calcularTotal() {
 
     for (const auto &index : list) { total += model->data(index.row(), coluna).toDouble(); }
 
+    ui->widgetPgts->setTotal(total);
+
     total += ui->doubleSpinBoxFrete->value();
     total += ui->doubleSpinBoxSt->value();
 
     ui->doubleSpinBoxTotal->setValue(total);
-    ui->widgetPgts->setTotal(total);
 
     montarFluxoCaixa();
   } catch (std::exception &) {
@@ -745,7 +746,10 @@ void InputDialogFinanceiro::verifyFields() {
 
         if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
       } else {
-        if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
+        const double total = ui->doubleSpinBoxTotal->value();
+        const double pagamentos = ui->widgetPgts->getTotalPag() + ui->doubleSpinBoxFrete->value() + ui->doubleSpinBoxSt->value();
+
+        if (not qFuzzyCompare(total, pagamentos)) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
         ui->widgetPgts->verifyFields();
       }

@@ -346,8 +346,29 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditEmitenteLogradouro">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditEmitenteBairro">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_43">
+            <property name="text">
+             <string>UF:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_38">
+            <property name="text">
+             <string>Bairro:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLineEdit" name="lineEditEmitenteComplemento">
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -360,13 +381,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
-           <widget class="QLineEdit" name="lineEditEmitenteNumero">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="4">
            <widget class="QLabel" name="label_37">
             <property name="text">
@@ -374,22 +388,29 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
-           <widget class="QLineEdit" name="lineEditEmitenteComplemento">
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="lineEditEmitenteNumero">
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_38">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_34">
             <property name="text">
-             <string>Bairro:</string>
+             <string>CEP:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditEmitenteBairro">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditEmitenteLogradouro">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QLineEdit" name="lineEditEmitenteUF">
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -406,27 +427,6 @@
            <widget class="QLineEdit" name="lineEditEmitenteCidade">
             <property name="readOnly">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_43">
-            <property name="text">
-             <string>UF:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="lineEditEmitenteUF">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_34">
-            <property name="text">
-             <string>CEP:</string>
             </property>
            </widget>
           </item>
@@ -450,41 +450,6 @@
            <widget class="QLabel" name="label_31">
             <property name="text">
              <string>Razão:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditEmitenteNomeRazao">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_32">
-            <property name="text">
-             <string>Fantasia:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLineEdit" name="lineEditEmitenteFantasia">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Tel.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLineEdit" name="lineEditEmitenteTel1">
-            <property name="readOnly">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -516,6 +481,41 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Tel.:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QLineEdit" name="lineEditEmitenteTel1">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLineEdit" name="lineEditEmitenteFantasia">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_32">
+            <property name="text">
+             <string>Fantasia:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="3">
+           <widget class="QLineEdit" name="lineEditEmitenteNomeRazao">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -526,273 +526,8 @@
        <string>Destinatário/Remetente</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="4" column="0">
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Cliente</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_12">
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="label_40">
-            <property name="text">
-             <string>Nome/Razão:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLineEdit" name="lineEditDestinatarioNomeRazao">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3" colspan="2">
-           <widget class="QLabel" name="label_41">
-            <property name="text">
-             <string>CPF/CNPJ:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioCPFCNPJ">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="6">
-           <widget class="QLabel" name="label_55">
-            <property name="text">
-             <string>Insc. Est.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="7">
-           <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="8">
-           <widget class="QPushButton" name="pushButtonConsultarCadastro">
-            <property name="text">
-             <string>Consultar cadastro</string>
-            </property>
-            <property name="autoDefault">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_42">
-            <property name="text">
-             <string>Tel.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioTel2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="lineEditDestinatarioTel1">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3" colspan="2">
-           <widget class="QLabel" name="label_54">
-            <property name="text">
-             <string>Tel.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QGroupBox" name="">
-            <layout class="QGridLayout" name="gridLayout_9">
-             <property name="leftMargin">
-              <number>3</number>
-             </property>
-             <property name="topMargin">
-              <number>3</number>
-             </property>
-             <property name="rightMargin">
-              <number>3</number>
-             </property>
-             <property name="bottomMargin">
-              <number>3</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_24">
-               <property name="text">
-                <string>Mudar Cliente:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="ItemBox" name="itemBoxCliente"/>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_5">
-         <property name="title">
-          <string>Endereço Faturamento</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_10">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_45">
-            <property name="text">
-             <string>Logradouro:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioLogradouro">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_46">
-            <property name="text">
-             <string>Número:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="lineEditDestinatarioNumero">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_47">
-            <property name="text">
-             <string>Comp.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioComplemento">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_48">
-            <property name="text">
-             <string>Bairro:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioBairro">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_49">
-            <property name="text">
-             <string>Cidade:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="lineEditDestinatarioCidade">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLabel" name="label_50">
-            <property name="text">
-             <string>UF:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioUF">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_44">
-            <property name="text">
-             <string>CEP:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioCEP">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QGroupBox" name="">
-            <layout class="QGridLayout" name="gridLayout_26">
-             <property name="leftMargin">
-              <number>3</number>
-             </property>
-             <property name="topMargin">
-              <number>3</number>
-             </property>
-             <property name="rightMargin">
-              <number>3</number>
-             </property>
-             <property name="bottomMargin">
-              <number>3</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_22">
-               <property name="text">
-                <string>Mudar Endereço:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="ItemBox" name="itemBoxEnderecoFaturamento"/>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QGroupBox" name="groupBox_20">
+       <item row="3" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBoxClienteEnt">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -800,106 +535,110 @@
           <string>Endereço Entrega</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_94">
-            <property name="text">
-             <string>Logradouro:</string>
-            </property>
-           </widget>
+          <item row="1" column="0" colspan="3">
+           <layout class="QGridLayout" name="gridLayout_10">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_94">
+              <property name="text">
+               <string>Logradouro:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioLogradouro_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_97">
+              <property name="text">
+               <string>Número:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioNumero_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_99">
+              <property name="text">
+               <string>Comp.:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioComplemento_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_95">
+              <property name="text">
+               <string>Bairro:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioBairro_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_98">
+              <property name="text">
+               <string>Cidade:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioCidade_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLabel" name="label_100">
+              <property name="text">
+               <string>UF:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioUF_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_96">
+              <property name="text">
+               <string>CEP:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioCEP_2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioLogradouro_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_97">
-            <property name="text">
-             <string>Número:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="lineEditDestinatarioNumero_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_99">
-            <property name="text">
-             <string>Comp.:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioComplemento_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_95">
-            <property name="text">
-             <string>Bairro:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioBairro_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_98">
-            <property name="text">
-             <string>Cidade:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="lineEditDestinatarioCidade_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLabel" name="label_100">
-            <property name="text">
-             <string>UF:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5">
-           <widget class="QLineEdit" name="lineEditDestinatarioUF_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_96">
-            <property name="text">
-             <string>CEP:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEditDestinatarioCEP_2">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QGroupBox" name="">
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox3">
             <layout class="QGridLayout" name="gridLayout_61">
              <property name="leftMargin">
               <number>3</number>
@@ -915,13 +654,325 @@
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="label_101">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Mudar Endereço:</string>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="ItemBox" name="itemBoxEnderecoEntrega"/>
+              <widget class="ItemBox" name="itemBoxEnderecoEntrega">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBoxCliente">
+         <property name="title">
+          <string>Cliente</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_13">
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox1">
+            <layout class="QGridLayout" name="gridLayout_9">
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mudar Cliente:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="ItemBox" name="itemBoxCliente">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <layout class="QGridLayout" name="gridLayout_12">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>Nome/Razão:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>Insc. Est.:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioInscEst">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6">
+             <widget class="QPushButton" name="pushButtonConsultarCadastro">
+              <property name="text">
+               <string>Consultar cadastro</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioTel2">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLabel" name="label_54">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioTel1">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Tel.:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>CPF/CNPJ:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioCPFCNPJ">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioNomeRazao">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBoxClienteFat">
+         <property name="title">
+          <string>Endereço Faturamento</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_19">
+          <item row="1" column="0" colspan="3">
+           <layout class="QGridLayout" name="gridLayout_18">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_45">
+              <property name="text">
+               <string>Logradouro:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioLogradouro">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_46">
+              <property name="text">
+               <string>Número:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioNumero">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_47">
+              <property name="text">
+               <string>Comp.:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioComplemento">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_48">
+              <property name="text">
+               <string>Bairro:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioBairro">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>Cidade:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="lineEditDestinatarioCidade">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLabel" name="label_50">
+              <property name="text">
+               <string>UF:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLineEdit" name="lineEditDestinatarioUF">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_44">
+              <property name="text">
+               <string>CEP:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEditDestinatarioCEP">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox2">
+            <layout class="QGridLayout" name="gridLayout_26">
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_22">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mudar Endereço:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="ItemBox" name="itemBoxEnderecoFaturamento">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -984,8 +1035,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>1041</width>
+                   <height>337</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1463,8 +1514,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>102</width>
-                   <height>92</height>
+                   <width>138</width>
+                   <height>98</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1613,8 +1664,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>183</width>
-                   <height>151</height>
+                   <width>220</width>
+                   <height>163</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -1933,8 +1984,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>205</width>
-                   <height>151</height>
+                   <width>251</width>
+                   <height>163</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2252,8 +2303,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>402</width>
-                   <height>266</height>
+                   <width>526</width>
+                   <height>290</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
@@ -3551,8 +3602,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>comboBoxDestinoOperacao</tabstop>
   <tabstop>comboBoxFinalidade</tabstop>
   <tabstop>lineEditEmitenteNomeRazao</tabstop>
-  <tabstop>lineEditEmitenteFantasia</tabstop>
-  <tabstop>lineEditEmitenteTel1</tabstop>
   <tabstop>lineEditEmitenteCNPJ</tabstop>
   <tabstop>lineEditEmitenteInscEstadual</tabstop>
   <tabstop>lineEditEmitenteLogradouro</tabstop>
@@ -3564,11 +3613,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>lineEditEmitenteCEP</tabstop>
   <tabstop>itemBoxCliente</tabstop>
   <tabstop>lineEditDestinatarioNomeRazao</tabstop>
-  <tabstop>lineEditDestinatarioCPFCNPJ</tabstop>
   <tabstop>lineEditDestinatarioInscEst</tabstop>
   <tabstop>pushButtonConsultarCadastro</tabstop>
-  <tabstop>lineEditDestinatarioTel1</tabstop>
-  <tabstop>lineEditDestinatarioTel2</tabstop>
   <tabstop>itemBoxEnderecoFaturamento</tabstop>
   <tabstop>lineEditDestinatarioLogradouro</tabstop>
   <tabstop>lineEditDestinatarioNumero</tabstop>

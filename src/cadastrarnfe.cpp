@@ -1325,12 +1325,25 @@ void CadastrarNFe::on_itemBoxCliente_textChanged() {
   ui->lineEditDestinatarioTel1->setText(query.value("tel").toString());
   ui->lineEditDestinatarioTel2->setText(query.value("telCel").toString());
 
-  ui->itemBoxEnderecoFaturamento->setId(1);
   ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + ui->itemBoxCliente->getId().toString() + " AND desativado = FALSE");
+  ui->itemBoxEnderecoEntrega->setFilter("(idCliente = " + ui->itemBoxCliente->getId().toString() + " AND desativado = FALSE) OR idEndereco = 1");
 
-  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + ui->itemBoxCliente->getId().toString() + " AND desativado = FALSE OR idEndereco = 1");
+  unsetConnections();
 
-  ui->itemBoxEnderecoEntrega->setId(1);
+  ui->itemBoxEnderecoFaturamento->clear();
+  ui->itemBoxEnderecoEntrega->clear();
+
+  const auto childrenFat = ui->groupBoxClienteFat->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : childrenFat) { line->clear(); }
+
+  const auto childrenEnt = ui->groupBoxClienteEnt->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : childrenEnt) { line->clear(); }
+
+  setConnections();
+
+  qApp->enqueueInformation("Por favor selecione os endereços!");
 }
 
 void CadastrarNFe::validarDados() {

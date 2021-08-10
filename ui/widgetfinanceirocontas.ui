@@ -106,7 +106,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>192</width>
+            <width>175</width>
             <height>1003</height>
            </rect>
           </property>
@@ -285,7 +285,14 @@
                   <number>2</number>
                  </property>
                  <item>
-                  <widget class="ItemBox" name="itemBoxLojas"/>
+                  <widget class="ItemBox" name="itemBoxLojas">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -664,15 +671,15 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -213,7 +213,11 @@ void CadastroUsuario::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroUsuario::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroUsuario::on_pushButtonDesativar_clicked() { remove(); }
+void CadastroUsuario::on_pushButtonDesativar_clicked() {
+  // TODO: encerrar conexoes no SQL do usuario desativado
+
+  remove();
+}
 
 void CadastroUsuario::on_pushButtonBuscar_clicked() {
   if (not confirmationMessage()) { return; }

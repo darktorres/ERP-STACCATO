@@ -52,6 +52,8 @@ void WidgetNfeEntrada::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
 void WidgetNfeEntrada::setupTables() {
+  // TODO: arrumar a coluna n.tipo pois as nfes de tipo 'ENTRADA' de fornecedor são na verdade nfes de saída
+  // TODO: mudar view para puxar apenas as NFes com cnpjDest igual a raiz da staccato
   model.setTable("view_nfe_entrada");
 
   model.setHeaderData("created", "Importado em");

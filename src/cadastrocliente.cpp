@@ -572,3 +572,4 @@ void CadastroCliente::verificaEndereco() {
 
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: limitar complemento de endereco a 60 caracteres
+// TODO: permitir alterar parte do endereço (provavelmente deve poder alterar apenas numero e complemento)

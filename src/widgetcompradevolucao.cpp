@@ -245,3 +245,5 @@ void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
+
+// TODO; colocar busca

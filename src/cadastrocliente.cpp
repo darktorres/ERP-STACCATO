@@ -233,6 +233,11 @@ void CadastroCliente::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
   ui->pushButtonDesativar->show();
+
+  if (readOnly) {
+    ui->pushButtonBuscar->hide();
+    ui->pushButtonNovoCad->hide();
+  }
 }
 
 bool CadastroCliente::verificaVinculo() {

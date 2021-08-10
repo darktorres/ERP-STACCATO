@@ -137,6 +137,11 @@ void CadastroLoja::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
   ui->pushButtonDesativar->show();
+
+  if (readOnly) {
+    ui->pushButtonBuscar->hide();
+    ui->pushButtonNovoCad->hide();
+  }
 }
 
 void CadastroLoja::setupMapper() {

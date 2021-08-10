@@ -145,6 +145,11 @@ void CadastroTransportadora::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();
   ui->pushButtonDesativar->show();
+
+  if (readOnly) {
+    ui->pushButtonBuscar->hide();
+    ui->pushButtonNovoCad->hide();
+  }
 }
 
 void CadastroTransportadora::on_pushButtonCadastrar_clicked() { save(); }

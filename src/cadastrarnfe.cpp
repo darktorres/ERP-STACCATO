@@ -64,6 +64,8 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   ui->lineEditNumero->setInputMask("999999999;_");
   ui->lineEditFormatoPagina->setInputMask("9;_");
 
+  ui->itemBoxCliente->setRegisterDialog("CadastroCliente");
+
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxEnderecoFaturamento->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxEnderecoEntrega->setSearchDialog(SearchDialog::enderecoCliente(this));

@@ -137,6 +137,11 @@ void CadastroUsuario::updateMode() {
 
   ui->pushButtonAtualizar->show();
   ui->pushButtonDesativar->show();
+
+  if (readOnly) {
+    ui->pushButtonBuscar->hide();
+    ui->pushButtonNovoCad->hide();
+  }
 }
 
 void CadastroUsuario::savingProcedures() {

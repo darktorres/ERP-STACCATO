@@ -758,7 +758,7 @@ void Venda::montarFluxoCaixa() {
 
   const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
 
-  for (int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento) {
+  for (int pagamento = 0; pagamento < ui->widgetPgts->qtdPagamentos; ++pagamento) {
     if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
 
     // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
@@ -1064,7 +1064,7 @@ void Venda::atualizarCredito() {
   double creditoRestante = ui->widgetPgts->getCredito();
   bool update = false;
 
-  for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
+  for (int i = 0; i < ui->widgetPgts->qtdPagamentos; ++i) {
     if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") {
       creditoRestante -= ui->widgetPgts->listValorPgt.at(i)->value();
       update = true;

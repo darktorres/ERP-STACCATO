@@ -292,7 +292,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
       }
 
-      for (int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento) {
+      for (int pagamento = 0; pagamento < ui->widgetPgts->qtdPagamentos; ++pagamento) {
         if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
 
         const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
@@ -375,12 +375,12 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
       // set st date
       if (updateDate) {
-        if (ui->widgetPgts->pagamentos > 0) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDataPgt.at(0)->date()); }
+        if (ui->widgetPgts->qtdPagamentos > 0) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDataPgt.at(0)->date()); }
       }
 
       //----------------------------------------------
 
-      if (ui->widgetPgts->pagamentos > 0) {
+      if (ui->widgetPgts->qtdPagamentos > 0) {
         double stForn = 0;
         double stLoja = 0;
 
@@ -739,7 +739,7 @@ void InputDialogFinanceiro::verifyFields() {
         if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
       }
 
-      if (ui->widgetPgts->pagamentos == 0) {
+      if (ui->widgetPgts->qtdPagamentos == 0) {
         QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
         msgBox.setButtonText(QMessageBox::Yes, "Continuar");
         msgBox.setButtonText(QMessageBox::No, "Voltar");

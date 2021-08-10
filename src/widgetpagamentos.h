@@ -34,7 +34,7 @@ public:
 
   // TODO: make private?
   // attributes
-  int pagamentos = 0; // TODO: rename this to count
+  int qtdPagamentos = 0;
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listTipoPgt;
   QList<QComboBox *> listTipoData;
@@ -48,28 +48,30 @@ signals:
 
 private:
   // attributes
-  bool representacao = false;
   bool fretePagoLoja = false;
-  double frete = 0;
-  double total = 0;
+  bool representacao = false;
   double credito = 0;
   double creditoRestante = 0;
+  double frete = 0;
+  double total = 0;
   QString idOrcamento;
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetPagamentos *ui;
   // methods
   auto calculaCreditoRestante() -> void;
   auto calcularTotal() -> void;
-  auto checkBoxRep(QFrame *frame, QHBoxLayout *layout) -> void;
-  auto comboBoxData(QHBoxLayout *layout) -> QComboBox *;
-  auto comboBoxParc(QHBoxLayout *layout) -> void;
-  auto comboBoxPgtCompra(QHBoxLayout *layout) -> void;
-  auto comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) -> void;
-  auto dateEditPgt(QHBoxLayout *layout) -> QDateEdit *;
-  auto doubleSpinBoxPgt(QHBoxLayout *layout) -> void;
-  auto labelPagamento(QHBoxLayout *layout) -> void;
-  auto lineEditPgt(QHBoxLayout *layout) -> void;
-  auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
+  auto checkBoxRep(QFrame *frame, QLayout *layout) -> void;
+  auto comboBoxParc(QLayout *layout) -> void;
+  auto comboBoxPgtCompra(QLayout *layout) -> void;
+  auto comboBoxPgtVenda(QFrame *frame, QLayout *layout) -> void;
+  auto comboBoxTipoData(QLayout *layout) -> void;
+  auto dateEditPgt(QLayout *layout) -> void;
+  auto deleteButton(QLayout *layout) -> void;
+  auto doubleSpinBoxPgt(QLayout *layout) -> void;
+  auto labelPagamento(QLayout *layout) -> void;
+  auto lineEditPgt(QLayout *layout) -> void;
+  auto on_comboBoxPgt_currentTextChanged(const QString &text) -> void;
+  auto on_comboBoxTipoData_currentTextChanged(const QString &text) -> void;
   auto on_doubleSpinBoxPgt_valueChanged(const int index) -> void;
   auto on_pushButtonAdicionarPagamento_clicked(const bool addFrete = true) -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;

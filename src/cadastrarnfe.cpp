@@ -1360,8 +1360,6 @@ void CadastrarNFe::validarDados() {
 
   if (ui->lineEditDestinatarioNumero->text().isEmpty()) { throw RuntimeError("Número endereço do destinatário vazio!", this); }
 
-  if (ui->lineEditDestinatarioBairro->text().isEmpty()) { throw RuntimeError("Bairro do destinatário vazio!", this); }
-
   if (queryIBGEDest.value("codigo").toString().isEmpty()) { throw RuntimeError("Código do município do destinatário vazio!", this); }
 
   if (ui->lineEditDestinatarioUF->text().isEmpty()) { throw RuntimeError("UF do destinatário vazio!", this); }

@@ -185,7 +185,13 @@ void InputDialogProduto::setFilter(const QStringList &ids) {
 
   if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: " + modelPedidoFornecedor.data(0, "fornecedor").toString()); }
 
-  ui->comboBoxST->setCurrentText(query.value("st").toString());
+  const double aliquotaSt = query.value("aliquotaSt").toDouble();
+
+  if (not qFuzzyIsNull(aliquotaSt)) {
+    ui->doubleSpinBoxAliquota->setValue(aliquotaSt);
+    ui->comboBoxST->setCurrentText("ST Fornecedor");
+  }
+
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
   if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }

@@ -218,8 +218,6 @@ bool Orcamento::viewRegister() {
       ui->plainTextEditBaixa->show();
     }
 
-    if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
-
     const bool expirado = (ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate());
 
     if (expirado or status != "ATIVO") {
@@ -701,7 +699,7 @@ void Orcamento::atualizaReplica() {
   if (ui->lineEditReplicaDe->text().isEmpty()) { return; }
 
   SqlQuery query;
-  query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento");
+  query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento AND status = 'EXPIRADO'");
   query.bindValue(":idReplica", ui->lineEditOrcamento->text());
   query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
 

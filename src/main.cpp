@@ -23,6 +23,10 @@ int main(int argc, char *argv[]) {
 
   Application app(argc, argv);
 
+  QTranslator translator;
+
+  if (translator.load(QLocale(), "qt", "_", "translations")) { app.installTranslator(&translator); }
+
 #ifdef Q_OS_WIN
   QSharedMemory sharedMemory;
   sharedMemory.setKey("staccato-erp");

@@ -68,7 +68,7 @@ contains(CONFIG, deploy){
       }
 }
 
-win32-msvc* {
+msvc {
    QMAKE_CXXFLAGS += /permissive-
 }
 

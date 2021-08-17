@@ -30,6 +30,14 @@
     SUCH DAMAGE.
  */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4018 4244 4305)
+#endif
+
 #include <stdio.h>
 #ifdef _MSC_VER
 #include <fcntl.h>

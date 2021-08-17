@@ -32,6 +32,14 @@
 /* Developed according to [MS-EMF] - v20160714, Released July 14, 2016
  * and [MS-WMF] - v20160714, Released July 14, 2016 */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

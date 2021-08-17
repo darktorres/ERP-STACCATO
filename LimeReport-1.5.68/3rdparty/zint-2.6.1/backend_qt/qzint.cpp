@@ -15,6 +15,15 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  ***************************************************************************/
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4018 4244 4305)
+#endif
+
 #include "qzint.h"
 #include <stdio.h>
 
@@ -114,7 +123,7 @@ void QZint::setPrimaryMessage(const QString &primaryMessage) { m_primaryMessage 
 
 int QZint::height() {
   encode();
-  return (m_zintSymbol->height + (m_border != NO_BORDER) ? m_borderWidth * 2 : 0) * (m_zintSymbol->symbology == BARCODE_MAXICODE ? (maxi_width + 1) : 1);
+  return ((m_zintSymbol->height + m_border != NO_BORDER) ? m_borderWidth * 2 : 0) * (m_zintSymbol->symbology == BARCODE_MAXICODE ? (maxi_width + 1) : 1);
 }
 
 void QZint::setHeight(int height) { m_height = height; }
@@ -125,7 +134,7 @@ void QZint::setOption3(int option) { m_option_3 = option; }
 
 int QZint::width() {
   encode();
-  return (m_zintSymbol->width + (m_border == BOX) ? m_borderWidth * 2 : 0) * (m_zintSymbol->symbology == BARCODE_MAXICODE ? (maxi_width + 1) : 1);
+  return ((m_zintSymbol->width + m_border == BOX) ? m_borderWidth * 2 : 0) * (m_zintSymbol->symbology == BARCODE_MAXICODE ? (maxi_width + 1) : 1);
 }
 
 float QZint::scale() { return m_scale; }

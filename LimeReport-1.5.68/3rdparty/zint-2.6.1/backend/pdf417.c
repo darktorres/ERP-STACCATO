@@ -41,6 +41,16 @@
    symbol->option_2 is used to adjust the width of the resulting symbol (i.e. the
    number of codeword columns not including row start and end data) */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

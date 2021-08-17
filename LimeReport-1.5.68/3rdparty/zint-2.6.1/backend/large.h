@@ -36,6 +36,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stddef.h>
+
 extern void binary_load(short int reg[], char data[], const size_t src_len);
 extern void binary_add(short int accumulator[], short int input_buffer[]);
 extern void binary_subtract(short int accumulator[], short int input_buffer[]);

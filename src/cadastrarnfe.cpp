@@ -360,6 +360,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
   if (resposta.contains("Autorizado o uso da NF-e") or resposta.contains("Uso Denegado")) { return carregarArquivo(acbrRemoto, filePath); }
 
+  // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
   throw RuntimeException("Resposta não tratada:\n" + resposta);
 }
 
@@ -1425,7 +1426,10 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
+  // TODO: não bloquear e deixar o ACBr mostrar a mensagem propria de erro?
   if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 14) { return qApp->enqueueInformation("SP não faz consulta de CPF!", this); }
+
+  // TODO: validar CPF/CNPJ antes de enviar
 
   ACBr acbrRemoto;
 
@@ -1464,6 +1468,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
     return qApp->enqueueInformation("CNPJ da consulta não cadastrado como contribuinte na UF", this);
   }
 
+  // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
   throw RuntimeException("Resposta não tratada!", this);
 }
 

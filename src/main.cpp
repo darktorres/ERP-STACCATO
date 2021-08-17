@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSharedMemory>
+#include <QTranslator>
 
 #ifdef Q_OS_WIN
 #include <windows.h>

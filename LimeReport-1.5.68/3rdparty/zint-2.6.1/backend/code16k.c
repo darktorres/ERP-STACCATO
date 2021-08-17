@@ -34,6 +34,14 @@
 
 /* Code 16k can hold up to 77 characters or 154 numbers */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>

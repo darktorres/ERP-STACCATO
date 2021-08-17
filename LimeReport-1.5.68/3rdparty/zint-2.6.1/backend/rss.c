@@ -62,6 +62,16 @@
  * RSS Expanded Stacked > GS1 DataBar Expanded Stacked Omnidirectional
  */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

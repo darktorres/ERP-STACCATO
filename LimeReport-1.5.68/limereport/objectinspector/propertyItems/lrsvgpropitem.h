@@ -2,6 +2,7 @@
 #define SVGPROPITEM_H
 
 #include "lrobjectpropitem.h"
+
 namespace LimeReport {
 
 class SvgPropItem : public ObjectPropItem {

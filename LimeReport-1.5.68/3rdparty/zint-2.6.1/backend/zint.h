@@ -36,6 +36,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stddef.h>
+
 struct zint_render_line {
   float x, y, length, width;
   struct zint_render_line *next; /* Pointer to next line */

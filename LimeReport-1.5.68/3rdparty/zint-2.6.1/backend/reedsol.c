@@ -48,6 +48,15 @@
 // malloc/free can be avoided by using static arrays of a suitable
 // size.
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include "reedsol.h"
 #include <stdio.h>  // only needed for debug (main)
 #include <stdlib.h> // only needed for malloc/free

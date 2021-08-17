@@ -34,6 +34,15 @@
  * Attempts to encode DotCode according to AIMD013 Rev 1.34a, dated Feb 19, 2009
  */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4018 4244 )
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

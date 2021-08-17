@@ -30,6 +30,15 @@
     SUCH DAMAGE.
  */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4018 4244 4267 4305)
+#endif
+
 #include "bmp.h" /* Bitmap header structure */
 #include "common.h"
 #include <math.h>

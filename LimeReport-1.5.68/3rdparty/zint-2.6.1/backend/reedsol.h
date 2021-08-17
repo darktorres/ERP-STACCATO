@@ -37,6 +37,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stddef.h>
+
 extern void rs_init_gf(const int poly);
 extern void rs_init_code(const int nsym, int index);
 extern void rs_encode(const size_t len, const unsigned char *data, unsigned char *res);

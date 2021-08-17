@@ -1,3 +1,5 @@
+CONFIG += static_build
+
 #BINARY_RESULT_DIR = $${TOP_BUILD_DIR}
 
 isEmpty(BINARY_RESULT_DIR) {
@@ -13,22 +15,30 @@ message(TOP_BUILD_DIR: $$TOP_BUILD_DIR)
 !contains(CONFIG, no_build_translations){
     CONFIG += build_translations
 }
-#CONFIG *= easy_profiler
 
-CONFIG += no_zint
+#CONFIG += no_zint
 
 !contains(CONFIG, no_zint){
     CONFIG *= zint
+	
+    ZINT_PATH = $$PWD/3rdparty/zint-2.6.1
+    ZINT_VERSION = 2.6.1
+    DEFINES *= HAVE_ZINT
+    INCLUDEPATH += $$ZINT_PATH/backend $$ZINT_PATH/backend_qt
+    DEPENDPATH += $$ZINT_PATH/backend $$ZINT_PATH/backend_qt
+
+    include(3rdparty/3rdparty.pro)
 }
+
+#CONFIG += no_svg
 
 !contains(CONGIG, no_svg){
     QT *= svg
     CONFIG *= svg
-    DEFINES += HAVE_SVG
+    DEFINES *= HAVE_SVG
 }
 
-#INCLUDEPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
-#DEPENDPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
+#CONFIG *= easy_profiler
 
 #contains(CONFIG, easy_profiler){
 #    message(EasyProfiler)
@@ -36,20 +46,24 @@ CONFIG += no_zint
 #    greaterThan(QT_MAJOR_VERSION, 4){
 #        DEFINES += BUILD_WITH_EASY_PROFILER
 #    }
+
+#    INCLUDEPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
+#    DEPENDPATH += $$PWD/3rdparty/easyprofiler/easy_profiler_core/include
 #}
 
 !contains(CONFIG, qtscriptengine){
-greaterThan(QT_MAJOR_VERSION, 4){
-greaterThan(QT_MINOR_VERSION, 5){
-    CONFIG *= qjsengine
-}
-lessThan(QT_MINOR_VERSION, 6){
-    CONFIG *= qtscriptengine
-}
-}
-lessThan(QT_MAJOR_VERSION, 5){
-    CONFIG *= qtscriptengine
-}
+    greaterThan(QT_MAJOR_VERSION, 4){
+        greaterThan(QT_MINOR_VERSION, 5){
+            CONFIG *= qjsengine
+        }
+        lessThan(QT_MINOR_VERSION, 6){
+            CONFIG *= qtscriptengine
+        }
+    }
+
+    lessThan(QT_MAJOR_VERSION, 5){
+        CONFIG *= qtscriptengine
+    }
 }
 
 contains(CONFIG, qtscriptengine){
@@ -66,11 +80,6 @@ contains(CONFIG, qtscriptengine){
 #!contains(CONFIG, no_embedded_designer){
 #    CONFIG *= embedded_designer
 #    DEFINES += HAVE_REPORT_DESIGNER
-#}
-
-#ZINT_PATH = $$PWD/3rdparty/zint-2.6.1
-#contains(CONFIG,zint){
-#    DEFINES *= HAVE_ZINT
 #}
 
 greaterThan(QT_MAJOR_VERSION, 4) {

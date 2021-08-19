@@ -35,8 +35,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->setupUi(this);
 
   connectLineEditsToDirty();
-  setupTables();
   setItemBoxes();
+  setupTables();
   setupMapper();
   newRegister();
 

@@ -29,9 +29,9 @@
 Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento", parent), ui(new Ui::Orcamento) {
   ui->setupUi(this);
 
-  setupTables();
   connectLineEditsToDirty();
   setItemBoxes();
+  setupTables();
   setupMapper();
   newRegister();
 

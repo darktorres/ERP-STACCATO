@@ -5,9 +5,6 @@
 #include <QSqlQuery>
 
 RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : RegisterDialog(table, primaryKeyStr, parent) {
-  setWindowModality(Qt::NonModal);
-  setWindowFlags(Qt::Window);
-
   setupTables(table);
 }
 

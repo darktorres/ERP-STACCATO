@@ -14,14 +14,13 @@
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
 
-  setWindowModality(Qt::NonModal);
-
   connectLineEditsToDirty();
-  setupTables();
+  setItemBoxes();
   setupUi();
+  setupTables();
   setupMapper();
   newRegister();
-  setItemBoxes();
+
   setConnections();
 }
 

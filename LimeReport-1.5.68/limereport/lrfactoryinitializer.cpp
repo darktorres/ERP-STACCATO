@@ -18,9 +18,7 @@
 #include "lrdesignelementsfactory.h"
 #ifdef HAVE_SVG
 #include "items/lrsvgitem.h"
-#ifdef HAVE_REPORT_DESIGNER
 #include "objectinspector/propertyItems/lrsvgpropitem.h"
-#endif
 #endif
 
 #ifdef HAVE_REPORT_DESIGNER

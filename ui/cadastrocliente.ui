@@ -296,7 +296,7 @@ QLineEdit:!read-only {
                   <item row="0" column="6">
                    <widget class="QCheckBox" name="checkBoxDataNasc">
                     <property name="text">
-                     <string>Data Nasc.</string>
+                     <string>Aniversário</string>
                     </property>
                    </widget>
                   </item>

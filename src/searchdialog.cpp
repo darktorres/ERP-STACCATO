@@ -37,12 +37,12 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   }
 
   ui->legendaEstoque->hide();
-  ui->legendaStaccatoOFF->hide();
   ui->legendaPromocao->hide();
+  ui->legendaStaccatoOFF->hide();
+  ui->pushButtonModelo3d->hide();
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
   ui->treeView->hide();
-  ui->pushButtonModelo3d->hide();
 
   ui->lineEditBusca->setFocus();
 
@@ -368,12 +368,13 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->setHeaderData("validade", "Validade");
   sdProd->setHeaderData("ui", "UI");
 
+  sdProd->ui->legendaEstoque->show();
+  sdProd->ui->legendaPromocao->show();
+  sdProd->ui->legendaStaccatoOFF->show();
+  sdProd->ui->pushButtonModelo3d->show();
   sdProd->ui->radioButtonProdAtivos->show();
   sdProd->ui->radioButtonProdDesc->show();
-  sdProd->ui->legendaEstoque->show();
-  sdProd->ui->legendaStaccatoOFF->show();
-  sdProd->ui->legendaPromocao->show();
-  sdProd->ui->pushButtonModelo3d->show();
+
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 
   sdProd->ui->lineEditBusca->setPlaceholderText("Fornecedor/Descrição/Coleção/Código Comercial");

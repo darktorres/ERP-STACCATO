@@ -13,16 +13,17 @@
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
 
+  connectLineEditsToDirty();
+  fillComboBoxLoja();
+  setupTables();
+  setupMapper();
+  newRegister();
+
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
   if (not User::isAdmin()) { ui->table->hide(); }
 
-  connectLineEditsToDirty();
-  setupTables();
-  fillComboBoxLoja();
-  setupMapper();
-  newRegister();
   setConnections();
 }
 

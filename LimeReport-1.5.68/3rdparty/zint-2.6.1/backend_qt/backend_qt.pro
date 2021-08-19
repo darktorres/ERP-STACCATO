@@ -12,6 +12,8 @@ contains(CONFIG, static_build){
     DEFINES += QZINT_LIBRARY
 }
 
+include(../../../common.pri)
+
 macx{
     CONFIG -= dll
     CONFIG += lib_bundle
@@ -21,12 +23,8 @@ unix{
     CONFIG += plugin
 }
 
-msvc{
-    DEFINES += _CRT_SECURE_NO_WARNINGS
-}
-
-DEFINES += ZINT_VERSION=\\\"$$ZINT_VERSION\\\"
-
+INCLUDEPATH += $$PWD/../backend
+DEFINES +=  _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_WARNINGS ZINT_VERSION=\\\"$$VERSION\\\"
 CONFIG(release, debug|release){
         TARGET = QtZint
 } else {
@@ -37,6 +35,14 @@ CONFIG(release, debug|release){
     SOURCES += $$PWD/../backend/png.c
     LIBS += -lpng
 }
+
+
+win32-msvc* {
+    DEFINES += _CRT_SECURE_NO_WARNINGS
+    #QMAKE_CFLAGS += /TP /wd4018 /wd4244 /wd4305
+    #QMAKE_CXXFLAGS += /TP /wd4018 /wd4244 /wd4305
+}
+
 
 INCLUDEPATH += zint zint/backend zint/backend_qt
 
@@ -58,6 +64,7 @@ HEADERS +=  $$PWD/../backend/aztec.h \
             $$PWD/../backend/reedsol.h \
             $$PWD/../backend/rss.h \
             $$PWD/../backend/sjis.h \
+            $$PWD/../backend/stdint_msvc.h \
             $$PWD/../backend/zint.h \
             $$PWD/qzint.h \
             $$PWD/qzint_global.h
@@ -104,3 +111,10 @@ SOURCES += $$PWD/../backend/2of5.c \
            $$PWD/../backend/tif.c \
            $$PWD/../backend/upcean.c \
            $$PWD/qzint.cpp
+
+DESTDIR        = $${DEST_LIBS}
+#DLLDESTDIR     = $${DESTDIR}
+unix {
+    target.path = $${DESTDIR}
+    INSTALLS = target
+}

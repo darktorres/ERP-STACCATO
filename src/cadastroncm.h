@@ -27,4 +27,6 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto verificaNCM(const QModelIndex &index) -> void;
+  auto verifyFields() -> void;
 };

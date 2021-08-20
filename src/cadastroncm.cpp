@@ -26,6 +26,7 @@ void CadastroNCM::setConnections() {
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonRemover_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CadastroNCM::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &CadastroNCM::verificaNCM, connectionType);
 }
 
 void CadastroNCM::setupTables() {
@@ -52,13 +53,38 @@ void CadastroNCM::setupTables() {
   ui->table->setItemDelegateForColumn("aliq", new PorcentagemDelegate(false, this));
 }
 
-void CadastroNCM::on_pushButtonSalvar_clicked() {
-  for (int row = 0; row < model.rowCount(); ++row) {
-    if (model.data(row, "ncm").toString().length() != 8) { throw RuntimeError("NCM deve ter 8 dígitos!", this); }
-    // TODO: se houver algum dado em CEST verificar se o tamanho é 7
+void CadastroNCM::verificaNCM(const QModelIndex &index) {
+  if (index.column() == ui->table->columnIndex("ncm")) {
+    QString ncm = index.data().toString();
+
+    auto match = model.match("ncm", ncm, -1, Qt::MatchExactly);
+
+    if (match.size() > 1) {
+      model.removeRow(index.row());
+      throw RuntimeError("NCM já cadastrado, removendo!");
+    }
   }
+}
+
+void CadastroNCM::verifyFields() {
+  for (int row = 0; row < model.rowCount(); ++row) {
+    QString ncm = model.data(row, "ncm").toString();
+    QString cest = model.data(row, "cest").toString();
+
+    if (ncm.length() != 8) { throw RuntimeError("NCM deve ter 8 dígitos!", this); }
+
+    if (not cest.isEmpty() and cest.length() != 7) { throw RuntimeError("CEST deve ser vazio ou ter 7 dígitos!"); }
+  }
+}
+
+void CadastroNCM::on_pushButtonSalvar_clicked() {
+  verifyFields();
+
+  qApp->startTransaction("CadastroNCM::pushButtonSalvar");
 
   model.submitAll();
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Dados atualizados!", this);
   close();
@@ -70,6 +96,11 @@ void CadastroNCM::on_lineEditBusca_textChanged(const QString &text) { model.setF
 
 void CadastroNCM::on_pushButtonAdicionar_clicked() {
   const int row = model.insertRowAtEnd();
+
+  model.setData(row, "mva4", 0);
+  model.setData(row, "mva12", 0);
+  model.setData(row, "aliq", 0);
+
   ui->table->selectRow(row);
 }
 
@@ -82,8 +113,3 @@ void CadastroNCM::on_pushButtonRemover_clicked() {
 
   model.submitAll();
 }
-
-// TODO: avisar após digitar NCM se ele já estiver cadastrado (o banco de dados não vai permitir cadastrar duplicado mas a mensagem de
-// erro dele não é amigável
-// TODO: colocar created/lastUpdated no sql
-// TODO: CEST deve ter 7 digitos, validar

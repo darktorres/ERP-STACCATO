@@ -28,7 +28,7 @@ CONFIG *= precompile_header
 
 message($$QMAKESPEC)
 
-win32{
+win32 {
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
     QMAKE_TARGET_PRODUCT = ERP
     QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
@@ -37,52 +37,52 @@ win32{
     RC_ICONS = Staccato.ico
 }
 
-win32-msvc{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
+win32-msvc { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
 
-win32-g++{ LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
+win32-g++ { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
 
-contains(CONFIG, deploy){
+contains(CONFIG, deploy) {
     message(deploy)
     DEFINES *= DEPLOY
 
- *-msvc*{
-    QMAKE_CXXFLAGS_RELEASE *= /O2
-        }
+    win32-msvc {
+        QMAKE_CXXFLAGS_RELEASE *= /O2
+    }
 
- *-g++{
-    QMAKE_CXXFLAGS_RELEASE *= -O3
-    QMAKE_LFLAGS_RELEASE *= -O3
-      }
-} else{
- *-msvc*{
-    QMAKE_CXXFLAGS_DEBUG -= -O2
-    QMAKE_CXXFLAGS_RELEASE -= -O2
-    QMAKE_CXXFLAGS_DEBUG *= /Od
-    QMAKE_CXXFLAGS_RELEASE *= /Od
-        }
+    *-g++ {
+        QMAKE_CXXFLAGS_RELEASE *= -O3
+        QMAKE_LFLAGS_RELEASE *= -O3
+    }
+} else {
+    win32-msvc {
+        QMAKE_CXXFLAGS_DEBUG -= -O2
+        QMAKE_CXXFLAGS_RELEASE -= -O2
+        QMAKE_CXXFLAGS_DEBUG *= /Od
+        QMAKE_CXXFLAGS_RELEASE *= /Od
+    }
 
- *-g++{
-    QMAKE_CXXFLAGS_DEBUG *= -O0
-    QMAKE_CXXFLAGS_RELEASE *= -O0
-    QMAKE_LFLAGS_DEBUG *= -O0
-    QMAKE_LFLAGS_RELEASE *= -O0
-      }
+    *-g++ {
+        QMAKE_CXXFLAGS_DEBUG *= -O0
+        QMAKE_CXXFLAGS_RELEASE *= -O0
+        QMAKE_LFLAGS_DEBUG *= -O0
+        QMAKE_LFLAGS_RELEASE *= -O0
+    }
 }
 
-msvc {
+win32-msvc {
    QMAKE_CXXFLAGS += /permissive-
 }
 
-linux-g++{
+linux-g++ {
     QMAKE_LFLAGS *= -fuse-ld=gold
 }
 
-linux-clang{
-    QMAKE_LFLAGS *= -fuse-ld=lld-12
+linux-clang {
+    QMAKE_LFLAGS *= -fuse-ld=lld-13
 }
 
-win32-g++{ # ccache is not compatible with MSVC
-    exists($(QTDIR)/bin/ccache.exe){
+win32-g++ { # ccache is not compatible with MSVC
+    exists($(QTDIR)/bin/ccache.exe) {
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
@@ -93,10 +93,10 @@ win32-g++{ # ccache is not compatible with MSVC
     }
 }
 
-linux{
+linux {
     CCACHE_BIN = $$system(which ccache)
 
-    !isEmpty(CCACHE_BIN){
+    !isEmpty(CCACHE_BIN) {
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX

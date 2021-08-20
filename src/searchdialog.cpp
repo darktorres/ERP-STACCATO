@@ -388,7 +388,7 @@ SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *paren
   auto *sdProfissional =
       new SearchDialog("Buscar Profissional", "profissional", "idProfissional", {"nome_razao"}, "nome_razao, tipoProf", "desativado = FALSE" + filtroNaoHa, "nome_razao", true, parent);
 
-  sdProfissional->hideColumns({"idLoja", "idUsuarioRel", "idProfissional", "inscEstadual", "contatoNome", "contatoCPF", "contatoApelido", "contatoRG", "banco", "agencia", "cc", "nomeBanco",
+  sdProfissional->hideColumns({"idLoja", "idUsuarioRel", "idProfissional", "inscEstadual", "contatoNome", "contatoCPF", "contatoApelido", "contatoRG", "aniversario", "banco", "agencia", "cc", "nomeBanco",
                                "cpfBanco", "desativado", "comissao", "poupanca", "cnpjBanco"});
 
   sdProfissional->setHeaderData("pfpj", "Tipo");

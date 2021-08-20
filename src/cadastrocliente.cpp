@@ -34,7 +34,7 @@ void CadastroCliente::marcarCompletar() {
 
   const QString styleSheetAmarelo = "QLineEdit:read-only {"
                                     "    background-color: rgb(255, 255, 127);"
-                                    "	color: #7f7f3f;"
+                                    "	 color: #7f7f3f;"
                                     "}"
                                     ""
                                     "QLineEdit:!read-only {"
@@ -129,7 +129,11 @@ void CadastroCliente::verifyFields() {
 }
 
 void CadastroCliente::savingProcedures() {
-  if (ui->checkBoxDataNasc->isChecked()) { setData("dataNasc", ui->dateEditDataNasc->date()); }
+  if (ui->checkBoxDataNasc->isChecked()) {
+    setData("dataNasc", ui->dateEditDataNasc->date());
+  } else {
+    setData("dataNasc", QVariant());
+  }
 
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }
@@ -486,35 +490,20 @@ void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
 void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
   tipoPFPJ = (checked) ? "PF" : "PJ";
 
-  if (checked) {
-    ui->lineEditCNPJ->clear();
+  ui->lineEditCNPJ->setHidden(checked);
+  ui->labelCNPJ->setHidden(checked);
+  ui->lineEditInscEstadual->setHidden(checked);
+  ui->labelInscricaoEstadual->setHidden(checked);
+  ui->checkBoxInscEstIsento->setHidden(checked);
 
-    ui->lineEditCNPJ->setHidden(true);
-    ui->labelCNPJ->setHidden(true);
-    ui->lineEditInscEstadual->setHidden(true);
-    ui->labelInscricaoEstadual->setHidden(true);
-    ui->checkBoxInscEstIsento->setHidden(true);
+  ui->lineEditCPF->setVisible(checked);
+  ui->labelCPF->setVisible(checked);
+  ui->dateEditDataNasc->setVisible(checked);
+  ui->checkBoxDataNasc->setVisible(checked);
 
-    ui->lineEditCPF->setVisible(true);
-    ui->labelCPF->setVisible(true);
-    ui->dateEditDataNasc->setVisible(true);
-    ui->checkBoxDataNasc->setVisible(true);
-  } else {
-    ui->lineEditCPF->clear();
+  checked ? ui->lineEditCNPJ->clear() : ui->lineEditCPF->clear();
 
-    ui->lineEditCPF->setVisible(false);
-    ui->labelCPF->setVisible(false);
-    ui->dateEditDataNasc->setVisible(false);
-    ui->checkBoxDataNasc->setVisible(false);
-
-    ui->lineEditCNPJ->setHidden(false);
-    ui->labelCNPJ->setHidden(false);
-    ui->lineEditInscEstadual->setHidden(false);
-    ui->labelInscricaoEstadual->setHidden(false);
-    ui->checkBoxInscEstIsento->setHidden(false);
-
-    ui->checkBoxDataNasc->setChecked(false);
-  }
+  if (not checked) { ui->checkBoxDataNasc->setChecked(false); }
 
   adjustSize();
 }

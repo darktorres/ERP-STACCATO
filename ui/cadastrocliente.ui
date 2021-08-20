@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1148</width>
-    <height>732</height>
+    <width>1132</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -118,156 +118,63 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
-               <item row="1" column="1">
-                <widget class="QWidget" name="widgetPJ" native="true">
-                 <layout class="QGridLayout" name="gridLayout_13">
-                  <item row="2" column="6">
-                   <widget class="QDateEdit" name="dateEditDataNasc">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="accessibleName">
-                     <string>Data Nascimento</string>
-                    </property>
-                    <property name="calendarPopup">
-                     <bool>true</bool>
-                    </property>
-                    <property name="date">
-                     <date>
-                      <year>1900</year>
-                      <month>1</month>
-                      <day>1</day>
-                     </date>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QLineEdit" name="lineEditNomeFantasia">
-                    <property name="minimumSize">
-                     <size>
-                      <width>120</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="accessibleName">
-                     <string>Apelido/Nome Fantasia</string>
-                    </property>
-                    <property name="clearButtonEnabled">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QLabel" name="labelCNPJ">
-                    <property name="text">
-                     <string>CNPJ</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="2">
-                   <widget class="QLineEdit" name="lineEditCPF">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="accessibleName">
-                     <string>CPF</string>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">QLineEdit:read-only {
-	color: #787878;
-}</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QLabel" name="labelCPF">
-                    <property name="text">
-                     <string>CPF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="3">
-                   <widget class="QLineEdit" name="lineEditCNPJ">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>135</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="accessibleName">
-                     <string>CNPJ</string>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">QLineEdit:read-only {
-	color: #787878;
-}</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="4">
-                   <widget class="QLineEdit" name="lineEditInscEstadual">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>135</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="accessibleName">
-                     <string>Insc. Estadual</string>
-                    </property>
-                    <property name="clearButtonEnabled">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QLabel" name="label_54">
-                    <property name="text">
-                     <string>Apelido/Nome Fantasia</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="labelCliente">
-                    <property name="text">
-                     <string>Nome/Razão Social</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLineEdit" name="lineEditCliente">
-                    <property name="minimumSize">
-                     <size>
-                      <width>120</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="accessibleName">
-                     <string>Nome/Razão Social</string>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">QLineEdit:read-only {
+               <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout_6">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="labelCliente">
+                   <property name="text">
+                    <string>Nome/Razão Social</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_54">
+                   <property name="text">
+                    <string>Apelido/Nome Fantasia</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="labelCPF">
+                   <property name="text">
+                    <string>CPF</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QLabel" name="labelCNPJ">
+                   <property name="text">
+                    <string>CNPJ</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="4">
+                  <widget class="QLabel" name="labelInscricaoEstadual">
+                   <property name="text">
+                    <string>Insc. Estadual</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="6">
+                  <widget class="QCheckBox" name="checkBoxDataNasc">
+                   <property name="text">
+                    <string>Aniversário</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLineEdit" name="lineEditCliente">
+                   <property name="minimumSize">
+                    <size>
+                     <width>120</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Nome/Razão Social</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLineEdit:read-only {
     background-color: rgb(255, 255, 127);
 	color: #7f7f3f;
 }
@@ -276,44 +183,147 @@ QLineEdit:!read-only {
     background-color: rgb(255, 255, 127);
     color: #000000;
 }</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="5">
-                   <widget class="QCheckBox" name="checkBoxInscEstIsento">
-                    <property name="text">
-                     <string>Isento?</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="4" colspan="2">
-                   <widget class="QLabel" name="labelInscricaoEstadual">
-                    <property name="text">
-                     <string>Insc. Estadual</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="6">
-                   <widget class="QCheckBox" name="checkBoxDataNasc">
-                    <property name="text">
-                     <string>Aniversário</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="lineEditNomeFantasia">
+                   <property name="minimumSize">
+                    <size>
+                     <width>120</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Apelido/Nome Fantasia</string>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLineEdit" name="lineEditCPF">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="accessibleName">
+                    <string>CPF</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLineEdit:read-only {
+	color: #787878;
+}</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="lineEditCNPJ">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>135</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="accessibleName">
+                    <string>CNPJ</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLineEdit:read-only {
+	color: #787878;
+}</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="4">
+                  <widget class="QLineEdit" name="lineEditInscEstadual">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>135</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Insc. Estadual</string>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="5">
+                  <widget class="QCheckBox" name="checkBoxInscEstIsento">
+                   <property name="text">
+                    <string>Isento?</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="6">
+                  <widget class="QDateEdit" name="dateEditDataNasc">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Data Nascimento</string>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                   <property name="date">
+                    <date>
+                     <year>1900</year>
+                     <month>1</month>
+                     <day>1</day>
+                    </date>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </widget>
             </item>
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBoxPFPJ">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="title">
                <string>Tipo</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
                 <widget class="QRadioButton" name="radioButtonPF">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="accessibleName">
                   <string>Pessoa Física</string>
                  </property>
@@ -324,6 +334,12 @@ QLineEdit:!read-only {
                </item>
                <item>
                 <widget class="QRadioButton" name="radioButtonPJ">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="accessibleName">
                   <string>Pessoa Jurídica</string>
                  </property>

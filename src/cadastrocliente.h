@@ -28,7 +28,7 @@ private:
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
-  auto on_checkBoxDataNasc_stateChanged(const int state) -> void;
+  auto on_checkBoxDataNasc_stateChanged(const int state) -> void; // TODO: renamw functions/widgets to aniversario
   auto on_checkBoxInscEstIsento_toggled(const bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;

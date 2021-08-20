@@ -21,6 +21,10 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   setupMapper();
   newRegister();
 
+  ui->lineEditProfissional->setFocus();
+
+  on_radioButtonPF_toggled(true);
+
   setConnections();
 }
 
@@ -35,6 +39,7 @@ void CadastroProfissional::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(sdProfissional, &SearchDialog::itemSelected, this, &CadastroProfissional::viewRegisterById, connectionType);
+  connect(ui->checkBoxDataNasc, &QCheckBox::stateChanged, this, &CadastroProfissional::on_checkBoxDataNasc_stateChanged, connectionType);
   connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroProfissional::on_checkBoxMostrarInativos_clicked, connectionType);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroProfissional::on_lineEditCEP_textChanged, connectionType);
   connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditCNPJ_textEdited, connectionType);
@@ -88,6 +93,7 @@ void CadastroProfissional::setupUi() {
 
 void CadastroProfissional::setupMapper() {
   addMapping(ui->comboBoxTipo, "tipoProf");
+  addMapping(ui->dateEditDataNasc, "aniversario");
   addMapping(ui->doubleSpinBoxComissao, "comissao");
   addMapping(ui->itemBoxLoja, "idLoja", "id");
   addMapping(ui->itemBoxVendedor, "idUsuarioRel", "id");
@@ -106,9 +112,9 @@ void CadastroProfissional::setupMapper() {
   addMapping(ui->lineEditNextel, "nextel");
   addMapping(ui->lineEditNomeFantasia, "nomeFantasia");
   addMapping(ui->lineEditProfissional, "nome_razao");
+  addMapping(ui->lineEditTel, "tel");
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
-  addMapping(ui->lineEditTel, "tel");
 
   addMapping(ui->lineEditNomeBancario, "nomeBanco");
   addMapping(ui->lineEditCPFBancario, "cpfBanco");
@@ -173,6 +179,11 @@ bool CadastroProfissional::viewRegister() {
 
   (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
+  if (not data("aniversario").isNull()) {
+    ui->checkBoxDataNasc->setChecked(true);
+    ui->dateEditDataNasc->setEnabled(true);
+  }
+
   const bool existeVinculo = verificaVinculo();
   const bool administrativo = User::isAdministrativo();
   const bool bloquear = (existeVinculo and not administrativo);
@@ -186,6 +197,8 @@ bool CadastroProfissional::viewRegister() {
 
   return true;
 }
+
+void CadastroProfissional::on_checkBoxDataNasc_stateChanged(const int state) { ui->dateEditDataNasc->setEnabled(state); }
 
 void CadastroProfissional::cadastrar() {
   try {
@@ -236,6 +249,12 @@ void CadastroProfissional::verifyFields() {
 }
 
 void CadastroProfissional::savingProcedures() {
+  if (ui->checkBoxDataNasc->isChecked()) {
+    setData("aniversario", ui->dateEditDataNasc->date());
+  } else {
+    setData("aniversario", QVariant());
+  }
+
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }
 
@@ -409,13 +428,20 @@ void CadastroProfissional::on_pushButtonDesativarEnd_clicked() {
 }
 
 void CadastroProfissional::on_radioButtonPF_toggled(const bool checked) {
-  tipoPFPJ = checked ? QString("PF") : QString("PJ");
+  tipoPFPJ = (checked) ? "PF" : "PJ";
+
   ui->lineEditCNPJ->setHidden(checked);
   ui->labelCNPJ->setHidden(checked);
   ui->lineEditCPF->setVisible(checked);
   ui->labelCPF->setVisible(checked);
   ui->lineEditInscEstadual->setHidden(checked);
   ui->labelInscricaoEstadual->setHidden(checked);
+
+  ui->dateEditDataNasc->setVisible(checked);
+  ui->checkBoxDataNasc->setVisible(checked);
+
+  if (not checked) { ui->checkBoxDataNasc->setChecked(false); }
+
   checked ? ui->lineEditCNPJ->clear() : ui->lineEditCPF->clear();
 
   adjustSize();

@@ -24,6 +24,7 @@
 ****************************************************************************/
 #include <QDataStream>
 #include <QDebug>
+#include <QIODevice>
 
 #include "xlsxcolor_p.h"
 #include "xlsxformat.h"

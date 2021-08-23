@@ -36,9 +36,9 @@ void RegisterDialog::connectLineEditsToDirty() {
 void RegisterDialog::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close, connectionType);
+  connect(new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close, connectionType);
   connect(
-      new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, [&]() { save(); }, connectionType);
+      new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this), &QShortcut::activated, this, [&]() { save(); }, connectionType);
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {

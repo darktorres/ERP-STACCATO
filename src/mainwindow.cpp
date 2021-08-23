@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setWindowIcon(QIcon("Staccato.ico"));
   setWindowTitle("ERP Staccato");
 
-  auto *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
+  auto *shortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
   const QString hostname = User::getSetting("Login/hostname").toString();

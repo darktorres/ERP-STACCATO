@@ -113,13 +113,13 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
 
   // ---------------------------------------------------------------
 
-  QVector<QPointF> vec;
+  QList<QPointF> vec;
 
   const auto seriesList = m_chart->series();
 
   for (auto *const series : seriesList) {
     auto *const xySeries = qobject_cast<QXYSeries *>(series);
-    if (xySeries) { vec << xySeries->pointsVector(); }
+    if (xySeries) { vec << xySeries->points(); }
   }
 
   // ---------------------------------------------------------------

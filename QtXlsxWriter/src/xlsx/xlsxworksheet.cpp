@@ -1237,7 +1237,7 @@ void WorksheetPrivate::saveXmlCellData(QXmlStreamWriter &writer, int row, int co
         writer.writeStartElement(QStringLiteral("r"));
         if (string.fragmentFormat(i).hasFontData()) {
           writer.writeStartElement(QStringLiteral("rPr"));
-          //:Todo
+          //: Todo
           writer.writeEndElement(); // rPr
         }
         writer.writeStartElement(QStringLiteral("t"));
@@ -1845,7 +1845,7 @@ void WorksheetPrivate::loadXmlSheetData(QXmlStreamReader &reader) {
             } else if (reader.name() == QLatin1String("is")) {
               while (not reader.atEnd() and not(reader.name() == QLatin1String("is") and reader.tokenType() == QXmlStreamReader::EndElement)) {
                 if (reader.readNextStartElement()) {
-                  //:Todo, add rich text read support
+                  //: Todo, add rich text read support
                   if (reader.name() == QLatin1String("t")) { cell->d_func()->value = reader.readElementText(); }
                 }
               }
@@ -2115,7 +2115,7 @@ void WorksheetPrivate::validateDimension() {
   if (dimension.isValid() or cellTable.isEmpty()) return;
 
   int firstRow = cellTable.constBegin().key();
-  int lastRow = (cellTable.constEnd() - 1).key();
+  int lastRow = (std::prev(cellTable.constEnd())).key();
   int firstColumn = -1;
   int lastColumn = -1;
 
@@ -2124,7 +2124,7 @@ void WorksheetPrivate::validateDimension() {
 
     if (firstColumn == -1 or it.value().constBegin().key() < firstColumn) firstColumn = it.value().constBegin().key();
 
-    if (lastColumn == -1 or (it.value().constEnd() - 1).key() > lastColumn) lastColumn = (it.value().constEnd() - 1).key();
+    if (lastColumn == -1 or (std::prev(it.value().constEnd())).key() > lastColumn) lastColumn = (std::prev(it.value().constEnd())).key();
   }
 
   CellRange cr(firstRow, firstColumn, lastRow, lastColumn);

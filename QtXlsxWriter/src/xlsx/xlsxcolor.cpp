@@ -82,7 +82,13 @@ bool XlsxColor::loadFromXml(QXmlStreamReader &reader) {
   return true;
 }
 
+#if QT_VERSION < 0x060000
 XlsxColor::operator QVariant() const { return QVariant(qMetaTypeId<XlsxColor>(), this); }
+#endif
+
+#if QT_VERSION >= 0x060000
+XlsxColor::operator QVariant() const { return QVariant(QMetaType::fromType<XlsxColor>(), this); }
+#endif
 
 QColor XlsxColor::fromARGBString(const QString &c) {
   Q_ASSERT(c.length() == 8);

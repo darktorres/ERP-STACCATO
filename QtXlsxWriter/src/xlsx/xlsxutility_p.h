@@ -37,12 +37,9 @@
 //
 
 #include "xlsxglobal.h"
-class QPoint;
-class QString;
-class QStringList;
-class QColor;
-class QDateTime;
-class QTime;
+
+#include <QDateTime>
+#include <QStringList>
 
 namespace QXlsx {
 class CellReference;

@@ -32,7 +32,6 @@
 #include <QDateTimeEdit>
 #include <QDebug>
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <QDialog>
 #include <QDir>
 #include <QDockWidget>
@@ -94,13 +93,10 @@
 #include <QPixmap>
 #include <QPoint>
 #include <QPointF>
-#include <QPrintDialog>
-#include <QPrinter>
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QRect>
 #include <QRectF>
-#include <QRegExp>
 #include <QRegularExpression>
 #include <QResource>
 #include <QScopedPointer>
@@ -147,7 +143,6 @@
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QUiLoader>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QVariant>

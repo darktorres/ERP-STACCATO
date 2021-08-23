@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QTextStream>
+#include <QWidget>
 
 class CNAB {
 

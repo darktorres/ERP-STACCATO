@@ -74,7 +74,13 @@ RichString &RichString::operator=(const RichString &other) {
 /*!
     Returns the rich string as a QVariant
 */
+#if QT_VERSION < 0x060000
 RichString::operator QVariant() const { return QVariant(qMetaTypeId<RichString>(), this); }
+#endif
+
+#if QT_VERSION >= 0x060000
+RichString::operator QVariant() const { return QVariant(QMetaType::fromType<RichString>(), this); }
+#endif
 
 /*!
     Returns true if this is rich text string.

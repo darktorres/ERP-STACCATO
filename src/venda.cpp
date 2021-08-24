@@ -1061,20 +1061,21 @@ void Venda::on_pushButtonGerarExcel_clicked() {
 }
 
 void Venda::atualizarCredito() {
-  double creditoRestante = ui->widgetPgts->getCredito();
+  double creditoUsado = 0;
   bool update = false;
 
   for (int i = 0; i < ui->widgetPgts->qtdPagamentos; ++i) {
     if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") {
-      creditoRestante -= ui->widgetPgts->listValorPgt.at(i)->value();
+      creditoUsado += ui->widgetPgts->listValorPgt.at(i)->value();
       update = true;
     }
   }
 
   if (update) {
     SqlQuery query;
-    query.prepare("UPDATE cliente SET credito = :credito WHERE idCliente = :idCliente");
-    query.bindValue(":credito", creditoRestante);
+    // NOTE: usar 'credito = credito - X' porque se outro usuario estiver fazendo devolucao a query 'credito = creditoRestante' vai sobrescrever o valor
+    query.prepare("UPDATE cliente SET credito = credito - :creditoUsado WHERE idCliente = :idCliente");
+    query.bindValue(":creditoUsado", creditoUsado);
     query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
     if (not query.exec()) { throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text()); }

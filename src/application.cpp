@@ -90,7 +90,7 @@ void Application::readSettingsFile() {
     return;
   }
 
-  const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
+  const QStringList lines = QString(file.readAll()).replace("\r\n", "\n").split("\n", Qt::SkipEmptyParts);
 
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }

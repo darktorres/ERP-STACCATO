@@ -825,6 +825,9 @@ color: rgb(0, 0, 0);</string>
                   <property name="decimals">
                    <number>4</number>
                   </property>
+                  <property name="maximum">
+                   <double>9999999.000000000000000</double>
+                  </property>
                  </widget>
                 </item>
                 <item row="0" column="3">
@@ -861,7 +864,7 @@ color: rgb(0, 0, 0);</string>
                    <bool>true</bool>
                   </property>
                   <property name="maximum">
-                   <double>9999.989999999999782</double>
+                   <double>9999999.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -1031,6 +1034,9 @@ color: rgb(0, 0, 0);</string>
                   <property name="decimals">
                    <number>4</number>
                   </property>
+                  <property name="maximum">
+                   <double>9999999.000000000000000</double>
+                  </property>
                  </widget>
                 </item>
                 <item row="0" column="5">
@@ -1116,6 +1122,9 @@ color: rgb(0, 0, 0);</string>
                   </property>
                   <property name="decimals">
                    <number>4</number>
+                  </property>
+                  <property name="maximum">
+                   <double>9999999.000000000000000</double>
                   </property>
                  </widget>
                 </item>

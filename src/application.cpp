@@ -155,6 +155,8 @@ bool Application::dbReconnect(const bool silent) {
 
   isConnected = db.open();
 
+  emit setConnectionStatus(isConnected);
+
   if (not isConnected) {
     // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
     if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
@@ -208,10 +210,12 @@ void Application::runSqlJobs() {
 
 void Application::startSqlPing() {
   auto *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
-  timer->start(1min);
+  connect(timer, &QTimer::timeout, this, [&] {
+    const bool conectado = QSqlQuery().exec("DO 0");
 
-  // TODO: se ping falhar marcar 'desconectado'?
+    if (not conectado) { dbReconnect(true); }
+  });
+  timer->start(1min);
 }
 
 void Application::startUpdaterPing() {
@@ -330,7 +334,10 @@ void Application::showMessages() {
     if (exception.message.contains("cannot be null")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
     if (exception.message.contains("Incorrect string value")) { exception.message = "Erro no banco de dados! Entre em contato com o suporte!"; }
 
-    if (exception.message == "Conexão com o servidor perdida!") { emit verifyDb(false); }
+    if (exception.message == "Conexão com o servidor perdida!") {
+      isConnected = false;
+      emit setConnectionStatus(false);
+    }
 
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }

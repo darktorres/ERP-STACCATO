@@ -72,7 +72,7 @@ public:
   auto inline static delayedTimer = 500ms;
 
 signals:
-  void verifyDb(const bool conectado);
+  void setConnectionStatus(const bool conectado);
 
 private:
   struct Message {

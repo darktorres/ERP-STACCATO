@@ -118,6 +118,7 @@ linux {
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
+        QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
         message($$QMAKE_CC)
         message($$QMAKE_CXX)
     }

@@ -47,6 +47,6 @@ private:
   auto on_tabWidget_currentChanged() -> void;
   auto reconnectDb() -> void;
   auto resetTables() -> void;
+  auto setConnectionStatus(const bool conectado) -> void;
   auto setConnections() -> void;
-  auto verifyDb(const bool conectado) -> void;
 };

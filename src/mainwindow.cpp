@@ -110,7 +110,7 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb, connectionType);
+  connect(qApp, &Application::setConnectionStatus, this, &MainWindow::setConnectionStatus, connectionType);
   connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered, connectionType);
   connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered, connectionType);
   connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered, connectionType);
@@ -183,10 +183,10 @@ void MainWindow::updateTables() {
 void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
 
-  verifyDb(conectado);
+  setConnectionStatus(conectado);
 }
 
-void MainWindow::verifyDb(const bool conectado) {
+void MainWindow::setConnectionStatus(const bool conectado) {
   pushButtonStatus->setText(conectado ? "Conectado: " + User::getSetting("Login/hostname").toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 

@@ -98,7 +98,7 @@ void CadastroTransportadora::verifyFields() {
 }
 
 void CadastroTransportadora::savingProcedures() {
-  setData("cnpj", ui->lineEditCNPJ->text());
+  setData("cnpj", (ui->lineEditCNPJ->text() == "../-") ? "" : ui->lineEditCNPJ->text());
   setData("razaoSocial", ui->lineEditRazaoSocial->text());
   setData("nomeFantasia", ui->lineEditNomeFantasia->text());
   setData("inscEstadual", ui->lineEditInscEstadual->text());

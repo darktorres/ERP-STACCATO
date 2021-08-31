@@ -90,7 +90,10 @@ void Application::readSettingsFile() {
     return;
   }
 
-  const QStringList lines = QString(file.readAll()).replace("\r\n", "\n").split("\n", Qt::SkipEmptyParts);
+  QString fileContent = file.readAll();
+  fileContent.replace("\r\n", "\n"); // so it works with both Windows and Unix line endings
+
+  const QStringList lines = fileContent.split("\n", Qt::SkipEmptyParts);
 
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
@@ -111,7 +114,7 @@ void Application::genericLogin(const QString &hostname) {
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString()); }
 
-  const QString systemPassword = file.readAll();
+  const QString systemPassword = file.readAll().trimmed();
 
   // ------------------------------------------------------------
 

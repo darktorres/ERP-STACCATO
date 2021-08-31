@@ -263,7 +263,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString(), this); }
 
-  const QString password = file.readAll();
+  const QString password = file.readAll().trimmed();
 
   // those query's below commit transaction so have to be done outside transaction
   SqlQuery query;

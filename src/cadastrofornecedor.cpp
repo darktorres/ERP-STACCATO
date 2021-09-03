@@ -480,5 +480,11 @@ void CadastroFornecedor::verificaEndereco() {
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }
 
+void CadastroFornecedor::connectLineEditsToDirty() {
+  const auto children = ui->tabWidget->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroFornecedor::marcarDirty); }
+}
+
 // TODO: 5poder alterar na tela 'comissao'
 // TODO: quando for novo cadastro permitir marcar flag de representacao

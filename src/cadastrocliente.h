@@ -27,6 +27,7 @@ private:
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto novoEndereco() -> void;
   auto on_checkBoxDataNasc_stateChanged(const int state) -> void; // TODO: renamw functions/widgets to aniversario
   auto on_checkBoxInscEstIsento_toggled(const bool checked) -> void;

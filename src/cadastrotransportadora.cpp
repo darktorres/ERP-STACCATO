@@ -454,3 +454,9 @@ void CadastroTransportadora::verificaEndereco() {
 
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }
+
+void CadastroTransportadora::connectLineEditsToDirty() {
+  const auto children = ui->tabWidget->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroTransportadora::marcarDirty); }
+}

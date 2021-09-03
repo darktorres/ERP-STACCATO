@@ -35,7 +35,6 @@ protected:
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
   auto confirmationMessage() -> bool;
-  auto connectLineEditsToDirty() -> void;
   auto data(const QString &key) const -> QVariant;
   auto marcarDirty() -> void;
   auto remove() -> void;
@@ -46,6 +45,7 @@ protected:
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;
   virtual auto clearFields() -> void = 0;
+  virtual auto connectLineEditsToDirty() -> void = 0;
   virtual auto newRegister() -> bool;
   virtual auto save(const bool silent = false) -> void final;
   virtual auto verifyRequiredField(const QLineEdit &line) -> void;

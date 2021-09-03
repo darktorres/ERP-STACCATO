@@ -30,6 +30,7 @@ private:
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto newRegister() -> bool final;
   auto novaConta() -> void;
   auto novoEndereco() -> void;

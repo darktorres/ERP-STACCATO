@@ -27,6 +27,7 @@ private:
   auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto novoEndereco() -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;

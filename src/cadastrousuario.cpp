@@ -326,6 +326,12 @@ bool CadastroUsuario::newRegister() {
   return true;
 }
 
+void CadastroUsuario::connectLineEditsToDirty() {
+  const auto children = ui->tabWidget->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroUsuario::marcarDirty); }
+}
+
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
 // FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais

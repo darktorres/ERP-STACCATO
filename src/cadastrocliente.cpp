@@ -559,6 +559,12 @@ void CadastroCliente::verificaEndereco() {
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }
 
+void CadastroCliente::connectLineEditsToDirty() {
+  const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroCliente::marcarDirty); }
+}
+
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: limitar complemento de endereco a 60 caracteres
 // TODO: permitir alterar parte do endereço (provavelmente deve poder alterar apenas numero e complemento)

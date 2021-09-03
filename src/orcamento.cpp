@@ -1686,6 +1686,12 @@ void Orcamento::redoBackupItem() {
   }
 }
 
+void Orcamento::connectLineEditsToDirty() {
+  const auto children = ui->tabWidget->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &Orcamento::marcarDirty); }
+}
+
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)
 // TODO: 0se produto for estoque permitir vender por peça (setar minimo/multiplo)
 // TODO: 2orcamento de reposicao nao pode ter profissional associado (bloquear)

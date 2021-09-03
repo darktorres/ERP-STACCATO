@@ -25,6 +25,7 @@ private:
   // methods
   auto cadastrar() -> void final;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto criarUsuarioMySQL() -> void;
   auto fillComboBoxLoja() -> void;
   auto newRegister() -> bool final;

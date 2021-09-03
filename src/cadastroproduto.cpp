@@ -258,6 +258,12 @@ bool CadastroProduto::viewRegister() {
   return true;
 }
 
+void CadastroProduto::connectLineEditsToDirty() {
+  const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroProduto::marcarDirty); }
+}
+
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
 // TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos

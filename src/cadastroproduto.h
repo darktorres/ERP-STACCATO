@@ -25,6 +25,7 @@ private:
   auto cadastrar() -> void final;
   auto calcularMarkup() -> void;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto on_checkBoxValidade_stateChanged(const int state) -> void;
   auto on_doubleSpinBoxCusto_valueChanged() -> void;
   auto on_doubleSpinBoxVenda_valueChanged() -> void;

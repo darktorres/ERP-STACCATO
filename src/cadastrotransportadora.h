@@ -29,6 +29,7 @@ private:
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto clearVeiculo() -> void;
+  auto connectLineEditsToDirty() -> void final;
   auto newRegister() -> bool final;
   auto novoEndereco() -> void;
   auto novoVeiculo() -> void;

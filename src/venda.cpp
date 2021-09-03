@@ -1653,6 +1653,12 @@ void Venda::calcularPesoTotal() {
   ui->spinBoxPesoTotal->setValue(total);
 }
 
+void Venda::connectLineEditsToDirty() {
+  const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &Venda::marcarDirty); }
+}
+
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao
 // TODO: 0quando for 'MATR' nao criar fluxo caixa
 // TODO: verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)

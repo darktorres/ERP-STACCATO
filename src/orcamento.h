@@ -43,6 +43,7 @@ private:
   auto calcularPesoTotal() -> void;
   auto calcularTotais() -> std::tuple<double, double, double>;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto corrigirValores() -> void;
   auto dataItem(const QString &key) const -> QVariant;
   auto generateId() -> void;

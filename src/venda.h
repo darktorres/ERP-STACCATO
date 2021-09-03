@@ -44,6 +44,7 @@ private:
   auto calcularPesoTotal() -> void;
   auto cancelamento() -> void;
   auto clearFields() -> void final;
+  auto connectLineEditsToDirty() -> void final;
   auto copiaProdutosOrcamento() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;

@@ -467,3 +467,9 @@ void CadastroProfissional::verificaEndereco() {
 
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
 }
+
+void CadastroProfissional::connectLineEditsToDirty() {
+  const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroProfissional::marcarDirty); }
+}

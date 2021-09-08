@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>877</width>
-    <height>1251</height>
+    <height>817</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,16 +20,6 @@
       <widget class="QPushButton" name="pushButtonFollowup">
        <property name="text">
         <string>Followup</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEditBusca">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="placeholderText">
-        <string>Código/Vendedor/Cliente/Profissional/OC Rep</string>
        </property>
       </widget>
      </item>
@@ -46,36 +36,18 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1" rowspan="2" colspan="2">
-      <widget class="TableView" name="table">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="mouseTracking">
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="lineEditBusca">
+       <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
+       <property name="placeholderText">
+        <string>Código/Vendedor/Cliente/Profissional/OC Rep</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0" rowspan="2">
-      <widget class="ScrollArea" name="scrollArea">
+      <widget class="ScrollArea" name="scrollAreaVenda">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -94,7 +66,7 @@
           <x>0</x>
           <y>0</y>
           <width>179</width>
-          <height>1198</height>
+          <height>764</height>
          </rect>
         </property>
         <property name="autoFillBackground">
@@ -680,6 +652,25 @@
        </widget>
       </widget>
      </item>
+     <item row="0" column="1" rowspan="2" colspan="2">
+      <widget class="TableView" name="table">
+       <property name="mouseTracking">
+        <bool>true</bool>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
@@ -704,7 +695,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>pushButtonFollowup</tabstop>
-  <tabstop>scrollArea</tabstop>
+  <tabstop>scrollAreaVenda</tabstop>
   <tabstop>groupBoxStatusFinanceiro</tabstop>
   <tabstop>checkBoxPendente2</tabstop>
   <tabstop>checkBoxLiberado</tabstop>

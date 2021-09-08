@@ -847,11 +847,11 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex &index) {
 
 void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   if (not index.isValid()) {
-    ui->frameICMS->setDisabled(true);
-    ui->frameIPI->setDisabled(true);
-    ui->framePIS->setDisabled(true);
-    ui->frameCOFINS->setDisabled(true);
-    ui->frameInterEstadual->setDisabled(true);
+    ui->scrollAreaICMS->setDisabled(true);
+    ui->scrollAreaIPI->setDisabled(true);
+    ui->scrollAreaPIS->setDisabled(true);
+    ui->scrollAreaCOFINS->setDisabled(true);
+    ui->scrollAreaInterestadual->setDisabled(true);
     return;
   }
 
@@ -860,11 +860,11 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   try {
     const int row = index.row();
 
-    ui->frameICMS->setEnabled(true);
-    ui->frameIPI->setEnabled(true);
-    ui->framePIS->setEnabled(true);
-    ui->frameCOFINS->setEnabled(true);
-    ui->frameInterEstadual->setEnabled(true);
+    ui->scrollAreaICMS->setEnabled(true);
+    ui->scrollAreaIPI->setEnabled(true);
+    ui->scrollAreaPIS->setEnabled(true);
+    ui->scrollAreaCOFINS->setEnabled(true);
+    ui->scrollAreaInterestadual->setEnabled(true);
 
     listarCfop();
 
@@ -895,7 +895,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
     // TODO: arrumar esse codigo, nao é mais 80%
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
-      ui->frameInterEstadual->setEnabled(true);
+      ui->scrollAreaInterestadual->setEnabled(true);
 
       ui->doubleSpinBoxPercentualFcpDestino->setValue(2);
       ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelProduto.data(row, "vBC").toDouble());

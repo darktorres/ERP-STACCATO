@@ -8,5 +8,6 @@ class ScrollArea final : public QScrollArea {
 public:
   explicit ScrollArea(QWidget *parent);
 
+  auto minimumSizeHint() const -> QSize final;
   auto sizeHint() const -> QSize final;
 };

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1036</width>
-    <height>617</height>
+    <width>1336</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
        <item row="3" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBoxEndereco">
          <property name="title">
-          <string>Endereço</string>
+          <string>Endereços</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
@@ -90,12 +90,6 @@
           </item>
           <item row="1" column="0">
            <widget class="QComboBox" name="comboBoxTipoEnd">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
             <item>
              <property name="text">
               <string>Principal</string>
@@ -115,24 +109,6 @@
           </item>
           <item row="1" column="1">
            <widget class="LineEditCEP" name="lineEditCEP">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>75</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;O sistema preenche o endereço automaticamente a partir do CEP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -150,12 +126,6 @@
           </item>
           <item row="1" column="2">
            <widget class="QLineEdit" name="lineEditLogradouro">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Logradouro</string>
             </property>
@@ -163,12 +133,6 @@
           </item>
           <item row="1" column="6">
            <widget class="QLineEdit" name="lineEditCidade">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Cidade</string>
             </property>
@@ -176,18 +140,6 @@
           </item>
           <item row="1" column="3">
            <widget class="QLineEdit" name="lineEditNumero">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Número</string>
             </property>
@@ -195,18 +147,6 @@
           </item>
           <item row="1" column="7">
            <widget class="QLineEdit" name="lineEditUF">
-            <property name="minimumSize">
-             <size>
-              <width>35</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>UF</string>
             </property>
@@ -214,12 +154,6 @@
           </item>
           <item row="1" column="5">
            <widget class="QLineEdit" name="lineEditBairro">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Bairro/Distrito</string>
             </property>
@@ -227,18 +161,6 @@
           </item>
           <item row="1" column="4">
            <widget class="QLineEdit" name="lineEditComplemento">
-            <property name="minimumSize">
-             <size>
-              <width>75</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Complemento</string>
             </property>
@@ -256,17 +178,61 @@
           <string>Info. Loja</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelDescricao">
+          <item row="0" column="3">
+           <widget class="QLabel" name="labelNomeFantasia">
             <property name="text">
-             <string>Descrição</string>
+             <string>Nome Fantasia</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="labelRazaoSocial">
-            <property name="text">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditRazaoSocial">
+            <property name="accessibleName">
              <string>Razão Social</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelCNPJ">
+            <property name="text">
+             <string>CNPJ</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="lineEditSIGLA">
+            <property name="accessibleName">
+             <string>Sigla</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLineEdit" name="lineEditCNPJ">
+            <property name="accessibleName">
+             <string>CNPJ</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="lineEditDescricao">
+            <property name="accessibleName">
+             <string>Descrição</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
             </property>
            </widget>
           </item>
@@ -277,21 +243,58 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QLabel" name="labelCNPJ">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelDescricao">
             <property name="text">
-             <string>CNPJ</string>
+             <string>Descrição</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="7">
-           <widget class="LineEditTel" name="lineEditTel">
-            <property name="maximumSize">
-             <size>
-              <width>90</width>
-              <height>16777215</height>
-             </size>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="lineEditNomeFantasia">
+            <property name="accessibleName">
+             <string>Nome Fantasia</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="labelRazaoSocial">
+            <property name="text">
+             <string>Razão Social</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="labelInscEstadual">
+            <property name="text">
+             <string>Insc. Estadual</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditInscEstadual">
+            <property name="accessibleName">
+             <string>Insc. Estadual</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="labelTel">
+            <property name="text">
+             <string>Tel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="LineEditTel" name="lineEditTel">
             <property name="accessibleName">
              <string>Telefone</string>
             </property>
@@ -301,158 +304,17 @@ color: rgb(0, 0, 0);</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="8">
+          <item row="2" column="3">
            <widget class="QLabel" name="labelTel2">
             <property name="text">
              <string>Tel2</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="lineEditNomeFantasia">
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>Nome Fantasia</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="8">
+          <item row="3" column="3">
            <widget class="LineEditTel" name="lineEditTel2">
-            <property name="maximumSize">
-             <size>
-              <width>90</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="accessibleName">
              <string>Telefone 2</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLineEdit" name="lineEditDescricao">
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>Descrição</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="7">
-           <widget class="QLabel" name="labelTel">
-            <property name="text">
-             <string>Tel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="labelNomeFantasia">
-            <property name="text">
-             <string>Nome Fantasia</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLineEdit" name="lineEditSIGLA">
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>Sigla</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditRazaoSocial">
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>Razão Social</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5" colspan="2">
-           <widget class="QLineEdit" name="lineEditInscEstadual">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>Insc. Estadual</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLabel" name="labelInscEstadual">
-            <property name="text">
-             <string>Insc. Estadual</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLineEdit" name="lineEditCNPJ">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string>CNPJ</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
             </property>
            </widget>
           </item>
@@ -566,8 +428,8 @@ color: rgb(0, 0, 0);</string>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>20</width>
-             <height>40</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
           </spacer>
@@ -642,8 +504,8 @@ color: rgb(0, 0, 0);</string>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>20</width>
-             <height>40</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
           </spacer>
@@ -667,8 +529,8 @@ color: rgb(0, 0, 0);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>877</width>
-            <height>548</height>
+            <width>1177</width>
+            <height>602</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
@@ -741,8 +603,8 @@ color: rgb(0, 0, 0);</string>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>20</width>
-               <height>40</height>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
             </spacer>
@@ -919,8 +781,8 @@ color: rgb(0, 0, 0);</string>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -952,10 +814,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditRazaoSocial</tabstop>
   <tabstop>lineEditSIGLA</tabstop>
   <tabstop>lineEditNomeFantasia</tabstop>
-  <tabstop>lineEditCNPJ</tabstop>
-  <tabstop>lineEditInscEstadual</tabstop>
-  <tabstop>lineEditTel</tabstop>
-  <tabstop>lineEditTel2</tabstop>
   <tabstop>lineEditBanco</tabstop>
   <tabstop>lineEditAgencia</tabstop>
   <tabstop>lineEditConta</tabstop>

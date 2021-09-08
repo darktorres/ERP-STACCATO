@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1700</width>
+    <width>1319</width>
     <height>755</height>
    </rect>
   </property>
@@ -24,6 +24,18 @@
        <item>
         <widget class="QGroupBox" name="frameData">
          <layout class="QGridLayout" name="gridLayout_2">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
           <item row="1" column="0">
            <widget class="QLabel" name="labelProximoEvento">
             <property name="text">
@@ -70,6 +82,21 @@
        <item>
         <widget class="QFrame" name="frameDataPreco">
          <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
@@ -90,6 +117,9 @@
               <property name="mouseTracking">
                <bool>true</bool>
               </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
               <property name="selectionMode">
                <enum>QAbstractItemView::MultiSelection</enum>
               </property>
@@ -103,6 +133,9 @@
             </item>
             <item>
              <widget class="TreeView" name="treeView">
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
               <property name="editTriggers">
                <set>QAbstractItemView::NoEditTriggers</set>
               </property>
@@ -117,12 +150,36 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
                <item row="0" column="0">
                 <widget class="QGroupBox" name="groupBoxSt">
                  <property name="title">
                   <string>Aplicar ST em todas as linhas selecionadas</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout">
+                  <property name="leftMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>3</number>
+                  </property>
                   <item row="1" column="1">
                    <widget class="QComboBox" name="comboBoxST">
                     <item>
@@ -194,6 +251,18 @@
                   <string>Dados da ST</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_5">
+                  <property name="leftMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>3</number>
+                  </property>
                   <item row="0" column="0">
                    <widget class="QDateEdit" name="dateEditPgtSt">
                     <property name="displayFormat">
@@ -220,6 +289,18 @@
                   <string>Código Fornecedor</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_10">
+                  <property name="leftMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>3</number>
+                  </property>
                   <item row="0" column="0">
                    <widget class="QLineEdit" name="lineEditCodFornecedor"/>
                   </item>
@@ -232,6 +313,18 @@
                   <string>Dados do frete</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_4">
+                  <property name="leftMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>3</number>
+                  </property>
                   <item row="0" column="1">
                    <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
                     <property name="enabled">
@@ -316,6 +409,18 @@
        <number>0</number>
       </property>
       <layout class="QGridLayout" name="gridLayout_9">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="0" column="0">
         <widget class="QSplitter" name="splitter_2">
          <property name="orientation">
@@ -336,6 +441,9 @@
           </property>
           <property name="mouseTracking">
            <bool>true</bool>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::MultiSelection</enum>
@@ -413,6 +521,18 @@
           <string>Financeiro</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
           <item row="1" column="0">
            <widget class="QComboBox" name="comboBoxFinanceiro">
             <item>
@@ -439,8 +559,8 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>20</width>
-              <height>40</height>
+              <width>0</width>
+              <height>0</height>
              </size>
             </property>
            </spacer>
@@ -491,8 +611,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
       </spacer>

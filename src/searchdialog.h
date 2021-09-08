@@ -12,6 +12,11 @@ class SearchDialog;
 class SearchDialog final : public QDialog {
   Q_OBJECT
 
+  struct FullTextIndex {
+    QString index;
+    QString placeHolder;
+  };
+
 public:
   // Factory Methods
   static auto cliente(QWidget *parent) -> SearchDialog *;
@@ -41,7 +46,7 @@ signals:
   void itemSelected(const QVariant &id);
 
 private:
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QList<FullTextIndex> &fullTextIndexes, const QString &filter,
                         const QString &sortColumn, const bool naoListar, QWidget *parent);
   ~SearchDialog() final;
 
@@ -53,7 +58,7 @@ private:
   bool permitirDescontinuados = false;
   bool showAllProdutos = false;
   bool silent = false;
-  QString const fullTextIndex;
+  QList<FullTextIndex> const fullTextIndexes;
   QString const primaryKey;
   QString filter;
   QString fornecedorRep;
@@ -68,13 +73,12 @@ private:
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonSelecionar_clicked() -> void;
-  auto on_radioButtonProdAtivos_toggled() -> void;
-  auto on_radioButtonProdDesc_toggled() -> void;
   auto on_table_clicked(const QModelIndex &index) -> void;
   auto on_table_doubleClicked() -> void;
   auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
+  auto setupSearchWidgets() -> void;
   auto setupTables(const QString &table, const QString &sortColumn) -> void;
 
   inline static SearchDialog *cacheLoja = nullptr;

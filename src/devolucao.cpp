@@ -530,6 +530,7 @@ void Devolucao::salvarCredito() {
 }
 
 void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2) {
+  // TODO: The 'idVenda' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QString idVenda = modelProdutos2.data(currentRow, "idVenda").toString();
 
   determinarIdDevolucao();
@@ -741,6 +742,7 @@ void Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double quantRestante = quantOriginal - quantDevolvida;
   const QString status = modelCompra.data(0, "status").toString();
+  // TODO: The 'idVenda' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QString idVenda = modelCompra.data(0, "idVenda").toString();
 
   modelCompra.setData(0, "obs", idVenda + " DEVOLVEU");

@@ -144,6 +144,7 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
 
+  // TODO: The 'text' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
 
   if (text.isEmpty()) { return; }

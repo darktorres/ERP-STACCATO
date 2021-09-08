@@ -42,13 +42,8 @@ void Smtp::setConnections() {
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected, connectionType);
 }
 
+// TODO: The 'from' function argument possesses the same name as one of the class members, which can result in a confusion.
 void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
-  // FIXME: shadows
-
-  // TODO: V688 http://www.viva64.com/en/V688 The 'from' function argument possesses the same name as one of the class members, which
-  // can result in a confusion.void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString
-  // &body, const QStringList &files, const QString &assinatura) {
-
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");

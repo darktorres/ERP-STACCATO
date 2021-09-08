@@ -149,8 +149,6 @@ void ProdutosPendentes::setupTables() {
 
   ui->tableProdutos->setModel(&modelViewProdutos);
 
-  ui->tableProdutos->setItemDelegate(new NoEditDelegate(this));
-
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("custoVenda", new ReaisDelegate(this));
@@ -183,8 +181,6 @@ void ProdutosPendentes::setupTables() {
   modelCompra.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->tableCompra->setModel(&modelCompra);
-
-  ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
 
   ui->tableCompra->hideColumn("idPedido2");
   ui->tableCompra->hideColumn("idPedidoFK");

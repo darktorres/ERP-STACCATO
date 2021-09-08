@@ -115,6 +115,10 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   modelViewVenda.setFilter(filtros.join(" AND "));
+
+  //-------------------------------------
+
+  ui->scrollAreaVenda->setEnabled(true);
 }
 
 void WidgetVenda::montaFiltroTexto() {
@@ -123,6 +127,10 @@ void WidgetVenda::montaFiltroTexto() {
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 
   modelViewVenda.setFilter(filtroBusca);
+
+  //-------------------------------------
+
+  ui->scrollAreaVenda->setDisabled(true);
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {

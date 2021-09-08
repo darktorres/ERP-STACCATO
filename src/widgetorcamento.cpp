@@ -315,13 +315,22 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   modelViewOrcamento.setFilter(filtros.join(" AND "));
+
+  //-------------------------------------
+
+  ui->scrollAreaOrcamento->setEnabled(true);
 }
 
 void WidgetOrcamento::montaFiltroTexto() {
+
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
   modelViewOrcamento.setFilter(filtroBusca);
+
+  //-------------------------------------
+
+  ui->scrollAreaOrcamento->setDisabled(true);
 }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {

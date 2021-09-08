@@ -388,8 +388,8 @@ color: rgb(0, 0, 0);</string>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
-                     <width>40</width>
-                     <height>20</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
                   </spacer>
@@ -490,8 +490,8 @@ color: rgb(0, 0, 0);</string>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
-                        <width>352</width>
-                        <height>23</height>
+                        <width>0</width>
+                        <height>0</height>
                        </size>
                       </property>
                      </spacer>
@@ -1159,8 +1159,8 @@ color: rgb(0, 0, 0);</string>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
        </spacer>
@@ -1348,8 +1348,8 @@ color: rgb(0, 0, 0);</string>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
        </spacer>
@@ -1366,6 +1366,11 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
@@ -1375,11 +1380,6 @@ color: rgb(0, 0, 0);</string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

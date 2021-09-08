@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1132</width>
-    <height>716</height>
+    <width>1237</width>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,8 +83,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -104,6 +104,18 @@
        <item row="0" column="0">
         <widget class="QFrame" name="frame">
          <layout class="QGridLayout" name="gridLayout_15">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="1" column="0" colspan="4">
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="1">
@@ -778,7 +790,7 @@ QLineEdit:!read-only {
           <item row="0" column="0" colspan="2">
            <widget class="QGroupBox" name="groupBoxEndereco">
             <property name="title">
-             <string/>
+             <string>Endereços</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_22">
              <item row="1" column="5">
@@ -1073,8 +1085,8 @@ QLineEdit:!read-only {
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
              </spacer>

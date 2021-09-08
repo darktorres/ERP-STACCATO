@@ -6,83 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1051</width>
-    <height>662</height>
+    <width>817</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Antecipação</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="3">
+   <item row="1" column="5">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="labelEvento">
-       <property name="text">
-        <string>Data do evento:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="0" colspan="2">
-      <widget class="QPushButton" name="pushButtonGerar">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Gerar antecipação</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxDescTotal">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-       <property name="prefix">
-        <string/>
-       </property>
-       <property name="suffix">
-        <string>%</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="labelValorLiquido">
-       <property name="text">
-        <string>Valor líquido de mdr:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="0" colspan="2">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="labelPrazoMedio">
-       <property name="text">
-        <string>Prazo médio:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="labelDescTotal">
-       <property name="text">
-        <string>Taxa desc. total:</string>
-       </property>
-      </widget>
-     </item>
+     <property name="spacing">
+      <number>3</number>
+     </property>
      <item row="5" column="0">
       <widget class="QLabel" name="labelValorBruto">
        <property name="text">
@@ -90,24 +26,194 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
-      <widget class="QCheckBox" name="checkBoxIOF">
-       <property name="text">
-        <string>IOF</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="labelDescMes">
-       <property name="text">
-        <string>Taxa desc/mês:</string>
-       </property>
-      </widget>
-     </item>
      <item row="9" column="0">
       <widget class="QLabel" name="labelLiqIOF">
        <property name="text">
         <string>Valor Líquido de IOF</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Filtros</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelTipo">
+          <property name="text">
+           <string>Tipo:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="ComboBox" name="comboBoxLoja"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelLoja">
+          <property name="text">
+           <string>Loja:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelVenda">
+          <property name="text">
+           <string>Venda:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="lineEditVenda"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxPagamento"/>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBoxData">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Data</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="dateEditAte">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEditDe">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_13">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Até:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>De:</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxValorLiquido">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="showGroupSeparator" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="prefix">
+        <string>R$ </string>
+       </property>
+       <property name="maximum">
+        <double>999999.989999999990687</double>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxPrazoMedio">
+       <property name="wrapping">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="showGroupSeparator" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="maximum">
+        <double>999.990000000000009</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxDescMes">
+       <property name="prefix">
+        <string/>
+       </property>
+       <property name="suffix">
+        <string>%</string>
        </property>
       </widget>
      </item>
@@ -133,6 +239,50 @@
        </property>
       </widget>
      </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="labelValorLiquido">
+       <property name="text">
+        <string>Valor líquido de mdr:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QDateEdit" name="dateEditEvento">
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelDescMes">
+       <property name="text">
+        <string>Taxa desc/mês:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelDescTotal">
+       <property name="text">
+        <string>Taxa desc. total:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0" colspan="2">
+      <widget class="ItemBox" name="itemBoxConta"/>
+     </item>
+     <item row="10" column="0" colspan="2">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item row="8" column="1">
       <widget class="QDoubleSpinBox" name="doubleSpinBoxIOF">
        <property name="layoutDirection">
@@ -155,6 +305,53 @@
        </property>
       </widget>
      </item>
+     <item row="3" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxDescTotal">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="prefix">
+        <string/>
+       </property>
+       <property name="suffix">
+        <string>%</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelEvento">
+       <property name="text">
+        <string>Data do evento:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0" colspan="2">
+      <widget class="QPushButton" name="pushButtonGerar">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Gerar antecipação</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="labelValorPresente">
+       <property name="text">
+        <string>Valor presente líquido:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QCheckBox" name="checkBoxIOF">
+       <property name="text">
+        <string>IOF</string>
+       </property>
+      </widget>
+     </item>
      <item row="7" column="1">
       <widget class="QDoubleSpinBox" name="doubleSpinBoxValorPresente">
        <property name="layoutDirection">
@@ -168,141 +365,6 @@
        </property>
        <property name="maximum">
         <double>999999.989999999990687</double>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxValorLiquido">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-       <property name="showGroupSeparator" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="prefix">
-        <string>R$ </string>
-       </property>
-       <property name="maximum">
-        <double>999999.989999999990687</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" colspan="2">
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string>Filtros</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="0">
-         <widget class="QLabel" name="labelLoja">
-          <property name="text">
-           <string>Loja:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="lineEditVenda"/>
-        </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="comboBoxPagamento"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="labelVenda">
-          <property name="text">
-           <string>Venda:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="labelTipo">
-          <property name="text">
-           <string>Tipo:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="ComboBox" name="comboBoxLoja"/>
-        </item>
-        <item row="3" column="0" colspan="3">
-         <widget class="QGroupBox" name="groupBoxData">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="title">
-           <string>Data</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="1">
-            <widget class="QDateEdit" name="dateEditDe">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="calendarPopup">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDateEdit" name="dateEditAte">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="calendarPopup">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_12">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>De:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_13">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Até:</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="labelValorPresente">
-       <property name="text">
-        <string>Valor presente líquido:</string>
        </property>
       </widget>
      </item>
@@ -325,23 +387,10 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0" colspan="2">
-      <widget class="ItemBox" name="itemBoxConta"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QDateEdit" name="dateEditEvento">
-       <property name="calendarPopup">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxDescMes">
-       <property name="prefix">
-        <string/>
-       </property>
-       <property name="suffix">
-        <string>%</string>
+     <item row="4" column="0">
+      <widget class="QLabel" name="labelPrazoMedio">
+       <property name="text">
+        <string>Prazo médio:</string>
        </property>
       </widget>
      </item>
@@ -352,28 +401,9 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxPrazoMedio">
-       <property name="wrapping">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-       <property name="showGroupSeparator" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="maximum">
-        <double>999.990000000000009</double>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item row="0" column="1" rowspan="2">
+   <item row="1" column="4">
     <widget class="TableView" name="table">
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
@@ -398,18 +428,17 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
   </customwidget>
+  <customwidget>
+   <class>ComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/combobox.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>table</tabstop>
   <tabstop>comboBoxPagamento</tabstop>
   <tabstop>comboBoxLoja</tabstop>
   <tabstop>dateEditEvento</tabstop>

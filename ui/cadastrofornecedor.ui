@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1114</width>
-    <height>762</height>
+    <width>1245</width>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,7 +88,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -109,6 +109,18 @@
        <item row="1" column="0">
         <widget class="QFrame" name="frameCadastro">
          <layout class="QGridLayout" name="gridLayout_7">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="1" column="0" colspan="2">
@@ -737,7 +749,7 @@ color: rgb(0, 0, 0);</string>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
@@ -748,7 +760,7 @@ color: rgb(0, 0, 0);</string>
           <item row="0" column="0" colspan="2">
            <widget class="QGroupBox" name="groupBoxEndereco">
             <property name="title">
-             <string/>
+             <string>Endereços</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_22">
              <item row="1" column="5">
@@ -1043,8 +1055,8 @@ color: rgb(0, 0, 0);</string>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>0</width>
+              <height>0</height>
              </size>
             </property>
            </spacer>
@@ -1056,7 +1068,7 @@ color: rgb(0, 0, 0);</string>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>20</width>
+              <width>0</width>
               <height>0</height>
              </size>
             </property>
@@ -1165,7 +1177,7 @@ color: rgb(0, 0, 0);</string>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -1178,8 +1190,8 @@ color: rgb(0, 0, 0);</string>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
-           <height>20</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>

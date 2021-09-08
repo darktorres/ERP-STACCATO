@@ -40,6 +40,7 @@ void Comprovantes::setConnections() {
   connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked, connectionType);
 }
 
+// TODO: The 'idVenda' function argument possesses the same name as one of the class members, which can result in a confusion.
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE fotoEntrega IS NOT NULL AND idVenda = '" + idVenda + "'");
 

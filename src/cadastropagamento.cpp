@@ -159,6 +159,8 @@ void CadastroPagamento::limparSelecao() {
   //--------------------------------------
 
   modelTaxas.setFilter("0");
+
+  ui->tablePagamentos->clearSelection();
 }
 
 void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
@@ -334,9 +336,7 @@ void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {
 }
 
 void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
-  limparSelecao();
-
-  if (not index.isValid()) { return; }
+  if (not index.isValid()) { return limparSelecao(); }
 
   const int id = modelPagamentos.data(index.row(), "idPagamento").toInt();
 

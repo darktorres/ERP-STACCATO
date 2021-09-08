@@ -454,6 +454,7 @@ void CadastroCliente::novoEndereco() {
   setEnderecoReadOnly(false);
 }
 
+// TODO: The 'readOnly' function argument possesses the same name as one of the class members, which can result in a confusion.
 void CadastroCliente::setEnderecoReadOnly(const bool readOnly) {
   ui->lineEditCEP->setReadOnly(readOnly);
   ui->lineEditLogradouro->setReadOnly(readOnly);

@@ -278,11 +278,11 @@ int WidgetCompraGerar::getOrdemCompra() {
     throw RuntimeException("Erro buscando próxima OC: " + queryOC.lastError().text());
   }
 
-  if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima O.C.!"); }
+  if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima OC!"); }
 
   bool ok = false;
 
-  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
+  int oc = QInputDialog::getInt(this, "OC", "Qual a Ordem de Compra?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
 
   if (not ok) { throw std::exception(); }
 
@@ -307,7 +307,7 @@ int WidgetCompraGerar::getOrdemCompra() {
 
       bool ok2 = false;
 
-      oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
+      oc = QInputDialog::getInt(this, "OC", "Qual a Ordem de Compra?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
 
       if (not ok2) { throw std::exception(); }
     }

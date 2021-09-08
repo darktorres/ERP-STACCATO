@@ -1157,6 +1157,7 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
     ui->frameST->hide();
   }
 
+  // TODO: preencher os casos abaixo
   if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
 
   if (text == "20 - Com redução de base de cálculo") {}
@@ -1600,7 +1601,8 @@ void CadastrarNFe::listarCfop() {
   while (queryCfop.next()) { ui->comboBoxCfop->addItem(queryCfop.value(stringUF).toString() + " - " + queryCfop.value("NAT").toString()); }
 }
 
-void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabWidget_4->setTabEnabled(4, text == "2 Operação interestadual"); }
+// TODO: essa verificacao deve ser feita logo ao abrir a tela de emissao
+void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabInterestadual->setEnabled((text == "2 Operação interestadual")); }
 
 void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
   ui->doubleSpinBoxValorFrete->setEnabled(checked);

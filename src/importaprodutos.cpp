@@ -411,6 +411,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   const QLocale locale(QLocale::Portuguese);
 
+  // TODO: The 'fornecedor' local variable possesses the same name as one of the class members, which can result in a confusion.
   QVariant fornecedor = xlsx.readValue(row, 1);
   QVariant descricao = xlsx.readValue(row, 2);
   QVariant un = xlsx.readValue(row, 3);
@@ -445,6 +446,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   if (precoVenda.userType() == QMetaType::QString) { precoVenda = locale.toDouble(precoVenda.toString()); }
   precoVenda = qApp->roundDouble(precoVenda.toDouble());
 
+  // TODO: The 'ui' local variable possesses the same name as one of the class members, which can result in a confusion.
   QVariant ui = xlsx.readValue(row, 15);
   QVariant un2 = xlsx.readValue(row, 16);
 
@@ -721,6 +723,7 @@ void ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
 void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   const QString ncm = produto.ncm;
   const QString codBarras = produto.codBarras;
+  // TODO: The 'fornecedor' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QString fornecedor = produto.fornecedor;
   const QString un = produto.un;
   const QString codComercial = produto.codComercial;

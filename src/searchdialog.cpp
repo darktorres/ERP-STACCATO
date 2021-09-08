@@ -94,6 +94,9 @@ void SearchDialog::buscaProduto(const QString &searchFilter) {
 }
 
 void SearchDialog::on_lineEditBusca_textChanged() {
+  // TODO: na busca por CPF de cliente não encontra nada porque o cpf é armazenado com . e -
+  // armazenar CPF/CNPJ sem pontos/hifens e usar um delegate para formatar na exibicao
+
   QString text;
 
   const auto lineEdits = ui->frameLineEdit->findChildren<QLineEdit *>();

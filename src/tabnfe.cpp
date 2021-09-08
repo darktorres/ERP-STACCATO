@@ -29,3 +29,7 @@ void TabNFe::resetTables() {
 }
 
 void TabNFe::on_tabWidgetNfe_currentChanged() { updateTables(); }
+
+// TODO: colocar uma terceira aba para NFes de produtos comprados em lojas de terceiro para reposicao (não devem entrar na tela de NFes da staccato pois não entram no financeiro/não devem ter impostos
+// calculados/não devem ser enviadas para a contabilidade)
+// não deve criar estoque??

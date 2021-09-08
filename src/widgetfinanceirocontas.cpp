@@ -85,7 +85,9 @@ void WidgetFinanceiroContas::setConnections() {
 void WidgetFinanceiroContas::updateTables() {
   if (not isSet) {
     timer.setSingleShot(true);
+
     ui->radioButtonPendente->setChecked(true);
+
     ui->dateEditRealizadoAte->setDate(qApp->serverDate());
     ui->dateEditRealizadoDe->setDate(qApp->serverDate());
     ui->dateEditVencimentoAte->setDate(qApp->serverDate());
@@ -443,29 +445,39 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   SqlQuery queryPagamento;
-  queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
-  queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
+  queryPagamento.prepare("SELECT grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
 
-  if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+  for (auto &index : list) {
+    queryPagamento.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
 
-  if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: " + model.data(list.first().row(), "idPagamento").toString()); }
+    if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-  if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
+    if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: " + model.data(index.row(), "idPagamento").toString()); }
+
+    if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
+  }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Reverter");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
+    qApp->startTransaction("");
+
     SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
+    for (auto &index : list) {
+      query.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
+
+      if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
+    }
+
+    qApp->endTransaction();
 
     updateTables();
 
-    qApp->enqueueInformation("Lançamento revertido com sucesso!", this);
+    qApp->enqueueInformation("Lançamentos revertidos com sucesso!", this);
   }
 }
 

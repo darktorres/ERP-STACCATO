@@ -518,7 +518,7 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
   const QString fornecedor = model.data(row, "fornecedor").toString();
   const QString codComercial = model.data(row, "codComercial").toString();
 
-  const QString url = "https://" + ip + "/webdav/METAIS_VIVIANE/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
+  const QString url = "https://" + ip + "/webdav/SISTEMA/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
 
   auto *manager = new QNetworkAccessManager(this);
   manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);

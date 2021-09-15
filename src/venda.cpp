@@ -1220,16 +1220,21 @@ void Venda::cancelamento() {
 
   if (not query4.exec()) { throw RuntimeException("Erro marcando produtos da venda como cancelados: " + query4.lastError().text()); }
 
+  // -------------------------------------------------------------------------
+
   SqlQuery query5;
   query5.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query5.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query5.exec()) { throw RuntimeException("Erro marcando produtos da venda como cancelados: " + query5.lastError().text()); }
 
+  // -------------------------------------------------------------------------
+
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) {
-      // TODO: é gerado crédito mesmo se a conta nao chegou a ser paga?
-      if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
+    const QString status = modelFluxoCaixa.data(row, "status").toString();
+    const QString tipo = modelFluxoCaixa.data(row, "tipo").toString();
+
+    if (status == "RECEBIDO" and tipo.contains("CONTA CLIENTE")) {
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 
       SqlQuery query6;
@@ -1241,11 +1246,15 @@ void Venda::cancelamento() {
     }
   }
 
+  // -------------------------------------------------------------------------
+
   SqlQuery query7;
   query7.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query7.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query7.exec()) { throw RuntimeException("Erro marcando contas como canceladas: " + query7.lastError().text()); }
+
+  // -------------------------------------------------------------------------
 
   SqlQuery query8;
   query8.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
@@ -1305,8 +1314,11 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     const QString status = modelFluxoCaixa.data(row, "status").toString();
+    const QString tipo = modelFluxoCaixa.data(row, "tipo").toString();
 
-    if (status == "RECEBIDO") { throw RuntimeError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this); }
+    if (status == "RECEBIDO" and not tipo.contains("CONTA CLIENTE")) {
+      throw RuntimeError("Um ou mais pagamentos foram recebidos!\nPeça para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
+    }
   }
 
   // -------------------------------------------------------------------------

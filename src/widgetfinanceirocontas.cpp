@@ -208,6 +208,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     filtros << "cp.desativado = FALSE";
 
+    // TODO: move query to Sql class
     model.setQuery(
         "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, cp.idVenda AS `cp_idVenda`, `cp`.`contraParte` AS `contraparte`, "
         "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`dataPagamento` AS `dataPagamento`, cp.dataRealizado AS dataRealizado, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT "

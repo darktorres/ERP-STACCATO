@@ -167,11 +167,14 @@ void InputDialogFinanceiro::setupTables() {
 
   modelPedidoFornecedor2.setTable("pedido_fornecedor_has_produto2");
 
+  if (tipo == Tipo::Financeiro) {
+    modelPedidoFornecedor2.setHeaderData("status", "Status");
+    modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+    modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");
+  }
+
   modelPedidoFornecedor2.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor2.setHeaderData("st", "ST");
-  modelPedidoFornecedor2.setHeaderData("status", "Status");
-  modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
-  modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");
   modelPedidoFornecedor2.setHeaderData("idVenda", "Venda");
   modelPedidoFornecedor2.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor2.setHeaderData("descricao", "Produto");
@@ -188,9 +191,15 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor2);
 
-  ui->table->hideColumn("idRelacionado");
+  if (tipo == Tipo::ConfirmarCompra) {
+    ui->table->hideColumn("status");
+    ui->table->hideColumn("ordemRepresentacao");
+    ui->table->hideColumn("codFornecedor");
+  }
+
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idPedidoFK");
+  ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
@@ -199,6 +208,9 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("quantUpd");
+  ui->table->hideColumn("un2");
+  ui->table->hideColumn("kgcx");
+  ui->table->hideColumn("formComercial");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
@@ -212,15 +224,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
-  ui->table->hideColumn("un2");
-  ui->table->hideColumn("kgcx");
-  ui->table->hideColumn("formComercial");
-
-  if (tipo == Tipo::ConfirmarCompra) {
-    ui->table->hideColumn("status");
-    ui->table->hideColumn("ordemRepresentacao");
-    ui->table->hideColumn("codFornecedor");
-  }
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
@@ -247,15 +250,15 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
-  ui->tableFluxoCaixa->hideColumn("idVenda");
-  ui->tableFluxoCaixa->hideColumn("idCnab");
-  ui->tableFluxoCaixa->hideColumn("idNFe");
-  ui->tableFluxoCaixa->hideColumn("nfe");
-  ui->tableFluxoCaixa->hideColumn("contraParte");
-  ui->tableFluxoCaixa->hideColumn("idCompra");
-  ui->tableFluxoCaixa->hideColumn("idLoja");
   ui->tableFluxoCaixa->hideColumn("idPagamento");
   ui->tableFluxoCaixa->hideColumn("dataEmissao");
+  ui->tableFluxoCaixa->hideColumn("idCompra");
+  ui->tableFluxoCaixa->hideColumn("idVenda");
+  ui->tableFluxoCaixa->hideColumn("idLoja");
+  ui->tableFluxoCaixa->hideColumn("contraParte");
+  ui->tableFluxoCaixa->hideColumn("idNFe");
+  ui->tableFluxoCaixa->hideColumn("idCnab");
+  ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("dataRealizado");
   ui->tableFluxoCaixa->hideColumn("valorReal");
   ui->tableFluxoCaixa->hideColumn("tipoReal");
@@ -269,9 +272,9 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
+  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("dataPagamento", new EditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
-  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 }
 
 void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {

@@ -87,33 +87,24 @@ void InputDialogProduto::setupTables() {
   if (tipo == Tipo::GerarCompra) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto"); }
   if (tipo == Tipo::Faturamento) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2"); }
 
+  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
+  modelPedidoFornecedor.setHeaderData("st", "ST");
   modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
+  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
   modelPedidoFornecedor.setHeaderData("colecao", "Coleção");
+  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
+  modelPedidoFornecedor.setHeaderData("quant", "Quant.");
+  modelPedidoFornecedor.setHeaderData("un", "Un.");
   modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
   modelPedidoFornecedor.setHeaderData("prcUnitario", "R$ Unit.");
-  modelPedidoFornecedor.setHeaderData("quant", "Quant.");
   modelPedidoFornecedor.setHeaderData("preco", "Total");
-  modelPedidoFornecedor.setHeaderData("un", "Un.");
-  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
-  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
-  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
-  modelPedidoFornecedor.setHeaderData("st", "ST");
 
   modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
 
   ui->table->setModel(&modelPedidoFornecedor);
-
-  ui->table->hideColumn("idRelacionado");
-  ui->table->hideColumn("idVendaProduto1");
-  ui->table->hideColumn("idVendaProduto2");
-  ui->table->hideColumn("codFornecedor");
-  ui->table->hideColumn("statusFinanceiro");
-  ui->table->hideColumn("ordemCompra");
-  ui->table->hideColumn("quantUpd");
-  ui->table->hideColumn("selecionado");
 
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
 
@@ -122,13 +113,21 @@ void InputDialogProduto::setupTables() {
     ui->table->hideColumn("idPedidoFK");
   }
 
+  ui->table->hideColumn("status");
+  ui->table->hideColumn("idRelacionado");
+  ui->table->hideColumn("selecionado");
+  ui->table->hideColumn("statusFinanceiro");
+  ui->table->hideColumn("ordemCompra");
+  ui->table->hideColumn("codFornecedor");
+  ui->table->hideColumn("idVendaProduto1");
+  ui->table->hideColumn("idVendaProduto2");
+  ui->table->hideColumn("idCompra");
+  ui->table->hideColumn("idProduto");
+  ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("un2");
   ui->table->hideColumn("kgcx");
-
-  ui->table->hideColumn("idProduto");
+  ui->table->hideColumn("formComercial");
   ui->table->hideColumn("codBarras");
-  ui->table->hideColumn("idCompra");
-  ui->table->hideColumn("status");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");
@@ -141,24 +140,26 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
-  ui->table->hideColumn("formComercial");
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
   ui->table->setItemDelegateForColumn("obs", new EditDelegate(this));
 
   if (tipo == Tipo::GerarCompra) {
-    ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-    ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
+    ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
     ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
     ui->table->setItemDelegateForColumn("caixas", new EditDelegate(this));
+    ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+    ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   }
 
-  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
-
-  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+  if (tipo == Tipo::Faturamento) {
+    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
+    ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this));
+    ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(2, true, this));
+    ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(2, true, this));
+  }
 }
 
 void InputDialogProduto::setFilter(const QStringList &ids) {

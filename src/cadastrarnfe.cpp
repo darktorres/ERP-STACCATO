@@ -374,7 +374,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbrRemoto);
 
-  if (not validarRegras(acbrRemoto, filePath)) { return; }
+  // TODO: reativar depois de arrumar os spinBoxs para considerar 4 decimais
+  //  if (not validarRegras(acbrRemoto, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
 

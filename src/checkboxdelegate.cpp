@@ -44,3 +44,5 @@ void CheckBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());
   emit commitData(editor);
 }
+
+// TODO: trocar checkbox por ✓✔☑✅√ ✖✘✗✕

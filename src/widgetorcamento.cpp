@@ -41,9 +41,6 @@ void WidgetOrcamento::setWidgets() {
       ui->frameVendedores->hide();
     }
 
-    // TODO: remove this?
-    if (User::nome == "VIVIANE") { ui->frameVendedores->show(); }
-
     (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
     ui->dateEditMes->setDate(qApp->serverDate());

@@ -894,3 +894,4 @@ void Devolucao::alterarLinhaOriginal(const int currentRow) {
 // TODO: 2. adicionar devolucao de frete quando houver
 // TODO: 2. criar linha no followup
 // TODO: 2. quando for devolver para o fornecedor perguntar a quantidade
+// TODO: ativar ordenação nas tabelas?

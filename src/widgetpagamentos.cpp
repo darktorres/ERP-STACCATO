@@ -332,7 +332,7 @@ void WidgetPagamentos::setTipo(const Tipo novoTipo) {
 void WidgetPagamentos::setTotal(const double value) {
   total = value;
 
-  for (auto *const doubleSpinBoxPgt : listValorPgt) { doubleSpinBoxPgt->setMaximum(total); }
+  for (auto *const doubleSpinBoxPgt : qAsConst(listValorPgt)) { doubleSpinBoxPgt->setMaximum(total); }
 }
 
 void WidgetPagamentos::setFrete(const double value) { frete = value; }

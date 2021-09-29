@@ -530,9 +530,6 @@ void Devolucao::salvarCredito() {
 }
 
 void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2) {
-  // TODO: The 'idVenda' local variable possesses the same name as one of the class members, which can result in a confusion.
-  const QString idVenda = modelProdutos2.data(currentRow, "idVenda").toString();
-
   determinarIdDevolucao();
 
   criarComissaoProfissional(currentRow);

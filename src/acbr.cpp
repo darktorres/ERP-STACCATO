@@ -85,7 +85,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   const QString respostaSalvar = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
 
-  if (not respostaSalvar.contains("OK")) { throw RuntimeException(respostaSalvar); }
+  if (not respostaSalvar.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException(respostaSalvar); }
 
   //  qDebug() << "respostaSalvar: " << respostaSalvar;
 
@@ -95,13 +95,13 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   //  qDebug() << "respostaConsultar: " << respostaConsultar;
 
-  if (respostaConsultar.contains("NF-e não consta na base de dados da SEFAZ")) {
+  if (respostaConsultar.contains("NF-e não consta na base de dados da SEFAZ", Qt::CaseInsensitive)) {
     removerNota(idNFe);
     throw RuntimeException("NFe não consta na SEFAZ, removendo do sistema...");
   }
 
-  if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e") and not respostaConsultar.contains("xEvento=Cancelamento registrado") and
-      not respostaConsultar.contains("XMotivo=Uso Denegado")) {
+  if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e", Qt::CaseInsensitive) and not respostaConsultar.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive) and
+      not respostaConsultar.contains("XMotivo=Uso Denegado", Qt::CaseInsensitive)) {
     throw RuntimeException(respostaConsultar);
   }
 
@@ -109,7 +109,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   QString respostaCarregar = enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
-  if (not respostaCarregar.contains("OK")) { throw RuntimeException(respostaCarregar); }
+  if (not respostaCarregar.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException(respostaCarregar); }
 
   //  qDebug() << "respostaCarregar: " << respostaCarregar;
 
@@ -194,7 +194,7 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not respostaEmail.contains("OK: E-mail enviado com sucesso!")) { throw RuntimeException(respostaEmail); }
+  if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) { throw RuntimeException(respostaEmail); }
 
   qApp->enqueueInformation(respostaEmail);
 }

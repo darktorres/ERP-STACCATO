@@ -758,15 +758,15 @@ void Venda::montarFluxoCaixa() {
 
   const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
 
-  for (int pagamento = 0; pagamento < ui->widgetPgts->qtdPagamentos; ++pagamento) {
-    if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
+  for (auto *pgt : ui->widgetPgts->pagamentos) {
+    if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
 
     // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
 
     //-----------------------------------------------------------------
 
-    const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
-    const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
+    const QString tipoPgt = pgt->comboTipoPgt->currentText();
+    const int parcelas = pgt->comboParcela->currentIndex() + 1;
 
     //-----------------------------------------------------------------
 
@@ -780,10 +780,10 @@ void Venda::montarFluxoCaixa() {
       modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
       modelFluxoCaixa.setData(row, "idLoja", idLoja);
       modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao);
-      modelFluxoCaixa.setData(row, "valor", ui->widgetPgts->listValorPgt.at(pagamento)->value());
-      modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);
+      modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value());
+      modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
       modelFluxoCaixa.setData(row, "parcela", 1);
-      modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(pagamento)->text());
+      modelFluxoCaixa.setData(row, "observacao", pgt->observacao->text());
       modelFluxoCaixa.setData(row, "representacao", false);
       const int creditoClientes = 11;
       modelFluxoCaixa.setData(row, "idConta", creditoClientes);
@@ -814,10 +814,10 @@ void Venda::montarFluxoCaixa() {
     //-----------------------------------------------------------------
     // calcular pagamento
 
-    const bool isRepresentacao = ui->widgetPgts->listCheckBoxRep.at(pagamento)->isChecked();
-    const QString observacaoPgt = ui->widgetPgts->listObservacao.at(pagamento)->text();
+    const bool isRepresentacao = pgt->checkBoxRep->isChecked();
+    const QString observacaoPgt = pgt->observacao->text();
 
-    const double valor = ui->widgetPgts->listValorPgt.at(pagamento)->value();
+    const double valor = pgt->valorPgt->value();
     const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
     const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
 
@@ -835,7 +835,7 @@ void Venda::montarFluxoCaixa() {
       modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
       modelFluxoCaixa.setData(row, "idLoja", idLoja);
 
-      QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
+      QDate dataPgt = pgt->dataPgt->date();
       if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
       if (pula1Mes) { dataPgt = dataPgt.addMonths(1); }
       dataPgt = dataPgt.addMonths(parcela);
@@ -851,7 +851,7 @@ void Venda::montarFluxoCaixa() {
       if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
 
       modelFluxoCaixa.setData(row, "valor", val);
-      modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt);
+      modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
       modelFluxoCaixa.setData(row, "parcela", parcela + 1);
       modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
       modelFluxoCaixa.setData(row, "representacao", isRepresentacao);
@@ -879,7 +879,7 @@ void Venda::montarFluxoCaixa() {
         if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val1 += restoTaxa; }
 
         modelFluxoCaixa2.setData(rowTaxa, "valor", val1);
-        modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pagamento + 1) + ". Taxa Cartão");
+        modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pgt->posicao) + ". Taxa Cartão");
         modelFluxoCaixa2.setData(rowTaxa, "parcela", parcela + 1);
         modelFluxoCaixa2.setData(rowTaxa, "taxa", true);
         modelFluxoCaixa2.setData(rowTaxa, "idConta", idConta);
@@ -904,7 +904,7 @@ void Venda::montarFluxoCaixa() {
         modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja);
         modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1));
         modelFluxoCaixa2.setData(rowComissao, "valor", valorComissao);
-        modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pagamento + 1) + ". Comissão");
+        modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pgt->posicao) + ". Comissão");
         modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1);
         modelFluxoCaixa2.setData(rowComissao, "comissao", true);
         modelFluxoCaixa2.setData(rowComissao, "centroCusto", idLoja);
@@ -1064,9 +1064,9 @@ void Venda::atualizarCredito() {
   double creditoUsado = 0;
   bool update = false;
 
-  for (int i = 0; i < ui->widgetPgts->qtdPagamentos; ++i) {
-    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") {
-      creditoUsado += ui->widgetPgts->listValorPgt.at(i)->value();
+  for (auto *pgt : ui->widgetPgts->pagamentos) {
+    if (pgt->comboTipoPgt->currentText() == "CONTA CLIENTE") {
+      creditoUsado += pgt->valorPgt->value();
       update = true;
     }
   }

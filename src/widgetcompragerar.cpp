@@ -454,11 +454,11 @@ QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ord
 void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
 
 void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+  const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
 
-  const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
+  const QString filtro = fornecedor.isEmpty() ? "0" : "status = 'PENDENTE' AND fornecedor = '" + fornecedor + "'";
 
-  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
+  modelProdutos.setFilter(filtro);
 }
 
 void WidgetCompraGerar::cancelar(const QModelIndexList &list) {

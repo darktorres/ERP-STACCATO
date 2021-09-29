@@ -174,7 +174,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 
   //-------------------------------------------
 
-  if (not resposta.contains("OK")) { throw RuntimeException("ACBR " + resposta, this); }
+  if (not resposta.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException("ACBR " + resposta, this); }
 
   const QStringList respostaSplit = resposta.remove("OK: ").split("\r\n", Qt::SkipEmptyParts);
 
@@ -338,7 +338,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
 }
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
-  if (resposta.contains("xMotivo=Rejeição")) {
+  if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
     qDebug() << "rejeicao";
 
     removerNota(idNFe);
@@ -349,7 +349,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     throw RuntimeException(rejeicao, this);
   }
 
-  if (resposta.contains("Erro Interno")) {
+  if (resposta.contains("Erro Interno", Qt::CaseInsensitive)) {
     qDebug() << "erro interno sefaz";
 
     removerNota(idNFe);
@@ -358,7 +358,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
 
-  if (resposta.contains("Autorizado o uso da NF-e") or resposta.contains("Uso Denegado")) { return carregarArquivo(acbrRemoto, filePath); }
+  if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbrRemoto, filePath); }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
   throw RuntimeException("Resposta não tratada:\n" + resposta);
@@ -374,7 +374,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbrRemoto);
 
-  if (not validarRegras(acbrRemoto, filePath)) { return; }
+  // TODO: reativar depois de arrumar os spinBoxs para considerar 4 decimais
+  //  if (not validarRegras(acbrRemoto, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
 
@@ -398,8 +399,8 @@ void CadastrarNFe::cadastrar(const int idNFe) {
   queryNFe.bindValue(":xml", xml);
   queryNFe.bindValue(":idNFe", idNFe);
 
-  if (xml.contains("Autorizado o uso da NF-e")) { queryNFe.bindValue(":status", "AUTORIZADO"); }
-  if (xml.contains("Uso Denegado")) { queryNFe.bindValue(":status", "DENEGADA"); }
+  if (xml.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive)) { queryNFe.bindValue(":status", "AUTORIZADO"); }
+  if (xml.contains("Uso Denegado", Qt::CaseInsensitive)) { queryNFe.bindValue(":status", "DENEGADA"); }
 
   if (not queryNFe.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + queryNFe.lastError().text()); }
 }
@@ -1436,12 +1437,12 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
   const QString resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
 
-  if (resposta.contains("CStat=111")) { // Consulta cadastro com uma ocorrência
-    QStringList respostaSplit = resposta.split("\r\n", Qt::SkipEmptyParts).filter("IE=");
+  if (resposta.contains("CStat=111", Qt::CaseInsensitive)) { // Consulta cadastro com uma ocorrência
+    QStringList respostaSplit = resposta.split("\r\n", Qt::SkipEmptyParts).filter("IE=", Qt::CaseInsensitive);
 
     if (respostaSplit.empty()) { throw RuntimeException("Não foi encontrado a inscrição estadual na consulta!"); }
 
-    const QString inscricao = respostaSplit.first().remove("IE=");
+    const QString inscricao = respostaSplit.first().remove("IE=", Qt::CaseInsensitive);
 
     if (not inscricao.isEmpty()) {
       ui->lineEditDestinatarioInscEst->setText(inscricao);
@@ -1457,7 +1458,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
     return qApp->enqueueInformation("Consulta com sucesso, atualizando dados...", this);
   }
 
-  if (resposta.contains("CStat=259")) { // CNPJ da consulta não cadastrado como contribuinte na UF
+  if (resposta.contains("CStat=259", Qt::CaseInsensitive)) { // CNPJ da consulta não cadastrado como contribuinte na UF
     ui->lineEditDestinatarioInscEst->clear();
 
     SqlQuery query;
@@ -1493,7 +1494,7 @@ void CadastrarNFe::on_itemBoxLoja_textChanged() {
 
   //  const QString resposta = acbrRemoto.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
 
-  //  if (not resposta.contains("OK")) {
+  //  if (not resposta.contains("OK", Qt::CaseInsensitive)) {
   //    ui->itemBoxLoja->clear();
   //    throw RuntimeException("ACBR " + resposta);
   //  }
@@ -1626,9 +1627,9 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 
   qApp->endTransaction();
 
-  if (xml.contains("Uso Denegado")) {
+  if (xml.contains("Uso Denegado", Qt::CaseInsensitive)) {
     // TODO: desvincular do pedido para que possa ser feito outra nfe
-    throw RuntimeError(resposta.mid(resposta.indexOf("\r\nMsg=") + 6).split("\r\n").first());
+    throw RuntimeError(resposta.mid(resposta.indexOf("\r\nMsg=", 0, Qt::CaseInsensitive) + 6).split("\r\n").first());
   }
 
   qApp->enqueueInformation("Autorizado o uso da NF-e!", this);
@@ -1648,7 +1649,7 @@ void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
   // TODO: testar se comando deu ok
   QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
-  xml = resposta.remove("OK: ");
+  xml = resposta.remove("OK: ", Qt::CaseInsensitive);
 }
 
 void CadastrarNFe::preencherDadosNFe() {
@@ -2042,7 +2043,7 @@ void CadastrarNFe::preencherTransporte() {
 bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
   const QString resposta = acbrRemoto.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")");
 
-  if (not resposta.startsWith("OK:")) {
+  if (not resposta.startsWith("OK:", Qt::CaseInsensitive)) {
     QStringList lines = resposta.split("\r\n", Qt::SkipEmptyParts);
     lines.removeFirst();
 

@@ -101,7 +101,7 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
   const auto lineEdits = ui->frameLineEdit->findChildren<QLineEdit *>();
 
-  for (auto lineEdit : lineEdits) { text += qApp->sanitizeSQL(lineEdit->text()); }
+  for (const auto *lineEdit : lineEdits) { text += qApp->sanitizeSQL(lineEdit->text()); }
 
   if (text.isEmpty() and model.tableName() == "profissional") { return model.setFilter("idProfissional = 1"); }
 
@@ -554,10 +554,10 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
 }
 
 void SearchDialog::setupSearchWidgets() {
-  auto frameLayout = ui->frameLineEdit->layout();
+  auto *frameLayout = ui->frameLineEdit->layout();
 
-  for (auto &fullText : fullTextIndexes) {
-    auto lineEdit = new QLineEdit(this);
+  for (const auto &fullText : fullTextIndexes) {
+    auto *lineEdit = new QLineEdit(this);
     lineEdit->setPlaceholderText(fullText.placeHolder);
     lineEdit->setClearButtonEnabled(true);
     connect(lineEdit, &QLineEdit::textChanged, this, &SearchDialog::delayFiltro);

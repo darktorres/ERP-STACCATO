@@ -5,6 +5,7 @@
 #include <QDateEdit>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
+#include <QLabel>
 
 namespace Ui {
 class WidgetPagamentos;

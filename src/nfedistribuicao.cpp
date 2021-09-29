@@ -199,10 +199,10 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   qDebug() << "pesquisar nsu: " << ultimoNSU;
   const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + "\", " + QString::number(ultimoNSU) + ")");
 
-  if (resposta.contains("Consumo Indevido")) { tempoTimer = 1h; }
-  if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { tempoTimer = 1h; }
+  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 
-  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado")) ? 1h : 15min;
+  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado", Qt::CaseInsensitive)) ? 1h : 15min;
 
   //----------------------------------------------------------
 
@@ -299,9 +299,9 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
 
   for (const auto &evento : eventos) {
-    if (evento.contains("[DistribuicaoDFe]")) { processarEventoPrincipal(evento, idLoja); }
-    if (evento.contains("[ResDFe")) { processarEventoNFe(evento); }
-    if (evento.contains("[ResEve")) { processarEventoInformacao(evento); }
+    if (evento.contains("[DistribuicaoDFe]", Qt::CaseInsensitive)) { processarEventoPrincipal(evento, idLoja); }
+    if (evento.contains("[ResDFe", Qt::CaseInsensitive)) { processarEventoNFe(evento); }
+    if (evento.contains("[ResEve", Qt::CaseInsensitive)) { processarEventoInformacao(evento); }
   }
 }
 
@@ -458,7 +458,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
   const QString resposta = acbrRemoto.enviarComando(comando);
 
-  if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
+  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 
   //----------------------------------------------------------
 
@@ -471,25 +471,25 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
     //----------------------------------------------------------
 
-    auto lineMotivo = split.filter("XMotivo=");
+    auto lineMotivo = split.filter("XMotivo=", Qt::CaseInsensitive);
 
     if (lineMotivo.empty()) { throw RuntimeException("Não encontrou o campo 'XMotivo': " + evento); }
 
-    const QString motivo = lineMotivo.first().remove("XMotivo=");
+    const QString motivo = lineMotivo.first().remove("XMotivo=", Qt::CaseInsensitive);
 
     if (motivo == "Lote de evento processado") { continue; }
 
     //----------------------------------------------------------
 
-    auto lineChave = split.filter("chNFe=");
+    auto lineChave = split.filter("chNFe=", Qt::CaseInsensitive);
 
     if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chNFe': " + evento); }
 
-    const QString chaveAcesso = lineChave.first().remove("chNFe=");
+    const QString chaveAcesso = lineChave.first().remove("chNFe=", Qt::CaseInsensitive);
 
     //----------------------------------------------------------
 
-    if (motivo.contains("Evento de Ciencia da Operacao informado apos a manifestacao final do destinatario")) {
+    if (motivo.contains("Evento de Ciencia da Operacao informado apos a manifestacao final do destinatario", Qt::CaseInsensitive)) {
       SqlQuery query;
 
       if (not query.exec("UPDATE nfe SET statusDistribuicao = 'FINALIZADA', dataDistribuicao = NOW(), "
@@ -502,7 +502,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
       continue;
     }
 
-    if (motivo.contains("Rejeicao:") and motivo.contains("para NFe cancelada ou denegada")) {
+    if (motivo.contains("Rejeicao:", Qt::CaseInsensitive) and motivo.contains("para NFe cancelada ou denegada", Qt::CaseInsensitive)) {
       SqlQuery query;
 
       if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', "
@@ -515,7 +515,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
       continue;
     }
 
-    if (motivo.contains("Evento registrado e vinculado a NF-e") or motivo.contains("Rejeicao: Duplicidade de evento")) {
+    if (motivo.contains("Evento registrado e vinculado a NF-e", Qt::CaseInsensitive) or motivo.contains("Rejeicao: Duplicidade de evento", Qt::CaseInsensitive)) {
       SqlQuery query;
 
       if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
@@ -634,13 +634,13 @@ void NFeDistribuicao::processarEventoPrincipal(const QString &evento, const QStr
 
   //----------------------------------------------------------
 
-  auto lineMaxNSU = split.filter("maxNSU=");
-  auto lineUltNSU = split.filter("ultNSU=");
+  auto lineMaxNSU = split.filter("maxNSU=", Qt::CaseInsensitive);
+  auto lineUltNSU = split.filter("ultNSU=", Qt::CaseInsensitive);
 
   if (lineMaxNSU.empty() or lineUltNSU.empty()) { throw RuntimeException("Não encontrou o campo 'maxNSU/ultNSU': " + evento); }
 
-  const QString maxNSU = lineMaxNSU.first().remove("maxNSU=");
-  const QString ultNSU = lineUltNSU.first().remove("ultNSU=");
+  const QString maxNSU = lineMaxNSU.first().remove("maxNSU=", Qt::CaseInsensitive);
+  const QString ultNSU = lineUltNSU.first().remove("ultNSU=", Qt::CaseInsensitive);
 
   maximoNSU = maxNSU.toInt();
   ultimoNSU = ultNSU.toInt();
@@ -659,60 +659,60 @@ void NFeDistribuicao::processarEventoNFe(const QString &evento) {
 
   //----------------------------------------------------------
 
-  auto lineChave = split.filter("chDFe=");
+  auto lineChave = split.filter("chDFe=", Qt::CaseInsensitive);
 
   if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chDFe': " + evento); }
 
-  const QString chaveAcesso = lineChave.first().remove("chDFe=");
+  const QString chaveAcesso = lineChave.first().remove("chDFe=", Qt::CaseInsensitive);
   const QString numeroNFe = chaveAcesso.mid(25, 9);
 
   //----------------------------------------------------------
 
-  auto lineCnpj = split.filter("CNPJCPF=");
+  auto lineCnpj = split.filter("CNPJCPF=", Qt::CaseInsensitive);
 
   if (lineCnpj.empty()) { throw RuntimeException("Não encontrou o campo 'CNPJCPF': " + evento); }
 
-  const QString cnpjOrig = lineCnpj.first().remove("CNPJCPF=");
+  const QString cnpjOrig = lineCnpj.first().remove("CNPJCPF=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineNome = split.filter("EmixNome=");
+  auto lineNome = split.filter("EmixNome=", Qt::CaseInsensitive);
 
   if (lineNome.empty()) { throw RuntimeException("Não encontrou o campo 'EmixNome': " + evento); }
 
-  const QString nomeEmitente = lineNome.first().remove("EmixNome=");
+  const QString nomeEmitente = lineNome.first().remove("EmixNome=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineValor = split.filter("vNF=");
+  auto lineValor = split.filter("vNF=", Qt::CaseInsensitive);
 
   if (lineValor.empty()) { throw RuntimeException("Não encontrou o campo 'vNF': " + evento); }
 
-  const QString valor = lineValor.first().remove("vNF=").replace(',', '.');
+  const QString valor = lineValor.first().remove("vNF=", Qt::CaseInsensitive).replace(',', '.');
 
   //----------------------------------------------------------
 
-  auto lineNSU = split.filter("NSU=");
+  auto lineNSU = split.filter("NSU=", Qt::CaseInsensitive);
 
   if (lineNSU.empty()) { throw RuntimeException("Não encontrou o campo 'NSU': " + evento); }
 
-  const QString nsu = lineNSU.first().remove("NSU=");
+  const QString nsu = lineNSU.first().remove("NSU=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineXML = split.filter("XML=");
+  auto lineXML = split.filter("XML=", Qt::CaseInsensitive);
 
   if (lineXML.empty()) { throw RuntimeException("Não encontrou o campo 'XML': " + evento); }
 
-  const QString xml = lineXML.first().remove("XML=");
+  const QString xml = lineXML.first().remove("XML=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineSchema = split.filter("schema=");
+  auto lineSchema = split.filter("schema=", Qt::CaseInsensitive);
 
   if (lineSchema.empty()) { throw RuntimeException("Não encontrou o campo 'schema': " + evento); }
 
-  const QString schemaEvento = lineSchema.first().remove("schema=");
+  const QString schemaEvento = lineSchema.first().remove("schema=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
@@ -771,7 +771,7 @@ void NFeDistribuicao::processarEventoNFe(const QString &evento) {
 }
 
 void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
-  if (evento.contains("Comprovante de Entrega do CT-e")) { return; }
+  if (evento.contains("Comprovante de Entrega do CT-e", Qt::CaseInsensitive)) { return; }
 
   //----------------------------------------------------------
 
@@ -779,27 +779,27 @@ void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
 
   //----------------------------------------------------------
 
-  auto lineEvento = split.filter("xEvento=");
+  auto lineEvento = split.filter("xEvento=", Qt::CaseInsensitive);
 
   if (lineEvento.empty()) { throw RuntimeException("Não encontrou o campo 'xEvento': " + evento); }
 
-  const QString eventoTipo = lineEvento.first().remove("xEvento=");
+  const QString eventoTipo = lineEvento.first().remove("xEvento=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineMotivo = split.filter("xMotivo=");
+  auto lineMotivo = split.filter("xMotivo=", Qt::CaseInsensitive);
 
   if (lineMotivo.empty()) { throw RuntimeException("Não encontrou o campo 'xMotivo': " + evento); }
 
-  const QString motivo = lineMotivo.first().remove("xMotivo=");
+  const QString motivo = lineMotivo.first().remove("xMotivo=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
-  auto lineChave = split.filter("chDFe=");
+  auto lineChave = split.filter("chDFe=", Qt::CaseInsensitive);
 
   if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chNFe': " + evento); }
 
-  const QString chaveAcesso = lineChave.first().remove("chDFe=");
+  const QString chaveAcesso = lineChave.first().remove("chDFe=", Qt::CaseInsensitive);
 
   //----------------------------------------------------------
 
@@ -817,7 +817,7 @@ void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
 
     if (nsuCadastrado == 0) { return; } // se NFe foi importada manualmente não fazer eventos de ciência
 
-    if (motivo.contains("Evento registrado e vinculado a NF-e")) {
+    if (motivo.contains("Evento registrado e vinculado a NF-e", Qt::CaseInsensitive)) {
       if (eventoTipo == "Ciencia da Operacao" and statusCadastrado == "DESCONHECIDO") {
         SqlQuery queryAtualiza;
 

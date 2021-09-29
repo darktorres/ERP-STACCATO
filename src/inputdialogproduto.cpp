@@ -2,6 +2,7 @@
 #include "ui_inputdialogproduto.h"
 
 #include "application.h"
+#include "comboboxdelegate.h"
 #include "editdelegate.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"

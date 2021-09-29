@@ -447,7 +447,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
 void WidgetPagamentos::verifyFields() {
   for (auto *pgt : pagamentos) {
-    if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pgt->posicao) + "!"); }
+    if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pgt->posicao) + "!"); }
 
     if (qFuzzyIsNull(pgt->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(pgt->posicao) + " está com valor 0!"); }
 

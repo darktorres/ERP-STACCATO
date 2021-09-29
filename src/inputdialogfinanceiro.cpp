@@ -293,7 +293,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       }
 
       for (auto *pgt : ui->widgetPgts->pagamentos) {
-        if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO") { continue; }
+        if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
 
         const QString tipoPgt = pgt->comboTipoPgt->currentText();
         const int parcelas = pgt->comboParcela->currentIndex() + 1;

@@ -189,7 +189,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const QString resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
-  if (not resposta.contains("xEvento=Cancelamento registrado")) { throw RuntimeException("Resposta: " + resposta); }
+  if (not resposta.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive)) { throw RuntimeException("Resposta: " + resposta); }
 
   qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe");
 
@@ -391,9 +391,9 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
   QString status;
 
-  if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
-  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CANCELADA"; }
-  if (resposta.contains("XMotivo=Uso Denegado")) { status = "DENEGADA"; }
+  if (resposta.contains("XMotivo=Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADO"; }
+  if (resposta.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive)) { status = "CANCELADA"; }
+  if (resposta.contains("XMotivo=Uso Denegado", Qt::CaseInsensitive)) { status = "DENEGADA"; }
 
   if (status.isEmpty()) { throw RuntimeException("Erro status vazio!"); }
 

@@ -5,10 +5,32 @@
 #include <QDateEdit>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
+#include <QLabel>
 
 namespace Ui {
 class WidgetPagamentos;
 }
+
+class Pagamento : public QWidget {
+  Q_OBJECT
+
+public:
+  enum class TipoPgt { Normal, Frete, ST };
+  Q_ENUM(TipoPgt)
+
+  explicit Pagamento(TipoPgt tipoPgt, QWidget *parent) : QWidget(parent), tipoPgt(tipoPgt) {}
+
+  int posicao = 0;
+  QLabel *label = nullptr;
+  QCheckBox *checkBoxRep = nullptr;
+  QComboBox *comboTipoPgt = nullptr;
+  QComboBox *comboTipoData = nullptr;
+  QComboBox *comboParcela = nullptr;
+  QDoubleSpinBox *valorPgt = nullptr;
+  QDateEdit *dataPgt = nullptr;
+  QLineEdit *observacao = nullptr;
+  TipoPgt tipoPgt;
+};
 
 class WidgetPagamentos final : public QWidget {
   Q_OBJECT
@@ -32,16 +54,9 @@ public:
   auto setTotal(const double value) -> void;
   auto verifyFields() -> void;
 
-  // TODO: make private?
-  // attributes
-  int qtdPagamentos = 0;
-  QList<QCheckBox *> listCheckBoxRep;
-  QList<QComboBox *> listTipoPgt;
-  QList<QComboBox *> listTipoData;
-  QList<QComboBox *> listParcela;
-  QList<QDoubleSpinBox *> listValorPgt;
-  QList<QDateEdit *> listDataPgt;
-  QList<QLineEdit *> listObservacao;
+  QList<Pagamento *> pagamentos;
+  Pagamento *pgtFrete = nullptr;
+  Pagamento *pgtSt = nullptr;
 
 signals:
   void montarFluxoCaixa();
@@ -60,19 +75,19 @@ private:
   // methods
   auto calculaCreditoRestante() -> void;
   auto calcularTotal() -> void;
-  auto checkBoxRep(QFrame *frame, QLayout *layout) -> void;
-  auto comboBoxParc(QLayout *layout) -> void;
-  auto comboBoxPgtCompra(QLayout *layout) -> void;
-  auto comboBoxPgtVenda(QFrame *frame, QLayout *layout) -> void;
-  auto comboBoxTipoData(QLayout *layout) -> void;
-  auto dateEditPgt(QLayout *layout) -> void;
+  auto checkBoxRep(Pagamento *pgt) -> void;
+  auto comboBoxParc(Pagamento *pgt) -> void;
+  auto comboBoxPgtCompra(Pagamento *pgt) -> void;
+  auto comboBoxPgtVenda(Pagamento *pgt) -> void;
+  auto comboBoxTipoData(Pagamento *pgt) -> void;
+  auto dateEditPgt(Pagamento *pgt) -> void;
   auto deleteButton(QLayout *layout) -> void;
-  auto doubleSpinBoxPgt(QLayout *layout) -> void;
-  auto labelPagamento(QLayout *layout) -> void;
-  auto lineEditPgt(QLayout *layout) -> void;
+  auto doubleSpinBoxPgt(Pagamento *pgt) -> void;
+  auto labelPagamento(Pagamento *pgt) -> void;
+  auto lineEditPgt(Pagamento *pgt) -> void;
   auto on_comboBoxPgt_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxTipoData_currentTextChanged(const QString &text) -> void;
-  auto on_doubleSpinBoxPgt_valueChanged(const int index) -> void;
+  auto on_doubleSpinBoxPgt_valueChanged() -> void;
   auto on_pushButtonAdicionarPagamento_clicked(const bool addFrete = true) -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;

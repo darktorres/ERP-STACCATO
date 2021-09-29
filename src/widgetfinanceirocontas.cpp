@@ -448,7 +448,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   SqlQuery queryPagamento;
   queryPagamento.prepare("SELECT grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
 
-  for (auto &index : list) {
+  for (const auto &index : list) {
     queryPagamento.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
 
     if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
@@ -468,7 +468,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
 
-    for (auto &index : list) {
+    for (const auto &index : list) {
       query.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
 
       if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }

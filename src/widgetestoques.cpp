@@ -45,7 +45,7 @@ void WidgetEstoques::setHeaderData() {
   model.setHeaderData("descricao", "Produto");
   if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("caixasContabil", "Cx. Contábil"); }
   if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("contabil", "Contábil"); }
-  model.setHeaderData("caixas", "Cx Rest.");
+  model.setHeaderData("caixas", "Cx. Rest.");
   model.setHeaderData("restante", "Quant. Rest.");
   model.setHeaderData("unEst", "Un.");
   if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("unProd", "Un. Prod."); }

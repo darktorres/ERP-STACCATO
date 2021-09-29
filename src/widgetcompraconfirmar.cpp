@@ -52,6 +52,7 @@ void WidgetCompraConfirmar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraConfirmar::on_tableResumo_clicked, connectionType);
 }
 
 void WidgetCompraConfirmar::updateTables() {
@@ -145,6 +146,14 @@ void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraConfirmar::on_tableResumo_clicked(const QModelIndex &index) {
+  const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewCompras.setFilter(filtro);
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

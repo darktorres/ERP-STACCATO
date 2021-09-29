@@ -55,6 +55,7 @@ void WidgetCompraFaturar::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked, connectionType);
+  connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraFaturar::on_tableResumo_clicked, connectionType);
 }
 
 void WidgetCompraFaturar::updateTables() {
@@ -213,6 +214,14 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraFaturar::on_tableResumo_clicked(const QModelIndex &index) {
+  const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewFaturamento.setFilter(filtro);
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

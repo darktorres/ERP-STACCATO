@@ -746,172 +746,9 @@ void Venda::montarFluxoCaixa() {
     for (int row = 0; row < modelFluxoCaixa2.rowCount(); ++row) { modelFluxoCaixa2.setData(row, "status", "SUBSTITUIDO"); }
   }
 
-  const QString fornecedor = modelItem.data(0, "fornecedor").toString();
+  for (auto *pgt : qAsConst(ui->widgetPgts->pagamentos)) { processarPagamento(pgt); }
 
-  SqlQuery query1;
-  query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  query1.bindValue(":razaoSocial", fornecedor);
-
-  if (not query1.exec()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
-
-  if (not query1.first()) { throw RuntimeException("Dados não encontrados do fornecedor: " + fornecedor); }
-
-  const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
-
-  for (auto *pgt : ui->widgetPgts->pagamentos) {
-    if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
-
-    // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
-
-    //-----------------------------------------------------------------
-
-    const QString tipoPgt = pgt->comboTipoPgt->currentText();
-    const int parcelas = pgt->comboParcela->currentIndex() + 1;
-
-    //-----------------------------------------------------------------
-
-    if (tipoPgt == "CONTA CLIENTE") {
-      const int row = modelFluxoCaixa.insertRowAtEnd();
-
-      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
-
-      modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
-      modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao);
-      modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
-      modelFluxoCaixa.setData(row, "idLoja", idLoja);
-      modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao);
-      modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value());
-      modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
-      modelFluxoCaixa.setData(row, "parcela", 1);
-      modelFluxoCaixa.setData(row, "observacao", pgt->observacao->text());
-      modelFluxoCaixa.setData(row, "representacao", false);
-      const int creditoClientes = 11;
-      modelFluxoCaixa.setData(row, "idConta", creditoClientes);
-      modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda");
-      modelFluxoCaixa.setData(row, "subGrupo", "");
-      modelFluxoCaixa.setData(row, "centroCusto", idLoja);
-
-      continue;
-    }
-
-    SqlQuery query2;
-    query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
-                   "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
-    query2.bindValue(":pagamento", tipoPgt);
-    query2.bindValue(":parcela", parcelas);
-
-    if (not query2.exec()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
-
-    if (not query2.first()) { throw RuntimeException("Dados do pagamento não encontrado!"); }
-
-    const int idConta = query2.value("idConta").toInt();
-    const bool pula1Mes = query2.value("pula1Mes").toInt();
-    const bool ajustaDiaUtil = query2.value("ajustaDiaUtil").toBool();
-    const bool dMaisUm = query2.value("dMaisUm").toBool();
-    const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
-    const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
-
-    //-----------------------------------------------------------------
-    // calcular pagamento
-
-    const bool isRepresentacao = pgt->checkBoxRep->isChecked();
-    const QString observacaoPgt = pgt->observacao->text();
-
-    const double valor = pgt->valorPgt->value();
-    const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
-    const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
-
-    const double valorTaxa = qApp->roundDouble(valor * porcentagemTaxa, 2) * -1;
-    const double parcelaTaxa = qApp->roundDouble(valorTaxa / parcelas, 2);
-    const double restoTaxa = qApp->roundDouble(valorTaxa - (parcelaTaxa * parcelas), 2);
-
-    const QDate dataEmissao = (correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate());
-
-    for (int parcela = 0; parcela < parcelas; ++parcela) {
-      const int row = modelFluxoCaixa.insertRowAtEnd();
-
-      modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
-      modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao);
-      modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
-      modelFluxoCaixa.setData(row, "idLoja", idLoja);
-
-      QDate dataPgt = pgt->dataPgt->date();
-      if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
-      if (pula1Mes) { dataPgt = dataPgt.addMonths(1); }
-      dataPgt = dataPgt.addMonths(parcela);
-      if (ajustaDiaUtil) { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
-
-      modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-
-      const bool primeiraParcela = (parcela == 0);
-      const bool ultimaParcela = (parcela == parcelas - 1);
-
-      double val = valorParcela;
-
-      if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
-
-      modelFluxoCaixa.setData(row, "valor", val);
-      modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
-      modelFluxoCaixa.setData(row, "parcela", parcela + 1);
-      modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
-      modelFluxoCaixa.setData(row, "representacao", isRepresentacao);
-      modelFluxoCaixa.setData(row, "idConta", idConta);
-      modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda");
-      modelFluxoCaixa.setData(row, "subGrupo", "");
-      modelFluxoCaixa.setData(row, "centroCusto", idLoja);
-
-      //-----------------------------------------------------------------
-      // calcular taxa
-
-      const bool calculaTaxa = (not qFuzzyIsNull(porcentagemTaxa) and not isRepresentacao and not tipoPgt.contains("CONTA CLIENTE"));
-
-      if (calculaTaxa) {
-        const int rowTaxa = modelFluxoCaixa2.insertRowAtEnd();
-
-        modelFluxoCaixa2.setData(rowTaxa, "contraParte", "Administradora Cartão");
-        modelFluxoCaixa2.setData(rowTaxa, "dataEmissao", dataEmissao);
-        modelFluxoCaixa2.setData(rowTaxa, "idVenda", ui->lineEditVenda->text());
-        modelFluxoCaixa2.setData(rowTaxa, "idLoja", idLoja);
-        modelFluxoCaixa2.setData(rowTaxa, "dataPagamento", dataPgt);
-
-        double val1 = parcelaTaxa;
-
-        if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val1 += restoTaxa; }
-
-        modelFluxoCaixa2.setData(rowTaxa, "valor", val1);
-        modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pgt->posicao) + ". Taxa Cartão");
-        modelFluxoCaixa2.setData(rowTaxa, "parcela", parcela + 1);
-        modelFluxoCaixa2.setData(rowTaxa, "taxa", true);
-        modelFluxoCaixa2.setData(rowTaxa, "idConta", idConta);
-        modelFluxoCaixa2.setData(rowTaxa, "centroCusto", idLoja);
-        modelFluxoCaixa2.setData(rowTaxa, "grupo", "Tarifas Cartão");
-      }
-
-      //-----------------------------------------------------------------
-      // calcular comissao loja
-
-      const bool calculaComissao = (not qFuzzyIsNull(taxaComissao) and isRepresentacao and observacaoPgt != "FRETE");
-
-      if (calculaComissao) {
-        const double valorBase = modelFluxoCaixa.data(row, "valor").toDouble();
-        const double valorComissao = valorBase * taxaComissao;
-
-        const int rowComissao = modelFluxoCaixa2.insertRowAtEnd();
-
-        modelFluxoCaixa2.setData(rowComissao, "contraParte", modelItem.data(0, "fornecedor"));
-        modelFluxoCaixa2.setData(rowComissao, "dataEmissao", dataEmissao);
-        modelFluxoCaixa2.setData(rowComissao, "idVenda", ui->lineEditVenda->text());
-        modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja);
-        modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1));
-        modelFluxoCaixa2.setData(rowComissao, "valor", valorComissao);
-        modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pgt->posicao) + ". Comissão");
-        modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1);
-        modelFluxoCaixa2.setData(rowComissao, "comissao", true);
-        modelFluxoCaixa2.setData(rowComissao, "centroCusto", idLoja);
-        modelFluxoCaixa2.setData(rowComissao, "grupo", "Comissão Representação");
-      }
-    }
-  }
+  if (ui->widgetPgts->pgtFrete) { processarPagamento(ui->widgetPgts->pgtFrete); }
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
@@ -934,7 +771,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
     ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
 
     ui->widgetPgts->setTotal(total);
-    ui->widgetPgts->resetarPagamentos();
+    montarFluxoCaixa();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -981,7 +818,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+    montarFluxoCaixa();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -1010,7 +847,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
     ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+    montarFluxoCaixa();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -1039,7 +876,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    ui->widgetPgts->resetarPagamentos();
+    montarFluxoCaixa();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -1064,7 +901,7 @@ void Venda::atualizarCredito() {
   double creditoUsado = 0;
   bool update = false;
 
-  for (auto *pgt : ui->widgetPgts->pagamentos) {
+  for (auto *pgt : qAsConst(ui->widgetPgts->pagamentos)) {
     if (pgt->comboTipoPgt->currentText() == "CONTA CLIENTE") {
       creditoUsado += pgt->valorPgt->value();
       update = true;
@@ -1378,7 +1215,10 @@ void Venda::on_pushButtonDevolucao_clicked() {
   devolucao->show();
 }
 
-void Venda::on_dateTimeEdit_dateTimeChanged() { ui->widgetPgts->resetarPagamentos(); }
+void Venda::on_dateTimeEdit_dateTimeChanged() {
+  // TODO: colocar uma funcao em WidgetPagamentos para setar data e não precisar apagar pagamentos
+  ui->widgetPgts->resetarPagamentos();
+}
 
 void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
@@ -1669,6 +1509,175 @@ void Venda::connectLineEditsToDirty() {
   const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &Venda::marcarDirty); }
+}
+
+void Venda::processarPagamento(Pagamento *pgt) {
+  if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { return; }
+
+  // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
+
+  //-----------------------------------------------------------------
+
+  const QString tipoPgt = pgt->comboTipoPgt->currentText();
+  const int parcelas = pgt->comboParcela->currentIndex() + 1;
+
+  //-----------------------------------------------------------------
+
+  if (tipoPgt == "CONTA CLIENTE") {
+    const int row = modelFluxoCaixa.insertRowAtEnd();
+
+    const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
+
+    modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
+    modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao);
+    modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
+    modelFluxoCaixa.setData(row, "idLoja", idLoja);
+    modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao);
+    modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value());
+    modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
+    modelFluxoCaixa.setData(row, "parcela", 1);
+    modelFluxoCaixa.setData(row, "observacao", pgt->observacao->text());
+    modelFluxoCaixa.setData(row, "representacao", false);
+    const int creditoClientes = 11;
+    modelFluxoCaixa.setData(row, "idConta", creditoClientes);
+    modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda");
+    modelFluxoCaixa.setData(row, "subGrupo", "");
+    modelFluxoCaixa.setData(row, "centroCusto", idLoja);
+
+    return;
+  }
+
+  SqlQuery query2;
+  query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa "
+                 "FROM forma_pagamento fp "
+                 "LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
+                 "WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
+  query2.bindValue(":pagamento", tipoPgt);
+  query2.bindValue(":parcela", parcelas);
+
+  if (not query2.exec()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
+
+  if (not query2.first()) { throw RuntimeException("Dados do pagamento não encontrado!"); }
+
+  const int idConta = query2.value("idConta").toInt();
+  const bool pula1Mes = query2.value("pula1Mes").toInt();
+  const bool ajustaDiaUtil = query2.value("ajustaDiaUtil").toBool();
+  const bool dMaisUm = query2.value("dMaisUm").toBool();
+  const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
+  const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
+
+  //-----------------------------------------------------------------
+  // calcular pagamento
+
+  const bool isRepresentacao = pgt->checkBoxRep->isChecked();
+  const QString observacaoPgt = pgt->observacao->text();
+
+  const double valor = pgt->valorPgt->value();
+  const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
+  const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
+
+  const double valorTaxa = qApp->roundDouble(valor * porcentagemTaxa, 2) * -1;
+  const double parcelaTaxa = qApp->roundDouble(valorTaxa / parcelas, 2);
+  const double restoTaxa = qApp->roundDouble(valorTaxa - (parcelaTaxa * parcelas), 2);
+
+  const QDate dataEmissao = (correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate());
+
+  for (int parcela = 0; parcela < parcelas; ++parcela) {
+    const int row = modelFluxoCaixa.insertRowAtEnd();
+
+    modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
+    modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao);
+    modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
+    modelFluxoCaixa.setData(row, "idLoja", idLoja);
+
+    QDate dataPgt = pgt->dataPgt->date();
+    if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
+    if (pula1Mes) { dataPgt = dataPgt.addMonths(1); }
+    dataPgt = dataPgt.addMonths(parcela);
+    if (ajustaDiaUtil) { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
+
+    modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
+
+    const bool primeiraParcela = (parcela == 0);
+    const bool ultimaParcela = (parcela == parcelas - 1);
+
+    double val = valorParcela;
+
+    if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
+
+    modelFluxoCaixa.setData(row, "valor", val);
+    modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
+    modelFluxoCaixa.setData(row, "parcela", parcela + 1);
+    modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
+    modelFluxoCaixa.setData(row, "representacao", isRepresentacao);
+    modelFluxoCaixa.setData(row, "idConta", idConta);
+    modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda");
+    modelFluxoCaixa.setData(row, "subGrupo", "");
+    modelFluxoCaixa.setData(row, "centroCusto", idLoja);
+
+    //-----------------------------------------------------------------
+    // calcular taxa
+
+    const bool calculaTaxa = (not qFuzzyIsNull(porcentagemTaxa) and not isRepresentacao and not tipoPgt.contains("CONTA CLIENTE"));
+
+    if (calculaTaxa) {
+      const int rowTaxa = modelFluxoCaixa2.insertRowAtEnd();
+
+      modelFluxoCaixa2.setData(rowTaxa, "contraParte", "Administradora Cartão");
+      modelFluxoCaixa2.setData(rowTaxa, "dataEmissao", dataEmissao);
+      modelFluxoCaixa2.setData(rowTaxa, "idVenda", ui->lineEditVenda->text());
+      modelFluxoCaixa2.setData(rowTaxa, "idLoja", idLoja);
+      modelFluxoCaixa2.setData(rowTaxa, "dataPagamento", dataPgt);
+
+      double val1 = parcelaTaxa;
+
+      if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val1 += restoTaxa; }
+
+      modelFluxoCaixa2.setData(rowTaxa, "valor", val1);
+      modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pgt->posicao) + ". Taxa Cartão");
+      modelFluxoCaixa2.setData(rowTaxa, "parcela", parcela + 1);
+      modelFluxoCaixa2.setData(rowTaxa, "taxa", true);
+      modelFluxoCaixa2.setData(rowTaxa, "idConta", idConta);
+      modelFluxoCaixa2.setData(rowTaxa, "centroCusto", idLoja);
+      modelFluxoCaixa2.setData(rowTaxa, "grupo", "Tarifas Cartão");
+    }
+
+    //-----------------------------------------------------------------
+    // calcular comissao loja
+
+    const QString fornecedor = modelItem.data(0, "fornecedor").toString();
+
+    SqlQuery query1;
+    query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
+    query1.bindValue(":razaoSocial", fornecedor);
+
+    if (not query1.exec()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
+
+    if (not query1.first()) { throw RuntimeException("Dados não encontrados do fornecedor: " + fornecedor); }
+
+    const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
+
+    const bool calculaComissao = (not qFuzzyIsNull(taxaComissao) and isRepresentacao and observacaoPgt != "FRETE");
+
+    if (calculaComissao) {
+      const double valorBase = modelFluxoCaixa.data(row, "valor").toDouble();
+      const double valorComissao = valorBase * taxaComissao;
+
+      const int rowComissao = modelFluxoCaixa2.insertRowAtEnd();
+
+      modelFluxoCaixa2.setData(rowComissao, "contraParte", modelItem.data(0, "fornecedor"));
+      modelFluxoCaixa2.setData(rowComissao, "dataEmissao", dataEmissao);
+      modelFluxoCaixa2.setData(rowComissao, "idVenda", ui->lineEditVenda->text());
+      modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja);
+      modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1));
+      modelFluxoCaixa2.setData(rowComissao, "valor", valorComissao);
+      modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pgt->posicao) + ". Comissão");
+      modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1);
+      modelFluxoCaixa2.setData(rowComissao, "comissao", true);
+      modelFluxoCaixa2.setData(rowComissao, "centroCusto", idLoja);
+      modelFluxoCaixa2.setData(rowComissao, "grupo", "Comissão Representação");
+    }
+  }
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

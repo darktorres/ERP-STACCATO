@@ -350,7 +350,7 @@ void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
     ui->doubleSpinBoxST->hide();
   }
 
-  if (text == "ST Fornecedor" or text == "ST Loja") {
+  if (text == "ST Fornecedor") {
     ui->labelAliquota->show();
     ui->doubleSpinBoxAliquota->show();
     ui->labelST->show();

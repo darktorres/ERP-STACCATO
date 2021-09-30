@@ -47,110 +47,60 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <property name="spacing">
-       <number>3</number>
-      </property>
-      <item row="1" column="0">
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="title">
-         <string/>
+      <item row="1" column="5">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <layout class="QGridLayout" name="gridLayout_5">
-         <property name="leftMargin">
-          <number>3</number>
-         </property>
-         <property name="topMargin">
-          <number>3</number>
-         </property>
-         <property name="rightMargin">
-          <number>3</number>
-         </property>
-         <property name="bottomMargin">
-          <number>3</number>
-         </property>
-         <property name="spacing">
-          <number>3</number>
-         </property>
-         <item row="0" column="6">
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="3">
-          <widget class="QLabel" name="labelComprar">
-           <property name="text">
-            <string>Comprar:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="labelQuantTotal">
-           <property name="text">
-            <string>Quant. Total:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantTotal">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
-           </property>
-           <property name="decimals">
-            <number>3</number>
-           </property>
-           <property name="minimum">
-            <double>-9999.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>9999.989999999999782</double>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="4">
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxComprar">
-           <property name="decimals">
-            <number>3</number>
-           </property>
-           <property name="maximum">
-            <double>99999.990000000005239</double>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5">
-          <widget class="QPushButton" name="pushButtonComprar">
-           <property name="text">
-            <string>Adicionar em Compras</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="pushButtonComprar">
+        <property name="text">
+         <string>Adicionar em Compras</string>
+        </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelQuantTotal">
+        <property name="text">
+         <string>Quant. Total:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantTotal">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-9999.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9999.989999999999782</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="labelComprar">
+        <property name="text">
+         <string>Comprar:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="6">
        <widget class="TableView" name="tableProdutos">
         <property name="mouseTracking">
          <bool>true</bool>
@@ -175,6 +125,16 @@
         </attribute>
        </widget>
       </item>
+      <item row="1" column="3">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxComprar">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -194,9 +154,6 @@
        <number>3</number>
       </property>
       <property name="bottomMargin">
-       <number>3</number>
-      </property>
-      <property name="spacing">
        <number>3</number>
       </property>
       <item row="1" column="1">
@@ -315,9 +272,6 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <property name="spacing">
-       <number>3</number>
-      </property>
       <item row="1" column="1">
        <widget class="QPushButton" name="pushButtonConsumirCompra">
         <property name="enabled">
@@ -427,9 +381,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>tableProdutos</tabstop>
-  <tabstop>doubleSpinBoxQuantTotal</tabstop>
-  <tabstop>doubleSpinBoxComprar</tabstop>
-  <tabstop>pushButtonComprar</tabstop>
   <tabstop>tableEstoque</tabstop>
   <tabstop>pushButtonConsumirEstoque</tabstop>
  </tabstops>

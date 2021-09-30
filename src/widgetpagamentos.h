@@ -46,12 +46,13 @@ public:
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
   auto setCredito(const double creditoCliente) -> void;
-  auto setFrete(const double value) -> void;
+  auto setFrete(const double newFrete) -> void;
   auto setFretePagoLoja() -> void;
-  auto setIdOrcamento(const QString &value) -> void;
+  auto setIdOrcamento(const QString &newIdOrcamento) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
+  auto setST(const double newSt) -> void;
   auto setTipo(const Tipo novoTipo) -> void;
-  auto setTotal(const double value) -> void;
+  auto setTotal(const double newTotal) -> void;
   auto verifyFields() -> void;
 
   QList<Pagamento *> pagamentos;
@@ -63,17 +64,21 @@ signals:
 
 private:
   // attributes
-  bool fretePagoLoja = false;
-  bool representacao = false;
+  bool fretePagoLoja = false; // rename to isFretePagoLoja
+  bool representacao = false; // rename to isRepresentacao
   double credito = 0;
   double creditoRestante = 0;
   double frete = 0;
+  double st = 0;
   double total = 0;
   QString idOrcamento;
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetPagamentos *ui;
   // methods
+  auto buscarTiposPgtsCompra(QComboBox *comboBoxPgt) -> void;
+  auto buscarTiposPgtsVenda(QComboBox *comboBoxPgt) -> void;
   auto calculaCreditoRestante() -> void;
+  auto calcularRestante() -> void;
   auto calcularTotal() -> void;
   auto checkBoxRep(Pagamento *pgt) -> void;
   auto comboBoxParc(Pagamento *pgt) -> void;
@@ -83,12 +88,14 @@ private:
   auto dateEditPgt(Pagamento *pgt) -> void;
   auto deleteButton(QLayout *layout) -> void;
   auto doubleSpinBoxPgt(Pagamento *pgt) -> void;
+  auto insertPgtInScrollArea(Pagamento *pgt) -> void;
   auto labelPagamento(Pagamento *pgt) -> void;
   auto lineEditPgt(Pagamento *pgt) -> void;
   auto on_comboBoxPgt_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxTipoData_currentTextChanged(const QString &text) -> void;
   auto on_doubleSpinBoxPgt_valueChanged() -> void;
-  auto on_pushButtonAdicionarPagamento_clicked(const bool addFrete = true) -> void;
+  auto on_pushButtonAdicionarPagamento_clicked(const Pagamento::TipoPgt tipoPgt = Pagamento::TipoPgt::Normal) -> void;
+  auto on_pushButtonDelete_clicked() -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;

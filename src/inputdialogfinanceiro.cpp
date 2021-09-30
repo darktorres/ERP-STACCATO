@@ -38,8 +38,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
   ui->dateEditEvento->setDate(qApp->serverDate());
   ui->dateEditProximo->setDate(qApp->serverDate());
-  ui->dateEditPgtSt->setDate(qApp->serverDate());
-  ui->dateEditFrete->setDate(qApp->serverDate());
 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
@@ -64,13 +62,10 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
     ui->treeView->hide();
 
-    ui->table->setSelectionMode(QTableView::NoSelection);
     ui->tableFluxoCaixa->setSelectionMode(QTableView::MultiSelection);
   }
 
   setConnections();
-
-  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [&]() { montarFluxoCaixa(true); });
 
   showMaximized();
 }
@@ -84,13 +79,9 @@ void InputDialogFinanceiro::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->checkBoxDataFrete, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxDataFrete_toggled, connectionType);
   connect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled, connectionType);
-  connect(ui->checkBoxParcelarSt, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxParcelarSt_toggled, connectionType);
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged, connectionType);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged, connectionType);
-  connect(ui->dateEditFrete, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditFrete_dateChanged, connectionType);
-  connect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged, connectionType);
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged, connectionType);
   connect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged, connectionType);
@@ -100,18 +91,15 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged, connectionType);
   connect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal, connectionType);
+  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &InputDialogFinanceiro::montarFluxoCaixa, connectionType);
 }
 
 void InputDialogFinanceiro::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(ui->checkBoxDataFrete, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxDataFrete_toggled);
   disconnect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled);
-  disconnect(ui->checkBoxParcelarSt, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxParcelarSt_toggled);
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged);
-  disconnect(ui->dateEditFrete, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditFrete_dateChanged);
-  disconnect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged);
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
@@ -121,6 +109,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
   disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged);
   disconnect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
+  disconnect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &InputDialogFinanceiro::montarFluxoCaixa);
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
@@ -150,8 +139,6 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
   }
 
   setConnections();
-
-  montarFluxoCaixa();
 }
 
 QDate InputDialogFinanceiro::getDate() const { return ui->dateEditEvento->date(); }
@@ -277,7 +264,7 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
 }
 
-void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
+void InputDialogFinanceiro::montarFluxoCaixa() {
   qDebug() << "montarFluxoCaixa";
 
   unsetConnections();
@@ -295,184 +282,11 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
       }
 
-      for (auto *pgt : ui->widgetPgts->pagamentos) {
-        if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
+      for (auto *pgt : qAsConst(ui->widgetPgts->pagamentos)) { processarPagamento(pgt); }
 
-        const QString tipoPgt = pgt->comboTipoPgt->currentText();
-        const int parcelas = pgt->comboParcela->currentIndex() + 1;
+      if (ui->widgetPgts->pgtFrete) { processarPagamento(ui->widgetPgts->pgtFrete); }
 
-        SqlQuery query2;
-        query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
-                       "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
-        query2.bindValue(":pagamento", tipoPgt);
-        query2.bindValue(":parcela", parcelas);
-
-        if (not query2.exec()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
-
-        if (not query2.first()) { throw RuntimeException("Dados não encontrados para o pagamento: " + tipoPgt); }
-
-        const int idConta = query2.value("idConta").toInt();
-        const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
-
-        //-----------------------------------------------------------------
-
-        const QString observacaoPgt = pgt->observacao->text();
-
-        const double valor = pgt->valorPgt->value();
-        const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
-        const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
-
-        for (int parcela = 0; parcela < parcelas; ++parcela) {
-          const int row = modelFluxoCaixa.insertRowAtEnd();
-
-          modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-          modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-          modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-          modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-
-          QString tipoData = pgt->comboTipoData->currentText();
-          QDate dataPgt = pgt->dataPgt->date();
-
-          if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
-            dataPgt = dataPgt.addMonths(parcela);
-          } else {
-            dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
-          }
-
-          dataPgt = qApp->ajustarDiaUtil(dataPgt);
-
-          modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-
-          const bool primeiraParcela = (parcela == 0);
-          const bool ultimaParcela = (parcela == parcelas - 1);
-
-          double val = valorParcela;
-
-          if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
-
-          modelFluxoCaixa.setData(row, "valor", val);
-          modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
-          modelFluxoCaixa.setData(row, "parcela", parcela + 1);
-          modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
-          modelFluxoCaixa.setData(row, "idConta", idConta);
-          modelFluxoCaixa.setData(row, "grupo", "PRODUTOS - VENDA");
-        }
-      }
-
-      if (ui->doubleSpinBoxFrete->value() > 0) {
-        const int row = modelFluxoCaixa.insertRowAtEnd();
-
-        modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-        modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-        modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-        modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-        QDate dataFrete = ui->checkBoxDataFrete->isChecked() ? qApp->ajustarDiaUtil(ui->dateEditFrete->date()) : modelFluxoCaixa.data(0, "dataPagamento").toDate();
-        modelFluxoCaixa.setData(row, "dataPagamento", dataFrete);
-        modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
-        modelFluxoCaixa.setData(row, "tipo", "Frete");
-        modelFluxoCaixa.setData(row, "parcela", 1);
-        modelFluxoCaixa.setData(row, "observacao", "");
-        modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-        modelFluxoCaixa.setData(row, "grupo", "LOGÍSTICA - FRETES");
-      }
-
-      // set st date
-      if (updateDate) {
-        if (ui->widgetPgts->pagamentos.size() > 0) { ui->dateEditPgtSt->setDate(ui->widgetPgts->pagamentos.at(0)->dataPgt->date()); }
-      }
-
-      //----------------------------------------------
-
-      if (ui->widgetPgts->pagamentos.size() > 0) {
-        double stForn = 0;
-        double stLoja = 0;
-
-        const auto list = ui->table->selectionModel()->selectedRows();
-
-        for (const auto &index : list) {
-          const int row = index.row();
-
-          const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
-
-          if (tipoSt == "SEM ST") { continue; }
-
-          const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
-          const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
-          const double valorSt = preco * (aliquotaSt / 100);
-
-          if (tipoSt == "ST FORNECEDOR") { stForn += valorSt; }
-          if (tipoSt == "ST LOJA") { stLoja += valorSt; }
-        }
-
-        // 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
-
-        const int parcelas = ui->widgetPgts->pagamentos.at(0)->comboParcela->currentIndex() + 1;
-
-        if (stForn > 0) {
-          if (ui->checkBoxParcelarSt->isChecked()) {
-            // TODO: dividir antes o valor para achar o resto e colocar na primeira/ultima parcela
-
-            for (int parcela = 0; parcela < parcelas; ++parcela) {
-              const int row = modelFluxoCaixa.insertRowAtEnd();
-
-              modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-              modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-              modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-              modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-
-              const QString tipoData = ui->widgetPgts->pagamentos.at(0)->comboTipoData->currentText();
-              QDate dataPgt = ui->widgetPgts->pagamentos.at(0)->dataPgt->date();
-
-              if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
-                dataPgt = dataPgt.addMonths(parcela);
-              } else {
-                dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
-              }
-
-              dataPgt = qApp->ajustarDiaUtil(dataPgt);
-
-              modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-
-              modelFluxoCaixa.setData(row, "valor", stForn / parcelas);
-              modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
-              modelFluxoCaixa.setData(row, "parcela", parcela + 1);
-              modelFluxoCaixa.setData(row, "observacao", "");
-              modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-              modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
-            }
-          } else {
-            const int row = modelFluxoCaixa.insertRowAtEnd();
-
-            modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-            modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-            modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-            modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-            modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()));
-            modelFluxoCaixa.setData(row, "valor", stForn);
-            modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
-            modelFluxoCaixa.setData(row, "parcela", 1);
-            modelFluxoCaixa.setData(row, "observacao", "");
-            modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-            modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
-          }
-        }
-
-        if (stLoja > 0) {
-          const int row = modelFluxoCaixa.insertRowAtEnd();
-
-          modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
-          modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-          modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
-          modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-          modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()));
-          modelFluxoCaixa.setData(row, "valor", stLoja);
-          modelFluxoCaixa.setData(row, "tipo", "ST Loja");
-          modelFluxoCaixa.setData(row, "parcela", 1);
-          modelFluxoCaixa.setData(row, "observacao", "");
-          modelFluxoCaixa.setData(row, "idConta", modelFluxoCaixa.data(0, "idConta"));
-          modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS");
-        }
-      }
+      if (ui->widgetPgts->pgtSt) { processarPagamento(ui->widgetPgts->pgtSt); }
     }();
   } catch (std::exception &) {
     setConnections();
@@ -507,18 +321,43 @@ void InputDialogFinanceiro::calcularTotal() {
       throw RuntimeException("Tipo Nulo!");
     }();
 
+    ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
+
+    // -------------------------------
+
     double total = 0;
 
     const auto list = table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += model->data(index.row(), coluna).toDouble(); }
+    for (const auto &index : list) { total += qApp->roundDouble(model->data(index.row(), coluna).toDouble(), 2); }
 
-    ui->widgetPgts->setTotal(total);
+    selectedTotal = total;
+    ui->widgetPgts->setTotal(selectedTotal);
+
+    // -------------------------------
+
+    double totalSt = 0;
+
+    const auto list2 = ui->table->selectionModel()->selectedRows();
+
+    for (const auto &index : list2) {
+      const int row = index.row();
+      const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
+      const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
+      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
+      if (tipoSt == "ST FORNECEDOR") { totalSt += aliquotaSt / 100 * preco; }
+    }
+
+    ui->widgetPgts->setST(totalSt);
+
+    // -------------------------------
 
     total += ui->doubleSpinBoxFrete->value();
-    total += ui->doubleSpinBoxSt->value();
+    total += totalSt;
 
     ui->doubleSpinBoxTotal->setValue(total);
+
+    // -------------------------------
 
     montarFluxoCaixa();
   } catch (std::exception &) {
@@ -667,8 +506,6 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   modelFluxoCaixa.select();
 
-  ui->checkBoxMarcarTodos->setChecked(true);
-
   if (tipo == Tipo::Financeiro) {
     ui->comboBoxFinanceiro->setCurrentText(modelPedidoFornecedor.data(0, "statusFinanceiro").toString());
     ui->dateEditEvento->setDate(modelFluxoCaixa.data(0, "dataEmissao").toDate());
@@ -700,7 +537,7 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   // -------------------------------------------------------------------------
 
-  calcularTotal();
+  if (tipo == Tipo::ConfirmarCompra) { ui->checkBoxMarcarTodos->setChecked(true); }
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
@@ -750,7 +587,7 @@ void InputDialogFinanceiro::verifyFields() {
         if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
       } else {
         const double total = ui->doubleSpinBoxTotal->value();
-        const double pagamentos = ui->widgetPgts->getTotalPag() + ui->doubleSpinBoxFrete->value() + ui->doubleSpinBoxSt->value();
+        const double pagamentos = ui->widgetPgts->getTotalPag();
 
         if (not qFuzzyCompare(total, pagamentos)) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
@@ -806,25 +643,13 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 
   for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
 
-  //  ui->frameAdicionais->show();
-  //  ui->framePgtTotal->show();
-  //  ui->pushButtonAdicionarPagamento->show();
+  ui->frameAdicionais->show();
   ui->widgetPgts->show();
-
-  // TODO: 5alterar para que apenas na tela do financeiro compra a opcao de corrigir fluxo percorra todas as linhas
-  // (enquanto na confirmacao de pagamento percorre apenas as linhas selecionadas)
-
-  //  calcularTotal();
-  //  ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() {
-  calcularTotal();
+void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() { calcularTotal(); }
 
-  montarFluxoCaixa();
-}
-
-void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged() { montarFluxoCaixa(false); }
+void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged() { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
@@ -849,14 +674,14 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
   }
 
   setConnections();
-
-  montarFluxoCaixa();
 }
 
-void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text) {
+void InputDialogFinanceiro::on_comboBoxST_currentTextChanged() {
   unsetConnections();
 
   try {
+    const QString text = ui->comboBoxST->currentText();
+
     if (text == "Sem ST") {
       ui->doubleSpinBoxSt->setValue(0);
       ui->doubleSpinBoxAliquota->setValue(0);
@@ -867,14 +692,13 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
       ui->doubleSpinBoxSt->hide();
     }
 
-    if (text == "ST Fornecedor" or text == "ST Loja") {
+    if (text == "ST Fornecedor") {
       ui->doubleSpinBoxAliquota->setValue(4.68);
 
       ui->labelAliquota->show();
       ui->doubleSpinBoxAliquota->show();
       ui->labelSt->show();
       ui->doubleSpinBoxSt->show();
-      ui->dateEditPgtSt->show();
     }
 
     setMaximumST();
@@ -901,18 +725,8 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 
 void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled() { montarFluxoCaixa(); }
 
-void InputDialogFinanceiro::on_dateEditFrete_dateChanged() {
-  const auto match = modelFluxoCaixa.match("tipo", "FRETE", 1, Qt::MatchExactly);
-
-  if (match.isEmpty()) { return; }
-
-  modelFluxoCaixa.setData(match.first().row(), "dataPagamento", ui->dateEditFrete->date());
-}
-
-void InputDialogFinanceiro::on_checkBoxDataFrete_toggled(const bool checked) { ui->dateEditFrete->setEnabled(checked); }
-
 void InputDialogFinanceiro::setMaximumST() {
-  const double maximoST = ui->doubleSpinBoxTotal->value() * ui->doubleSpinBoxAliquota->maximum() / 100;
+  const double maximoST = selectedTotal * ui->doubleSpinBoxAliquota->maximum() / 100;
 
   ui->doubleSpinBoxSt->setMaximum(maximoST);
 }
@@ -946,12 +760,83 @@ void InputDialogFinanceiro::on_table_selectionChanged() {
   setMaximumST();
 }
 
+void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
+  if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { return; }
+
+  const QString tipoPgt = pgt->comboTipoPgt->currentText();
+  const int parcelas = pgt->comboParcela->currentIndex() + 1;
+
+  SqlQuery query;
+  query.prepare("SELECT fp.idConta, fp.centavoSobressalente "
+                "FROM forma_pagamento fp "
+                "LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
+                "WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
+  query.bindValue(":pagamento", tipoPgt);
+  query.bindValue(":parcela", parcelas);
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando taxa: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o pagamento: " + tipoPgt); }
+
+  const int idConta = query.value("idConta").toInt();
+  const bool centavoPrimeiraParcela = query.value("centavoSobressalente").toBool();
+
+  //-----------------------------------------------------------------
+
+  const QString observacaoPgt = pgt->observacao->text();
+
+  const double valor = pgt->valorPgt->value();
+  const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
+  const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
+
+  for (int parcela = 0; parcela < parcelas; ++parcela) {
+    const int row = modelFluxoCaixa.insertRowAtEnd();
+
+    modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
+    modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
+    modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
+    // TODO: esse idLoja provavelmente está errado
+    modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
+
+    QString tipoData = pgt->comboTipoData->currentText();
+    QDate dataPgt = pgt->dataPgt->date();
+
+    if (tipoData == "DATA + 1 MÊS" or tipoData == "DATA MÊS") {
+      dataPgt = dataPgt.addMonths(parcela);
+    } else {
+      dataPgt = dataPgt.addDays(tipoData.toInt() * parcela);
+    }
+
+    dataPgt = qApp->ajustarDiaUtil(dataPgt);
+
+    modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
+
+    const bool primeiraParcela = (parcela == 0);
+    const bool ultimaParcela = (parcela == parcelas - 1);
+    double val = valorParcela;
+
+    if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
+
+    modelFluxoCaixa.setData(row, "valor", val);
+    modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
+    modelFluxoCaixa.setData(row, "parcela", parcela + 1);
+    modelFluxoCaixa.setData(row, "observacao", observacaoPgt);
+    modelFluxoCaixa.setData(row, "idConta", idConta);
+
+    QString grupo;
+
+    if (pgt->tipoPgt == Pagamento::TipoPgt::Normal) { grupo = "PRODUTOS - VENDA"; }
+    if (pgt->tipoPgt == Pagamento::TipoPgt::Frete) { grupo = "LOGÍSTICA - FRETES"; }
+    if (pgt->tipoPgt == Pagamento::TipoPgt::ST) { grupo = "IMPOSTOS - ICMS;ST;ISS"; }
+
+    modelFluxoCaixa.setData(row, "grupo", grupo);
+  }
+}
+
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
-// TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo
 
 // TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo que vem do fornecedor)
 // TODO: 3quando for representacao mostrar fluxo de comissao
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 // TODO: gerar lancamentos da st por produto
-// TODO: colocar checkbox para dizer se a ST vai ser na data do primeiro pagamento ou vai ser dividida junto com as parcelas
 // TODO: colocar um checkbox para dizer se mostra ou não os pagamentos substituidos/cancelados

@@ -79,7 +79,7 @@ void WidgetPagamentos::dateEditPgt(Pagamento *pgt) {
 void WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged() {
   auto *pgt = qobject_cast<Pagamento *>(sender()->parent());
 
-  if (not pgt) { throw RuntimeException("Pgt Null!"); }
+  if (not pgt) { throw RuntimeException("Erro Pgt Nulo!"); }
 
   if (pgt->comboTipoPgt->currentText() == "CONTA CLIENTE") { calculaCreditoRestante(); }
 
@@ -179,7 +179,7 @@ void WidgetPagamentos::comboBoxPgtVenda(Pagamento *pgt) {
 void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &text) {
   auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
 
-  if (not pgt) { throw RuntimeException("Pgt Null!"); }
+  if (not pgt) { throw RuntimeException("Erro Pgt Nulo!!"); }
 
   const QDate currentDate = qApp->serverDate();
 
@@ -201,7 +201,7 @@ void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &tex
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const QString &text) {
   auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
 
-  if (not pgt) { throw RuntimeException("Pgt Null!"); }
+  if (not pgt) { throw RuntimeException("Erro Pgt Nulo!"); }
 
   if (text == "ESCOLHA UMA OPÇÃO!") { return; }
 

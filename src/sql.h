@@ -9,6 +9,8 @@ class Sql {
 public:
   Sql() = delete;
 
+  static auto contasPagar(const QString &filtros, const QString &busca) -> QString;
+  static auto contasReceber(const QString &filtros) -> QString;
   static auto queryEstoque(const QString &match, const QString &having) -> QString;
   static auto updateVendaStatus(const QString &idVendas) -> void;
   static auto updateVendaStatus(const QStringList &idVendas) -> void;

@@ -383,6 +383,71 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          " HAVING " + having;
 }
 
+QString Sql::contasPagar(const QString &filtros, const QString &busca) {
+  return " SELECT * FROM "
+         "      (SELECT "
+         "          `cp`.`idPagamento` AS `idPagamento`, "
+         "          `cp`.`idLoja` AS `idLoja`, "
+         "          `cp`.`idVenda` AS `cp_idVenda`, "
+         "          `cp`.`contraParte` AS `contraparte`, "
+         "          `cp`.`dataEmissao` AS `dataEmissao`, "
+         "          `cp`.`dataPagamento` AS `dataPagamento`, "
+         "          `cp`.`dataRealizado` AS `dataRealizado`, "
+         "          `cp`.`valor` AS `valor`, "
+         "          `cp`.`status` AS `status`, "
+         "          GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
+         "          GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, "
+         "          `cp`.`tipo` AS `tipo`, "
+         "          `cp`.`parcela` AS `parcela`, "
+         "          `cp`.`observacao` AS `observacao`, "
+         "          `cp`.`grupo` AS `grupo`, "
+         "          GROUP_CONCAT(DISTINCT `pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, "
+         "          GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda`, "
+         "          GROUP_CONCAT(DISTINCT `pf2`.`codFornecedor` SEPARATOR ', ') AS `codFornecedor` "
+         "      FROM "
+         "          `conta_a_pagar_has_pagamento` `cp` "
+         "      LEFT JOIN "
+         "          `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` "
+         "      LEFT JOIN "
+         "          `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` "
+         "      LEFT JOIN "
+         "          `estoque` `e` ON `ehc`.`idEstoque` = `e`.`idEstoque` "
+         "      LEFT JOIN "
+         "          `nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` "
+         "      WHERE " +
+                    filtros +
+         "      GROUP BY `cp`.`idPagamento`) x "
+         + busca;
+}
+
+QString Sql::contasReceber(const QString &filtros) {
+  return "  SELECT "
+         "      `cr`.`idPagamento` AS `idPagamento`, "
+         "      `cr`.`idLoja` AS `idLoja`, "
+         "      `cr`.`representacao` AS `representacao`, "
+         "      `cr`.`contraParte` AS `contraparte`, "
+         "      `cr`.`dataEmissao` AS `dataEmissao`, "
+         "      `cr`.`dataPagamento` AS `dataPagamento`, "
+         "      `cr`.`dataRealizado` AS `dataRealizado`, "
+         "      `cr`.`idVenda` AS `idVenda`, "
+         "      GROUP_CONCAT(DISTINCT `pf2`.`ordemRepresentacao`) AS ordemRepresentacao, "
+         "      `cr`.`valor` AS `valor`, "
+         "      `cr`.`tipo` AS `tipo`, "
+         "      `cr`.`parcela` AS `parcela`, "
+         "      `cr`.`observacao` AS `observacao`, "
+         "      `cr`.`status` AS `status`, "
+         "      `v`.`statusFinanceiro` AS `statusFinanceiro` "
+         "  FROM "
+         "      `conta_a_receber_has_pagamento` `cr` "
+         "  LEFT JOIN "
+         "      `venda` `v` ON `cr`.`idVenda` = `v`.`idVenda` "
+         "  LEFT JOIN "
+         "      pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda "
+         "  WHERE " +
+                filtros +
+         "  GROUP BY `cr`.`idPagamento`";
+}
+
 // clang-format on
 
 // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem

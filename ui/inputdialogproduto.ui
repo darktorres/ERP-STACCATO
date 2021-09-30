@@ -109,6 +109,11 @@
           <widget class="QComboBox" name="comboBoxST">
            <item>
             <property name="text">
+             <string>Tipo de ST</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
              <string>Sem ST</string>
             </property>
            </item>

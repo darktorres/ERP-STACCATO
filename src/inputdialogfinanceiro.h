@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 #include "sqltreemodel.h"
+#include "widgetpagamentos.h"
 
 #include <QDialog>
 #include <QStack>
@@ -27,6 +28,7 @@ public:
 private:
   // attributes
   bool representacao = false;
+  double selectedTotal = 0;
   QStack<int> blockingSignals;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelPedidoFornecedor2;
@@ -38,13 +40,11 @@ private:
   auto atualizaPrecosPF1(const int rowPF2) -> void;
   auto cadastrar() -> void;
   auto calcularTotal() -> void;
-  auto montarFluxoCaixa(const bool updateDate = true) -> void;
-  auto on_checkBoxDataFrete_toggled(const bool checked) -> void;
+  auto montarFluxoCaixa() -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
   auto on_checkBoxParcelarSt_toggled() -> void;
-  auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
+  auto on_comboBoxST_currentTextChanged() -> void;
   auto on_dateEditEvento_dateChanged(const QDate date) -> void;
-  auto on_dateEditFrete_dateChanged() -> void;
   auto on_dateEditPgtSt_dateChanged() -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged() -> void;
@@ -52,6 +52,7 @@ private:
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_table_selectionChanged() -> void;
+  auto processarPagamento(Pagamento *pgt) -> void;
   auto setCodFornecedor() -> void;
   auto setConnections() -> void;
   auto setMaximumST() -> void;

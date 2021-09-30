@@ -31,15 +31,23 @@ WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 void WidgetPagamentos::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked, connectionType);
+  //  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked, connectionType);
+  connect(
+      ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, [=] { on_pushButtonAdicionarPagamento_clicked(Pagamento::TipoPgt::Normal); }, connectionType);
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked, connectionType);
   connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonPgtLoja_clicked, connectionType);
   connect(ui->pushButtonFreteLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonFreteLoja_clicked, connectionType);
 }
 
 void WidgetPagamentos::labelPagamento(Pagamento *pgt) {
-  auto *labelPagamento = new QLabel(pgt);
-  labelPagamento->setText("Pgt." + QString::number(pagamentos.size()));
+  QString label;
+
+  if (pgt->tipoPgt == Pagamento::TipoPgt::Normal) { label = "Pgt. " + QString::number(pagamentos.size() + 1); }
+  if (pgt->tipoPgt == Pagamento::TipoPgt::Frete) { label = "FRETE"; }
+  if (pgt->tipoPgt == Pagamento::TipoPgt::ST) { label = "ST"; }
+
+  auto *labelPagamento = new QLabel(this);
+  labelPagamento->setText(label);
 
   pgt->layout()->addWidget(labelPagamento);
   pgt->label = labelPagamento;
@@ -94,9 +102,12 @@ void WidgetPagamentos::doubleSpinBoxPgt(Pagamento *pgt) {
 
   auto *doubleSpinBoxPgt = new QDoubleSpinBox(pgt);
   doubleSpinBoxPgt->setPrefix("R$ ");
-  doubleSpinBoxPgt->setMaximum(total);
+  //  doubleSpinBoxPgt->setMinimum(0);
+  //  doubleSpinBoxPgt->setMaximum(total);
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
+
+  if (pgt->tipoPgt == Pagamento::TipoPgt::Frete or pgt->tipoPgt == Pagamento::TipoPgt::ST) { doubleSpinBoxPgt->setButtonSymbols(QDoubleSpinBox::NoButtons); }
 
   connect(doubleSpinBoxPgt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged);
 
@@ -117,52 +128,21 @@ void WidgetPagamentos::comboBoxParc(Pagamento *pgt) {
 
 void WidgetPagamentos::comboBoxTipoData(Pagamento *pgt) {
   auto *comboBoxTipoData = new QComboBox(pgt);
-  comboBoxTipoData->addItem("DATA MÊS");
-  comboBoxTipoData->addItem("DATA + 1 MÊS");
-  comboBoxTipoData->addItem("14");
-  comboBoxTipoData->addItem("20");
-  comboBoxTipoData->addItem("28");
-  comboBoxTipoData->addItem("30");
-  comboBoxTipoData->addItem("60");
-  comboBoxTipoData->addItem("90");
-  comboBoxTipoData->addItem("120");
-  comboBoxTipoData->addItem("150");
-  comboBoxTipoData->addItem("180");
-  comboBoxTipoData->addItem("210");
+
+  QStringList list{"DATA MÊS", "DATA + 1 MÊS", "14", "20", "28", "30", "60", "90", "120", "150", "180", "210"};
+
+  comboBoxTipoData->addItems(list);
 
   connect(comboBoxTipoData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::on_comboBoxTipoData_currentTextChanged);
 
   pgt->layout()->addWidget(comboBoxTipoData);
   pgt->comboTipoData = comboBoxTipoData;
-
-  // connect this comboBoxData to the equivalent dateEditPgt
-
-  // listComboData with 0 elements: size 0
-  // listComboData with 1 elements: size 1; first element at [0]
-
-  //  const auto dateEditPair = listDatePgt.at(listComboData.size());
-
-  //  connect(comboBoxData, &QComboBox::currentTextChanged, listDatePgt.at(listComboData.size()), );
-
-  // TODO: quando alterar dataPgt para 14/20/28/30 alterar a data no dateEdit e não apenas no fluxo
 }
 
 void WidgetPagamentos::comboBoxPgtCompra(Pagamento *pgt) {
   auto *comboBoxPgt = new QComboBox(pgt);
   comboBoxPgt->setMinimumWidth(140);
-
-  SqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
-  queryPag.bindValue(":idLoja", User::idLoja);
-
-  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
-
-  QStringList list;
-  list << "ESCOLHA UMA OPÇÃO!";
-
-  while (queryPag.next()) { list << queryPag.value("pagamento").toString(); }
-
-  comboBoxPgt->insertItems(0, list);
+  buscarTiposPgtsCompra(comboBoxPgt);
 
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, &WidgetPagamentos::on_comboBoxPgt_currentTextChanged);
 
@@ -172,8 +152,10 @@ void WidgetPagamentos::comboBoxPgtCompra(Pagamento *pgt) {
 
 void WidgetPagamentos::checkBoxRep(Pagamento *pgt) {
   auto *checkboxRep = new QCheckBox(pgt);
-  checkboxRep->setText("Fornecedor");
-  checkboxRep->setVisible(representacao);
+  //  checkboxRep->setText("Fornecedor");
+  checkboxRep->setText("Pago p/ forn.");
+  //  checkboxRep->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+  checkboxRep->setVisible(representacao); // why this?
   checkboxRep->setChecked(representacao);
   checkboxRep->setEnabled(false);
 
@@ -186,24 +168,7 @@ void WidgetPagamentos::checkBoxRep(Pagamento *pgt) {
 void WidgetPagamentos::comboBoxPgtVenda(Pagamento *pgt) {
   auto *comboBoxPgt = new QComboBox(pgt);
   comboBoxPgt->setMinimumWidth(140);
-
-  if (idOrcamento.isEmpty()) { throw RuntimeError("Orçamento vazio!"); }
-
-  SqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE apenasRepresentacao = :apenasRepresentacao AND idLoja = (SELECT idLoja FROM orcamento WHERE idOrcamento = :idOrcamento)");
-  queryPag.bindValue(":idOrcamento", idOrcamento);
-  queryPag.bindValue(":apenasRepresentacao", representacao);
-
-  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
-
-  QStringList list;
-  list << "ESCOLHA UMA OPÇÃO!";
-
-  while (queryPag.next()) { list << queryPag.value("pagamento").toString(); }
-
-  if (credito > 0) { list << "CONTA CLIENTE"; }
-
-  comboBoxPgt->insertItems(0, list);
+  buscarTiposPgtsVenda(comboBoxPgt);
 
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, &WidgetPagamentos::on_comboBoxPgt_currentTextChanged);
 
@@ -212,7 +177,9 @@ void WidgetPagamentos::comboBoxPgtVenda(Pagamento *pgt) {
 }
 
 void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &text) {
-  auto *sender = qobject_cast<Pagamento *>(QObject::sender());
+  auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
+
+  if (not pgt) { throw RuntimeException("Pgt Null!"); }
 
   const QDate currentDate = qApp->serverDate();
 
@@ -226,54 +193,56 @@ void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &tex
     dataPgt = currentDate.addDays(text.toInt());
   }
 
-  sender->dataPgt->setDate(dataPgt);
+  pgt->dataPgt->setDate(dataPgt);
 
   emit montarFluxoCaixa();
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const QString &text) {
-  auto *sender = qobject_cast<Pagamento *>(QObject::sender());
+  auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
+
+  if (not pgt) { throw RuntimeException("Pgt Null!"); }
 
   if (text == "ESCOLHA UMA OPÇÃO!") { return; }
 
   if (text == "CONTA CLIENTE") {
     if (qFuzzyIsNull(ui->doubleSpinBoxCreditoDisponivel->value())) {
-      sender->comboTipoPgt->setCurrentIndex(0);
+      pgt->comboTipoPgt->setCurrentIndex(0);
       throw RuntimeError("Não há saldo cliente restante!", this);
     }
 
-    double currentValue = sender->valorPgt->value();
-    double newValue = qMin(currentValue, creditoRestante);
+    //    double currentValue = pgt->valorPgt->value();
+    //    double newValue = qMin(currentValue, creditoRestante);
     calculaCreditoRestante();
-    sender->valorPgt->setMaximum(newValue);
-    sender->comboParcela->clear();
-    sender->comboParcela->addItem("1x");
+    //    pgt->valorPgt->setMaximum(newValue);
+    pgt->comboParcela->clear();
+    pgt->comboParcela->addItem("1x");
     emit montarFluxoCaixa();
     return;
   }
 
-  sender->valorPgt->setMaximum(total); // TODO: it looks like this is not needed anymore since setTotal() update all widgets
+  //  pgt->valorPgt->setMaximum(total); // TODO: it looks like this is not needed anymore since setTotal() update all widgets
 
   SqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
-  query.bindValue(":pagamento", sender->comboTipoPgt->currentText());
+  query.bindValue(":pagamento", pgt->comboTipoPgt->currentText());
 
   if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrou dados do pagamento: " + sender->comboTipoPgt->currentText()); }
+  if (not query.first()) { throw RuntimeException("Não encontrou dados do pagamento: " + pgt->comboTipoPgt->currentText()); }
 
   const int parcelas = query.value("parcelas").toInt();
 
   { // NOTE: avoid sending signal before widgets are all set
-    const QSignalBlocker blocker(sender->comboParcela);
+    const QSignalBlocker blocker(pgt->comboParcela);
 
-    sender->comboParcela->clear();
+    pgt->comboParcela->clear();
 
-    for (int i = 0; i < parcelas; ++i) { sender->comboParcela->addItem(QString::number(i + 1) + "x"); }
+    for (int i = 0; i < parcelas; ++i) { pgt->comboParcela->addItem(QString::number(i + 1) + "x"); }
   }
 
-  sender->comboParcela->setEnabled(true);
-  sender->dataPgt->setEnabled(true);
+  pgt->comboParcela->setEnabled(true);
+  pgt->dataPgt->setEnabled(true);
 
   calculaCreditoRestante();
 
@@ -292,22 +261,24 @@ void WidgetPagamentos::resetarPagamentos() {
 
   calculaCreditoRestante();
 
+  calcularTotal();
+
   emit montarFluxoCaixa();
 }
 
 double WidgetPagamentos::getTotalPag() { return ui->doubleSpinBoxTotalPag->value(); }
 
-void WidgetPagamentos::prepararPagamentosRep() {
-  if (qFuzzyIsNull(frete)) { return; }
+// void WidgetPagamentos::prepararPagamentosRep() {
+//  if (qFuzzyIsNull(frete)) { return; }
 
-  on_pushButtonAdicionarPagamento_clicked();
+//  on_pushButtonAdicionarPagamento_clicked();
 
-  pagamentos.at(0)->checkBoxRep->setChecked(not fretePagoLoja);
-  pagamentos.at(0)->observacao->setText("FRETE");
-  pagamentos.at(0)->observacao->setReadOnly(true);
-  pagamentos.at(0)->valorPgt->setValue(frete);
-  pagamentos.at(0)->valorPgt->setReadOnly(true);
-}
+//  pagamentos.at(0)->checkBoxRep->setChecked(not fretePagoLoja);
+//  pagamentos.at(0)->observacao->setText("FRETE");
+//  pagamentos.at(0)->observacao->setReadOnly(true);
+//  pagamentos.at(0)->valorPgt->setValue(frete);
+//  pagamentos.at(0)->valorPgt->setReadOnly(true);
+//}
 
 void WidgetPagamentos::setCredito(const double creditoCliente) {
   credito = creditoCliente;
@@ -338,55 +309,151 @@ void WidgetPagamentos::setTipo(const Tipo novoTipo) {
   }
 }
 
-void WidgetPagamentos::setTotal(const double value) {
-  total = value;
+void WidgetPagamentos::setTotal(const double newTotal) {
+  total = newTotal;
 
-  for (auto *pgt : pagamentos) { pgt->valorPgt->setMaximum(total); }
+  if (tipo == Tipo::Venda and representacao) { total -= frete; }
+
+  calcularTotal();
+  //  for (auto *pgt : pagamentos) { pgt->valorPgt->setMaximum(total); }
 }
 
-void WidgetPagamentos::setFrete(const double value) { frete = value; }
+void WidgetPagamentos::setFrete(const double newFrete) {
+  frete = newFrete;
+
+  if ((tipo == Tipo::Venda and representacao) or tipo == Tipo::Compra) {
+    if (qFuzzyIsNull(frete)) {
+      delete pgtFrete;
+      pgtFrete = nullptr;
+      calcularTotal();
+      return;
+    }
+
+    if (not pgtFrete) {
+      on_pushButtonAdicionarPagamento_clicked(Pagamento::TipoPgt::Frete);
+
+      QSignalBlocker blocker1(pgtFrete->observacao);
+
+      if (fretePagoLoja) { pgtFrete->checkBoxRep->setChecked(false); }
+
+      pgtFrete->observacao->setText("FRETE");
+      pgtFrete->observacao->setReadOnly(true);
+      pgtFrete->valorPgt->setReadOnly(true);
+    }
+
+    QSignalBlocker blocker2(pgtFrete->valorPgt);
+
+    pgtFrete->valorPgt->setMaximum(frete);
+    pgtFrete->valorPgt->setMinimum(frete);
+    pgtFrete->valorPgt->setValue(frete);
+
+    calcularTotal();
+  }
+}
+
+void WidgetPagamentos::setST(const double newSt) {
+  qDebug() << "";
+
+  st = newSt;
+
+  if (qFuzzyIsNull(st)) {
+    delete pgtSt;
+    pgtSt = nullptr;
+    calcularTotal();
+    return;
+  }
+
+  if (not pgtSt) {
+    on_pushButtonAdicionarPagamento_clicked(Pagamento::TipoPgt::ST);
+
+    QSignalBlocker blocker1(pgtSt->observacao);
+
+    pgtSt->observacao->setText("ST");
+    pgtSt->observacao->setReadOnly(true);
+    pgtSt->valorPgt->setReadOnly(true);
+  }
+
+  QSignalBlocker blocker2(pgtSt->valorPgt);
+
+  pgtSt->valorPgt->setMaximum(st);
+  pgtSt->valorPgt->setMinimum(st);
+  pgtSt->valorPgt->setValue(st);
+
+  calcularTotal();
+}
 
 void WidgetPagamentos::setFretePagoLoja() {
   fretePagoLoja = true;
 
-  ui->pushButtonFreteLoja->setDisabled(true);
+  if (pgtFrete) { pgtFrete->checkBoxRep->setChecked(not fretePagoLoja); }
+
+  //  ui->pushButtonFreteLoja->setDisabled(true);
 }
 
-void WidgetPagamentos::setIdOrcamento(const QString &value) { idOrcamento = value; }
+void WidgetPagamentos::setIdOrcamento(const QString &newIdOrcamento) { idOrcamento = newIdOrcamento; }
 
 double WidgetPagamentos::getCredito() const { return credito; }
 
-void WidgetPagamentos::calcularTotal() {
-  //  if (not pagamentos.isEmpty()) {
-  const double sumWithoutLast = std::accumulate(pagamentos.cbegin(), pagamentos.cend() - 1, 0., [=](double accum, const Pagamento *pgt) { return accum += pgt->valorPgt->value(); });
+void WidgetPagamentos::calcularRestante() {
+  if (pagamentos.empty()) { return; }
+
+  double sumWithoutLast = std::accumulate(pagamentos.cbegin(), pagamentos.cend(), 0., [=](double accum, const Pagamento *pgt) { return accum += pgt->valorPgt->value(); });
+  sumWithoutLast -= pagamentos.last()->valorPgt->value();
+
+  for (auto *pgt : qAsConst(pagamentos)) {
+    pgt->valorPgt->setMaximum(total);
+    pgt->valorPgt->setMinimum(0);
+  }
 
   auto *lastSpinBox = pagamentos.constLast()->valorPgt;
-
   lastSpinBox->blockSignals(true);
+  lastSpinBox->setMaximum(total - sumWithoutLast);
+  lastSpinBox->setMinimum(total - sumWithoutLast);
   lastSpinBox->setValue(total - sumWithoutLast);
   lastSpinBox->blockSignals(false);
+}
+
+void WidgetPagamentos::calcularTotal() {
+  calcularRestante();
 
   // ----------------------------------------
 
   const double sumAll = std::accumulate(pagamentos.cbegin(), pagamentos.cend(), 0., [=](double accum, const Pagamento *pgt) { return accum += pgt->valorPgt->value(); });
 
-  ui->doubleSpinBoxTotalPag->setValue(sumAll);
-  //  }
+  if (tipo == Tipo::Venda) {
+    double total = sumAll;
+
+    if (representacao) { total += frete; }
+
+    ui->doubleSpinBoxTotalPag->setValue(total);
+  }
+
+  if (tipo == Tipo::Compra) { ui->doubleSpinBoxTotalPag->setValue(sumAll + frete + st); }
 
   // ----------------------------------------
 
   emit montarFluxoCaixa();
 }
 
-void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
+void WidgetPagamentos::insertPgtInScrollArea(Pagamento *pgt) {
+  int index = -1;
+
+  if (pgt->tipoPgt == Pagamento::TipoPgt::Normal) { index = -1; }                                         // insert at end
+  if (pgt->tipoPgt == Pagamento::TipoPgt::Frete or pgt->tipoPgt == Pagamento::TipoPgt::ST) { index = 0; } // insert at beginning
+
+  auto *scrollLayout = qobject_cast<QVBoxLayout *>(ui->scrollArea->widget()->layout());
+  scrollLayout->insertWidget(index, pgt);
+
+  // TODO: insert spacing at end of layout
+}
+
+void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const Pagamento::TipoPgt tipoPgt) {
   if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
-  auto *pgt = new Pagamento(Pagamento::TipoPgt::Normal, this);
+  auto *pgt = new Pagamento(tipoPgt, this);
   pgt->posicao = pagamentos.size() + 1;
   pgt->setLayout(new QHBoxLayout);
   pgt->layout()->setContentsMargins(0, 0, 0, 0);
-
-  pagamentos << pgt;
 
   //---------------------------------------------------
 
@@ -407,15 +474,43 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
   dateEditPgt(pgt);
   lineEditPgt(pgt);
 
-  ui->scrollArea->widget()->layout()->addWidget(pgt);
+  if (tipoPgt == Pagamento::TipoPgt::Normal) { pagamentos << pgt; }
+  if (tipoPgt == Pagamento::TipoPgt::Frete) { pgtFrete = pgt; }
+  if (tipoPgt == Pagamento::TipoPgt::ST) { pgtSt = pgt; }
+
+  insertPgtInScrollArea(pgt);
 
   //---------------------------------------------------
 
   calcularTotal();
+}
 
-  //---------------------------------------------------
+void WidgetPagamentos::on_pushButtonDelete_clicked() {
+  //  auto *sender = qobject_cast<QPushButton *>(QObject::sender());
 
-  if (representacao and addFrete and pagamentos.size() == 1) { prepararPagamentosRep(); }
+  //  QString name = sender->objectName().remove("pushButtonDelete");
+  //  int index = name.toInt() - 1;
+
+  //  auto frames = findChildren<QFrame *>("frame" + name);
+
+  //  qDebug() << "name: " << name;
+  //  qDebug() << "index: " << index;
+  //  qDebug() << "frames: " << frames;
+
+  //  qDebug() << "1listValor: " << listValorPgt;
+  //  qDebug() << "1listValor: " << listValorPgt.at(0)->value();
+
+  //  listCheckBoxRep.removeAt(index);
+  //  listTipoPgt.removeAt(index);
+  //  listTipoData.removeAt(index);
+  //  listParcela.removeAt(index);
+  //  listValorPgt.removeAt(index);
+  //  listDataPgt.removeAt(index);
+  //  listObservacao.removeAt(index);
+
+  //  frames.at(0)->deleteLater();
+
+  //  qtdPagamentos -= 1;
 }
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
@@ -433,24 +528,66 @@ void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
 void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
   if (qFuzzyIsNull(frete)) { throw RuntimeError("Não há frete!", this); }
 
-  resetarPagamentos();
-
-  on_pushButtonAdicionarPagamento_clicked(false);
-  on_pushButtonAdicionarPagamento_clicked(false);
-
-  pagamentos.at(0)->checkBoxRep->setChecked(false);
-  pagamentos.at(0)->observacao->setText("FRETE");
-  pagamentos.at(0)->observacao->setReadOnly(true);
-  pagamentos.at(0)->valorPgt->setValue(frete);
-  pagamentos.at(0)->valorPgt->setReadOnly(true);
+  pgtFrete->checkBoxRep->setChecked(false);
 }
 
 void WidgetPagamentos::verifyFields() {
-  for (auto *pgt : pagamentos) {
-    if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pgt->posicao) + "!"); }
+  if (pgtFrete) {
+    if (pgtFrete->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento do frete!"); }
+    if (qFuzzyIsNull(pgtFrete->valorPgt->value())) { throw RuntimeError("Pagamento do frete está com valor 0!"); }
+    if (pgtFrete->valorPgt->value() < 0) { throw RuntimeError("Pagamento do frete está com valor negativo!"); }
+  }
 
-    if (qFuzzyIsNull(pgt->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(pgt->posicao) + " está com valor 0!"); }
+  if (pgtSt) {
+    if (pgtSt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento da ST!"); }
+    if (qFuzzyIsNull(pgtSt->valorPgt->value())) { throw RuntimeError("Pagamento da ST está com valor 0!"); }
+    if (pgtSt->valorPgt->value() < 0) { throw RuntimeError("Pagamento da ST´ está com valor negativo!"); }
+  }
 
-    if (tipo == Tipo::Venda and pgt->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(pgt->posicao) + "!"); }
+  // TODO: trocar por um foreach e usar pgt.posicao no lugar de i
+  for (int i = 0; i < pagamentos.size(); ++i) {
+    if (pagamentos.at(i)->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!"); }
+    if (qFuzzyIsNull(pagamentos.at(i)->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(i + 1) + " está com valor 0!"); }
+    if (pagamentos.at(i)->valorPgt->value() < 0) { throw RuntimeError("Pagamento " + QString::number(i + 1) + " está com valor negativo!"); }
+    if (tipo == Tipo::Venda and pagamentos.at(i)->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!"); }
   }
 }
+
+void WidgetPagamentos::buscarTiposPgtsCompra(QComboBox *comboBoxPgt) {
+  SqlQuery queryPag;
+  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
+  queryPag.bindValue(":idLoja", User::idLoja);
+
+  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
+
+  QStringList list;
+  list << "ESCOLHA UMA OPÇÃO!";
+
+  while (queryPag.next()) { list << queryPag.value("pagamento").toString(); }
+
+  comboBoxPgt->insertItems(0, list);
+}
+
+void WidgetPagamentos::buscarTiposPgtsVenda(QComboBox *comboBoxPgt) {
+  if (idOrcamento.isEmpty()) { throw RuntimeError("Orçamento vazio!"); }
+
+  SqlQuery queryPag;
+  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE apenasRepresentacao = :apenasRepresentacao AND idLoja = (SELECT idLoja FROM orcamento WHERE idOrcamento = :idOrcamento)");
+  queryPag.bindValue(":idOrcamento", idOrcamento);
+  queryPag.bindValue(":apenasRepresentacao", representacao);
+
+  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
+
+  QStringList list;
+  list << "ESCOLHA UMA OPÇÃO!";
+
+  while (queryPag.next()) { list << queryPag.value("pagamento").toString(); }
+
+  if (credito > 0) { list << "CONTA CLIENTE"; }
+
+  comboBoxPgt->insertItems(0, list);
+}
+
+// TODO: colocar um botão para apagar pagamento em vez de limpar pagamentos e fazer tudo do zero
+// TODO: ao alterar total recalcular o valor que sobra e colocar no ultimo pagamento
+// TODO: transformar 'frete loja'/'pgt total loja' em checkbox

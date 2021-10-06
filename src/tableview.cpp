@@ -21,6 +21,8 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setDefaultSectionSize(20);
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
+  setAlternatingRowColors(true);
+
   setConnections();
 }
 

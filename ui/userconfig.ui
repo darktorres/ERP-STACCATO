@@ -175,7 +175,7 @@
    <item row="0" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBoxAcbr">
      <property name="title">
-      <string>ACBr</string>
+      <string>Emissor de NFe - ACBr</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">

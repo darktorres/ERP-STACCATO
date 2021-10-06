@@ -12,7 +12,7 @@
 ACBr::ACBr(QObject *parent) : QObject(parent) {
   progressDialog.reset();
   progressDialog.setCancelButton(nullptr);
-  progressDialog.setLabelText("Esperando ACBr...");
+  progressDialog.setLabelText("Esperando o emissor de NFe ACBr...");
   progressDialog.setWindowTitle("ERP Staccato");
   progressDialog.setWindowModality(Qt::WindowModal);
   progressDialog.setMaximum(0);
@@ -36,8 +36,8 @@ void ACBr::error(QAbstractSocket::SocketError socketError) {
 
   switch (socketError) {
   case QAbstractSocket::ConnectionRefusedError: [[fallthrough]];
-  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao ACBr! Verifique se ele está aberto!");
-  case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com ACBr encerrada!");
+  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao emissor de NFe ACBr! Verifique se ele está aberto!");
+  case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com o emissor de NFe ACBr encerrada!");
   default: throw RuntimeException("Erro socket: " + socket.errorString());
   }
 }
@@ -158,7 +158,7 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
     const QString servidorConfig = User::getSetting("User/servidorACBr").toString();
     const QString porta = User::getSetting("User/portaACBr").toString();
 
-    if (servidorConfig.isEmpty() or porta.isEmpty()) { throw RuntimeError("Preencher IP e porta do ACBr nas configurações!"); }
+    if (servidorConfig.isEmpty() or porta.isEmpty()) { throw RuntimeError("Preencher IP e porta do emissor de NFe ACBr nas configurações!"); }
 
     if (not qApp->getSilent()) { progressDialog.show(); }
 
@@ -186,6 +186,10 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
   }
 
   progressDialog.cancel();
+
+  // TODO: caso o ACBr retorne alguma das mensagens abaixo pedir para o usuario remover e reconectar o leitor do certificado
+  // Erro ao criar a chave do CSP.
+  // Erro relacionado ao Canal Seguro
 
   return resposta;
 }

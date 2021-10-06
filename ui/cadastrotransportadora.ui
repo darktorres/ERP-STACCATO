@@ -513,9 +513,6 @@ color: rgb(0, 0, 0);</string>
          <property name="tabKeyNavigation">
           <bool>false</bool>
          </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SingleSelection</enum>
          </property>
@@ -636,9 +633,6 @@ color: rgb(0, 0, 0);</string>
          </property>
          <property name="tabKeyNavigation">
           <bool>false</bool>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SingleSelection</enum>

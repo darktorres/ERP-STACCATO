@@ -660,9 +660,6 @@
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
        <property name="selectionBehavior">
         <enum>QAbstractItemView::SelectRows</enum>
        </property>
@@ -682,15 +679,15 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
-  </customwidget>
-  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -169,7 +169,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::Faturamento, this);
+  InputDialog input(InputDialog::Tipo::ReagendarFaturamento, this);
   if (input.exec() != InputDialog::Accepted) { return; }
 
   const QDate dataPrevista = input.getNextDate();

@@ -19,75 +19,74 @@ InputDialog::InputDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->dateEditEvento->setDate(qApp->serverDate());
   ui->dateEditProximo->setDate(qApp->serverDate());
 
-  if (tipo == Tipo::Carrinho) {
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
+  //--------------------------------------
 
-    ui->labelProximoEvento->setText("Data prevista compra:");
-  }
+  ui->labelEvento->hide();
+  ui->dateEditEvento->hide();
 
-  if (tipo == Tipo::Faturamento) {
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
+  ui->labelObservacao->hide();
+  ui->lineEditObservacao->hide();
 
-    ui->labelProximoEvento->setText("Data prevista faturamento:");
-  }
+  ui->labelVeiculo->hide();
+  ui->itemBoxVeiculo->hide();
+
+  ui->labelData->hide();
+  ui->dateTimeVeiculo->hide();
+
+  //--------------------------------------
+
+  if (tipo == Tipo::Carrinho) { ui->labelProximoEvento->setText("Data prevista compra:"); }
+
+  if (tipo == Tipo::ReagendarFaturamento) { ui->labelProximoEvento->setText("Data prevista faturamento:"); }
 
   if (tipo == Tipo::AgendarColeta) {
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
     ui->labelProximoEvento->show();
     ui->dateEditProximo->show();
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
 
     ui->labelProximoEvento->setText("Data prevista coleta");
     ui->dateEditProximo->setDate(qApp->serverDate().addDays(8));
   }
 
   if (tipo == Tipo::Coleta) {
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
+    ui->labelEvento->show();
+    ui->dateEditEvento->show();
 
     ui->labelEvento->setText("Data coleta:");
     ui->labelProximoEvento->setText("Data prevista recebimento:");
   }
 
-  if (tipo == Tipo::AgendarRecebimento) {
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
+  if (tipo == Tipo::ReagendarRecebimento) {
     ui->labelProximoEvento->show();
     ui->dateEditProximo->show();
 
     ui->labelProximoEvento->setText("Data prevista recebimento:");
   }
 
-  if (tipo == Tipo::AgendarEntrega) {
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
-    ui->labelProximoEvento->show();
-    ui->dateEditProximo->show();
-    ui->labelObservacao->hide();
-    ui->lineEditObservacao->hide();
-
-    ui->labelProximoEvento->setText("Data prevista entrega:");
-  }
-
   if (tipo == Tipo::ReagendarPedido) {
-    ui->labelEvento->hide();
-    ui->dateEditEvento->hide();
     ui->labelProximoEvento->show();
     ui->dateEditProximo->show();
     ui->labelObservacao->show();
     ui->lineEditObservacao->show();
 
     ui->labelProximoEvento->setText("Data prevista:");
+  }
+
+  if (tipo == Tipo::ReagendarEntrega) {
+    ui->labelProximoEvento->hide();
+    ui->dateEditProximo->hide();
+
+    ui->labelVeiculo->show();
+    ui->itemBoxVeiculo->show();
+
+    ui->labelData->show();
+    ui->dateTimeVeiculo->show();
+
+    ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
+    ui->dateTimeVeiculo->setDate(qApp->serverDate());
+
+    ui->labelProximoEvento->setText("Data prevista entrega:");
+
+    setFixedWidth(682);
   }
 
   setConnections();
@@ -112,6 +111,12 @@ QDate InputDialog::getNextDate() const { return ui->dateEditProximo->date(); }
 
 QString InputDialog::getObservacao() const { return ui->lineEditObservacao->text(); }
 
+int InputDialog::getVeiculo() const { return ui->itemBoxVeiculo->getId().toInt(); }
+
+void InputDialog::setVeiculo(const int idVeiculo) { ui->itemBoxVeiculo->setId(idVeiculo); }
+
+QDateTime InputDialog::getDataVeiculo() const { return ui->dateTimeVeiculo->dateTime(); }
+
 void InputDialog::on_dateEditEvento_dateChanged(const QDate date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
@@ -119,6 +124,10 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate date) {
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
     if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Observação não pode estar vazio!", this); }
+  }
+
+  if (tipo == Tipo::ReagendarEntrega) {
+    if (ui->itemBoxVeiculo->text().isEmpty()) { throw RuntimeError("Deve selecionar um veículo!", this); }
   }
 
   QDialog::accept();

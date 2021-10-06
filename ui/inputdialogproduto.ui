@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>769</width>
-    <height>354</height>
+    <width>778</width>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,6 +176,26 @@
           </widget>
          </item>
          <item>
+          <widget class="QLineEdit" name="lineEditCodRep">
+           <property name="placeholderText">
+            <string>Cód. Rep.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QLabel" name="labelTotal">
            <property name="text">
             <string>Total:</string>
@@ -206,26 +226,6 @@
             <double>999999.989999999990687</double>
            </property>
           </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEditCodRep">
-           <property name="placeholderText">
-            <string>Cód. Rep.</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>

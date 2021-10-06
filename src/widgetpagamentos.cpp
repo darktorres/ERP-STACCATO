@@ -101,6 +101,8 @@ void WidgetPagamentos::doubleSpinBoxPgt(Pagamento *pgt) {
   const double restante = total - ui->doubleSpinBoxTotalPag->value();
 
   auto *doubleSpinBoxPgt = new QDoubleSpinBox(pgt);
+  //  doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  //  doubleSpinBoxPgt->setMinimumWidth(80);
   doubleSpinBoxPgt->setPrefix("R$ ");
   //  doubleSpinBoxPgt->setMinimum(0);
   //  doubleSpinBoxPgt->setMaximum(total);
@@ -177,7 +179,7 @@ void WidgetPagamentos::comboBoxPgtVenda(Pagamento *pgt) {
 }
 
 void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &text) {
-  auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
+  auto *pgt = qobject_cast<Pagamento *>(QObject::sender()->parent());
 
   if (not pgt) { throw RuntimeException("Erro Pgt Nulo!!"); }
 
@@ -199,7 +201,7 @@ void WidgetPagamentos::on_comboBoxTipoData_currentTextChanged(const QString &tex
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const QString &text) {
-  auto *pgt = qobject_cast<Pagamento *>(QObject::sender());
+  auto *pgt = qobject_cast<Pagamento *>(QObject::sender()->parent());
 
   if (not pgt) { throw RuntimeException("Erro Pgt Nulo!"); }
 
@@ -486,7 +488,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const Pagamento::
 }
 
 void WidgetPagamentos::on_pushButtonDelete_clicked() {
-  //  auto *sender = qobject_cast<QPushButton *>(QObject::sender());
+  //  auto *sender = qobject_cast<QPushButton *>(QObject::sender()->parent());
 
   //  QString name = sender->objectName().remove("pushButtonDelete");
   //  int index = name.toInt() - 1;

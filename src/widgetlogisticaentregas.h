@@ -50,7 +50,7 @@ private:
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
   auto processarConsultaNFe(const int idNFe, const QString &xml) -> void;
-  auto reagendar(const QModelIndexList &list, const QDate dataPrevEnt) -> void;
+  auto reagendar(const QModelIndexList &list, const QDateTime dataVeiculo, const int idVeiculo) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

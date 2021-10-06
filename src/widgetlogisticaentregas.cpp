@@ -83,9 +83,9 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setFilter("");
 
   modelCalendario.setHeaderData("data", "Agendado");
-  modelCalendario.setHeaderData("modelo", "Modelo");
-  modelCalendario.setHeaderData("razaoSocial", "Transp.");
+  modelCalendario.setHeaderData("modelo", "Veículo");
   modelCalendario.setHeaderData("kg", "Kg.");
+  modelCalendario.setHeaderData("razaoSocial", "Transp.");
   modelCalendario.setHeaderData("idVenda", "Venda");
 
   ui->tableCalendario->setModel(&modelCalendario);
@@ -117,15 +117,15 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelProdutos.setTable("view_calendario_produto");
 
-  modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
+  modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("produto", "Produto");
-  modelProdutos.setHeaderData("codComercial", "Código");
   modelProdutos.setHeaderData("formComercial", "Formato");
+  modelProdutos.setHeaderData("codComercial", "Código");
   modelProdutos.setHeaderData("caixas", "Cx.");
-  modelProdutos.setHeaderData("kg", "Kg.");
   modelProdutos.setHeaderData("quant", "Quant.");
   modelProdutos.setHeaderData("un", "Un.");
+  modelProdutos.setHeaderData("kg", "Kg.");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
   modelProdutos.setHeaderData("local", "Local");
@@ -146,13 +146,17 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarEntrega, this);
+  const int row = list.first().row();
+  const int idVeiculo = modelCarga.data(row, "idVeiculo").toInt();
+
+  InputDialog input(InputDialog::Tipo::ReagendarEntrega, this);
+  input.setVeiculo(idVeiculo);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
   qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonReagendar");
 
-  reagendar(list, input.getNextDate());
+  reagendar(list, input.getDataVeiculo(), input.getVeiculo());
 
   qApp->endTransaction();
 
@@ -161,7 +165,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate dataPrevEnt) {
+void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDateTime dataVeiculo, const int idVeiculo) {
   SqlQuery query1;
   query1.prepare("UPDATE venda_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
@@ -169,22 +173,23 @@ void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
   query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   SqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE idEvento = :idEvento");
+  query3.prepare("UPDATE veiculo_has_produto SET data = :data, idVeiculo = :idVeiculo WHERE idEvento = :idEvento");
 
   for (const auto &index : list) {
     for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-      query1.bindValue(":dataPrevEnt", dataPrevEnt);
+      query1.bindValue(":dataPrevEnt", dataVeiculo.date());
       query1.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
       if (not query1.exec()) { throw RuntimeException("Erro atualizando data venda: " + query1.lastError().text()); }
 
-      query2.bindValue(":dataPrevEnt", dataPrevEnt);
+      query2.bindValue(":dataPrevEnt", dataVeiculo.date());
       query2.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
       if (not query2.exec()) { throw RuntimeException("Erro atualizando data pedido_fornecedor: " + query2.lastError().text()); }
     }
 
-    query3.bindValue(":data", dataPrevEnt);
+    query3.bindValue(":data", dataVeiculo);
+    query3.bindValue(":idVeiculo", idVeiculo);
     query3.bindValue(":idEvento", modelCarga.data(index.row(), "idEvento"));
 
     if (not query3.exec()) { throw RuntimeException("Erro atualizando data carga: " + query3.lastError().text()); }
@@ -231,6 +236,11 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
   ui->pushButtonGerarNFe->setDisabled(true);
   ui->pushButtonImprimirDanfe->setDisabled(true);
   ui->pushButtonCancelarEntrega->setDisabled(true);
+
+  {
+    QSignalBlocker blocker(ui->lineEditBuscar);
+    ui->lineEditBuscar->clear();
+  }
 }
 
 void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {

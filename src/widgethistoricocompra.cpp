@@ -109,6 +109,8 @@ void WidgetHistoricoCompra::setTreeView() {
   modelTree.setHeaderData("dataPrevEnt", "Prev. Entrega");
   modelTree.setHeaderData("dataRealEnt", "Entrega");
 
+  modelTree.proxyModel = new ProdutoProxyModel(&modelTree, this);
+
   ui->treeView->setModel(&modelTree);
 
   ui->treeView->hideColumn("idRelacionado");

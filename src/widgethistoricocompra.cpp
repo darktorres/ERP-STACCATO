@@ -167,10 +167,14 @@ void WidgetHistoricoCompra::montaFiltro() {
 
 void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
+  const auto rowCount = ui->tableNFe->rowCount();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (list.isEmpty() and rowCount != 1) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
-  ACBrLib::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt());
+  const int row = (list.isEmpty()) ? 0 : list.first().row();
+  const int idNFe = modelNFe.data(row, "idNFe").toInt();
+
+  ACBrLib::gerarDanfe(idNFe);
 }
 
 void WidgetHistoricoCompra::on_pushButtonFollowup_clicked() {

@@ -693,6 +693,8 @@
  <tabstops>
   <tabstop>pushButtonFollowup</tabstop>
   <tabstop>scrollAreaVenda</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonProprios</tabstop>
   <tabstop>groupBoxStatusFinanceiro</tabstop>
   <tabstop>checkBoxPendente2</tabstop>
   <tabstop>checkBoxLiberado</tabstop>
@@ -713,11 +715,13 @@
   <tabstop>checkBoxRepoEntrega</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
   <tabstop>checkBoxDevolvido</tabstop>
+  <tabstop>checkBoxMes</tabstop>
+  <tabstop>dateEditMes</tabstop>
+  <tabstop>checkBoxDia</tabstop>
+  <tabstop>dateEditDia</tabstop>
   <tabstop>comboBoxLojas</tabstop>
   <tabstop>comboBoxVendedores</tabstop>
   <tabstop>comboBoxFornecedores</tabstop>
-  <tabstop>dateEditMes</tabstop>
-  <tabstop>dateEditDia</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
  </tabstops>

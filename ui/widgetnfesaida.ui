@@ -263,11 +263,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>groupBoxMes</tabstop>
-  <tabstop>dateEdit</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxAutorizado</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>checkBoxDenegada</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
   <tabstop>table</tabstop>
   <tabstop>pushButtonCancelarNFe</tabstop>
   <tabstop>pushButtonConsultarNFe</tabstop>

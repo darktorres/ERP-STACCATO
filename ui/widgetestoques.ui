@@ -218,6 +218,7 @@ color: rgb(255, 255, 0);</string>
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
   <tabstop>dateEditMes</tabstop>
   <tabstop>pushButtonRelatorio</tabstop>
   <tabstop>radioButtonMaior</tabstop>

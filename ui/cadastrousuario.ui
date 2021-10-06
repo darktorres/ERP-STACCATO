@@ -452,6 +452,13 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditPasswd_2</tabstop>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>table</tabstop>
+  <tabstop>lineEditNomeBancario</tabstop>
+  <tabstop>lineEditCPFBancario</tabstop>
+  <tabstop>lineEditCNPJBancario</tabstop>
+  <tabstop>lineEditBanco</tabstop>
+  <tabstop>lineEditAgencia</tabstop>
+  <tabstop>lineEditCC</tabstop>
+  <tabstop>checkBoxPoupanca</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

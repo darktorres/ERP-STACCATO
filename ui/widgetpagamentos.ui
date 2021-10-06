@@ -253,6 +253,10 @@
  <tabstops>
   <tabstop>doubleSpinBoxCreditoTotal</tabstop>
   <tabstop>doubleSpinBoxCreditoDisponivel</tabstop>
+  <tabstop>pushButtonAdicionarPagamento</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>pushButtonFreteLoja</tabstop>
+  <tabstop>pushButtonPgtLoja</tabstop>
   <tabstop>pushButtonLimparPag</tabstop>
   <tabstop>doubleSpinBoxTotalPag</tabstop>
  </tabstops>

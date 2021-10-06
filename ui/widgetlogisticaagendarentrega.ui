@@ -1071,6 +1071,11 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>scrollAreaLogistica</tabstop>
+  <tabstop>radioButtonEntregaLimpar</tabstop>
+  <tabstop>radioButtonTotalEstoque</tabstop>
+  <tabstop>radioButtonParcialEstoque</tabstop>
+  <tabstop>radioButtonSemEstoque</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxIniciado</tabstop>
@@ -1086,9 +1091,13 @@
   <tabstop>checkBoxRepoEntrega</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
   <tabstop>checkBoxDevolvido</tabstop>
+  <tabstop>checkBoxAtelier</tabstop>
+  <tabstop>checkBoxServicos</tabstop>
   <tabstop>lineEditAviso</tabstop>
   <tabstop>tableVendas</tabstop>
   <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>pushButtonReagendarPedido</tabstop>
   <tabstop>tableProdutos</tabstop>
   <tabstop>pushButtonImportarNFe</tabstop>
   <tabstop>pushButtonGerarNFeFutura</tabstop>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>976</width>
+    <width>994</width>
     <height>590</height>
    </rect>
   </property>
@@ -188,6 +188,7 @@
   <tabstop>pushButtonImprimirDanfe</tabstop>
   <tabstop>pushButtonReagendar</tabstop>
   <tabstop>pushButtonCancelarEntrega</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
   <tabstop>tableProdutos</tabstop>
   <tabstop>lineEditBuscar</tabstop>
  </tabstops>

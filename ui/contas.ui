@@ -113,6 +113,8 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonCriarLancamento</tabstop>
+  <tabstop>pushButtonDuplicarLancamento</tabstop>
   <tabstop>tablePendentes</tabstop>
   <tabstop>tableProcessados</tabstop>
   <tabstop>pushButtonSalvar</tabstop>

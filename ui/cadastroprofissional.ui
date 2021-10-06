@@ -1120,6 +1120,12 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditCPF</tabstop>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
+  <tabstop>comboBoxTipo</tabstop>
+  <tabstop>doubleSpinBoxComissao</tabstop>
+  <tabstop>checkBoxDataNasc</tabstop>
+  <tabstop>dateEditDataNasc</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>

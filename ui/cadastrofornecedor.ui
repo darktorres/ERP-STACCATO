@@ -1223,6 +1223,11 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
   <tabstop>checkBoxRepresentacao</tabstop>
+  <tabstop>comboBoxEspecialidade</tabstop>
+  <tabstop>doubleSpinBoxComissaoVendedor</tabstop>
+  <tabstop>doubleSpinBoxComissaoEspecial</tabstop>
+  <tabstop>doubleSpinBoxComissaoLoja</tabstop>
+  <tabstop>checkBoxVemSul</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
@@ -1235,6 +1240,14 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>comboBoxSt</tabstop>
   <tabstop>doubleSpinBoxAliquotaSt</tabstop>
+  <tabstop>comboBoxTipoEnd</tabstop>
+  <tabstop>lineEditCEP</tabstop>
+  <tabstop>lineEditLogradouro</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditComplemento</tabstop>
+  <tabstop>lineEditBairro</tabstop>
+  <tabstop>lineEditCidade</tabstop>
+  <tabstop>lineEditUF</tabstop>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>

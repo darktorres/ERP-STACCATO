@@ -510,6 +510,8 @@
   <tabstop>pushButtonCriarOrc</tabstop>
   <tabstop>pushButtonFollowup</tabstop>
   <tabstop>scrollAreaOrcamento</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonProprios</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxValido</tabstop>
   <tabstop>checkBoxExpirado</tabstop>
@@ -517,9 +519,11 @@
   <tabstop>checkBoxFechado</tabstop>
   <tabstop>checkBoxReplicado</tabstop>
   <tabstop>checkBoxPerdido</tabstop>
+  <tabstop>checkBoxMes</tabstop>
+  <tabstop>dateEditMes</tabstop>
   <tabstop>comboBoxLojas</tabstop>
   <tabstop>comboBoxVendedores</tabstop>
-  <tabstop>dateEditMes</tabstop>
+  <tabstop>comboBoxFornecedores</tabstop>
   <tabstop>comboBoxFollowup</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>

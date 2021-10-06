@@ -526,6 +526,8 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>scrollAreaCompra</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxFiltroPendentes</tabstop>
   <tabstop>checkBoxFiltroIniciados</tabstop>

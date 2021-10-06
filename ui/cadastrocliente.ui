@@ -1131,6 +1131,7 @@ QLineEdit:!read-only {
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
   <tabstop>checkBoxInscEstIsento</tabstop>
+  <tabstop>checkBoxDataNasc</tabstop>
   <tabstop>dateEditDataNasc</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
@@ -1144,6 +1145,8 @@ QLineEdit:!read-only {
   <tabstop>lineEditEmail</tabstop>
   <tabstop>doubleSpinBoxCredito</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
   <tabstop>lineEditCEP</tabstop>
   <tabstop>lineEditLogradouro</tabstop>

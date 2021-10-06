@@ -253,6 +253,7 @@ color: rgb(0, 0, 0);</string>
  <tabstops>
   <tabstop>table</tabstop>
   <tabstop>treeView</tabstop>
+  <tabstop>checkBoxDescontinuados</tabstop>
   <tabstop>pushButtonModelo3d</tabstop>
   <tabstop>legendaStaccatoOFF</tabstop>
   <tabstop>legendaEstoque</tabstop>

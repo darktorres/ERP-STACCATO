@@ -275,6 +275,20 @@
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>groupBoxStatus</tabstop>
+  <tabstop>checkBoxAutorizado</tabstop>
+  <tabstop>checkBoxPendente</tabstop>
+  <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
+  <tabstop>groupBoxLojas</tabstop>
+  <tabstop>itemBoxLojas_2</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>pushButtonInutilizarNFe</tabstop>
+  <tabstop>pushButtonExportar</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

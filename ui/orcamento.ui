@@ -572,9 +572,6 @@ color: rgb(0, 0, 0);</string>
              <property name="defaultDropAction">
               <enum>Qt::MoveAction</enum>
              </property>
-             <property name="alternatingRowColors">
-              <bool>true</bool>
-             </property>
              <property name="selectionMode">
               <enum>QAbstractItemView::SingleSelection</enum>
              </property>

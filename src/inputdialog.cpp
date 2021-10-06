@@ -136,3 +136,4 @@ void InputDialog::on_pushButtonSalvar_clicked() {
 
 // TODO: 0colocar titulo, descricao para nao perder o fluxo
 // TODO: colocar as classes variacoes (Produto/Financeiro) como widget e colocar nesta classe
+// TODO: alterar o windowTitle de "Informações" para o id do contexto, ex: OC 1234, Venda ALPH-1111

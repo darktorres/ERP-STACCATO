@@ -75,7 +75,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="labelSaldoCliente">
           <property name="text">
            <string>Saldo cliente:</string>
           </property>
@@ -113,7 +113,7 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labelSaldoRestante">
           <property name="text">
            <string>Saldo cliente restante:</string>
           </property>

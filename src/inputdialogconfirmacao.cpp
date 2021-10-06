@@ -568,6 +568,8 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
+  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
+
   const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }

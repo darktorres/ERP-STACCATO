@@ -374,7 +374,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbrRemoto);
 
-  // TODO: reativar depois de arrumar os spinBoxs para considerar 4 decimais
+  // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NFe, reativar depois de arrumar os spinBoxs para considerar 4 decimais
   //  if (not validarRegras(acbrRemoto, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();

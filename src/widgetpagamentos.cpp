@@ -304,8 +304,10 @@ void WidgetPagamentos::setTipo(const Tipo novoTipo) {
   tipo = novoTipo;
 
   if (tipo == Tipo::Compra) {
-    ui->label_4->hide();
+    ui->labelSaldoCliente->hide();
     ui->doubleSpinBoxCreditoTotal->hide();
+    ui->labelSaldoRestante->hide();
+    ui->doubleSpinBoxCreditoDisponivel->hide();
     ui->pushButtonFreteLoja->hide();
     ui->pushButtonPgtLoja->hide();
   }

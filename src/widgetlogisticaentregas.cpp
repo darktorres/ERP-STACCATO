@@ -165,7 +165,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDateTime dataVeiculo, const int idVeiculo) {
+void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDateTime &dataVeiculo, const int idVeiculo) {
   SqlQuery query1;
   query1.prepare("UPDATE venda_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 

@@ -53,7 +53,7 @@ void WidgetPagamentos::labelPagamento(Pagamento *pgt) {
   pgt->label = labelPagamento;
 }
 
-void WidgetPagamentos::lineEditPgt(Pagamento *pgt) {
+void WidgetPagamentos::lineEditPgt(Pagamento *pgt) const {
   auto *lineEditPgt = new QLineEdit(pgt);
   lineEditPgt->setPlaceholderText("Observação");
 
@@ -63,7 +63,7 @@ void WidgetPagamentos::lineEditPgt(Pagamento *pgt) {
   pgt->observacao = lineEditPgt;
 }
 
-void WidgetPagamentos::dateEditPgt(Pagamento *pgt) {
+void WidgetPagamentos::dateEditPgt(Pagamento *pgt) const {
   auto *dateEditPgt = new QDateEdit(pgt);
   dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   dateEditPgt->setDisplayFormat("dd/MM/yy");
@@ -117,7 +117,7 @@ void WidgetPagamentos::doubleSpinBoxPgt(Pagamento *pgt) {
   pgt->valorPgt = doubleSpinBoxPgt;
 }
 
-void WidgetPagamentos::comboBoxParc(Pagamento *pgt) {
+void WidgetPagamentos::comboBoxParc(Pagamento *pgt) const {
   auto *comboboxPgtParc = new QComboBox(pgt);
   comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   comboboxPgtParc->setMaximumWidth(45);
@@ -128,7 +128,7 @@ void WidgetPagamentos::comboBoxParc(Pagamento *pgt) {
   pgt->comboParcela = comboboxPgtParc;
 }
 
-void WidgetPagamentos::comboBoxTipoData(Pagamento *pgt) {
+void WidgetPagamentos::comboBoxTipoData(Pagamento *pgt) const {
   auto *comboBoxTipoData = new QComboBox(pgt);
 
   QStringList list{"DATA MÊS", "DATA + 1 MÊS", "14", "20", "28", "30", "60", "90", "120", "150", "180", "210"};
@@ -152,7 +152,7 @@ void WidgetPagamentos::comboBoxPgtCompra(Pagamento *pgt) {
   pgt->comboTipoPgt = comboBoxPgt;
 }
 
-void WidgetPagamentos::checkBoxRep(Pagamento *pgt) {
+void WidgetPagamentos::checkBoxRep(Pagamento *pgt) const {
   auto *checkboxRep = new QCheckBox(pgt);
   //  checkboxRep->setText("Fornecedor");
   checkboxRep->setText("Pago p/ forn.");
@@ -526,7 +526,7 @@ void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
 
   if (dialog.exec() == QDialog::Rejected) { return; }
 
-  for (auto *pgt : pagamentos) { pgt->checkBoxRep->setChecked(false); }
+  for (auto *pgt : qAsConst(pagamentos)) { pgt->checkBoxRep->setChecked(false); }
 }
 
 void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {

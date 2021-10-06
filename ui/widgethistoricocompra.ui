@@ -126,6 +126,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
   <tabstop>tablePedidos</tabstop>
   <tabstop>tableNFe</tabstop>
   <tabstop>pushButtonDanfe</tabstop>

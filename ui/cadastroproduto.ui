@@ -1408,6 +1408,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditDescricao</tabstop>
   <tabstop>comboBoxUn</tabstop>
   <tabstop>itemBoxFornecedor</tabstop>
+  <tabstop>checkBoxValidade</tabstop>
   <tabstop>dateEditValidade</tabstop>
   <tabstop>lineEditColecao</tabstop>
   <tabstop>doubleSpinBoxM2Cx</tabstop>

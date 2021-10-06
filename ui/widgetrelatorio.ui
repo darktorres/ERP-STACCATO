@@ -313,6 +313,7 @@
  <tabstops>
   <tabstop>dateEditMes</tabstop>
   <tabstop>pushButtonExcel</tabstop>
+  <tabstop>tableRelatorio</tabstop>
   <tabstop>tableTotalVendedor</tabstop>
   <tabstop>tableTotalLoja</tabstop>
   <tabstop>doubleSpinBoxGeral</tabstop>

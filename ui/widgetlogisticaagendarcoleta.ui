@@ -470,7 +470,9 @@
   <tabstop>pushButtonAgendarColeta</tabstop>
   <tabstop>pushButtonCancelarCarga</tabstop>
   <tabstop>pushButtonMontarCarga</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
   <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
   <tabstop>doubleSpinBoxPeso</tabstop>
   <tabstop>doubleSpinBoxCapacidade</tabstop>
   <tabstop>tableTranspAgend</tabstop>

@@ -439,8 +439,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>table</tabstop>
   <tabstop>comboBoxPagamento</tabstop>
   <tabstop>comboBoxLoja</tabstop>
+  <tabstop>lineEditVenda</tabstop>
+  <tabstop>groupBoxData</tabstop>
+  <tabstop>dateEditDe</tabstop>
+  <tabstop>dateEditAte</tabstop>
   <tabstop>dateEditEvento</tabstop>
   <tabstop>doubleSpinBoxDescMes</tabstop>
   <tabstop>doubleSpinBoxDescTotal</tabstop>

@@ -1379,12 +1379,12 @@ color: rgb(0, 0, 0);</string>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>lineEditVenda</tabstop>
-  <tabstop>itemBoxVendedor</tabstop>
-  <tabstop>itemBoxConsultor</tabstop>
-  <tabstop>itemBoxCliente</tabstop>
   <tabstop>dateTimeEdit</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
   <tabstop>treeView</tabstop>
   <tabstop>pushButtonAdicionarObservacao</tabstop>
   <tabstop>pushButtonModelo3d</tabstop>
@@ -1392,7 +1392,9 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>
   <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>spinBoxPesoTotal</tabstop>
   <tabstop>itemBoxEnderecoFat</tabstop>
+  <tabstop>plainTextEdit</tabstop>
   <tabstop>dateTimeEditOrc</tabstop>
   <tabstop>lineEditIdOrcamento</tabstop>
   <tabstop>checkBoxRT</tabstop>
@@ -1415,6 +1417,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonDevolucao</tabstop>
   <tabstop>pushButtonCancelamento</tabstop>
   <tabstop>pushButtonVoltar</tabstop>
+  <tabstop>checkBoxMostrarCancelados</tabstop>
   <tabstop>comboBoxFinanceiro</tabstop>
   <tabstop>pushButtonCorrigirFluxo</tabstop>
   <tabstop>pushButtonFinanceiroSalvar</tabstop>

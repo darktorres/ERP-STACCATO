@@ -242,8 +242,8 @@
   <tabstop>dateEditEvento</tabstop>
   <tabstop>dateEditProximo</tabstop>
   <tabstop>tableLogistica</tabstop>
-  <tabstop>pushButtonQuebradoReceb</tabstop>
   <tabstop>pushButtonQuebradoEntrega</tabstop>
+  <tabstop>pushButtonQuebradoReceb</tabstop>
   <tabstop>lineEditFoto</tabstop>
   <tabstop>pushButtonFoto</tabstop>
   <tabstop>lineEditRecebeu</tabstop>

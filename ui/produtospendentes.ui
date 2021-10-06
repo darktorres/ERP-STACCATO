@@ -381,6 +381,11 @@
  </customwidgets>
  <tabstops>
   <tabstop>tableProdutos</tabstop>
+  <tabstop>doubleSpinBoxQuantTotal</tabstop>
+  <tabstop>doubleSpinBoxComprar</tabstop>
+  <tabstop>pushButtonComprar</tabstop>
+  <tabstop>tableCompra</tabstop>
+  <tabstop>pushButtonConsumirCompra</tabstop>
   <tabstop>tableEstoque</tabstop>
   <tabstop>pushButtonConsumirEstoque</tabstop>
  </tabstops>

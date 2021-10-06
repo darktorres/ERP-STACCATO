@@ -808,6 +808,10 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditRazaoSocial</tabstop>
   <tabstop>lineEditSIGLA</tabstop>
   <tabstop>lineEditNomeFantasia</tabstop>
+  <tabstop>lineEditCNPJ</tabstop>
+  <tabstop>lineEditInscEstadual</tabstop>
+  <tabstop>lineEditTel</tabstop>
+  <tabstop>lineEditTel2</tabstop>
   <tabstop>lineEditBanco</tabstop>
   <tabstop>lineEditAgencia</tabstop>
   <tabstop>lineEditConta</tabstop>

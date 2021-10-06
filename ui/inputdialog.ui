@@ -158,6 +158,11 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>dateEditEvento</tabstop>
+  <tabstop>dateEditProximo</tabstop>
+  <tabstop>lineEditObservacao</tabstop>
+  <tabstop>itemBoxVeiculo</tabstop>
+  <tabstop>dateTimeVeiculo</tabstop>
   <tabstop>pushButtonSalvar</tabstop>
  </tabstops>
  <resources/>

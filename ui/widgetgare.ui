@@ -295,6 +295,10 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>radioButtonPendente</tabstop>
+  <tabstop>radioButtonLiberado</tabstop>
+  <tabstop>radioButtonGerado</tabstop>
+  <tabstop>radioButtonPago</tabstop>
   <tabstop>groupBoxDia</tabstop>
   <tabstop>dateEditFiltro</tabstop>
   <tabstop>table</tabstop>

@@ -369,10 +369,12 @@
   <tabstop>checkBoxCentavoSobressalente</tabstop>
   <tabstop>checkBoxPula1Mes</tabstop>
   <tabstop>checkBoxApenasRepresentacao</tabstop>
+  <tabstop>pushButtonAdicionarPagamento</tabstop>
+  <tabstop>pushButtonAtualizarPagamento</tabstop>
   <tabstop>tablePagamentos</tabstop>
+  <tabstop>tableTaxas</tabstop>
   <tabstop>pushButtonRemoverPagamento</tabstop>
   <tabstop>pushButtonLimparSelecao</tabstop>
-  <tabstop>tableTaxas</tabstop>
   <tabstop>pushButtonAtualizarTaxas</tabstop>
   <tabstop>itemBoxLoja</tabstop>
   <tabstop>tableAssocia1</tabstop>

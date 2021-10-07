@@ -1469,7 +1469,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
 void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (not index.parent().isValid()) { return; }
-  if (not User::isAdmin() or not User::isAdministrativo()) { return; }
+  if (not User::isAdmin() and not User::isAdministrativo()) { return; }
 
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);

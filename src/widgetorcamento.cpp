@@ -23,7 +23,9 @@ void WidgetOrcamento::setWidgets() {
     fillComboBoxFollowup();
     fillComboBoxLoja();
 
-    if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    const QString lojaGeral = "1";
+
+    if (User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
     fillComboBoxVendedor();
 

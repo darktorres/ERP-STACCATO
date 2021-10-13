@@ -52,6 +52,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("produto", "Produto");
   modelVendaProduto.setHeaderData("obs", "Obs.");
   modelVendaProduto.setHeaderData("lote", "Lote");
+  modelVendaProduto.setHeaderData("kg", "Kg.");
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");

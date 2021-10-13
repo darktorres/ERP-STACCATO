@@ -1018,6 +1018,7 @@ void Venda::cancelamento() {
   SqlQuery query1;
 
   if (not idOrcamento.isEmpty()) {
+    // TODO: não marcar orçamento como ativo se ele estiver fora da validade
     query1.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
     query1.bindValue(":idOrcamento", idOrcamento);
 
@@ -1066,6 +1067,8 @@ void Venda::cancelamento() {
   if (not query5.exec()) { throw RuntimeException("Erro marcando produtos da venda como cancelados: " + query5.lastError().text()); }
 
   // -------------------------------------------------------------------------
+
+  // TODO: no pedido ALPH-211411 não funcionou, testar
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     const QString status = modelFluxoCaixa.data(row, "status").toString();

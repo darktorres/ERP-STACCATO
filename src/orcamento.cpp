@@ -266,6 +266,8 @@ bool Orcamento::viewRegister() {
       ui->pushButtonGerarVenda->show();
     }
 
+    ui->checkBoxFreteManual->setDisabled(ui->checkBoxRepresentacao->isChecked());
+
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
     canChangeFrete = freteManual;
@@ -1317,6 +1319,8 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
 }
 
 void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
+  ui->checkBoxFreteManual->setDisabled(checked);
+  ui->checkBoxFreteManual->setChecked(checked);
   ui->itemBoxProduto->setRepresentacao(checked);
   novoItem();
 }

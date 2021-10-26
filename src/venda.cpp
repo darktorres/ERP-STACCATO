@@ -337,6 +337,11 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   idLoja = queryOrc.value("idLoja").toInt();
   representacao = queryOrc.value("representacao").toBool();
 
+  if (representacao) {
+    ui->checkBoxFreteManual->setDisabled(true);
+    ui->checkBoxFreteManual->setChecked(true);
+  }
+
   // -------------------------------------------------------------------------
 
   SqlQuery queryFrete;

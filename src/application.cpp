@@ -41,10 +41,8 @@ Application::~Application() { db.close(); }
 
 // for system errors
 void Application::enqueueException(const QString &exception, QWidget *parent) {
-  // TODO: guardar o arquivo/linha que chamou essa funcao
+  // TODO: guardar o arquivo/linha que chamou essa funcao (stacktrace?)
   exceptionQueue << Message{exception, parent};
-
-  Log::createLog("Exceção", exception);
 
   showMessages();
 }
@@ -57,8 +55,6 @@ bool Application::enqueueException(const bool boolean, const QString &exception,
 // for user errors
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
-
-  Log::createLog("Erro", error);
 
   showMessages();
 }
@@ -323,6 +319,8 @@ void Application::showMessages() {
   showingMessages = true;
 
   for (auto &exception : exceptionQueue) {
+    Log::createLog("Exceção", exception.message);
+
     if (exception.message.contains("Access denied for user")) { exception.message = "Login inválido!"; }
     if (exception.message.contains("Can't connect to MySQL server")) { exception.message = "Não foi possível conectar ao servidor!"; }
     if (exception.message.contains("MySQL server has gone away")) { exception.message = "Conexão com o servidor perdida!"; }
@@ -345,10 +343,22 @@ void Application::showMessages() {
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }
 
-  if (not silent) {
-    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
-    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
-    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  for (const auto &error : std::as_const(errorQueue)) {
+    Log::createLog("Erro", error.message);
+
+    if (not silent) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+  }
+
+  for (const auto &warning : std::as_const(warningQueue)) {
+    Log::createLog("Aviso", warning.message);
+
+    if (not silent) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+  }
+
+  for (const auto &information : std::as_const(informationQueue)) {
+    Log::createLog("Informação", information.message);
+
+    if (not silent) { QMessageBox::information(information.widget, "Informação!", information.message); }
   }
 
   exceptionQueue.clear();

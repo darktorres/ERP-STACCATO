@@ -35,7 +35,7 @@ public:
 
   auto ajustarDiaUtil(const QDate date) -> QDate;
   auto darkTheme() -> void;
-  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
+  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> void;
   auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;

@@ -165,7 +165,7 @@ bool Application::dbReconnect(const bool silent) {
   return db.isOpen();
 }
 
-bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
+void Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
   genericLogin(hostname);
 
   User::login(user, userPassword);
@@ -182,8 +182,6 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
 
   startSqlPing();
   startUpdaterPing();
-
-  return true;
 }
 
 void Application::runSqlJobs() {

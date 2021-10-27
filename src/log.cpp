@@ -17,5 +17,5 @@ void Log::createLog(const QString &tipo, const QString &message) {
 
   query.exec();
 
-  qDebug() << "log: " + tipo + ", " + message;
+  qDebug() << "log: (" + tipo + ") -> " + message;
 }

@@ -246,7 +246,28 @@ void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
   orcamento->show();
 }
 
+void WidgetOrcamento::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
+}
+
 void WidgetOrcamento::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
 
   //-------------------------------------

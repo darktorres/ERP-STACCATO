@@ -37,7 +37,28 @@ void WidgetVenda::setupTables() {
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
 }
 
+void WidgetVenda::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
+}
+
 void WidgetVenda::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
 
   //-------------------------------------

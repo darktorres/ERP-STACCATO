@@ -31,6 +31,7 @@ private:
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto fillComboBoxFornecedor() -> void;
   auto fillComboBoxLoja() -> void;

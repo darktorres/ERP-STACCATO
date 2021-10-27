@@ -29,6 +29,7 @@ private:
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto fillComboBoxFollowup() -> void;
   auto fillComboBoxFornecedor() -> void;

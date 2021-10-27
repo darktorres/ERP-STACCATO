@@ -38,10 +38,6 @@ void WidgetVenda::setupTables() {
 }
 
 void WidgetVenda::montaFiltro() {
-  if (not User::isGerente() and not User::isVendedorOrEspecial() and not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
-
-  //-------------------------------------
-
   QStringList filtros;
 
   //-------------------------------------
@@ -115,22 +111,6 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   modelViewVenda.setFilter(filtros.join(" AND "));
-
-  //-------------------------------------
-
-  ui->scrollAreaVenda->setEnabled(true);
-}
-
-void WidgetVenda::montaFiltroTexto() {
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
-                              "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
-
-  modelViewVenda.setFilter(filtroBusca);
-
-  //-------------------------------------
-
-  ui->scrollAreaVenda->setDisabled(true);
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {

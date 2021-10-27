@@ -92,7 +92,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     User::setSetting("User/lastuser", ui->lineEditUser->text());
     User::setSetting("User/passwd", ui->lineEditPass->text());
 
-    if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
+    qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text());
 
     verificaVersao(); // TODO: usar o webserver para indicar se está em manutencao
     verificaManutencao();

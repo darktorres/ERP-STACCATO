@@ -337,7 +337,7 @@ SearchDialog *SearchDialog::nfe(QWidget *parent) {
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
 
-  const QList<FullTextIndex> fullTextIndex = {{"fornecedor", "Fornecedor"}, {"descricao", "Descrição"}, {"colecao", "Coleção"}, {"codcomercial", "Código Comercial"}};
+  const QList<FullTextIndex> fullTextIndex = {{"descricao", "Descrição"}, {"codcomercial", "Código Comercial"}, {"colecao", "Coleção"}, {"fornecedor", "Fornecedor"}};
 
   auto *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, fullTextIndex, "idProduto = 0", "", true, parent);
 

@@ -160,7 +160,7 @@ void WidgetVenda::setWidgets() {
     fillComboBoxFornecedor();
     fillComboBoxLoja();
 
-    if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
     fillComboBoxVendedor();
 

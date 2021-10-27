@@ -25,7 +25,7 @@ void WidgetOrcamento::setWidgets() {
 
     const QString lojaGeral = "1";
 
-    if (User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
     fillComboBoxVendedor();
 

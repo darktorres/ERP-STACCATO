@@ -444,7 +444,7 @@
          </widget>
          <widget class="QGroupBox" name="groupBoxProdutos">
           <property name="title">
-           <string>Item do Orçamento</string>
+           <string>Itens do Orçamento</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
            <property name="leftMargin">

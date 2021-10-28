@@ -29,6 +29,7 @@ private:
   SqlTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> void;
   auto cancelarNFe(const QString &chaveAcesso, const int row) -> void;
   auto delayFiltro() -> void;

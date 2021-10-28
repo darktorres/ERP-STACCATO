@@ -165,3 +165,4 @@ QSize ItemBox::sizeHint() const {
 // TODO: replace this with eliding? https://wiki.qt.io/Elided_Label
 // TODO: ajustar o tamanho do widget de acordo com o tamanho do texto para o autodimensionar funcionar corretamente na tableView (usar sizeHint?)
 // TODO: add clearButtonEnabled?
+// TODO: adicionar placeholder no lugar de usar um label junto do itemBox?

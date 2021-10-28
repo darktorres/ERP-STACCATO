@@ -37,6 +37,7 @@ private:
   auto adicionaProdutoNoModel(const int row, const double caixas) -> void;
   auto adicionarProduto(const QModelIndexList &list) -> void;
   auto adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
+  auto ajustarGroupBoxStatus() -> void;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
   auto delayFiltro() -> void;

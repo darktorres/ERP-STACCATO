@@ -60,6 +60,7 @@ void NFeDistribuicao::updateTables() {
 
   if (not modelIsSet) {
     setupTables();
+    montaFiltro();
     modelIsSet = true;
   }
 
@@ -95,7 +96,7 @@ void NFeDistribuicao::setConnections() {
   connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxStatus_toggled, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU, connectionType);
   connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
@@ -115,7 +116,7 @@ void NFeDistribuicao::unsetConnections() {
   disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxStatus_toggled);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro);
   disconnect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked);
@@ -573,15 +574,19 @@ QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
 }
 
 void NFeDistribuicao::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
 
   filtros << "nsu IS NOT NULL";
 
-  //-------------------------------------
+  //------------------------------------- filtro status
 
   QStringList filtroCheck;
 
-  const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
@@ -589,7 +594,7 @@ void NFeDistribuicao::montaFiltro() {
 
   if (not filtroCheck.isEmpty()) { filtros << "statusDistribuicao IN (" + filtroCheck.join(", ") + ")"; }
 
-  //-------------------------------------
+  //------------------------------------- filtro loja
 
   const QString lojaNome = ui->itemBoxLoja->text();
   const QString idLoja = ui->itemBoxLoja->getId().toString();
@@ -609,11 +614,11 @@ void NFeDistribuicao::montaFiltro() {
   model.setFilter(filtros.join(" AND "));
 }
 
-void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
+void NFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
-    const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
     for (const auto &child : children) {
       child->setEnabled(true);
@@ -871,6 +876,23 @@ bool NFeDistribuicao::houveConsultaEmOutroPc() {
   if (not query.first()) { throw RuntimeException("Última consulta não encontrada!", this); }
 
   return query.value("tempo").toInt() < 60;
+}
+
+void NFeDistribuicao::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

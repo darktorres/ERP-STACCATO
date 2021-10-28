@@ -2,6 +2,7 @@
 
 #include "sqltablemodel.h"
 
+#include <QStack>
 #include <QTimer>
 #include <QWidget>
 
@@ -23,13 +24,16 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QStack<int> blockingSignals;
   QTimer timer;
   SqlTableModel model;
   Ui::WidgetDevolucao *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_pushButtonGerarNFe_clicked() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };

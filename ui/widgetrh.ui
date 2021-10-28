@@ -27,13 +27,41 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="2">
+    <widget class="TableView" name="tableTotal"/>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Total</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Filtros</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item>
        <widget class="QDateEdit" name="dateEdit">
         <property name="displayFormat">
          <string>MM/yyyy</string>
@@ -43,7 +71,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item>
+       <widget class="QPushButton" name="pushButtonSalvarMes">
+        <property name="text">
+         <string>Salvar mês</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -56,27 +91,7 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButtonSalvarMes">
-        <property name="text">
-         <string>Salvar mês</string>
-        </property>
-       </widget>
-      </item>
      </layout>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="TableView" name="tableTotal"/>
-   </item>
-   <item row="0" column="2">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Total</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
     </widget>
    </item>
   </layout>

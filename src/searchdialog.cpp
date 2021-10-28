@@ -508,6 +508,11 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) {
   on_lineEditBusca_textChanged();
 }
 
+void SearchDialog::show() {
+  model.select(); // para atualizar os dados que possam ter sido alterados enquanto o SearchDialog estava invisível
+  QDialog::show();
+}
+
 void SearchDialog::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 

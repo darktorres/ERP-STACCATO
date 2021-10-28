@@ -1261,7 +1261,7 @@ color: rgb(0, 0, 0);</string>
                </size>
               </property>
               <property name="text">
-               <string>Observações do produto</string>
+               <string>Observações</string>
               </property>
               <property name="buddy">
                <cstring>textEditObserv</cstring>

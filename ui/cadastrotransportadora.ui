@@ -37,7 +37,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="groupBoxTransportadora">
          <property name="title">
           <string>Info. Transportadora</string>
          </property>
@@ -256,6 +256,10 @@ color: rgb(0, 0, 0);</string>
             <property name="accessibleName">
              <string>Modelo</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="2">
@@ -307,6 +311,10 @@ color: rgb(0, 0, 0);</string>
             <property name="accessibleName">
              <string>Carga (Kg)</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="0" colspan="4">
@@ -343,6 +351,9 @@ color: rgb(0, 0, 0);</string>
                 <property name="text">
                  <string>Adicionar Veíc.</string>
                 </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -350,12 +361,18 @@ color: rgb(0, 0, 0);</string>
                 <property name="text">
                  <string>Atualizar Veíc.</string>
                 </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonDesativarVeiculo">
                 <property name="text">
                  <string>Desativar Veíc.</string>
+                </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -652,6 +669,9 @@ color: rgb(0, 0, 0);</string>
                 <property name="text">
                  <string>Adicionar End.</string>
                 </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -659,12 +679,18 @@ color: rgb(0, 0, 0);</string>
                 <property name="text">
                  <string>Atualizar End.</string>
                 </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonDesativarEnd">
                 <property name="text">
                  <string>Desativar End.</string>
+                </property>
+                <property name="autoDefault">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -715,6 +741,9 @@ color: rgb(0, 0, 0);</string>
        <property name="text">
         <string>Cadastrar</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -728,6 +757,9 @@ color: rgb(0, 0, 0);</string>
        <property name="text">
         <string>Atualizar</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -738,6 +770,9 @@ color: rgb(0, 0, 0);</string>
        <property name="icon">
         <iconset resource="../qrs/resources.qrc">
          <normaloff>:/search.png</normaloff>:/search.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -755,6 +790,9 @@ color: rgb(0, 0, 0);</string>
       <widget class="QPushButton" name="pushButtonDesativar">
        <property name="text">
         <string>Desativar</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

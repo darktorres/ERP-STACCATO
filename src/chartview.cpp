@@ -122,6 +122,8 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
     if (xySeries) { vec << xySeries->points(); }
   }
 
+  if (vec.isEmpty()) { return; }
+
   // ---------------------------------------------------------------
 
   auto *const axisX = m_chart->axes(Qt::Horizontal).at(0);

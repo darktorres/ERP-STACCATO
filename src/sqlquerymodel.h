@@ -34,3 +34,5 @@ private:
   // methods
   auto select(const QString &query) -> void;
 };
+
+// TODO: add setFilter(filtro)? internamente usar setQuery() + string do filtro

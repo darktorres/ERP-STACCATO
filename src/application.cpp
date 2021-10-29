@@ -278,6 +278,9 @@ void Application::startTransaction(const QString &messageLog) {
 }
 
 void Application::endTransaction() {
+  // TODO: verificar se a transação ainda é válida
+  // https://dba.stackexchange.com/questions/128726/transaction-identifier-possible-with-mysql
+
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
   qDebug() << "endTransaction";

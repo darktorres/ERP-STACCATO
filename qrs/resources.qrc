@@ -12,5 +12,7 @@
         <file>box_medium.png</file>
         <file>box_small.png</file>
         <file>galpao2.png</file>
+        <file>novo_galpao.png</file>
+        <file>novo_galpao2.png</file>
     </qresource>
 </RCC>

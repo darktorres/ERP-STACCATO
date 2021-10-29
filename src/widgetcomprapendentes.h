@@ -29,6 +29,7 @@ private:
   SqlTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto insere(const QDate dataPrevista) -> void;
   auto montaFiltro() -> void;

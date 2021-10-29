@@ -337,7 +337,7 @@ SearchDialog *SearchDialog::nfe(QWidget *parent) {
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
 
-  const QList<FullTextIndex> fullTextIndex = {{"fornecedor", "Fornecedor"}, {"descricao", "Descrição"}, {"colecao", "Coleção"}, {"codcomercial", "Código Comercial"}};
+  const QList<FullTextIndex> fullTextIndex = {{"descricao", "Descrição"}, {"codcomercial", "Código Comercial"}, {"colecao", "Coleção"}, {"fornecedor", "Fornecedor"}};
 
   auto *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, fullTextIndex, "idProduto = 0", "", true, parent);
 
@@ -469,7 +469,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   auto *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, fullTextIndex, filtro + filtroLoja + filtroAdmin, "nome", false, parent);
 
-  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "password", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
+  sdVendedor->hideColumns(
+      {"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
@@ -505,6 +506,11 @@ QString SearchDialog::getFilter() const { return filter; }
 void SearchDialog::setRepresentacao(const bool isRepresentacao) {
   this->isRepresentacao = isRepresentacao;
   on_lineEditBusca_textChanged();
+}
+
+void SearchDialog::show() {
+  model.select(); // para atualizar os dados que possam ter sido alterados enquanto o SearchDialog estava invisível
+  QDialog::show();
 }
 
 void SearchDialog::on_pushButtonModelo3d_clicked() {

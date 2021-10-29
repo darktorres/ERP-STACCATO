@@ -15,5 +15,7 @@ void Log::createLog(const QString &tipo, const QString &message) {
   query.bindValue(":tipo", tipo);
   query.bindValue(":message", message);
 
-  qDebug() << "save log: " << query.exec();
+  query.exec();
+
+  qDebug() << "log: (" + tipo + ") -> " + message;
 }

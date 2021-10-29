@@ -60,5 +60,6 @@ private:
   auto updateMode() -> void final;
   auto verificaEndereco() -> void;
   auto verifyFields() -> void final;
+  auto verifyFieldsVeiculo() -> void;
   auto viewRegister() -> bool final;
 };

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1237</width>
-    <height>715</height>
+    <width>1213</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,8 +93,8 @@
    </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+     <property name="tabBarAutoHide">
+      <bool>true</bool>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -130,6 +130,21 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_6">
                  <item row="0" column="0">
@@ -328,6 +343,21 @@ QLineEdit:!read-only {
                <string>Tipo</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
                <item>
                 <widget class="QRadioButton" name="radioButtonPF">
                  <property name="sizePolicy">
@@ -369,6 +399,21 @@ QLineEdit:!read-only {
                <string>Representante</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_2">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="0" column="2">
                 <widget class="QLabel" name="labelCPFContato">
                  <property name="text">
@@ -491,6 +536,21 @@ QLineEdit:!read-only {
                <string>Contatos</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_4">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="1" column="1">
                 <widget class="LineEditTel" name="lineEditTel_Cel">
                  <property name="sizePolicy">
@@ -674,6 +734,21 @@ QLineEdit:!read-only {
                <string>Mais informações</string>
               </property>
               <layout class="QGridLayout" name="gridLayout">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="1" column="0">
                 <widget class="QDoubleSpinBox" name="doubleSpinBoxCredito">
                  <property name="readOnly">
@@ -759,6 +834,21 @@ QLineEdit:!read-only {
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_21">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="1" column="0">
            <widget class="TableView" name="tableEndereco">
             <property name="mouseTracking">
@@ -790,6 +880,21 @@ QLineEdit:!read-only {
              <string>Endereços</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_22">
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <property name="spacing">
+              <number>3</number>
+             </property>
              <item row="1" column="5">
               <widget class="QLineEdit" name="lineEditBairro">
                <property name="minimumSize">

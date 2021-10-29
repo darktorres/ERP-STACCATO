@@ -205,7 +205,14 @@ void WidgetCompraPendentes::on_groupBoxStatus_toggled(const bool enabled) {
 }
 
 void WidgetCompraPendentes::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
+
+  //-------------------------------------
+
   QStringList filtroCheck;
 
   const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
@@ -368,6 +375,23 @@ void WidgetCompraPendentes::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraPendentes::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para

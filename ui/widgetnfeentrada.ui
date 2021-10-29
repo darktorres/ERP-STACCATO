@@ -93,6 +93,21 @@
       <set>Qt::AlignCenter</set>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
       <item>
        <widget class="QGroupBox" name="groupBoxStatus">
         <property name="title">
@@ -233,7 +248,7 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="ItemBox" name="itemBoxLojas_2">
+          <widget class="ItemBox" name="itemBoxLoja">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -283,7 +298,7 @@
   <tabstop>groupBoxMes</tabstop>
   <tabstop>dateEdit</tabstop>
   <tabstop>groupBoxLojas</tabstop>
-  <tabstop>itemBoxLojas_2</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
   <tabstop>table</tabstop>
   <tabstop>pushButtonInutilizarNFe</tabstop>
   <tabstop>pushButtonExportar</tabstop>

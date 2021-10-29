@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1393</width>
-    <height>391</height>
+    <width>1057</width>
+    <height>429</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,19 +27,19 @@
        <number>3</number>
       </property>
       <property name="leftMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="groupBoxFiltros">
+       <widget class="QGroupBox" name="groupBoxStatus">
         <property name="title">
          <string>Status Manifestação</string>
         </property>
@@ -243,7 +243,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>groupBoxFiltros</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxDesconhecido</tabstop>
   <tabstop>checkBoxCiencia</tabstop>
   <tabstop>checkBoxConfirmacao</tabstop>

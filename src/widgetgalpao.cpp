@@ -71,8 +71,8 @@ void WidgetGalpao::updateTables() {
 
     setConnections();
 
-    ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //    ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //    ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     ui->graphicsPallet->setSceneRect(pixmapBackground->boundingRect().width() + 70, 0, 842, 99999);
     ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());

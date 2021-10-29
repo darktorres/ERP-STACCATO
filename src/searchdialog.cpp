@@ -461,7 +461,7 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::vendedor(QWidget *parent) {
-  const QList<FullTextIndex> fullTextIndex = {{"tipo", "Função"}, {"nome", "Nome"}};
+  const QList<FullTextIndex> fullTextIndex = {/*{"tipo", "Função"},*/ {"nome", "Nome"}};
 
   const QString filtro = "tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL') AND desativado = FALSE";
   const QString filtroLoja = (User::idLoja == "1" or User::isEspecial()) ? "" : " AND idLoja = " + User::idLoja;

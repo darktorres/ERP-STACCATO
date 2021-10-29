@@ -318,6 +318,10 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QString filtroCheck;
 
   if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = "HAVING (Estoque > 0 OR Outros > 0)"; }
@@ -1027,6 +1031,23 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetLogisticaAgendarEntrega::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

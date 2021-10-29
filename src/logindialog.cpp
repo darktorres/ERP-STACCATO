@@ -2,9 +2,12 @@
 #include "ui_logindialog.h"
 
 #include "application.h"
+#include "log.h"
 #include "user.h"
 
+#include <QHostInfo>
 #include <QMessageBox>
+#include <QNetworkInterface>
 #include <QSqlError>
 #include <QVersionNumber>
 
@@ -92,7 +95,21 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     User::setSetting("User/lastuser", ui->lineEditUser->text());
     User::setSetting("User/passwd", ui->lineEditPass->text());
 
-    if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
+    qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text());
+
+    //-----------------------------------------------------
+
+    auto addresses = QNetworkInterface::allAddresses();
+
+    QMutableListIterator<QHostAddress> iterator(addresses);
+
+    while (iterator.hasNext()) {
+      if (auto address = iterator.next(); address.protocol() != QAbstractSocket::IPv4Protocol or address == QHostAddress(QHostAddress::LocalHost)) { iterator.remove(); }
+    }
+
+    //-----------------------------------------------------
+
+    Log::createLog("Login", "Usuário: " + User::nome + ", Host: " + QHostInfo::localHostName() + ", IP: " + addresses.first().toString());
 
     verificaVersao(); // TODO: usar o webserver para indicar se está em manutencao
     verificaManutencao();

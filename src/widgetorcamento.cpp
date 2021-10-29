@@ -23,7 +23,9 @@ void WidgetOrcamento::setWidgets() {
     fillComboBoxFollowup();
     fillComboBoxLoja();
 
-    if (User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    const QString lojaGeral = "1";
+
+    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
 
     fillComboBoxVendedor();
 
@@ -244,8 +246,25 @@ void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
   orcamento->show();
 }
 
+void WidgetOrcamento::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
+}
+
 void WidgetOrcamento::montaFiltro() {
-  if (not User::isGerente() and not User::isVendedorOrEspecial() and not ui->lineEditBusca->text().isEmpty()) { return montaFiltroTexto(); }
+  ajustarGroupBoxStatus();
 
   //-------------------------------------
 
@@ -312,22 +331,6 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   modelViewOrcamento.setFilter(filtros.join(" AND "));
-
-  //-------------------------------------
-
-  ui->scrollAreaOrcamento->setEnabled(true);
-}
-
-void WidgetOrcamento::montaFiltroTexto() {
-
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
-
-  modelViewOrcamento.setFilter(filtroBusca);
-
-  //-------------------------------------
-
-  ui->scrollAreaOrcamento->setDisabled(true);
 }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {

@@ -31,12 +31,12 @@ private:
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto fillComboBoxFornecedor() -> void;
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxVendedor() -> void;
   auto montaFiltro() -> void;
-  auto montaFiltroTexto() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_dateEditDia_dateChanged() -> void;
   auto on_dateEditMes_dateChanged() -> void;

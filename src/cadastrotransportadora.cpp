@@ -92,7 +92,13 @@ void CadastroTransportadora::clearFields() {
 }
 
 void CadastroTransportadora::verifyFields() {
-  const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+  const auto children = ui->groupBoxTransportadora->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { verifyRequiredField(*line); }
+}
+
+void CadastroTransportadora::verifyFieldsVeiculo() {
+  const auto children = ui->groupBoxVeiculo->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { verifyRequiredField(*line); }
 }
@@ -315,9 +321,6 @@ bool CadastroTransportadora::viewRegister() {
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
 void CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
-  if (ui->lineEditModelo->text().isEmpty()) { throw RuntimeError("Um campo obrigatório não foi preenchido:\nModelo"); }
-  if (ui->lineEditCarga->text().isEmpty()) { throw RuntimeError("Um campo obrigatório não foi preenchido:\nCarga (Kg)"); }
-
   if (tipoVeiculo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
 
   modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text());
@@ -335,6 +338,7 @@ void CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
+  verifyFieldsVeiculo();
   cadastrarVeiculo();
   novoVeiculo();
 }

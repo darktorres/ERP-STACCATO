@@ -118,19 +118,25 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeSaida::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
+
+  //------------------------------------- filtro texto
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   const QString filtroBusca = "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')";
   if (not text.isEmpty()) { filtros << filtroBusca; }
 
-  //-------------------------------------
+  //------------------------------------- filtro data
 
   const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
-  //-------------------------------------
+  //------------------------------------- filtro status
 
   QStringList filtroCheck;
 
@@ -436,6 +442,23 @@ void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chave
   stream << resposta;
 
   arquivo.close();
+}
+
+void WidgetNfeSaida::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)

@@ -110,6 +110,7 @@ void CadastroUsuario::setupMapper() {
   addMapping(ui->comboBoxLoja, "idLoja", "currentValue");
   addMapping(ui->comboBoxTipo, "tipo");
   addMapping(ui->lineEditEmail, "email");
+  addMapping(ui->lineEditTelefone, "telefone");
   addMapping(ui->lineEditNome, "nome");
   addMapping(ui->lineEditUser, "user");
 
@@ -151,6 +152,7 @@ void CadastroUsuario::savingProcedures() {
   setData("tipo", ui->comboBoxTipo->currentText());
   setData("user", ui->lineEditUser->text());
   setData("email", ui->lineEditEmail->text());
+  setData("telefone", ui->lineEditTelefone->text());
   setData("user", ui->lineEditUser->text());
 
   if (ui->lineEditPasswd->text() != "********") {

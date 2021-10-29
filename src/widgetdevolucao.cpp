@@ -31,6 +31,10 @@ void WidgetDevolucao::updateTables() {
 void WidgetDevolucao::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetDevolucao::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
   QStringList filtros;
 
   //-------------------------------------
@@ -57,6 +61,13 @@ void WidgetDevolucao::setConnections() {
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked, connectionType);
+}
+
+void WidgetDevolucao::unsetConnections() {
+  disconnect(&timer, &QTimer::timeout, this, &WidgetDevolucao::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro);
+  disconnect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked);
 }
 
 void WidgetDevolucao::setupTables() {
@@ -132,6 +143,23 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
   nfe->setAttribute(Qt::WA_DeleteOnClose);
 
   nfe->show();
+}
+
+void WidgetDevolucao::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: renomear classe para WidgetLogisticaDevolucao

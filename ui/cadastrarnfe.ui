@@ -1581,8 +1581,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>307</height>
+                <width>120</width>
+                <height>80</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_83">
@@ -1725,8 +1725,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>307</height>
+                <width>202</width>
+                <height>145</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_84">
@@ -2039,8 +2039,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>307</height>
+                <width>233</width>
+                <height>145</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_85">
@@ -2352,8 +2352,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>307</height>
+                <width>506</width>
+                <height>274</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_5">

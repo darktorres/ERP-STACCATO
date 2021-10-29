@@ -337,6 +337,11 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   idLoja = queryOrc.value("idLoja").toInt();
   representacao = queryOrc.value("representacao").toBool();
 
+  if (representacao) {
+    ui->checkBoxFreteManual->setDisabled(true);
+    ui->checkBoxFreteManual->setChecked(true);
+  }
+
   // -------------------------------------------------------------------------
 
   SqlQuery queryFrete;
@@ -1018,6 +1023,7 @@ void Venda::cancelamento() {
   SqlQuery query1;
 
   if (not idOrcamento.isEmpty()) {
+    // TODO: não marcar orçamento como ativo se ele estiver fora da validade
     query1.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
     query1.bindValue(":idOrcamento", idOrcamento);
 
@@ -1066,6 +1072,8 @@ void Venda::cancelamento() {
   if (not query5.exec()) { throw RuntimeException("Erro marcando produtos da venda como cancelados: " + query5.lastError().text()); }
 
   // -------------------------------------------------------------------------
+
+  // TODO: no pedido ALPH-211411 não funcionou, testar
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     const QString status = modelFluxoCaixa.data(row, "status").toString();
@@ -1469,7 +1477,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
 void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (not index.parent().isValid()) { return; }
-  if (not User::isAdmin() or User::isAdministrativo()) { return; }
+  if (not User::isAdmin() and not User::isAdministrativo()) { return; }
 
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);

@@ -101,52 +101,10 @@
        <string>Cadastro Usuário</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="5" column="1">
-        <widget class="QLineEdit" name="lineEditPasswd">
-         <property name="accessibleName">
-          <string>Senha</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="echoMode">
-          <enum>QLineEdit::Password</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelTipo">
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelUser">
          <property name="text">
-          <string>Tipo:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
-        <widget class="QTableView" name="table"/>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="lineEditPasswd_2">
-         <property name="accessibleName">
-          <string>Conf. de senha</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="echoMode">
-          <enum>QLineEdit::Password</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="lineEditUser">
-         <property name="accessibleName">
-          <string>Nome de usuário</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
+          <string>Usuário:</string>
          </property>
         </widget>
        </item>
@@ -157,38 +115,58 @@ color: rgb(0, 0, 0);</string>
          </property>
         </widget>
        </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="labelEmail">
+         <property name="text">
+          <string>E-mail:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QComboBox" name="comboBoxEspecialidade">
+         <item>
+          <property name="text">
+           <string>0 - Não definido</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1 - Revestimentos</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2 - Louças e Metais</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>3 - Acessórios</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>4 - Insumos</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>5 - Serviços</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="lineEditEmail">
+         <property name="accessibleName">
+          <string>Sigla</string>
+         </property>
+        </widget>
+       </item>
        <item row="5" column="0">
         <widget class="QLabel" name="labelPasswd">
          <property name="text">
           <string>Senha:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="ComboBox" name="comboBoxLoja">
-         <property name="accessibleName">
-          <string>Loja</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelUser">
-         <property name="text">
-          <string>Usuário:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelLoja">
-         <property name="text">
-          <string>Loja:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="labelSigla">
-         <property name="text">
-          <string>E-mail:</string>
          </property>
         </widget>
        </item>
@@ -200,6 +178,20 @@ color: rgb(0, 0, 0);</string>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(255, 255, 127);
 color: rgb(0, 0, 0);</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelEspecialidade">
+         <property name="text">
+          <string>Especialidade:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelTipo">
+         <property name="text">
+          <string>Tipo:</string>
          </property>
         </widget>
        </item>
@@ -267,53 +259,75 @@ color: rgb(0, 0, 0);</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QLineEdit" name="lineEditEmail">
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="lineEditUser">
+         <property name="accessibleName">
+          <string>Nome de usuário</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelLoja">
+         <property name="text">
+          <string>Loja:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="lineEditPasswd">
+         <property name="accessibleName">
+          <string>Senha</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="lineEditPasswd_2">
+         <property name="accessibleName">
+          <string>Conf. de senha</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 255, 127);
+color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="ComboBox" name="comboBoxLoja">
+         <property name="accessibleName">
+          <string>Loja</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="LineEditTel" name="lineEditTelefone">
          <property name="accessibleName">
           <string>Sigla</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QComboBox" name="comboBoxEspecialidade">
-         <item>
-          <property name="text">
-           <string>0 - Não definido</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>1 - Revestimentos</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>2 - Louças e Metais</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>3 - Acessórios</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>4 - Insumos</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>5 - Serviços</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelEspecialidade">
+       <item row="8" column="0">
+        <widget class="QLabel" name="labelTelefone">
          <property name="text">
-          <string>Especialidade:</string>
+          <string>Telefone:</string>
          </property>
         </widget>
+       </item>
+       <item row="9" column="0" colspan="2">
+        <widget class="QTableView" name="table"/>
        </item>
       </layout>
      </widget>
@@ -323,110 +337,88 @@ color: rgb(0, 0, 0);</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Dados bancários:</string>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelBanco_4">
+           <property name="text">
+            <string>CNPJ:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelBanco_3">
+           <property name="text">
+            <string>CPF:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelBanco">
+           <property name="text">
+            <string>Banco:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="labelAgencia">
+           <property name="text">
+            <string>Agência:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="labelCC">
+           <property name="text">
+            <string>C/C:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="lineEditCC"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="labelBanco_2">
+           <property name="text">
+            <string>Nome:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QCheckBox" name="checkBoxPoupanca">
+           <property name="text">
+            <string>Poupança</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEditAgencia"/>
+         </item>
+         <item row="3" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEditBanco"/>
+         </item>
+         <item row="2" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEditCNPJBancario"/>
+         </item>
+         <item row="1" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEditCPFBancario"/>
+         </item>
+         <item row="0" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEditNomeBancario"/>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_4">
-            <item row="2" column="0">
-             <widget class="QLabel" name="labelBanco_4">
-              <property name="text">
-               <string>CNPJ:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="labelBanco_3">
-              <property name="text">
-               <string>CPF:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="labelBanco">
-              <property name="text">
-               <string>Banco:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="labelAgencia">
-              <property name="text">
-               <string>Agência:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="labelCC">
-              <property name="text">
-               <string>C/C:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QLineEdit" name="lineEditCC"/>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelBanco_2">
-              <property name="text">
-               <string>Nome:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="2">
-             <widget class="QCheckBox" name="checkBoxPoupanca">
-              <property name="text">
-               <string>Poupança</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEditAgencia"/>
-            </item>
-            <item row="3" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEditBanco"/>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEditCNPJBancario"/>
-            </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEditCPFBancario"/>
-            </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEditNomeBancario"/>
-            </item>
-           </layout>
-          </item>
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -440,6 +432,11 @@ color: rgb(0, 0, 0);</string>
    <extends>QComboBox</extends>
    <header>src/combobox.h</header>
   </customwidget>
+  <customwidget>
+   <class>LineEditTel</class>
+   <extends>QLineEdit</extends>
+   <header>src/lineedittel.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -452,13 +449,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditPasswd_2</tabstop>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>table</tabstop>
-  <tabstop>lineEditNomeBancario</tabstop>
-  <tabstop>lineEditCPFBancario</tabstop>
-  <tabstop>lineEditCNPJBancario</tabstop>
-  <tabstop>lineEditBanco</tabstop>
-  <tabstop>lineEditAgencia</tabstop>
-  <tabstop>lineEditCC</tabstop>
-  <tabstop>checkBoxPoupanca</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

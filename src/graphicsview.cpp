@@ -39,7 +39,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 void GraphicsView::resizeEvent(QResizeEvent *event) {
   //  qDebug() << "view resize: " << event;
 
-  if (resizable and scene()) { fitInView(sceneRect(), Qt::KeepAspectRatio); }
+  //  if (resizable and scene()) { fitInView(sceneRect(), Qt::KeepAspectRatio); }
 
   QGraphicsView::resizeEvent(event);
 }

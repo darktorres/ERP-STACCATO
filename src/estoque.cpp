@@ -57,6 +57,7 @@ void Estoque::setupTables() {
 
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 
+  ui->tableEstoque->hideColumn("idBloco");
   ui->tableEstoque->hideColumn("restante");
   ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("idNFe");

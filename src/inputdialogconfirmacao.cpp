@@ -148,6 +148,7 @@ void InputDialogConfirmacao::setupTables() {
 
     ui->tableLogistica->setModel(&modelEstoque);
 
+    ui->tableLogistica->hideColumn("idBloco");
     ui->tableLogistica->hideColumn("restante");
     ui->tableLogistica->hideColumn("ajuste");
     ui->tableLogistica->hideColumn("vBCIPI");

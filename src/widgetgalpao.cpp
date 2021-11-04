@@ -25,6 +25,7 @@ void WidgetGalpao::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled, connectionType);
   connect(ui->checkBoxCriarApagar, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarApagar_toggled, connectionType);
   connect(ui->checkBoxMover, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMover_toggled, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged, connectionType);
@@ -38,6 +39,7 @@ void WidgetGalpao::setConnections() {
 void WidgetGalpao::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled);
   disconnect(ui->checkBoxCriarApagar, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarApagar_toggled);
   disconnect(ui->checkBoxMover, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMover_toggled);
   disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged);
@@ -54,6 +56,8 @@ void WidgetGalpao::updateTables() {
 
     // TODO: usar 2 scenes para não misturar pallets com estoques?
     // uma outra opção seria usar uma TableView no lugar do graphicsPallet
+
+    ui->graphicsPallet->hide();
 
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(Qt::white);
@@ -373,6 +377,8 @@ void WidgetGalpao::on_checkBoxMover_toggled(bool checked) {
 }
 
 void WidgetGalpao::on_pushButtonSalvar_clicked() { salvarPallets(); }
+
+void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
 // TODO: adicionar botao para criar pallet
 // TODO: adicionar botao para remover pallet

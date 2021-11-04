@@ -76,6 +76,20 @@
       <property name="rightMargin">
        <number>0</number>
       </property>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="checkBoxMover">
+        <property name="text">
+         <string>Mover pallets</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QPushButton" name="pushButtonSalvar">
+        <property name="text">
+         <string>Salvar</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="leftMargin">
@@ -109,11 +123,48 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="checkBoxMover">
-        <property name="text">
-         <string>Mover pallets</string>
+      <item row="7" column="0">
+       <widget class="QGroupBox" name="groupBoxEdicao">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
+        <property name="title">
+         <string>Habilitar edição</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="pushButtonCriarPallet">
+           <property name="text">
+            <string>Criar pallet</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonRemoverPallet">
+           <property name="text">
+            <string>Remover pallet</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item row="2" column="0">
@@ -226,54 +277,10 @@
         </item>
        </layout>
       </item>
-      <item row="6" column="0">
-       <widget class="QGroupBox" name="groupBoxEdicao">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="title">
-         <string>Habilitar edição</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="leftMargin">
-          <number>2</number>
-         </property>
-         <property name="topMargin">
-          <number>2</number>
-         </property>
-         <property name="rightMargin">
-          <number>2</number>
-         </property>
-         <property name="bottomMargin">
-          <number>2</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="pushButtonCriarPallet">
-           <property name="text">
-            <string>Criar pallet</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonRemoverPallet">
-           <property name="text">
-            <string>Remover pallet</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item row="5" column="0">
-       <widget class="QPushButton" name="pushButtonSalvar">
+       <widget class="QCheckBox" name="checkBoxConteudo">
         <property name="text">
-         <string>Salvar</string>
+         <string>Mostrar conteúdo</string>
         </property>
        </widget>
       </item>

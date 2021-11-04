@@ -32,6 +32,7 @@ private:
   Ui::WidgetGalpao *ui;
   // methods
   auto carregarPallets() -> void;
+  auto on_checkBoxConteudo_toggled(bool checked) -> void;
   auto on_checkBoxCriarApagar_toggled(bool checked) -> void;
   auto on_checkBoxMover_toggled(bool checked) -> void;
   auto on_dateTimeEdit_dateChanged() -> void;

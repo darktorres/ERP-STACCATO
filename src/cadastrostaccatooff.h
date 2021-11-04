@@ -23,6 +23,7 @@ private:
   auto on_itemBoxFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
   auto on_pushButtonDescadastrar_clicked() -> void;
+  auto on_pushButtonLimparFiltroFornecedor_clicked() -> void;
   auto on_radioButtonEstoque_toggled(const bool checked) -> void;
   auto on_radioButtonStaccatoOFF_toggled(const bool checked) -> void;
   auto on_radioButtonTodos_toggled(const bool checked) -> void;

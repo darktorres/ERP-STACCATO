@@ -33,6 +33,7 @@ void CadastroStaccatoOff::setConnections() {
   connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked, connectionType);
   connect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltroFornecedor, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonLimparFiltroFornecedor_clicked, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled, connectionType);
@@ -188,4 +189,10 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
 
   model.select();
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
+}
+
+void CadastroStaccatoOff::on_pushButtonLimparFiltroFornecedor_clicked() {
+  ui->itemBoxFornecedor->clear();
+
+  model.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 }

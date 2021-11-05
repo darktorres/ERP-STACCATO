@@ -361,7 +361,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbrRemoto, filePath); }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
-  throw RuntimeException("Resposta não tratada:\n" + resposta);
+  throw RuntimeException("Resposta não tratada:\n" + resposta, this);
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
@@ -1471,7 +1471,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
-  throw RuntimeException("Resposta não tratada!", this);
+  throw RuntimeException("Resposta não tratada:\n" + resposta, this);
 }
 
 void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(const double value) {

@@ -1,3 +1,5 @@
+
+#include "xml.h"
 #pragma once
 
 #include <QMainWindow>
@@ -9,6 +11,12 @@ class MainWindow;
 
 class MainWindow final : public QMainWindow {
   Q_OBJECT
+
+  struct NCM {
+    double mva4;
+    double mva12;
+    double aliq;
+  };
 
 public:
   explicit MainWindow(QWidget *parent);
@@ -49,4 +57,7 @@ private:
   auto resetTables() -> void;
   auto setConnectionStatus(const bool conectado) -> void;
   auto setConnections() -> void;
+  auto verifyDb(const bool conectado) -> void;
+  double calculaGare(XML &xml);
+  MainWindow::NCM buscaNCM(const XML &xml, const QString &ncm);
 };

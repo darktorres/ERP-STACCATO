@@ -101,11 +101,111 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   //---------------------------------------------------------------------------
 
   setConnections();
+
+  //---------------------------------------------------------------------------
+
+  return;
+
+  SqlQuery queryGare;
+
+  //  if (not queryGare.exec("select * from nfe where tipo = 'ENTRADA' and created > '2021-01-01' AND utilizada = TRUE")) { throw RuntimeError("erro buscando nfes: " + queryGare.lastError().text()); }
+  //  if (not queryGare.exec("SELECT * FROM nfe n LEFT JOIN conta_a_pagar_has_pagamento chp ON n.idNFe = chp.idNFe WHERE n.tipo = 'ENTRADA' AND n.created > '2021-01-01' AND n.utilizada = TRUE AND "
+  //                         "chp.grupo = 'IMPOSTOS - ICMS;ST;ISS' AND chp.status IN ('PENDENTE GARE', 'LIBERADO GARE', 'GERADO GARE')")) {
+  if (not queryGare.exec("select * from nfe where idNFe = 53191")) { throw RuntimeError("erro buscando nfes: " + queryGare.lastError().text()); }
+
+  qApp->startTransaction("correção gares");
+
+  while (queryGare.next()) {
+    XML xml = XML(queryGare.value("xml").toByteArray());
+
+    const int id = queryGare.value("idNFe").toInt();
+
+    const double valorAntigo = qApp->roundDouble(queryGare.value("gare").toDouble());
+    const double valorNovo = qApp->roundDouble(calculaGare(xml));
+
+    //    qDebug() << "idNFe: " << id;
+    //    qDebug() << "old gare: " << valorAntigo;
+    //    qDebug() << "new gare: " << valorNovo;
+
+    //        if (not qFuzzyCompare(1.0 + valorAntigo, 1.0 + valorNovo)) {
+    //   if (not qFuzzyCompare(valorAntigo, valorNovo)) {
+    if (qAbs(valorAntigo - valorNovo) > 1) {
+      qDebug() << "idNFe: " << id;
+      qDebug() << "old gare: " << valorAntigo;
+      qDebug() << "new gare: " << valorNovo;
+
+      SqlQuery queryNFe;
+
+      if (not queryNFe.exec("UPDATE nfe SET gare = " + QString::number(valorNovo) + " WHERE idNFe = " + QString::number(id))) {
+        throw RuntimeError("erro atualizando gare na nfe: " + queryNFe.lastError().text());
+      }
+
+      SqlQuery queryConta;
+
+      if (not queryConta.exec("UPDATE conta_a_pagar_has_pagamento SET valor = " + QString::number(valorNovo) + " WHERE idNFe = " + QString::number(id) + " AND grupo = 'IMPOSTOS - ICMS;ST;ISS'")) {
+        throw RuntimeError("erro atualizando gare na conta: " + queryConta.lastError().text());
+      }
+    }
+  }
+
+  qApp->endTransaction();
 }
 
 MainWindow::MainWindow() : MainWindow(nullptr) {}
 
 MainWindow::~MainWindow() { delete ui; }
+
+double MainWindow::calculaGare(XML &xml) {
+  double total = 0;
+
+  for (auto &produto : xml.produtos) {
+    const MainWindow::NCM ncm = buscaNCM(xml, produto.ncm);
+
+    // CST 00 Tributada integralmente (pago ao governo)
+    // CST 10 Tributada e com cobrança do ICMS por substituição tributária
+    // CST 60 ICMS cobrado anteriormente por substituição tributária (pago ao fornecedor)
+
+    if (produto.tipoICMS != "ICMS00") { continue; }
+
+    const double icmsIntra = ncm.aliq;
+    const double mva = (qFuzzyCompare(produto.pICMS, 4)) ? ncm.mva4 : ncm.mva12;
+    const double baseCalculo = produto.valor + produto.vIPI + produto.outros + produto.frete + produto.seguro - produto.desconto;
+    const double icmsProprio = produto.vICMS;
+    const double baseST = (baseCalculo) * (1 + mva);
+    double icmsST = (baseST * icmsIntra) - icmsProprio;
+    icmsST = qMax(icmsST, 0.);
+
+    total += icmsST;
+
+    produto.valorGare = icmsST;
+
+    //    qDebug() << "baseCalculo: " << baseCalculo;
+    //    qDebug() << "mvaAjustado: " << mva;
+    //    qDebug() << "icmsIntra: " << icmsIntra;
+    //    qDebug() << "icmsProprio: " << icmsProprio;
+    //    qDebug() << "baseST: " << baseST;
+    //    qDebug() << "icmsST: " << icmsST;
+  }
+
+  //  qDebug() << "new gare: " << total;
+
+  return total;
+}
+
+MainWindow::NCM MainWindow::buscaNCM(const XML &xml, const QString &ncm) {
+  SqlQuery query;
+
+  if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'")) { throw RuntimeException("Erro buscando ncm " + ncm + ": " + query.lastError().text()); }
+
+  //  if (not query.first()) { throw RuntimeError("NCM " + ncm + " não cadastrado!"); }
+  if (not query.first()) {
+    //    qDebug() << "NFe: " << xml.nNF << ", NCM " + ncm + " não cadastrado!";
+    qDebug() << "'" << xml.nNF << "'";
+    return NCM{0, 0, 0};
+  }
+
+  return NCM{query.value("mva4").toDouble() / 100, query.value("mva12").toDouble() / 100, query.value("aliq").toDouble() / 100};
+}
 
 void MainWindow::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);

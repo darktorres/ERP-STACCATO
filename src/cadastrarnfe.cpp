@@ -181,7 +181,7 @@ QString CadastrarNFe::montarXML() {
 
 QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
   QString resposta = acbrRemoto.enviarComando(montarXML());
-  //  qDebug() << "resposta: " << resposta;
+  qDebug() << "gerarNota: " << resposta;
 
   //-------------------------------------------
 
@@ -200,7 +200,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 }
 
 int CadastrarNFe::preCadastrarNota() {
-  qDebug() << "precadastrar";
+  qDebug() << "preCadastrarNota";
 
   qApp->startTransaction("CadastrarNFe::preCadastrarNota");
 
@@ -350,7 +350,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
-    qDebug() << "rejeicao";
+    qDebug() << "processarResposta -> rejeicao";
 
     removerNota(idNFe);
 
@@ -361,7 +361,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   }
 
   if (resposta.contains("Erro Interno", Qt::CaseInsensitive)) {
-    qDebug() << "erro interno sefaz";
+    qDebug() << "processarResposta -> erro interno sefaz";
 
     removerNota(idNFe);
 
@@ -1628,7 +1628,7 @@ void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
 
 void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
   const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
-  qDebug() << "enviar nfe: " << resposta;
+  qDebug() << "enviarNFe: " << resposta;
 
   processarResposta(resposta, filePath, idNFe, acbrRemoto);
 
@@ -2086,3 +2086,9 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 // https://sigaofisco.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
 // https://cr.inf.br/blog/manual-como-fazer-nota-de-devolucao/
 // https://legislacao.fazenda.sp.gov.br/Paginas/RC20724_2019.aspx
+
+// NFe de serviço
+
+// usar NCM 00
+// usar CFOP 59xx/69xx
+// preencher ISSQN - Imposto sobre serviço de qualquer natureza

@@ -18,7 +18,8 @@ class CadastrarNFe final : public QDialog {
 
 public:
   // TODO: adicionar tipo Frete
-  // TODO: separa Entrada em DevolucaoCliente, DevolucaoFornecedor
+  // TODO: adicionar tipo Serviço
+  // TODO: separar Entrada em DevolucaoCliente, DevolucaoFornecedor
   enum class Tipo { Entrada, Saida, Futura, SaidaAposFutura };
   Q_ENUM(Tipo)
 

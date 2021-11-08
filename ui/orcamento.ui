@@ -444,7 +444,7 @@
          </widget>
          <widget class="QGroupBox" name="groupBoxProdutos">
           <property name="title">
-           <string>Item do Orçamento</string>
+           <string>Itens do Orçamento</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
            <property name="leftMargin">
@@ -571,9 +571,6 @@ color: rgb(0, 0, 0);</string>
              </property>
              <property name="defaultDropAction">
               <enum>Qt::MoveAction</enum>
-             </property>
-             <property name="alternatingRowColors">
-              <bool>true</bool>
              </property>
              <property name="selectionMode">
               <enum>QAbstractItemView::SingleSelection</enum>
@@ -1811,18 +1808,21 @@ color: rgb(0, 0, 0);</string>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>lineEditOrcamento</tabstop>
-  <tabstop>itemBoxVendedor</tabstop>
-  <tabstop>itemBoxConsultor</tabstop>
-  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>dataEmissao</tabstop>
   <tabstop>spinBoxValidade</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
   <tabstop>itemBoxProduto</tabstop>
+  <tabstop>doubleSpinBoxPrecoUn</tabstop>
   <tabstop>doubleSpinBoxCaixas</tabstop>
   <tabstop>doubleSpinBoxQuant</tabstop>
   <tabstop>doubleSpinBoxMinimo</tabstop>
   <tabstop>doubleSpinBoxQuantCx</tabstop>
+  <tabstop>doubleSpinBoxEstoque</tabstop>
   <tabstop>lineEditUn</tabstop>
   <tabstop>doubleSpinBoxDesconto</tabstop>
   <tabstop>doubleSpinBoxTotalItem</tabstop>
@@ -1841,6 +1841,9 @@ color: rgb(0, 0, 0);</string>
   <tabstop>legendaEstoque</tabstop>
   <tabstop>legendaPromocao</tabstop>
   <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>spinBoxPesoTotal</tabstop>
+  <tabstop>plainTextEditObs</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
   <tabstop>lineEditReplicaDe</tabstop>
   <tabstop>lineEditReplicadoEm</tabstop>
   <tabstop>doubleSpinBoxSubTotalBruto</tabstop>

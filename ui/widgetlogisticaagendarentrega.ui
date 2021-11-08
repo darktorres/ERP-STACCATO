@@ -30,7 +30,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>168</width>
+        <width>162</width>
         <height>609</height>
        </rect>
       </property>
@@ -799,6 +799,18 @@
      </widget>
      <widget class="QFrame" name="frameCaminhao">
       <layout class="QGridLayout" name="gridLayout_4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="4" column="0">
         <widget class="QPushButton" name="pushButtonAgendarCarga">
          <property name="text">
@@ -868,9 +880,6 @@
             </property>
             <property name="editTriggers">
              <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
             </property>
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
@@ -956,9 +965,6 @@
             </property>
             <property name="editTriggers">
              <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
             </property>
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
@@ -1053,18 +1059,23 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>scrollAreaLogistica</tabstop>
+  <tabstop>radioButtonEntregaLimpar</tabstop>
+  <tabstop>radioButtonTotalEstoque</tabstop>
+  <tabstop>radioButtonParcialEstoque</tabstop>
+  <tabstop>radioButtonSemEstoque</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxIniciado</tabstop>
@@ -1080,9 +1091,13 @@
   <tabstop>checkBoxRepoEntrega</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
   <tabstop>checkBoxDevolvido</tabstop>
+  <tabstop>checkBoxAtelier</tabstop>
+  <tabstop>checkBoxServicos</tabstop>
   <tabstop>lineEditAviso</tabstop>
   <tabstop>tableVendas</tabstop>
   <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>pushButtonReagendarPedido</tabstop>
   <tabstop>tableProdutos</tabstop>
   <tabstop>pushButtonImportarNFe</tabstop>
   <tabstop>pushButtonGerarNFeFutura</tabstop>

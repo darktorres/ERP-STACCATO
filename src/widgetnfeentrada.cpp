@@ -22,18 +22,50 @@ WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
 void WidgetNfeEntrada::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
 
+void WidgetNfeEntrada::unsetConnections() {
+  blockingSignals.push(0);
+
+  disconnect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro);
+  disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
+  disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
+  disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
+}
+
 void WidgetNfeEntrada::updateTables() {
   if (not isSet) {
     timer.setSingleShot(true);
+    ui->dateEdit->setDate(qApp->serverDate());
+    ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
     setConnections();
     isSet = true;
   }
@@ -56,7 +88,6 @@ void WidgetNfeEntrada::setupTables() {
   // TODO: mudar view para puxar apenas as NFes com cnpjDest igual a raiz da staccato
   model.setTable("view_nfe_entrada");
 
-  model.setHeaderData("created", "Importado em");
   model.setHeaderData("utilizada", "Utilizada");
 
   ui->table->setModel(&model);
@@ -64,8 +95,6 @@ void WidgetNfeEntrada::setupTables() {
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
   ui->table->hideColumn("nsu");
-
-  ui->table->showColumn("created");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 
@@ -89,12 +118,55 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void WidgetNfeEntrada::on_lineEditBusca_textChanged() { montaFiltro(); }
-
 void WidgetNfeEntrada::montaFiltro() {
+  ajustarGroupBoxStatus();
+
+  //-------------------------------------
+
+  QStringList filtros;
+
+  //------------------------------------- filtro texto
+
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  model.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
+  const QString filtroBusca = "NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
+  if (not text.isEmpty()) { filtros << filtroBusca; }
+
+  //------------------------------------- filtro data
+
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`Importado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  if (not filtroData.isEmpty()) { filtros << filtroData; }
+
+  //------------------------------------- filtro status
+
+  QStringList filtroCheck;
+
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (const auto &child : children) {
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
+  }
+
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
+
+  //------------------------------------- filtro loja
+
+  const QString lojaNome = ui->itemBoxLoja->text();
+  const QString idLoja = ui->itemBoxLoja->getId().toString();
+
+  if (not lojaNome.isEmpty()) {
+    QSqlQuery queryLoja;
+
+    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
+
+    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
+
+    filtros << "`CNPJ Dest` = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
+  }
+
+  //-------------------------------------
+
+  model.setFilter(filtros.join(" AND "));
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
@@ -272,6 +344,23 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   }
 
   qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);
+}
+
+void WidgetNfeEntrada::ajustarGroupBoxStatus() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxStatus->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
 }
 
 // TODO: 5copiar filtros do widgetnfesaida

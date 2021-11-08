@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1237</width>
-    <height>672</height>
+    <width>1192</width>
+    <height>597</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,21 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_21">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="1" column="0">
            <widget class="TableView" name="tableEndereco">
             <property name="mouseTracking">
@@ -52,9 +67,6 @@
             </property>
             <property name="tabKeyNavigation">
              <bool>false</bool>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
             </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::SingleSelection</enum>
@@ -73,6 +85,21 @@
              <string>Endereços</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_22">
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <property name="spacing">
+              <number>3</number>
+             </property>
              <item row="1" column="5">
               <widget class="QLineEdit" name="lineEditBairro">
                <property name="minimumSize">
@@ -364,6 +391,21 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_6">
                  <item row="0" column="1">
@@ -596,6 +638,21 @@ color: rgb(0, 0, 0);</string>
                <string>Tipo</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
                <item>
                 <widget class="QRadioButton" name="radioButtonPF">
                  <property name="sizePolicy">
@@ -631,6 +688,21 @@ color: rgb(0, 0, 0);</string>
                <string>Representante</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_8">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="0" column="2">
                 <widget class="QLabel" name="labelCPFContato">
                  <property name="text">
@@ -741,6 +813,21 @@ color: rgb(0, 0, 0);</string>
                <string>Contatos</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_9">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="1" column="1">
                 <widget class="LineEditTel" name="lineEditTel_Cel">
                  <property name="sizePolicy">
@@ -915,6 +1002,21 @@ color: rgb(0, 0, 0);</string>
           <string>Dados bancários:</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="2" column="0">
@@ -1123,6 +1225,12 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditCPF</tabstop>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
+  <tabstop>comboBoxTipo</tabstop>
+  <tabstop>doubleSpinBoxComissao</tabstop>
+  <tabstop>checkBoxDataNasc</tabstop>
+  <tabstop>dateEditDataNasc</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>

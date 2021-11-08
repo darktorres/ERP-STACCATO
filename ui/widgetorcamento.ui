@@ -65,9 +65,6 @@
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
@@ -498,21 +495,23 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
-  </customwidget>
-  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>pushButtonCriarOrc</tabstop>
   <tabstop>pushButtonFollowup</tabstop>
   <tabstop>scrollAreaOrcamento</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonProprios</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxValido</tabstop>
   <tabstop>checkBoxExpirado</tabstop>
@@ -520,9 +519,11 @@
   <tabstop>checkBoxFechado</tabstop>
   <tabstop>checkBoxReplicado</tabstop>
   <tabstop>checkBoxPerdido</tabstop>
+  <tabstop>checkBoxMes</tabstop>
+  <tabstop>dateEditMes</tabstop>
   <tabstop>comboBoxLojas</tabstop>
   <tabstop>comboBoxVendedores</tabstop>
-  <tabstop>dateEditMes</tabstop>
+  <tabstop>comboBoxFornecedores</tabstop>
   <tabstop>comboBoxFollowup</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>

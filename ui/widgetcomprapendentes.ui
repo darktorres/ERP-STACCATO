@@ -30,9 +30,6 @@
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
           </property>
@@ -517,18 +514,20 @@
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
+  <tabstop>scrollAreaCompra</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxFiltroPendentes</tabstop>
   <tabstop>checkBoxFiltroIniciados</tabstop>

@@ -1071,8 +1071,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>995</width>
-                <height>305</height>
+                <width>1009</width>
+                <height>307</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_81">
@@ -1581,8 +1581,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>297</height>
+                <width>120</width>
+                <height>80</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_83">
@@ -1725,8 +1725,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>297</height>
+                <width>202</width>
+                <height>145</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_84">
@@ -2039,8 +2039,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>297</height>
+                <width>233</width>
+                <height>145</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_85">
@@ -2352,8 +2352,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
-                <height>297</height>
+                <width>506</width>
+                <height>274</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_5">
@@ -3686,8 +3686,10 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>comboBoxDestinoOperacao</tabstop>
   <tabstop>comboBoxFinalidade</tabstop>
   <tabstop>lineEditEmitenteNomeRazao</tabstop>
+  <tabstop>lineEditEmitenteFantasia</tabstop>
   <tabstop>lineEditEmitenteCNPJ</tabstop>
   <tabstop>lineEditEmitenteInscEstadual</tabstop>
+  <tabstop>lineEditEmitenteTel1</tabstop>
   <tabstop>lineEditEmitenteLogradouro</tabstop>
   <tabstop>lineEditEmitenteNumero</tabstop>
   <tabstop>lineEditEmitenteComplemento</tabstop>
@@ -3699,6 +3701,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>lineEditDestinatarioNomeRazao</tabstop>
   <tabstop>lineEditDestinatarioInscEst</tabstop>
   <tabstop>pushButtonConsultarCadastro</tabstop>
+  <tabstop>lineEditDestinatarioCPFCNPJ</tabstop>
+  <tabstop>lineEditDestinatarioTel1</tabstop>
+  <tabstop>lineEditDestinatarioTel2</tabstop>
   <tabstop>itemBoxEnderecoFaturamento</tabstop>
   <tabstop>lineEditDestinatarioLogradouro</tabstop>
   <tabstop>lineEditDestinatarioNumero</tabstop>
@@ -3715,24 +3720,44 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>lineEditDestinatarioCidade_2</tabstop>
   <tabstop>lineEditDestinatarioUF_2</tabstop>
   <tabstop>lineEditDestinatarioCEP_2</tabstop>
+  <tabstop>tableItens</tabstop>
+  <tabstop>tabImpostoProduto</tabstop>
   <tabstop>scrollAreaICMS</tabstop>
   <tabstop>comboBoxCfop</tabstop>
   <tabstop>comboBoxRegime</tabstop>
   <tabstop>comboBoxSituacaoTributaria</tabstop>
   <tabstop>comboBoxICMSOrig</tabstop>
   <tabstop>comboBoxICMSModBc</tabstop>
-  <tabstop>doubleSpinBoxICMSvbc</tabstop>
-  <tabstop>doubleSpinBoxICMSpicms</tabstop>
-  <tabstop>doubleSpinBoxICMSvicms</tabstop>
   <tabstop>comboBoxICMSModBcSt</tabstop>
+  <tabstop>doubleSpinBoxICMSvbc</tabstop>
   <tabstop>doubleSpinBoxICMSpmvast</tabstop>
+  <tabstop>doubleSpinBoxICMSpicms</tabstop>
   <tabstop>doubleSpinBoxICMSvbcst</tabstop>
+  <tabstop>doubleSpinBoxICMSvicms</tabstop>
   <tabstop>doubleSpinBoxICMSpicmsst</tabstop>
   <tabstop>doubleSpinBoxICMSvicmsst</tabstop>
   <tabstop>scrollAreaIPI</tabstop>
+  <tabstop>comboBoxIPIcst</tabstop>
+  <tabstop>lineEditIPIcEnq</tabstop>
   <tabstop>scrollAreaPIS</tabstop>
+  <tabstop>comboBoxPIScst</tabstop>
+  <tabstop>doubleSpinBoxPISvbc</tabstop>
+  <tabstop>doubleSpinBoxPISppis</tabstop>
+  <tabstop>doubleSpinBoxPISvpis</tabstop>
   <tabstop>scrollAreaCOFINS</tabstop>
+  <tabstop>comboBoxCOFINScst</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvbc</tabstop>
+  <tabstop>doubleSpinBoxCOFINSpcofins</tabstop>
+  <tabstop>doubleSpinBoxCOFINSvcofins</tabstop>
   <tabstop>scrollAreaInterestadual</tabstop>
+  <tabstop>doubleSpinBoxPercentualFcpDestino</tabstop>
+  <tabstop>doubleSpinBoxBaseCalculoDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInternaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxAliquotaInter</tabstop>
+  <tabstop>doubleSpinBoxPercentualPartilha</tabstop>
+  <tabstop>doubleSpinBoxPartilhaDestinatario</tabstop>
+  <tabstop>doubleSpinBoxPartilhaRemetente</tabstop>
+  <tabstop>doubleSpinBoxFcpDestino</tabstop>
   <tabstop>doubleSpinBoxBaseICMS</tabstop>
   <tabstop>doubleSpinBoxValorICMS</tabstop>
   <tabstop>doubleSpinBoxValorPIS</tabstop>
@@ -3748,6 +3773,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
   <tabstop>lineEditTransportadorRazaoSocial</tabstop>
   <tabstop>lineEditTransportadorInscEst</tabstop>
   <tabstop>lineEditTransportadorEndereco</tabstop>
+  <tabstop>lineEditTransportadorMunicipio</tabstop>
   <tabstop>lineEditTransportadorUf</tabstop>
   <tabstop>doubleSpinBoxTransportadorBaseCalculo</tabstop>
   <tabstop>spinBoxTransportadorAliquota</tabstop>

@@ -644,9 +644,6 @@
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::MultiSelection</enum>
          </property>
@@ -686,13 +683,30 @@
   <tabstop>tableVencidos</tabstop>
   <tabstop>tableVencer</tabstop>
   <tabstop>scrollArea</tabstop>
+  <tabstop>radioButtonTodos</tabstop>
+  <tabstop>radioButtonPendente</tabstop>
+  <tabstop>radioButtonConferido</tabstop>
+  <tabstop>radioButtonAgendado</tabstop>
+  <tabstop>radioButtonRecebido</tabstop>
+  <tabstop>radioButtonPago</tabstop>
+  <tabstop>radioButtonCancelado</tabstop>
   <tabstop>groupBoxLojas</tabstop>
   <tabstop>itemBoxLojas</tabstop>
   <tabstop>groupBoxVencimento</tabstop>
   <tabstop>dateEditVencimentoDe</tabstop>
   <tabstop>dateEditVencimentoAte</tabstop>
+  <tabstop>groupBoxRealizado</tabstop>
+  <tabstop>dateEditRealizadoDe</tabstop>
+  <tabstop>dateEditRealizadoAte</tabstop>
   <tabstop>doubleSpinBoxDe</tabstop>
   <tabstop>doubleSpinBoxAte</tabstop>
+  <tabstop>pushButtonRemessaItau</tabstop>
+  <tabstop>pushButtonImportarFolhaPag</tabstop>
+  <tabstop>pushButtonAdiantarRecebimento</tabstop>
+  <tabstop>pushButtonInserirLancamento</tabstop>
+  <tabstop>pushButtonInserirTransferencia</tabstop>
+  <tabstop>pushButtonExcluirLancamento</tabstop>
+  <tabstop>pushButtonReverterPagamento</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
  </tabstops>

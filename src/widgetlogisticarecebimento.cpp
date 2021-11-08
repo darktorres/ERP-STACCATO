@@ -203,7 +203,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarRecebimento, this);
+  InputDialog input(InputDialog::Tipo::ReagendarRecebimento, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 

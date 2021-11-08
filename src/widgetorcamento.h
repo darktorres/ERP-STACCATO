@@ -29,13 +29,13 @@ private:
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
+  auto ajustarGroupBoxStatus() -> void;
   auto delayFiltro() -> void;
   auto fillComboBoxFollowup() -> void;
   auto fillComboBoxFornecedor() -> void;
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxVendedor() -> void;
   auto montaFiltro() -> void;
-  auto montaFiltroTexto() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_dateEditMes_dateChanged() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

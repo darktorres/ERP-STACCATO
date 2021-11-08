@@ -41,6 +41,7 @@ public:
   auto setFilter(const QString &newFilter) -> void;
   auto setFornecedorRep(const QString &newFornecedorRep) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
+  auto show() -> void;
 
 signals:
   void itemSelected(const QVariant &id);

@@ -38,6 +38,7 @@ private:
   Ui::NFeDistribuicao *ui;
   // methods
   auto agendarOperacao() -> void;
+  auto ajustarGroupBoxStatus() -> void;
   auto buscarNSU() -> void;
   auto confirmar(const bool silent) -> void;
   auto darCiencia(const bool silent) -> void;
@@ -49,7 +50,7 @@ private:
   auto houveConsultaEmOutroPc() -> bool;
   auto montaFiltro() -> void;
   auto naoRealizar(const bool silent) -> void;
-  auto on_groupBoxFiltros_toggled(const bool enabled) -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCiencia_clicked() -> void;
   auto on_pushButtonConfirmacao_clicked() -> void;
   auto on_pushButtonDesconhecimento_clicked() -> void;

@@ -36,9 +36,6 @@
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::MultiSelection</enum>
      </property>
@@ -118,6 +115,16 @@
    <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>checkBoxMarcarTodos</tabstop>
+  <tabstop>pushButtonVenda</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>lineEditBusca</tabstop>
+  <tabstop>pushButtonMarcarRecebido</tabstop>
+  <tabstop>pushButtonReagendar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+  <tabstop>pushButtonFollowup</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

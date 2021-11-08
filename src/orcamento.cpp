@@ -266,6 +266,8 @@ bool Orcamento::viewRegister() {
       ui->pushButtonGerarVenda->show();
     }
 
+    ui->checkBoxFreteManual->setDisabled(ui->checkBoxRepresentacao->isChecked());
+
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
     canChangeFrete = freteManual;
@@ -1317,6 +1319,8 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
 }
 
 void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
+  ui->checkBoxFreteManual->setDisabled(checked);
+  ui->checkBoxFreteManual->setChecked(checked);
   ui->itemBoxProduto->setRepresentacao(checked);
   novoItem();
 }
@@ -1588,7 +1592,7 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
   const QString fornecedor = modelItem.data(row, "fornecedor").toString();
   const QString codComercial = modelItem.data(row, "codComercial").toString();
 
-  const QString url = "https://" + ip + "/webdav/METAIS_VIVIANE/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
+  const QString url = "https://" + ip + "/webdav/SISTEMA/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
 
   auto *manager = new QNetworkAccessManager(this);
   manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);

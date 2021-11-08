@@ -8,7 +8,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMimeData>
 
-EstoqueItem::EstoqueItem(const QString &text, const int idVendaProduto2, QGraphicsItem *parent) : QGraphicsSimpleTextItem(text, parent), idVendaProduto2(idVendaProduto2) {}
+EstoqueItem::EstoqueItem(const QString &text, QGraphicsItem *parent) : QGraphicsSimpleTextItem(text, parent), idVendaProduto2(text.split(" - ").last().toInt()) { setBrush(QBrush(QColor(Qt::red))); }
 
 void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   startDrag(event->pos());
@@ -37,3 +37,5 @@ void EstoqueItem::startDrag(QPointF pos) {
 
   if (status != Qt::IgnoreAction) { pallet->reorderChildren(); }
 }
+
+int EstoqueItem::getIdVendaProduto2() const { return idVendaProduto2; }

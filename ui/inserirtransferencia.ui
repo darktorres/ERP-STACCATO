@@ -201,6 +201,7 @@
  <tabstops>
   <tabstop>itemBoxDe</tabstop>
   <tabstop>itemBoxPara</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
   <tabstop>doubleSpinBoxValor</tabstop>
   <tabstop>dateEdit</tabstop>
   <tabstop>lineEditObservacao</tabstop>

@@ -85,16 +85,16 @@
        <number>3</number>
       </property>
       <property name="leftMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>3</number>
       </property>
       <item>
        <widget class="QGroupBox" name="groupBoxStatus">
@@ -263,11 +263,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>groupBoxMes</tabstop>
-  <tabstop>dateEdit</tabstop>
+  <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxAutorizado</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
+  <tabstop>checkBoxDenegada</tabstop>
+  <tabstop>groupBoxMes</tabstop>
+  <tabstop>dateEdit</tabstop>
   <tabstop>table</tabstop>
   <tabstop>pushButtonCancelarNFe</tabstop>
   <tabstop>pushButtonConsultarNFe</tabstop>

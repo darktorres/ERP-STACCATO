@@ -22,7 +22,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.10.14");
+  setApplicationVersion("0.10.20");
   setStyle("Fusion");
 
   QDir::setCurrent(QCoreApplication::applicationDirPath());
@@ -41,10 +41,8 @@ Application::~Application() { db.close(); }
 
 // for system errors
 void Application::enqueueException(const QString &exception, QWidget *parent) {
-  // TODO: guardar o arquivo/linha que chamou essa funcao
+  // TODO: guardar o arquivo/linha que chamou essa funcao (stacktrace?)
   exceptionQueue << Message{exception, parent};
-
-  Log::createLog("Exceção", exception);
 
   showMessages();
 }
@@ -57,8 +55,6 @@ bool Application::enqueueException(const bool boolean, const QString &exception,
 // for user errors
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
-
-  Log::createLog("Erro", error);
 
   showMessages();
 }
@@ -169,7 +165,7 @@ bool Application::dbReconnect(const bool silent) {
   return db.isOpen();
 }
 
-bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
+void Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
   genericLogin(hostname);
 
   User::login(user, userPassword);
@@ -186,8 +182,6 @@ bool Application::dbConnect(const QString &hostname, const QString &user, const 
 
   startSqlPing();
   startUpdaterPing();
-
-  return true;
 }
 
 void Application::runSqlJobs() {
@@ -278,6 +272,9 @@ void Application::startTransaction(const QString &messageLog) {
 }
 
 void Application::endTransaction() {
+  // TODO: verificar se a transação ainda é válida
+  // https://dba.stackexchange.com/questions/128726/transaction-identifier-possible-with-mysql
+
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
   qDebug() << "endTransaction";
@@ -323,6 +320,8 @@ void Application::showMessages() {
   showingMessages = true;
 
   for (auto &exception : exceptionQueue) {
+    Log::createLog("Exceção", exception.message);
+
     if (exception.message.contains("Access denied for user")) { exception.message = "Login inválido!"; }
     if (exception.message.contains("Can't connect to MySQL server")) { exception.message = "Não foi possível conectar ao servidor!"; }
     if (exception.message.contains("MySQL server has gone away")) { exception.message = "Conexão com o servidor perdida!"; }
@@ -345,10 +344,22 @@ void Application::showMessages() {
     if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }
 
-  if (not silent) {
-    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
-    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
-    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  for (const auto &error : std::as_const(errorQueue)) {
+    Log::createLog("Erro", error.message);
+
+    if (not silent) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+  }
+
+  for (const auto &warning : std::as_const(warningQueue)) {
+    Log::createLog("Aviso", warning.message);
+
+    if (not silent) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+  }
+
+  for (const auto &information : std::as_const(informationQueue)) {
+    Log::createLog("Informação", information.message);
+
+    if (not silent) { QMessageBox::information(information.widget, "Informação!", information.message); }
   }
 
   exceptionQueue.clear();

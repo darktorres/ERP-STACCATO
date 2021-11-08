@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1245</width>
-    <height>761</height>
+    <width>1200</width>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -129,6 +129,21 @@
                <string>Representante</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_2">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="0" column="3">
                 <widget class="QLabel" name="label_1">
                  <property name="text">
@@ -239,6 +254,21 @@
                <string>Contatos</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_4">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="1" column="1">
                 <widget class="LineEditTel" name="lineEditTel_Cel">
                  <property name="sizePolicy">
@@ -407,6 +437,21 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="2" column="0">
                 <widget class="QLineEdit" name="lineEditFornecedor">
                  <property name="minimumSize">
@@ -624,6 +669,21 @@ color: rgb(0, 0, 0);</string>
                <string>Substituição Tributária</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_8">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>3</number>
+               </property>
                <item row="1" column="3">
                 <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaSt">
                  <property name="suffix">
@@ -681,6 +741,21 @@ color: rgb(0, 0, 0);</string>
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="1" column="0">
            <widget class="TableView" name="tableEndereco">
             <property name="mouseTracking">
@@ -694,9 +769,6 @@ color: rgb(0, 0, 0);</string>
             </property>
             <property name="tabKeyNavigation">
              <bool>false</bool>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
             </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::SingleSelection</enum>
@@ -763,6 +835,21 @@ color: rgb(0, 0, 0);</string>
              <string>Endereços</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_22">
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <property name="spacing">
+              <number>3</number>
+             </property>
              <item row="1" column="5">
               <widget class="QLineEdit" name="lineEditBairro">
                <property name="minimumSize">
@@ -987,6 +1074,21 @@ color: rgb(0, 0, 0);</string>
           <string>Dados bancários:</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="4" column="0">
@@ -1090,6 +1192,21 @@ color: rgb(0, 0, 0);</string>
           <string>Prazos especialidades (dias úteis)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_14">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="3" column="1">
            <widget class="QSpinBox" name="spinBoxPrazoEspecialidade4">
             <property name="maximum">
@@ -1226,6 +1343,11 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
   <tabstop>checkBoxRepresentacao</tabstop>
+  <tabstop>comboBoxEspecialidade</tabstop>
+  <tabstop>doubleSpinBoxComissaoVendedor</tabstop>
+  <tabstop>doubleSpinBoxComissaoEspecial</tabstop>
+  <tabstop>doubleSpinBoxComissaoLoja</tabstop>
+  <tabstop>checkBoxVemSul</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
@@ -1238,6 +1360,14 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>comboBoxSt</tabstop>
   <tabstop>doubleSpinBoxAliquotaSt</tabstop>
+  <tabstop>comboBoxTipoEnd</tabstop>
+  <tabstop>lineEditCEP</tabstop>
+  <tabstop>lineEditLogradouro</tabstop>
+  <tabstop>lineEditNumero</tabstop>
+  <tabstop>lineEditComplemento</tabstop>
+  <tabstop>lineEditBairro</tabstop>
+  <tabstop>lineEditCidade</tabstop>
+  <tabstop>lineEditUF</tabstop>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>

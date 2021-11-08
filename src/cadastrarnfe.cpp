@@ -361,7 +361,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbrRemoto, filePath); }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
-  throw RuntimeException("Resposta não tratada:\n" + resposta);
+  throw RuntimeException("Resposta não tratada:\n" + resposta, this);
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
@@ -374,7 +374,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbrRemoto);
 
-  // TODO: reativar depois de arrumar os spinBoxs para considerar 4 decimais
+  // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NFe, reativar depois de arrumar os spinBoxs para considerar 4 decimais
   //  if (not validarRegras(acbrRemoto, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
@@ -1471,7 +1471,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
-  throw RuntimeException("Resposta não tratada!", this);
+  throw RuntimeException("Resposta não tratada:\n" + resposta, this);
 }
 
 void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(const double value) {

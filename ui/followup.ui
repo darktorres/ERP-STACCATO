@@ -208,6 +208,7 @@
  <tabstops>
   <tabstop>table</tabstop>
   <tabstop>plainTextEdit</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
   <tabstop>dateFollowup</tabstop>
   <tabstop>dateProxFollowup</tabstop>
   <tabstop>radioButtonFrio</tabstop>

@@ -337,7 +337,7 @@ SearchDialog *SearchDialog::nfe(QWidget *parent) {
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
 
-  const QList<FullTextIndex> fullTextIndex = {{"fornecedor", "Fornecedor"}, {"descricao", "Descrição"}, {"colecao", "Coleção"}, {"codcomercial", "Código Comercial"}};
+  const QList<FullTextIndex> fullTextIndex = {{"descricao", "Descrição"}, {"codcomercial", "Código Comercial"}, {"colecao", "Coleção"}, {"fornecedor", "Fornecedor"}};
 
   auto *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, fullTextIndex, "idProduto = 0", "", true, parent);
 
@@ -461,7 +461,7 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::vendedor(QWidget *parent) {
-  const QList<FullTextIndex> fullTextIndex = {{"tipo", "Função"}, {"nome", "Nome"}};
+  const QList<FullTextIndex> fullTextIndex = {/*{"tipo", "Função"},*/ {"nome", "Nome"}};
 
   const QString filtro = "tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL') AND desativado = FALSE";
   const QString filtroLoja = (User::idLoja == "1" or User::isEspecial()) ? "" : " AND idLoja = " + User::idLoja;
@@ -469,7 +469,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   auto *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, fullTextIndex, filtro + filtroLoja + filtroAdmin, "nome", false, parent);
 
-  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "password", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
+  sdVendedor->hideColumns(
+      {"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
@@ -507,6 +508,11 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) {
   on_lineEditBusca_textChanged();
 }
 
+void SearchDialog::show() {
+  model.select(); // para atualizar os dados que possam ter sido alterados enquanto o SearchDialog estava invisível
+  QDialog::show();
+}
+
 void SearchDialog::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
@@ -518,7 +524,7 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
   const QString fornecedor = model.data(row, "fornecedor").toString();
   const QString codComercial = model.data(row, "codComercial").toString();
 
-  const QString url = "https://" + ip + "/webdav/METAIS_VIVIANE/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
+  const QString url = "https://" + ip + "/webdav/SISTEMA/MODELOS 3D/" + fornecedor + "/" + codComercial + ".skp";
 
   auto *manager = new QNetworkAccessManager(this);
   manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);

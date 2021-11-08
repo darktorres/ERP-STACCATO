@@ -29,9 +29,6 @@
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SingleSelection</enum>
          </property>
@@ -59,9 +56,6 @@
          </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SingleSelection</enum>
@@ -132,6 +126,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>pushButtonFollowup</tabstop>
   <tabstop>tablePedidos</tabstop>
   <tabstop>tableNFe</tabstop>
   <tabstop>pushButtonDanfe</tabstop>

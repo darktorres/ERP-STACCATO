@@ -44,6 +44,7 @@ void Contas::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Contas::on_checkBoxMostrarCancelados_toggled, connectionType);
   connect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked, connectionType);
   connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked, connectionType);
@@ -53,6 +54,7 @@ void Contas::setConnections() {
 void Contas::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Contas::on_checkBoxMostrarCancelados_toggled);
   disconnect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked);
   disconnect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
@@ -450,6 +452,19 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       modelPendentes.setData(newRow, col, value);
     }
   }
+}
+
+void Contas::on_checkBoxMostrarCancelados_toggled(const bool checked) {
+  // FIXME: se o model tiver linhas com alterações elas serão perdidas
+
+  QString filter = modelPendentes.filter();
+
+  const QString a = "'AGENDADO')";
+  const QString b = "'AGENDADO', 'CANCELADO', 'SUBSTITUIDO')";
+
+  (checked) ? filter.replace(a, b) : filter.replace(b, a);
+
+  modelPendentes.setFilter(filter);
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

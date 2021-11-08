@@ -74,6 +74,8 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   if (idVenda.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
 
+  setWindowTitle(windowTitle() + " - " + idVenda);
+
   ui->frameST->hide();
 
   prepararNFe(items);

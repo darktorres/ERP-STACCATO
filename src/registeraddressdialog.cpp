@@ -4,9 +4,7 @@
 
 #include <QSqlQuery>
 
-RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : RegisterDialog(table, primaryKeyStr, parent) {
-  setupTables(table);
-}
+RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : RegisterDialog(table, primaryKeyStr, parent) { setupTables(table); }
 
 void RegisterAddressDialog::setupTables(const QString &table) {
   modelEnd.setTable(table + "_has_endereco");

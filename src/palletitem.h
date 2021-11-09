@@ -30,6 +30,8 @@ public:
 signals:
   void save();
   void unselectOthers();
+  void selectedIdBloco(const QString &idBloco, const QString &label);
+  void hidePalletFrame();
 
 protected:
   auto dragEnterEvent(QGraphicsSceneDragDropEvent *event) -> void final;
@@ -56,5 +58,5 @@ private:
   QString idBloco;
   QString label;
   // methods
-  auto select() -> void;
+  //  auto select() -> void;
 };

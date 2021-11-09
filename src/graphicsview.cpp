@@ -4,7 +4,18 @@
 #include <QDebug>
 #include <QMouseEvent>
 
-GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) { setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform); }
+GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
+  setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+  setDragMode(QGraphicsView::ScrollHandDrag);
+
+  setTransformationAnchor(AnchorUnderMouse);
+  setResizeAnchor(AnchorUnderMouse);
+
+  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+  setFrameShape(NoFrame);
+}
 
 void GraphicsView::mousePressEvent(QMouseEvent *event) {
   //  qDebug() << "press";
@@ -47,3 +58,17 @@ void GraphicsView::resizeEvent(QResizeEvent *event) {
 void GraphicsView::setResizable(bool newResizable) { resizable = newResizable; }
 
 void GraphicsView::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }
+
+void GraphicsView::wheelEvent(QWheelEvent *event) {
+  double factor = 0;
+
+  if (event->angleDelta().y() > 0) {
+    factor = 1.25;
+    zoom += 1;
+  } else {
+    factor = 0.8;
+    zoom -= 1;
+  }
+
+  scale(factor, factor);
+}

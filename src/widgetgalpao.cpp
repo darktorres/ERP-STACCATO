@@ -34,6 +34,7 @@ void WidgetGalpao::setConnections() {
   connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonCriarPallet_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked, connectionType);
 }
 
 void WidgetGalpao::unsetConnections() {
@@ -48,16 +49,26 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonCriarPallet_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked);
+  disconnect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked);
 }
 
 void WidgetGalpao::updateTables() {
   if (not isSet) {
-    ui->groupBoxEdicao->hide();
+    //    ui->groupBoxEdicao->hide();
+    ui->checkBoxCriarApagar->setVisible(false);
+    ui->checkBoxMover->setVisible(false);
+    ui->pushButtonCriarPallet->setVisible(false);
+    ui->pushButtonRemoverPallet->setVisible(false);
+    ui->pushButtonSalvar->setVisible(false);
 
     // TODO: usar 2 scenes para não misturar pallets com estoques?
     // uma outra opção seria usar uma TableView no lugar do graphicsPallet
 
+    //---------------------------
     ui->graphicsPallet->hide();
+    ui->checkBoxConteudo->hide();
+    //---------------------------
+    ui->framePallet->hide();
 
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(Qt::white);
@@ -86,12 +97,14 @@ void WidgetGalpao::updateTables() {
 
   if (not modelIsSet) {
     setupTables();
+    carregarPallets();
     modelIsSet = true;
   }
 
   modelTranspAgend.select();
 
-  carregarPallets();
+  // TODO: this is slow, refactor estoque_contabil on SQL to be materialized
+  //  carregarPallets();
 }
 
 void WidgetGalpao::setupTables() {
@@ -145,12 +158,16 @@ void WidgetGalpao::carregarPallets() {
   }
 
   // 1. ler pallets do banco de dados e inserir na scene
-  // 2. ler conteudo dos pallets e inserir nos pallets existentes na scene
 
-  // 1
   SqlQuery queryBlocos;
 
-  if (not queryBlocos.exec("SELECT * FROM galpao")) { throw RuntimeError("Erro buscando pallets: " + queryBlocos.lastError().text(), this); }
+  if (not queryBlocos.exec("SELECT * FROM galpao ORDER BY label ASC")) { throw RuntimeError("Erro buscando pallets: " + queryBlocos.lastError().text(), this); }
+
+  ui->comboBoxPalletAtual->clear();
+  ui->comboBoxMoverParaPallet->clear();
+
+  //  ui->comboBoxPalletAtual->addItem("Selecionar pallet...");
+  //  ui->comboBoxMoverParaPallet->addItem("Mover para pallet...");
 
   while (queryBlocos.next()) {
     const QString idBloco = queryBlocos.value("idBloco").toString();
@@ -162,17 +179,31 @@ void WidgetGalpao::carregarPallets() {
     const QStringList tamanhoList = queryBlocos.value("tamanho").toString().split(",");
     const QRectF tamanho = QRectF(0, 0, tamanhoList.at(0).toDouble(), tamanhoList.at(1).toDouble());
 
+    //    auto *pallet = new PalletItem(idBloco, idBloco + " " + label, posicao, tamanho, ui->graphicsGalpao->sceneRect().width());
     auto *pallet = new PalletItem(idBloco, label, posicao, tamanho, ui->graphicsGalpao->sceneRect().width());
     pallet->setFlag(QGraphicsItem::ItemIsSelectable);
 
     connect(pallet, &PalletItem::save, this, &WidgetGalpao::salvarPallets);
     connect(pallet, &PalletItem::unselectOthers, this, &WidgetGalpao::unselectOthers);
+    connect(pallet, &PalletItem::selectedIdBloco, this, &WidgetGalpao::carregarBloco);
+    connect(pallet, &PalletItem::hidePalletFrame, this, &WidgetGalpao::hidePalletFrame);
 
     palletsHash.insert(pallet->getIdBloco(), pallet);
     scene->addItem(pallet);
+
+    // --------------------------------
+
+    ui->comboBoxPalletAtual->addItem(label);
+    ui->comboBoxMoverParaPallet->addItem(label);
   }
 
-  // 2
+  ui->comboBoxPalletAtual->insertItem(0, "Selecionar pallet...");
+  ui->comboBoxMoverParaPallet->insertItem(0, "Mover para pallet...");
+
+  ui->comboBoxPalletAtual->setCurrentIndex(0);
+  ui->comboBoxMoverParaPallet->setCurrentIndex(0);
+
+  // 2. ler conteudo dos pallets e inserir nos pallets existentes na scene
 
   SqlQuery query;
 
@@ -296,6 +327,14 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
 }
 
 void WidgetGalpao::on_groupBoxEdicao_toggled(const bool checked) {
+  // TODO: pedir senha do gerente para habilitar edição da planta
+
+  ui->checkBoxCriarApagar->setVisible(checked);
+  ui->checkBoxMover->setVisible(checked);
+  ui->pushButtonCriarPallet->setVisible(checked);
+  ui->pushButtonRemoverPallet->setVisible(checked);
+  ui->pushButtonSalvar->setVisible(checked);
+
   const auto items = scene->items();
 
   for (auto *item : items) {
@@ -379,6 +418,92 @@ void WidgetGalpao::on_checkBoxMover_toggled(bool checked) {
 void WidgetGalpao::on_pushButtonSalvar_clicked() { salvarPallets(); }
 
 void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
+
+void WidgetGalpao::carregarBloco(const QString &idBloco, const QString &label) {
+  ui->comboBoxPalletAtual->setCurrentText(label);
+
+  ui->frameTransportadora->hide();
+  ui->groupBoxEdicao->hide();
+  ui->framePallet->show();
+
+  modelPallet.setQuery(" SELECT "
+                       "     g.idBloco, "
+                       "     v.idEstoque_idConsumo, "
+                       "     v.tipo, "
+                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
+                       "     REPLACE(v.descricao, '-', '') AS descricao, "
+                       "     v.idVendaProduto2, "
+                       "     v.codComercial, "
+                       "     v.numeroNFe, "
+                       "     v.lote, "
+                       "     v.idVenda "
+                       " FROM "
+                       "     galpao g "
+                       " LEFT JOIN "
+                       "     view_galpao v ON g.idBloco = v.idBloco "
+                       " WHERE "
+                       "     idEstoque_idConsumo IS NOT NULL AND g.idBloco = " +
+                       idBloco /*+ " ORDER BY CAST(g.idBloco AS UNSIGNED) ASC, idEstoque_idConsumo ASC"*/);
+
+  modelPallet.select();
+
+  modelPallet.sort("idEstoque_idConsumo");
+
+  modelPallet.setHeaderData("tipo", "Tipo");
+  modelPallet.setHeaderData("caixas", "Cx.");
+  modelPallet.setHeaderData("descricao", "Produto");
+  modelPallet.setHeaderData("codComercial", "Código");
+  modelPallet.setHeaderData("numeroNFe", "NFe");
+  modelPallet.setHeaderData("lote", "Lote");
+  modelPallet.setHeaderData("idVenda", "Pedido");
+
+  ui->tablePallet->setModel(&modelPallet);
+
+  ui->tablePallet->hideColumn("idBloco");
+  ui->tablePallet->hideColumn("idEstoque_idConsumo");
+  ui->tablePallet->hideColumn("idVendaProduto2");
+}
+
+void WidgetGalpao::hidePalletFrame() {
+  ui->frameTransportadora->show();
+  ui->groupBoxEdicao->show();
+  ui->framePallet->hide();
+}
+
+void WidgetGalpao::on_pushButtonSalvarMover_clicked() {
+  if (ui->comboBoxMoverParaPallet->currentText() == "Mover para pallet..." /*and ui->lineEditMoverParaPallet->text().isEmpty()*/) { throw RuntimeError("Selecione um pallet de destino!"); }
+
+  const auto selection = ui->tablePallet->selectionModel()->selectedRows();
+
+  qApp->startTransaction("on_pushButtonSalvarMover_clicked");
+
+  const QString label = ui->comboBoxMoverParaPallet->currentText();
+
+  for (auto index : selection) {
+    const QString tipo = modelPallet.data(index.row(), "tipo").toString();
+    const QString id = modelPallet.data(index.row(), "idEstoque_idConsumo").toString();
+
+    SqlQuery query;
+
+    if (tipo == "EST. LOJA") {
+      if (not query.exec("UPDATE estoque SET idBloco = (SELECT idBloco FROM galpao WHERE label = '" + label + "') WHERE idEstoque = " + id)) {
+        throw RuntimeError("Erro movendo itens: " + query.lastError().text());
+      }
+    }
+
+    if (tipo == "CLIENTE") {
+      if (not query.exec("UPDATE estoque_has_consumo SET idBloco = (SELECT idBloco FROM galpao WHERE label = '" + label + "') WHERE idConsumo = " + id)) {
+        throw RuntimeError("Erro movendo itens: " + query.lastError().text());
+      }
+    }
+  }
+
+  qApp->endTransaction();
+
+  modelPallet.select();
+
+  qApp->enqueueInformation("Itens movidos com sucesso!");
+}
 
 // TODO: adicionar botao para criar pallet
 // TODO: adicionar botao para remover pallet

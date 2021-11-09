@@ -19,11 +19,13 @@ protected:
   auto mousePressEvent(QMouseEvent *event) -> void final;
   auto mouseReleaseEvent(QMouseEvent *event) -> void final;
   auto resizeEvent(QResizeEvent *event) -> void final;
+  auto wheelEvent(QWheelEvent *event) -> void final;
 
 private:
   // attributes
   bool resizable = false;
   bool isEditable = false;
+  int zoom = 0;
   PalletItem *pallet = nullptr;
   // methods
 };

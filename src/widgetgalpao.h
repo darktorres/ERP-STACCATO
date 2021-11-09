@@ -1,6 +1,7 @@
 #pragma once
 
 #include "palletitem.h"
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QGraphicsScene>
@@ -28,10 +29,13 @@ private:
   QStack<int> blockingSignals;
   QGraphicsScene *scene = nullptr;
   SqlTableModel modelTranspAgend;
+  SqlQueryModel modelPallet;
   QHash<QString, PalletItem *> palletsHash;
   Ui::WidgetGalpao *ui;
   // methods
+  auto carregarBloco(const QString &idBloco, const QString &label) -> void;
   auto carregarPallets() -> void;
+  auto hidePalletFrame() -> void;
   auto on_checkBoxConteudo_toggled(bool checked) -> void;
   auto on_checkBoxCriarApagar_toggled(bool checked) -> void;
   auto on_checkBoxMover_toggled(bool checked) -> void;
@@ -40,6 +44,7 @@ private:
   auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_pushButtonCriarPallet_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
+  auto on_pushButtonSalvarMover_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_table_selectionChanged() -> void;
   auto resizeEvent(QResizeEvent *event) -> void final;

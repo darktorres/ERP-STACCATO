@@ -68,16 +68,6 @@ void PalletItem::addEstoque(const QString &estoqueText) {
   estoques += estoqueText;
 }
 
-void PalletItem::setLabel(const QString &value) { label = value; }
-
-QString PalletItem::getLabel() const { return label; }
-
-QString PalletItem::getEstoques() const { return estoques; }
-
-bool PalletItem::getFlagHighlight() const { return flagHighlight; }
-
-void PalletItem::setFlagHighlight(const bool value) { flagHighlight = value; }
-
 void PalletItem::reorderChildren() {
   int pos = 15;
 
@@ -89,25 +79,6 @@ void PalletItem::reorderChildren() {
   }
 }
 
-void PalletItem::unselect() {
-  if (not selected) { return; }
-
-  selected = false;
-
-  prepareGeometryChange();
-
-  const auto children = childItems();
-
-  for (auto *const estoque : children) { estoque->setVisible(false); }
-}
-
-const QRectF &PalletItem::getSize() const { return size; }
-
-void PalletItem::setSize(const QRectF &newSize) {
-  prepareGeometryChange();
-  size = newSize;
-}
-
 void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
 
 void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
@@ -115,7 +86,7 @@ void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem
 void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
 
 void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-  //  qDebug() << "press";
+  qDebug() << "press";
 
   if (not flags().testFlag(QGraphicsItem::ItemIsSelectable)) { return; }
 
@@ -123,11 +94,15 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
   selected = not selected;
 
-  prepareGeometryChange();
+  if (selected) { emit selectedIdBloco(idBloco, label); }
 
-  const auto children = childItems();
+  if (not selected) { emit hidePalletFrame(); }
 
-  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+  //  prepareGeometryChange();
+
+  //  const auto children = childItems();
+
+  //  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 
   QGraphicsItem::mousePressEvent(event);
 }
@@ -144,14 +119,6 @@ void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 
   QGraphicsItem::mouseReleaseEvent(event);
 }
-
-QString PalletItem::getIdBloco() const { return idBloco; }
-
-void PalletItem::setIdBloco(const QString &newIdBloco) { idBloco = newIdBloco; }
-
-QString PalletItem::getPosicao() const { return QString::number(scenePos().x()) + "," + QString::number(scenePos().y()); }
-
-QString PalletItem::getTamanho() const { return QString::number(size.width()) + "," + QString::number(size.height()); }
 
 void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseDoubleClickEvent(event); }
 
@@ -194,14 +161,55 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   event->acceptProposedAction();
 }
 
-void PalletItem::select() {
-  selected = not selected;
+// void PalletItem::select() {
+//  qDebug() << "select";
+
+//  selected = not selected;
+
+//  prepareGeometryChange();
+
+//  const auto children = childItems();
+
+//  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+//}
+
+void PalletItem::unselect() {
+  //  qDebug() << "unselect";
+
+  if (not selected) { return; }
+
+  selected = false;
 
   prepareGeometryChange();
 
   const auto children = childItems();
 
-  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+  for (auto *const estoque : children) { estoque->setVisible(false); }
 }
+
+const QRectF &PalletItem::getSize() const { return size; }
+
+void PalletItem::setSize(const QRectF &newSize) {
+  prepareGeometryChange();
+  size = newSize;
+}
+
+void PalletItem::setLabel(const QString &value) { label = value; }
+
+QString PalletItem::getLabel() const { return label; }
+
+QString PalletItem::getEstoques() const { return estoques; }
+
+bool PalletItem::getFlagHighlight() const { return flagHighlight; }
+
+void PalletItem::setFlagHighlight(const bool value) { flagHighlight = value; }
+
+QString PalletItem::getIdBloco() const { return idBloco; }
+
+void PalletItem::setIdBloco(const QString &newIdBloco) { idBloco = newIdBloco; }
+
+QString PalletItem::getPosicao() const { return QString::number(scenePos().x()) + "," + QString::number(scenePos().y()); }
+
+QString PalletItem::getTamanho() const { return QString::number(size.width()) + "," + QString::number(size.height()); }
 
 // TODO: deletar pallet usando seleção e depois apertando Delete, transferir o conteudo do pallet para a entrada ou um espaço temporario

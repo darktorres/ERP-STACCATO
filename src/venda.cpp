@@ -240,7 +240,6 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->hideColumn("subGrupo");
   ui->tableFluxoCaixa->hideColumn("comissao");
   ui->tableFluxoCaixa->hideColumn("taxa");
-  ui->tableFluxoCaixa->hideColumn("desativado");
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
@@ -284,7 +283,6 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("subGrupo");
   ui->tableFluxoCaixa2->hideColumn("comissao");
   ui->tableFluxoCaixa2->hideColumn("taxa");
-  ui->tableFluxoCaixa2->hideColumn("desativado");
 
   ui->tableFluxoCaixa2->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
@@ -591,7 +589,7 @@ bool Venda::viewRegister() {
 
     setTreeView();
 
-    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE");
+    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND comissao = FALSE AND taxa = FALSE");
 
     modelFluxoCaixa.select();
 
@@ -602,7 +600,7 @@ bool Venda::viewRegister() {
 
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
-      modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND (comissao = TRUE OR taxa = TRUE) AND desativado = FALSE");
+      modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND (comissao = TRUE OR taxa = TRUE)");
 
       modelFluxoCaixa2.select();
 

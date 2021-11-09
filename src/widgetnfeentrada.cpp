@@ -306,7 +306,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (model.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (model.data(index.row(), "status").toString() == "RESUMO") { continue; }
 
     // pegar XML do MySQL e salvar em arquivo
 

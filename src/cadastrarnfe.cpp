@@ -1398,8 +1398,12 @@ void CadastrarNFe::validarDados() {
   // TODO: se preço for zero mostrar mensagem avisando que se produto for reposição colocar 1 centavo
 
   for (int row = 0; row < modelProduto.rowCount(); ++row) {
+    const QString ncm = modelProduto.data(row, "ncm").toString();
+
+    if (ncm.isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
+    if (ncm.size() != 2 and ncm.size() != 8) { throw RuntimeError("Linha " + QString::number(row + 1) + ": tamanho inválido de NCM, deve ter 2 ou 8 dígitos!", this); }
+
     if (modelProduto.data(row, "cfop").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CFOP vazio!", this); }
-    if (modelProduto.data(row, "ncm").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
     if (modelProduto.data(row, "codComercial").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Código vazio!", this); }
     if (modelProduto.data(row, "produto").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Descrição vazio!", this); }
     if (modelProduto.data(row, "un").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Unidade vazio!", this); }

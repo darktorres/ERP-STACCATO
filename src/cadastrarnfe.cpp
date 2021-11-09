@@ -6,6 +6,7 @@
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
 #include "file.h"
+#include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -73,6 +74,8 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   if (idVenda.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
 
+  setWindowTitle(windowTitle() + " - " + idVenda);
+
   ui->frameST->hide();
 
   prepararNFe(items);
@@ -137,6 +140,14 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
+  ui->tableItens->setItemDelegateForColumn("fornecedor", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("produto", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("caixas", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("quant", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("un", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("quantCaixa", new NoEditDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("codComercial", new NoEditDelegate(this));
+
   ui->tableItens->hideColumn("idRelacionado");
   ui->tableItens->hideColumn("peso");
   ui->tableItens->hideColumn("idProduto");
@@ -170,7 +181,7 @@ QString CadastrarNFe::montarXML() {
 
 QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
   QString resposta = acbrRemoto.enviarComando(montarXML());
-  //  qDebug() << "resposta: " << resposta;
+  qDebug() << "gerarNota: " << resposta;
 
   //-------------------------------------------
 
@@ -189,7 +200,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 }
 
 int CadastrarNFe::preCadastrarNota() {
-  qDebug() << "precadastrar";
+  qDebug() << "preCadastrarNota";
 
   qApp->startTransaction("CadastrarNFe::preCadastrarNota");
 
@@ -339,7 +350,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
-    qDebug() << "rejeicao";
+    qDebug() << "processarResposta -> rejeicao";
 
     removerNota(idNFe);
 
@@ -350,7 +361,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   }
 
   if (resposta.contains("Erro Interno", Qt::CaseInsensitive)) {
-    qDebug() << "erro interno sefaz";
+    qDebug() << "processarResposta -> erro interno sefaz";
 
     removerNota(idNFe);
 
@@ -1387,8 +1398,12 @@ void CadastrarNFe::validarDados() {
   // TODO: se preço for zero mostrar mensagem avisando que se produto for reposição colocar 1 centavo
 
   for (int row = 0; row < modelProduto.rowCount(); ++row) {
+    const QString ncm = modelProduto.data(row, "ncm").toString();
+
+    if (ncm.isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
+    if (ncm.size() != 2 and ncm.size() != 8) { throw RuntimeError("Linha " + QString::number(row + 1) + ": tamanho inválido de NCM, deve ter 2 ou 8 dígitos!", this); }
+
     if (modelProduto.data(row, "cfop").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CFOP vazio!", this); }
-    if (modelProduto.data(row, "ncm").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": NCM vazio!", this); }
     if (modelProduto.data(row, "codComercial").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Código vazio!", this); }
     if (modelProduto.data(row, "produto").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Descrição vazio!", this); }
     if (modelProduto.data(row, "un").toString().isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Unidade vazio!", this); }
@@ -1617,7 +1632,7 @@ void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
 
 void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
   const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
-  qDebug() << "enviar nfe: " << resposta;
+  qDebug() << "enviarNFe: " << resposta;
 
   processarResposta(resposta, filePath, idNFe, acbrRemoto);
 
@@ -2075,3 +2090,9 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 // https://sigaofisco.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
 // https://cr.inf.br/blog/manual-como-fazer-nota-de-devolucao/
 // https://legislacao.fazenda.sp.gov.br/Paginas/RC20724_2019.aspx
+
+// NFe de serviço
+
+// usar NCM 00
+// usar CFOP 59xx/69xx
+// preencher ISSQN - Imposto sobre serviço de qualquer natureza

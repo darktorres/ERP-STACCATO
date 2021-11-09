@@ -44,6 +44,7 @@ void Contas::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Contas::on_checkBoxMostrarCancelados_toggled, connectionType);
   connect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked, connectionType);
   connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked, connectionType);
@@ -53,6 +54,7 @@ void Contas::setConnections() {
 void Contas::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->checkBoxMostrarCancelados, &QCheckBox::toggled, this, &Contas::on_checkBoxMostrarCancelados_toggled);
   disconnect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonCriarLancamento_clicked);
   disconnect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
@@ -251,7 +253,6 @@ void Contas::setupTables() {
   ui->tablePendentes->hideColumn("idLoja");
   ui->tablePendentes->hideColumn("created");
   ui->tablePendentes->hideColumn("lastUpdated");
-  ui->tablePendentes->hideColumn("desativado");
 
   // -------------------------------------------------------------------------
 
@@ -304,7 +305,6 @@ void Contas::setupTables() {
   ui->tableProcessados->hideColumn("idLoja");
   ui->tableProcessados->hideColumn("created");
   ui->tableProcessados->hideColumn("lastUpdated");
-  ui->tableProcessados->hideColumn("desativado");
 }
 
 void Contas::verifyFields() {
@@ -339,9 +339,9 @@ void Contas::viewContaPagarData(const QString &dataPagamento) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 
@@ -367,9 +367,9 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 
@@ -387,7 +387,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: " + idPagamento); }
 
-  const QString idVenda = query.value("idVenda").toString();
+  const QString idVenda = query.value("idVenda").toString().left(11);
 
   // -------------------------------------------------------------------------
 
@@ -395,13 +395,11 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                             : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
   // -------------------------------------------------------------------------
 
-  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                               : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
   // -------------------------------------------------------------------------
 
@@ -439,7 +437,6 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
       if (modelPendentes.fieldIndex("nfe") == col) { continue; }
       if (modelPendentes.fieldIndex("valor") == col) { continue; }
-      if (modelPendentes.fieldIndex("desativado") == col) { continue; }
       if (modelPendentes.fieldIndex("created") == col) { continue; }
       if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }
 
@@ -450,6 +447,19 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       modelPendentes.setData(newRow, col, value);
     }
   }
+}
+
+void Contas::on_checkBoxMostrarCancelados_toggled(const bool checked) {
+  // FIXME: se o model tiver linhas com alterações elas serão perdidas
+
+  QString filter = modelPendentes.filter();
+
+  const QString a = "'AGENDADO')";
+  const QString b = "'AGENDADO', 'CANCELADO', 'SUBSTITUIDO')";
+
+  (checked) ? filter.replace(a, b) : filter.replace(b, a);
+
+  modelPendentes.setFilter(filter);
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

@@ -109,9 +109,11 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
     //-----------------------------------------------------
 
+    // TODO: usar 'SELECT USER()' no mysql para pegar o ip externo
     Log::createLog("Login", "Usuário: " + User::nome + ", Host: " + QHostInfo::localHostName() + ", IP: " + addresses.first().toString());
 
-    verificaVersao(); // TODO: usar o webserver para indicar se está em manutencao
+    verificaVersao();
+    // TODO: usar o webserver para indicar se está em manutencao e fazer essa verificação antes do login
     verificaManutencao();
   }
 

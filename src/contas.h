@@ -31,6 +31,7 @@ private:
   Tipo const tipo;
   Ui::Contas *ui;
   // methods
+  auto on_checkBoxMostrarCancelados_toggled(const bool checked) -> void;
   auto on_pushButtonCriarLancamento_clicked() -> void;
   auto on_pushButtonDuplicarLancamento_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;

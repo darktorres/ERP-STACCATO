@@ -47,17 +47,30 @@
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
+        <item row="0" column="2">
+         <widget class="QPushButton" name="pushButtonDuplicarLancamento">
+          <property name="text">
+           <string>Duplicar</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
          <widget class="QPushButton" name="pushButtonCriarLancamento">
           <property name="text">
            <string>Criar lançamento</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="pushButtonDuplicarLancamento">
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="checkBoxMostrarCancelados">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Duplicar</string>
+           <string>Mostrar cancelados/substituídos</string>
           </property>
          </widget>
         </item>

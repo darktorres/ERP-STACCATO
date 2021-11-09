@@ -485,3 +485,4 @@ void AnteciparRecebimento::selecionarTaxa() {
 // TODO: fazer uma tela igual para dar baixa em lote nos recebimentos
 // TODO: os tipos de pagamento mudam com o tempo, no lugar de pegar os tipos de pagamentos atuais pegar 'DISTINCT tipos' da tabela contas_receber
 // TODO: para poder usar o distinct acima separar o número do tipo em colunas diferentes? "1. Cartão" -> "1" + "Cartão"
+// TODO: quando alterar a data 'de' deve incrementar a data 'até' para que 'até' não seja antes de 'de'

@@ -194,8 +194,6 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    filtros << "cp.desativado = FALSE";
-
     model.setQuery(Sql::contasPagar(filtros.join(" AND "), busca));
 
     model.sort(ui->radioButtonPago->isChecked() ? "`dataRealizado`" : "`dataPagamento`");
@@ -252,7 +250,6 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    filtros << "cr.desativado = FALSE";
     filtros << "cr.representacao = FALSE";
 
     model.setQuery(Sql::contasReceber(filtros.join(" AND ")));

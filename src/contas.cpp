@@ -253,7 +253,6 @@ void Contas::setupTables() {
   ui->tablePendentes->hideColumn("idLoja");
   ui->tablePendentes->hideColumn("created");
   ui->tablePendentes->hideColumn("lastUpdated");
-  ui->tablePendentes->hideColumn("desativado");
 
   // -------------------------------------------------------------------------
 
@@ -306,7 +305,6 @@ void Contas::setupTables() {
   ui->tableProcessados->hideColumn("idLoja");
   ui->tableProcessados->hideColumn("created");
   ui->tableProcessados->hideColumn("lastUpdated");
-  ui->tableProcessados->hideColumn("desativado");
 }
 
 void Contas::verifyFields() {
@@ -341,9 +339,9 @@ void Contas::viewContaPagarData(const QString &dataPagamento) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PAGO') AND desativado = FALSE");
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 
@@ -369,9 +367,9 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
+  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PAGO') AND desativado = FALSE");
+  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 
@@ -389,7 +387,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: " + idPagamento); }
 
-  const QString idVenda = query.value("idVenda").toString();
+  const QString idVenda = query.value("idVenda").toString().left(11);
 
   // -------------------------------------------------------------------------
 
@@ -397,13 +395,11 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                             : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
   // -------------------------------------------------------------------------
 
-  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PAGO') AND representacao = FALSE AND desativado = FALSE"
-                                               : "idVenda = '" + idVenda + "' AND status IN ('PAGO') AND representacao = FALSE AND desativado = FALSE");
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
   // -------------------------------------------------------------------------
 
@@ -441,7 +437,6 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
       if (modelPendentes.fieldIndex("nfe") == col) { continue; }
       if (modelPendentes.fieldIndex("valor") == col) { continue; }
-      if (modelPendentes.fieldIndex("desativado") == col) { continue; }
       if (modelPendentes.fieldIndex("created") == col) { continue; }
       if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }
 

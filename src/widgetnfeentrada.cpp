@@ -212,6 +212,8 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 }
 
 void WidgetNfeEntrada::inutilizar(const int row) {
+  // TODO: em vez de deletar linhas apenas marcar como cancelado?
+
   SqlQuery queryPedidoFornecedor;
   queryPedidoFornecedor.prepare(
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "

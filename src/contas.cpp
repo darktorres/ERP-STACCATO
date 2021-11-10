@@ -251,6 +251,7 @@ void Contas::setupTables() {
 
   ui->tablePendentes->hideColumn("idPagamento");
   ui->tablePendentes->hideColumn("idLoja");
+  ui->tablePendentes->hideColumn("desativado");
   ui->tablePendentes->hideColumn("created");
   ui->tablePendentes->hideColumn("lastUpdated");
 
@@ -303,6 +304,7 @@ void Contas::setupTables() {
 
   ui->tableProcessados->hideColumn("idPagamento");
   ui->tableProcessados->hideColumn("idLoja");
+  ui->tableProcessados->hideColumn("desativado");
   ui->tableProcessados->hideColumn("created");
   ui->tableProcessados->hideColumn("lastUpdated");
 }
@@ -437,6 +439,7 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
       if (modelPendentes.fieldIndex("nfe") == col) { continue; }
       if (modelPendentes.fieldIndex("valor") == col) { continue; }
+      if (modelPendentes.fieldIndex("desativado") == col) { continue; }
       if (modelPendentes.fieldIndex("created") == col) { continue; }
       if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }
 

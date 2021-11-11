@@ -606,7 +606,7 @@ bool Venda::viewRegister() {
 
       modelFluxoCaixa2.select();
 
-      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(true); }
+      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->show(); }
 
       ui->frameRT->show();
       ui->labelRT->show();

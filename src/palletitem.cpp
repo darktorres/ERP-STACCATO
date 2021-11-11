@@ -59,7 +59,7 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 void PalletItem::addEstoque(const QString &estoqueText) {
   auto *estoque = new EstoqueItem(estoqueText, this);
-  estoque->setVisible(false);
+  estoque->hide();
   const int offset = counter++ * 15;
   estoque->setPos(mapFromScene(sceneSize, offset));
 
@@ -155,7 +155,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
 
   auto *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
   item->setParentItem(this);
-  item->setVisible(false);
+  item->hide();
   reorderChildren();
 
   event->acceptProposedAction();

@@ -35,13 +35,13 @@ private:
   SqlTableModel modelEstoque;
   SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
-
   // methods
   auto buscarRestante() -> void;
   auto dividirCompra(const int idVendaProduto2, const double quant) -> void;
   auto exibirNota() -> void;
+  auto limitarAlturaTabela() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto viewRegisterById(const bool showWindow) -> bool;
+  auto viewRegisterById(const bool showWindow) -> void;
 };

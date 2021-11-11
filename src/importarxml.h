@@ -43,6 +43,7 @@ public:
 
 private:
   // attributes
+  int idBlocoRecebimento;
   QDate const dataFaturamento;
   QMap<QString, double> mapNFes;
   QStack<int> blockingSignals;

@@ -96,7 +96,6 @@ void ImportarXML::setupTables() {
   modelEstoque.setHeaderData("descricao", "Produto");
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("local", "Local");
-  modelEstoque.setHeaderData("bloco", "Bloco");
   modelEstoque.setHeaderData("quant", "Quant.");
   modelEstoque.setHeaderData("restante", "Restante");
   modelEstoque.setHeaderData("un", "Un.");
@@ -129,6 +128,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("observacao");
   ui->tableEstoque->hideColumn("idBloco");
+  ui->tableEstoque->hideColumn("bloco");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("ncm");
@@ -811,9 +811,19 @@ void ImportarXML::perguntarLocal(XML &xml) {
   const QString local = input.textValue();
 
   xml.local = local;
+
+  if (local == "CD") {
+    if (not query.exec("SELECT idBloco FROM galpao WHERE label = 'EM RECEBIMENTO'")) { throw RuntimeException("Erro procurando por bloco de recebimento: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Bloco de recebimento não encontrado!"); }
+
+    idBlocoRecebimento = query.value("idBloco").toInt();
+  }
 }
 
 void ImportarXML::percorrerXml(XML &xml) {
+  if (xml.local == "CD" and idBlocoRecebimento == 0) { throw RuntimeException("Bloco de recebimento não definido!"); }
+
   for (const auto &produto : qAsConst(xml.produtos)) {
     const int idEstoque = qApp->reservarIdEstoque();
 
@@ -827,6 +837,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "idNFe", xml.idNFe);
     modelEstoque.setData(newRow, "fornecedor", xml.xNome);
     modelEstoque.setData(newRow, "local", xml.local);
+    modelEstoque.setData(newRow, "idBloco", idBlocoRecebimento);
     modelEstoque.setData(newRow, "descricao", produto.descricao);
     modelEstoque.setData(newRow, "quant", produto.quant);
     modelEstoque.setData(newRow, "restante", produto.quant);

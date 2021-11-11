@@ -92,10 +92,10 @@ void WidgetLogisticaRecebimento::setupTables() {
 
 void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) {
   SqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', bloco = :bloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
+  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', idBloco = :idBloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   SqlQuery query2;
-  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', bloco = :bloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
+  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', idBloco = :idBloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
 
   SqlQuery query3;
   query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
@@ -112,10 +112,18 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   SqlQuery query6;
   query6.prepare("UPDATE nfe SET confirmar = TRUE WHERE idNFe = :idNFe AND nsu IS NOT NULL AND statusDistribuicao = 'CIÊNCIA'");
 
+  SqlQuery queryBloco;
+
+  if (not queryBloco.exec("SELECT idBloco FROM galpao WHERE label = 'ENTRADA'")) { throw RuntimeException("Erro buscando id do bloco de entrada: " + queryBloco.lastError().text()); }
+
+  if (not queryBloco.first()) { throw RuntimeException("Bloco de entrada não encontrado!"); }
+
+  const int idBloco = queryBloco.value("idBloco").toInt();
+
   for (const auto &index : list) {
     const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");
 
-    query1.bindValue(":bloco", (isCD) ? "ENTRADA" : "");
+    query1.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
     query1.bindValue(":recebidoPor", recebidoPor);
     query1.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
@@ -124,7 +132,7 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     //-----------------------------------------------------------------
 
     query2.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
-    query2.bindValue(":bloco", (isCD) ? "ENTRADA" : "");
+    query2.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
 
     if (not query2.exec()) { throw RuntimeException("Erro atualizando status da venda: " + query2.lastError().text()); }
 

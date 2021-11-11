@@ -145,8 +145,16 @@ void Estoque::buscarRestante() {
   const double quantRestante = modelEstoque.data(0, "restante").toDouble();
   const QString un = modelEstoque.data(0, "un").toString();
 
-  ui->doubleSpinBoxRestante->setValue(quantRestante);
-  ui->doubleSpinBoxRestante->setSuffix(" " + un);
+  ui->doubleSpinBoxQuantRestante->setValue(quantRestante);
+  ui->doubleSpinBoxQuantRestante->setSuffix(" " + un);
+
+  //--------------------------------------
+
+  const double quantCaixa = modelEstoque.data(0, "quant").toDouble() / modelEstoque.data(0, "caixas").toDouble();
+  const double caixasRestante = quantRestante / quantCaixa;
+
+  ui->doubleSpinBoxCaixasRestante->setValue(caixasRestante);
+  ui->doubleSpinBoxCaixasRestante->setSuffix(" cx.");
 }
 
 void Estoque::limitarAlturaTabela() {
@@ -205,7 +213,7 @@ void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   if (modelEstoque.filter().isEmpty()) { throw RuntimeException("Não setou idEstoque!"); }
 
-  if (quant > ui->doubleSpinBoxRestante->value()) { throw RuntimeException("Quantidade insuficiente do estoque " + idEstoque + "!"); }
+  if (quant > ui->doubleSpinBoxQuantRestante->value()) { throw RuntimeException("Quantidade insuficiente do estoque " + idEstoque + "!"); }
 
   // -------------------------------------------------------------------------
 

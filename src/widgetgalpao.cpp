@@ -55,11 +55,11 @@ void WidgetGalpao::unsetConnections() {
 void WidgetGalpao::updateTables() {
   if (not isSet) {
     //    ui->groupBoxEdicao->hide();
-    ui->checkBoxCriarApagar->setVisible(false);
-    ui->checkBoxMover->setVisible(false);
-    ui->pushButtonCriarPallet->setVisible(false);
-    ui->pushButtonRemoverPallet->setVisible(false);
-    ui->pushButtonSalvar->setVisible(false);
+    ui->checkBoxCriarApagar->hide();
+    ui->checkBoxMover->hide();
+    ui->pushButtonCriarPallet->hide();
+    ui->pushButtonRemoverPallet->hide();
+    ui->pushButtonSalvar->hide();
 
     // TODO: usar 2 scenes para não misturar pallets com estoques?
     // uma outra opção seria usar uma TableView no lugar do graphicsPallet

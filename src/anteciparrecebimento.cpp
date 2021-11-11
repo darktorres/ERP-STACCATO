@@ -372,41 +372,41 @@ void AnteciparRecebimento::fillComboBoxPagamento() {
 
 void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString &text) {
   if (text == "COMISSÃO") {
-    ui->labelDescMes->setVisible(false);
-    ui->labelDescTotal->setVisible(false);
-    ui->labelPrazoMedio->setVisible(false);
-    ui->labelValorBruto->setVisible(false);
-    ui->labelValorLiquido->setVisible(false);
-    ui->labelLiqIOF->setVisible(false);
+    ui->labelDescMes->hide();
+    ui->labelDescTotal->hide();
+    ui->labelPrazoMedio->hide();
+    ui->labelValorBruto->hide();
+    ui->labelValorLiquido->hide();
+    ui->labelLiqIOF->hide();
 
-    ui->doubleSpinBoxDescMes->setVisible(false);
-    ui->doubleSpinBoxDescTotal->setVisible(false);
-    ui->doubleSpinBoxPrazoMedio->setVisible(false);
-    ui->doubleSpinBoxValorBruto->setVisible(false);
-    ui->doubleSpinBoxValorLiquido->setVisible(false);
-    ui->doubleSpinBoxIOF->setVisible(false);
-    ui->doubleSpinBoxLiqIOF->setVisible(false);
+    ui->doubleSpinBoxDescMes->hide();
+    ui->doubleSpinBoxDescTotal->hide();
+    ui->doubleSpinBoxPrazoMedio->hide();
+    ui->doubleSpinBoxValorBruto->hide();
+    ui->doubleSpinBoxValorLiquido->hide();
+    ui->doubleSpinBoxIOF->hide();
+    ui->doubleSpinBoxLiqIOF->hide();
 
-    ui->checkBoxIOF->setVisible(false);
+    ui->checkBoxIOF->hide();
   }
 
   if (text == "CRÉDITO" or text == "") {
-    ui->labelDescMes->setVisible(true);
-    ui->labelDescTotal->setVisible(true);
-    ui->labelPrazoMedio->setVisible(true);
-    ui->labelValorBruto->setVisible(true);
-    ui->labelValorLiquido->setVisible(true);
-    ui->labelLiqIOF->setVisible(true);
+    ui->labelDescMes->show();
+    ui->labelDescTotal->show();
+    ui->labelPrazoMedio->show();
+    ui->labelValorBruto->show();
+    ui->labelValorLiquido->show();
+    ui->labelLiqIOF->show();
 
-    ui->doubleSpinBoxDescMes->setVisible(true);
-    ui->doubleSpinBoxDescTotal->setVisible(true);
-    ui->doubleSpinBoxPrazoMedio->setVisible(true);
-    ui->doubleSpinBoxValorBruto->setVisible(true);
-    ui->doubleSpinBoxValorLiquido->setVisible(true);
-    ui->doubleSpinBoxIOF->setVisible(true);
-    ui->doubleSpinBoxLiqIOF->setVisible(true);
+    ui->doubleSpinBoxDescMes->show();
+    ui->doubleSpinBoxDescTotal->show();
+    ui->doubleSpinBoxPrazoMedio->show();
+    ui->doubleSpinBoxValorBruto->show();
+    ui->doubleSpinBoxValorLiquido->show();
+    ui->doubleSpinBoxIOF->show();
+    ui->doubleSpinBoxLiqIOF->show();
 
-    ui->checkBoxIOF->setVisible(true);
+    ui->checkBoxIOF->show();
   }
 
   montaFiltro();

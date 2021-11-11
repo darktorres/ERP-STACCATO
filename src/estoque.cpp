@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QScrollBar>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -148,7 +149,19 @@ void Estoque::buscarRestante() {
   ui->doubleSpinBoxRestante->setSuffix(" " + un);
 }
 
-bool Estoque::viewRegisterById(const bool showWindow) {
+void Estoque::limitarAlturaTabela() {
+  int rowTotalHeight = ui->tableEstoque->verticalHeader()->sectionSize(0) * 3; // add extra height
+
+  int count = ui->tableEstoque->verticalHeader()->count();
+
+  for (int i = 0; i < count; ++i) {
+    if (not ui->tableEstoque->verticalHeader()->isSectionHidden(i)) { rowTotalHeight += ui->tableEstoque->verticalHeader()->sectionSize(i); }
+  }
+
+  ui->tableEstoque->setMaximumHeight(rowTotalHeight);
+}
+
+void Estoque::viewRegisterById(const bool showWindow) {
   if (idEstoque.isEmpty()) { throw RuntimeException("Estoque não encontrado!", this); }
 
   modelEstoque.setFilter("idEstoque = " + idEstoque);
@@ -165,9 +178,9 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   buscarRestante();
 
-  if (showWindow) { show(); }
+  limitarAlturaTabela();
 
-  return true;
+  if (showWindow) { show(); }
 }
 
 void Estoque::on_pushButtonExibirNfe_clicked() { exibirNota(); }

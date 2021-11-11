@@ -10,7 +10,7 @@ class PalletItem final : public QGraphicsObject {
 public:
   explicit PalletItem(const QString &idBloco, const QString &label, const QPointF &posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent = nullptr);
 
-  auto addEstoque(const QString &estoqueText) -> void;
+  //  auto addEstoque(const QString &estoqueText) -> void;
   auto boundingRect() const -> QRectF final;
   auto getEstoques() const -> QString;
   auto getFlagHighlight() const -> bool;
@@ -20,7 +20,7 @@ public:
   auto getSize() const -> const QRectF &;
   auto getTamanho() const -> QString;
   auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void final;
-  auto reorderChildren() -> void;
+  //  auto reorderChildren() -> void;
   auto setFlagHighlight(const bool value) -> void;
   auto setIdBloco(const QString &newIdBloco) -> void;
   auto setLabel(const QString &value) -> void;
@@ -29,18 +29,19 @@ public:
 
 signals:
   void save();
+  void selectBloco();
+  void unselectBloco();
   void unselectOthers();
-  void selectedIdBloco(const QString &idBloco, const QString &label);
-  void hidePalletFrame();
 
 protected:
-  auto dragEnterEvent(QGraphicsSceneDragDropEvent *event) -> void final;
-  auto dragLeaveEvent(QGraphicsSceneDragDropEvent *event) -> void final;
-  auto dragMoveEvent(QGraphicsSceneDragDropEvent *event) -> void final;
-  auto dropEvent(QGraphicsSceneDragDropEvent *event) -> void final;
-  auto hoverEnterEvent(QGraphicsSceneHoverEvent *event) -> void final;
-  auto hoverLeaveEvent(QGraphicsSceneHoverEvent *event) -> void final;
-  auto hoverMoveEvent(QGraphicsSceneHoverEvent *event) -> void final;
+  //  auto dragEnterEvent(QGraphicsSceneDragDropEvent *event) -> void final;
+  //  auto dragLeaveEvent(QGraphicsSceneDragDropEvent *event) -> void final;
+  //  auto dragMoveEvent(QGraphicsSceneDragDropEvent *event) -> void final;
+  //  auto dropEvent(QGraphicsSceneDragDropEvent *event) -> void final;
+  //  auto hoverEnterEvent(QGraphicsSceneHoverEvent *event) -> void final;
+  //  auto hoverLeaveEvent(QGraphicsSceneHoverEvent *event) -> void final;
+  //  auto hoverMoveEvent(QGraphicsSceneHoverEvent *event) -> void final;
+  auto keyPressEvent(QKeyEvent *event) -> void final;
   auto mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) -> void final;
   auto mouseMoveEvent(QGraphicsSceneMouseEvent *event) -> void final;
   auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void final;

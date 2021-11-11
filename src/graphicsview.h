@@ -1,6 +1,7 @@
 #pragma once
 
 #include "palletitem.h"
+#include "widgetgalpao.h"
 
 #include <QGraphicsView>
 
@@ -10,6 +11,8 @@ class GraphicsView final : public QGraphicsView {
 
 public:
   explicit GraphicsView(QWidget *parent = nullptr);
+
+  WidgetGalpao *widgetGalpao = nullptr;
 
   auto setIsEditable(bool newIsEditable) -> void;
   auto setResizable(bool newResizable) -> void;

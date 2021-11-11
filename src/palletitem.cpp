@@ -57,36 +57,37 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
   }
 }
 
-void PalletItem::addEstoque(const QString &estoqueText) {
-  auto *estoque = new EstoqueItem(estoqueText, this);
-  estoque->hide();
-  const int offset = counter++ * 15;
-  estoque->setPos(mapFromScene(sceneSize, offset));
+// void PalletItem::addEstoque(const QString &estoqueText) {
+//  auto *estoque = new EstoqueItem(estoqueText, this);
+//  estoque->hide();
+//  const int offset = counter++ * 15;
+//  estoque->setPos(mapFromScene(sceneSize, offset));
 
-  if (estoques.isEmpty()) { estoques += "\n"; }
+//  if (estoques.isEmpty()) { estoques += "\n"; }
 
-  estoques += estoqueText;
-}
+//  estoques += estoqueText;
+//}
 
-void PalletItem::reorderChildren() {
-  int pos = 15;
+// void PalletItem::reorderChildren() {
+//  int pos = 15;
 
-  const auto children = childItems();
+//  const auto children = childItems();
 
-  for (auto *const estoque : children) {
-    estoque->setPos(mapFromScene(sceneSize, pos));
-    pos += 15;
-  }
-}
+//  for (auto *const estoque : children) {
+//    estoque->setPos(mapFromScene(sceneSize, pos));
+//    pos += 15;
+//  }
+//}
 
-void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
+// void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
 
-void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
+// void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
 
-void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
+// void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
 
 void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-  qDebug() << "press";
+  qDebug() << "PalletItem::mousePressEvent";
+  //  qDebug() << flags();
 
   if (not flags().testFlag(QGraphicsItem::ItemIsSelectable)) { return; }
 
@@ -94,9 +95,9 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
   selected = not selected;
 
-  if (selected) { emit selectedIdBloco(idBloco, label); }
+  if (selected) { emit selectBloco(); }
 
-  if (not selected) { emit hidePalletFrame(); }
+  if (not selected) { emit unselectBloco(); }
 
   //  prepareGeometryChange();
 
@@ -104,61 +105,89 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
   //  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
 
+  update();
+
   QGraphicsItem::mousePressEvent(event);
 }
 
 void PalletItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-  //  qDebug() << "move";
+  //  qDebug() << "PalletItem::mouseMoveEvent";
   QGraphicsItem::mouseMoveEvent(event);
+  //  update();
 }
 
 void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-  //  qDebug() << "release";
+  //  qDebug() << "PalletItem::mouseReleaseEvent";
 
-  reorderChildren();
+  //  reorderChildren();
 
   QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseDoubleClickEvent(event); }
 
-void PalletItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
-  if (childItems().contains(qobject_cast<EstoqueItem *>(event->mimeData()->parent()))) {
-    event->ignore();
-    return;
+// void PalletItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
+//  if (childItems().contains(qobject_cast<EstoqueItem *>(event->mimeData()->parent()))) {
+//    event->ignore();
+//    return;
+//  }
+
+//  if (event->mimeData()->hasFormat("text/plain")) { event->accept(); }
+
+//  QGraphicsItem::dragEnterEvent(event);
+//}
+
+// void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) {
+//  Q_UNUSED(event);
+//  QGraphicsItem::dragMoveEvent(event);
+//}
+
+// void PalletItem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) {
+//  Q_UNUSED(event);
+//  QGraphicsItem::dragLeaveEvent(event);
+//}
+
+// void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
+//  Q_UNUSED(event);
+
+//  const QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
+
+//  if (text.isEmpty()) { return; }
+
+//  const QString &id = text.at(0);
+//  const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
+//  const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
+
+//  SqlQuery query;
+
+//  if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
+//    event->ignore();
+//    throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
+//  }
+
+//  auto *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
+//  item->setParentItem(this);
+//  item->hide();
+//  reorderChildren();
+
+//  event->acceptProposedAction();
+
+//  QGraphicsItem::dropEvent(event);
+//}
+
+void PalletItem::keyPressEvent(QKeyEvent *event) {
+  // TODO: deletar pallet usando seleção e depois apertando Delete, transferir o conteudo do pallet para a entrada ou um espaço temporario
+  qDebug() << "PalletItem::keyPressEvent: " << event;
+
+  if (flags().testFlag(QGraphicsItem::ItemIsFocusable) and event->key() == Qt::Key_Delete) {
+    // delete pallet
+    qDebug() << "delete pallet";
+
+    // 1. verificar se pallet possui produtos e avisar usuario para remover todos os produtos
+    // 2. usar uma query para deletar pallet
   }
 
-  if (event->mimeData()->hasFormat("text/plain")) { event->accept(); }
-}
-
-void PalletItem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(event); }
-
-void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(event); }
-
-void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
-  Q_UNUSED(event);
-
-  const QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
-
-  if (text.isEmpty()) { return; }
-
-  const QString &id = text.at(0);
-  const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
-  const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
-
-  SqlQuery query;
-
-  if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
-    event->ignore();
-    throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
-  }
-
-  auto *item = qobject_cast<EstoqueItem *>(event->mimeData()->parent());
-  item->setParentItem(this);
-  item->hide();
-  reorderChildren();
-
-  event->acceptProposedAction();
+  QGraphicsObject::keyPressEvent(event);
 }
 
 // void PalletItem::select() {
@@ -180,11 +209,12 @@ void PalletItem::unselect() {
 
   selected = false;
 
-  prepareGeometryChange();
+  //  prepareGeometryChange();
 
-  const auto children = childItems();
+  //  const auto children = childItems();
 
-  for (auto *const estoque : children) { estoque->setVisible(false); }
+  //  for (auto *const estoque : children) { estoque->hide(); }
+  //  update();
 }
 
 const QRectF &PalletItem::getSize() const { return size; }
@@ -192,9 +222,13 @@ const QRectF &PalletItem::getSize() const { return size; }
 void PalletItem::setSize(const QRectF &newSize) {
   prepareGeometryChange();
   size = newSize;
+  update();
 }
 
-void PalletItem::setLabel(const QString &value) { label = value; }
+void PalletItem::setLabel(const QString &value) {
+  label = value;
+  update();
+}
 
 QString PalletItem::getLabel() const { return label; }
 
@@ -211,5 +245,3 @@ void PalletItem::setIdBloco(const QString &newIdBloco) { idBloco = newIdBloco; }
 QString PalletItem::getPosicao() const { return QString::number(scenePos().x()) + "," + QString::number(scenePos().y()); }
 
 QString PalletItem::getTamanho() const { return QString::number(size.width()) + "," + QString::number(size.height()); }
-
-// TODO: deletar pallet usando seleção e depois apertando Delete, transferir o conteudo do pallet para a entrada ou um espaço temporario

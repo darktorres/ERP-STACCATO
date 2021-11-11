@@ -18,12 +18,15 @@ GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
 }
 
 void GraphicsView::mousePressEvent(QMouseEvent *event) {
-  //  qDebug() << "press";
+  //  qDebug() << "GraphicsView::mousePressEvent";
 
   if (isEditable) {
-    // TODO: verificar quantos PalletItem tem na scene e usar a quantidade como label
-
     pallet = new PalletItem("", "", mapToScene(event->pos()), QRectF(0, 0, 40, 40), sceneRect().width());
+
+    connect(pallet, &PalletItem::save, widgetGalpao, &WidgetGalpao::salvarPallets);
+    connect(pallet, &PalletItem::unselectOthers, widgetGalpao, &WidgetGalpao::unselectOthers);
+    connect(pallet, &PalletItem::selectBloco, widgetGalpao, &WidgetGalpao::carregarBloco);
+    connect(pallet, &PalletItem::unselectBloco, widgetGalpao, &WidgetGalpao::unselectBloco);
 
     scene()->addItem(pallet);
   }
@@ -32,7 +35,7 @@ void GraphicsView::mousePressEvent(QMouseEvent *event) {
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
-  //  qDebug() << "move";
+  //  qDebug() << "GraphicsView::mouseMoveEvent";
 
   if (pallet) { pallet->setSize(QRectF(QPointF(0, 0), mapToScene(event->pos()) - pallet->pos())); }
 
@@ -40,7 +43,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
-  //  qDebug() << "release";
+  //  qDebug() << "GraphicsView::mouseReleaseEvent";
 
   if (pallet) { pallet = nullptr; }
 
@@ -48,27 +51,39 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void GraphicsView::resizeEvent(QResizeEvent *event) {
-  //  qDebug() << "view resize: " << event;
+  //  qDebug() << "GraphicsView::resizeEvent";
 
   //  if (resizable and scene()) { fitInView(sceneRect(), Qt::KeepAspectRatio); }
 
   QGraphicsView::resizeEvent(event);
 }
 
-void GraphicsView::setResizable(bool newResizable) { resizable = newResizable; }
-
-void GraphicsView::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }
-
 void GraphicsView::wheelEvent(QWheelEvent *event) {
+  //  qDebug() << "GraphicsView::wheelEvent";
+
+  // TODO: implementar zoom por touch
+
   double factor = 0;
 
   if (event->angleDelta().y() > 0) {
+    if (zoom == 6) { return; }
+
     factor = 1.25;
     zoom += 1;
   } else {
+    if (zoom == -6) { return; }
+
     factor = 0.8;
     zoom -= 1;
   }
 
   scale(factor, factor);
+
+  // TODO: accept event?
+
+  QGraphicsView::wheelEvent(event);
 }
+
+void GraphicsView::setResizable(bool newResizable) { resizable = newResizable; }
+
+void GraphicsView::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }

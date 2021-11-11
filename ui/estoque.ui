@@ -160,7 +160,23 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxRestante">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantRestante">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="maximum">
+        <double>99999.990000000005239</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxCaixasRestante">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -205,7 +221,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEdit_3</tabstop>
   <tabstop>lineEdit_6</tabstop>
   <tabstop>lineEdit_7</tabstop>
-  <tabstop>doubleSpinBoxRestante</tabstop>
+  <tabstop>doubleSpinBoxQuantRestante</tabstop>
   <tabstop>pushButtonExibirNfe</tabstop>
  </tabstops>
  <resources/>

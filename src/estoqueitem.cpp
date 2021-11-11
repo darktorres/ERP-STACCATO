@@ -19,23 +19,23 @@ void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 void EstoqueItem::startDrag(QPointF pos) {
   Q_UNUSED(pos);
 
-  emit startDragSignal();
+  //  emit startDragSignal();
 
-  QPixmap pixmap = QPixmap("://box_medium.png");
+  //  QPixmap pixmap = QPixmap("://box_medium.png");
 
-  auto *const pallet = dynamic_cast<PalletItem *>(parentItem());
+  //  auto *const pallet = dynamic_cast<PalletItem *>(parentItem());
 
-  auto *mimeData = new QMimeData;
-  mimeData->setText(text());
-  mimeData->setParent(this);
+  //  auto *mimeData = new QMimeData;
+  //  mimeData->setText(text());
+  //  mimeData->setParent(this);
 
-  auto *drag = new QDrag(this);
-  drag->setMimeData(mimeData);
-  drag->setPixmap(pixmap);
+  //  auto *drag = new QDrag(this);
+  //  drag->setMimeData(mimeData);
+  //  drag->setPixmap(pixmap);
 
-  const auto status = drag->exec();
+  //  const auto status = drag->exec();
 
-  if (status != Qt::IgnoreAction) { pallet->reorderChildren(); }
+  //  if (status != Qt::IgnoreAction) { pallet->reorderChildren(); }
 }
 
 int EstoqueItem::getIdVendaProduto2() const { return idVendaProduto2; }

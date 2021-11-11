@@ -2,8 +2,10 @@
 #include "ui_widgetgalpao.h"
 
 #include "application.h"
+#include "logindialog.h"
 #include "palletitem.h"
 #include "sqlquery.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QDrag>
@@ -26,12 +28,15 @@ void WidgetGalpao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled, connectionType);
-  connect(ui->checkBoxCriarApagar, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarApagar_toggled, connectionType);
-  connect(ui->checkBoxMover, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMover_toggled, connectionType);
+  connect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled, connectionType);
+  connect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled, connectionType);
+  connect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged, connectionType);
-  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &WidgetGalpao::on_groupBoxEdicao_toggled, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetGalpao::on_itemBoxVeiculo_textChanged, connectionType);
-  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonCriarPallet_clicked, connectionType);
+  connect(ui->lineEditBuscaPallet, &QLineEdit::returnPressed, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged, connectionType);
+  connect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged, connectionType);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked, connectionType);
@@ -41,12 +46,15 @@ void WidgetGalpao::unsetConnections() {
   blockingSignals.push(0);
 
   disconnect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled);
-  disconnect(ui->checkBoxCriarApagar, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarApagar_toggled);
-  disconnect(ui->checkBoxMover, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMover_toggled);
+  disconnect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled);
+  disconnect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled);
+  disconnect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled);
   disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged);
-  disconnect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &WidgetGalpao::on_groupBoxEdicao_toggled);
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetGalpao::on_itemBoxVeiculo_textChanged);
-  disconnect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonCriarPallet_clicked);
+  disconnect(ui->lineEditBuscaPallet, &QLineEdit::returnPressed, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
+  disconnect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged);
+  disconnect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged);
+  disconnect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked);
   disconnect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked);
@@ -54,12 +62,13 @@ void WidgetGalpao::unsetConnections() {
 
 void WidgetGalpao::updateTables() {
   if (not isSet) {
-    //    ui->groupBoxEdicao->hide();
-    ui->checkBoxCriarApagar->hide();
-    ui->checkBoxMover->hide();
-    ui->pushButtonCriarPallet->hide();
+    ui->groupBoxEdicao->hide();
+    ui->checkBoxCriarPallet->hide();
+    ui->checkBoxMoverPallet->hide();
     ui->pushButtonRemoverPallet->hide();
     ui->pushButtonSalvar->hide();
+    ui->labelNomePallet->hide();
+    ui->lineEditNomePallet->hide();
 
     // TODO: usar 2 scenes para não misturar pallets com estoques?
     // uma outra opção seria usar uma TableView no lugar do graphicsPallet
@@ -68,7 +77,6 @@ void WidgetGalpao::updateTables() {
     ui->graphicsPallet->hide();
     ui->checkBoxConteudo->hide();
     //---------------------------
-    ui->framePallet->hide();
 
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(Qt::white);
@@ -86,11 +94,10 @@ void WidgetGalpao::updateTables() {
 
     setConnections();
 
-    //    ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //    ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
     ui->graphicsPallet->setSceneRect(pixmapBackground->boundingRect().width() + 70, 0, 842, 99999);
     ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
+
+    ui->graphicsGalpao->widgetGalpao = this;
 
     isSet = true;
   }
@@ -146,8 +153,8 @@ void WidgetGalpao::setupTables() {
 void WidgetGalpao::carregarPallets() {
   unsetConnections();
 
-  ui->checkBoxCriarApagar->setChecked(false);
-  ui->checkBoxMover->setChecked(false);
+  ui->checkBoxCriarPallet->setChecked(false);
+  ui->checkBoxMoverPallet->setChecked(false);
 
   setConnections();
 
@@ -166,9 +173,6 @@ void WidgetGalpao::carregarPallets() {
   ui->comboBoxPalletAtual->clear();
   ui->comboBoxMoverParaPallet->clear();
 
-  //  ui->comboBoxPalletAtual->addItem("Selecionar pallet...");
-  //  ui->comboBoxMoverParaPallet->addItem("Mover para pallet...");
-
   while (queryBlocos.next()) {
     const QString idBloco = queryBlocos.value("idBloco").toString();
     const QString label = queryBlocos.value("label").toString();
@@ -179,16 +183,15 @@ void WidgetGalpao::carregarPallets() {
     const QStringList tamanhoList = queryBlocos.value("tamanho").toString().split(",");
     const QRectF tamanho = QRectF(0, 0, tamanhoList.at(0).toDouble(), tamanhoList.at(1).toDouble());
 
-    //    auto *pallet = new PalletItem(idBloco, idBloco + " " + label, posicao, tamanho, ui->graphicsGalpao->sceneRect().width());
     auto *pallet = new PalletItem(idBloco, label, posicao, tamanho, ui->graphicsGalpao->sceneRect().width());
     pallet->setFlag(QGraphicsItem::ItemIsSelectable);
 
     connect(pallet, &PalletItem::save, this, &WidgetGalpao::salvarPallets);
     connect(pallet, &PalletItem::unselectOthers, this, &WidgetGalpao::unselectOthers);
-    connect(pallet, &PalletItem::selectedIdBloco, this, &WidgetGalpao::carregarBloco);
-    connect(pallet, &PalletItem::hidePalletFrame, this, &WidgetGalpao::hidePalletFrame);
+    connect(pallet, &PalletItem::selectBloco, this, &WidgetGalpao::carregarBloco);
+    connect(pallet, &PalletItem::unselectBloco, this, &WidgetGalpao::unselectBloco);
 
-    palletsHash.insert(pallet->getIdBloco(), pallet);
+    //    palletsHash.insert(pallet->getIdBloco(), pallet);
     scene->addItem(pallet);
 
     // --------------------------------
@@ -205,42 +208,44 @@ void WidgetGalpao::carregarPallets() {
 
   // 2. ler conteudo dos pallets e inserir nos pallets existentes na scene
 
-  SqlQuery query;
+  //  SqlQuery query;
 
-  if (not query.exec("SELECT "
-                     "  g.idBloco, "
-                     "  v.idEstoque_idConsumo, "
-                     "  v.tipo, "
-                     "  CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
-                     "  REPLACE(v.descricao, '-', '') AS descricao, "
-                     "  v.idVendaProduto2 "
-                     "FROM "
-                     "  galpao g "
-                     "LEFT JOIN "
-                     "  view_galpao v ON g.idBloco = v.idBloco "
-                     "WHERE "
-                     "  idEstoque_idConsumo IS NOT NULL "
-                     "ORDER BY CAST(g.idBloco AS UNSIGNED) ASC, idEstoque_idConsumo ASC")) {
-    throw RuntimeError("Erro buscando dados do galpão: " + query.lastError().text(), this);
-  }
+  //  if (not query.exec("SELECT "
+  //                     "  g.idBloco, "
+  //                     "  v.idEstoque_idConsumo, "
+  //                     "  v.tipo, "
+  //                     "  CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
+  //                     "  REPLACE(v.descricao, '-', '') AS descricao, "
+  //                     "  v.idVendaProduto2 "
+  //                     "FROM "
+  //                     "  galpao g "
+  //                     "LEFT JOIN "
+  //                     "  view_galpao v ON g.idBloco = v.idBloco "
+  //                     "WHERE "
+  //                     "  idEstoque_idConsumo IS NOT NULL "
+  //                     "ORDER BY CAST(g.idBloco AS UNSIGNED) ASC, idEstoque_idConsumo ASC")) {
+  //    throw RuntimeError("Erro buscando dados do galpão: " + query.lastError().text(), this);
+  //  }
 
-  QHash<QString, QString> blocos;
+  //  QHash<QString, QString> blocos;
 
-  while (query.next()) {
-    const QString idBloco = query.value("idBloco").toString();
-    const QString idEstoque_idConsumo = query.value("idEstoque_idConsumo").toString();
-    const QString tipo = query.value("tipo").toString();
-    const QString caixas = QString::number(query.value("caixas").toDouble());
-    const QString descricao = query.value("descricao").toString();
-    const QString idVendaProduto2 = query.value("idVendaProduto2").toString();
+  //  while (query.next()) {
+  //    const QString idBloco = query.value("idBloco").toString();
+  //    const QString idEstoque_idConsumo = query.value("idEstoque_idConsumo").toString();
+  //    const QString tipo = query.value("tipo").toString();
+  //    const QString caixas = QString::number(query.value("caixas").toDouble());
+  //    const QString descricao = query.value("descricao").toString();
+  //    const QString idVendaProduto2 = query.value("idVendaProduto2").toString();
 
-    const QString item = idEstoque_idConsumo + " - " + tipo + " - " + caixas + "cx - " + descricao + " - " + idVendaProduto2;
+  //    const QString item = idEstoque_idConsumo + " - " + tipo + " - " + caixas + "cx - " + descricao + " - " + idVendaProduto2;
 
-    palletsHash.value(idBloco)->addEstoque(item);
-  }
+  //    palletsHash.value(idBloco)->addEstoque(item);
+  //  }
 }
 
 void WidgetGalpao::salvarPallets() {
+  // TODO: verificar se todos os pallets possuem nome antes de salvar
+
   const auto items = scene->items();
 
   SqlQuery query;
@@ -315,51 +320,32 @@ void WidgetGalpao::unselectOthers() {
   }
 }
 
-void WidgetGalpao::on_pushButtonCriarPallet_clicked() {
-  // 1. on mousePressEvent store the mouse position
-  // 2. on mouseMoveEvent store the second position and draw the rectangle
-  // 3. for every subsequent mouseMoveEvent redo step 2
-  // 4. on mouseReleaseEvent store the positions on a PalletItem
-}
-
 void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
-  //
-}
+  if (not selectedIdBloco) { throw RuntimeError("Nenhum pallet selecionado!"); }
 
-void WidgetGalpao::on_groupBoxEdicao_toggled(const bool checked) {
-  // TODO: pedir senha do gerente para habilitar edição da planta
+  // TODO: verificar se pallet tem produtos e pedir para usuario mover itens para outro pallet
 
-  ui->checkBoxCriarApagar->setVisible(checked);
-  ui->checkBoxMover->setVisible(checked);
-  ui->pushButtonCriarPallet->setVisible(checked);
-  ui->pushButtonRemoverPallet->setVisible(checked);
-  ui->pushButtonSalvar->setVisible(checked);
+  SqlQuery query;
 
-  const auto items = scene->items();
+  if (not query.exec("DELETE FROM galpao WHERE idBloco = " + selectedIdBloco->getIdBloco())) { throw RuntimeException("Erro removendo pallet: " + query.lastError().text()); }
 
-  for (auto *item : items) {
-    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
-  }
+  delete selectedIdBloco;
+  selectedIdBloco = nullptr;
 
-  if (checked) { unselectOthers(); }
-
-  ui->graphicsGalpao->setIsEditable(checked);
-
-  ui->pushButtonCriarPallet->setDisabled(true);
-  ui->pushButtonRemoverPallet->setDisabled(true);
+  qApp->enqueueInformation("Pallet removido com sucesso!");
 }
 
 void WidgetGalpao::resizeEvent(QResizeEvent *event) {
-  //  qDebug() << "widget resize: " << event;
+  //  qDebug() << "WidgetGalpao::resizeEvent: " << event;
 
   QWidget::resizeEvent(event);
 }
 
-void WidgetGalpao::on_checkBoxCriarApagar_toggled(bool checked) {
-  if (ui->checkBoxMover->isChecked()) {
+void WidgetGalpao::on_checkBoxCriarPallet_toggled(bool checked) {
+  if (ui->checkBoxMoverPallet->isChecked()) {
     unsetConnections();
 
-    ui->checkBoxMover->setChecked(false);
+    ui->checkBoxMoverPallet->setChecked(false);
 
     const auto items = scene->items();
 
@@ -367,6 +353,7 @@ void WidgetGalpao::on_checkBoxCriarApagar_toggled(bool checked) {
       if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
         pallet->setFlag(QGraphicsItem::ItemIsMovable, false);
         pallet->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        pallet->setFlag(QGraphicsItem::ItemIsFocusable, false);
       }
     }
 
@@ -375,7 +362,7 @@ void WidgetGalpao::on_checkBoxCriarApagar_toggled(bool checked) {
 
   ui->graphicsGalpao->setIsEditable(checked);
 
-  if (not checked and not ui->checkBoxMover->isChecked()) {
+  if (not checked and not ui->checkBoxMoverPallet->isChecked()) {
     const auto items = scene->items();
 
     for (auto *item : items) {
@@ -384,11 +371,11 @@ void WidgetGalpao::on_checkBoxCriarApagar_toggled(bool checked) {
   }
 }
 
-void WidgetGalpao::on_checkBoxMover_toggled(bool checked) {
-  if (ui->checkBoxCriarApagar->isChecked()) {
+void WidgetGalpao::on_checkBoxMoverPallet_toggled(bool checked) {
+  if (ui->checkBoxCriarPallet->isChecked()) {
     unsetConnections();
 
-    ui->checkBoxCriarApagar->setChecked(false);
+    ui->checkBoxCriarPallet->setChecked(false);
 
     ui->graphicsGalpao->setIsEditable(false);
 
@@ -401,12 +388,13 @@ void WidgetGalpao::on_checkBoxMover_toggled(bool checked) {
     if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
       pallet->setFlag(QGraphicsItem::ItemIsMovable, checked);
       pallet->setFlag(QGraphicsItem::ItemIsSelectable, not checked);
+      pallet->setFlag(QGraphicsItem::ItemIsFocusable, checked);
     }
   }
 
   if (checked) { unselectOthers(); }
 
-  if (not checked and not ui->checkBoxCriarApagar->isChecked()) {
+  if (not checked and not ui->checkBoxCriarPallet->isChecked()) {
     const auto items = scene->items();
 
     for (auto *item : items) {
@@ -419,35 +407,50 @@ void WidgetGalpao::on_pushButtonSalvar_clicked() { salvarPallets(); }
 
 void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
-void WidgetGalpao::carregarBloco(const QString &idBloco, const QString &label) {
-  ui->comboBoxPalletAtual->setCurrentText(label);
+void WidgetGalpao::carregarBloco() {
+  selectedIdBloco = dynamic_cast<PalletItem *>(sender());
 
-  ui->frameTransportadora->hide();
-  ui->groupBoxEdicao->hide();
-  ui->framePallet->show();
+  qDebug() << "id: " << selectedIdBloco->getIdBloco();
+  qDebug() << "label: " << selectedIdBloco->getLabel();
+
+  //------------------------------
+  unsetConnections();
+
+  ui->comboBoxPalletAtual->setCurrentText(selectedIdBloco->getLabel());
+  ui->lineEditNomePallet->setText(selectedIdBloco->getLabel());
+
+  ui->lineEditBuscaPallet->clear();
+
+  setConnections();
+  //------------------------------
+
+  if (ui->groupBoxEdicao->isChecked()) { return; }
+
+  ui->tabWidget->setCurrentIndex(1);
 
   modelPallet.setQuery(" SELECT "
                        "     g.idBloco, "
+                       "     g.label, "
                        "     v.idEstoque_idConsumo, "
                        "     v.tipo, "
-                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
-                       "     REPLACE(v.descricao, '-', '') AS descricao, "
                        "     v.idVendaProduto2, "
-                       "     v.codComercial, "
                        "     v.numeroNFe, "
+                       "     v.codComercial, "
                        "     v.lote, "
-                       "     v.idVenda "
+                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
+                       "     v.idVenda, "
+                       "     REPLACE(v.descricao, '-', '') AS descricao "
                        " FROM "
                        "     galpao g "
                        " LEFT JOIN "
                        "     view_galpao v ON g.idBloco = v.idBloco "
                        " WHERE "
                        "     idEstoque_idConsumo IS NOT NULL AND g.idBloco = " +
-                       idBloco /*+ " ORDER BY CAST(g.idBloco AS UNSIGNED) ASC, idEstoque_idConsumo ASC"*/);
+                       selectedIdBloco->getIdBloco());
 
   modelPallet.select();
 
-  modelPallet.sort("idEstoque_idConsumo");
+  //  modelPallet.sort("idEstoque_idConsumo");
 
   modelPallet.setHeaderData("tipo", "Tipo");
   modelPallet.setHeaderData("caixas", "Cx.");
@@ -460,14 +463,27 @@ void WidgetGalpao::carregarBloco(const QString &idBloco, const QString &label) {
   ui->tablePallet->setModel(&modelPallet);
 
   ui->tablePallet->hideColumn("idBloco");
+  ui->tablePallet->hideColumn("label");
   ui->tablePallet->hideColumn("idEstoque_idConsumo");
   ui->tablePallet->hideColumn("idVendaProduto2");
+
+  //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
 }
 
-void WidgetGalpao::hidePalletFrame() {
-  ui->frameTransportadora->show();
-  ui->groupBoxEdicao->show();
-  ui->framePallet->hide();
+void WidgetGalpao::unselectBloco() {
+  //  ui->tabWidget->setCurrentIndex(0);
+  ui->comboBoxPalletAtual->setCurrentIndex(0);
+
+  //----------------------
+  unsetConnections();
+
+  modelPallet.clear();
+  ui->lineEditNomePallet->clear();
+
+  setConnections();
+  //----------------------
+
+  selectedIdBloco = nullptr;
 }
 
 void WidgetGalpao::on_pushButtonSalvarMover_clicked() {
@@ -503,6 +519,96 @@ void WidgetGalpao::on_pushButtonSalvarMover_clicked() {
   modelPallet.select();
 
   qApp->enqueueInformation("Itens movidos com sucesso!");
+}
+
+void WidgetGalpao::on_lineEditMoverParaPallet_textChanged(const QString &text) {
+  Q_UNUSED(text)
+
+  // TODO: pintar de vermelho caso o pallet digitado não exista; pintar de verde caso exista
+}
+
+void WidgetGalpao::on_lineEditNomePallet_textChanged(const QString &text) { selectedIdBloco->setLabel(text); }
+
+void WidgetGalpao::on_pushButtonBuscar_clicked() {
+  const QString text = ui->lineEditBuscaPallet->text();
+
+  if (text.isEmpty()) { return; }
+
+  QString filtroBloco;
+
+  if (selectedIdBloco) { filtroBloco = "AND g.label = '" + selectedIdBloco->getLabel() + "'"; }
+
+  modelPallet.setQuery(" SELECT "
+                       "     g.idBloco, "
+                       "     g.label, "
+                       "     v.idEstoque_idConsumo, "
+                       "     v.tipo, "
+                       "     v.idVendaProduto2, "
+                       "     v.numeroNFe, "
+                       "     v.codComercial, "
+                       "     v.lote, "
+                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
+                       "     v.idVenda, "
+                       "     REPLACE(v.descricao, '-', '') AS descricao "
+                       " FROM "
+                       "     galpao g "
+                       " LEFT JOIN "
+                       "     view_galpao v ON g.idBloco = v.idBloco "
+                       " WHERE "
+                       "     idEstoque_idConsumo IS NOT NULL " +
+                       filtroBloco + " AND (codComercial LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR lote LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%')");
+
+  modelPallet.select();
+
+  //  modelPallet.sort("idEstoque_idConsumo");
+
+  modelPallet.setHeaderData("label", "Pallet");
+  modelPallet.setHeaderData("tipo", "Tipo");
+  modelPallet.setHeaderData("caixas", "Cx.");
+  modelPallet.setHeaderData("descricao", "Produto");
+  modelPallet.setHeaderData("codComercial", "Código");
+  modelPallet.setHeaderData("numeroNFe", "NFe");
+  modelPallet.setHeaderData("lote", "Lote");
+  modelPallet.setHeaderData("idVenda", "Pedido");
+
+  ui->tablePallet->setModel(&modelPallet);
+
+  if (not selectedIdBloco) { ui->tablePallet->showColumn("label"); }
+
+  ui->tablePallet->hideColumn("idBloco");
+  ui->tablePallet->hideColumn("idEstoque_idConsumo");
+  ui->tablePallet->hideColumn("idVendaProduto2");
+
+  //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
+}
+
+void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
+  if (checked and not User::isAdmin() and not User::isGerente()) {
+    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
+
+    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+    if (dialog.exec() != QDialog::Accepted) { return; }
+  }
+
+  // ----------------------------------------------
+
+  ui->groupBoxEdicao->setVisible(checked);
+  ui->checkBoxCriarPallet->setVisible(checked);
+  ui->checkBoxMoverPallet->setVisible(checked);
+  ui->pushButtonRemoverPallet->setVisible(checked);
+  ui->pushButtonSalvar->setVisible(checked);
+  ui->labelNomePallet->setVisible(checked);
+  ui->lineEditNomePallet->setVisible(checked);
+
+  const auto items = scene->items();
+
+  for (auto *item : items) {
+    //      if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsFocusable, checked); }
+  }
+
+  //  if (checked) { unselectOthers(); }
 }
 
 // TODO: adicionar botao para criar pallet

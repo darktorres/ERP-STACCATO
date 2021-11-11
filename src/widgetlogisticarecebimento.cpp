@@ -91,26 +91,26 @@ void WidgetLogisticaRecebimento::setupTables() {
 }
 
 void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) {
-  SqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', idBloco = :idBloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
+  SqlQuery queryEstoque;
+  queryEstoque.prepare("UPDATE estoque SET status = 'ESTOQUE', idBloco = :idBloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
-  SqlQuery query2;
-  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', idBloco = :idBloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
+  SqlQuery queryConsumo;
+  queryConsumo.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', idBloco = :idBloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
 
-  SqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
-                 "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                      "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
-  SqlQuery query4;
-  query4.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
-                 "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                     "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
-  SqlQuery query5;
-  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
-                 "idEstoque = :idEstoque)");
+  SqlQuery queryGare;
+  queryGare.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
+                    "idEstoque = :idEstoque)");
 
-  SqlQuery query6;
-  query6.prepare("UPDATE nfe SET confirmar = TRUE WHERE idNFe = :idNFe AND nsu IS NOT NULL AND statusDistribuicao = 'CIÊNCIA'");
+  SqlQuery queryNFe;
+  queryNFe.prepare("UPDATE nfe SET confirmar = TRUE WHERE idNFe = :idNFe AND nsu IS NOT NULL AND statusDistribuicao = 'CIÊNCIA'");
 
   SqlQuery queryBloco;
 
@@ -123,46 +123,46 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   for (const auto &index : list) {
     const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");
 
-    query1.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
-    query1.bindValue(":recebidoPor", recebidoPor);
-    query1.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryEstoque.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
+    queryEstoque.bindValue(":recebidoPor", recebidoPor);
+    queryEstoque.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query1.exec()) { throw RuntimeException("Erro atualizando status do estoque: " + query1.lastError().text()); }
-
-    //-----------------------------------------------------------------
-
-    query2.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
-    query2.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
-
-    if (not query2.exec()) { throw RuntimeException("Erro atualizando status da venda: " + query2.lastError().text()); }
+    if (not queryEstoque.exec()) { throw RuntimeException("Erro atualizando status do estoque: " + queryEstoque.lastError().text()); }
 
     //-----------------------------------------------------------------
 
-    query3.bindValue(":dataRealReceb", dataReceb);
-    query3.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
-    query3.bindValue(":codComercial", modelViewRecebimento.data(index.row(), "codComercial"));
+    queryConsumo.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryConsumo.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
 
-    if (not query3.exec()) { throw RuntimeException("Erro atualizando status da compra: " + query3.lastError().text()); }
-
-    //-----------------------------------------------------------------
-
-    query4.bindValue(":dataRealReceb", dataReceb);
-    query4.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
-
-    if (not query4.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + query4.lastError().text()); }
+    if (not queryConsumo.exec()) { throw RuntimeException("Erro atualizando status da venda: " + queryConsumo.lastError().text()); }
 
     //-----------------------------------------------------------------
 
-    query5.bindValue(":dataRealReceb", qApp->ajustarDiaUtil(dataReceb.addDays(1)));
-    query5.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryCompra.bindValue(":dataRealReceb", dataReceb);
+    queryCompra.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryCompra.bindValue(":codComercial", modelViewRecebimento.data(index.row(), "codComercial"));
 
-    if (not query5.exec()) { throw RuntimeException("Erro atualizando pagamento gare: " + query5.lastError().text()); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 
     //-----------------------------------------------------------------
 
-    query6.bindValue(":idNFe", modelViewRecebimento.data(index.row(), "idNFe"));
+    queryVenda.bindValue(":dataRealReceb", dataReceb);
+    queryVenda.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query6.exec()) { throw RuntimeException("Erro marcando NFe para confirmar: " + query6.lastError().text()); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + queryVenda.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryGare.bindValue(":dataRealReceb", qApp->ajustarDiaUtil(dataReceb.addDays(1)));
+    queryGare.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+
+    if (not queryGare.exec()) { throw RuntimeException("Erro atualizando pagamento gare: " + queryGare.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryNFe.bindValue(":idNFe", modelViewRecebimento.data(index.row(), "idNFe"));
+
+    if (not queryNFe.exec()) { throw RuntimeException("Erro marcando NFe para confirmar: " + queryNFe.lastError().text()); }
   }
 }
 

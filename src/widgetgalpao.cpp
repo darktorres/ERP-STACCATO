@@ -100,8 +100,6 @@ void WidgetGalpao::updateTables() {
     //    ui->graphicsPallet->setSceneRect(pixmapBackground->boundingRect().width() + 70, 0, 842, 99999);
     ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
 
-    ui->graphicsGalpao->widgetGalpao = this;
-
     isSet = true;
   }
 

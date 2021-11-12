@@ -18,7 +18,7 @@ class WidgetGalpao final : public QWidget {
   friend class GraphicsView;
 
 public:
-  explicit WidgetGalpao(QWidget *parent = nullptr);
+  explicit WidgetGalpao(QWidget *parent);
   ~WidgetGalpao();
 
   auto resetTables() -> void;

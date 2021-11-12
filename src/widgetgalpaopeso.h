@@ -14,7 +14,7 @@ class WidgetGalpaoPeso : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetGalpaoPeso(QWidget *parent = nullptr);
+  explicit WidgetGalpaoPeso(QWidget *parent);
   ~WidgetGalpaoPeso();
 
   auto resetTables() -> void;

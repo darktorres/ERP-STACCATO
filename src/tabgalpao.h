@@ -10,7 +10,7 @@ class TabGalpao : public QWidget {
   Q_OBJECT
 
 public:
-  explicit TabGalpao(QWidget *parent = nullptr);
+  explicit TabGalpao(QWidget *parent);
   ~TabGalpao();
 
   auto resetTables() -> void;

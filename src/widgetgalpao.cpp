@@ -169,7 +169,7 @@ void WidgetGalpao::carregarPallets() {
 
   SqlQuery queryBlocos;
 
-  if (not queryBlocos.exec("SELECT * FROM galpao ORDER BY label ASC")) { throw RuntimeError("Erro buscando pallets: " + queryBlocos.lastError().text(), this); }
+  if (not queryBlocos.exec("SELECT * FROM galpao ORDER BY LENGTH(label) DESC, label ASC")) { throw RuntimeError("Erro buscando pallets: " + queryBlocos.lastError().text(), this); }
 
   ui->comboBoxPalletAtual->clear();
   ui->comboBoxMoverParaPallet->clear();

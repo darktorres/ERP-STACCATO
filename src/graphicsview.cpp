@@ -37,6 +37,8 @@ void GraphicsView::mousePressEvent(QMouseEvent *event) {
 void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mouseMoveEvent";
 
+  // FIXME: quando o mouse é movido acima e/ou a esquerda do ponto inicial, o pallet fica invisivel (o tamanho fica negativo)
+
   if (pallet) { pallet->setSize(QRectF(QPointF(0, 0), mapToScene(event->pos()) - pallet->pos())); }
 
   QGraphicsView::mouseMoveEvent(event);

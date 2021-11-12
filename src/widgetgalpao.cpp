@@ -39,8 +39,8 @@ void WidgetGalpao::setConnections() {
   connect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked, connectionType);
-  connect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked, connectionType);
+  connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
+  connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
 }
 
 void WidgetGalpao::unsetConnections() {
@@ -57,8 +57,8 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged);
   disconnect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
-  disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvar_clicked);
-  disconnect(ui->pushButtonSalvarMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarMover_clicked);
+  disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
+  disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
 }
 
 void WidgetGalpao::updateTables() {
@@ -67,7 +67,7 @@ void WidgetGalpao::updateTables() {
     ui->checkBoxCriarPallet->hide();
     ui->checkBoxMoverPallet->hide();
     ui->pushButtonRemoverPallet->hide();
-    ui->pushButtonSalvar->hide();
+    ui->pushButtonSalvarPallets->hide();
     ui->labelNomePallet->hide();
     ui->lineEditNomePallet->hide();
 
@@ -404,15 +404,12 @@ void WidgetGalpao::on_checkBoxMoverPallet_toggled(bool checked) {
   }
 }
 
-void WidgetGalpao::on_pushButtonSalvar_clicked() { salvarPallets(); }
+void WidgetGalpao::on_pushButtonSalvarPallets_clicked() { salvarPallets(); }
 
 void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
 void WidgetGalpao::carregarBloco() {
   selectedIdBloco = dynamic_cast<PalletItem *>(sender());
-
-  qDebug() << "id: " << selectedIdBloco->getIdBloco();
-  qDebug() << "label: " << selectedIdBloco->getLabel();
 
   //------------------------------
   unsetConnections();
@@ -469,7 +466,9 @@ void WidgetGalpao::unselectBloco() {
   selectedIdBloco = nullptr;
 }
 
-void WidgetGalpao::on_pushButtonSalvarMover_clicked() {
+void WidgetGalpao::on_pushButtonMover_clicked() {
+  if (ui->comboBoxPalletAtual->currentText() == "EM RECEBIMENTO") { throw RuntimeError("Não pode mover produtos ainda não recebidos!"); }
+
   if (ui->comboBoxMoverParaPallet->currentText() == "Mover para pallet..." /*and ui->lineEditMoverParaPallet->text().isEmpty()*/) { throw RuntimeError("Selecione um pallet de destino!"); }
 
   const auto selection = ui->tablePallet->selectionModel()->selectedRows();
@@ -560,7 +559,7 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
   ui->checkBoxCriarPallet->setVisible(checked);
   ui->checkBoxMoverPallet->setVisible(checked);
   ui->pushButtonRemoverPallet->setVisible(checked);
-  ui->pushButtonSalvar->setVisible(checked);
+  ui->pushButtonSalvarPallets->setVisible(checked);
   ui->labelNomePallet->setVisible(checked);
   ui->lineEditNomePallet->setVisible(checked);
 

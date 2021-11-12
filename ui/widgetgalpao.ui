@@ -87,7 +87,7 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QPushButton" name="pushButtonSalvar">
+           <widget class="QPushButton" name="pushButtonSalvarPallets">
             <property name="text">
              <string>Salvar</string>
             </property>
@@ -398,7 +398,7 @@
                 <item>
                  <widget class="QLineEdit" name="lineEditBuscaPallet">
                   <property name="placeholderText">
-                   <string>Código/NFe/Lote/Pedido</string>
+                   <string>Produto/Código/NFe/Lote/Pedido</string>
                   </property>
                  </widget>
                 </item>
@@ -412,9 +412,9 @@
                </layout>
               </item>
               <item row="4" column="0" colspan="3">
-               <widget class="QPushButton" name="pushButtonSalvarMover">
+               <widget class="QPushButton" name="pushButtonMover">
                 <property name="text">
-                 <string>Salvar</string>
+                 <string>Mover</string>
                 </property>
                </widget>
               </item>

@@ -77,6 +77,7 @@ void WidgetGalpao::updateTables() {
     //---------------------------
     ui->graphicsPallet->hide();
     ui->checkBoxConteudo->hide();
+    ui->lineEditMoverParaPallet->hide();
     //---------------------------
 
     scene = new QGraphicsScene(this);
@@ -105,14 +106,11 @@ void WidgetGalpao::updateTables() {
 
   if (not modelIsSet) {
     setupTables();
-    carregarPallets();
     modelIsSet = true;
   }
 
   modelTranspAgend.select();
-
-  // TODO: this is slow, refactor estoque_contabil on SQL to be materialized
-  //  carregarPallets();
+  carregarPallets();
 }
 
 void WidgetGalpao::setupTables() {
@@ -152,6 +150,8 @@ void WidgetGalpao::setupTables() {
 }
 
 void WidgetGalpao::carregarPallets() {
+  if (isDirty) { return; }
+
   unsetConnections();
 
   ui->checkBoxCriarPallet->setChecked(false);
@@ -245,28 +245,46 @@ void WidgetGalpao::carregarPallets() {
 }
 
 void WidgetGalpao::salvarPallets() {
-  // TODO: verificar se todos os pallets possuem nome antes de salvar
+  unselectBloco();
+
+  qApp->startTransaction("WidgetGalpao::salvarPallets");
+
+  isDirty = true;
 
   const auto items = scene->items();
 
-  SqlQuery query;
-
   for (auto *item : items) {
     if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
-      if (pallet->getIdBloco().isEmpty()) {
-        if (not query.exec("INSERT INTO galpao (label, posicao, tamanho) VALUES ('" + pallet->getLabel() + "', '" + pallet->getPosicao() + "', '" + pallet->getTamanho() + "')")) {
-          throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
-        }
-      } else {
-        if (not query.exec("UPDATE galpao SET label = '" + pallet->getLabel() + "', posicao = '" + pallet->getPosicao() + "', tamanho = '" + pallet->getTamanho() +
-                           "' WHERE idBloco = " + pallet->getIdBloco())) {
-          throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
-        }
-      }
+      if (pallet->getLabel().isEmpty()) { throw RuntimeError("Pallet sem nome! Cadastre um nome antes de salvar!"); }
+
+      pallet->getIdBloco().isEmpty() ? inserirPallet(pallet) : atualizarPallet(pallet);
     }
   }
 
+  isDirty = false;
+
+  qApp->endTransaction();
+
   qApp->enqueueInformation("Pallets salvos com sucesso!", this);
+
+  carregarPallets();
+}
+
+void WidgetGalpao::inserirPallet(PalletItem *pallet) {
+  SqlQuery query;
+
+  if (not query.exec("INSERT INTO galpao (label, posicao, tamanho) VALUES ('" + pallet->getLabel() + "', '" + pallet->getPosicao() + "', '" + pallet->getTamanho() + "')")) {
+    throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
+  }
+}
+
+void WidgetGalpao::atualizarPallet(PalletItem *pallet) {
+  SqlQuery query;
+
+  if (not query.exec("UPDATE galpao SET label = '" + pallet->getLabel() + "', posicao = '" + pallet->getPosicao() + "', tamanho = '" + pallet->getTamanho() +
+                     "' WHERE idBloco = " + pallet->getIdBloco())) {
+    throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
+  }
 }
 
 void WidgetGalpao::on_dateTimeEdit_dateChanged() {
@@ -324,7 +342,9 @@ void WidgetGalpao::unselectOthers() {
 void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   if (not selectedIdBloco) { throw RuntimeError("Nenhum pallet selecionado!"); }
 
-  // TODO: verificar se pallet tem produtos e pedir para usuario mover itens para outro pallet
+  if (modelPallet.rowCount() > 0) { throw RuntimeError("Pallet possui produtos! Transfira os produtos para outros pallets antes de remover!"); }
+
+  qApp->startTransaction("WidgetGalpao::on_pushButtonRemoverPallet_clicked");
 
   SqlQuery query;
 
@@ -332,6 +352,8 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
 
   delete selectedIdBloco;
   selectedIdBloco = nullptr;
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Pallet removido com sucesso!");
 }
@@ -343,6 +365,8 @@ void WidgetGalpao::resizeEvent(QResizeEvent *event) {
 }
 
 void WidgetGalpao::on_checkBoxCriarPallet_toggled(bool checked) {
+  unselectBloco();
+
   if (ui->checkBoxMoverPallet->isChecked()) {
     unsetConnections();
 
@@ -373,6 +397,8 @@ void WidgetGalpao::on_checkBoxCriarPallet_toggled(bool checked) {
 }
 
 void WidgetGalpao::on_checkBoxMoverPallet_toggled(bool checked) {
+  unselectBloco();
+
   if (ui->checkBoxCriarPallet->isChecked()) {
     unsetConnections();
 
@@ -411,11 +437,14 @@ void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPalle
 void WidgetGalpao::carregarBloco() {
   selectedIdBloco = dynamic_cast<PalletItem *>(sender());
 
+  if (not selectedIdBloco) { return; }
+
   //------------------------------
   unsetConnections();
 
   ui->comboBoxPalletAtual->setCurrentText(selectedIdBloco->getLabel());
   ui->lineEditNomePallet->setText(selectedIdBloco->getLabel());
+  ui->lineEditNomePallet->setEnabled(true);
 
   ui->lineEditBuscaPallet->clear();
 
@@ -426,31 +455,35 @@ void WidgetGalpao::carregarBloco() {
 
   ui->tabWidget->setCurrentIndex(1);
 
-  modelPallet.setQuery(Sql::view_galpao(selectedIdBloco->getIdBloco()));
+  if (not selectedIdBloco->getIdBloco().isEmpty()) {
+    modelPallet.setQuery(Sql::view_galpao(selectedIdBloco->getIdBloco()));
 
-  modelPallet.select();
+    modelPallet.select();
 
-  //  modelPallet.sort("idEstoque_idConsumo");
+    //  modelPallet.sort("idEstoque_idConsumo");
 
-  modelPallet.setHeaderData("tipo", "Tipo");
-  modelPallet.setHeaderData("caixas", "Cx.");
-  modelPallet.setHeaderData("descricao", "Produto");
-  modelPallet.setHeaderData("codComercial", "Código");
-  modelPallet.setHeaderData("numeroNFe", "NFe");
-  modelPallet.setHeaderData("lote", "Lote");
-  modelPallet.setHeaderData("idVenda", "Pedido");
+    modelPallet.setHeaderData("tipo", "Tipo");
+    modelPallet.setHeaderData("caixas", "Cx.");
+    modelPallet.setHeaderData("descricao", "Produto");
+    modelPallet.setHeaderData("codComercial", "Código");
+    modelPallet.setHeaderData("numeroNFe", "NFe");
+    modelPallet.setHeaderData("lote", "Lote");
+    modelPallet.setHeaderData("idVenda", "Pedido");
 
-  ui->tablePallet->setModel(&modelPallet);
+    ui->tablePallet->setModel(&modelPallet);
 
-  ui->tablePallet->hideColumn("idBloco");
-  ui->tablePallet->hideColumn("label");
-  ui->tablePallet->hideColumn("idEstoque_idConsumo");
-  ui->tablePallet->hideColumn("idVendaProduto2");
+    ui->tablePallet->hideColumn("idBloco");
+    ui->tablePallet->hideColumn("label");
+    ui->tablePallet->hideColumn("idEstoque_idConsumo");
+    ui->tablePallet->hideColumn("idVendaProduto2");
 
-  //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
+    //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
+  }
 }
 
 void WidgetGalpao::unselectBloco() {
+  if (not selectedIdBloco) { return; }
+
   //  ui->tabWidget->setCurrentIndex(0);
   ui->comboBoxPalletAtual->setCurrentIndex(0);
 
@@ -459,10 +492,12 @@ void WidgetGalpao::unselectBloco() {
 
   modelPallet.clear();
   ui->lineEditNomePallet->clear();
+  ui->lineEditNomePallet->setDisabled(true);
 
   setConnections();
   //----------------------
 
+  selectedIdBloco->unselect();
   selectedIdBloco = nullptr;
 }
 
@@ -509,7 +544,11 @@ void WidgetGalpao::on_lineEditMoverParaPallet_textChanged(const QString &text) {
   // TODO: pintar de vermelho caso o pallet digitado não exista; pintar de verde caso exista
 }
 
-void WidgetGalpao::on_lineEditNomePallet_textChanged(const QString &text) { selectedIdBloco->setLabel(text); }
+void WidgetGalpao::on_lineEditNomePallet_textChanged(const QString &text) {
+  // TODO: verificar se o nome já existe para não ficar 2 pallets com o mesmo nome
+
+  if (selectedIdBloco) { selectedIdBloco->setLabel(text); }
+}
 
 void WidgetGalpao::on_pushButtonBuscar_clicked() {
   const QString text = ui->lineEditBuscaPallet->text();

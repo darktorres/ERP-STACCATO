@@ -1010,8 +1010,8 @@ void Venda::criarConsumos() {
   if (not query.exec()) { throw RuntimeException("Erro buscando produtos estoque: " + query.lastError().text()); }
 
   while (query.next()) {
-    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
-    estoque->criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble());
+    auto estoque = Estoque(query.value("idEstoque").toString(), this);
+    estoque.criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble());
   }
 }
 

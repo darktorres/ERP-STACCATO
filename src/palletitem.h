@@ -8,7 +8,7 @@ class PalletItem final : public QGraphicsObject {
   Q_OBJECT
 
 public:
-  explicit PalletItem(const QString &idBloco, const QString &label, const QPointF &posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent = nullptr);
+  explicit PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent = nullptr);
 
   //  auto addEstoque(const QString &estoqueText) -> void;
   auto boundingRect() const -> QRectF final;

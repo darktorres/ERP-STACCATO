@@ -13,7 +13,7 @@
 #include <QSqlError>
 #include <QToolTip>
 
-PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPointF &posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent)
+PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent)
     : QGraphicsObject(parent), sceneSize(sceneSize + 79), size(size), idBloco(idBloco), label(label) {
   setAcceptHoverEvents(true);
   setAcceptDrops(true);

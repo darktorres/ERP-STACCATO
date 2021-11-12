@@ -81,7 +81,7 @@ void WidgetGalpao::updateTables() {
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(Qt::white);
 
-    auto pixmapBackground = new QGraphicsPixmapItem(QPixmap("://novo_galpao2.png"));
+    auto *pixmapBackground = new QGraphicsPixmapItem(QPixmap("://novo_galpao2.png"));
     scene->addItem(pixmapBackground);
 
     ui->graphicsGalpao->setResizable(true);

@@ -556,7 +556,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="GraphicsView" name="graphicsGalpao">
+        <widget class="ViewGalpao" name="graphicsGalpao">
          <property name="mouseTracking">
           <bool>true</bool>
          </property>
@@ -566,7 +566,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="GraphicsView" name="graphicsPallet">
+        <widget class="ViewGalpao" name="graphicsPallet">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -605,9 +605,9 @@
    <header>src/itembox.h</header>
   </customwidget>
   <customwidget>
-   <class>GraphicsView</class>
+   <class>ViewGalpao</class>
    <extends>QGraphicsView</extends>
-   <header>src/graphicsview.h</header>
+   <header>src/viewgalpao.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

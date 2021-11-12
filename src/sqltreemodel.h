@@ -42,13 +42,13 @@ public:
   ~SqlTreeModel() final;
 
   auto appendModel(QSqlQueryModel *model) -> void; // Append the SQL model as the next level of the tree.
-  auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int final;
+  auto columnCount(const QModelIndex &parent = {}) const -> int final;
   auto data(const QModelIndex &index, const int role = Qt::DisplayRole) const -> QVariant final;
   auto fieldIndex(const QString &fieldName) const -> int;
   auto findIndex(const int level, const int id, const int column) const -> QModelIndex; // Return the index of an item with given level and primary key.
   auto flags(const QModelIndex &index) const -> Qt::ItemFlags final;
   auto headerData(const int section, const Qt::Orientation orientation, const int role = Qt::DisplayRole) const -> QVariant final;
-  auto index(const int row, const int column, const QModelIndex &parent = QModelIndex()) const -> QModelIndex final;
+  auto index(const int row, const int column, const QModelIndex &parent = {}) const -> QModelIndex final;
   auto insertModel(QSqlQueryModel *model, const int parentLevel = -1) -> void; // Insert the SQL model at the specified parent level.
   auto levelOf(const QModelIndex &index) const -> int;                         // Return the level of the given item.
   auto mappedColumn(const QModelIndex &index) const -> int;                    // Return the column number in the SQL model of the given item.
@@ -56,7 +56,7 @@ public:
   auto modelAt(const int level) const -> QSqlQueryModel *;                     // Return the SQL model at the given level.
   auto parent(const QModelIndex &index) const -> QModelIndex final;
   auto rawData(const int level, const int row, const int column, const int role = Qt::DisplayRole) const -> QVariant; // Return the data from the SQL model.
-  auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int final;
+  auto rowCount(const QModelIndex &parent = {}) const -> int final;
   auto rowId(const QModelIndex &index) const -> int;                               // Return the primary key of the given item.
   auto rowParentId(const QModelIndex &index) const -> int;                         // Return the foreign key of the given item.
   auto setColumnMapping(const int level, const QList<int> &columnMapping) -> void; // Map tree model columns to SQL model columns. By default all columns are mapped except the primary and foreign

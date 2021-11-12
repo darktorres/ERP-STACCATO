@@ -4,6 +4,7 @@
 #include "application.h"
 #include "logindialog.h"
 #include "palletitem.h"
+#include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
 
@@ -428,25 +429,7 @@ void WidgetGalpao::carregarBloco() {
 
   ui->tabWidget->setCurrentIndex(1);
 
-  modelPallet.setQuery(" SELECT "
-                       "     g.idBloco, "
-                       "     g.label, "
-                       "     v.idEstoque_idConsumo, "
-                       "     v.tipo, "
-                       "     v.idVendaProduto2, "
-                       "     v.numeroNFe, "
-                       "     v.codComercial, "
-                       "     v.lote, "
-                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
-                       "     v.idVenda, "
-                       "     REPLACE(v.descricao, '-', '') AS descricao "
-                       " FROM "
-                       "     galpao g "
-                       " LEFT JOIN "
-                       "     view_galpao v ON g.idBloco = v.idBloco "
-                       " WHERE "
-                       "     idEstoque_idConsumo IS NOT NULL AND g.idBloco = " +
-                       selectedIdBloco->getIdBloco());
+  modelPallet.setQuery(Sql::view_galpao(selectedIdBloco->getIdBloco()));
 
   modelPallet.select();
 
@@ -534,29 +517,9 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
 
   if (text.isEmpty()) { return; }
 
-  QString filtroBloco;
+  const QString idBloco = (selectedIdBloco) ? selectedIdBloco->getIdBloco() : "";
 
-  if (selectedIdBloco) { filtroBloco = "AND g.label = '" + selectedIdBloco->getLabel() + "'"; }
-
-  modelPallet.setQuery(" SELECT "
-                       "     g.idBloco, "
-                       "     g.label, "
-                       "     v.idEstoque_idConsumo, "
-                       "     v.tipo, "
-                       "     v.idVendaProduto2, "
-                       "     v.numeroNFe, "
-                       "     v.codComercial, "
-                       "     v.lote, "
-                       "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
-                       "     v.idVenda, "
-                       "     REPLACE(v.descricao, '-', '') AS descricao "
-                       " FROM "
-                       "     galpao g "
-                       " LEFT JOIN "
-                       "     view_galpao v ON g.idBloco = v.idBloco "
-                       " WHERE "
-                       "     idEstoque_idConsumo IS NOT NULL " +
-                       filtroBloco + " AND (codComercial LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR lote LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%')");
+  modelPallet.setQuery(Sql::view_galpao(idBloco, text));
 
   modelPallet.select();
 

@@ -552,6 +552,35 @@ QString Sql::view_estoque(const QString &idEstoque) {
          "     e.idEstoque = " + idEstoque;
 }
 
+QString Sql::view_galpao(const QString &idBloco, const QString &filtroText) {
+  // TODO: adicionar 'EM RECEBIMENTO'
+
+  const QString filtroBloco = (not idBloco.isEmpty()) ? " AND g.idBloco = " + idBloco : "";
+  const QString filtro = (not filtroText.isEmpty()) ? " AND (descricao LIKE '%"+filtroText+"%' OR codComercial LIKE '%" + filtroText + "%' OR numeroNFe LIKE '%" + filtroText + "%' OR "
+                                                      "lote LIKE '%" + filtroText + "%' OR idVenda LIKE '%" + filtroText + "%')"
+                                                    : "";
+
+  return " SELECT "
+         "     g.idBloco, "
+         "     g.label, "
+         "     v.idEstoque_idConsumo, "
+         "     v.tipo, "
+         "     v.idVendaProduto2, "
+         "     v.numeroNFe, "
+         "     v.codComercial, "
+         "     v.lote, "
+         "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "
+         "     v.idVenda, "
+         "     REPLACE(v.descricao, '-', '') AS descricao "
+         " FROM "
+         "     galpao g "
+         " LEFT JOIN "
+         "     view_galpao v ON g.idBloco = v.idBloco "
+         " WHERE "
+         "     idEstoque_idConsumo IS NOT NULL " +
+         filtroBloco + filtro;
+}
+
 // clang-format on
 
 // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem

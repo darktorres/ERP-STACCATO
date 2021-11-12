@@ -25,4 +25,5 @@ public:
   static auto view_estoque_contabil(const QString &match, const QString &data = qApp->serverDate().toString("yyyy-MM-dd")) -> QString;
   static auto view_relatorio_loja(const QString &mes = QString(), const QString &idUsuario = QString(), const QString &idUsuarioConsultor = QString(), const QString &loja = QString()) -> QString;
   static auto view_relatorio_vendedor(const QString &mes = QString(), const QString &idUsuario = QString(), const QString &idUsuarioConsultor = QString(), const QString &loja = QString()) -> QString;
+  static auto view_galpao(const QString &idBloco, const QString &filtroText = {}) -> QString;
 };

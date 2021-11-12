@@ -17,6 +17,10 @@ public:
   auto setIsEditable(bool newIsEditable) -> void;
   auto setResizable(bool newResizable) -> void;
 
+signals:
+  void selectBloco();
+  void unselectBloco();
+
 protected:
   auto mouseMoveEvent(QMouseEvent *event) -> void final;
   auto mousePressEvent(QMouseEvent *event) -> void final;

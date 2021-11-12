@@ -110,6 +110,10 @@ void Estoque::setupTables() {
 
   modelViewConsumo.setTable("view_estoque_consumo");
 
+  modelViewConsumo.setFilter("idEstoque = " + idEstoque);
+
+  modelViewConsumo.select();
+
   modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
   modelViewConsumo.setHeaderData("status", "Status Consumo");
   modelViewConsumo.setHeaderData("bloco", "Bloco");

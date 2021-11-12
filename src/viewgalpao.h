@@ -11,8 +11,6 @@ class ViewGalpao final : public QGraphicsView {
 public:
   explicit ViewGalpao(QWidget *parent = nullptr);
 
-  WidgetGalpao *widgetGalpao = nullptr;
-
   auto setIsEditable(bool newIsEditable) -> void;
   auto setResizable(bool newResizable) -> void;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QDialog>
@@ -22,7 +23,7 @@ public:
   };
   Q_ENUM(FieldColors)
 
-  explicit Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent);
+  explicit Estoque(const QString &idEstoque, QWidget *parent);
   ~Estoque();
 
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> void;
@@ -31,17 +32,15 @@ public:
 private:
   // attributes
   QString const idEstoque;
-  SqlTableModel modelConsumo;
-  SqlTableModel modelEstoque;
+  SqlQueryModel modelEstoque;
   SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
   // methods
-  auto buscarRestante() -> void;
   auto dividirCompra(const int idVendaProduto2, const double quant) -> void;
   auto exibirNota() -> void;
   auto limitarAlturaTabela() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
+  auto preencherRestante() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto viewRegisterById(const bool showWindow) -> void;
 };

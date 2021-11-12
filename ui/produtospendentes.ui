@@ -70,7 +70,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="labelQuantTotal">
         <property name="text">
-         <string>Quant. Total:</string>
+         <string>Quant. selecionada:</string>
         </property>
        </widget>
       </item>

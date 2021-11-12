@@ -103,8 +103,9 @@ void WidgetEstoques::resetTables() { modelIsSet = false; }
 void WidgetEstoques::on_table_activated(const QModelIndex &index) {
   const QString idEstoque = model.data(index, "idEstoque").toString();
 
-  auto *estoque = new Estoque(idEstoque, true, this);
+  auto *estoque = new Estoque(idEstoque, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
+  estoque->show();
 }
 
 void WidgetEstoques::escolheFiltro() { ui->radioButtonEstoqueContabil->isChecked() ? montaFiltroContabil() : montaFiltro(); }

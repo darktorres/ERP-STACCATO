@@ -32,15 +32,16 @@ void WidgetGalpao::setConnections() {
   connect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled, connectionType);
   connect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled, connectionType);
   connect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled, connectionType);
+  connect(ui->comboBoxPalletAtual, &QComboBox::currentTextChanged, this, &WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetGalpao::on_itemBoxVeiculo_textChanged, connectionType);
   connect(ui->lineEditBuscaPallet, &QLineEdit::returnPressed, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged, connectionType);
   connect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
-  connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
 }
 
 void WidgetGalpao::unsetConnections() {
@@ -50,15 +51,16 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled);
   disconnect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled);
   disconnect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled);
+  disconnect(ui->comboBoxPalletAtual, &QComboBox::currentTextChanged, this, &WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged);
   disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetGalpao::on_dateTimeEdit_dateChanged);
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetGalpao::on_itemBoxVeiculo_textChanged);
   disconnect(ui->lineEditBuscaPallet, &QLineEdit::returnPressed, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
   disconnect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged);
   disconnect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged);
   disconnect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
+  disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
-  disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
 }
 
 void WidgetGalpao::updateTables() {
@@ -78,6 +80,8 @@ void WidgetGalpao::updateTables() {
     ui->graphicsPallet->hide();
     ui->checkBoxConteudo->hide();
     ui->lineEditMoverParaPallet->hide();
+    ui->labelAltura->hide();
+    ui->spinBoxAltura->hide();
     //---------------------------
 
     scene = new QGraphicsScene(this);
@@ -110,6 +114,7 @@ void WidgetGalpao::updateTables() {
   }
 
   modelTranspAgend.select();
+  modelPallet.select(); // this one is slow due to view_estoque_contabil
   carregarPallets();
 }
 
@@ -152,12 +157,13 @@ void WidgetGalpao::setupTables() {
 void WidgetGalpao::carregarPallets() {
   if (isDirty) { return; }
 
+  const QString palletSelecionado = ui->comboBoxPalletAtual->currentText();
+  const QString palletDestino = ui->comboBoxMoverParaPallet->currentText();
+
   unsetConnections();
 
   ui->checkBoxCriarPallet->setChecked(false);
   ui->checkBoxMoverPallet->setChecked(false);
-
-  setConnections();
 
   const auto items = scene->items();
 
@@ -197,6 +203,7 @@ void WidgetGalpao::carregarPallets() {
 
     // --------------------------------
 
+    // TODO: guardar o idBloco junto do label
     ui->comboBoxPalletAtual->addItem(label);
     ui->comboBoxMoverParaPallet->addItem(label);
   }
@@ -242,6 +249,11 @@ void WidgetGalpao::carregarPallets() {
 
   //    palletsHash.value(idBloco)->addEstoque(item);
   //  }
+
+  if (palletSelecionado != "Selecionar pallet...") { ui->comboBoxPalletAtual->setCurrentText(palletSelecionado); }
+  if (palletDestino != "Mover para pallet...") { ui->comboBoxMoverParaPallet->setCurrentText(palletDestino); }
+
+  setConnections();
 }
 
 void WidgetGalpao::salvarPallets() {
@@ -484,18 +496,19 @@ void WidgetGalpao::carregarBloco() {
 void WidgetGalpao::unselectBloco() {
   if (not selectedIdBloco) { return; }
 
+  unsetConnections();
+  //----------------------
+
   //  ui->tabWidget->setCurrentIndex(0);
   ui->comboBoxPalletAtual->setCurrentIndex(0);
 
-  //----------------------
-  unsetConnections();
-
-  modelPallet.clear();
+  modelPallet.setQuery("");
+  modelPallet.select();
   ui->lineEditNomePallet->clear();
   ui->lineEditNomePallet->setDisabled(true);
 
-  setConnections();
   //----------------------
+  setConnections();
 
   selectedIdBloco->unselect();
   selectedIdBloco = nullptr;
@@ -504,9 +517,13 @@ void WidgetGalpao::unselectBloco() {
 void WidgetGalpao::on_pushButtonMover_clicked() {
   if (ui->comboBoxPalletAtual->currentText() == "EM RECEBIMENTO") { throw RuntimeError("Não pode mover produtos ainda não recebidos!"); }
 
+  if (ui->comboBoxPalletAtual->currentText() == "Selecionar pallet...") { throw RuntimeError("Selecione um pallet de origem!"); }
+
   if (ui->comboBoxMoverParaPallet->currentText() == "Mover para pallet..." /*and ui->lineEditMoverParaPallet->text().isEmpty()*/) { throw RuntimeError("Selecione um pallet de destino!"); }
 
   const auto selection = ui->tablePallet->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
   qApp->startTransaction("on_pushButtonSalvarMover_clicked");
 
@@ -612,6 +629,23 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
   //  if (checked) { unselectOthers(); }
 }
 
+void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged(const QString &text) {
+  unselectBloco();
+
+  const auto items = scene->items();
+
+  for (auto *item : items) {
+    auto *pallet = dynamic_cast<PalletItem *>(item);
+
+    if (not pallet) { continue; }
+
+    if (pallet->getLabel() == text) {
+      pallet->select();
+      break;
+    }
+  }
+}
+
 // TODO: adicionar botao para criar pallet
 // TODO: adicionar botao para remover pallet
 // TODO: funcao de selecionar um caminhao e colorir todos os pallets correspondentes aos produtos agendados
@@ -620,3 +654,11 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
 // TODO: listar os consumos que na venda esteja em 'estoque' e o restante dos estoques (livre)
 // TODO: colocar nas permissoes de usuario uma coluna para 'galpao' para poder limitar quem ve essa aba
 // TODO: quando marcar item entregue mudar bloco do consumo para fora dos pallets (usar um pallet invisivel ou apenas deixar vazio a coluna do bloco)
+
+// TAREFAS:
+// .implementar botão de quebra
+// .implementar botão de fracionar para separar um produto em vários pallets (usar idRelacionado para vincular os estoques)
+//      separar estoque em arvore?
+// .implementar botão de ajustar quantidade, seja para mais ou para menos
+// .arrumar view_estoque_contabil
+// .colocar um botão de followup

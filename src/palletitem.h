@@ -21,6 +21,7 @@ public:
   auto getTamanho() const -> QString;
   auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void final;
   //  auto reorderChildren() -> void;
+  auto select() -> void;
   auto setFlagHighlight(const bool value) -> void;
   auto setIdBloco(const QString &newIdBloco) -> void;
   auto setLabel(const QString &value) -> void;
@@ -59,5 +60,4 @@ private:
   QString idBloco;
   QString label;
   // methods
-  auto select() -> void;
 };

@@ -154,7 +154,7 @@ void Estoque::preencherRestante() {
 }
 
 void Estoque::limitarAlturaTabela() {
-  int rowTotalHeight = ui->tableEstoque->verticalHeader()->sectionSize(0) * 3; // add extra height
+  int rowTotalHeight = ui->tableEstoque->verticalHeader()->sectionSize(0) * 2; // add extra height
 
   int count = ui->tableEstoque->verticalHeader()->count();
 

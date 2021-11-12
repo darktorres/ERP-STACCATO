@@ -59,5 +59,5 @@ private:
   QString idBloco;
   QString label;
   // methods
-  //  auto select() -> void;
+  auto select() -> void;
 };

@@ -91,21 +91,7 @@ void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
   if (not flags().testFlag(QGraphicsItem::ItemIsSelectable)) { return; }
 
-  if (not selected) { emit unselectOthers(); }
-
-  selected = not selected;
-
-  if (selected) { emit selectBloco(); }
-
-  if (not selected) { emit unselectBloco(); }
-
-  //  prepareGeometryChange();
-
-  //  const auto children = childItems();
-
-  //  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
-
-  update();
+  select();
 
   QGraphicsItem::mousePressEvent(event);
 }
@@ -190,20 +176,28 @@ void PalletItem::keyPressEvent(QKeyEvent *event) {
   QGraphicsObject::keyPressEvent(event);
 }
 
-// void PalletItem::select() {
-//  qDebug() << "select";
+void PalletItem::select() {
+  //  qDebug() << "PalletItem::select";
 
-//  selected = not selected;
+  if (not selected) { emit unselectOthers(); }
 
-//  prepareGeometryChange();
+  selected = not selected;
 
-//  const auto children = childItems();
+  if (selected) { emit selectBloco(); }
 
-//  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
-//}
+  if (not selected) { emit unselectBloco(); }
+
+  //  prepareGeometryChange();
+
+  //  const auto children = childItems();
+
+  //  for (auto *const estoque : children) { estoque->setVisible(not estoque->isVisible()); }
+
+  update();
+}
 
 void PalletItem::unselect() {
-  //  qDebug() << "unselect";
+  //  qDebug() << "PalletItem::unselect";
 
   if (not selected) { return; }
 
@@ -214,7 +208,8 @@ void PalletItem::unselect() {
   //  const auto children = childItems();
 
   //  for (auto *const estoque : children) { estoque->hide(); }
-  //  update();
+
+  update();
 }
 
 const QRectF &PalletItem::getSize() const { return size; }

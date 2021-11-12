@@ -129,6 +129,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("observacao");
   ui->tableEstoque->hideColumn("idBloco");
   ui->tableEstoque->hideColumn("bloco");
+  ui->tableEstoque->hideColumn("altura");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("ncm");
@@ -198,6 +199,7 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->hideColumn("quantUpd");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("idBloco");
+  ui->tableConsumo->hideColumn("altura");
   ui->tableConsumo->hideColumn("idProduto");
   ui->tableConsumo->hideColumn("ncm");
   ui->tableConsumo->hideColumn("cfop");

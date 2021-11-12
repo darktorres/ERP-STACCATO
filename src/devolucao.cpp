@@ -80,6 +80,7 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("produto", "Produto");
   modelProdutos2.setHeaderData("obs", "Obs.");
   modelProdutos2.setHeaderData("lote", "Lote");
+  modelProdutos2.setHeaderData("kg", "Kg.");
   modelProdutos2.setHeaderData("caixas", "Caixas");
   modelProdutos2.setHeaderData("quant", "Quant.");
   modelProdutos2.setHeaderData("un", "Un.");
@@ -147,6 +148,7 @@ void Devolucao::setupTables() {
   modelDevolvidos1.setHeaderData("produto", "Produto");
   modelDevolvidos1.setHeaderData("obs", "Obs.");
   modelDevolvidos1.setHeaderData("lote", "Lote");
+  modelDevolvidos1.setHeaderData("kg", "Kg.");
   modelDevolvidos1.setHeaderData("prcUnitario", "R$ Unit.");
   modelDevolvidos1.setHeaderData("caixas", "Caixas");
   modelDevolvidos1.setHeaderData("quant", "Quant.");

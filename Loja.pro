@@ -172,7 +172,6 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
-    src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -231,6 +230,7 @@ SOURCES += \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
+    src/viewgalpao.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
@@ -312,7 +312,6 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
-    src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
@@ -370,6 +369,7 @@ HEADERS  += \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
+    src/viewgalpao.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \

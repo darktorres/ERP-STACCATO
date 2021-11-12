@@ -1,10 +1,10 @@
-#include "graphicsview.h"
+#include "viewgalpao.h"
 #include "palletitem.h"
 
 #include <QDebug>
 #include <QMouseEvent>
 
-GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
+ViewGalpao::ViewGalpao(QWidget *parent) : QGraphicsView(parent) {
   setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
   setDragMode(QGraphicsView::ScrollHandDrag);
 
@@ -17,14 +17,14 @@ GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
   setFrameShape(NoFrame);
 }
 
-void GraphicsView::mousePressEvent(QMouseEvent *event) {
+void ViewGalpao::mousePressEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mousePressEvent";
 
   if (isEditable) {
     pallet = new PalletItem("", "", mapToScene(event->pos()), QRectF(0, 0, 40, 40));
 
-    connect(pallet, &PalletItem::selectBloco, this, &GraphicsView::selectBloco);
-    connect(pallet, &PalletItem::unselectBloco, this, &GraphicsView::unselectBloco);
+    connect(pallet, &PalletItem::selectBloco, this, &ViewGalpao::selectBloco);
+    connect(pallet, &PalletItem::unselectBloco, this, &ViewGalpao::unselectBloco);
 
     scene()->addItem(pallet);
   }
@@ -32,7 +32,7 @@ void GraphicsView::mousePressEvent(QMouseEvent *event) {
   QGraphicsView::mousePressEvent(event);
 }
 
-void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
+void ViewGalpao::mouseMoveEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mouseMoveEvent";
 
   // FIXME: quando o mouse é movido acima e/ou a esquerda do ponto inicial, o pallet fica invisivel (o tamanho fica negativo)
@@ -42,7 +42,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
   QGraphicsView::mouseMoveEvent(event);
 }
 
-void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
+void ViewGalpao::mouseReleaseEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mouseReleaseEvent";
 
   if (pallet) { pallet = nullptr; }
@@ -50,7 +50,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
   QGraphicsView::mouseReleaseEvent(event);
 }
 
-void GraphicsView::resizeEvent(QResizeEvent *event) {
+void ViewGalpao::resizeEvent(QResizeEvent *event) {
   //  qDebug() << "GraphicsView::resizeEvent";
 
   //  if (resizable and scene()) { fitInView(sceneRect(), Qt::KeepAspectRatio); }
@@ -58,7 +58,7 @@ void GraphicsView::resizeEvent(QResizeEvent *event) {
   QGraphicsView::resizeEvent(event);
 }
 
-void GraphicsView::wheelEvent(QWheelEvent *event) {
+void ViewGalpao::wheelEvent(QWheelEvent *event) {
   //  qDebug() << "GraphicsView::wheelEvent";
 
   // TODO: implementar zoom por touch
@@ -84,6 +84,6 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
   QGraphicsView::wheelEvent(event);
 }
 
-void GraphicsView::setResizable(bool newResizable) { resizable = newResizable; }
+void ViewGalpao::setResizable(bool newResizable) { resizable = newResizable; }
 
-void GraphicsView::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }
+void ViewGalpao::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }

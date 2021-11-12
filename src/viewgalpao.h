@@ -5,12 +5,11 @@
 
 #include <QGraphicsView>
 
-// TODO: renomear para algo especifico do galpao
-class GraphicsView final : public QGraphicsView {
+class ViewGalpao final : public QGraphicsView {
   Q_OBJECT
 
 public:
-  explicit GraphicsView(QWidget *parent = nullptr);
+  explicit ViewGalpao(QWidget *parent = nullptr);
 
   WidgetGalpao *widgetGalpao = nullptr;
 

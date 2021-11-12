@@ -89,8 +89,8 @@ void WidgetGalpao::updateTables() {
     ui->graphicsGalpao->setScene(scene);
     //    ui->graphicsPallet->setScene(scene);
 
-    connect(ui->graphicsGalpao, &GraphicsView::selectBloco, this, &WidgetGalpao::selectBloco);
-    connect(ui->graphicsGalpao, &GraphicsView::unselectBloco, this, &WidgetGalpao::unselectBloco);
+    connect(ui->graphicsGalpao, &ViewGalpao::selectBloco, this, &WidgetGalpao::selectBloco);
+    connect(ui->graphicsGalpao, &ViewGalpao::unselectBloco, this, &WidgetGalpao::unselectBloco);
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());

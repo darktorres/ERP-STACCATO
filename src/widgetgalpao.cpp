@@ -66,17 +66,11 @@ void WidgetGalpao::unsetConnections() {
 void WidgetGalpao::updateTables() {
   if (not isSet) {
     ui->groupBoxEdicao->hide();
-    ui->checkBoxCriarPallet->hide();
-    ui->checkBoxMoverPallet->hide();
-    ui->pushButtonRemoverPallet->hide();
-    ui->pushButtonSalvarPallets->hide();
-    ui->labelNomePallet->hide();
-    ui->lineEditNomePallet->hide();
 
     // TODO: usar 2 scenes para não misturar pallets com estoques?
-    // uma outra opção seria usar uma TableView no lugar do graphicsPallet
 
     //---------------------------
+    // TODO: re-enable these later
     ui->graphicsPallet->hide();
     ui->checkBoxConteudo->hide();
     ui->lineEditMoverParaPallet->hide();
@@ -90,17 +84,20 @@ void WidgetGalpao::updateTables() {
     auto *pixmapBackground = new QGraphicsPixmapItem(QPixmap("://novo_galpao2.png"));
     scene->addItem(pixmapBackground);
 
-    ui->graphicsGalpao->setResizable(true);
+    //    ui->graphicsGalpao->setResizable(true);
 
     ui->graphicsGalpao->setScene(scene);
-    ui->graphicsPallet->setScene(scene);
+    //    ui->graphicsPallet->setScene(scene);
+
+    connect(ui->graphicsGalpao, &GraphicsView::selectBloco, this, &WidgetGalpao::selectBloco);
+    connect(ui->graphicsGalpao, &GraphicsView::unselectBloco, this, &WidgetGalpao::unselectBloco);
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
     setConnections();
 
-    ui->graphicsPallet->setSceneRect(pixmapBackground->boundingRect().width() + 70, 0, 842, 99999);
+    //    ui->graphicsPallet->setSceneRect(pixmapBackground->boundingRect().width() + 70, 0, 842, 99999);
     ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
 
     ui->graphicsGalpao->widgetGalpao = this;
@@ -115,6 +112,7 @@ void WidgetGalpao::updateTables() {
 
   modelTranspAgend.select();
   modelPallet.select(); // this one is slow due to view_estoque_contabil
+  // TODO: don't unselect current bloco
   carregarPallets();
 }
 
@@ -155,15 +153,15 @@ void WidgetGalpao::setupTables() {
 }
 
 void WidgetGalpao::carregarPallets() {
-  if (isDirty) { return; }
+  if (isDirty()) { return; }
 
   const QString palletSelecionado = ui->comboBoxPalletAtual->currentText();
   const QString palletDestino = ui->comboBoxMoverParaPallet->currentText();
 
-  unsetConnections();
-
   ui->checkBoxCriarPallet->setChecked(false);
   ui->checkBoxMoverPallet->setChecked(false);
+
+  unsetConnections();
 
   const auto items = scene->items();
 
@@ -190,12 +188,10 @@ void WidgetGalpao::carregarPallets() {
     const QStringList tamanhoList = queryBlocos.value("tamanho").toString().split(",");
     const QRectF tamanho = QRectF(0, 0, tamanhoList.at(0).toDouble(), tamanhoList.at(1).toDouble());
 
-    auto *pallet = new PalletItem(idBloco, label, posicao, tamanho, ui->graphicsGalpao->sceneRect().width());
+    auto *pallet = new PalletItem(idBloco, label, posicao, tamanho);
     pallet->setFlag(QGraphicsItem::ItemIsSelectable);
 
-    connect(pallet, &PalletItem::save, this, &WidgetGalpao::salvarPallets);
-    connect(pallet, &PalletItem::unselectOthers, this, &WidgetGalpao::unselectOthers);
-    connect(pallet, &PalletItem::selectBloco, this, &WidgetGalpao::carregarBloco);
+    connect(pallet, &PalletItem::selectBloco, this, &WidgetGalpao::selectBloco);
     connect(pallet, &PalletItem::unselectBloco, this, &WidgetGalpao::unselectBloco);
 
     //    palletsHash.insert(pallet->getIdBloco(), pallet);
@@ -259,21 +255,27 @@ void WidgetGalpao::carregarPallets() {
 void WidgetGalpao::salvarPallets() {
   unselectBloco();
 
-  qApp->startTransaction("WidgetGalpao::salvarPallets");
+  ui->checkBoxCriarPallet->setChecked(false);
+  ui->checkBoxMoverPallet->setChecked(false);
 
-  isDirty = true;
+  qApp->startTransaction("WidgetGalpao::salvarPallets");
 
   const auto items = scene->items();
 
   for (auto *item : items) {
     if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
-      if (pallet->getLabel().isEmpty()) { throw RuntimeError("Pallet sem nome! Cadastre um nome antes de salvar!"); }
+      if (pallet->getLabel().isEmpty()) {
+        pallet->select();
+        ui->graphicsGalpao->centerOn(pallet);
+        throw RuntimeError("Pallet sem nome! Cadastre um nome antes de salvar!");
+      }
+
+      if (not pallet->isDirty) { continue; }
 
       pallet->getIdBloco().isEmpty() ? inserirPallet(pallet) : atualizarPallet(pallet);
+      pallet->isDirty = false;
     }
   }
-
-  isDirty = false;
 
   qApp->endTransaction();
 
@@ -316,6 +318,8 @@ void WidgetGalpao::setFilter() {
 }
 
 void WidgetGalpao::on_table_selectionChanged() {
+  // TODO: na tabela tem o bloco, pegar o bloco na linha para não percorrer todos os itens
+
   const auto items = scene->items();
 
   for (auto *item : items) {
@@ -343,14 +347,6 @@ void WidgetGalpao::on_table_selectionChanged() {
   scene->update();
 }
 
-void WidgetGalpao::unselectOthers() {
-  const auto items = scene->items();
-
-  for (auto *item : items) {
-    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->unselect(); }
-  }
-}
-
 void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   if (not selectedIdBloco) { throw RuntimeError("Nenhum pallet selecionado!"); }
 
@@ -370,13 +366,7 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   qApp->enqueueInformation("Pallet removido com sucesso!");
 }
 
-void WidgetGalpao::resizeEvent(QResizeEvent *event) {
-  //  qDebug() << "WidgetGalpao::resizeEvent: " << event;
-
-  QWidget::resizeEvent(event);
-}
-
-void WidgetGalpao::on_checkBoxCriarPallet_toggled(bool checked) {
+void WidgetGalpao::on_checkBoxCriarPallet_toggled(const bool checked) {
   unselectBloco();
 
   if (ui->checkBoxMoverPallet->isChecked()) {
@@ -408,7 +398,7 @@ void WidgetGalpao::on_checkBoxCriarPallet_toggled(bool checked) {
   }
 }
 
-void WidgetGalpao::on_checkBoxMoverPallet_toggled(bool checked) {
+void WidgetGalpao::on_checkBoxMoverPallet_toggled(const bool checked) {
   unselectBloco();
 
   if (ui->checkBoxCriarPallet->isChecked()) {
@@ -431,8 +421,6 @@ void WidgetGalpao::on_checkBoxMoverPallet_toggled(bool checked) {
     }
   }
 
-  if (checked) { unselectOthers(); }
-
   if (not checked and not ui->checkBoxCriarPallet->isChecked()) {
     const auto items = scene->items();
 
@@ -446,7 +434,9 @@ void WidgetGalpao::on_pushButtonSalvarPallets_clicked() { salvarPallets(); }
 
 void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
-void WidgetGalpao::carregarBloco() {
+void WidgetGalpao::selectBloco() {
+  qDebug() << "WidgetGalpao::carregarBloco";
+
   selectedIdBloco = dynamic_cast<PalletItem *>(sender());
 
   if (not selectedIdBloco) { return; }
@@ -455,15 +445,18 @@ void WidgetGalpao::carregarBloco() {
   unsetConnections();
 
   ui->comboBoxPalletAtual->setCurrentText(selectedIdBloco->getLabel());
+
   ui->lineEditNomePallet->setText(selectedIdBloco->getLabel());
-  ui->lineEditNomePallet->setEnabled(true);
+
+  ui->framePalletSelecionado->setEnabled(true);
+  ui->frameEdicao->setDisabled(true);
 
   ui->lineEditBuscaPallet->clear();
 
   setConnections();
   //------------------------------
 
-  if (ui->groupBoxEdicao->isChecked()) { return; }
+  if (ui->checkBoxEdicao->isChecked()) { return; }
 
   ui->tabWidget->setCurrentIndex(1);
 
@@ -499,13 +492,15 @@ void WidgetGalpao::unselectBloco() {
   unsetConnections();
   //----------------------
 
-  //  ui->tabWidget->setCurrentIndex(0);
   ui->comboBoxPalletAtual->setCurrentIndex(0);
 
   modelPallet.setQuery("");
   modelPallet.select();
+
   ui->lineEditNomePallet->clear();
-  ui->lineEditNomePallet->setDisabled(true);
+
+  ui->framePalletSelecionado->setDisabled(true);
+  ui->frameEdicao->setEnabled(true);
 
   //----------------------
   setConnections();
@@ -601,6 +596,7 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
 }
 
 void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
+  // TODO: o loginDialog de autorizacao aceita qualquer pessoa que seja do administrativo, refazer a lógica abaixo para considerar isso
   if (checked and not User::isAdmin() and not User::isGerente()) {
     qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
 
@@ -609,24 +605,20 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
     if (dialog.exec() != QDialog::Accepted) { return; }
   }
 
+  if (not checked and isDirty()) {
+    // TODO: avisar usuario ou descartar alteracoes
+  }
+
   // ----------------------------------------------
 
+  ui->frameAcessorio->setVisible(not checked);
   ui->groupBoxEdicao->setVisible(checked);
-  ui->checkBoxCriarPallet->setVisible(checked);
-  ui->checkBoxMoverPallet->setVisible(checked);
-  ui->pushButtonRemoverPallet->setVisible(checked);
-  ui->pushButtonSalvarPallets->setVisible(checked);
-  ui->labelNomePallet->setVisible(checked);
-  ui->lineEditNomePallet->setVisible(checked);
 
   const auto items = scene->items();
 
   for (auto *item : items) {
-    //      if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
     if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsFocusable, checked); }
   }
-
-  //  if (checked) { unselectOthers(); }
 }
 
 void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged(const QString &text) {
@@ -646,19 +638,30 @@ void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged(const QString &text
   }
 }
 
-// TODO: adicionar botao para criar pallet
-// TODO: adicionar botao para remover pallet
+bool WidgetGalpao::isDirty() {
+  const auto items = scene->items();
+
+  for (auto *item : items) {
+    auto *pallet = dynamic_cast<PalletItem *>(item);
+
+    if (not pallet) { continue; }
+
+    if (pallet->isDirty) { return true; }
+  }
+
+  return false;
+}
+
 // TODO: funcao de selecionar um caminhao e colorir todos os pallets correspondentes aos produtos agendados
-// TODO: zoom
+// TODO: zoom por touch
 // TODO: guardar idEstoque em veiculo_has_produto
 // TODO: listar os consumos que na venda esteja em 'estoque' e o restante dos estoques (livre)
-// TODO: colocar nas permissoes de usuario uma coluna para 'galpao' para poder limitar quem ve essa aba
 // TODO: quando marcar item entregue mudar bloco do consumo para fora dos pallets (usar um pallet invisivel ou apenas deixar vazio a coluna do bloco)
 
 // TAREFAS:
 // .implementar botão de quebra
 // .implementar botão de fracionar para separar um produto em vários pallets (usar idRelacionado para vincular os estoques)
-//      separar estoque em arvore?
+// =====> separar estoque em arvore?
 // .implementar botão de ajustar quantidade, seja para mais ou para menos
 // .arrumar view_estoque_contabil
 // .colocar um botão de followup

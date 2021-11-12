@@ -13,12 +13,14 @@
 #include <QSqlError>
 #include <QToolTip>
 
-PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, const int sceneSize, QGraphicsItem *parent)
-    : QGraphicsObject(parent), sceneSize(sceneSize + 79), size(size), idBloco(idBloco), label(label) {
+PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, QGraphicsItem *parent)
+    : QGraphicsObject(parent), size(size), idBloco(idBloco), label(label) {
   setAcceptHoverEvents(true);
   setAcceptDrops(true);
 
   setPos(posicao);
+
+  if (idBloco.isEmpty()) { isDirty = true; }
 }
 
 QRectF PalletItem::boundingRect() const { return size; }
@@ -79,27 +81,15 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 //  }
 //}
 
-// void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
-
-// void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
-
-// void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
-
 void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   qDebug() << "PalletItem::mousePressEvent";
   //  qDebug() << flags();
 
   if (not flags().testFlag(QGraphicsItem::ItemIsSelectable)) { return; }
 
-  select();
+  if (event->button() == Qt::LeftButton) { select(); }
 
   QGraphicsItem::mousePressEvent(event);
-}
-
-void PalletItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-  //  qDebug() << "PalletItem::mouseMoveEvent";
-  QGraphicsItem::mouseMoveEvent(event);
-  //  update();
 }
 
 void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
@@ -110,8 +100,6 @@ void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mouseReleaseEvent(event);
 }
 
-void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseDoubleClickEvent(event); }
-
 // void PalletItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
 //  if (childItems().contains(qobject_cast<EstoqueItem *>(event->mimeData()->parent()))) {
 //    event->ignore();
@@ -121,16 +109,6 @@ void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraph
 //  if (event->mimeData()->hasFormat("text/plain")) { event->accept(); }
 
 //  QGraphicsItem::dragEnterEvent(event);
-//}
-
-// void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) {
-//  Q_UNUSED(event);
-//  QGraphicsItem::dragMoveEvent(event);
-//}
-
-// void PalletItem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) {
-//  Q_UNUSED(event);
-//  QGraphicsItem::dragLeaveEvent(event);
 //}
 
 // void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
@@ -161,25 +139,10 @@ void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraph
 //  QGraphicsItem::dropEvent(event);
 //}
 
-void PalletItem::keyPressEvent(QKeyEvent *event) {
-  // TODO: deletar pallet usando seleção e depois apertando Delete, transferir o conteudo do pallet para a entrada ou um espaço temporario
-  qDebug() << "PalletItem::keyPressEvent: " << event;
-
-  if (flags().testFlag(QGraphicsItem::ItemIsFocusable) and event->key() == Qt::Key_Delete) {
-    // delete pallet
-    qDebug() << "delete pallet";
-
-    // 1. verificar se pallet possui produtos e avisar usuario para remover todos os produtos
-    // 2. usar uma query para deletar pallet
-  }
-
-  QGraphicsObject::keyPressEvent(event);
-}
-
 void PalletItem::select() {
   //  qDebug() << "PalletItem::select";
 
-  if (not selected) { emit unselectOthers(); }
+  if (not selected) { unselectAll(); }
 
   selected = not selected;
 
@@ -212,10 +175,19 @@ void PalletItem::unselect() {
   update();
 }
 
+void PalletItem::unselectAll() {
+  const auto items = scene()->items();
+
+  for (auto *item : items) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->unselect(); }
+  }
+}
+
 const QRectF &PalletItem::getSize() const { return size; }
 
 void PalletItem::setSize(const QRectF &newSize) {
   prepareGeometryChange();
+  isDirty = true;
   size = newSize;
   update();
 }

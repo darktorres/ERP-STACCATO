@@ -21,12 +21,10 @@ void GraphicsView::mousePressEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mousePressEvent";
 
   if (isEditable) {
-    pallet = new PalletItem("", "", mapToScene(event->pos()), QRectF(0, 0, 40, 40), sceneRect().width());
+    pallet = new PalletItem("", "", mapToScene(event->pos()), QRectF(0, 0, 40, 40));
 
-    connect(pallet, &PalletItem::save, widgetGalpao, &WidgetGalpao::salvarPallets);
-    connect(pallet, &PalletItem::unselectOthers, widgetGalpao, &WidgetGalpao::unselectOthers);
-    connect(pallet, &PalletItem::selectBloco, widgetGalpao, &WidgetGalpao::carregarBloco);
-    connect(pallet, &PalletItem::unselectBloco, widgetGalpao, &WidgetGalpao::unselectBloco);
+    connect(pallet, &PalletItem::selectBloco, this, &GraphicsView::selectBloco);
+    connect(pallet, &PalletItem::unselectBloco, this, &GraphicsView::unselectBloco);
 
     scene()->addItem(pallet);
   }

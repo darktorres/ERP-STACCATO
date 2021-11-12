@@ -30,13 +30,6 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="pushButtonExibirNfe">
-     <property name="text">
-      <string>Exibir NFe</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="TableView" name="tableConsumo">
      <property name="mouseTracking">
@@ -52,19 +45,6 @@
       <bool>true</bool>
      </property>
     </widget>
-   </item>
-   <item row="1" column="1" rowspan="2">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -192,6 +172,13 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButtonExibirNfe">
+       <property name="text">
+        <string>Exibir NFe</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -222,7 +209,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEdit_6</tabstop>
   <tabstop>lineEdit_7</tabstop>
   <tabstop>doubleSpinBoxQuantRestante</tabstop>
-  <tabstop>pushButtonExibirNfe</tabstop>
  </tabstops>
  <resources/>
  <connections/>

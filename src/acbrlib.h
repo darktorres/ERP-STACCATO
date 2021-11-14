@@ -11,7 +11,7 @@ class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
 
 private:
   static auto check_result(HMODULE nHandler, const int ret) -> void;
@@ -20,13 +20,13 @@ private:
 
 #else
 
-#include <QByteArray>
+#include <QVariant>
 
 class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
 };
 
 #endif

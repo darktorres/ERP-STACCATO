@@ -25,7 +25,7 @@ void WidgetOrcamento::setWidgets() {
 
     const QString lojaGeral = "1";
 
-    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentText(User::fromLoja("descricao").toString()); }
 
     fillComboBoxVendedor();
 
@@ -86,8 +86,8 @@ void WidgetOrcamento::setConnections() {
   connect(ui->checkBoxReplicado, &QCheckBox::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxValido, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->comboBoxFollowup, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
-  connect(ui->comboBoxFornecedores, &ComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
-  connect(ui->comboBoxLojas, qOverload<int>(&ComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged, connectionType);
+  connect(ui->comboBoxFornecedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
+  connect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged, connectionType);
   connect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetOrcamento::on_dateEditMes_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled, connectionType);
@@ -111,9 +111,9 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->checkBoxReplicado, &QCheckBox::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxValido, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->comboBoxFollowup, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
-  disconnect(ui->comboBoxFornecedores, &ComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
+  disconnect(ui->comboBoxFornecedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->comboBoxLojas, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
-  disconnect(ui->comboBoxLojas, qOverload<int>(&ComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged);
+  disconnect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged);
   disconnect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetOrcamento::on_dateEditMes_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled);
@@ -135,7 +135,7 @@ void WidgetOrcamento::fillComboBoxVendedor() {
 
     ui->comboBoxVendedores->addItem("Vendedores");
 
-    const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+    const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : " AND idLoja = " + ui->comboBoxLojas->currentData().toString();
 
     SqlQuery query;
 
@@ -273,7 +273,7 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   // para gerente o combobox é marcado com a loja e escondido então a regra abaixo se aplica
-  const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+  const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : "idLoja = " + ui->comboBoxLojas->currentData().toString();
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
@@ -285,7 +285,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
+  const QString idVendedor = ui->comboBoxVendedores->currentData().toString();
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
 
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
@@ -374,7 +374,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
     // -------------------------------------------------------------------------
 
     if (User::isVendedor()) {
-      if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
+      if (ui->comboBoxLojas->currentData() != User::idLoja) {
         ui->radioButtonTodos->setDisabled(true);
         ui->radioButtonProprios->setChecked(true);
       } else {

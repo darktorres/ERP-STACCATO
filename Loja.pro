@@ -154,7 +154,6 @@ SOURCES += \
     src/checkboxdelegate.cpp \
     src/cnab.cpp \
     src/collapsiblewidget.cpp \
-    src/combobox.cpp \
     src/comboboxdelegate.cpp \
     src/comprovantes.cpp \
     src/contas.cpp \
@@ -294,7 +293,6 @@ HEADERS  += \
     src/checkboxdelegate.h \
     src/cnab.h \
     src/collapsiblewidget.h \
-    src/combobox.h \
     src/comboboxdelegate.h \
     src/comprovantes.h \
     src/contas.h \

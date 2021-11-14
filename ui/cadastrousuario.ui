@@ -306,7 +306,7 @@ color: rgb(0, 0, 0);</string>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="ComboBox" name="comboBoxLoja">
+        <widget class="QComboBox" name="comboBoxLoja">
          <property name="accessibleName">
           <string>Loja</string>
          </property>
@@ -427,11 +427,6 @@ color: rgb(0, 0, 0);</string>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
-  </customwidget>
   <customwidget>
    <class>LineEditTel</class>
    <extends>QLineEdit</extends>

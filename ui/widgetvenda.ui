@@ -579,7 +579,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="ComboBox" name="comboBoxLojas"/>
+                <widget class="QComboBox" name="comboBoxLojas"/>
                </item>
               </layout>
              </widget>
@@ -603,7 +603,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="ComboBox" name="comboBoxVendedores"/>
+                <widget class="QComboBox" name="comboBoxVendedores"/>
                </item>
               </layout>
              </widget>
@@ -627,7 +627,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="ComboBox" name="comboBoxFornecedores"/>
+                <widget class="QComboBox" name="comboBoxFornecedores"/>
                </item>
               </layout>
              </widget>
@@ -683,11 +683,6 @@
    <extends>QScrollArea</extends>
    <header>src/scrollarea.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

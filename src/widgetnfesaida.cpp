@@ -9,7 +9,6 @@
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #if __has_include("lrreportengine.h")
 #include "lrreportengine.h"
@@ -116,8 +115,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + model.data(index.row(), "idNFe").toString()); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
 }
 
 void WidgetNfeSaida::montaFiltro() {

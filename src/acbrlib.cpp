@@ -1,4 +1,4 @@
-#if _WIN32
+#ifdef Q_OS_WIN
 
 #include "acbrlib.h"
 
@@ -130,18 +130,31 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 #include "acbrlib.h"
 
 #include "application.h"
+#include "sqlquery.h"
+#include "xml_viewer.h"
+
+#include <QSqlError>
 
 void ACBrLib::gerarDanfe(const int idNFe) {
-  Q_UNUSED(idNFe)
+  if (idNFe == 0) { throw RuntimeError("Produto não possui NFe!"); }
 
-  throw RuntimeException("Não implementado para linux!");
+  SqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
+
+  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), nullptr);
+  viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  Q_UNUSED(fileContent)
   Q_UNUSED(openFile)
 
-  throw RuntimeException("Não implementado para linux!");
+  auto *viewer = new XML_Viewer(fileContent, nullptr);
+  viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 #endif

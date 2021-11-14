@@ -1,6 +1,7 @@
 #include "venda.h"
 #include "ui_venda.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
@@ -20,7 +21,6 @@
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -1479,6 +1479,8 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (not index.parent().isValid()) { return; }
   if (not User::isAdmin() and not User::isAdministrativo()) { return; }
 
+  // TODO: se for vendedor abrir a NFe de saida
+
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);
   const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
@@ -1491,8 +1493,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeError("Linha não possui NFe!"); }
 
-  XML_Viewer viewer(query.value("xml").toByteArray(), this);
-  viewer.on_pushButtonDanfe_clicked();
+  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
 }
 
 void Venda::calcularPesoTotal() {

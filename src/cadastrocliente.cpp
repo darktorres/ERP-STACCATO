@@ -247,7 +247,9 @@ void CadastroCliente::updateMode() {
 bool CadastroCliente::verificaVinculo() {
   SqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) { throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text()); }
+  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString() + " LIMIT 1")) {
+    throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());
+  }
 
   return query.size() > 0;
 }

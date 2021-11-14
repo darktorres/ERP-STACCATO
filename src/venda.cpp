@@ -1493,7 +1493,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeError("Linha não possui NFe!"); }
 
-  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 void Venda::calcularPesoTotal() {

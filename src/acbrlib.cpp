@@ -28,11 +28,13 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
 
-  gerarDanfe(query.value("xml").toByteArray(), true);
+  gerarDanfe(query.value("xml"), true);
 }
 
-void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  if (fileContent.contains("<resNFe")) { throw RuntimeError("XML resumido, não é possível gerar DANFE!"); }
+void ACBrLib::gerarDanfe(const QVariant &fileContent, const bool openFile) {
+  const auto fileContent2 = fileContent.toByteArray();
+
+  if (fileContent2.contains("<resNFe")) { throw RuntimeError("XML resumido, não é possível gerar DANFE!"); }
 
   HMODULE nHandler = LoadLibraryW(L"ACBrNFe32.dll");
 
@@ -54,7 +56,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   if (not method_carregar_xml) { throw RuntimeException("Erro ACBrLib NFE_CarregarXML!"); }
 
-  ret = method_carregar_xml(fileContent);
+  ret = method_carregar_xml(fileContent2);
 
   check_result(nHandler, ret);
 
@@ -82,7 +84,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   // ---------------------------------------------
 
-  const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
+  const QString chaveAcesso = fileContent2.mid(fileContent2.indexOf("Id=") + 7, 44);
   const QString filePath = QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf";
 
   if (openFile) {
@@ -150,10 +152,10 @@ void ACBrLib::gerarDanfe(const int idNFe) {
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
+void ACBrLib::gerarDanfe(const QVariant &fileContent, const bool openFile) {
   Q_UNUSED(openFile)
 
-  auto *viewer = new XML_Viewer(fileContent, nullptr);
+  auto *viewer = new XML_Viewer(fileContent.toByteArray(), nullptr);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 

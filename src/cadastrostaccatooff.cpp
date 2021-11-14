@@ -131,12 +131,10 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cadastrar promoção?", QMessageBox::Yes | QMessageBox::Cancel, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cadastrar");
-  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+  msgBox.button(QMessageBox::Yes)->setText("Cadastrar");
+  msgBox.button(QMessageBox::Cancel)->setText("Cancelar");
 
-  const int escolha = msgBox.exec();
-
-  if (escolha == QMessageBox::Cancel) { return; }
+  if (msgBox.exec() == QMessageBox::Cancel) { return; }
 
   //--------------------------------------------
 
@@ -166,12 +164,10 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja descadastrar promoção?", QMessageBox::Yes | QMessageBox::Cancel, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Descadastrar");
-  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+  msgBox.button(QMessageBox::Yes)->setText("Descadastrar");
+  msgBox.button(QMessageBox::Cancel)->setText("Cancelar");
 
-  const int escolha = msgBox.exec();
-
-  if (escolha == QMessageBox::Cancel) { return; }
+  if (msgBox.exec() == QMessageBox::Cancel) { return; }
 
   //--------------------------------------------
 

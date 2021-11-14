@@ -32,7 +32,7 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
       const QString status = proxyIndex.siblingAtColumn(statusIndex).data().toString();
 
       if (status == "ENTREGUE") {
-        if (role == Qt::DisplayRole) { return QVariant(); }
+        if (role == Qt::DisplayRole) { return {}; }
       }
 
       if (dias >= 5) {

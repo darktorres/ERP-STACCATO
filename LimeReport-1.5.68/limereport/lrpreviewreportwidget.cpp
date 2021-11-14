@@ -189,7 +189,7 @@ void PreviewReportWidget::print() {
     lp.setPrinterName(pi.defaultPrinter().printerName());
 #endif
 #ifdef HAVE_QT5
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     lp.setPrinterName(pi.defaultPrinterName());
 #else
     lp.setPrinterName(pi.defaultPrinter().printerName());

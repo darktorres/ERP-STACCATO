@@ -436,7 +436,12 @@ bool Worksheet::write(int row, int column, const QVariant &value, const Format &
     } else if (d->workbook->isStringsToHyperlinksEnabled() and token.contains(d->urlPattern)) {
       // convert to url
       ret = writeHyperlink(row, column, QUrl(token));
-    } else if (d->workbook->isStringsToNumbersEnabled() and (value.canConvert(QMetaType::Double))) {
+    } else if (d->workbook->isStringsToNumbersEnabled() and
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+               (value.canConvert(QMetaType::Double))) {
+#else
+               (value.canConvert(QMetaType(QMetaType::Double)))) {
+#endif
       // Try convert string to number if the flag enabled.
       ret = writeString(row, column, value.toString(), format);
     } else {

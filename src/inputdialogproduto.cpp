@@ -246,8 +246,8 @@ void InputDialogProduto::calcularTotal() {
 void InputDialogProduto::on_pushButtonSalvar_clicked() {
   if (ui->lineEditCodRep->isVisible() and ui->lineEditCodRep->text().isEmpty()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Não preencheu 'Cód. Rep.'. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Salvar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Salvar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }

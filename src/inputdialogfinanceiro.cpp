@@ -581,8 +581,8 @@ void InputDialogFinanceiro::verifyFields() {
 
       if (ui->widgetPgts->pagamentos.isEmpty()) {
         QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
-        msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-        msgBox.setButtonText(QMessageBox::No, "Voltar");
+        msgBox.button(QMessageBox::Yes)->setText("Continuar");
+        msgBox.button(QMessageBox::No)->setText("Voltar");
 
         if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
       } else {
@@ -736,7 +736,7 @@ void InputDialogFinanceiro::setCodFornecedor() {
 
   try {
     // clean codFornecedor on unselected rows
-    for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { modelPedidoFornecedor2.setData(row, "codFornecedor", QVariant()); }
+    for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { modelPedidoFornecedor2.setData(row, "codFornecedor", {}); }
 
     //-----------------------------------------------
 

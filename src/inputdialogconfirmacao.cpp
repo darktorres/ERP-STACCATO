@@ -320,13 +320,15 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
   QString obs;
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
-  msgBox.setButtonText(QMessageBox::No, "Gerar crédito");
-  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+  msgBox.button(QMessageBox::Yes)->setText("Criar reposição");
+  msgBox.button(QMessageBox::No)->setText("Gerar crédito");
+  msgBox.button(QMessageBox::Cancel)->setText("Cancelar");
 
   const int choice = msgBox.exec();
 
   if (choice == QMessageBox::Cancel) { return; }
+  // TODO: adicionar e testar bool no getText
+  // TODO: verificar se observacao não está vazio
   if (choice == QMessageBox::Yes) { obs = QInputDialog::getText(this, "Observacao", "Observacao: "); }
 
   const int novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();

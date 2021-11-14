@@ -146,7 +146,7 @@ public:
   enum AngleType { Angle0, Angle90, Angle180, Angle270 };
 
   enum InputMode { DATA_INPUT_MODE = 0, UNICODE_INPUT_MODE = 1, GS1_INPUT_MODE = 2, KANJI_INPUT_MODE = 3, SJIS_INPUT_MODE = 4 };
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
   Q_ENUM(BarcodeType)
   Q_ENUM(AngleType)
   Q_ENUM(InputMode)

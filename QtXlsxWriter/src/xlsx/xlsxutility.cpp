@@ -65,7 +65,7 @@ double datetimeToNumber(const QDateTime &dt, bool is1904) {
 
   double excel_time = epoch.msecsTo(dt) / (1000 * 60 * 60 * 24.0);
 
-#if QT_VERSION >= 0x050200
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
   if (dt.isDaylightTime()) // Add one hour if the date is Daylight
     excel_time += 1.0 / 24.0;
 #endif
@@ -88,7 +88,7 @@ QDateTime datetimeFromNumber(double num, bool is1904) {
 
   QDateTime dt = epoch.addMSecs(msecs);
 
-#if QT_VERSION >= 0x050200
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
   // Remove one hour to see whether the date is Daylight
   QDateTime dt2 = dt.addMSecs(-3600);
   if (dt2.isDaylightTime()) return dt2;

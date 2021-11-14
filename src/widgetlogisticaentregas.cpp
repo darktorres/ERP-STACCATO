@@ -370,8 +370,8 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() { // TODO: 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 

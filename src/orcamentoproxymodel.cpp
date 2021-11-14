@@ -37,7 +37,7 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
       const QString status = proxyIndex.siblingAtColumn(statusIndex).data().toString();
 
       if (status == "FECHADO") {
-        if (role == Qt::DisplayRole) { return QVariant(); }
+        if (role == Qt::DisplayRole) { return {}; }
       }
 
       if (dias >= 5) {

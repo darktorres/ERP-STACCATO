@@ -694,7 +694,7 @@ void Orcamento::buscarConsultor() {
 
   if (query.size() == 1 and query.first()) { setData("idUsuarioConsultor", query.value("idUsuario")); }
 
-  if (query.size() == 0) { model.setData(currentRow, "idUsuarioConsultor", QVariant(QVariant::UInt)); }
+  if (query.size() == 0) { model.setData(currentRow, "idUsuarioConsultor", {}); }
 }
 
 void Orcamento::atualizaReplica() {
@@ -1213,8 +1213,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   if (not produtos.isEmpty()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n    -" + produtos.join("\n    -"), QMessageBox::Yes | QMessageBox::No,
                        this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
@@ -1223,8 +1223,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!",
                        "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada e serão removidos da réplica:\n    -" + estoques.join("\n    -"),
                        QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }

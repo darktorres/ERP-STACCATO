@@ -239,7 +239,7 @@ int SqlTreeModel::rowParentId(const QModelIndex &index) const {
 }
 
 QVariant SqlTreeModel::rawData(const int level, const int row, const int column, const int role) const {
-  if (level < 0 or row < 0 or column < 0) { return QVariant(); }
+  if (level < 0 or row < 0 or column < 0) { return {}; }
 
   SqlTreeModelLevel *levelData = d->m_levelData.at(level);
   QSqlQueryModel *model = levelData->m_model;

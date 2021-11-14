@@ -434,6 +434,7 @@ void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPalle
 void WidgetGalpao::selectBloco() {
   //  qDebug() << "WidgetGalpao::selectBloco";
 
+  // TODO: use qobject_cast
   selectedIdBloco = dynamic_cast<PalletItem *>(sender());
 
   if (not selectedIdBloco) { return; }
@@ -639,6 +640,7 @@ void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged() {
 bool WidgetGalpao::isDirty() {
   const auto items = scene->items();
 
+  // TODO: usar std::any_of()
   for (auto *item : items) {
     auto *pallet = dynamic_cast<PalletItem *>(item);
 

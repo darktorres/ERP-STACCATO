@@ -1,12 +1,12 @@
 #include "estoque.h"
 #include "ui_estoque.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoqueproxymodel.h"
 #include "sql.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -174,12 +174,9 @@ void Estoque::exibirNota() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando NFe: " + query.lastError().text(), this); }
 
-  if (query.size() == 0) { return qApp->enqueueWarning("Não encontrou NFe associada!", this); }
+  if (not query.first()) { return qApp->enqueueWarning("Não encontrou NFe associada!", this); }
 
-  while (query.next()) {
-    auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-    viewer->setAttribute(Qt::WA_DeleteOnClose);
-  }
+  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
 }
 
 void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {

@@ -1,11 +1,11 @@
 #include "widgetgare.h"
 #include "ui_widgetgare.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
-#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -216,8 +216,7 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe de id: " + model.data(index.row(), "idNFe").toString()); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
 }
 
 void WidgetGare::on_tableSelection_changed() {

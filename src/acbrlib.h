@@ -1,6 +1,6 @@
 #pragma once
 
-#if _WIN32
+#ifdef Q_OS_WIN
 
 #include <QByteArray>
 #include <windows.h>

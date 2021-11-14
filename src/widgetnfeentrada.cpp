@@ -9,7 +9,6 @@
 #include "file.h"
 #include "reaisdelegate.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QDir>
@@ -114,8 +113,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
 }
 
 void WidgetNfeEntrada::montaFiltro() {

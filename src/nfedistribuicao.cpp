@@ -1,12 +1,12 @@
 #include "nfedistribuicao.h"
 #include "ui_nfedistribuicao.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "file.h"
 #include "nfeproxymodel.h"
 #include "reaisdelegate.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QFile>
 #include <QInputDialog>
@@ -544,8 +544,7 @@ void NFeDistribuicao::on_table_activated(const QModelIndex &index) {
 
   if (xml.isEmpty()) { throw RuntimeException("XML vazio!", this); }
 
-  auto *viewer = new XML_Viewer(xml, this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(xml, true);
 }
 
 QString NFeDistribuicao::encontraInfCpl(const QString &xml) {

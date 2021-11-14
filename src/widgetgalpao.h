@@ -42,7 +42,7 @@ private:
   auto on_checkBoxCriarPallet_toggled(const bool checked) -> void;
   auto on_checkBoxEdicao_toggled(const bool checked) -> void;
   auto on_checkBoxMoverPallet_toggled(const bool checked) -> void;
-  auto on_comboBoxPalletAtual_currentTextChanged(const QString &text) -> void;
+  auto on_comboBoxPalletAtual_currentTextChanged() -> void;
   auto on_dateTimeEdit_dateChanged() -> void;
   auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_lineEditMoverParaPallet_textChanged(const QString &text) -> void;

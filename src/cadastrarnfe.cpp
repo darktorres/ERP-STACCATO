@@ -26,7 +26,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   const int lojaACBr = User::getSetting("User/lojaACBr").toInt();
 
-  if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+  if (lojaACBr == 0) { throw RuntimeError(R"(Escolha a loja a ser utilizada em "Opções->Configurações->ACBr->Loja"!)", this); }
 
   const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
 
@@ -162,7 +162,7 @@ QString CadastrarNFe::montarXML() {
 
   QTextStream stream(&nfe);
 
-  stream << "NFE.CriarNFe(\"\n";
+  stream << R"(NFE.CriarNFe(")";
 
   writeIdentificacao(stream);
   writeEmitente(stream);
@@ -174,7 +174,7 @@ QString CadastrarNFe::montarXML() {
   writeVolume(stream);
   writeComplemento(stream);
 
-  stream << "\",1)\n"; // return xml
+  stream << R"(",1))"; // return xml
 
   return nfe;
 }
@@ -662,7 +662,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     formato = (formato.isEmpty() ? "" : " - " + formato);
     const QString descricao = produto + formato;
     const QString caixas = modelProduto.data(row, "caixas").toString();
-    stream << "Descricao = " + descricao.left(100).remove("\"") + " (" + caixas + " Cx.)\n";
+    stream << "Descricao = " + descricao.left(100).remove(R"(")") + " (" + caixas + " Cx.)\n";
 
     stream << "Unidade = " + modelProduto.data(row, "un").toString() + "\n";
     stream << "Quantidade = " + modelProduto.data(row, "quant").toString() + "\n";

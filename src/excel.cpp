@@ -35,7 +35,7 @@ void Excel::gerarExcel() {
     fileName = customFileName;
   } else {
     fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
-    fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
+    fileName.remove(R"(\)").remove("/").remove(":").remove("*").remove("?").remove(R"(")").remove("<").remove(">").remove("|");
     fileName = folderKey + "/" + fileName;
   }
 

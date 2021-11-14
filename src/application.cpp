@@ -442,7 +442,7 @@ double Application::roundDouble(const double value, const int decimais) {
 QString Application::sanitizeSQL(const QString &string) {
   QString sanitized = string;
 
-  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove("\\");
+  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove(R"(\)");
 
   return sanitized;
 }

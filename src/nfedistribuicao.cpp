@@ -198,7 +198,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   buscarNSU();
 
   qDebug() << "pesquisar nsu: " << ultimoNSU;
-  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + "\", " + QString::number(ultimoNSU) + ")");
+  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
 
   if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { tempoTimer = 1h; }
   if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
@@ -427,7 +427,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
   }
 
   QString comando;
-  comando += "NFE.EnviarEvento(\"[EVENTO]\r\n";
+  comando += R"(NFE.EnviarEvento("[EVENTO])" + QString("\r\n");
   comando += "idLote = 1\r\n";
 
   int count = 0;
@@ -453,7 +453,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
     if (operacao == "NÃO REALIZADA") { comando += "xJust = " + justificativa + "\r\n"; }
   }
 
-  comando += "\")";
+  comando += R"("))";
 
   //----------------------------------------------------------
 

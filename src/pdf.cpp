@@ -75,7 +75,7 @@ void PDF::gerarPdf() {
   }
 
   QString profissional = queryProfissional.value("nome_razao").toString();
-  if (not profissional.isEmpty() and mostrarRT) { profissional += " <span style=\"color: red\"><strong>" + query.value("rt").toString() + "%</strong>"; }
+  if (not profissional.isEmpty() and mostrarRT) { profissional += R"( <span style="color: red"><strong>)" + query.value("rt").toString() + "%</strong>"; }
   dataManager->setReportVariable("Profissional", profissional.isEmpty() ? "NÃO HÁ" : profissional);
   dataManager->setReportVariable("EmailProfissional", queryProfissional.value("email"));
   dataManager->setReportVariable("Vendedor", queryVendedor.value("nome"));
@@ -127,7 +127,7 @@ void PDF::gerarPdf() {
   }
 
   QString fileName = id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".pdf";
-  fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
+  fileName.remove(R"(\)").remove("/").remove(":").remove("*").remove("?").remove(R"(")").remove("<").remove(">").remove("|");
 
   fileName = folderKey + "/" + fileName;
 

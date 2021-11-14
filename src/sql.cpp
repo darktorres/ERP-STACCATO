@@ -567,6 +567,7 @@ QString Sql::view_galpao(const QString &idBloco, const QString &filtroText) {
          "     v.tipo, "
          "     v.idVendaProduto2, "
          "     v.numeroNFe, "
+         "     v.idNFe, "
          "     v.codComercial, "
          "     v.lote, "
          "     CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, "

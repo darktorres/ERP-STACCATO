@@ -51,6 +51,8 @@ private:
   auto on_pushButtonMover_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
   auto on_pushButtonSalvarPallets_clicked() -> void;
+  auto on_tablePallet_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
   auto on_table_selectionChanged() -> void;
   auto salvarPallets() -> void;
   auto selectBloco() -> void;

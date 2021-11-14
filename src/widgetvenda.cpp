@@ -64,7 +64,7 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   // para gerente o combobox é marcado com a loja e escondido então a regra abaixo se aplica
-  const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+  const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : "idLoja = " + ui->comboBoxLojas->currentData().toString();
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
@@ -80,7 +80,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
+  const QString idVendedor = ui->comboBoxVendedores->currentData().toString();
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
 
@@ -161,7 +161,9 @@ void WidgetVenda::setWidgets() {
     fillComboBoxFornecedor();
     fillComboBoxLoja();
 
-    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != "1") { ui->comboBoxLojas->setCurrentValue(User::idLoja); }
+    const QString lojaGeral = "1";
+
+    if (not User::isAdmin() and not User::isAdministrativo() and User::idLoja != lojaGeral) { ui->comboBoxLojas->setCurrentText(User::fromLoja("descricao").toString()); }
 
     fillComboBoxVendedor();
 
@@ -214,9 +216,9 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->comboBoxFornecedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->comboBoxFornecedores, &QComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged, connectionType);
-  connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditDia_dateChanged, connectionType);
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled, connectionType);
@@ -252,10 +254,10 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->comboBoxFornecedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->comboBoxFornecedores, &QComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->comboBoxLojas, &QComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
-  disconnect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditDia_dateChanged);
   disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
@@ -294,7 +296,7 @@ void WidgetVenda::fillComboBoxVendedor() {
 
     ui->comboBoxVendedores->addItem("Vendedores");
 
-    const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+    const QString filtroLoja = (ui->comboBoxLojas->currentText() == "Lojas") ? "" : " AND idLoja = " + ui->comboBoxLojas->currentData().toString();
 
     SqlQuery query;
 
@@ -371,7 +373,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
     // -------------------------------------------------------------------------
 
     if (User::isVendedor()) {
-      if (ui->comboBoxLojas->getCurrentValue() != User::idLoja) {
+      if (ui->comboBoxLojas->currentData() != User::idLoja) {
         ui->radioButtonTodos->setDisabled(true);
         ui->radioButtonProprios->setChecked(true);
       } else {

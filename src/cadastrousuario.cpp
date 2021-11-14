@@ -148,7 +148,7 @@ void CadastroUsuario::updateMode() {
 
 void CadastroUsuario::savingProcedures() {
   setData("nome", ui->lineEditNome->text());
-  setData("idLoja", ui->comboBoxLoja->getCurrentValue());
+  setData("idLoja", ui->comboBoxLoja->currentData());
   setData("tipo", ui->comboBoxTipo->currentText());
   setData("user", ui->lineEditUser->text());
   setData("email", ui->lineEditEmail->text());

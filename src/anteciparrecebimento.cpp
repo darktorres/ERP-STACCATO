@@ -188,7 +188,7 @@ void AnteciparRecebimento::montaFiltro() {
 
   const QString textLoja = ui->comboBoxLoja->currentText();
 
-  if (not textLoja.isEmpty()) { filtroLoja = "idLoja = " + ui->comboBoxLoja->getCurrentValue().toString(); }
+  if (not textLoja.isEmpty()) { filtroLoja = "idLoja = " + ui->comboBoxLoja->currentData().toString(); }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 

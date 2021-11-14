@@ -2,8 +2,11 @@
 
 #include "application.h"
 #include "file.h"
-#include "lrreportengine.h"
 #include "user.h"
+
+#if __has_include("lrreportengine.h")
+#include "lrreportengine.h"
+#endif
 
 #include <QDate>
 #include <QDebug>
@@ -21,6 +24,7 @@ PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(p
 }
 
 void PDF::gerarPdf() {
+#if __has_include("lrreportengine.h")
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
   const QString folderKey = User::getSetting(folder).toString();
@@ -142,6 +146,9 @@ void PDF::gerarPdf() {
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
 
   qApp->enqueueInformation("Arquivo salvo como " + fileName, parent);
+#else
+  qApp->enqueueWarning("LimeReport desativado!");
+#endif
 }
 
 void PDF::setQuerys() {

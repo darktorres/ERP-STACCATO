@@ -212,7 +212,7 @@ void XML::verificaNCMs() {
   for (const auto &produto : qAsConst(produtos)) {
     SqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "' LIMIT 1")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
 
     if (not query.first()) { ncms << produto.ncm; }
   }

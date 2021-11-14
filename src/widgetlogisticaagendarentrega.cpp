@@ -982,7 +982,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   xml.validar();
 
   SqlQuery query;
-  query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso LIMIT 1");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }

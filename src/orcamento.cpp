@@ -1170,7 +1170,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   queryEquivalente.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
   SqlQuery queryEstoque;
-  queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant");
+  queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant LIMIT 1");
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     const bool isEstoque = modelItem.data(row, "estoque").toBool();
@@ -1568,7 +1568,7 @@ void Orcamento::verificaDisponibilidadeEstoque() {
     const QString idProduto = modelItem.data(row, "idProduto").toString();
     const QString quant = modelItem.data(row, "quant").toString();
 
-    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant + " LIMIT 1")) {
       throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text());
     }
 

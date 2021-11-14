@@ -697,7 +697,7 @@ void Venda::verificaDisponibilidadeEstoque() {
     const QString idProduto = modelItem.data(row, "idProduto").toString();
     const QString quant = modelItem.data(row, "quant").toString();
 
-    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant + " LIMIT 1")) {
       throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text());
     }
 

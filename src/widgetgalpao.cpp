@@ -197,9 +197,8 @@ void WidgetGalpao::carregarPallets() {
 
     // --------------------------------
 
-    // TODO: guardar o idBloco junto do label
-    ui->comboBoxPalletAtual->addItem(label);
-    ui->comboBoxMoverParaPallet->addItem(label);
+    ui->comboBoxPalletAtual->addItem(label, idBloco);
+    ui->comboBoxMoverParaPallet->addItem(label, idBloco);
   }
 
   ui->comboBoxPalletAtual->insertItem(0, "Selecionar pallet...");
@@ -433,7 +432,7 @@ void WidgetGalpao::on_pushButtonSalvarPallets_clicked() { salvarPallets(); }
 void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
 void WidgetGalpao::selectBloco() {
-  qDebug() << "WidgetGalpao::carregarBloco";
+  //  qDebug() << "WidgetGalpao::selectBloco";
 
   selectedIdBloco = dynamic_cast<PalletItem *>(sender());
 
@@ -443,7 +442,6 @@ void WidgetGalpao::selectBloco() {
   unsetConnections();
 
   ui->comboBoxPalletAtual->setCurrentText(selectedIdBloco->getLabel());
-
   ui->lineEditNomePallet->setText(selectedIdBloco->getLabel());
 
   ui->framePalletSelecionado->setEnabled(true);
@@ -485,6 +483,8 @@ void WidgetGalpao::selectBloco() {
 }
 
 void WidgetGalpao::unselectBloco() {
+  //  qDebug() << "WidgetGalpao::unselectBloco";
+
   if (not selectedIdBloco) { return; }
 
   unsetConnections();
@@ -518,9 +518,11 @@ void WidgetGalpao::on_pushButtonMover_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
 
-  qApp->startTransaction("on_pushButtonSalvarMover_clicked");
+  const QString idBloco = ui->comboBoxMoverParaPallet->currentData().toString();
 
-  const QString label = ui->comboBoxMoverParaPallet->currentText();
+  if (idBloco.isEmpty()) { throw RuntimeException("idBloco vazio!"); }
+
+  qApp->startTransaction("on_pushButtonSalvarMover_clicked");
 
   for (auto index : selection) {
     const QString tipo = modelPallet.data(index.row(), "tipo").toString();
@@ -529,15 +531,11 @@ void WidgetGalpao::on_pushButtonMover_clicked() {
     SqlQuery query;
 
     if (tipo == "EST. LOJA") {
-      if (not query.exec("UPDATE estoque SET idBloco = (SELECT idBloco FROM galpao WHERE label = '" + label + "') WHERE idEstoque = " + id)) {
-        throw RuntimeError("Erro movendo itens: " + query.lastError().text());
-      }
+      if (not query.exec("UPDATE estoque SET idBloco = " + idBloco + " WHERE idEstoque = " + id)) { throw RuntimeError("Erro movendo itens: " + query.lastError().text()); }
     }
 
     if (tipo == "CLIENTE") {
-      if (not query.exec("UPDATE estoque_has_consumo SET idBloco = (SELECT idBloco FROM galpao WHERE label = '" + label + "') WHERE idConsumo = " + id)) {
-        throw RuntimeError("Erro movendo itens: " + query.lastError().text());
-      }
+      if (not query.exec("UPDATE estoque_has_consumo SET idBloco = " + idBloco + " WHERE idConsumo = " + id)) { throw RuntimeError("Erro movendo itens: " + query.lastError().text()); }
     }
   }
 
@@ -619,8 +617,10 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
   }
 }
 
-void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged(const QString &text) {
-  unselectBloco();
+void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged() {
+  const QString idBloco = ui->comboBoxPalletAtual->currentData().toString();
+
+  if (idBloco.isEmpty()) { return; }
 
   const auto items = scene->items();
 
@@ -629,7 +629,7 @@ void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged(const QString &text
 
     if (not pallet) { continue; }
 
-    if (pallet->getLabel() == text) {
+    if (pallet->getIdBloco() == idBloco) {
       pallet->select();
       break;
     }

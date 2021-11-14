@@ -13,7 +13,7 @@ TEMPLATE = app
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.5.68/limereport/limereport.pri)
+versionAtMost(QT_VERSION, 5.15.2) { include(LimeReport-1.5.68/limereport/limereport.pri) }
 
 QT *= core gui sql network xml charts widgets
 

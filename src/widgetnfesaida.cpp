@@ -6,11 +6,14 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "file.h"
-#include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "user.h"
 #include "xml_viewer.h"
+
+#if __has_include("lrreportengine.h")
+#include "lrreportengine.h"
+#endif
 
 #include <QDesktopServices>
 #include <QDir>
@@ -232,6 +235,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 // TODO: 1botao para gerar relatorio igual ao da receita
 
 void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
+#if __has_include("lrreportengine.h")
   // TODO: 3formatar decimais no padrao BR
   // TODO: 3perguntar um intervalo de tempo para filtrar as notas
   // TODO: 3verificar quais as tags na nota dos campos que faltam preencher
@@ -288,6 +292,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório: " + report.lastError(), this); }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + filename, this); }
+#else
+  qApp->enqueueWarning("LimeReport desativado!", this);
+#endif
 }
 
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {

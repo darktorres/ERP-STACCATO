@@ -1,12 +1,14 @@
 #include "widgetgalpao.h"
 #include "ui_widgetgalpao.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "logindialog.h"
 #include "palletitem.h"
 #include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
+#include "venda.h"
 
 #include <QDebug>
 #include <QDrag>
@@ -42,6 +44,8 @@ void WidgetGalpao::setConnections() {
   connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
+  connect(ui->tablePallet, &QTableView::doubleClicked, this, &WidgetGalpao::on_tablePallet_doubleClicked, connectionType);
+  connect(ui->tableTranspAgend, &QTableView::doubleClicked, this, &WidgetGalpao::on_tableTranspAgend_doubleClicked, connectionType);
 }
 
 void WidgetGalpao::unsetConnections() {
@@ -61,6 +65,8 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
+  disconnect(ui->tablePallet, &QTableView::doubleClicked, this, &WidgetGalpao::on_tablePallet_doubleClicked);
+  disconnect(ui->tableTranspAgend, &QTableView::doubleClicked, this, &WidgetGalpao::on_tableTranspAgend_doubleClicked);
 }
 
 void WidgetGalpao::updateTables() {
@@ -467,14 +473,15 @@ void WidgetGalpao::selectBloco() {
     modelPallet.setHeaderData("tipo", "Tipo");
     modelPallet.setHeaderData("caixas", "Cx.");
     modelPallet.setHeaderData("descricao", "Produto");
-    modelPallet.setHeaderData("codComercial", "Código");
+    modelPallet.setHeaderData("codComercial", "Cód. Com.");
     modelPallet.setHeaderData("numeroNFe", "NFe");
     modelPallet.setHeaderData("lote", "Lote");
-    modelPallet.setHeaderData("idVenda", "Pedido");
+    modelPallet.setHeaderData("idVenda", "Venda");
 
     ui->tablePallet->setModel(&modelPallet);
 
     ui->tablePallet->hideColumn("idBloco");
+    ui->tablePallet->hideColumn("idNFe");
     ui->tablePallet->hideColumn("label");
     ui->tablePallet->hideColumn("idEstoque_idConsumo");
     ui->tablePallet->hideColumn("idVendaProduto2");
@@ -576,16 +583,17 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
   modelPallet.setHeaderData("tipo", "Tipo");
   modelPallet.setHeaderData("caixas", "Cx.");
   modelPallet.setHeaderData("descricao", "Produto");
-  modelPallet.setHeaderData("codComercial", "Código");
+  modelPallet.setHeaderData("codComercial", "Cód. Com.");
   modelPallet.setHeaderData("numeroNFe", "NFe");
   modelPallet.setHeaderData("lote", "Lote");
-  modelPallet.setHeaderData("idVenda", "Pedido");
+  modelPallet.setHeaderData("idVenda", "Venda");
 
   ui->tablePallet->setModel(&modelPallet);
 
   if (not selectedIdBloco) { ui->tablePallet->showColumn("label"); }
 
   ui->tablePallet->hideColumn("idBloco");
+  ui->tablePallet->hideColumn("idNFe");
   ui->tablePallet->hideColumn("idEstoque_idConsumo");
   ui->tablePallet->hideColumn("idVendaProduto2");
 
@@ -650,6 +658,34 @@ bool WidgetGalpao::isDirty() {
   }
 
   return false;
+}
+
+void WidgetGalpao::on_tableTranspAgend_doubleClicked(const QModelIndex &index) {
+  const QString header = modelTranspAgend.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") {
+    auto *venda = new Venda(this);
+    venda->setAttribute(Qt::WA_DeleteOnClose);
+    venda->viewRegisterById(modelTranspAgend.data(index.row(), "idVenda"));
+    venda->show();
+  }
+}
+
+void WidgetGalpao::on_tablePallet_doubleClicked(const QModelIndex &index) {
+  const QString header = modelPallet.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "NFe") { ACBrLib::gerarDanfe(modelPallet.data(index.row(), "idNFe").toInt()); }
+
+  if (header == "Venda") {
+    QStringList ids = modelPallet.data(index.row(), "idVenda").toString().split(", ");
+
+    for (const auto &id : ids) {
+      auto *venda = new Venda(this);
+      venda->setAttribute(Qt::WA_DeleteOnClose);
+      venda->viewRegisterById(id);
+      venda->show();
+    }
+  }
 }
 
 // TODO: funcao de selecionar um caminhao e colorir todos os pallets correspondentes aos produtos agendados

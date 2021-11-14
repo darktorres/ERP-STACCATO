@@ -125,9 +125,9 @@ void RegisterDialog::verifyRequiredField(const QLineEdit &line) {
 bool RegisterDialog::confirmationMessage() {
   if (isDirty) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Deseja salvar as alterações?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Salvar");
-    msgBox.setButtonText(QMessageBox::No, "Descartar");
-    msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+    msgBox.button(QMessageBox::Yes)->setText("Salvar");
+    msgBox.button(QMessageBox::No)->setText("Descartar");
+    msgBox.button(QMessageBox::Cancel)->setText("Cancelar");
 
     const int escolha = msgBox.exec();
 
@@ -213,8 +213,8 @@ void RegisterDialog::clearFields() {
 
 int RegisterDialog::removeBox() {
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja desativar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Desativar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Desativar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   return msgBox.exec();
 }

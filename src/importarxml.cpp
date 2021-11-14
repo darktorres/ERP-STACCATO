@@ -505,7 +505,7 @@ void ImportarXML::limparAssociacoes() {
 
   for (int row = 0; row < modelVenda.rowCount(); ++row) {
     modelVenda.setData(row, "status", "EM FATURAMENTO");
-    modelVenda.setData(row, "dataRealFat", QVariant());
+    modelVenda.setData(row, "dataRealFat", {});
   }
 
   modelConsumo.revertAll();

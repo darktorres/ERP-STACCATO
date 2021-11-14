@@ -387,8 +387,8 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Excluir");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Excluir");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     SqlQuery query;
@@ -428,8 +428,8 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Reverter");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Reverter");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     qApp->startTransaction("");

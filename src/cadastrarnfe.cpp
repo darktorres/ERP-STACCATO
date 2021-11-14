@@ -2064,8 +2064,8 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Validação apresentou os seguintes problemas:\n" + lines.join("\n") + "\n\n\nDeseja continuar mesmo assim?",
                        QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return false; }
   }

@@ -249,11 +249,7 @@ void CadastroProfissional::verifyFields() {
 }
 
 void CadastroProfissional::savingProcedures() {
-  if (ui->checkBoxDataNasc->isChecked()) {
-    setData("aniversario", ui->dateEditDataNasc->date());
-  } else {
-    setData("aniversario", QVariant());
-  }
+  setData("aniversario", (ui->checkBoxDataNasc->isChecked()) ? ui->dateEditDataNasc->date() : QVariant());
 
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }

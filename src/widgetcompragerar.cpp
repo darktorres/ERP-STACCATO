@@ -247,8 +247,8 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
 void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {
   QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Enviar");
-  msgBox.setButtonText(QMessageBox::No, "Pular");
+  msgBox.button(QMessageBox::Yes)->setText("Enviar");
+  msgBox.button(QMessageBox::No)->setText("Pular");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, razaoSocial, this);
@@ -298,8 +298,8 @@ int WidgetCompraGerar::getOrdemCompra() {
 
     if (query2.first()) {
       QMessageBox msgBox(QMessageBox::Question, "Atenção!", "OC já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
-      msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-      msgBox.setButtonText(QMessageBox::No, "Voltar");
+      msgBox.button(QMessageBox::Yes)->setText("Continuar");
+      msgBox.button(QMessageBox::No)->setText("Voltar");
 
       const int choice = msgBox.exec();
 
@@ -490,8 +490,8 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 

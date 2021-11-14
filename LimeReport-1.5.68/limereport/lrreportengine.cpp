@@ -226,7 +226,7 @@ bool ReportEnginePrivate::printPages(ReportPages pages, QPrinter *printer) {
       m_printer.data()->setPrinterName(pi.defaultPrinter().printerName());
 #endif
 #ifdef HAVE_QT5
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     m_printer.data()->setPrinterName(pi.defaultPrinterName());
 #else
     m_printer.data()->setPrinterName(pi.defaultPrinter().printerName());
@@ -328,7 +328,7 @@ bool ReportEnginePrivate::printReport(QPrinter *printer) {
       m_printer.data()->setPrinterName(pi.defaultPrinter().printerName());
 #endif
 #ifdef HAVE_QT5
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     m_printer.data()->setPrinterName(pi.defaultPrinterName());
 #else
     m_printer.data()->setPrinterName(pi.defaultPrinter().printerName());

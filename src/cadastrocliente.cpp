@@ -129,11 +129,8 @@ void CadastroCliente::verifyFields() {
 }
 
 void CadastroCliente::savingProcedures() {
-  if (ui->checkBoxDataNasc->isChecked()) {
-    setData("dataNasc", ui->dateEditDataNasc->date());
-  } else {
-    setData("dataNasc", QVariant());
-  }
+  // TODO: porque em 'profissional' o campo tem outro nome?
+  setData("dataNasc", (ui->checkBoxDataNasc->isChecked()) ? ui->dateEditDataNasc->date() : QVariant());
 
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }

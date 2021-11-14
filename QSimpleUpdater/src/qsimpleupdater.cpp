@@ -46,6 +46,7 @@
 
 #include "application.h"
 
+#include <QAbstractButton>
 #include <QVersionNumber>
 
 /*! \internal
@@ -309,8 +310,8 @@ void QSimpleUpdater::onCheckingFinished() {
     _message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     _message.setText("<b>" + tr("Uma nova versão de %1 está disponível!").arg(qApp->applicationName()) + "</b>");
     _message.setInformativeText(tr("%1 %2 está disponível - você tem %3. Gostaria de baixar ela agora?").arg(qApp->applicationName()).arg(latestVersion()).arg(installedVersion()));
-    _message.setButtonText(QMessageBox::Yes, "Baixar");
-    _message.setButtonText(QMessageBox::No, "Pular");
+    _message.button(QMessageBox::Yes)->setText("Baixar");
+    _message.button(QMessageBox::No)->setText("Pular");
 
     if (_message.exec() == QMessageBox::Yes) { downloadLatestVersion(); }
   }

@@ -83,7 +83,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
 
-  const QString respostaSalvar = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
+  const QString respostaSalvar = enviarComando(R"(NFE.SaveToFile()" + filePath + R"(, ")" + query.value("xml").toString() + R"("))");
 
   if (not respostaSalvar.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException(respostaSalvar); }
 

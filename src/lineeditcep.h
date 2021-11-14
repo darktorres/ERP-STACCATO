@@ -10,8 +10,4 @@ public:
   ~LineEditCEP() = default;
 
   auto isValid() const -> bool;
-
-private:
-  auto getValue() const -> QString;
-  auto setValue(const QString &value) -> void;
 };

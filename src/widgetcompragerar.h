@@ -40,6 +40,7 @@ private:
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarCompra_clicked() -> void;
+  auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_tableResumo_clicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

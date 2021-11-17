@@ -33,11 +33,8 @@ void TabLogistica::updateTables() {
     ui->splitter->setStretchFactor(0, 1);
     ui->splitter->setStretchFactor(1, 0);
 
+    setupTables();
     setConnections();
-
-    ui->tableForn->setModel(&modelViewLogistica);
-
-    on_tabWidgetLogistica_currentChanged();
 
     isSet = true;
   }
@@ -69,7 +66,7 @@ void TabLogistica::on_tableForn_clicked(const QModelIndex &index) {
   if (currentTab == "Representação") { ui->widgetRepresentacao->tableFornLogistica_clicked(fornecedor); }
 }
 
-void TabLogistica::on_tabWidgetLogistica_currentChanged() {
+void TabLogistica::setupTables() {
   const QString currentTab = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
   ui->frameForn->hide();
@@ -91,6 +88,13 @@ void TabLogistica::on_tabWidgetLogistica_currentChanged() {
 
     modelViewLogistica.select();
   }
+
+  ui->tableForn->setModel(&modelViewLogistica);
+}
+
+void TabLogistica::on_tabWidgetLogistica_currentChanged() {
+  setupTables();
+  updateTables();
 }
 
 void TabLogistica::on_pushButtonLimparFiltro_clicked() {

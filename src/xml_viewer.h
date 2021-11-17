@@ -19,7 +19,6 @@ public:
 
 private:
   // attributes
-  QByteArray const fileContent;
   XML xml;
   Ui::XML_Viewer *ui;
   // methods

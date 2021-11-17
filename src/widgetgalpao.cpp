@@ -440,8 +440,7 @@ void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPalle
 void WidgetGalpao::selectBloco() {
   //  qDebug() << "WidgetGalpao::selectBloco";
 
-  // TODO: use qobject_cast
-  selectedIdBloco = dynamic_cast<PalletItem *>(sender());
+  selectedIdBloco = qobject_cast<PalletItem *>(sender());
 
   if (not selectedIdBloco) { return; }
 
@@ -517,8 +516,6 @@ void WidgetGalpao::unselectBloco() {
 
 void WidgetGalpao::on_pushButtonMover_clicked() {
   if (ui->comboBoxPalletAtual->currentText() == "EM RECEBIMENTO") { throw RuntimeError("Não pode mover produtos ainda não recebidos!"); }
-
-  if (ui->comboBoxPalletAtual->currentText() == "Selecionar pallet...") { throw RuntimeError("Selecione um pallet de origem!"); }
 
   if (ui->comboBoxMoverParaPallet->currentText() == "Mover para pallet..." /*and ui->lineEditMoverParaPallet->text().isEmpty()*/) { throw RuntimeError("Selecione um pallet de destino!"); }
 

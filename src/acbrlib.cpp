@@ -11,6 +11,8 @@
 #include <QSqlError>
 #include <QUrl>
 
+#define BUFFER_LEN 256
+
 typedef int (*NFE_Inicializar)(const char *eArqConfig, const char *eChaveCrypt);
 typedef int (*NFE_Finalizar)();
 typedef int (*NFE_UltimoRetorno)(const char *sMensagem, int *esTamanho);
@@ -149,14 +151,14 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), nullptr);
+  auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void ACBrLib::gerarDanfe(const QVariant &fileContent, const bool openFile) {
   Q_UNUSED(openFile)
 
-  auto *viewer = new XML_Viewer(fileContent.toByteArray(), nullptr);
+  auto *viewer = new XML_Viewer(fileContent.toString(), nullptr);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 

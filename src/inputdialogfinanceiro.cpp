@@ -39,6 +39,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
   ui->dateEditEvento->setDate(qApp->serverDate());
   ui->dateEditProximo->setDate(qApp->serverDate());
 
+  ui->treeView->hide();
+
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
     ui->frameDataPreco->show();
@@ -49,8 +51,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
     ui->widgetPgts->show();
 
-    ui->treeView->hide();
-
     ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
   }
 
@@ -60,9 +60,18 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
     ui->frameAdicionais->hide();
 
-    ui->treeView->hide();
-
     ui->tableFluxoCaixa->setSelectionMode(QTableView::MultiSelection);
+  }
+
+  if (tipo == Tipo::Historico) {
+    ui->frameDataPreco->show();
+
+    ui->frameAdicionais->hide();
+    ui->framePagamentos->hide();
+    ui->checkBoxMarcarTodos->hide();
+    ui->pushButtonSalvar->hide();
+
+    ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
   }
 
   setConnections();
@@ -154,7 +163,7 @@ void InputDialogFinanceiro::setupTables() {
 
   modelPedidoFornecedor2.setTable("pedido_fornecedor_has_produto2");
 
-  if (tipo == Tipo::Financeiro) {
+  if (tipo == Tipo::Financeiro or tipo == Tipo::Historico) {
     modelPedidoFornecedor2.setHeaderData("status", "Status");
     modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
     modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");

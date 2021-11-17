@@ -540,9 +540,9 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 }
 
 void NFeDistribuicao::on_table_activated(const QModelIndex &index) {
-  const QVariant xml = model.data(index.row(), "xml");
+  const QString xml = model.data(index.row(), "xml").toString();
 
-  if (xml.toByteArray().isEmpty()) { throw RuntimeException("XML vazio!", this); }
+  if (xml.isEmpty()) { throw RuntimeException("XML vazio!", this); }
 
   ACBrLib::gerarDanfe(xml, true);
 }

@@ -90,6 +90,8 @@ void TabLogistica::setupTables() {
   }
 
   ui->tableForn->setModel(&modelViewLogistica);
+
+  ui->tableForn->sortByColumn("Fornecedor");
 }
 
 void TabLogistica::on_tabWidgetLogistica_currentChanged() {

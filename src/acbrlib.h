@@ -2,10 +2,7 @@
 
 #ifdef Q_OS_WIN
 
-#include <QByteArray>
 #include <windows.h>
-
-#define BUFFER_LEN 256
 
 class ACBrLib {
 

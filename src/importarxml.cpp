@@ -710,7 +710,7 @@ void ImportarXML::usarXMLInutilizado() {
 
   if (query.value("status").toString() != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
 
-  const auto fileContent = query.value("xml").toByteArray();
+  const auto fileContent = query.value("xml").toString();
 
   // ----------------------------------------------------------------
 

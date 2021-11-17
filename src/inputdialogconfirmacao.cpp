@@ -152,6 +152,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("bloco");
     ui->tableLogistica->hideColumn("restante");
     ui->tableLogistica->hideColumn("ajuste");
+    ui->tableLogistica->hideColumn("contabil");
     ui->tableLogistica->hideColumn("vBCIPI");
     ui->tableLogistica->hideColumn("pIPI");
     ui->tableLogistica->hideColumn("vIPI");

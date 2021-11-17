@@ -82,7 +82,7 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 //}
 
 void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-  qDebug() << "PalletItem::mousePressEvent";
+  //  qDebug() << "PalletItem::mousePressEvent";
   //  qDebug() << flags();
 
   if (not flags().testFlag(QGraphicsItem::ItemIsSelectable)) { return; }

@@ -569,7 +569,7 @@ void WidgetGalpao::on_lineEditNomePallet_textChanged(const QString &text) {
 void WidgetGalpao::on_pushButtonBuscar_clicked() {
   const QString text = ui->lineEditBuscaPallet->text();
 
-  if (text.isEmpty()) { return; }
+  //  if (text.isEmpty()) { return; }
 
   const QString idBloco = (selectedIdBloco) ? selectedIdBloco->getIdBloco() : "";
 

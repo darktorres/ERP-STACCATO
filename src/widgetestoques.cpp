@@ -91,6 +91,7 @@ void WidgetEstoques::updateTables() {
   if (not modelIsSet) {
     setupTables();
     modelIsSet = true;
+    return; // to avoid double selecting table
   }
 
   model.select();

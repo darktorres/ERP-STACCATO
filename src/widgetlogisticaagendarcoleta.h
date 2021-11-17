@@ -42,11 +42,10 @@ private:
   auto on_pushButtonAdicionarProduto_clicked() -> void;
   auto on_pushButtonAgendarColeta_clicked() -> void;
   auto on_pushButtonCancelarCarga_clicked() -> void;
-  auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
-  auto on_pushButtonVenda_clicked() -> void;
+  auto on_tableEstoque_doubleClicked(const QModelIndex &index) -> void;
   auto processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga = false) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

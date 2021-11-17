@@ -4,9 +4,11 @@
 #include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "estoque.h"
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "inputdialogfinanceiro.h"
 #include "user.h"
 #include "venda.h"
 
@@ -35,11 +37,10 @@ void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonAgendarColeta, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked, connectionType);
   connect(ui->pushButtonCancelarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked, connectionType);
-  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMontarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked, connectionType);
-  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked, connectionType);
+  connect(ui->tableEstoque, &QTableView::doubleClicked, this, &WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaAgendarColeta::setupTables() {
@@ -74,6 +75,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableEstoque->hideColumn("formComercial");
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("idNFe");
+  ui->tableEstoque->hideColumn("idCompra");
 
   connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
 
@@ -379,40 +381,12 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   modelTranspAtual.select();
 }
 
-void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
-
-  ACBrLib::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt());
-}
-
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
-}
-
-void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
-
-  for (const auto &index : list) {
-    const QString idVenda = modelEstoque.data(index.row(), "idVenda").toString();
-    const QStringList ids = idVenda.split(", ");
-
-    if (ids.isEmpty()) { return; }
-
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
-  }
 }
 
 void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled() { montaFiltro(); }
@@ -452,6 +426,37 @@ void WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelIndex &index) {
+  const QString header = modelEstoque.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Estoque") {
+    auto *estoque = new Estoque(modelEstoque.data(index.row(), "idEstoque").toString(), this);
+    estoque->setAttribute(Qt::WA_DeleteOnClose);
+    estoque->show();
+  }
+
+  if (header == "NFe") { ACBrLib::gerarDanfe(modelEstoque.data(index.row(), "idNFe").toInt()); }
+
+  if (header == "Venda") {
+    QStringList ids = modelEstoque.data(index.row(), "idVenda").toString().split(", ");
+
+    for (const auto &id : ids) {
+      auto *venda = new Venda(this);
+      venda->setAttribute(Qt::WA_DeleteOnClose);
+      venda->viewRegisterById(id);
+      venda->show();
+    }
+  }
+
+  if (header == "OC") {
+    auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, this);
+    input->setAttribute(Qt::WA_DeleteOnClose);
+    input->setFilter(modelEstoque.data(index.row(), "idCompra").toString());
+
+    input->show();
+  }
 }
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de

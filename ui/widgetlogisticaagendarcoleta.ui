@@ -391,24 +391,6 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="3">
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="2">
-      <widget class="QPushButton" name="pushButtonVenda">
-       <property name="text">
-        <string>Venda</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButtonDanfe">
-       <property name="text">
-        <string>DANFE</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item row="3" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -462,8 +444,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>pushButtonDanfe</tabstop>
-  <tabstop>pushButtonVenda</tabstop>
   <tabstop>tableEstoque</tabstop>
   <tabstop>lineEditBusca</tabstop>
   <tabstop>pushButtonAgendarColeta</tabstop>

@@ -1,10 +1,13 @@
 #include "widgetlogisticacoleta.h"
 #include "ui_widgetlogisticacoleta.h"
 
+#include "acbrlib.h"
 #include "application.h"
+#include "estoque.h"
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "inputdialogfinanceiro.h"
 #include "sql.h"
 #include "sqlquery.h"
 #include "venda.h"
@@ -28,7 +31,7 @@ void WidgetLogisticaColeta::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked, connectionType);
-  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonVenda_clicked, connectionType);
+  connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaColeta::on_table_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaColeta::updateTables() {
@@ -87,6 +90,8 @@ void WidgetLogisticaColeta::setupTables() {
   ui->table->setModel(&modelViewColeta);
 
   ui->table->hideColumn("fornecedor");
+  ui->table->hideColumn("idNFe");
+  ui->table->hideColumn("idCompra");
 }
 
 void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
@@ -219,26 +224,6 @@ void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate d
   }
 }
 
-void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
-
-  for (const auto &index : list) {
-    const QString idVenda = modelViewColeta.data(index.row(), "idVenda").toString();
-    const QStringList ids = idVenda.split(", ");
-
-    if (ids.isEmpty()) { return; }
-
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
-  }
-}
-
 void WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
   SqlQuery query1;
   query1.prepare(
@@ -303,4 +288,35 @@ void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
+  const QString header = modelViewColeta.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Estoque") {
+    auto *estoque = new Estoque(modelViewColeta.data(index.row(), "idEstoque").toString(), this);
+    estoque->setAttribute(Qt::WA_DeleteOnClose);
+    estoque->show();
+  }
+
+  if (header == "NFe") { ACBrLib::gerarDanfe(modelViewColeta.data(index.row(), "idNFe").toInt()); }
+
+  if (header == "Venda") {
+    QStringList ids = modelViewColeta.data(index.row(), "idVenda").toString().split(", ");
+
+    for (const auto &id : ids) {
+      auto *venda = new Venda(this);
+      venda->setAttribute(Qt::WA_DeleteOnClose);
+      venda->viewRegisterById(id);
+      venda->show();
+    }
+  }
+
+  if (header == "OC") {
+    auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, this);
+    input->setAttribute(Qt::WA_DeleteOnClose);
+    input->setFilter(modelViewColeta.data(index.row(), "idCompra").toString());
+
+    input->show();
+  }
 }

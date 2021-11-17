@@ -138,7 +138,7 @@ void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelect
 
 void SearchDialog::on_table_clicked(const QModelIndex &index) {
   if (model.tableName() == "view_nfe_inutilizada" and index.isValid()) {
-    XML *xml = new XML(model.data(index.row(), "xml").toByteArray(), XML::Tipo::Nulo, this);
+    XML *xml = new XML(model.data(index.row(), "xml").toString(), XML::Tipo::Entrada, this);
     ui->treeView->setModel(&xml->model);
     ui->treeView->expandAll();
   }

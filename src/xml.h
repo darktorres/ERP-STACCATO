@@ -67,15 +67,15 @@ private:
 public:
   enum class Tipo { Entrada, Saida, Nulo };
 
-  explicit XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent);
-  explicit XML(const QByteArray &fileContent);
+  explicit XML(const QString &fileContent, const Tipo tipo, QWidget *parent);
+  explicit XML(const QString &fileContent);
 
   auto validar() -> void;
   auto verificaNCMs() -> void;
 
   QVector<Produto> produtos;
 
-  QByteArray const fileContent;
+  QString const fileContent;
   QStandardItemModel model;
   QString local;
 

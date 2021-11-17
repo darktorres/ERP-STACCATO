@@ -132,6 +132,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("altura");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
+  ui->tableEstoque->hideColumn("contabil");
   ui->tableEstoque->hideColumn("ncm");
   ui->tableEstoque->hideColumn("nve");
   ui->tableEstoque->hideColumn("extipi");

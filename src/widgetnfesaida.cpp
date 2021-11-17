@@ -115,7 +115,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + model.data(index.row(), "idNFe").toString()); }
 
-  ACBrLib::gerarDanfe(query.value("xml").toByteArray(), true);
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 void WidgetNfeSaida::montaFiltro() {
@@ -333,7 +333,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    ACBrLib::gerarDanfe(query.value("xml").toByteArray(), false);
+    ACBrLib::gerarDanfe(query.value("xml"), false);
 
     // copiar para pasta predefinida
 

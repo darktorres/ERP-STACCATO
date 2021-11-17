@@ -4,7 +4,7 @@
 #include "acbrlib.h"
 #include "application.h"
 
-XML_Viewer::XML_Viewer(const QByteArray &content, QWidget *parent) : QDialog(parent), fileContent(content), xml(content), ui(new Ui::XML_Viewer) {
+XML_Viewer::XML_Viewer(const QByteArray &content, QWidget *parent) : QDialog(parent), xml(content), ui(new Ui::XML_Viewer) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -27,7 +27,7 @@ void XML_Viewer::setConnections() {
 
 void XML_Viewer::on_pushButtonDanfe_clicked() {
 #ifdef Q_OS_WIN
-  ACBrLib::gerarDanfe(fileContent, true);
+  ACBrLib::gerarDanfe(xml.fileContent, true);
 #else
   throw RuntimeException("Não implementado para linux!");
 #endif

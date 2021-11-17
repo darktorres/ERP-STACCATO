@@ -135,6 +135,7 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 #include "sqlquery.h"
 #include "xml_viewer.h"
 
+#include <QDebug>
 #include <QSqlError>
 
 void ACBrLib::gerarDanfe(const int idNFe) {

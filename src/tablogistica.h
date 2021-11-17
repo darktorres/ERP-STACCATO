@@ -28,4 +28,5 @@ private:
   auto on_tabWidgetLogistica_currentChanged() -> void;
   auto on_tableForn_clicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
+  auto setupTables() -> void;
 };

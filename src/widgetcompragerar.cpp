@@ -109,6 +109,7 @@ void WidgetCompraGerar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked, connectionType);
 }
 
@@ -522,6 +523,16 @@ void WidgetCompraGerar::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraGerar::on_pushButtonLimparFiltro_clicked() {
+  ui->tableResumo->clearSelection();
+
+  const QString fornecedor = "";
+
+  const QString filtro = fornecedor.isEmpty() ? "0" : "status = 'PENDENTE' AND fornecedor = '" + fornecedor + "'";
+
+  modelProdutos.setFilter(filtro);
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes

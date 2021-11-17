@@ -52,6 +52,7 @@ void WidgetCompraConfirmar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraConfirmar::on_tableResumo_clicked, connectionType);
 }
 
@@ -150,6 +151,16 @@ void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
 
 void WidgetCompraConfirmar::on_tableResumo_clicked(const QModelIndex &index) {
   const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewCompras.setFilter(filtro);
+}
+
+void WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked() {
+  ui->tableResumo->clearSelection();
+
+  const QString fornecedor = "";
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 

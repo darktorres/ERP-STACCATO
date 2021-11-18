@@ -31,7 +31,6 @@ void WidgetGalpao::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled, connectionType);
   connect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled, connectionType);
   connect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled, connectionType);
   connect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled, connectionType);
@@ -53,7 +52,6 @@ void WidgetGalpao::setConnections() {
 void WidgetGalpao::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(ui->checkBoxConteudo, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxConteudo_toggled);
   disconnect(ui->checkBoxCriarPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxCriarPallet_toggled);
   disconnect(ui->checkBoxEdicao, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxEdicao_toggled);
   disconnect(ui->checkBoxMoverPallet, &QCheckBox::toggled, this, &WidgetGalpao::on_checkBoxMoverPallet_toggled);
@@ -80,8 +78,6 @@ void WidgetGalpao::updateTables() {
 
     //---------------------------
     // TODO: re-enable these later
-    ui->graphicsPallet->hide();
-    ui->checkBoxConteudo->hide();
     ui->lineEditMoverParaPallet->hide();
     ui->labelAltura->hide();
     ui->spinBoxAltura->hide();
@@ -451,8 +447,6 @@ void WidgetGalpao::on_checkBoxMoverPallet_toggled(const bool checked) {
 }
 
 void WidgetGalpao::on_pushButtonSalvarPallets_clicked() { salvarPallets(); }
-
-void WidgetGalpao::on_checkBoxConteudo_toggled(bool checked) { ui->graphicsPallet->setVisible(checked); }
 
 void WidgetGalpao::selectBloco() {
   //  qDebug() << "WidgetGalpao::selectBloco";

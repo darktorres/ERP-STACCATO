@@ -147,13 +147,6 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="checkBoxConteudo">
-         <property name="text">
-          <string>Mostrar conteúdo</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget">
          <property name="tabPosition">
@@ -578,28 +571,6 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="ViewGalpao" name="graphicsPallet">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>619</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="mouseTracking">
-          <bool>true</bool>
-         </property>
-         <property name="tabletTracking">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -635,7 +606,6 @@
   <tabstop>dateTimeEdit</tabstop>
   <tabstop>tableTranspAgend</tabstop>
   <tabstop>graphicsGalpao</tabstop>
-  <tabstop>graphicsPallet</tabstop>
  </tabstops>
  <resources/>
  <connections/>

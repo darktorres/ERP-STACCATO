@@ -115,8 +115,7 @@ void WidgetGalpao::updateTables() {
   }
 
   modelTranspAgend.select();
-  modelPallet.select(); // this one is slow due to view_estoque_contabil
-  // TODO: don't unselect current bloco
+  modelPallet.select();
   carregarPallets();
 }
 
@@ -166,6 +165,13 @@ void WidgetGalpao::carregarPallets() {
   ui->checkBoxMoverPallet->setChecked(false);
 
   unsetConnections();
+
+  QString selectedLabel;
+
+  if (selectedIdBloco) {
+    selectedLabel = selectedIdBloco->getLabel();
+    selectedIdBloco = nullptr;
+  }
 
   const auto items = scene->items();
 
@@ -253,6 +259,17 @@ void WidgetGalpao::carregarPallets() {
   if (palletDestino != "Mover para pallet...") { ui->comboBoxMoverParaPallet->setCurrentText(palletDestino); }
 
   setConnections();
+
+  // ------------------------------------------------
+
+  const auto items2 = scene->items();
+
+  for (auto *item : items2) {
+    if (auto *pallet = dynamic_cast<PalletItem *>(item); pallet and pallet->getLabel() == selectedLabel) {
+      pallet->select();
+      break;
+    }
+  }
 }
 
 void WidgetGalpao::salvarPallets() {

@@ -147,19 +147,17 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
 
     const QString oldText = widget->getHtml();
 
-    QString text = oldText.isEmpty() ? "" : oldText + R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>
+    QString text = oldText.isEmpty() ? "" : oldText + R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;"> </p>
                                                          <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">-----------------------------------------</p>
-                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>)";
+                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;"> </p>)";
 
     QStringList produtos = query.value("produtos").toString().split("/");
     QString produtosList;
 
     for (auto &produto : produtos) { produtosList += QString(R"(<li style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</li>)").arg(produto); }
 
-    const QString destino = query.value("logradouro").toString().replace(" ", "+") + "," + query.value("numero").toString().replace(" ", "+") + "," +
-                            query.value("cidade").toString().replace(" ", "+") + "," + query.value("uf").toString().replace(" ", "+");
-
-    // TODO: colocar origem como 'arg'
+    const QString origem = query.value("origem").toString();
+    const QString destino = query.value("destino").toString();
 
     text += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">10:00 Kg: %1, Cx.: %2</p>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%3</p>
@@ -169,10 +167,10 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate startDate) {
            </ul>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Status: %6</p>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">
-           <a href="https://www.google.com/maps/dir/?api=1&amp;origin=Rua+Sales&oacute;polis,27,Barueri,SP&amp;destination=%7&amp;
+           <a href="https://www.google.com/maps/dir/?api=1&origin=%7&destination=%8&
            travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
                 .arg(query.value("kg").toString(), query.value("caixas").toString(), query.value("idVenda").toString(), query.value("bairro").toString() + " - " + query.value("cidade").toString(),
-                     produtosList, query.value("status").toString(), destino);
+                     produtosList, query.value("status").toString(), origem, destino);
 
     widget->setHtml(text);
     ui->tableWidget->setCellWidget(row, diaSemana, widget);

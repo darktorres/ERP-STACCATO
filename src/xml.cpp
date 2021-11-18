@@ -36,6 +36,8 @@ void XML::montarArvore() {
 }
 
 void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
+  // TODO: traduzir nomes para ficar um XML legivel para leigos, ex: 'xMun' -> 'Cidade'
+
   QDomElement child = element.firstChildElement();
 
   for (; not child.isNull(); child = child.nextSiblingElement()) {
@@ -66,7 +68,7 @@ void XML::lerValores(const QStandardItem *item) {
       const QString parentText = child->parent()->text();
       QString text = child->text();
 
-      if (text.contains("chNFe")) { chaveAcesso = text.remove("chNFe -"); }
+      if (text.contains("chNFe")) { chaveAcesso = text.remove("chNFe - "); }
       if (text.contains("nNF -")) { nNF = text.remove("nNF - ").rightJustified(9, '0'); }
       if (text.contains("dhEmi -")) { dataHoraEmissao = text.remove("dhEmi - "); }
 

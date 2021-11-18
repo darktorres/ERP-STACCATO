@@ -3,6 +3,7 @@
 
 #include "acbrlib.h"
 #include "application.h"
+#include "followup.h"
 #include "logindialog.h"
 #include "palletitem.h"
 #include "sql.h"
@@ -41,6 +42,7 @@ void WidgetGalpao::setConnections() {
   connect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged, connectionType);
   connect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
@@ -62,6 +64,7 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->lineEditMoverParaPallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditMoverParaPallet_textChanged);
   disconnect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged);
   disconnect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
@@ -497,6 +500,7 @@ void WidgetGalpao::selectBloco() {
     ui->tablePallet->hideColumn("idNFe");
     ui->tablePallet->hideColumn("label");
     ui->tablePallet->hideColumn("idEstoque_idConsumo");
+    ui->tablePallet->hideColumn("idEstoque");
     ui->tablePallet->hideColumn("idVendaProduto2");
 
     //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
@@ -606,6 +610,7 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
   ui->tablePallet->hideColumn("idBloco");
   ui->tablePallet->hideColumn("idNFe");
   ui->tablePallet->hideColumn("idEstoque_idConsumo");
+  ui->tablePallet->hideColumn("idEstoque");
   ui->tablePallet->hideColumn("idVendaProduto2");
 
   //  ui->tablePallet->sortByColumn("idEstoque_idConsumo");
@@ -683,6 +688,18 @@ void WidgetGalpao::on_tablePallet_doubleClicked(const QModelIndex &index) {
       venda->show();
     }
   }
+}
+
+void WidgetGalpao::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->tablePallet->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  const QString idEstoque = modelPallet.data(selection.first().row(), "idEstoque").toString();
+
+  auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: funcao de selecionar um caminhao e colorir todos os pallets correspondentes aos produtos agendados

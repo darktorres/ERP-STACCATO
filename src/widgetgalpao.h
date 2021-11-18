@@ -47,6 +47,7 @@ private:
   auto on_lineEditMoverParaPallet_textChanged(const QString &text) -> void;
   auto on_lineEditNomePallet_textChanged(const QString &text) -> void;
   auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMover_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
   auto on_pushButtonSalvarPallets_clicked() -> void;

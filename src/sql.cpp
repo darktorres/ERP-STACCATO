@@ -564,6 +564,7 @@ QString Sql::view_galpao(const QString &idBloco, const QString &filtroText) {
          "     g.idBloco, "
          "     g.label, "
          "     v.idEstoque_idConsumo, "
+         "     v.idEstoque, "
          "     v.tipo, "
          "     v.idVendaProduto2, "
          "     v.numeroNFe, "

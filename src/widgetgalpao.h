@@ -37,7 +37,6 @@ private:
   auto atualizarPallet(PalletItem *pallet) -> void;
   auto carregarPallets() -> void;
   auto inserirPallet(PalletItem *pallet) -> void;
-  auto isDirty() -> bool;
   auto on_checkBoxConteudo_toggled(bool checked) -> void;
   auto on_checkBoxCriarPallet_toggled(const bool checked) -> void;
   auto on_checkBoxEdicao_toggled(const bool checked) -> void;

@@ -17,7 +17,7 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="1" column="1">
+   <item row="1" column="2">
     <widget class="QGroupBox" name="groupBoxEdicao">
      <property name="checked">
       <bool>false</bool>
@@ -35,7 +35,7 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="0" column="0">
+      <item row="0" column="1">
        <widget class="QFrame" name="framePalletSelecionado">
         <property name="enabled">
          <bool>false</bool>
@@ -73,7 +73,7 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="0">
        <widget class="QFrame" name="frameEdicao">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -106,17 +106,23 @@
         </layout>
        </widget>
       </item>
+      <item row="0" column="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="checkBoxEdicao">
-     <property name="text">
-      <string>Habilitar edição</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="0" colspan="3">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -589,6 +595,13 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="checkBoxEdicao">
+     <property name="text">
+      <string>Habilitar edição</string>
+     </property>
     </widget>
    </item>
   </layout>

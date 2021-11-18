@@ -156,7 +156,7 @@ void WidgetGalpao::setupTables() {
 }
 
 void WidgetGalpao::carregarPallets() {
-  if (isDirty()) { return; }
+  if (ui->checkBoxEdicao->isChecked()) { return; }
 
   const QString palletSelecionado = ui->comboBoxPalletAtual->currentText();
   const QString palletDestino = ui->comboBoxMoverParaPallet->currentText();
@@ -290,10 +290,7 @@ void WidgetGalpao::salvarPallets() {
         throw RuntimeError("Pallet sem nome! Cadastre um nome antes de salvar!");
       }
 
-      if (not pallet->isDirty) { continue; }
-
       pallet->getIdBloco().isEmpty() ? inserirPallet(pallet) : atualizarPallet(pallet);
-      pallet->isDirty = false;
     }
   }
 
@@ -624,8 +621,9 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
     if (dialog.exec() != QDialog::Accepted) { return; }
   }
 
-  if (not checked and isDirty()) {
+  if (not checked) {
     // TODO: avisar usuario ou descartar alteracoes
+    // TODO: auto salvar?
   }
 
   // ----------------------------------------------
@@ -657,21 +655,6 @@ void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged() {
       break;
     }
   }
-}
-
-bool WidgetGalpao::isDirty() {
-  const auto items = scene->items();
-
-  // TODO: usar std::any_of()
-  for (auto *item : items) {
-    auto *pallet = dynamic_cast<PalletItem *>(item);
-
-    if (not pallet) { continue; }
-
-    if (pallet->isDirty) { return true; }
-  }
-
-  return false;
 }
 
 void WidgetGalpao::on_tableTranspAgend_doubleClicked(const QModelIndex &index) {

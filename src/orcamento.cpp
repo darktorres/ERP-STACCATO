@@ -266,9 +266,9 @@ bool Orcamento::viewRegister() {
       ui->pushButtonGerarVenda->show();
     }
 
-    ui->checkBoxFreteManual->setDisabled(ui->checkBoxRepresentacao->isChecked());
+    ui->checkBoxFreteManual->setHidden(ui->checkBoxRepresentacao->isChecked());
 
-    const bool freteManual = ui->checkBoxFreteManual->isChecked();
+    const bool freteManual = ui->checkBoxFreteManual->isChecked() or ui->checkBoxRepresentacao->isChecked();
 
     canChangeFrete = freteManual;
 
@@ -777,7 +777,8 @@ void Orcamento::calcPrecoGlobalTotal() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setMinimum(frete);
+    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
+
     ui->doubleSpinBoxFrete->setValue(frete);
   }
 
@@ -1319,8 +1320,11 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
 }
 
 void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
-  ui->checkBoxFreteManual->setDisabled(checked);
-  ui->checkBoxFreteManual->setChecked(checked);
+  ui->checkBoxFreteManual->setHidden(checked);
+
+  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
+  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
+
   ui->itemBoxProduto->setRepresentacao(checked);
   novoItem();
 }
@@ -1397,7 +1401,8 @@ void Orcamento::on_itemBoxVendedor_textChanged() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setMinimum(frete);
+    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
+
     ui->doubleSpinBoxFrete->setValue(frete);
   }
 }

@@ -152,7 +152,7 @@ void WidgetGalpao::setupTables() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_table_selectionChanged, connectionType);
+  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_tableTranspAgend_selectionChanged, connectionType);
 }
 
 void WidgetGalpao::carregarPallets() {
@@ -334,12 +334,10 @@ void WidgetGalpao::setFilter() {
 
   modelTranspAgend.select();
 
-  on_table_selectionChanged();
+  on_tableTranspAgend_selectionChanged();
 }
 
-void WidgetGalpao::on_table_selectionChanged() {
-  // TODO: na tabela tem o bloco, pegar o bloco na linha para não percorrer todos os itens
-
+void WidgetGalpao::on_tableTranspAgend_selectionChanged() {
   const auto items = scene->items();
 
   for (auto *item : items) {
@@ -348,19 +346,21 @@ void WidgetGalpao::on_table_selectionChanged() {
 
   const auto list = ui->tableTranspAgend->selectionModel()->selectedRows();
 
-  for (auto index : list) {
-    const int idVendaProduto2 = modelTranspAgend.data(index.row(), "idVendaProduto2").toInt();
+  if (list.isEmpty()) { return scene->update(); }
 
+  QStringList ids;
+
+  for (auto &index : list) { ids << modelTranspAgend.data(index.row(), "idVendaProduto2").toString(); }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT DISTINCT idBloco FROM estoque_has_consumo WHERE idVendaProduto2 IN (" + ids.join(", ") + ")")) { throw RuntimeException("Erro: " + query.lastError().text()); }
+
+  while (query.next()) {
     for (auto *item : items) {
-      if (auto *pallet = dynamic_cast<PalletItem *>(item)) {
-        auto palletItems = pallet->childItems();
+      const QString idBloco = query.value("idBloco").toString();
 
-        for (auto *palletItem : palletItems) {
-          if (auto *estoque = dynamic_cast<EstoqueItem *>(palletItem)) {
-            if (idVendaProduto2 == estoque->getIdVendaProduto2()) { pallet->setFlagHighlight(true); }
-          }
-        }
-      }
+      if (auto *pallet = dynamic_cast<PalletItem *>(item); pallet and pallet->getIdBloco() == idBloco) { pallet->setFlagHighlight(true); }
     }
   }
 

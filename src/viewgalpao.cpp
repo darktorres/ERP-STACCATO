@@ -4,18 +4,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 
-ViewGalpao::ViewGalpao(QWidget *parent) : QGraphicsView(parent) {
-  setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-  setDragMode(QGraphicsView::ScrollHandDrag);
-
-  setTransformationAnchor(AnchorUnderMouse);
-  setResizeAnchor(AnchorUnderMouse);
-
-  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  setFrameShape(NoFrame);
-}
+ViewGalpao::ViewGalpao(QWidget *parent) : QGraphicsView(parent) {}
 
 void ViewGalpao::mousePressEvent(QMouseEvent *event) {
   //  qDebug() << "GraphicsView::mousePressEvent";

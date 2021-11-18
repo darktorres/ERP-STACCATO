@@ -16,6 +16,7 @@ void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsSimpleTextItem::mousePressEvent(event);
 }
 
+// TODO: transferir esse código para WidgetGalpao e apagar essa classe
 void EstoqueItem::startDrag(QPointF pos) {
   Q_UNUSED(pos);
 

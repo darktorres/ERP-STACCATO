@@ -19,8 +19,6 @@ PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPoin
   setAcceptDrops(true);
 
   setPos(posicao);
-
-  if (idBloco.isEmpty()) { isDirty = true; }
 }
 
 QRectF PalletItem::boundingRect() const { return size; }
@@ -187,7 +185,6 @@ const QRectF &PalletItem::getSize() const { return size; }
 
 void PalletItem::setSize(const QRectF &newSize) {
   prepareGeometryChange();
-  isDirty = true;
   size = newSize;
   update();
 }

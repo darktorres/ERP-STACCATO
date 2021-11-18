@@ -10,8 +10,6 @@ class PalletItem final : public QGraphicsObject {
 public:
   explicit PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, QGraphicsItem *parent = nullptr);
 
-  bool isDirty = false;
-
   //  auto addEstoque(const QString &estoqueText) -> void;
   auto boundingRect() const -> QRectF final;
   auto getEstoques() const -> QString;

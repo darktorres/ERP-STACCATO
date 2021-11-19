@@ -76,3 +76,11 @@ void ViewGalpao::wheelEvent(QWheelEvent *event) {
 void ViewGalpao::setResizable(bool newResizable) { resizable = newResizable; }
 
 void ViewGalpao::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }
+
+bool ViewGalpao::viewportEvent(QEvent *event) {
+  // TODO: usar essa funcao para receber TouchEvent
+
+  qDebug() << "event: " << event;
+
+  return QGraphicsView::viewportEvent(event);
+}

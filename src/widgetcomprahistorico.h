@@ -10,12 +10,12 @@ namespace Ui {
 class WidgetHistoricoCompra;
 }
 
-class WidgetHistoricoCompra final : public QWidget {
+class WidgetCompraHistorico final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetHistoricoCompra(QWidget *parent);
-  ~WidgetHistoricoCompra();
+  explicit WidgetCompraHistorico(QWidget *parent);
+  ~WidgetCompraHistorico();
 
   auto resetTables() -> void;
   auto updateTables() -> void;

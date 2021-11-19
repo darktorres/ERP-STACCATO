@@ -191,7 +191,6 @@ SOURCES += \
     src/logindialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
-    src/nfedistribuicao.cpp \
     src/nfeproxymodel.cpp \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
@@ -235,6 +234,7 @@ SOURCES += \
     src/widgetcompradevolucao.cpp \
     src/widgetcomprafaturar.cpp \
     src/widgetcompragerar.cpp \
+    src/widgetcomprahistorico.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
     src/widgetconsistencia.cpp \
@@ -248,7 +248,6 @@ SOURCES += \
     src/widgetgalpaopeso.cpp \
     src/widgetgare.cpp \
     src/widgetgraficos.cpp \
-    src/widgethistoricocompra.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
     src/widgetlogisticacalendario.cpp \
@@ -258,6 +257,7 @@ SOURCES += \
     src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
+    src/widgetnfedistribuicao.cpp \
     src/widgetnfeentrada.cpp \
     src/widgetnfesaida.cpp \
     src/widgetorcamento.cpp \
@@ -329,7 +329,6 @@ HEADERS  += \
     src/log.h \
     src/logindialog.h \
     src/mainwindow.h \
-    src/nfedistribuicao.h \
     src/nfeproxymodel.h \
     src/noeditdelegate.h \
     src/orcamento.h \
@@ -373,6 +372,7 @@ HEADERS  += \
     src/widgetcompradevolucao.h \
     src/widgetcomprafaturar.h \
     src/widgetcompragerar.h \
+    src/widgetcomprahistorico.h \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
     src/widgetconsistencia.h \
@@ -386,7 +386,6 @@ HEADERS  += \
     src/widgetgalpaopeso.h \
     src/widgetgare.h \
     src/widgetgraficos.h \
-    src/widgethistoricocompra.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \
     src/widgetlogisticacalendario.h \
@@ -396,6 +395,7 @@ HEADERS  += \
     src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
+    src/widgetnfedistribuicao.h \
     src/widgetnfeentrada.h \
     src/widgetnfesaida.h \
     src/widgetorcamento.h \

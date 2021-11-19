@@ -1,4 +1,4 @@
-#include "nfedistribuicao.h"
+#include "widgetnfedistribuicao.h"
 #include "ui_nfedistribuicao.h"
 
 #include "acbrlib.h"
@@ -13,17 +13,17 @@
 #include <QSqlError>
 #include <QTimer>
 
-NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::NFeDistribuicao) {
+WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::NFeDistribuicao) {
   ui->setupUi(this);
 
-  connect(&timer, &QTimer::timeout, this, &NFeDistribuicao::downloadAutomatico);
+  connect(&timer, &QTimer::timeout, this, &WidgetNFeDistribuicao::downloadAutomatico);
   timer.setTimerType(Qt::VeryCoarseTimer);
   timer.start(tempoTimer);
 }
 
-NFeDistribuicao::~NFeDistribuicao() { delete ui; }
+WidgetNFeDistribuicao::~WidgetNFeDistribuicao() { delete ui; }
 
-void NFeDistribuicao::downloadAutomatico() {
+void WidgetNFeDistribuicao::downloadAutomatico() {
   if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
   if (houveConsultaEmOutroPc()) { return; }
 
@@ -46,9 +46,9 @@ void NFeDistribuicao::downloadAutomatico() {
   timer.start(tempoTimer);
 }
 
-void NFeDistribuicao::resetTables() { modelIsSet = false; }
+void WidgetNFeDistribuicao::resetTables() { modelIsSet = false; }
 
-void NFeDistribuicao::updateTables() {
+void WidgetNFeDistribuicao::updateTables() {
   if (not isSet) {
     setConnections();
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
@@ -67,7 +67,7 @@ void NFeDistribuicao::updateTables() {
   model.select();
 }
 
-void NFeDistribuicao::buscarNSU() {
+void WidgetNFeDistribuicao::buscarNSU() {
   const QString idLoja = ui->itemBoxLoja->getId().toString();
 
   if (idLoja.isEmpty()) { return; }
@@ -83,51 +83,51 @@ void NFeDistribuicao::buscarNSU() {
   cnpjDest = queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-");
 }
 
-void NFeDistribuicao::setConnections() {
+void WidgetNFeDistribuicao::setConnections() {
   if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
 
   if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU, connectionType);
-  connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
-  connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
-  connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
-  connect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonNaoRealizada_clicked, connectionType);
-  connect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonPesquisar_clicked, connectionType);
-  connect(ui->table, &TableView::activated, this, &NFeDistribuicao::on_table_activated, connectionType);
+  connect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::on_groupBoxStatus_toggled, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::buscarNSU, connectionType);
+  connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
+  connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
+  connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
+  connect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked, connectionType);
+  connect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetNFeDistribuicao::on_table_activated, connectionType);
 }
 
-void NFeDistribuicao::unsetConnections() {
+void WidgetNFeDistribuicao::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxStatus_toggled);
-  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::buscarNSU);
-  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &NFeDistribuicao::montaFiltro);
-  disconnect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked);
-  disconnect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked);
-  disconnect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked);
-  disconnect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonNaoRealizada_clicked);
-  disconnect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonPesquisar_clicked);
-  disconnect(ui->table, &TableView::activated, this, &NFeDistribuicao::on_table_activated);
+  disconnect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::on_groupBoxStatus_toggled);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::buscarNSU);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->pushButtonCiencia, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonCiencia_clicked);
+  disconnect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked);
+  disconnect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked);
+  disconnect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked);
+  disconnect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked);
+  disconnect(ui->table, &TableView::activated, this, &WidgetNFeDistribuicao::on_table_activated);
 }
 
-void NFeDistribuicao::setupTables() {
+void WidgetNFeDistribuicao::setupTables() {
   // TODO: substituir por uma view para não ficar puxando os xmls, quando precisar do xml buscar pelo idNFe
   model.setTable("nfe");
 
@@ -168,7 +168,7 @@ void NFeDistribuicao::setupTables() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 }
 
-void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
   // 1. chamar funcao DistribuicaoDFePorUltNSU no ACBr
   // 2. guardar resumo e eventos das NFes retornadas
   // 3. enquanto maxNSU != ultNSU repetir os passos
@@ -240,7 +240,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   qDebug() << "end pesquisa";
 }
 
-void NFeDistribuicao::confirmar(const bool silent) {
+void WidgetNFeDistribuicao::confirmar(const bool silent) {
   auto match = model.multiMatch({{"confirmar", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
@@ -254,7 +254,7 @@ void NFeDistribuicao::confirmar(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::desconhecer(const bool silent) {
+void WidgetNFeDistribuicao::desconhecer(const bool silent) {
   auto match = model.multiMatch({{"desconhecer", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
@@ -268,7 +268,7 @@ void NFeDistribuicao::desconhecer(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::naoRealizar(const bool silent) {
+void WidgetNFeDistribuicao::naoRealizar(const bool silent) {
   auto match = model.multiMatch({{"naoRealizar", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
@@ -282,7 +282,7 @@ void NFeDistribuicao::naoRealizar(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::darCiencia(const bool silent) {
+void WidgetNFeDistribuicao::darCiencia(const bool silent) {
   auto match = model.multiMatch({{"ciencia", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
@@ -296,7 +296,7 @@ void NFeDistribuicao::darCiencia(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
+void WidgetNFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
 
   for (const auto &evento : eventos) {
@@ -306,7 +306,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
   }
 }
 
-void NFeDistribuicao::on_pushButtonCiencia_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonCiencia_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
@@ -326,7 +326,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
   monitorar ? darCiencia(false) : agendarOperacao();
 }
 
-void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
@@ -346,7 +346,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
   monitorar ? confirmar(false) : agendarOperacao();
 }
 
-void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
@@ -366,7 +366,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   monitorar ? desconhecer(false) : agendarOperacao();
 }
 
-void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
@@ -386,7 +386,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
   monitorar ? naoRealizar(false) : agendarOperacao();
 }
 
-void NFeDistribuicao::agendarOperacao() {
+void WidgetNFeDistribuicao::agendarOperacao() {
   qApp->startTransaction("NFeDistribuicao::agendarOperacao");
 
   model.submitAll();
@@ -396,7 +396,7 @@ void NFeDistribuicao::agendarOperacao() {
   qApp->enqueueInformation("Operação agendada com sucesso!", this);
 }
 
-bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &selection) {
+bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &selection) {
   QString column;
 
   if (operacao == "CIÊNCIA") { column = "ciencia"; }
@@ -539,7 +539,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
   return true;
 }
 
-void NFeDistribuicao::on_table_activated(const QModelIndex &index) {
+void WidgetNFeDistribuicao::on_table_activated(const QModelIndex &index) {
   const QString xml = model.data(index.row(), "xml").toString();
 
   if (xml.isEmpty()) { throw RuntimeException("XML vazio!", this); }
@@ -547,7 +547,7 @@ void NFeDistribuicao::on_table_activated(const QModelIndex &index) {
   ACBrLib::gerarDanfe(xml, true);
 }
 
-QString NFeDistribuicao::encontraInfCpl(const QString &xml) {
+QString WidgetNFeDistribuicao::encontraInfCpl(const QString &xml) {
   const int indexInfCpl1 = xml.indexOf("<infCpl>");
   const int indexInfCpl2 = xml.indexOf("</infCpl>");
 
@@ -556,7 +556,7 @@ QString NFeDistribuicao::encontraInfCpl(const QString &xml) {
   return "";
 }
 
-QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
+QString WidgetNFeDistribuicao::encontraTransportadora(const QString &xml) {
   const int indexTransportadora1 = xml.indexOf("<transporta>");
   const int indexTransportadora2 = xml.indexOf("</transporta>");
 
@@ -572,7 +572,7 @@ QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
   return "";
 }
 
-void NFeDistribuicao::montaFiltro() {
+void WidgetNFeDistribuicao::montaFiltro() {
   ajustarGroupBoxStatus();
 
   //-------------------------------------
@@ -613,7 +613,7 @@ void NFeDistribuicao::montaFiltro() {
   model.setFilter(filtros.join(" AND "));
 }
 
-void NFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
+void WidgetNFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
   try {
@@ -633,7 +633,7 @@ void NFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
   montaFiltro();
 }
 
-void NFeDistribuicao::processarEventoPrincipal(const QString &evento, const QString &idLoja) {
+void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, const QString &idLoja) {
   const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
 
   //----------------------------------------------------------
@@ -658,7 +658,7 @@ void NFeDistribuicao::processarEventoPrincipal(const QString &evento, const QStr
   }
 }
 
-void NFeDistribuicao::processarEventoNFe(const QString &evento) {
+void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
   const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
 
   //----------------------------------------------------------
@@ -774,7 +774,7 @@ void NFeDistribuicao::processarEventoNFe(const QString &evento) {
   throw RuntimeException("Evento de NFe não tratado: " + evento);
 }
 
-void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
+void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
   if (evento.contains("Comprovante de Entrega do CT-e", Qt::CaseInsensitive)) { return; }
 
   //----------------------------------------------------------
@@ -865,7 +865,7 @@ void NFeDistribuicao::processarEventoInformacao(const QString &evento) {
   }
 }
 
-bool NFeDistribuicao::houveConsultaEmOutroPc() {
+bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
   QSqlQuery query;
 
   if (not query.exec("SELECT timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM maintenance")) {
@@ -877,7 +877,7 @@ bool NFeDistribuicao::houveConsultaEmOutroPc() {
   return query.value("tempo").toInt() < 60;
 }
 
-void NFeDistribuicao::ajustarGroupBoxStatus() {
+void WidgetNFeDistribuicao::ajustarGroupBoxStatus() {
   bool empty = true;
   auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
 

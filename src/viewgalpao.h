@@ -23,6 +23,7 @@ protected:
   auto mousePressEvent(QMouseEvent *event) -> void final;
   auto mouseReleaseEvent(QMouseEvent *event) -> void final;
   auto resizeEvent(QResizeEvent *event) -> void final;
+  auto viewportEvent(QEvent *event) -> bool final;
   auto wheelEvent(QWheelEvent *event) -> void final;
 
 private:

@@ -709,3 +709,4 @@ void WidgetGalpao::on_pushButtonFollowup_clicked() {
 // .implementar botão de ajustar quantidade, seja para mais ou para menos
 // .arrumar view_estoque_contabil
 // .colocar um botão de followup
+// .lidar com devoluções, marcar como 'entrada' ao devolver para estoque?

@@ -51,7 +51,7 @@ void WidgetEstoques::setHeaderData() {
   if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("unProd", "Un. Prod."); }
   model.setHeaderData("lote", "Lote");
   model.setHeaderData("local", "Local");
-  model.setHeaderData("bloco", "Bloco");
+  model.setHeaderData("label", "Bloco");
   model.setHeaderData("codComercial", "Cód. Com.");
   model.setHeaderData("nfe", "NFe");
   model.setHeaderData("dataPrevColeta", "Prev. Coleta");

@@ -640,7 +640,7 @@ void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
 void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged() {
   const QString idBloco = ui->comboBoxPalletAtual->currentData().toString();
 
-  if (idBloco.isEmpty()) { return; }
+  if (idBloco.isEmpty()) { return unselectBloco(); }
 
   const auto items = scene->items();
 

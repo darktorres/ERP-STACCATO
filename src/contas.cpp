@@ -311,15 +311,17 @@ void Contas::setupTables() {
 
 void Contas::verifyFields() {
   for (int row = 0; row < ui->tablePendentes->rowCount(); ++row) {
+    if (modelPendentes.data(row, "valor") == 0) { throw RuntimeError("'R$' vazio na linha " + QString::number(row + 1) + "!", this); }
+
     const QString status = modelPendentes.data(row, "status").toString();
 
     if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
-      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { throw RuntimeError("'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal") == 0) { throw RuntimeError("'R$ Real' vazio!", this); }
-      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { throw RuntimeError("'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "idConta") == 0) { throw RuntimeError("'Conta' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto") == 0) { throw RuntimeError("'Centro Custo' vazio!", this); }
-      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio!", this); }
+      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { throw RuntimeError("'Data Realizado' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "valorReal") == 0) { throw RuntimeError("'R$ Real' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { throw RuntimeError("'Tipo Real' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "idConta") == 0) { throw RuntimeError("'Conta' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "centroCusto") == 0) { throw RuntimeError("'Centro Custo' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio na linha " + QString::number(row + 1) + "!", this); }
     }
   }
 }
@@ -439,6 +441,8 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
       if (modelPendentes.fieldIndex("nfe") == col) { continue; }
       if (modelPendentes.fieldIndex("valor") == col) { continue; }
+      if (modelPendentes.fieldIndex("grupo") == col) { continue; }
+      if (modelPendentes.fieldIndex("subGrupo") == col) { continue; }
       if (modelPendentes.fieldIndex("desativado") == col) { continue; }
       if (modelPendentes.fieldIndex("created") == col) { continue; }
       if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }

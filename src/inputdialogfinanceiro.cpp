@@ -762,11 +762,11 @@ void InputDialogFinanceiro::setCodFornecedor() {
 }
 
 void InputDialogFinanceiro::on_table_selectionChanged() {
-  setCodFornecedor();
-
-  calcularTotal();
-
-  setMaximumST();
+  if (tipo == Tipo::ConfirmarCompra) {
+    setCodFornecedor();
+    calcularTotal();
+    setMaximumST();
+  }
 }
 
 void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
@@ -827,6 +827,7 @@ void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
     if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
 
     modelFluxoCaixa.setData(row, "valor", val);
+    // TODO: se for ST/FRETE preencher com ST/FRETE no tipo
     modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
     modelFluxoCaixa.setData(row, "parcela", parcela + 1);
     modelFluxoCaixa.setData(row, "observacao", observacaoPgt);

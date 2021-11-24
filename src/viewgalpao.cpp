@@ -26,7 +26,12 @@ void ViewGalpao::mouseMoveEvent(QMouseEvent *event) {
 
   // FIXME: quando o mouse é movido acima e/ou a esquerda do ponto inicial, o pallet fica invisivel (o tamanho fica negativo)
 
-  if (pallet) { pallet->setSize(QRectF(QPointF(0, 0), mapToScene(event->pos()) - pallet->pos())); }
+  if (pallet) {
+    const QPointF topLeft = {0, 0};
+    const QPointF bottomRight = mapToScene(event->pos()) - pallet->pos();
+
+    pallet->setSize(QRectF(topLeft, bottomRight));
+  }
 
   QGraphicsView::mouseMoveEvent(event);
 }

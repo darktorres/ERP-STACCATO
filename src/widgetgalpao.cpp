@@ -192,10 +192,10 @@ void WidgetGalpao::carregarPallets() {
     const QString label = queryBlocos.value("label").toString();
 
     const QStringList posicaoList = queryBlocos.value("posicao").toString().split(",");
-    const QPointF posicao = QPointF(posicaoList.at(0).toDouble(), posicaoList.at(1).toDouble());
+    const QPointF posicao = {posicaoList.at(0).toDouble(), posicaoList.at(1).toDouble()};
 
     const QStringList tamanhoList = queryBlocos.value("tamanho").toString().split(",");
-    const QRectF tamanho = QRectF(0, 0, tamanhoList.at(0).toDouble(), tamanhoList.at(1).toDouble());
+    const QRectF tamanho = {0, 0, tamanhoList.at(0).toDouble(), tamanhoList.at(1).toDouble()};
 
     auto *pallet = new PalletItem(idBloco, label, posicao, tamanho);
     pallet->setFlag(QGraphicsItem::ItemIsSelectable);

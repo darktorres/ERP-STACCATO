@@ -21,7 +21,7 @@ DEFINES *= QT_DEPRECATED_WARNINGS
 # VERSION is empty
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-CONFIG *= c++17 warn_on
+CONFIG *= c++latest warn_on
 
 PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header

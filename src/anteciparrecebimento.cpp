@@ -426,9 +426,11 @@ void AnteciparRecebimento::selecionarTaxa() {
     const auto listSelection = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : listSelection) {
-      const auto listMatch = modelContaReceber.multiMatch({{"idVenda", modelContaReceber.data(index.row(), "idVenda").toString()},
-                                                           {"tipo", modelContaReceber.data(index.row(), "tipo").toString().left(1) + ". TAXA CARTÃO"},
-                                                           {"parcela", modelContaReceber.data(index.row(), "parcela")}});
+      const QString idVenda = modelContaReceber.data(index.row(), "idVenda").toString();
+      const QString tipo = modelContaReceber.data(index.row(), "tipo").toString().left(1) + ". TAXA CARTÃO";
+      const QString parcela = modelContaReceber.data(index.row(), "parcela").toString();
+
+      const auto listMatch = modelContaReceber.multiMatch({{"idVenda", idVenda}, {"tipo", tipo}, {"parcela", parcela}});
 
       for (const auto &rowMatch : listMatch) { ui->table->selectRow(rowMatch); }
     }

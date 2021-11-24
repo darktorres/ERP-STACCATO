@@ -609,7 +609,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   ui->lineEditFoto->setText("Enviando...");
 
-  connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
+  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
     const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
 
     if (redirect.isValid()) {

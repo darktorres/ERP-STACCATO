@@ -33,7 +33,7 @@ void WidgetPagamentos::setConnections() {
 
   //  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked, connectionType);
   connect(
-      ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, [=] { on_pushButtonAdicionarPagamento_clicked(Pagamento::TipoPgt::Normal); }, connectionType);
+      ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, [=, this] { on_pushButtonAdicionarPagamento_clicked(Pagamento::TipoPgt::Normal); }, connectionType);
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked, connectionType);
   connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonPgtLoja_clicked, connectionType);
   connect(ui->pushButtonFreteLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonFreteLoja_clicked, connectionType);

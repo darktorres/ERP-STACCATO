@@ -202,3 +202,5 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
 
   qApp->enqueueInformation(respostaEmail);
 }
+
+// TODO: colocar parent em progressDialog para que a barra fique centralizada com a janela que chamou

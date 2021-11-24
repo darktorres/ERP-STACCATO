@@ -279,7 +279,7 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
   unsetConnections();
 
   try {
-    [=] {
+    [=, this] {
       if (representacao) { return; }
       if (not ui->widgetPgts->isVisible()) { return; }
 

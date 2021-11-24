@@ -26,9 +26,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  PalletItem *selectedIdBloco = nullptr;
+  PalletItem *currentPallet = nullptr;
   QGraphicsScene *scene = nullptr;
-  //  QHash<QString, PalletItem *> palletsHash;
   QStack<int> blockingSignals;
   SqlQueryModel modelPallet;
   SqlTableModel modelTranspAgend;
@@ -54,7 +53,7 @@ private:
   auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableTranspAgend_selectionChanged() -> void;
   auto salvarPallets() -> void;
-  auto selectBloco() -> void;
+  auto selectBloco(PalletItem *const palletPtr) -> void;
   auto setConnections() -> void;
   auto setFilter() -> void;
   auto setupTables() -> void;

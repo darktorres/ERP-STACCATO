@@ -29,7 +29,7 @@ public:
   auto unselect() -> void;
 
 signals:
-  void selectBloco();
+  void selectBloco(PalletItem *item);
   void unselectBloco();
 
 protected:

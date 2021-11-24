@@ -15,7 +15,7 @@ public:
   auto setResizable(bool newResizable) -> void;
 
 signals:
-  void selectBloco();
+  void selectBloco(PalletItem *item);
   void unselectBloco();
 
 protected:

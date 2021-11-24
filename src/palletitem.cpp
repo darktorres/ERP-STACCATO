@@ -144,7 +144,7 @@ void PalletItem::select() {
 
   selected = not selected;
 
-  if (selected) { emit selectBloco(); }
+  if (selected) { emit selectBloco(this); }
 
   if (not selected) { emit unselectBloco(); }
 

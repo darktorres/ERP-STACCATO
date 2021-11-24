@@ -80,7 +80,7 @@ void ViewGalpao::setIsEditable(bool newIsEditable) { isEditable = newIsEditable;
 bool ViewGalpao::viewportEvent(QEvent *event) {
   // TODO: usar essa funcao para receber TouchEvent
 
-  qDebug() << "event: " << event;
+  //  qDebug() << "event: " << event;
 
   return QGraphicsView::viewportEvent(event);
 }

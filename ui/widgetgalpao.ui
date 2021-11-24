@@ -96,17 +96,10 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonSalvarPallets">
-           <property name="text">
-            <string>Salvar alterações</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="3">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -118,6 +111,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pushButtonSalvarPallets">
+        <property name="text">
+         <string>Salvar alterações</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

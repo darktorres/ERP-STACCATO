@@ -349,6 +349,8 @@ void CadastrarNFe::removerNota(const int idNFe) {
 }
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NFe para verificar se foi autorizada!"); }
+
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
     qDebug() << "processarResposta -> rejeicao";
 
@@ -397,6 +399,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     ACBrLib::gerarDanfe(xml); // close if error
   } catch (std::exception &) {
     if (not manterAberto) { close(); }
+
     manterAberto = false;
     throw;
   }

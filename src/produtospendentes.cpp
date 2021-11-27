@@ -6,15 +6,12 @@
 #include "editdelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
-#include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QInputDialog>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 

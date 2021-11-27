@@ -23,7 +23,6 @@ private:
   bool recebido = false;
   QProgressDialog progressDialog;
   QString const welcome = "Esperando por comandos.\x03";
-  QString lastHost;
   QString resposta;
   QTcpSocket socket;
   // methods

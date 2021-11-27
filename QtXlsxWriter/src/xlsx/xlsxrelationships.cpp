@@ -22,13 +22,12 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <QBuffer>
-#include <QDir>
-#include <QFile>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 #include "xlsxrelationships_p.h"
+
+#include <QBuffer>
+#include <QDir>
+#include <QXmlStreamReader>
 
 namespace QXlsx {
 
@@ -57,7 +56,7 @@ void Relationships::addWorksheetRelationship(const QString &relativeType, const 
 QList<XlsxRelationship> Relationships::relationships(const QString &type) const {
   QList<XlsxRelationship> res;
   for (const auto &ship : m_relationships) {
-    if (ship.type == type) res.append(ship);
+    if (ship.type == type) { res.append(ship); }
   }
   return res;
 }
@@ -83,7 +82,7 @@ void Relationships::saveToXmlFile(QIODevice *device) const {
     writer.writeAttribute(QStringLiteral("Id"), relation.id);
     writer.writeAttribute(QStringLiteral("Type"), relation.type);
     writer.writeAttribute(QStringLiteral("Target"), relation.target);
-    if (not relation.targetMode.isNull()) writer.writeAttribute(QStringLiteral("TargetMode"), relation.targetMode);
+    if (not relation.targetMode.isNull()) { writer.writeAttribute(QStringLiteral("TargetMode"), relation.targetMode); }
     writer.writeEndElement();
   }
   writer.writeEndElement(); // Relationships
@@ -130,7 +129,7 @@ bool Relationships::loadFromXmlData(const QByteArray &data) {
 
 XlsxRelationship Relationships::getRelationshipById(const QString &id) const {
   for (const auto &ship : m_relationships) {
-    if (ship.id == id) return ship;
+    if (ship.id == id) { return ship; }
   }
   return XlsxRelationship();
 }

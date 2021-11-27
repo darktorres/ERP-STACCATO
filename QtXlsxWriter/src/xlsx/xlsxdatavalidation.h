@@ -49,7 +49,7 @@ public:
   enum ErrorStyle { Stop, Warning, Information };
 
   DataValidation();
-  DataValidation(ValidationType type, ValidationOperator op = Between, const QString &formula1 = QString(), const QString &formula2 = QString(), bool allowBlank = false);
+  explicit DataValidation(ValidationType type, ValidationOperator op = Between, const QString &formula1 = QString(), const QString &formula2 = QString(), bool allowBlank = false);
   DataValidation(const DataValidation &other);
   ~DataValidation();
 

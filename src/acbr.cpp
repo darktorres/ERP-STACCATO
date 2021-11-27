@@ -4,7 +4,6 @@
 #include "sqlquery.h"
 #include "user.h"
 
-#include <QDesktopServices>
 #include <QSqlError>
 #include <QThread>
 #include <QUrl>

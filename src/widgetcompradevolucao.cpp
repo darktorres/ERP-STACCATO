@@ -5,7 +5,6 @@
 #include "followup.h"
 #include "sql.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlError>
 

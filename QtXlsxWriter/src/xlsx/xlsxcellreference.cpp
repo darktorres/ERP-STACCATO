@@ -33,13 +33,13 @@ QT_BEGIN_NAMESPACE_XLSX
 namespace {
 
 int intPow(int x, int p) {
-  if (p == 0) return 1;
-  if (p == 1) return x;
+  if (p == 0) { return 1; }
+  if (p == 1) { return x; }
 
   int tmp = intPow(x, p / 2);
-  if (p % 2 == 0)
+  if (p % 2 == 0) {
     return tmp * tmp;
-  else
+  } else
     return x * tmp * tmp;
 }
 
@@ -50,7 +50,7 @@ QString col_to_name(int col_num) {
     QString col_str;
     while (col_num) {
       int remainder = col_num % 26;
-      if (remainder == 0) remainder = 26;
+      if (remainder == 0) { remainder = 26; }
       col_str.prepend(QChar('A' + remainder - 1));
       col_num = (col_num - 1) / 26;
     }
@@ -124,12 +124,12 @@ CellReference::CellReference(const CellReference &other) : _row(other._row), _co
      If current object is invalid, an empty string will be returned.
 */
 QString CellReference::toString(bool row_abs, bool col_abs) const {
-  if (not isValid()) return QString();
+  if (not isValid()) { return QString(); }
 
   QString cell_str;
-  if (col_abs) cell_str.append(QLatin1Char('$'));
+  if (col_abs) { cell_str.append(QLatin1Char('$')); }
   cell_str.append(col_to_name(_column));
-  if (row_abs) cell_str.append(QLatin1Char('$'));
+  if (row_abs) { cell_str.append(QLatin1Char('$')); }
   cell_str.append(QString::number(_row));
   return cell_str;
 }

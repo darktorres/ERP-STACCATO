@@ -18,6 +18,6 @@ private:
   // attributes
   int const statusColumn;
   int const quantColumn;
-  int const unidadeColumn;
+  //  int const unidadeColumn;
   // methods
 };

@@ -12,7 +12,6 @@
 #include "user.h"
 #include "xlsxdocument.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -350,11 +349,12 @@ bool WidgetCompraGerar::verificaRepresentacao(const QModelIndexList &list) {
 }
 
 QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ordemCompra, const bool isRepresentacao) {
-  const int firstRow = list.first().row();
-  const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
   const QString folderKey = User::getSetting("User/ComprasFolder").toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
+
+  const int firstRow = list.first().row();
+  const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();

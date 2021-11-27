@@ -13,8 +13,6 @@
 #include "user.h"
 #include "xlsxdocument.h"
 
-#include <QDate>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QMessageBox>

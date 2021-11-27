@@ -291,8 +291,7 @@ template <uint16_t N> class chunk_allocator {
     }
 
     ~chunk_list() {
-      do
-        free_last();
+      do free_last();
       while (last != nullptr);
     }
 

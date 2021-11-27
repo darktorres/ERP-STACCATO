@@ -5,17 +5,13 @@
 #include "application.h"
 #include "followup.h"
 #include "logindialog.h"
-#include "palletitem.h"
 #include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
 #include "venda.h"
 
 #include <QDebug>
-#include <QDrag>
-#include <QElapsedTimer>
 #include <QGraphicsProxyWidget>
-#include <QGraphicsRectItem>
 #include <QSqlError>
 
 WidgetGalpao::WidgetGalpao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpao) { ui->setupUi(this); }
@@ -301,7 +297,7 @@ void WidgetGalpao::on_tableTranspAgend_selectionChanged() {
 
   QStringList ids;
 
-  for (auto &index : list) { ids << modelTranspAgend.data(index.row(), "idVendaProduto2").toString(); }
+  for (const auto &index : list) { ids << modelTranspAgend.data(index.row(), "idVendaProduto2").toString(); }
 
   SqlQuery query;
 
@@ -647,6 +643,6 @@ void WidgetGalpao::on_pushButtonFollowup_clicked() {
 // .implementar botão de fracionar para separar um produto em vários pallets (usar idRelacionado para vincular os estoques)
 // =====> separar estoque em arvore?
 // .implementar botão de ajustar quantidade, seja para mais ou para menos
-// .arrumar view_estoque_contabil
-// .colocar um botão de followup
 // .lidar com devoluções, marcar como 'entrada' ao devolver para estoque?
+// .altura
+// .ao selecionar linhas mostrar a soma das cxs.

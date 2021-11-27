@@ -59,47 +59,41 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
   }
 }
 
-void XML::limparValores() { produto = {}; }
-
 void XML::lerValores(const QStandardItem *item) {
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {
       const QStandardItem *child = item->child(row, col);
       const QString parentText = child->parent()->text();
       QString text = child->text();
+      Produto produto;
 
       if (text.contains("chNFe - ")) { chaveAcesso = text.remove("chNFe - "); }
       if (text.contains("nNF - ")) { nNF = text.remove("nNF - ").rightJustified(9, '0'); }
-      if (text.contains("dhEmi - ")) { dataHoraEmissao = text.remove("dhEmi - "); }
 
-      if (parentText == "emit" and text.contains("xFant - ")) { xFant = text.remove("xFant - "); }
       if (parentText == "emit" and text.contains("xNome - ")) { xNome = text.remove("xNome - "); }
       if (parentText == "emit" and text.contains("CNPJ - ")) { cnpjOrig = text.remove("CNPJ - "); }
       if (parentText == "dest" and text.contains("CNPJ - ")) { cnpjDest = text.remove("CNPJ - "); }
       if (parentText == "transporta" and text.contains("xNome - ")) { xNomeTransp = text.remove("xNome - "); }
 
-      if (parentText == "prod") { lerDadosProduto(child); }
+      if (parentText == "prod") { lerDadosProduto(child, produto); }
       if (parentText == "ICMS" and text.left(4) == "ICMS") { produto.tipoICMS = text; }
-      if (parentText == produto.tipoICMS) { lerICMSProduto(child); }
-      if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child); }
-      if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child); }
-      if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child); }
+      if (parentText == produto.tipoICMS) { lerICMSProduto(child, produto); }
+      if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child, produto); }
+      if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child, produto); }
+      if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child, produto); }
 
       if (parentText == "ICMSTot") { lerTotais(child); }
 
       if (child->hasChildren()) {
         lerValores(child);
 
-        if (parentText == "COFINS") {
-          produtos << produto;
-          limparValores();
-        }
+        if (parentText == "COFINS") { produtos << produto; }
       }
     }
   }
 }
 
-void XML::lerDadosProduto(const QStandardItem *child) {
+void XML::lerDadosProduto(const QStandardItem *child, Produto &produto) {
   QString text = child->text();
 
   if (text.contains("cProd - ")) { produto.codProd = text.remove("cProd - "); }
@@ -112,7 +106,6 @@ void XML::lerDadosProduto(const QStandardItem *child) {
   if (text.contains("CFOP - ")) { produto.cfop = text.remove("CFOP - "); }
   if (text.contains("uCom - ")) { produto.un = text.remove("uCom - ").toUpper(); }
   if (text.contains("qCom - ")) { produto.quant = text.remove("qCom - ").toDouble(); }
-  if (text.contains("vUnCom - ")) { produto.valorUnid = text.remove("vUnCom - ").toDouble(); }
   if (text.contains("vProd - ")) { produto.valor = text.remove("vProd - ").toDouble(); }
   if (text.contains("cEANTrib - ")) { produto.codBarrasTrib = text.remove("cEANTrib - "); }
   if (text.contains("uTrib - ")) { produto.unTrib = text.remove("uTrib - "); }
@@ -127,7 +120,7 @@ void XML::lerDadosProduto(const QStandardItem *child) {
   if (text.contains("nItemPed - ")) { produto.itemPedido = text.remove("nItemPed - ").toInt(); }
 }
 
-void XML::lerICMSProduto(const QStandardItem *child) {
+void XML::lerICMSProduto(const QStandardItem *child, Produto &produto) {
   QString text = child->text();
 
   if (text.contains("orig - ")) { produto.orig = text.remove("orig - ").toInt(); }
@@ -143,7 +136,7 @@ void XML::lerICMSProduto(const QStandardItem *child) {
   if (text.contains("vICMSST - ")) { produto.vICMSST = text.remove("vICMSST - ").toDouble(); }
 }
 
-void XML::lerIPIProduto(const QStandardItem *child) {
+void XML::lerIPIProduto(const QStandardItem *child, Produto &produto) {
   QString text = child->text();
 
   if (text.contains("cEnq - ")) { produto.cEnq = text.remove("cEnq - ").toInt(); }
@@ -156,7 +149,7 @@ void XML::lerIPIProduto(const QStandardItem *child) {
   if (text.contains("CST - ")) { produto.cstIPI = text.remove("CST - ").toInt(); }
 }
 
-void XML::lerPISProduto(const QStandardItem *child) {
+void XML::lerPISProduto(const QStandardItem *child, Produto &produto) {
   QString text = child->text();
 
   if (text.contains("CST - ")) { produto.cstPIS = text.remove("CST - ").toInt(); }
@@ -165,7 +158,7 @@ void XML::lerPISProduto(const QStandardItem *child) {
   if (text.contains("vPIS - ")) { produto.vPIS = text.remove("vPIS - ").toDouble(); }
 }
 
-void XML::lerCOFINSProduto(const QStandardItem *child) {
+void XML::lerCOFINSProduto(const QStandardItem *child, Produto &produto) {
   QString text = child->text();
 
   if (text.contains("CST - ")) { produto.cstCOFINS = text.remove("CST - ").toInt(); }
@@ -177,20 +170,6 @@ void XML::lerCOFINSProduto(const QStandardItem *child) {
 void XML::lerTotais(const QStandardItem *child) {
   QString text = child->text();
 
-  if (text.contains("vBC - ")) { vBC_Total = text.remove("vBC - ").toDouble(); }
-  if (text.contains("vICMS - ")) { vICMS_Total = text.remove("vICMS - ").toDouble(); }
-  if (text.contains("vICMSDeson - ")) { vICMSDeson_Total = text.remove("vICMSDeson - ").toDouble(); }
-  if (text.contains("vBCST - ")) { vBCST_Total = text.remove("vBCST - ").toDouble(); }
-  if (text.contains("vST - ")) { vST_Total = text.remove("vST - ").toDouble(); }
-  if (text.contains("vProd - ")) { vProd_Total = text.remove("vProd - ").toDouble(); }
-  if (text.contains("vFrete - ")) { vFrete_Total = text.remove("vFrete - ").toDouble(); }
-  if (text.contains("vSeg - ")) { vSeg_Total = text.remove("vSeg - ").toDouble(); }
-  if (text.contains("vDesc - ")) { vDesc_Total = text.remove("vDesc - ").toDouble(); }
-  if (text.contains("vII - ")) { vII_Total = text.remove("vII - ").toDouble(); }
-  if (text.contains("vIPI - ")) { vPIS_Total = text.remove("vIPI - ").toDouble(); }
-  if (text.contains("vPIS - ")) { vPIS_Total = text.remove("vPIS - ").toDouble(); }
-  if (text.contains("vCOFINS - ")) { vCOFINS_Total = text.remove("vCOFINS - ").toDouble(); }
-  if (text.contains("vOutro - ")) { vOutro_Total = text.remove("vOutro - ").toDouble(); }
   if (text.contains("vNF - ")) { vNF_Total = text.remove("vNF - ").toDouble(); }
 }
 

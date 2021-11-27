@@ -17,7 +17,6 @@ public:
   QString customFileName;
 
   auto gerarExcel() -> void;
-  auto getFileName() const -> QString;
 
 private:
   // attributes

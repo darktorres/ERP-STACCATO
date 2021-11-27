@@ -33,7 +33,7 @@ private:
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelPedidoFornecedor2;
   SqlTableModel modelPedidoFornecedor;
-  SqlTreeModel modelTree;
+  //  SqlTreeModel modelTree;
   Tipo const tipo;
   Ui::InputDialogFinanceiro *ui;
   // methods
@@ -42,10 +42,8 @@ private:
   auto calcularTotal() -> void;
   auto montarFluxoCaixa() -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
-  auto on_checkBoxParcelarSt_toggled() -> void;
   auto on_comboBoxST_currentTextChanged() -> void;
   auto on_dateEditEvento_dateChanged(const QDate date) -> void;
-  auto on_dateEditPgtSt_dateChanged() -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged() -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
@@ -56,7 +54,7 @@ private:
   auto setCodFornecedor() -> void;
   auto setConnections() -> void;
   auto setMaximumST() -> void;
-  auto setTreeView() -> void;
+  //  auto setTreeView() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;

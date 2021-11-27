@@ -40,7 +40,6 @@ class QIODevice;
 class QDateTime;
 class QUrl;
 class QImage;
-class WorksheetTest;
 
 QT_BEGIN_NAMESPACE_XLSX
 class DocumentPrivate;
@@ -156,12 +155,11 @@ public:
 private:
   friend class DocumentPrivate;
   friend class Workbook;
-  friend class ::WorksheetTest;
   Worksheet(const QString &sheetName, int sheetId, Workbook *book, CreateFlag flag);
-  Worksheet *copy(const QString &distName, int distId) const;
+  Worksheet *copy(const QString &distName, int distId) const override;
 
-  void saveToXmlFile(QIODevice *device) const;
-  bool loadFromXmlFile(QIODevice *device);
+  void saveToXmlFile(QIODevice *device) const override;
+  bool loadFromXmlFile(QIODevice *device) override;
   Q_DISABLE_COPY(Worksheet)
 };
 

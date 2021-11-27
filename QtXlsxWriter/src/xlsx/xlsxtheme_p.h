@@ -46,10 +46,10 @@ class Theme : public AbstractOOXmlFile {
 public:
   explicit Theme(CreateFlag flag);
 
-  void saveToXmlFile(QIODevice *device) const;
-  QByteArray saveToXmlData() const;
-  bool loadFromXmlData(const QByteArray &data);
-  bool loadFromXmlFile(QIODevice *device);
+  void saveToXmlFile(QIODevice *device) const override;
+  QByteArray saveToXmlData() const override;
+  bool loadFromXmlData(const QByteArray &data) override;
+  bool loadFromXmlFile(QIODevice *device) override;
 
   QByteArray xmlData;
 };

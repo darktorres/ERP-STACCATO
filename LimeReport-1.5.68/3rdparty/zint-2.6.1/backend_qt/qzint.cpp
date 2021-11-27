@@ -470,8 +470,12 @@ void QZint::render(QPainter &painter, const QRectF &paintRect) {
         painter.setFont(fontLarge);
         painter.drawText(3 + xoffset, m_zintSymbol->height + yoffset, 29, 9, Qt::AlignCenter, caption.mid(0, 4));
         painter.drawText(35 + xoffset, m_zintSymbol->height + yoffset, 29, 9, Qt::AlignCenter, caption.mid(4, 4));
-        if (caption.size() == 11) { /* EAN-2 */ painter.drawText(76 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(9, 2)); };
-        if (caption.size() == 14) { /* EAN-5 */ painter.drawText(76 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(9, 5)); };
+        if (caption.size() == 11) { /* EAN-2 */
+          painter.drawText(76 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(9, 2));
+        };
+        if (caption.size() == 14) { /* EAN-5 */
+          painter.drawText(76 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(9, 5));
+        };
         painter.setFont(fontSmall);
         textdone = true;
         break;
@@ -488,8 +492,12 @@ void QZint::render(QPainter &painter, const QRectF &paintRect) {
         painter.drawText(xoffset - 7, m_zintSymbol->height + yoffset, 7, 9, Qt::AlignCenter, caption.mid(0, 1));
         painter.drawText(3 + xoffset, m_zintSymbol->height + yoffset, 43, 9, Qt::AlignCenter, caption.mid(1, 6));
         painter.drawText(49 + xoffset, m_zintSymbol->height + yoffset, 43, 9, Qt::AlignCenter, caption.mid(7, 6));
-        if (caption.size() == 16) { /* EAN-2 */ painter.drawText(104 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(14, 2)); };
-        if (caption.size() == 19) { /* EAN-5 */ painter.drawText(104 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(14, 5)); };
+        if (caption.size() == 16) { /* EAN-2 */
+          painter.drawText(104 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(14, 2));
+        };
+        if (caption.size() == 19) { /* EAN-5 */
+          painter.drawText(104 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(14, 5));
+        };
         painter.setFont(fontSmall);
         textdone = true;
         break;
@@ -543,8 +551,12 @@ void QZint::render(QPainter &painter, const QRectF &paintRect) {
       painter.setFont(fontLarge);
       painter.drawText(11 + xoffset, m_zintSymbol->height + yoffset, 35, 9, Qt::AlignCenter, caption.mid(1, 5));
       painter.drawText(49 + xoffset, m_zintSymbol->height + yoffset, 35, 9, Qt::AlignCenter, caption.mid(6, 5));
-      if (caption.size() == 15) { /* EAN-2 */ painter.drawText(104 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(13, 2)); };
-      if (caption.size() == 18) { /* EAN-5 */ painter.drawText(104 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(13, 5)); };
+      if (caption.size() == 15) { /* EAN-2 */
+        painter.drawText(104 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(13, 2));
+      };
+      if (caption.size() == 18) { /* EAN-5 */
+        painter.drawText(104 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(13, 5));
+      };
       painter.setFont(fontSmall);
       textdone = true;
     }
@@ -560,8 +572,12 @@ void QZint::render(QPainter &painter, const QRectF &paintRect) {
       painter.drawText(51 + xoffset, m_zintSymbol->height + yoffset + 2, 7, 7, Qt::AlignCenter, caption.mid(7, 1));
       painter.setFont(fontLarge);
       painter.drawText(3 + xoffset, m_zintSymbol->height + yoffset, 43, 9, Qt::AlignCenter, caption.mid(1, 6));
-      if (caption.size() == 11) { /* EAN-2 */ painter.drawText(60 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(9, 2)); };
-      if (caption.size() == 14) { /* EAN-2 */ painter.drawText(60 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(9, 5)); };
+      if (caption.size() == 11) { /* EAN-2 */
+        painter.drawText(60 + xoffset, addon_text_height, 20, 9, Qt::AlignCenter, caption.mid(9, 2));
+      };
+      if (caption.size() == 14) { /* EAN-2 */
+        painter.drawText(60 + xoffset, addon_text_height, 47, 9, Qt::AlignCenter, caption.mid(9, 5));
+      };
       painter.setFont(fontSmall);
       textdone = true;
     }

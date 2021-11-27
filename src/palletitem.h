@@ -12,18 +12,14 @@ public:
 
   //  auto addEstoque(const QString &estoqueText) -> void;
   auto boundingRect() const -> QRectF final;
-  auto getEstoques() const -> QString;
-  auto getFlagHighlight() const -> bool;
   auto getIdBloco() const -> QString;
   auto getLabel() const -> QString;
   auto getPosicao() const -> QString;
-  auto getSize() const -> const QRectF &;
   auto getTamanho() const -> QString;
   auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void final;
   //  auto reorderChildren() -> void;
   auto select() -> void;
   auto setFlagHighlight(const bool value) -> void;
-  auto setIdBloco(const QString &newIdBloco) -> void;
   auto setLabel(const QString &value) -> void;
   auto setSize(const QRectF &newSize) -> void;
   auto unselect() -> void;

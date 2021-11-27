@@ -49,7 +49,6 @@
 class QXmlStreamWriter;
 class QXmlStreamReader;
 class QIODevice;
-class StylesTest;
 
 namespace QXlsx {
 
@@ -72,14 +71,13 @@ public:
   void addDxfFormat(const Format &format, bool force = false);
   Format dxfFormat(int idx) const;
 
-  void saveToXmlFile(QIODevice *device) const;
-  bool loadFromXmlFile(QIODevice *device);
+  void saveToXmlFile(QIODevice *device) const override;
+  bool loadFromXmlFile(QIODevice *device) override;
 
   QColor getColorByIndex(int idx);
 
 private:
   friend class Format;
-  friend class ::StylesTest;
 
   void fixNumFmt(const Format &format);
 

@@ -3,7 +3,6 @@
 #include "application.h"
 #include "user.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlRecord>
 

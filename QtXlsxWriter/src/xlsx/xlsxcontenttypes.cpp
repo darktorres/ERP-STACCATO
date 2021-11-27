@@ -22,14 +22,12 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <QBuffer>
-#include <QDebug>
-#include <QFile>
-#include <QMapIterator>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 #include "xlsxcontenttypes_p.h"
+
+#include <QBuffer>
+#include <QDebug>
+#include <QXmlStreamReader>
 
 namespace QXlsx {
 

@@ -86,8 +86,9 @@ RichString::operator QVariant() const { return QVariant(QMetaType::fromType<Rich
     Returns true if this is rich text string.
  */
 bool RichString::isRichString() const {
-  if (fragmentCount() > 1) // Is this enough??
+  if (fragmentCount() > 1) { // Is this enough??
     return true;
+  }
   return false;
 }
 
@@ -111,8 +112,8 @@ bool RichString::isEmtpy() const {
     Converts to plain text string.
 */
 QString RichString::toPlainString() const {
-  if (isEmtpy()) return QString();
-  if (d->fragmentTexts.size() == 1) return d->fragmentTexts[0];
+  if (isEmtpy()) { return QString(); }
+  if (d->fragmentTexts.size() == 1) { return d->fragmentTexts[0]; }
 
   return d->fragmentTexts.join(QString());
 }
@@ -163,7 +164,7 @@ void RichString::addFragment(const QString &text, const Format &format) {
     Returns fragment text at the position \a index.
  */
 QString RichString::fragmentText(int index) const {
-  if (index < 0 or index >= fragmentCount()) return QString();
+  if (index < 0 or index >= fragmentCount()) { return QString(); }
 
   return d->fragmentTexts[index];
 }
@@ -172,7 +173,7 @@ QString RichString::fragmentText(int index) const {
     Returns fragment format at the position \a index.
  */
 Format RichString::fragmentFormat(int index) const {
-  if (index < 0 or index >= fragmentCount()) return Format();
+  if (index < 0 or index >= fragmentCount()) { return Format(); }
 
   return d->fragmentFormats[index];
 }
@@ -193,7 +194,7 @@ QByteArray RichStringPrivate::idKey() const {
         bytes.append("@Text");
         bytes.append(fragmentTexts[i].toUtf8());
         bytes.append("@Format");
-        if (fragmentFormats[i].hasFontData()) bytes.append(fragmentFormats[i].fontKey());
+        if (fragmentFormats[i].hasFontData()) { bytes.append(fragmentFormats[i].fontKey()); }
       }
     }
     rs->_idKey = bytes;
@@ -234,8 +235,9 @@ bool operator<(const RichString &rs1, const RichString &rs2) { return rs1.d->idK
     otherwise returns false.
  */
 bool operator==(const RichString &rs1, const QString &rs2) {
-  if (rs1.fragmentCount() == 1 and rs1.fragmentText(0) == rs2) // format == 0
+  if (rs1.fragmentCount() == 1 and rs1.fragmentText(0) == rs2) { // format == 0
     return true;
+  }
 
   return false;
 }
@@ -246,8 +248,9 @@ bool operator==(const RichString &rs1, const QString &rs2) {
     otherwise returns false.
  */
 bool operator!=(const RichString &rs1, const QString &rs2) {
-  if (rs1.fragmentCount() == 1 and rs1.fragmentText(0) == rs2) // format == 0
+  if (rs1.fragmentCount() == 1 and rs1.fragmentText(0) == rs2) { // format == 0
     return false;
+  }
 
   return true;
 }

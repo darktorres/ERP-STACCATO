@@ -99,28 +99,8 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelProximoEvento">
-        <property name="text">
-         <string>Data prevista próximo evento:</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QDateEdit" name="dateEditEvento">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="calendarPopup">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDateEdit" name="dateEditProximo">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -240,7 +220,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>dateEditEvento</tabstop>
-  <tabstop>dateEditProximo</tabstop>
   <tabstop>tableLogistica</tabstop>
   <tabstop>pushButtonQuebradoEntrega</tabstop>
   <tabstop>pushButtonQuebradoReceb</tabstop>

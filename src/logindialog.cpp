@@ -6,7 +6,6 @@
 #include "user.h"
 
 #include <QHostInfo>
-#include <QMessageBox>
 #include <QNetworkInterface>
 #include <QSqlError>
 #include <QVersionNumber>

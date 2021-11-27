@@ -4,7 +4,6 @@
 #include "anteciparrecebimento.h"
 #include "application.h"
 #include "contas.h"
-#include "doubledelegate.h"
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"

@@ -4,8 +4,6 @@
 #include "application.h"
 #include "cadastrarnfe.h"
 
-#include <QDebug>
-
 WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) { ui->setupUi(this); }
 
 WidgetDevolucao::~WidgetDevolucao() { delete ui; }

@@ -5,7 +5,6 @@
 #include "qsimpleupdater.h"
 #include "user.h"
 
-#include <QDebug>
 #include <QFile>
 #include <QIcon>
 #include <QInputDialog>
@@ -47,21 +46,11 @@ void Application::enqueueException(const QString &exception, QWidget *parent) {
   showMessages();
 }
 
-bool Application::enqueueException(const bool boolean, const QString &exception, QWidget *parent) {
-  enqueueException(exception, parent);
-  return boolean;
-}
-
 // for user errors
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
   showMessages();
-}
-
-bool Application::enqueueError(const bool boolean, const QString &error, QWidget *parent) {
-  enqueueError(error, parent);
-  return boolean;
 }
 
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
@@ -149,7 +138,7 @@ void Application::loginError() {
   throw RuntimeException(db.lastError().text());
 }
 
-bool Application::dbReconnect(const bool silent) {
+bool Application::dbReconnect(const bool isSilent) {
   db.close();
 
   isConnected = db.open();
@@ -158,7 +147,7 @@ bool Application::dbReconnect(const bool silent) {
 
   if (not isConnected) {
     // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
-    if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
+    if (not isSilent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
     return false;
   }
 

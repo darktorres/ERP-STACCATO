@@ -35,7 +35,6 @@
 class QXmlStreamReader;
 class QXmlStreamWriter;
 class QColor;
-class ConditionalFormattingTest;
 
 QT_BEGIN_NAMESPACE_XLSX
 
@@ -115,7 +114,6 @@ public:
 
 private:
   friend class Worksheet;
-  friend class ::ConditionalFormattingTest;
   bool saveToXml(QXmlStreamWriter &writer) const;
   bool loadFromXml(QXmlStreamReader &reader, Styles *styles = nullptr);
   QSharedDataPointer<ConditionalFormattingPrivate> d;

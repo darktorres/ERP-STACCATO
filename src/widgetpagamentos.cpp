@@ -396,8 +396,6 @@ void WidgetPagamentos::setFretePagoLoja() {
 
 void WidgetPagamentos::setIdOrcamento(const QString &newIdOrcamento) { idOrcamento = newIdOrcamento; }
 
-double WidgetPagamentos::getCredito() const { return credito; }
-
 void WidgetPagamentos::calcularRestante() {
   if (pagamentos.empty()) { return; }
 
@@ -425,11 +423,11 @@ void WidgetPagamentos::calcularTotal() {
   const double sumAll = std::accumulate(pagamentos.cbegin(), pagamentos.cend(), 0., [=](double accum, const Pagamento *pgt) { return accum += pgt->valorPgt->value(); });
 
   if (tipo == Tipo::Venda) {
-    double total = sumAll;
+    double totalPag = sumAll;
 
-    if (representacao) { total += frete; }
+    if (representacao) { totalPag += frete; }
 
-    ui->doubleSpinBoxTotalPag->setValue(total);
+    ui->doubleSpinBoxTotalPag->setValue(totalPag);
   }
 
   if (tipo == Tipo::Compra) { ui->doubleSpinBoxTotalPag->setValue(sumAll + frete + st); }
@@ -440,9 +438,8 @@ void WidgetPagamentos::calcularTotal() {
 }
 
 void WidgetPagamentos::insertPgtInScrollArea(Pagamento *pgt) {
-  int index = -1;
+  int index = -1; // insert at end
 
-  if (pgt->tipoPgt == Pagamento::TipoPgt::Normal) { index = -1; }                                         // insert at end
   if (pgt->tipoPgt == Pagamento::TipoPgt::Frete or pgt->tipoPgt == Pagamento::TipoPgt::ST) { index = 0; } // insert at beginning
 
   auto *scrollLayout = qobject_cast<QVBoxLayout *>(ui->scrollArea->widget()->layout());
@@ -489,33 +486,33 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const Pagamento::
   calcularTotal();
 }
 
-void WidgetPagamentos::on_pushButtonDelete_clicked() {
-  //  auto *sender = qobject_cast<QPushButton *>(QObject::sender()->parent());
+// void WidgetPagamentos::on_pushButtonDelete_clicked() {
+//  auto *sender = qobject_cast<QPushButton *>(QObject::sender()->parent());
 
-  //  QString name = sender->objectName().remove("pushButtonDelete");
-  //  int index = name.toInt() - 1;
+//  QString name = sender->objectName().remove("pushButtonDelete");
+//  int index = name.toInt() - 1;
 
-  //  auto frames = findChildren<QFrame *>("frame" + name);
+//  auto frames = findChildren<QFrame *>("frame" + name);
 
-  //  qDebug() << "name: " << name;
-  //  qDebug() << "index: " << index;
-  //  qDebug() << "frames: " << frames;
+//  qDebug() << "name: " << name;
+//  qDebug() << "index: " << index;
+//  qDebug() << "frames: " << frames;
 
-  //  qDebug() << "1listValor: " << listValorPgt;
-  //  qDebug() << "1listValor: " << listValorPgt.at(0)->value();
+//  qDebug() << "1listValor: " << listValorPgt;
+//  qDebug() << "1listValor: " << listValorPgt.at(0)->value();
 
-  //  listCheckBoxRep.removeAt(index);
-  //  listTipoPgt.removeAt(index);
-  //  listTipoData.removeAt(index);
-  //  listParcela.removeAt(index);
-  //  listValorPgt.removeAt(index);
-  //  listDataPgt.removeAt(index);
-  //  listObservacao.removeAt(index);
+//  listCheckBoxRep.removeAt(index);
+//  listTipoPgt.removeAt(index);
+//  listTipoData.removeAt(index);
+//  listParcela.removeAt(index);
+//  listValorPgt.removeAt(index);
+//  listDataPgt.removeAt(index);
+//  listObservacao.removeAt(index);
 
-  //  frames.at(0)->deleteLater();
+//  frames.at(0)->deleteLater();
 
-  //  qtdPagamentos -= 1;
-}
+//  qtdPagamentos -= 1;
+//}
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
 
@@ -548,12 +545,11 @@ void WidgetPagamentos::verifyFields() {
     if (pgtSt->valorPgt->value() < 0) { throw RuntimeError("Pagamento da ST´ está com valor negativo!"); }
   }
 
-  // TODO: trocar por um foreach e usar pgt.posicao no lugar de i
-  for (int i = 0; i < pagamentos.size(); ++i) {
-    if (pagamentos.at(i)->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!"); }
-    if (qFuzzyIsNull(pagamentos.at(i)->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(i + 1) + " está com valor 0!"); }
-    if (pagamentos.at(i)->valorPgt->value() < 0) { throw RuntimeError("Pagamento " + QString::number(i + 1) + " está com valor negativo!"); }
-    if (tipo == Tipo::Venda and pagamentos.at(i)->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!"); }
+  for (auto *pagamento : qAsConst(pagamentos)) {
+    if (pagamento->comboTipoPgt->currentText() == "") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pagamento->posicao) + "!"); }
+    if (qFuzzyIsNull(pagamento->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(pagamento->posicao) + " está com valor 0!"); }
+    if (pagamento->valorPgt->value() < 0) { throw RuntimeError("Pagamento " + QString::number(pagamento->posicao) + " está com valor negativo!"); }
+    if (tipo == Tipo::Venda and pagamento->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(pagamento->posicao) + "!"); }
   }
 }
 

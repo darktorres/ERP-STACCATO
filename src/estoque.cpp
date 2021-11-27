@@ -9,7 +9,6 @@
 #include "user.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QScrollBar>
 #include <QSqlError>
 #include <QSqlRecord>

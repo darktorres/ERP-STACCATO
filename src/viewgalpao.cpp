@@ -1,5 +1,4 @@
 #include "viewgalpao.h"
-#include "palletitem.h"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -44,14 +43,6 @@ void ViewGalpao::mouseReleaseEvent(QMouseEvent *event) {
   QGraphicsView::mouseReleaseEvent(event);
 }
 
-void ViewGalpao::resizeEvent(QResizeEvent *event) {
-  //  qDebug() << "GraphicsView::resizeEvent";
-
-  //  if (resizable and scene()) { fitInView(sceneRect(), Qt::KeepAspectRatio); }
-
-  QGraphicsView::resizeEvent(event);
-}
-
 void ViewGalpao::wheelEvent(QWheelEvent *event) {
   //  qDebug() << "GraphicsView::wheelEvent";
 
@@ -77,8 +68,6 @@ void ViewGalpao::wheelEvent(QWheelEvent *event) {
 
   QGraphicsView::wheelEvent(event);
 }
-
-void ViewGalpao::setResizable(bool newResizable) { resizable = newResizable; }
 
 void ViewGalpao::setIsEditable(bool newIsEditable) { isEditable = newIsEditable; }
 

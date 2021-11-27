@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "comboboxdelegate.h"
-#include "doubledelegate.h"
 #include "editdelegate.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
@@ -431,68 +430,68 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::setTreeView() {
-  modelTree.appendModel(&modelPedidoFornecedor);
-  modelTree.appendModel(&modelPedidoFornecedor2);
+// void InputDialogFinanceiro::setTreeView() {
+//  modelTree.appendModel(&modelPedidoFornecedor);
+//  modelTree.appendModel(&modelPedidoFornecedor2);
 
-  modelTree.updateData();
+//  modelTree.updateData();
 
-  modelTree.setHeaderData("aliquotaSt", "Alíquota ST");
-  modelTree.setHeaderData("st", "ST");
-  modelTree.setHeaderData("status", "Status");
-  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
-  modelTree.setHeaderData("idVenda", "Código");
-  modelTree.setHeaderData("fornecedor", "Fornecedor");
-  modelTree.setHeaderData("descricao", "Produto");
-  modelTree.setHeaderData("obs", "Obs.");
-  modelTree.setHeaderData("colecao", "Coleção");
-  modelTree.setHeaderData("codComercial", "Cód. Com.");
-  modelTree.setHeaderData("quant", "Quant.");
-  modelTree.setHeaderData("un", "Un.");
-  modelTree.setHeaderData("un2", "Un.2");
-  modelTree.setHeaderData("caixas", "Caixas");
-  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
-  modelTree.setHeaderData("preco", "Total");
-  modelTree.setHeaderData("kgcx", "Kg./Cx.");
-  modelTree.setHeaderData("formComercial", "Formato");
+//  modelTree.setHeaderData("aliquotaSt", "Alíquota ST");
+//  modelTree.setHeaderData("st", "ST");
+//  modelTree.setHeaderData("status", "Status");
+//  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+//  modelTree.setHeaderData("idVenda", "Código");
+//  modelTree.setHeaderData("fornecedor", "Fornecedor");
+//  modelTree.setHeaderData("descricao", "Produto");
+//  modelTree.setHeaderData("obs", "Obs.");
+//  modelTree.setHeaderData("colecao", "Coleção");
+//  modelTree.setHeaderData("codComercial", "Cód. Com.");
+//  modelTree.setHeaderData("quant", "Quant.");
+//  modelTree.setHeaderData("un", "Un.");
+//  modelTree.setHeaderData("un2", "Un.2");
+//  modelTree.setHeaderData("caixas", "Caixas");
+//  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
+//  modelTree.setHeaderData("preco", "Total");
+//  modelTree.setHeaderData("kgcx", "Kg./Cx.");
+//  modelTree.setHeaderData("formComercial", "Formato");
 
-  ui->treeView->setModel(&modelTree);
+//  ui->treeView->setModel(&modelTree);
 
-  ui->treeView->hideColumn("idRelacionado");
-  ui->treeView->hideColumn("idPedido2");
-  ui->treeView->hideColumn("idPedidoFK");
-  ui->treeView->hideColumn("selecionado");
-  ui->treeView->hideColumn("statusFinanceiro");
-  ui->treeView->hideColumn("ordemCompra");
-  ui->treeView->hideColumn("idVendaProduto1");
-  ui->treeView->hideColumn("idVendaProduto2");
-  ui->treeView->hideColumn("idCompra");
-  ui->treeView->hideColumn("idProduto");
-  ui->treeView->hideColumn("quantUpd");
-  ui->treeView->hideColumn("codBarras");
-  ui->treeView->hideColumn("dataPrevCompra");
-  ui->treeView->hideColumn("dataRealCompra");
-  ui->treeView->hideColumn("dataPrevConf");
-  ui->treeView->hideColumn("dataRealConf");
-  ui->treeView->hideColumn("dataPrevFat");
-  ui->treeView->hideColumn("dataRealFat");
-  ui->treeView->hideColumn("dataPrevColeta");
-  ui->treeView->hideColumn("dataRealColeta");
-  ui->treeView->hideColumn("dataPrevReceb");
-  ui->treeView->hideColumn("dataRealReceb");
-  ui->treeView->hideColumn("dataPrevEnt");
-  ui->treeView->hideColumn("dataRealEnt");
-  ui->treeView->hideColumn("created");
-  ui->treeView->hideColumn("lastUpdated");
+//  ui->treeView->hideColumn("idRelacionado");
+//  ui->treeView->hideColumn("idPedido2");
+//  ui->treeView->hideColumn("idPedidoFK");
+//  ui->treeView->hideColumn("selecionado");
+//  ui->treeView->hideColumn("statusFinanceiro");
+//  ui->treeView->hideColumn("ordemCompra");
+//  ui->treeView->hideColumn("idVendaProduto1");
+//  ui->treeView->hideColumn("idVendaProduto2");
+//  ui->treeView->hideColumn("idCompra");
+//  ui->treeView->hideColumn("idProduto");
+//  ui->treeView->hideColumn("quantUpd");
+//  ui->treeView->hideColumn("codBarras");
+//  ui->treeView->hideColumn("dataPrevCompra");
+//  ui->treeView->hideColumn("dataRealCompra");
+//  ui->treeView->hideColumn("dataPrevConf");
+//  ui->treeView->hideColumn("dataRealConf");
+//  ui->treeView->hideColumn("dataPrevFat");
+//  ui->treeView->hideColumn("dataRealFat");
+//  ui->treeView->hideColumn("dataPrevColeta");
+//  ui->treeView->hideColumn("dataRealColeta");
+//  ui->treeView->hideColumn("dataPrevReceb");
+//  ui->treeView->hideColumn("dataRealReceb");
+//  ui->treeView->hideColumn("dataPrevEnt");
+//  ui->treeView->hideColumn("dataRealEnt");
+//  ui->treeView->hideColumn("created");
+//  ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegate(new NoEditDelegate(this));
+//  ui->treeView->setItemDelegate(new NoEditDelegate(this));
 
-  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
-  ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
-  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
-}
+//  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
+//  ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
+//  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+//  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+//  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
+//}
 
 void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (idCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
@@ -642,7 +641,7 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   if (selection.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
 
   for (const auto &index : selection) {
-    if (modelFluxoCaixa.data(index.row(), "status").toString() == "SUBSTITUIDO") { throw RuntimeError("Selecionado linhas já substituídas!", this); };
+    if (modelFluxoCaixa.data(index.row(), "status").toString() == "SUBSTITUIDO") { throw RuntimeError("Selecionado linhas já substituídas!", this); }
   }
 
   //--------------------------------------------------
@@ -657,8 +656,6 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() { calcularTotal(); }
-
-void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged() { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
@@ -731,8 +728,6 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged() {
 
   montarFluxoCaixa();
 }
-
-void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled() { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::setMaximumST() {
   const double maximoST = selectedTotal * ui->doubleSpinBoxAliquota->maximum() / 100;

@@ -9,7 +9,7 @@ class ChartView : public QGraphicsView {
 public:
   explicit ChartView(QChart *chart, QWidget *parent);
 
-  auto keepTooltip() -> void;
+  //  auto keepTooltip() -> void;
   auto removeTooltips() -> void;
   auto resetRange(const bool startXZero, const bool startYZero) -> void;
   auto setFormatX(const QString &newFormatX) -> void;

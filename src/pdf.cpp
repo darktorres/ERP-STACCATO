@@ -1,19 +1,18 @@
 #include "pdf.h"
 
 #include "application.h"
-#include "file.h"
-#include "user.h"
 
 #if __has_include("lrreportengine.h")
 #include "lrreportengine.h"
-#endif
 
-#include <QDate>
-#include <QDebug>
+#include "file.h"
+#include "user.h"
+
 #include <QDesktopServices>
 #include <QDir>
+#endif
+
 #include <QSqlError>
-#include <QUrl>
 
 PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(parent), tipo(tipo) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));

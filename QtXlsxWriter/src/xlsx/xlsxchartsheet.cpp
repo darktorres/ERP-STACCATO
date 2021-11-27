@@ -22,17 +22,17 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <QDir>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
-#include "xlsxchart.h"
 #include "xlsxchartsheet.h"
+#include "xlsxchart.h"
 #include "xlsxchartsheet_p.h"
 #include "xlsxdrawing_p.h"
 #include "xlsxdrawinganchor_p.h"
 #include "xlsxutility_p.h"
 #include "xlsxworkbook.h"
+
+#include <QDir>
+#include <QXmlStreamReader>
 
 QT_BEGIN_NAMESPACE_XLSX
 

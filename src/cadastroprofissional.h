@@ -21,7 +21,7 @@ private:
   Ui::CadastroProfissional *ui;
   // methods
   auto cadastrar() -> void final;
-  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;

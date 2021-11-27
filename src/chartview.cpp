@@ -29,11 +29,11 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphi
   setMouseTracking(true);
 }
 
-void ChartView::keepTooltip() {
-  m_tooltips.append(m_tooltip);
-  m_tooltip = new ChartTooltip(m_chart);
-  m_tooltip->hide();
-}
+// void ChartView::keepTooltip() {
+//  m_tooltips.append(m_tooltip);
+//  m_tooltip = new ChartTooltip(m_chart);
+//  m_tooltip->hide();
+//}
 
 void ChartView::tooltip(const QPointF point, const bool state) {
   if (not m_tooltip) { m_tooltip = new ChartTooltip(m_chart); }

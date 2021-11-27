@@ -5,14 +5,14 @@
 #include <QSqlRecord>
 
 SortFilterProxyModel::SortFilterProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QSortFilterProxyModel(parent), statusColumn(model->record().indexOf("status")), quantColumn(model->record().indexOf("quant")), unidadeColumn(model->record().indexOf("un")) {
+    : QSortFilterProxyModel(parent), statusColumn(model->record().indexOf("status")), quantColumn(model->record().indexOf("quant")) /*, unidadeColumn(model->record().indexOf("un"))*/ {
   setSourceModel(model);
   setDynamicSortFilter(false);
   setSortCaseSensitivity(Qt::CaseInsensitive);
 }
 
 SortFilterProxyModel::SortFilterProxyModel(SqlTreeModel *model, QObject *parent)
-    : QSortFilterProxyModel(parent), statusColumn(model->fieldIndex("status")), quantColumn(model->fieldIndex("quant")), unidadeColumn(model->fieldIndex("un")) {
+    : QSortFilterProxyModel(parent), statusColumn(model->fieldIndex("status")), quantColumn(model->fieldIndex("quant")) /*, unidadeColumn(model->fieldIndex("un"))*/ {
   setSourceModel(model);
   setDynamicSortFilter(false);
   setSortCaseSensitivity(Qt::CaseInsensitive);

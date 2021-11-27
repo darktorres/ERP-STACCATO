@@ -22,18 +22,16 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <QBuffer>
-#include <QDebug>
-#include <QDir>
-#include <QFile>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 #include "xlsxcolor_p.h"
 #include "xlsxformat_p.h"
 #include "xlsxrichstring.h"
 #include "xlsxsharedstrings_p.h"
 #include "xlsxutility_p.h"
+
+#include <QBuffer>
+#include <QDebug>
+#include <QXmlStreamReader>
 
 namespace QXlsx {
 
@@ -86,7 +84,7 @@ void SharedStrings::removeSharedString(const QString &string) { removeSharedStri
  *Broken, don't use.
  */
 void SharedStrings::removeSharedString(const RichString &string) {
-  if (not m_stringTable.contains(string)) return;
+  if (not m_stringTable.contains(string)) { return; }
 
   m_stringCount -= 1;
 
@@ -94,7 +92,7 @@ void SharedStrings::removeSharedString(const RichString &string) {
   item.count -= 1;
 
   if (item.count <= 0) {
-    for (int i = item.index + 1; i < m_stringList.size(); ++i) m_stringTable[m_stringList[i]].index -= 1;
+    for (int i = item.index + 1; i < m_stringList.size(); ++i) { m_stringTable[m_stringList[i]].index -= 1; }
 
     m_stringList.removeAt(item.index);
     m_stringTable.remove(string);
@@ -104,45 +102,47 @@ void SharedStrings::removeSharedString(const RichString &string) {
 int SharedStrings::getSharedStringIndex(const QString &string) const { return getSharedStringIndex(RichString(string)); }
 
 int SharedStrings::getSharedStringIndex(const RichString &string) const {
-  if (m_stringTable.contains(string)) return m_stringTable[string].index;
+  if (m_stringTable.contains(string)) { return m_stringTable[string].index; }
   return -1;
 }
 
 RichString SharedStrings::getSharedString(int index) const {
-  if (index < m_stringList.count() and index >= 0) return m_stringList[index];
+  if (index < m_stringList.count() and index >= 0) { return m_stringList[index]; }
   return RichString();
 }
 
 QList<RichString> SharedStrings::getSharedStrings() const { return m_stringList; }
 
 void SharedStrings::writeRichStringPart_rPr(QXmlStreamWriter &writer, const Format &format) const {
-  if (not format.hasFontData()) return;
+  if (not format.hasFontData()) { return; }
 
-  if (format.fontBold()) writer.writeEmptyElement(QStringLiteral("b"));
-  if (format.fontItalic()) writer.writeEmptyElement(QStringLiteral("i"));
-  if (format.fontStrikeOut()) writer.writeEmptyElement(QStringLiteral("strike"));
-  if (format.fontOutline()) writer.writeEmptyElement(QStringLiteral("outline"));
-  if (format.boolProperty(FormatPrivate::P_Font_Shadow)) writer.writeEmptyElement(QStringLiteral("shadow"));
+  if (format.fontBold()) { writer.writeEmptyElement(QStringLiteral("b")); }
+  if (format.fontItalic()) { writer.writeEmptyElement(QStringLiteral("i")); }
+  if (format.fontStrikeOut()) { writer.writeEmptyElement(QStringLiteral("strike")); }
+  if (format.fontOutline()) { writer.writeEmptyElement(QStringLiteral("outline")); }
+  if (format.boolProperty(FormatPrivate::P_Font_Shadow)) { writer.writeEmptyElement(QStringLiteral("shadow")); }
   if (format.hasProperty(FormatPrivate::P_Font_Underline)) {
     Format::FontUnderline u = format.fontUnderline();
     if (u != Format::FontUnderlineNone) {
       writer.writeEmptyElement(QStringLiteral("u"));
-      if (u == Format::FontUnderlineDouble)
+      if (u == Format::FontUnderlineDouble) {
         writer.writeAttribute(QStringLiteral("val"), QStringLiteral("double"));
-      else if (u == Format::FontUnderlineSingleAccounting)
+      } else if (u == Format::FontUnderlineSingleAccounting) {
         writer.writeAttribute(QStringLiteral("val"), QStringLiteral("singleAccounting"));
-      else if (u == Format::FontUnderlineDoubleAccounting)
+      } else if (u == Format::FontUnderlineDoubleAccounting) {
         writer.writeAttribute(QStringLiteral("val"), QStringLiteral("doubleAccounting"));
+      }
     }
   }
   if (format.hasProperty(FormatPrivate::P_Font_Script)) {
     Format::FontScript s = format.fontScript();
     if (s != Format::FontScriptNormal) {
       writer.writeEmptyElement(QStringLiteral("vertAlign"));
-      if (s == Format::FontScriptSuper)
+      if (s == Format::FontScriptSuper) {
         writer.writeAttribute(QStringLiteral("val"), QStringLiteral("superscript"));
-      else
+      } else {
         writer.writeAttribute(QStringLiteral("val"), QStringLiteral("subscript"));
+      }
     }
   }
 
@@ -198,7 +198,7 @@ void SharedStrings::saveToXmlFile(QIODevice *device) const {
           writer.writeEndElement(); // rPr
         }
         writer.writeStartElement(QStringLiteral("t"));
-        if (isSpaceReserveNeeded(string.fragmentText(i))) writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve"));
+        if (isSpaceReserveNeeded(string.fragmentText(i))) { writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve")); }
         writer.writeCharacters(string.fragmentText(i));
         writer.writeEndElement(); // t
 
@@ -207,7 +207,7 @@ void SharedStrings::saveToXmlFile(QIODevice *device) const {
     } else {
       writer.writeStartElement(QStringLiteral("t"));
       QString pString = string.toPlainString();
-      if (isSpaceReserveNeeded(pString)) writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve"));
+      if (isSpaceReserveNeeded(pString)) { writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve")); }
       writer.writeCharacters(pString);
       writer.writeEndElement(); // t
     }
@@ -226,10 +226,11 @@ void SharedStrings::readString(QXmlStreamReader &reader) {
   while (not reader.atEnd() and not(reader.name() == QLatin1String("si") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
-      if (reader.name() == QLatin1String("r"))
+      if (reader.name() == QLatin1String("r")) {
         readRichStringPart(reader, richString);
-      else if (reader.name() == QLatin1String("t"))
+      } else if (reader.name() == QLatin1String("t")) {
         readPlainStringPart(reader, richString);
+      }
     }
   }
 
@@ -300,20 +301,22 @@ Format SharedStrings::readRichStringPart_rPr(QXmlStreamReader &reader) {
         format.setFontSize(attributes.value(QLatin1String("val")).toString().toInt());
       } else if (reader.name() == QLatin1String("u")) {
         QString value = attributes.value(QLatin1String("val")).toString();
-        if (value == QLatin1String("double"))
+        if (value == QLatin1String("double")) {
           format.setFontUnderline(Format::FontUnderlineDouble);
-        else if (value == QLatin1String("doubleAccounting"))
+        } else if (value == QLatin1String("doubleAccounting")) {
           format.setFontUnderline(Format::FontUnderlineDoubleAccounting);
-        else if (value == QLatin1String("singleAccounting"))
+        } else if (value == QLatin1String("singleAccounting")) {
           format.setFontUnderline(Format::FontUnderlineSingleAccounting);
-        else
+        } else {
           format.setFontUnderline(Format::FontUnderlineSingle);
+        }
       } else if (reader.name() == QLatin1String("vertAlign")) {
         QString value = attributes.value(QLatin1String("val")).toString();
-        if (value == QLatin1String("superscript"))
+        if (value == QLatin1String("superscript")) {
           format.setFontScript(Format::FontScriptSuper);
-        else if (value == QLatin1String("subscript"))
+        } else if (value == QLatin1String("subscript")) {
           format.setFontScript(Format::FontScriptSub);
+        }
       } else if (reader.name() == QLatin1String("scheme")) {
         format.setProperty(FormatPrivate::P_Font_Scheme, attributes.value(QLatin1String("val")).toString());
       }
@@ -331,7 +334,7 @@ bool SharedStrings::loadFromXmlFile(QIODevice *device) {
     if (token == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("sst")) {
         QXmlStreamAttributes attributes = reader.attributes();
-        if ((hasUniqueCountAttr = attributes.hasAttribute(QLatin1String("uniqueCount")))) count = attributes.value(QLatin1String("uniqueCount")).toString().toInt();
+        if ((hasUniqueCountAttr = attributes.hasAttribute(QLatin1String("uniqueCount")))) { count = attributes.value(QLatin1String("uniqueCount")).toString().toInt(); }
       } else if (reader.name() == QLatin1String("si")) {
         readString(reader);
       }

@@ -33,8 +33,6 @@
 #include <QList>
 #include <QVariant>
 
-class FormatTest;
-
 QT_BEGIN_NAMESPACE_XLSX
 
 class Styles;
@@ -228,7 +226,6 @@ public:
 
 private:
   friend class Styles;
-  friend class ::FormatTest;
   friend Q_XLSX_EXPORT QDebug operator<<(QDebug, const Format &f);
 
   int theme() const;

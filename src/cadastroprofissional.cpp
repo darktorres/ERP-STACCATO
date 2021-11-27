@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "itembox.h"
 #include "user.h"
 
 #include <QDebug>
@@ -331,7 +330,7 @@ void CadastroProfissional::on_lineEditCPF_textEdited(const QString &text) { ui->
 
 void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) { ui->lineEditCNPJ->setStyleSheet(validaCNPJ(text) ? "" : "color: rgb(255, 0, 0)"); }
 
-bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -352,16 +351,16 @@ bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
 void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {

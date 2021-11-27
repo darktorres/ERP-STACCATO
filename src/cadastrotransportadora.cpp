@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "searchdialog.h"
 #include "user.h"
 
 #include <QDebug>
@@ -179,11 +178,13 @@ void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroTransportadora::on_pushButtonDesativarEnd_clicked() {
@@ -202,7 +203,7 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
-bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -223,8 +224,6 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroTransportadora::novoEndereco() {

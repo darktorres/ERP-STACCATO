@@ -29,7 +29,7 @@ public:
 
 private:
   // attributes
-  QString const idVenda;
+  QString const m_idVenda;
   SqlQueryModel model;
   Ui::Comprovantes *ui;
   // methods

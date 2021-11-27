@@ -6,7 +6,6 @@
 #include "user.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
@@ -42,7 +41,7 @@ void FollowUp::setConnections() {
 void FollowUp::on_pushButtonCancelar_clicked() { close(); }
 
 void FollowUp::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
   SqlQuery query;
   if (tipo == Tipo::Orcamento) {
@@ -93,14 +92,12 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   close();
 }
 
-bool FollowUp::verifyFields() {
+void FollowUp::verifyFields() {
   if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
     throw RuntimeError("Deve selecionar uma temperatura!", this);
   }
 
   if (ui->plainTextEdit->toPlainText().isEmpty()) { throw RuntimeError("Deve escrever uma observação!", this); }
-
-  return true;
 }
 
 void FollowUp::setupTables() {

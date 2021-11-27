@@ -53,13 +53,10 @@ protected:
 
 private:
   // attributes
-  QStringList textKeys;
   QDataWidgetMapper mapper;
   QWidget *parent = nullptr;
   // methods
-  auto getTextKeys() const -> QStringList;
   auto requiredStyle() -> QString;
-  auto setTextKeys(const QStringList &value) -> void;
   virtual auto cadastrar() -> void = 0;
   virtual auto closeEvent(QCloseEvent *event) -> void final;
   virtual auto keyPressEvent(QKeyEvent *event) -> void final;

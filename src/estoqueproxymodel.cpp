@@ -3,7 +3,6 @@
 #include "application.h"
 #include "user.h"
 
-#include <QBrush>
 #include <QSqlRecord>
 
 EstoqueProxyModel::EstoqueProxyModel(QSqlQueryModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->record().indexOf("quantUpd")) {

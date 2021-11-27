@@ -22,8 +22,8 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+
 #include "xlsxcellrange.h"
-#include "xlsxcellreference.h"
 
 #include <QPoint>
 #include <QString>
@@ -96,7 +96,7 @@ CellRange::CellRange(const CellRange &other) : top(other.top), left(other.left),
      Convert the range to string notation, such as "A1:B5".
 */
 QString CellRange::toString(bool row_abs, bool col_abs) const {
-  if (not isValid()) return QString();
+  if (not isValid()) { return QString(); }
 
   if (left == right and top == bottom) {
     // Single cell

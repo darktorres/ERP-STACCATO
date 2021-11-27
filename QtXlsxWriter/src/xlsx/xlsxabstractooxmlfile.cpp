@@ -27,7 +27,6 @@
 #include "xlsxabstractooxmlfile_p.h"
 
 #include <QBuffer>
-#include <QByteArray>
 
 QT_BEGIN_NAMESPACE_XLSX
 

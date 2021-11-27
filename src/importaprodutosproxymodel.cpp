@@ -3,7 +3,6 @@
 #include "application.h"
 #include "user.h"
 
-#include <QBrush>
 #include <QSqlRecord>
 
 ImportaProdutosProxyModel::ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent) : SortFilterProxyModel(model, parent), descontinuadoColumn(model->record().indexOf("descontinuado")) {

@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
-#include "editdelegate.h"
 #include "itemboxdelegate.h"
 #include "porcentagemdelegate.h"
 #include "sqlquery.h"

@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   QSharedMemory sharedMemory;
   sharedMemory.setKey("staccato-erp");
 
-  if (sharedMemory.create(1) == false) {
+  if (not sharedMemory.create(1)) {
     QMessageBox::critical(nullptr, "Erro!", "ERP já rodando!");
     app.exit();
     return 0;

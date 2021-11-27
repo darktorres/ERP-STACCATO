@@ -24,31 +24,23 @@
 ****************************************************************************/
 
 #include "xlsxdocument.h"
-#include "application.h"
-#include "file.h"
 #include "xlsxchart.h"
-#include "xlsxcontenttypes_p.h"
 #include "xlsxdocpropsapp_p.h"
 #include "xlsxdocpropscore_p.h"
 #include "xlsxdocument_p.h"
 #include "xlsxdrawing_p.h"
 #include "xlsxmediafile_p.h"
-#include "xlsxrelationships_p.h"
 #include "xlsxsharedstrings_p.h"
 #include "xlsxstyles_p.h"
-#include "xlsxtheme_p.h"
 #include "xlsxutility_p.h"
-#include "xlsxworkbook.h"
 #include "xlsxworkbook_p.h"
-#include "xlsxworksheet.h"
 #include "xlsxzipreader_p.h"
 #include "xlsxzipwriter_p.h"
 
-#include <QBuffer>
-#include <QDir>
-#include <QFile>
+#include "application.h"
+#include "file.h"
+
 #include <QMessageBox>
-#include <QPointF>
 
 QT_BEGIN_NAMESPACE_XLSX
 
@@ -90,9 +82,9 @@ QT_BEGIN_NAMESPACE_XLSX
 DocumentPrivate::DocumentPrivate(Document *p) : q_ptr(p), defaultPackageName(QStringLiteral("Book1.xlsx")) {}
 
 void DocumentPrivate::init() {
-  if (contentTypes.isNull()) contentTypes = QSharedPointer<ContentTypes>(new ContentTypes(ContentTypes::F_NewFromScratch));
+  if (contentTypes.isNull()) { contentTypes = QSharedPointer<ContentTypes>(new ContentTypes(ContentTypes::F_NewFromScratch)); }
 
-  if (workbook.isNull()) workbook = QSharedPointer<Workbook>(new Workbook(Workbook::F_NewFromScratch));
+  if (workbook.isNull()) { workbook = QSharedPointer<Workbook>(new Workbook(Workbook::F_NewFromScratch)); }
 }
 
 bool DocumentPrivate::loadPackage(QIODevice *device) {
@@ -119,7 +111,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
 
     DocPropsCore props(DocPropsCore::F_LoadFromExists);
     props.loadFromXmlData(zipReader.fileData(docPropsCore_Name));
-    for (const auto &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
+    for (const auto &name : props.propertyNames()) { q->setDocumentProperty(name, props.property(name)); }
   }
 
   // load app property
@@ -131,7 +123,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
 
     DocPropsApp props(DocPropsApp::F_LoadFromExists);
     props.loadFromXmlData(zipReader.fileData(docPropsApp_Name));
-    for (const auto &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
+    for (const auto &name : props.propertyNames()) { q->setDocumentProperty(name, props.property(name)); }
   }
 
   // load workbook now, Get the workbook file path from the root rels file
@@ -179,7 +171,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
     AbstractSheet *sheet = workbook->sheet(i);
     QString rel_path = getRelFilePath(sheet->filePath());
     // If the .rel file exists, load it.
-    if (zipReader.filePaths().contains(rel_path)) sheet->relationships()->loadFromXmlData(zipReader.fileData(rel_path));
+    if (zipReader.filePaths().contains(rel_path)) { sheet->relationships()->loadFromXmlData(zipReader.fileData(rel_path)); }
     sheet->loadFromXmlData(zipReader.fileData(sheet->filePath()));
   }
 
@@ -188,7 +180,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
     SimpleOOXmlFile *link = workbook->d_func()->externalLinks[i].data();
     QString rel_path = getRelFilePath(link->filePath());
     // If the .rel file exists, load it.
-    if (zipReader.filePaths().contains(rel_path)) link->relationships()->loadFromXmlData(zipReader.fileData(rel_path));
+    if (zipReader.filePaths().contains(rel_path)) { link->relationships()->loadFromXmlData(zipReader.fileData(rel_path)); }
     link->loadFromXmlData(zipReader.fileData(link->filePath()));
   }
 
@@ -196,7 +188,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
   for (int i = 0; i < workbook->drawings().size(); ++i) {
     Drawing *drawing = workbook->drawings()[i];
     QString rel_path = getRelFilePath(drawing->filePath());
-    if (zipReader.filePaths().contains(rel_path)) drawing->relationships()->loadFromXmlData(zipReader.fileData(rel_path));
+    if (zipReader.filePaths().contains(rel_path)) { drawing->relationships()->loadFromXmlData(zipReader.fileData(rel_path)); }
     drawing->loadFromXmlData(zipReader.fileData(drawing->filePath()));
   }
 
@@ -265,7 +257,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
 
     zipWriter.addFile(QStringLiteral("xl/externalLinks/externalLink%1.xml").arg(i + 1), link->saveToXmlData());
     Relationships *rel = link->relationships();
-    if (not rel->isEmpty()) zipWriter.addFile(QStringLiteral("xl/externalLinks/_rels/externalLink%1.xml.rels").arg(i + 1), rel->saveToXmlData());
+    if (not rel->isEmpty()) { zipWriter.addFile(QStringLiteral("xl/externalLinks/_rels/externalLink%1.xml.rels").arg(i + 1), rel->saveToXmlData()); }
   }
 
   // save workbook xml file
@@ -279,7 +271,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
 
     Drawing *drawing = workbook->drawings()[i];
     zipWriter.addFile(QStringLiteral("xl/drawings/drawing%1.xml").arg(i + 1), drawing->saveToXmlData());
-    if (not drawing->relationships()->isEmpty()) zipWriter.addFile(QStringLiteral("xl/drawings/_rels/drawing%1.xml.rels").arg(i + 1), drawing->relationships()->saveToXmlData());
+    if (not drawing->relationships()->isEmpty()) { zipWriter.addFile(QStringLiteral("xl/drawings/_rels/drawing%1.xml.rels").arg(i + 1), drawing->relationships()->saveToXmlData()); }
   }
 
   // save docProps app/core xml file
@@ -316,7 +308,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
   // save image files
   for (int i = 0; i < workbook->mediaFiles().size(); ++i) {
     QSharedPointer<MediaFile> mf = workbook->mediaFiles()[i];
-    if (not mf->mimeType().isEmpty()) contentTypes->addDefault(mf->suffix(), mf->mimeType());
+    if (not mf->mimeType().isEmpty()) { contentTypes->addDefault(mf->suffix(), mf->mimeType()); }
 
     zipWriter.addFile(QStringLiteral("xl/media/image%1.%2").arg(i + 1).arg(mf->suffix()), mf->contents());
   }
@@ -357,7 +349,7 @@ Document::Document(const QString &name, QWidget *parent) : QObject(parent), d_pt
   d_ptr->packageName = name;
   if (QFile::exists(name)) {
     File xlsx(name);
-    if (xlsx.open(QFile::ReadOnly)) d_ptr->loadPackage(&xlsx);
+    if (xlsx.open(QFile::ReadOnly)) { d_ptr->loadPackage(&xlsx); }
   }
   d_ptr->init();
 }
@@ -368,7 +360,7 @@ Document::Document(const QString &name, QWidget *parent) : QObject(parent), d_pt
  * The \a parent argument is passed to QObject's constructor.
  */
 Document::Document(QIODevice *device, QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)), parent(parent) {
-  if (device and device->isReadable()) d_ptr->loadPackage(device);
+  if (device and device->isReadable()) { d_ptr->loadPackage(device); }
   d_ptr->init();
 }
 
@@ -378,7 +370,7 @@ Document::Document(QIODevice *device, QWidget *parent) : QObject(parent), d_ptr(
     Write \a value to cell \a row_column with the given \a format.
  */
 bool Document::write(const CellReference &row_column, const QVariant &value, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->write(row_column, value, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->write(row_column, value, format); }
   return false;
 }
 
@@ -387,7 +379,7 @@ bool Document::write(const CellReference &row_column, const QVariant &value, con
  * Returns true on success.
  */
 bool Document::write(int row, int col, const QVariant &value, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->write(row, col, value, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->write(row, col, value, format); }
   return false;
 }
 
@@ -398,7 +390,7 @@ bool Document::write(int row, int col, const QVariant &value, const Format &form
     \sa cellAt()
 */
 QVariant Document::read(const CellReference &cell) const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->read(cell);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->read(cell); }
   return QVariant();
 }
 
@@ -408,12 +400,12 @@ QVariant Document::read(const CellReference &cell) const {
     \sa cellAt()
  */
 QVariant Document::read(int row, int col) const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->read(row, col);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->read(row, col); }
   return QVariant();
 }
 
 QVariant Document::readValue(int row, int col) const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->readValue(row, col);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->readValue(row, col); }
   return QVariant();
 }
 
@@ -422,7 +414,7 @@ QVariant Document::readValue(int row, int col) const {
  * Returns ture if success.
  */
 bool Document::insertImage(int row, int column, const QImage &image) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->insertImage(row, column, image);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->insertImage(row, column, image); }
   return false;
 }
 
@@ -432,7 +424,7 @@ bool Document::insertImage(int row, int column, const QImage &image) {
  * The chart will be returned.
  */
 Chart *Document::insertChart(int row, int col, const QSize &size) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->insertChart(row, col, size);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->insertChart(row, col, size); }
   return nullptr;
 }
 
@@ -444,7 +436,7 @@ Chart *Document::insertChart(int row, int col, const QSize &size) {
   \note All cells except the top-left one will be cleared.
  */
 bool Document::mergeCells(const CellRange &range, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->mergeCells(range, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->mergeCells(range, format); }
   return false;
 }
 
@@ -453,7 +445,7 @@ bool Document::mergeCells(const CellRange &range, const Format &format) {
   Returns true on success.
 */
 bool Document::unmergeCells(const CellRange &range) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->unmergeCells(range);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->unmergeCells(range); }
   return false;
 }
 
@@ -462,7 +454,7 @@ bool Document::unmergeCells(const CellRange &range) {
   Returns true on success.
  */
 bool Document::setColumnWidth(const CellRange &range, double width) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnWidth(range, width);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnWidth(range, width); }
   return false;
 }
 
@@ -471,7 +463,7 @@ bool Document::setColumnWidth(const CellRange &range, double width) {
   Returns true on success.
  */
 bool Document::setColumnFormat(const CellRange &range, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnFormat(range, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnFormat(range, format); }
   return false;
 }
 
@@ -481,7 +473,7 @@ bool Document::setColumnFormat(const CellRange &range, const Format &format) {
   Returns true on success.
  */
 bool Document::setColumnHidden(const CellRange &range, bool hidden) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnWidth(range, hidden);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnWidth(range, hidden); }
   return false;
 }
 
@@ -508,7 +500,7 @@ bool Document::setColumnHidden(int column, bool hidden) { return setColumnHidden
   Returns true on success.
  */
 bool Document::setColumnWidth(int colFirst, int colLast, double width) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnWidth(colFirst, colLast, width);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnWidth(colFirst, colLast, width); }
   return false;
 }
 
@@ -518,7 +510,7 @@ bool Document::setColumnWidth(int colFirst, int colLast, double width) {
   Returns true on success.
  */
 bool Document::setColumnFormat(int colFirst, int colLast, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnFormat(colFirst, colLast, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnFormat(colFirst, colLast, format); }
   return false;
 }
 
@@ -528,7 +520,7 @@ bool Document::setColumnFormat(int colFirst, int colLast, const Format &format) 
   Returns true on success.
  */
 bool Document::setColumnHidden(int colFirst, int colLast, bool hidden) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setColumnHidden(colFirst, colLast, hidden);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setColumnHidden(colFirst, colLast, hidden); }
   return false;
 }
 
@@ -538,7 +530,7 @@ bool Document::setColumnHidden(int colFirst, int colLast, bool hidden) {
   Returns true on success.
  */
 double Document::columnWidth(int column) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->columnWidth(column);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->columnWidth(column); }
   return 0.0;
 }
 
@@ -546,7 +538,7 @@ double Document::columnWidth(int column) {
   Returns formatting of the \a column. Columns are 1-indexed.
  */
 Format Document::columnFormat(int column) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->columnFormat(column);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->columnFormat(column); }
   return Format();
 }
 
@@ -554,7 +546,7 @@ Format Document::columnFormat(int column) {
   Returns true if \a column is hidden. Columns are 1-indexed.
  */
 bool Document::isColumnHidden(int column) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->isColumnHidden(column);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->isColumnHidden(column); }
   return false;
 }
 
@@ -573,7 +565,7 @@ bool Document::setRowFormat(int row, const Format &format) { return setRowFormat
   Returns true if success.
 */
 bool Document::setRowFormat(int rowFirst, int rowLast, const Format &format) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setRowFormat(rowFirst, rowLast, format);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setRowFormat(rowFirst, rowLast, format); }
   return false;
 }
 
@@ -592,7 +584,7 @@ bool Document::setRowHidden(int row, bool hidden) { return setRowHidden(row, row
   Returns true if success.
 */
 bool Document::setRowHidden(int rowFirst, int rowLast, bool hidden) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setRowHidden(rowFirst, rowLast, hidden);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setRowHidden(rowFirst, rowLast, hidden); }
   return false;
 }
 
@@ -613,7 +605,7 @@ bool Document::setRowHeight(int row, double height) { return setRowHeight(row, r
   Returns true if success.
 */
 bool Document::setRowHeight(int rowFirst, int rowLast, double height) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->setRowHeight(rowFirst, rowLast, height);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->setRowHeight(rowFirst, rowLast, height); }
   return false;
 }
 
@@ -621,7 +613,7 @@ bool Document::setRowHeight(int rowFirst, int rowLast, double height) {
  Returns height of \a row in points.
 */
 double Document::rowHeight(int row) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->rowHeight(row);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->rowHeight(row); }
   return 0.0;
 }
 
@@ -629,7 +621,7 @@ double Document::rowHeight(int row) {
  Returns format of \a row.
 */
 Format Document::rowFormat(int row) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->rowFormat(row);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->rowFormat(row); }
   return Format();
 }
 
@@ -637,7 +629,7 @@ Format Document::rowFormat(int row) {
  Returns true if \a row is hidden.
 */
 bool Document::isRowHidden(int row) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->isRowHidden(row);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->isRowHidden(row); }
   return false;
 }
 
@@ -646,7 +638,7 @@ bool Document::isRowHidden(int row) {
    Returns false if error occurs.
  */
 bool Document::groupRows(int rowFirst, int rowLast, bool collapsed) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->groupRows(rowFirst, rowLast, collapsed);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->groupRows(rowFirst, rowLast, collapsed); }
   return false;
 }
 
@@ -655,7 +647,7 @@ bool Document::groupRows(int rowFirst, int rowLast, bool collapsed) {
    Returns false if error occurs.
  */
 bool Document::groupColumns(int colFirst, int colLast, bool collapsed) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->groupColumns(colFirst, colLast, collapsed);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->groupColumns(colFirst, colLast, collapsed); }
   return false;
 }
 
@@ -663,7 +655,7 @@ bool Document::groupColumns(int colFirst, int colLast, bool collapsed) {
  *  Add a data \a validation rule for current worksheet. Returns true if successful.
  */
 bool Document::addDataValidation(const DataValidation &validation) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->addDataValidation(validation);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->addDataValidation(validation); }
   return false;
 }
 
@@ -671,7 +663,7 @@ bool Document::addDataValidation(const DataValidation &validation) {
  *  Add a  conditional formatting \a cf for current worksheet. Returns true if successful.
  */
 bool Document::addConditionalFormatting(const ConditionalFormatting &cf) {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->addConditionalFormatting(cf);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->addConditionalFormatting(cf); }
   return false;
 }
 
@@ -683,7 +675,7 @@ bool Document::addConditionalFormatting(const ConditionalFormatting &cf) {
  * \sa read()
  */
 Cell *Document::cellAt(const CellReference &pos) const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->cellAt(pos);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->cellAt(pos); }
   return nullptr;
 }
 
@@ -694,7 +686,7 @@ Cell *Document::cellAt(const CellReference &pos) const {
  * \sa read()
  */
 Cell *Document::cellAt(int row, int col) const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->cellAt(row, col);
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->cellAt(row, col); }
   return nullptr;
 }
 
@@ -717,7 +709,7 @@ bool Document::defineName(const QString &name, const QString &formula, const QSt
     Return the range that contains cell data.
  */
 CellRange Document::dimension() const {
-  if (Worksheet *sheet = currentWorksheet()) return sheet->dimension();
+  if (Worksheet *sheet = currentWorksheet()) { return sheet->dimension(); }
   return CellRange();
 }
 
@@ -726,9 +718,9 @@ CellRange Document::dimension() const {
  */
 QString Document::documentProperty(const QString &key) const {
   Q_D(const Document);
-  if (d->documentProperties.contains(key))
+  if (d->documentProperties.contains(key)) {
     return d->documentProperties[key];
-  else
+  } else
     return QString();
 }
 
@@ -854,9 +846,9 @@ AbstractSheet *Document::currentSheet() const {
  */
 Worksheet *Document::currentWorksheet() const {
   AbstractSheet *st = currentSheet();
-  if (st and st->sheetType() == AbstractSheet::SheetType::ST_WorkSheet)
+  if (st and st->sheetType() == AbstractSheet::SheetType::ST_WorkSheet) {
     return static_cast<Worksheet *>(st);
-  else
+  } else
     return nullptr;
 }
 

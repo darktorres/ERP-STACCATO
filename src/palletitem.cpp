@@ -1,7 +1,6 @@
 #include "palletitem.h"
 
 #include "application.h"
-#include "sqlquery.h"
 
 #include <QDebug>
 #include <QGraphicsProxyWidget>
@@ -10,8 +9,6 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QScrollArea>
-#include <QSqlError>
-#include <QToolTip>
 
 PalletItem::PalletItem(const QString &idBloco, const QString &label, const QPointF posicao, const QRectF &size, QGraphicsItem *parent)
     : QGraphicsObject(parent), size(size), idBloco(idBloco), label(label) {
@@ -181,8 +178,6 @@ void PalletItem::unselectAll() {
   }
 }
 
-const QRectF &PalletItem::getSize() const { return size; }
-
 void PalletItem::setSize(const QRectF &newSize) {
   prepareGeometryChange();
   size = newSize;
@@ -196,15 +191,9 @@ void PalletItem::setLabel(const QString &value) {
 
 QString PalletItem::getLabel() const { return label; }
 
-QString PalletItem::getEstoques() const { return estoques; }
-
-bool PalletItem::getFlagHighlight() const { return flagHighlight; }
-
 void PalletItem::setFlagHighlight(const bool value) { flagHighlight = value; }
 
 QString PalletItem::getIdBloco() const { return idBloco; }
-
-void PalletItem::setIdBloco(const QString &newIdBloco) { idBloco = newIdBloco; }
 
 QString PalletItem::getPosicao() const { return QString::number(scenePos().x()) + "," + QString::number(scenePos().y()); }
 

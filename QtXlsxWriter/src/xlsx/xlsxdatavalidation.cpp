@@ -29,7 +29,6 @@
 #include "xlsxworksheet.h"
 
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 QT_BEGIN_NAMESPACE_XLSX
 
@@ -209,20 +208,22 @@ void DataValidation::setErrorStyle(DataValidation::ErrorStyle es) { d->errorStyl
     Sets the formula1 to \a formula.
  */
 void DataValidation::setFormula1(const QString &formula) {
-  if (formula.startsWith(QLatin1Char('=')))
+  if (formula.startsWith(QLatin1Char('='))) {
     d->formula1 = formula.mid(1);
-  else
+  } else {
     d->formula1 = formula;
+  }
 }
 
 /*!
     Sets the formulas to \a formula.
  */
 void DataValidation::setFormula2(const QString &formula) {
-  if (formula.startsWith(QLatin1Char('=')))
+  if (formula.startsWith(QLatin1Char('='))) {
     d->formula2 = formula.mid(1);
-  else
+  } else {
     d->formula2 = formula;
+  }
 }
 
 /*!
@@ -311,25 +312,25 @@ bool DataValidation::saveToXml(QXmlStreamWriter &writer) const {
   }
 
   writer.writeStartElement(QStringLiteral("dataValidation"));
-  if (validationType() != DataValidation::None) writer.writeAttribute(QStringLiteral("type"), typeMap[validationType()]);
-  if (errorStyle() != DataValidation::Stop) writer.writeAttribute(QStringLiteral("errorStyle"), esMap[errorStyle()]);
-  if (validationOperator() != DataValidation::Between) writer.writeAttribute(QStringLiteral("operator"), opMap[validationOperator()]);
-  if (allowBlank()) writer.writeAttribute(QStringLiteral("allowBlank"), QStringLiteral("1"));
+  if (validationType() != DataValidation::None) { writer.writeAttribute(QStringLiteral("type"), typeMap[validationType()]); }
+  if (errorStyle() != DataValidation::Stop) { writer.writeAttribute(QStringLiteral("errorStyle"), esMap[errorStyle()]); }
+  if (validationOperator() != DataValidation::Between) { writer.writeAttribute(QStringLiteral("operator"), opMap[validationOperator()]); }
+  if (allowBlank()) { writer.writeAttribute(QStringLiteral("allowBlank"), QStringLiteral("1")); }
   //        if (dropDownVisible())
   //            writer.writeAttribute(QStringLiteral("showDropDown"), QStringLiteral("1"));
-  if (isPromptMessageVisible()) writer.writeAttribute(QStringLiteral("showInputMessage"), QStringLiteral("1"));
-  if (isErrorMessageVisible()) writer.writeAttribute(QStringLiteral("showErrorMessage"), QStringLiteral("1"));
-  if (not errorMessageTitle().isEmpty()) writer.writeAttribute(QStringLiteral("errorTitle"), errorMessageTitle());
-  if (not errorMessage().isEmpty()) writer.writeAttribute(QStringLiteral("error"), errorMessage());
-  if (not promptMessageTitle().isEmpty()) writer.writeAttribute(QStringLiteral("promptTitle"), promptMessageTitle());
-  if (not promptMessage().isEmpty()) writer.writeAttribute(QStringLiteral("prompt"), promptMessage());
+  if (isPromptMessageVisible()) { writer.writeAttribute(QStringLiteral("showInputMessage"), QStringLiteral("1")); }
+  if (isErrorMessageVisible()) { writer.writeAttribute(QStringLiteral("showErrorMessage"), QStringLiteral("1")); }
+  if (not errorMessageTitle().isEmpty()) { writer.writeAttribute(QStringLiteral("errorTitle"), errorMessageTitle()); }
+  if (not errorMessage().isEmpty()) { writer.writeAttribute(QStringLiteral("error"), errorMessage()); }
+  if (not promptMessageTitle().isEmpty()) { writer.writeAttribute(QStringLiteral("promptTitle"), promptMessageTitle()); }
+  if (not promptMessage().isEmpty()) { writer.writeAttribute(QStringLiteral("prompt"), promptMessage()); }
 
   QStringList sqref;
-  for (const auto &range : ranges()) sqref.append(range.toString());
+  for (const auto &range : ranges()) { sqref.append(range.toString()); }
   writer.writeAttribute(QStringLiteral("sqref"), sqref.join(QLatin1Char(' ')));
 
-  if (not formula1().isEmpty()) writer.writeTextElement(QStringLiteral("formula1"), formula1());
-  if (not formula2().isEmpty()) writer.writeTextElement(QStringLiteral("formula2"), formula2());
+  if (not formula1().isEmpty()) { writer.writeTextElement(QStringLiteral("formula1"), formula1()); }
+  if (not formula2().isEmpty()) { writer.writeTextElement(QStringLiteral("formula2"), formula2()); }
 
   writer.writeEndElement(); // dataValidation
 
@@ -373,7 +374,7 @@ DataValidation DataValidation::loadFromXml(QXmlStreamReader &reader) {
   QXmlStreamAttributes attrs = reader.attributes();
 
   QString sqref = attrs.value(QLatin1String("sqref")).toString();
-  for (const auto &range : sqref.split(QLatin1Char(' '))) validation.addRange(range);
+  for (const auto &range : sqref.split(QLatin1Char(' '))) { validation.addRange(CellRange(range)); }
 
   if (attrs.hasAttribute(QLatin1String("type"))) {
     QString t = attrs.value(QLatin1String("type")).toString();
@@ -405,11 +406,11 @@ DataValidation DataValidation::loadFromXml(QXmlStreamReader &reader) {
 
   QString et = attrs.value(QLatin1String("errorTitle")).toString();
   QString e = attrs.value(QLatin1String("error")).toString();
-  if (not e.isEmpty() or not et.isEmpty()) validation.setErrorMessage(e, et);
+  if (not e.isEmpty() or not et.isEmpty()) { validation.setErrorMessage(e, et); }
 
   QString pt = attrs.value(QLatin1String("promptTitle")).toString();
   QString p = attrs.value(QLatin1String("prompt")).toString();
-  if (not p.isEmpty() or not pt.isEmpty()) validation.setPromptMessage(p, pt);
+  if (not p.isEmpty() or not pt.isEmpty()) { validation.setPromptMessage(p, pt); }
 
   // find the end
   while (not(reader.name() == QLatin1String("dataValidation") and reader.tokenType() == QXmlStreamReader::EndElement)) {

@@ -2,19 +2,15 @@
 #include "ui_inserirlancamento.h"
 
 #include "application.h"
-#include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
 #include "dateformatdelegate.h"
-#include "doubledelegate.h"
 #include "itembox.h"
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QtMath>
 

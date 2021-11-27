@@ -12,7 +12,6 @@
 #include "sqlquery.h"
 #include "venda.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>

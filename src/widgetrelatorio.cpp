@@ -105,19 +105,6 @@ void WidgetRelatorio::calcularTotalGeral() {
   if (modelViewRelatorioLoja.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount()); }
 }
 
-void WidgetRelatorio::calcularTotalVendedor() {
-  double comissao = 0;
-  double porcentagem = 0;
-
-  for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
-    comissao += modelViewRelatorioVendedor.data(row, "Comissão").toDouble();
-    porcentagem += modelViewRelatorioVendedor.data(row, "%").toDouble();
-  }
-
-  ui->doubleSpinBoxValorComissao->setValue(comissao);
-  if (modelViewRelatorioVendedor.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioVendedor.rowCount()); }
-}
-
 void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
   QString filter = "Mês = '" + date + "'";

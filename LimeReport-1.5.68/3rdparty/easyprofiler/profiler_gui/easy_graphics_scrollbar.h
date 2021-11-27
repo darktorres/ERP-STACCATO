@@ -77,6 +77,7 @@ namespace profiler_gui {
 // By the way, Windows critical sections are slower than std::atomic_flag on Unix.
 class spin_lock {
   void *m_lock;
+
 public:
   void lock();
   void unlock();
@@ -88,6 +89,7 @@ namespace profiler_gui {
 // std::atomic_flag on Unix works fine and very fast (almost instant!)
 class spin_lock {
   ::std::atomic_flag m_lock;
+
 public:
   void lock() {
     while (m_lock.test_and_set(::std::memory_order_acquire))

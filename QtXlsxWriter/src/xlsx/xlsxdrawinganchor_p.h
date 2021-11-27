@@ -99,35 +99,35 @@ protected:
 
 class DrawingAbsoluteAnchor : public DrawingAnchor {
 public:
-  DrawingAbsoluteAnchor(Drawing *drawing, ObjectType objectType = Unknown);
+  explicit DrawingAbsoluteAnchor(Drawing *drawing, ObjectType objectType = Unknown);
 
   QPoint pos;
   QSize ext;
 
-  bool loadFromXml(QXmlStreamReader &reader);
-  void saveToXml(QXmlStreamWriter &writer) const;
+  bool loadFromXml(QXmlStreamReader &reader) override;
+  void saveToXml(QXmlStreamWriter &writer) const override;
 };
 
 class DrawingOneCellAnchor : public DrawingAnchor {
 public:
-  DrawingOneCellAnchor(Drawing *drawing, ObjectType objectType = Unknown);
+  explicit DrawingOneCellAnchor(Drawing *drawing, ObjectType objectType = Unknown);
 
   XlsxMarker from;
   QSize ext;
 
-  bool loadFromXml(QXmlStreamReader &reader);
-  void saveToXml(QXmlStreamWriter &writer) const;
+  bool loadFromXml(QXmlStreamReader &reader) override;
+  void saveToXml(QXmlStreamWriter &writer) const override;
 };
 
 class DrawingTwoCellAnchor : public DrawingAnchor {
 public:
-  DrawingTwoCellAnchor(Drawing *drawing, ObjectType objectType = Unknown);
+  explicit DrawingTwoCellAnchor(Drawing *drawing, ObjectType objectType = Unknown);
 
   XlsxMarker from;
   XlsxMarker to;
 
-  bool loadFromXml(QXmlStreamReader &reader);
-  void saveToXml(QXmlStreamWriter &writer) const;
+  bool loadFromXml(QXmlStreamReader &reader) override;
+  void saveToXml(QXmlStreamWriter &writer) const override;
 };
 
 } // namespace QXlsx

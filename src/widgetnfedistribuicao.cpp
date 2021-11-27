@@ -3,12 +3,10 @@
 
 #include "acbrlib.h"
 #include "application.h"
-#include "file.h"
 #include "nfeproxymodel.h"
 #include "reaisdelegate.h"
 #include "user.h"
 
-#include <QFile>
 #include <QInputDialog>
 #include <QSqlError>
 #include <QTimer>
@@ -27,6 +25,8 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
   if (houveConsultaEmOutroPc()) { return; }
 
+  timer.stop();
+
   updateTables();
 
   qDebug() << "download Automatico";
@@ -36,13 +36,11 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
     on_pushButtonPesquisar_clicked();
   } catch (std::exception &) {
     qApp->setSilent(false);
+    timer.start(tempoTimer);
     throw;
   }
 
   qApp->setSilent(false);
-
-  //-----------------------------------------------------------------
-
   timer.start(tempoTimer);
 }
 
@@ -753,6 +751,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     return;
   }
 
+  // TODO: condition is always true
   if (cadastrado) {
     const QString statusCadastrado = queryNFe.value("status").toString();
 
@@ -771,6 +770,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     return;
   }
 
+  // TODO: unreachable code
   throw RuntimeException("Evento de NFe não tratado: " + evento);
 }
 

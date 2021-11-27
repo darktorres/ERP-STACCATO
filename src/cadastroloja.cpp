@@ -195,11 +195,13 @@ void CadastroLoja::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 void CadastroLoja::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
 void CadastroLoja::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroLoja::on_pushButtonDesativarEnd_clicked() {
@@ -220,7 +222,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.select();
 }
 
-bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -241,8 +243,6 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroLoja::novoEndereco() {
@@ -396,7 +396,7 @@ bool CadastroLoja::newRegister() {
   return true;
 }
 
-bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
+void CadastroLoja::cadastrarConta(const Tipo tipoConta) {
   if (ui->lineEditBanco->text().isEmpty()) { throw RuntimeError("Banco inválido!", this); }
 
   if (tipoConta == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
@@ -408,8 +408,6 @@ bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
   if (tipoConta == Tipo::Cadastrar) { backupConta.append(modelConta.record(currentRowConta)); }
 
   isDirty = true;
-
-  return true;
 }
 
 void CadastroLoja::novaConta() {
@@ -428,11 +426,13 @@ void CadastroLoja::clearConta() {
 
 void CadastroLoja::on_pushButtonAdicionarConta_clicked() {
   // TODO: colocar flag para indicar que conta é virtual?
-  if (cadastrarConta()) { novaConta(); }
+  cadastrarConta();
+  novaConta();
 }
 
 void CadastroLoja::on_pushButtonAtualizarConta_clicked() {
-  if (cadastrarConta(Tipo::Atualizar)) { novaConta(); }
+  cadastrarConta(Tipo::Atualizar);
+  novaConta();
 }
 
 void CadastroLoja::on_pushButtonDesativarConta_clicked() {

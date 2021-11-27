@@ -5,19 +5,15 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
-#include "file.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
 
-#include <QDate>
 #include <QDir>
-#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlRecord>
 
 CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), idVenda(idVenda), tipo(tipo), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);

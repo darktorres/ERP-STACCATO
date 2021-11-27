@@ -3,9 +3,6 @@
 
 #include "application.h"
 #include "doubledelegate.h"
-#include "editdelegate.h"
-#include "noeditdelegate.h"
-#include "reaisdelegate.h"
 #include "user.h"
 
 #include <QDebug>

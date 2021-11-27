@@ -4,7 +4,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
-#include "reaisdelegate.h"
 #include "sql.h"
 
 #include <QMessageBox>

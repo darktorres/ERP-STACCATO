@@ -36,12 +36,10 @@ public:
   auto ajustarDiaUtil(const QDate date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> void;
-  auto dbReconnect(const bool silent = false) -> bool;
+  auto dbReconnect(const bool isSilent = false) -> bool;
   auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
-  auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueException(const QString &exception, QWidget *parent = nullptr) -> void;
-  auto enqueueException(const bool boolean, const QString &exception, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
   auto getInTransaction() const -> bool;

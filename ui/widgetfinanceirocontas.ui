@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>944</width>
-    <height>1025</height>
+    <width>1502</width>
+    <height>456</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,8 +106,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>175</width>
-            <height>1003</height>
+            <width>166</width>
+            <height>588</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
@@ -525,100 +525,6 @@
              </layout>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QGroupBox" name="groupBox_3">
-             <property name="title">
-              <string>Operações</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_6">
-              <property name="spacing">
-               <number>3</number>
-              </property>
-              <property name="leftMargin">
-               <number>2</number>
-              </property>
-              <property name="topMargin">
-               <number>2</number>
-              </property>
-              <property name="rightMargin">
-               <number>2</number>
-              </property>
-              <property name="bottomMargin">
-               <number>2</number>
-              </property>
-              <item>
-               <widget class="QPushButton" name="pushButtonRemessaItau">
-                <property name="text">
-                 <string>Gerar remessa ITAÚ</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Importar folha pag.</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Antecipar recebimento</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonInserirLancamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Inserir lançamento</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonInserirTransferencia">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Inserir transferência</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonExcluirLancamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Excluir lançamento</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButtonReverterPagamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Reverter pagamento</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
           </layout>
          </widget>
         </widget>
@@ -653,6 +559,94 @@
          <property name="sortingEnabled">
           <bool>true</bool>
          </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QFrame" name="frame_3">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Antecipar recebimento</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExcluirLancamento">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Excluir lançamento</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonRemessaItau">
+            <property name="text">
+             <string>Gerar remessa ITAÚ</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonImportarFolhaPag">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Importar folha pag.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonInserirLancamento">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Inserir lançamento</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonInserirTransferencia">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Inserir transferência</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonReverterPagamento">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Reverter pagamento</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -700,13 +694,7 @@
   <tabstop>dateEditRealizadoAte</tabstop>
   <tabstop>doubleSpinBoxDe</tabstop>
   <tabstop>doubleSpinBoxAte</tabstop>
-  <tabstop>pushButtonRemessaItau</tabstop>
-  <tabstop>pushButtonImportarFolhaPag</tabstop>
-  <tabstop>pushButtonAdiantarRecebimento</tabstop>
-  <tabstop>pushButtonInserirLancamento</tabstop>
   <tabstop>pushButtonInserirTransferencia</tabstop>
-  <tabstop>pushButtonExcluirLancamento</tabstop>
-  <tabstop>pushButtonReverterPagamento</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
  </tabstops>

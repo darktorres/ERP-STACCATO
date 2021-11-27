@@ -100,10 +100,6 @@ void RegisterDialog::keyPressEvent(QKeyEvent *event) {
   QDialog::keyPressEvent(event);
 }
 
-QStringList RegisterDialog::getTextKeys() const { return textKeys; }
-
-void RegisterDialog::setTextKeys(const QStringList &value) { textKeys = value; }
-
 void RegisterDialog::show() {
   QWidget::show();
   adjustSize();

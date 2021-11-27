@@ -94,8 +94,8 @@ void WidgetOrcamento::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetOrcamento::delayFiltro, connectionType);
   connect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked, connectionType);
-  connect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButtonProprios_toggled, connectionType);
-  connect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButtonTodos_toggled, connectionType);
+  connect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled, connectionType);
+  connect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated, connectionType);
 }
 
@@ -120,8 +120,8 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetOrcamento::delayFiltro);
   disconnect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked);
-  disconnect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButtonProprios_toggled);
-  disconnect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButtonTodos_toggled);
+  disconnect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled);
+  disconnect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled);
   disconnect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
 }
 
@@ -391,11 +391,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
   setConnections();
 }
 
-void WidgetOrcamento::on_radioButtonTodos_toggled(const bool checked) {
-  if (checked) { montaFiltro(); }
-}
-
-void WidgetOrcamento::on_radioButtonProprios_toggled(const bool checked) {
+void WidgetOrcamento::on_radioButton_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 

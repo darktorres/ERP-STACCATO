@@ -24,7 +24,7 @@ private:
   Ui::CadastroTransportadora *ui;
   // methods
   auto cadastrar() -> void final;
-  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> void;
   auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;

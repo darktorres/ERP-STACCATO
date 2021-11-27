@@ -14,7 +14,6 @@ public:
   auto columnIndex(const QString &column) const -> int;
   auto columnIndex(const QString &column, const bool silent) const -> int;
   auto hideColumn(const QString &column) -> void;
-  auto openPersistentEditor(const int row, const int column) -> void;
   auto resort() -> void;
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;

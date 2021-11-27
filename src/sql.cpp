@@ -1,6 +1,5 @@
 #include "sql.h"
 
-#include "application.h"
 #include "sqlquery.h"
 
 #include <QSqlError>

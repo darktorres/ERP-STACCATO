@@ -20,7 +20,7 @@ private:
   // attributes
   bool const isRepresentacao;
   QStack<int> blockingSignals;
-  QString const idVenda;
+  QString const m_idVenda;
   QString idDevolucao;
   SqlTableModel modelCliente;
   SqlTableModel modelCompra;

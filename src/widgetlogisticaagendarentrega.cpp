@@ -12,7 +12,6 @@
 #include "user.h"
 #include "xml.h"
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>

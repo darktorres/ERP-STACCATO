@@ -428,22 +428,6 @@ void Venda::verifyFields() {
   }
 }
 
-void Venda::calcPrecoGlobalTotal() {
-  double subTotalBruto = 0.;
-  double subTotalItens = 0.;
-
-  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
-    const double itemBruto = modelItem.data(row, "quant").toDouble() * modelItem.data(row, "prcUnitario").toDouble();
-    const double descItem = modelItem.data(row, "desconto").toDouble() / 100.;
-    const double stItem = itemBruto * (1. - descItem);
-    subTotalBruto += itemBruto;
-    subTotalItens += stItem;
-  }
-
-  ui->doubleSpinBoxSubTotalBruto->setValue(subTotalBruto);
-  ui->doubleSpinBoxSubTotalLiq->setValue(subTotalItens);
-}
-
 void Venda::clearFields() {}
 
 void Venda::setupMapper() {

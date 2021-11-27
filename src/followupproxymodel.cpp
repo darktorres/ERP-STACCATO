@@ -2,7 +2,6 @@
 
 #include "user.h"
 
-#include <QBrush>
 #include <QSqlRecord>
 
 FollowUpProxyModel::FollowUpProxyModel(QSqlQueryModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->record().indexOf("semaforo")) { setSourceModel(model); }

@@ -23,15 +23,13 @@
 **
 ****************************************************************************/
 
+#include "xlsxdocpropscore_p.h"
+
 #include <QBuffer>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
-#include <QFile>
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
-#include "xlsxdocpropscore_p.h"
 
 namespace QXlsx {
 
@@ -46,16 +44,17 @@ bool DocPropsCore::setProperty(const QString &name, const QString &value) {
 
   if (not validKeys.contains(name)) { return false; }
 
-  if (value.isEmpty())
+  if (value.isEmpty()) {
     m_properties.remove(name);
-  else
+  } else {
     m_properties[name] = value;
+  }
 
   return true;
 }
 
 QString DocPropsCore::property(const QString &name) const {
-  if (m_properties.contains(name)) return m_properties[name];
+  if (m_properties.contains(name)) { return m_properties[name]; }
 
   return QString();
 }
@@ -77,15 +76,15 @@ void DocPropsCore::saveToXmlFile(QIODevice *device) const {
   writer.writeNamespace(dcmitype, QStringLiteral("dcmitype"));
   writer.writeNamespace(xsi, QStringLiteral("xsi"));
 
-  if (m_properties.contains(QStringLiteral("title"))) writer.writeTextElement(dc, QStringLiteral("title"), m_properties[QStringLiteral("title")]);
+  if (m_properties.contains(QStringLiteral("title"))) { writer.writeTextElement(dc, QStringLiteral("title"), m_properties[QStringLiteral("title")]); }
 
-  if (m_properties.contains(QStringLiteral("subject"))) writer.writeTextElement(dc, QStringLiteral("subject"), m_properties[QStringLiteral("subject")]);
+  if (m_properties.contains(QStringLiteral("subject"))) { writer.writeTextElement(dc, QStringLiteral("subject"), m_properties[QStringLiteral("subject")]); }
 
   writer.writeTextElement(dc, QStringLiteral("creator"), m_properties.contains(QStringLiteral("creator")) ? m_properties[QStringLiteral("creator")] : QStringLiteral("Qt Xlsx Library"));
 
-  if (m_properties.contains(QStringLiteral("keywords"))) writer.writeTextElement(cp, QStringLiteral("keywords"), m_properties[QStringLiteral("keywords")]);
+  if (m_properties.contains(QStringLiteral("keywords"))) { writer.writeTextElement(cp, QStringLiteral("keywords"), m_properties[QStringLiteral("keywords")]); }
 
-  if (m_properties.contains(QStringLiteral("description"))) writer.writeTextElement(dc, QStringLiteral("description"), m_properties[QStringLiteral("description")]);
+  if (m_properties.contains(QStringLiteral("description"))) { writer.writeTextElement(dc, QStringLiteral("description"), m_properties[QStringLiteral("description")]); }
 
   writer.writeTextElement(cp, QStringLiteral("lastModifiedBy"), m_properties.contains(QStringLiteral("creator")) ? m_properties[QStringLiteral("creator")] : QStringLiteral("Qt Xlsx Library"));
 
@@ -99,9 +98,9 @@ void DocPropsCore::saveToXmlFile(QIODevice *device) const {
   writer.writeCharacters(QDateTime::currentDateTime().toString(Qt::ISODate));
   writer.writeEndElement(); // dcterms:created
 
-  if (m_properties.contains(QStringLiteral("category"))) writer.writeTextElement(cp, QStringLiteral("category"), m_properties[QStringLiteral("category")]);
+  if (m_properties.contains(QStringLiteral("category"))) { writer.writeTextElement(cp, QStringLiteral("category"), m_properties[QStringLiteral("category")]); }
 
-  if (m_properties.contains(QStringLiteral("status"))) writer.writeTextElement(cp, QStringLiteral("contentStatus"), m_properties[QStringLiteral("status")]);
+  if (m_properties.contains(QStringLiteral("status"))) { writer.writeTextElement(cp, QStringLiteral("contentStatus"), m_properties[QStringLiteral("status")]); }
 
   writer.writeEndElement(); // cp:coreProperties
   writer.writeEndDocument();

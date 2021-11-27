@@ -25,7 +25,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QTimer timer;
-  QString fornecedor;
+  QString m_fornecedor;
   SqlTableModel modelEstoque;
   SqlTableModel modelTranspAtual;
   SqlTableModel modelTranspAgend;

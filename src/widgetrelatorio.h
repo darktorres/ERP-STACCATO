@@ -23,14 +23,12 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlTableModel modelOrcamento;
   SqlTableModel modelViewRelatorio;
   SqlQueryModel modelViewRelatorioLoja;
   SqlQueryModel modelViewRelatorioVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;
-  auto calcularTotalVendedor() -> void;
   auto dateEditMes_dateChanged() -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName) -> void;
   auto on_pushButtonExcel_clicked() -> void;

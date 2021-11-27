@@ -4,7 +4,6 @@
 #include "application.h"
 #include "sqlquery.h"
 
-#include <QDebug>
 #include <QSqlError>
 
 WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpaoPeso) {

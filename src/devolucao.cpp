@@ -13,7 +13,7 @@
 #include <QSqlRecord>
 #include <cmath>
 
-Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao), idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao), m_idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   setConnections();
@@ -61,7 +61,7 @@ void Devolucao::unsetConnections() {
 void Devolucao::determinarIdDevolucao() {
   SqlQuery query;
   query.prepare("SELECT idVenda FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())");
-  query.bindValue(":idVenda", idVenda + "D%");
+  query.bindValue(":idVenda", m_idVenda + "D%");
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se existe devolução: " + query.lastError().text()); }
 
@@ -89,7 +89,7 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("formComercial", "Form. Com.");
   modelProdutos2.setHeaderData("total", "Total");
 
-  modelProdutos2.setFilter("idVenda = '" + idVenda + "' AND status != 'DEVOLVIDO'");
+  modelProdutos2.setFilter("idVenda = '" + m_idVenda + "' AND status != 'DEVOLVIDO'");
 
   modelProdutos2.select();
 
@@ -158,7 +158,7 @@ void Devolucao::setupTables() {
   modelDevolvidos1.setHeaderData("formComercial", "Form. Com.");
   modelDevolvidos1.setHeaderData("total", "Total");
 
-  modelDevolvidos1.setFilter("idVenda LIKE '" + idVenda + "D%'");
+  modelDevolvidos1.setFilter("idVenda LIKE '" + m_idVenda + "D%'");
 
   modelDevolvidos1.select();
 
@@ -217,7 +217,7 @@ void Devolucao::setupTables() {
   modelPagamentos.setHeaderData("status", "Status");
   modelPagamentos.setHeaderData("representacao", "Representação");
 
-  modelPagamentos.setFilter("idVenda LIKE '" + idVenda + "D%'");
+  modelPagamentos.setFilter("idVenda LIKE '" + m_idVenda + "D%'");
 
   modelPagamentos.select();
 
@@ -251,7 +251,7 @@ void Devolucao::setupTables() {
 
   modelVenda.setTable("venda");
 
-  modelVenda.setFilter("idVenda = '" + idVenda + "'");
+  modelVenda.setFilter("idVenda = '" + m_idVenda + "'");
 
   modelVenda.select();
 
@@ -375,13 +375,13 @@ void Devolucao::on_doubleSpinBoxCredito_valueChanged(const double credito) {
 void Devolucao::criarDevolucao() {
   SqlQuery query2;
   query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
-  query2.bindValue(":idVenda", idVenda + "D%");
+  query2.bindValue(":idVenda", m_idVenda + "D%");
 
   if (not query2.exec()) { throw RuntimeException("Erro determinando próximo id: " + query2.lastError().text()); }
 
-  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: " + idVenda); }
+  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: " + m_idVenda); }
 
-  idDevolucao = idVenda + "D" + query2.value("number").toString();
+  idDevolucao = m_idVenda + "D" + query2.value("number").toString();
 
   // -------------------------------------------------------------------------
 
@@ -514,6 +514,7 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "dataPagamento", qApp->serverDate());
   modelPagamentos.setData(newRow, "dataRealizado", qApp->serverDate());
   modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value() * -1);
+  // TODO: adicionar observacao dizendo qual porcentagem e de qual produto
 
   const int contaCreditos = 11;
   modelPagamentos.setData(newRow, "idConta", contaCreditos);
@@ -540,7 +541,7 @@ void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2
   inserirItens(currentRow, novoIdVendaProduto2);
   atualizarDevolucao();
 
-  Sql::updateVendaStatus(idVenda);
+  Sql::updateVendaStatus(m_idVenda);
 }
 
 void Devolucao::limparCampos() {
@@ -741,7 +742,6 @@ void Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double quantRestante = quantOriginal - quantDevolvida;
   const QString status = modelCompra.data(0, "status").toString();
-  // TODO: The 'idVenda' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QString idVenda = modelCompra.data(0, "idVenda").toString();
 
   modelCompra.setData(0, "obs", idVenda + " DEVOLVEU");

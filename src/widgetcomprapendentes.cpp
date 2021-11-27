@@ -9,9 +9,7 @@
 #include "inputdialog.h"
 #include "pdf.h"
 #include "produtospendentes.h"
-#include "reaisdelegate.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>

@@ -8,7 +8,6 @@
 #include "venda.h"
 #include "vendaproxymodel.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlError>
 
@@ -225,8 +224,8 @@ void WidgetVenda::setConnections() {
   connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked, connectionType);
-  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled, connectionType);
-  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonTodos_toggled, connectionType);
+  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled, connectionType);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated, connectionType);
 }
 
@@ -264,8 +263,8 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
-  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
-  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonTodos_toggled);
+  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled);
+  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled);
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
@@ -429,11 +428,7 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   montaFiltro();
 }
 
-void WidgetVenda::on_radioButtonTodos_toggled(const bool checked) {
-  if (checked) { montaFiltro(); }
-}
-
-void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
+void WidgetVenda::on_radioButton_toggled(const bool checked) {
   if (checked) { montaFiltro(); }
 }
 

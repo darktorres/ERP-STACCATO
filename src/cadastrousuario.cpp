@@ -323,7 +323,7 @@ bool CadastroUsuario::newRegister() {
   modelPermissoes.setData(row, "view_tab_relatorio", 1);
   modelPermissoes.setData(row, "webdav_documentos", 1);
 
-  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
+  for (int row2 = 0; row2 < ui->table->model()->rowCount(); ++row2) { ui->table->openPersistentEditor(ui->table->model()->index(row2, 0)); }
 
   return true;
 }

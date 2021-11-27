@@ -3,7 +3,6 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QFileInfo>
 
 File::File(const QString &name, QObject *parent) : QFile(name, parent) {}
 

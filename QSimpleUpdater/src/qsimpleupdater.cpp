@@ -107,7 +107,7 @@ void QSimpleUpdater::checkForUpdates() {
  */
 
 void QSimpleUpdater::openDownloadLink() {
-  if (not m_download_url.isEmpty()) QDesktopServices::openUrl(m_download_url);
+  if (not m_download_url.isEmpty()) { QDesktopServices::openUrl(m_download_url); }
 }
 
 /*!
@@ -134,7 +134,7 @@ QString QSimpleUpdater::installedVersion() const { return m_installed_version; }
  */
 
 void QSimpleUpdater::downloadLatestVersion() {
-  if (not m_download_url.isEmpty()) m_downloadDialog->beginDownload(m_download_url);
+  if (not m_download_url.isEmpty()) { m_downloadDialog->beginDownload(m_download_url); }
 }
 
 /*!
@@ -309,7 +309,7 @@ void QSimpleUpdater::onCheckingFinished() {
     _message.setDetailedText(changeLog());
     _message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     _message.setText("<b>" + tr("Uma nova versão de %1 está disponível!").arg(qApp->applicationName()) + "</b>");
-    _message.setInformativeText(tr("%1 %2 está disponível - você tem %3. Gostaria de baixar ela agora?").arg(qApp->applicationName()).arg(latestVersion()).arg(installedVersion()));
+    _message.setInformativeText(tr("%1 %2 está disponível - você tem %3. Gostaria de baixar ela agora?").arg(qApp->applicationName(), latestVersion(), installedVersion()));
     _message.button(QMessageBox::Yes)->setText("Baixar");
     _message.button(QMessageBox::No)->setText("Pular");
 
@@ -320,7 +320,7 @@ void QSimpleUpdater::onCheckingFinished() {
   else if (not silent() and m_show_newest_version and not m_latest_version.isEmpty()) {
     _message.setStandardButtons(QMessageBox::Ok);
     _message.setText("<b>" + tr("Você está atualizado!") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>");
-    _message.setInformativeText(tr("%1 %2 é a versão mais atual").arg(qApp->applicationName()).arg(installedVersion()));
+    _message.setInformativeText(tr("%1 %2 é a versão mais atual").arg(qApp->applicationName(), installedVersion()));
 
     _message.exec();
   }

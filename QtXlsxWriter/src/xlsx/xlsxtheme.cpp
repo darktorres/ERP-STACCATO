@@ -213,16 +213,17 @@ const char *defaultXmlData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalon
 Theme::Theme(CreateFlag flag) : AbstractOOXmlFile(flag) {}
 
 void Theme::saveToXmlFile(QIODevice *device) const {
-  if (xmlData.isEmpty())
+  if (xmlData.isEmpty()) {
     device->write(defaultXmlData);
-  else
+  } else {
     device->write(xmlData);
+  }
 }
 
 QByteArray Theme::saveToXmlData() const {
-  if (xmlData.isEmpty())
+  if (xmlData.isEmpty()) {
     return defaultXmlData;
-  else
+  } else
     return xmlData;
 }
 

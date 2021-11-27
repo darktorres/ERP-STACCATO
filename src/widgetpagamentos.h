@@ -42,7 +42,6 @@ public:
   explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
 
-  auto getCredito() const -> double;
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
   auto setCredito(const double creditoCliente) -> void;
@@ -86,7 +85,7 @@ private:
   auto comboBoxPgtVenda(Pagamento *pgt) -> void;
   auto comboBoxTipoData(Pagamento *pgt) const -> void;
   auto dateEditPgt(Pagamento *pgt) const -> void;
-  auto deleteButton(QLayout *layout) -> void;
+  //  auto deleteButton(QLayout *layout) -> void;
   auto doubleSpinBoxPgt(Pagamento *pgt) -> void;
   auto insertPgtInScrollArea(Pagamento *pgt) -> void;
   auto labelPagamento(Pagamento *pgt) -> void;
@@ -95,10 +94,10 @@ private:
   auto on_comboBoxTipoData_currentTextChanged(const QString &text) -> void;
   auto on_doubleSpinBoxPgt_valueChanged() -> void;
   auto on_pushButtonAdicionarPagamento_clicked(const Pagamento::TipoPgt tipoPgt = Pagamento::TipoPgt::Normal) -> void;
-  auto on_pushButtonDelete_clicked() -> void;
+  //  auto on_pushButtonDelete_clicked() -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
-  auto prepararPagamentosRep() -> void;
+  //  auto prepararPagamentosRep() -> void;
   auto setConnections() -> void;
 };

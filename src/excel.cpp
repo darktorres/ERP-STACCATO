@@ -192,8 +192,6 @@ void Excel::gerarExcel() {
   qApp->enqueueInformation("Arquivo salvo como " + fileName, parent);
 }
 
-QString Excel::getFileName() const { return fileName; }
-
 void Excel::setQuerys() {
   if (tipo == Tipo::Orcamento) {
     query.prepare("SELECT idLoja, idUsuario, idProfissional, idEnderecoEntrega, idCliente, data, subTotalLiq, subTotalBru, descontoPorc, frete, total, prazoEntrega, observacao FROM orcamento WHERE "

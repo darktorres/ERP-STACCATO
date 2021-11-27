@@ -23,17 +23,16 @@
 **
 ****************************************************************************/
 
-#include <QBuffer>
-#include <QDir>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
 #include "xlsxchart.h"
 #include "xlsxdrawing_p.h"
 #include "xlsxdrawinganchor_p.h"
 #include "xlsxmediafile_p.h"
 #include "xlsxutility_p.h"
 #include "xlsxworkbook.h"
+
+#include <QBuffer>
+#include <QDir>
+#include <QXmlStreamReader>
 
 namespace QXlsx {
 
@@ -261,16 +260,17 @@ void DrawingAnchor::saveXmlMarker(QXmlStreamWriter &writer, const XlsxMarker &ma
 }
 
 void DrawingAnchor::saveXmlObject(QXmlStreamWriter &writer) const {
-  if (m_objectType == Picture)
+  if (m_objectType == Picture) {
     saveXmlObjectPicture(writer);
-  else if (m_objectType == ConnectionShape)
+  } else if (m_objectType == ConnectionShape) {
     saveXmlObjectConnectionShape(writer);
-  else if (m_objectType == GraphicFrame)
+  } else if (m_objectType == GraphicFrame) {
     saveXmlObjectGraphicFrame(writer);
-  else if (m_objectType == GroupShape)
+  } else if (m_objectType == GroupShape) {
     saveXmlObjectGroupShape(writer);
-  else if (m_objectType == Shape)
+  } else if (m_objectType == Shape) {
     saveXmlObjectShape(writer);
+  }
 }
 
 void DrawingAnchor::saveXmlObjectConnectionShape(QXmlStreamWriter &writer) const { Q_UNUSED(writer) }

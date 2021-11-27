@@ -142,7 +142,7 @@ bool AbstractSheet::isVisible() const { return not isHidden(); }
  */
 void AbstractSheet::setHidden(bool hidden) {
   Q_D(AbstractSheet);
-  if (hidden == isHidden()) return;
+  if (hidden == isHidden()) { return; }
 
   d->sheetState = hidden ? SheetState::SS_Hidden : SheetState::SS_Visible;
 }

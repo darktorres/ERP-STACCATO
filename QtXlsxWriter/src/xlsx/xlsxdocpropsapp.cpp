@@ -23,15 +23,13 @@
 **
 ****************************************************************************/
 
+#include "xlsxdocpropsapp_p.h"
+
 #include <QBuffer>
 #include <QDateTime>
 #include <QDir>
-#include <QFile>
 #include <QVariant>
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
-#include "xlsxdocpropsapp_p.h"
 
 namespace QXlsx {
 
@@ -47,16 +45,17 @@ bool DocPropsApp::setProperty(const QString &name, const QString &value) {
 
   if (not validKeys.contains(name)) { return false; }
 
-  if (value.isEmpty())
+  if (value.isEmpty()) {
     m_properties.remove(name);
-  else
+  } else {
     m_properties[name] = value;
+  }
 
   return true;
 }
 
 QString DocPropsApp::property(const QString &name) const {
-  if (m_properties.contains(name)) return m_properties[name];
+  if (m_properties.contains(name)) { return m_properties[name]; }
 
   return QString();
 }
@@ -94,11 +93,11 @@ void DocPropsApp::saveToXmlFile(QIODevice *device) const {
   writer.writeStartElement(vt, QStringLiteral("vector"));
   writer.writeAttribute(QStringLiteral("size"), QString::number(m_titlesOfPartsList.size()));
   writer.writeAttribute(QStringLiteral("baseType"), QStringLiteral("lpstr"));
-  for (const auto &title : m_titlesOfPartsList) writer.writeTextElement(vt, QStringLiteral("lpstr"), title);
+  for (const auto &title : m_titlesOfPartsList) { writer.writeTextElement(vt, QStringLiteral("lpstr"), title); }
   writer.writeEndElement(); // vt:vector
   writer.writeEndElement(); // TitlesOfParts
 
-  if (m_properties.contains(QStringLiteral("manager"))) writer.writeTextElement(QStringLiteral("Manager"), m_properties[QStringLiteral("manager")]);
+  if (m_properties.contains(QStringLiteral("manager"))) { writer.writeTextElement(QStringLiteral("Manager"), m_properties[QStringLiteral("manager")]); }
   // Not like "manager", "company" always exists for Excel generated file.
   writer.writeTextElement(QStringLiteral("Company"), m_properties.contains(QStringLiteral("company")) ? m_properties[QStringLiteral("company")] : QString());
   writer.writeTextElement(QStringLiteral("LinksUpToDate"), QStringLiteral("false"));

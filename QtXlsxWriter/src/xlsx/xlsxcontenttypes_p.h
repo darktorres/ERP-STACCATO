@@ -73,8 +73,8 @@ public:
 
   void clearOverrides();
 
-  void saveToXmlFile(QIODevice *device) const;
-  bool loadFromXmlFile(QIODevice *device);
+  void saveToXmlFile(QIODevice *device) const override;
+  bool loadFromXmlFile(QIODevice *device) override;
 
 private:
   QMap<QString, QString> m_defaults;

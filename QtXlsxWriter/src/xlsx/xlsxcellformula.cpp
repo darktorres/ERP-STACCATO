@@ -22,21 +22,22 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+
 #include "xlsxcellformula.h"
 #include "xlsxcellformula_p.h"
 #include "xlsxutility_p.h"
 
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 QT_BEGIN_NAMESPACE_XLSX
 
 CellFormulaPrivate::CellFormulaPrivate(const QString &formula_, const CellRange &ref_, CellFormula::FormulaType type_) : formula(formula_), type(type_), reference(ref_), ca(false), si(0) {
   // Remove the formula '=' sign if exists
-  if (formula.startsWith(QLatin1String("=")))
+  if (formula.startsWith(QLatin1String("="))) {
     formula.remove(0, 1);
-  else if (formula.startsWith(QLatin1String("{=")) and formula.endsWith(QLatin1String("}")))
+  } else if (formula.startsWith(QLatin1String("{=")) and formula.endsWith(QLatin1String("}"))) {
     formula = formula.mid(2, formula.length() - 3);
+  }
 }
 
 CellFormulaPrivate::CellFormulaPrivate(const CellFormulaPrivate &other) : QSharedData(other), formula(other.formula), type(other.type), reference(other.reference), ca(other.ca), si(other.si) {}
@@ -134,12 +135,12 @@ bool CellFormula::saveToXml(QXmlStreamWriter &writer) const {
   case CellFormula::SharedType: t = QStringLiteral("shared"); break;
   default: break;
   }
-  if (not t.isEmpty()) writer.writeAttribute(QStringLiteral("t"), t);
-  if (d->reference.isValid()) writer.writeAttribute(QStringLiteral("ref"), d->reference.toString());
-  if (d->ca) writer.writeAttribute(QStringLiteral("ca"), QStringLiteral("1"));
-  if (d->type == CellFormula::SharedType) writer.writeAttribute(QStringLiteral("si"), QString::number(d->si));
+  if (not t.isEmpty()) { writer.writeAttribute(QStringLiteral("t"), t); }
+  if (d->reference.isValid()) { writer.writeAttribute(QStringLiteral("ref"), d->reference.toString()); }
+  if (d->ca) { writer.writeAttribute(QStringLiteral("ca"), QStringLiteral("1")); }
+  if (d->type == CellFormula::SharedType) { writer.writeAttribute(QStringLiteral("si"), QString::number(d->si)); }
 
-  if (not d->formula.isEmpty()) writer.writeCharacters(d->formula);
+  if (not d->formula.isEmpty()) { writer.writeCharacters(d->formula); }
 
   writer.writeEndElement(); // f
 
@@ -151,16 +152,17 @@ bool CellFormula::saveToXml(QXmlStreamWriter &writer) const {
  */
 bool CellFormula::loadFromXml(QXmlStreamReader &reader) {
   Q_ASSERT(reader.name() == QLatin1String("f"));
-  if (not d) d = new CellFormulaPrivate(QString(), CellRange(), NormalType);
+  if (not d) { d = new CellFormulaPrivate(QString(), CellRange(), NormalType); }
 
   QXmlStreamAttributes attributes = reader.attributes();
   QString typeString = attributes.value(QLatin1String("t")).toString();
-  if (typeString == QLatin1String("array"))
+  if (typeString == QLatin1String("array")) {
     d->type = ArrayType;
-  else if (typeString == QLatin1String("shared"))
+  } else if (typeString == QLatin1String("shared")) {
     d->type = SharedType;
-  else
+  } else {
     d->type = NormalType;
+  }
 
   if (attributes.hasAttribute(QLatin1String("ref"))) {
     QString refString = attributes.value(QLatin1String("ref")).toString();
@@ -170,7 +172,7 @@ bool CellFormula::loadFromXml(QXmlStreamReader &reader) {
   QString ca = attributes.value(QLatin1String("si")).toString();
   d->ca = parseXsdBoolean(ca, false);
 
-  if (attributes.hasAttribute(QLatin1String("si"))) d->si = attributes.value(QLatin1String("si")).toString().toInt();
+  if (attributes.hasAttribute(QLatin1String("si"))) { d->si = attributes.value(QLatin1String("si")).toString().toInt(); }
 
   d->formula = reader.readElementText();
   return true;

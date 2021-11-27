@@ -11,8 +11,9 @@ class CadastroFornecedor final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  enum class Especialidade { Revestimentos = 1, Loucas_Metais = 2, Acessorios = 3, Insumos = 4, Servicos = 5 };
-  Q_ENUM(Especialidade)
+  // TODO: usar/remover
+  //  enum class Especialidade { Revestimentos = 1, Loucas_Metais = 2, Acessorios = 3, Insumos = 4, Servicos = 5 };
+  //  Q_ENUM(Especialidade)
 
   explicit CadastroFornecedor(QWidget *parent);
   ~CadastroFornecedor() final;
@@ -24,7 +25,7 @@ private:
   // methods
   auto ajustarValidade(const int novaValidade) -> void;
   auto cadastrar() -> void final;
-  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;

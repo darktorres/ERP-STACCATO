@@ -4,7 +4,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
-#include "estoqueproxymodel.h"
 #include "file.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
@@ -14,7 +13,6 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 

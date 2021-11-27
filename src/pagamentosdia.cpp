@@ -5,7 +5,6 @@
 
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::PagamentosDia) {

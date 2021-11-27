@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "file.h"
-#include "orcamento.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 #include "user.h"
@@ -25,12 +24,8 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
   setupTables();
 
   ui->dateEditEvento->setDate(qApp->serverDate());
-  ui->dateEditProximo->setDate(qApp->serverDate());
 
   if (tipo == Tipo::Recebimento) {
-    ui->labelProximoEvento->hide();
-    ui->dateEditProximo->hide();
-
     ui->labelEvento->setText("Data do recebimento:");
 
     ui->labelFoto->hide();
@@ -44,9 +39,6 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
   }
 
   if (tipo == Tipo::Entrega) {
-    ui->labelProximoEvento->hide();
-    ui->dateEditProximo->hide();
-
     ui->labelEvento->setText("Data entrega:");
 
     ui->pushButtonQuebradoReceb->hide();
@@ -54,9 +46,6 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
 
   if (tipo == Tipo::Representacao) {
     ui->labelAviso->hide();
-
-    ui->labelProximoEvento->hide();
-    ui->dateEditProximo->hide();
 
     ui->tableLogistica->hide();
 
@@ -82,7 +71,6 @@ InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
 void InputDialogConfirmacao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogConfirmacao::on_dateEditEvento_dateChanged, connectionType);
   connect(ui->pushButtonQuebradoReceb, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked, connectionType);
   connect(ui->pushButtonQuebradoEntrega, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked, connectionType);
@@ -90,8 +78,6 @@ void InputDialogConfirmacao::setConnections() {
 }
 
 QDate InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->date(); }
-
-QDate InputDialogConfirmacao::getNextDateTime() const { return ui->dateEditProximo->date(); }
 
 QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu->text(); }
 
@@ -122,10 +108,6 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
 
   QDialog::accept();
   close();
-}
-
-void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate date) {
-  if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
 void InputDialogConfirmacao::setupTables() {

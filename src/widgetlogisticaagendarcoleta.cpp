@@ -12,12 +12,9 @@
 #include "user.h"
 #include "venda.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
-#include <QFile>
 #include <QMessageBox>
-#include <QProgressDialog>
 #include <QSqlError>
 #include <QStandardItemModel>
 #include <QUrl>
@@ -186,7 +183,7 @@ void WidgetLogisticaAgendarColeta::updateTables() {
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_clicked(const QString &fornecedor) {
-  this->fornecedor = fornecedor;
+  m_fornecedor = fornecedor;
 
   ui->lineEditBusca->clear();
 
@@ -258,7 +255,6 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
   for (const auto &index : list) {
     int idEstoque;
-    QString codComercial;
 
     if (montarCarga) {
       SqlQuery query;
@@ -268,8 +264,12 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       const int idEvento = query.value(0).toInt();
 
+      //-------------------------------------------------
+
       modelTranspAtual.setData(index.row(), "data", dataPrevColeta);
       modelTranspAtual.setData(index.row(), "idEvento", idEvento);
+
+      //-------------------------------------------------
 
       idEstoque = modelTranspAtual.data(index.row(), "idEstoque").toInt();
 
@@ -278,17 +278,18 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       if (not queryTemp.exec()) { throw RuntimeException("Erro buscando codComercial do estoque: " + queryTemp.lastError().text()); }
 
       if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: " + QString::number(idEstoque)); }
+      // TODO: codComercial é selecionado mas não é usado, essa query é apenas para verificar se existe codComercial?
 
-      codComercial = queryTemp.value("codComercial").toString();
     } else {
       idEstoque = modelEstoque.data(index.row(), "idEstoque").toInt();
-      codComercial = modelEstoque.data(index.row(), "codComercial").toString();
     }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
 
     if (not query2.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query2.lastError().text()); }
+
+    //-------------------------------------------------
 
     query3.bindValue(":dataPrevColeta", dataPrevColeta);
     query3.bindValue(":idEstoque", idEstoque);
@@ -394,9 +395,9 @@ void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled() { montaFiltro();
 void WidgetLogisticaAgendarColeta::montaFiltro() {
   QStringList filtros;
 
-  const QString filtroFornecedor = "fornecedor = '" + fornecedor + "'";
+  const QString filtroFornecedor = "fornecedor = '" + m_fornecedor + "'";
 
-  if (not fornecedor.isEmpty()) { filtros << filtroFornecedor; }
+  if (not m_fornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 

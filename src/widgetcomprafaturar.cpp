@@ -11,7 +11,6 @@
 #include "sql.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlError>
 

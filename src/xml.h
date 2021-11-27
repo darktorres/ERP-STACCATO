@@ -18,7 +18,6 @@ private:
     QString cfop;
     QString un;
     double quant = 0;
-    double valorUnid = 0;
     double valor = 0;
     QString codBarrasTrib;
     QString unTrib;
@@ -85,45 +84,28 @@ public:
   QString chaveAcesso;
   // identificacao
   QString nNF;
-  QString dataHoraEmissao;
   // emitente
-  QString xFant;
   QString xNome;
   QString cnpjOrig;
   // destinatario
   QString cnpjDest;
   // total
-  double vBC_Total = 0;
-  double vICMS_Total = 0;
-  double vICMSDeson_Total = 0;
-  double vBCST_Total = 0;
-  double vST_Total = 0;
-  double vProd_Total = 0;
-  double vFrete_Total = 0;
-  double vSeg_Total = 0;
-  double vDesc_Total = 0;
-  double vII_Total = 0;
-  double vPIS_Total = 0;
-  double vCOFINS_Total = 0;
-  double vOutro_Total = 0;
   double vNF_Total = 0;
   // transportadora
   QString xNomeTransp;
 
 private:
   // attributes
-  Produto produto;
   Tipo const tipo;
   QWidget *parent = nullptr;
   // methods
-  auto lerCOFINSProduto(const QStandardItem *child) -> void;
-  auto lerDadosProduto(const QStandardItem *child) -> void;
-  auto lerICMSProduto(const QStandardItem *child) -> void;
-  auto lerIPIProduto(const QStandardItem *child) -> void;
-  auto lerPISProduto(const QStandardItem *child) -> void;
+  auto lerCOFINSProduto(const QStandardItem *child, Produto &produto) -> void;
+  auto lerDadosProduto(const QStandardItem *child, Produto &produto) -> void;
+  auto lerICMSProduto(const QStandardItem *child, Produto &produto) -> void;
+  auto lerIPIProduto(const QStandardItem *child, Produto &produto) -> void;
+  auto lerPISProduto(const QStandardItem *child, Produto &produto) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
   auto lerValores(const QStandardItem *item) -> void;
-  auto limparValores() -> void;
   auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
   auto verificaCNPJ() -> void;

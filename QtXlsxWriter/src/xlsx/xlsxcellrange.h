@@ -31,10 +31,10 @@ QT_BEGIN_NAMESPACE_XLSX
 
 class Q_XLSX_EXPORT CellRange {
 public:
-  CellRange();
-  CellRange(int firstRow, int firstColumn, int lastRow, int lastColumn);
-  CellRange(const CellReference &topLeft, const CellReference &bottomRight);
-  CellRange(const QString &range);
+  explicit CellRange();
+  explicit CellRange(int firstRow, int firstColumn, int lastRow, int lastColumn);
+  explicit CellRange(const CellReference &topLeft, const CellReference &bottomRight);
+  explicit CellRange(const QString &range);
   explicit CellRange(const char *range);
   CellRange(const CellRange &other);
   ~CellRange() = default;

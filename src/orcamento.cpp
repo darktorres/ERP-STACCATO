@@ -4,7 +4,6 @@
 #include "application.h"
 #include "baixaorcamento.h"
 #include "cadastrocliente.h"
-#include "cadastroprofissional.h"
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
@@ -18,7 +17,6 @@
 #include "venda.h"
 
 #include <QAuthenticator>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QMessageBox>
@@ -1611,7 +1609,7 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=, this] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
 

@@ -5,7 +5,6 @@
 #include "sqlquery.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
@@ -30,8 +29,8 @@ void InserirTransferencia::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxCliente_textChanged, connectionType);
-  connect(ui->itemBoxDe, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
-  connect(ui->itemBoxPara, &ItemBox::textChanged, this, &InserirTransferencia::on_itemBoxPara_textChanged, connectionType);
+  connect(ui->itemBoxDe, &ItemBox::textChanged, this, &InserirTransferencia::itemBoxTextChanged, connectionType);
+  connect(ui->itemBoxPara, &ItemBox::textChanged, this, &InserirTransferencia::itemBoxTextChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked, connectionType);
 }
@@ -140,17 +139,7 @@ void InserirTransferencia::setupTables() {
   modelPara.setTable("conta_a_receber_has_pagamento");
 }
 
-void InserirTransferencia::on_itemBoxDe_textChanged() {
-  ui->itemBoxCliente->clear();
-
-  const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
-
-  ui->frameCliente->setVisible(mostrarCliente);
-
-  ui->doubleSpinBoxValor->setMaximum(999999.990000);
-}
-
-void InserirTransferencia::on_itemBoxPara_textChanged() {
+void InserirTransferencia::itemBoxTextChanged() {
   ui->itemBoxCliente->clear();
 
   const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");

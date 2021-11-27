@@ -35,7 +35,7 @@
 #endif
 
 #ifdef _MSC_VER
-#pragma warning ( disable : 4018 4244 4305 )
+#pragma warning(disable : 4018 4244 4305)
 #endif
 
 #include "code1.h"

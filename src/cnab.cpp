@@ -277,7 +277,6 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
     // header lote pag 13
 
-    registrosLote++;
     registrosTotal++;
     lote++;
 
@@ -312,6 +311,7 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
     stream << "\r\n";
 
     for (auto &pagamento : pagamentosSalario) {
+      registrosLote++;
       registrosTotal++;
       totalLote += pagamento.valor;
 
@@ -320,7 +320,7 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
       stream << "341";                            // 9(03) código banco na compensacao
       writeNumber(stream, lote, 4);               // 9(04) lote de servico
       stream << "3";                              // 9(01) registro detalhe de lote
-      writeNumber(stream, ++registrosLote, 5);    // 9(05) numero sequencial registro no lote
+      writeNumber(stream, registrosLote, 5);      // 9(05) numero sequencial registro no lote
       stream << "A";                              // X(01) codigo segmento reg. detalhe
       writeNumber(stream, 0, 3);                  // 9(03) tipo de movimento
       writeZeros(stream, 3);                      // 9(03) codigo da camara centralizadora
@@ -358,18 +358,17 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
     // trailer do lote pag 24
 
-    registrosLote++;
     registrosTotal++;
 
-    stream << "341";                       // 9(03) codigo banco na compensacao
-    writeNumber(stream, lote, 4);          // 9(04) lote de servico
-    stream << "5";                         // 9(01) registro trailer de lote
-    writeBlanks(stream, 9);                // X(09) complemento de registro brancos
-    writeNumber(stream, registrosLote, 6); // 9(06) quantidade registros do lote
-    writeNumber(stream, totalLote, 18);    // 9(16)V9(02) soma valor dos pagtos do lote
-    writeZeros(stream, 18);                // 9(18) complemento de registro zeros
-    writeBlanks(stream, 171);              // X(171) complemento de registro brancos
-    writeBlanks(stream, 10);               // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+    stream << "341";                           // 9(03) codigo banco na compensacao
+    writeNumber(stream, lote, 4);              // 9(04) lote de servico
+    stream << "5";                             // 9(01) registro trailer de lote
+    writeBlanks(stream, 9);                    // X(09) complemento de registro brancos
+    writeNumber(stream, 2 + registrosLote, 6); // 9(06) quantidade registros do lote
+    writeNumber(stream, totalLote, 18);        // 9(16)V9(02) soma valor dos pagtos do lote
+    writeZeros(stream, 18);                    // 9(18) complemento de registro zeros
+    writeBlanks(stream, 171);                  // X(171) complemento de registro brancos
+    writeBlanks(stream, 10);                   // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
     stream << "\r\n";
   }
 
@@ -381,7 +380,6 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
     // header lote pag 13
 
-    registrosLote++;
     registrosTotal++;
     lote++;
 
@@ -416,6 +414,7 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
     stream << "\r\n";
 
     for (auto &pagamento : pagamentosFornecedor) {
+      registrosLote++;
       registrosTotal++;
       totalLote += pagamento.valor;
 
@@ -424,7 +423,7 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
       stream << "341";                            // 9(03) código banco na compensacao
       writeNumber(stream, lote, 4);               // 9(04) lote de servico
       stream << "3";                              // 9(01) registro detalhe de lote
-      writeNumber(stream, ++registrosLote, 5);    // 9(05) numero sequencial registro no lote
+      writeNumber(stream, registrosLote, 5);      // 9(05) numero sequencial registro no lote
       stream << "A";                              // X(01) codigo segmento reg. detalhe
       writeNumber(stream, 0, 3);                  // 9(03) tipo de movimento
       writeZeros(stream, 3);                      // 9(03) codigo da camara centralizadora
@@ -462,18 +461,17 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
     // trailer do lote pag 24
 
-    registrosLote++;
     registrosTotal++;
 
-    stream << "341";                       // 9(03) codigo banco na compensacao
-    writeNumber(stream, lote, 4);          // 9(04) lote de servico
-    stream << "5";                         // 9(01) registro trailer de lote
-    writeBlanks(stream, 9);                // X(09) complemento de registro brancos
-    writeNumber(stream, registrosLote, 6); // 9(06) quantidade registros do lote
-    writeNumber(stream, totalLote, 18);    // 9(16)V9(02) soma valor dos pagtos do lote
-    writeZeros(stream, 18);                // 9(18) complemento de registro zeros
-    writeBlanks(stream, 171);              // X(171) complemento de registro brancos
-    writeBlanks(stream, 10);               // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+    stream << "341";                           // 9(03) codigo banco na compensacao
+    writeNumber(stream, lote, 4);              // 9(04) lote de servico
+    stream << "5";                             // 9(01) registro trailer de lote
+    writeBlanks(stream, 9);                    // X(09) complemento de registro brancos
+    writeNumber(stream, 2 + registrosLote, 6); // 9(06) quantidade registros do lote
+    writeNumber(stream, totalLote, 18);        // 9(16)V9(02) soma valor dos pagtos do lote
+    writeZeros(stream, 18);                    // 9(18) complemento de registro zeros
+    writeBlanks(stream, 171);                  // X(171) complemento de registro brancos
+    writeBlanks(stream, 10);                   // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
     stream << "\r\n";
   }
 

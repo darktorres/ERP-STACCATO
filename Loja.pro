@@ -124,6 +124,59 @@ linux {
     }
 }
 
+#-----------------------------------------------------
+
+CONFIG(release, debug|release) {
+    message(Release)
+    BUILD_TYPE = release
+} else {
+    message(Debug)
+    BUILD_TYPE = debug
+}
+
+unix {
+    ARCH_DIR           = $${OUT_PWD}/unix
+    ARCH_TYPE          = unix
+
+    macx {
+        ARCH_DIR       = $${OUT_PWD}/macx
+        ARCH_TYPE      = macx
+    }
+
+    linux {
+        !contains(QT_ARCH, x86_64) {
+            message("Compiling for 32bit system")
+            ARCH_DIR   = $${OUT_PWD}/linux32
+            ARCH_TYPE  = linux32
+        } else {
+            message("Compiling for 64bit system")
+            ARCH_DIR   = $${OUT_PWD}/linux64
+            ARCH_TYPE  = linux64
+        }
+    }
+}
+
+win32 {
+    !contains(QT_ARCH, x86_64) {
+        message("Compiling for 32bit system")
+        ARCH_DIR       = $${OUT_PWD}/win32
+        ARCH_TYPE      = win32
+    } else {
+        message("Compiling for 64bit system")
+        ARCH_DIR       = $${OUT_PWD}/win64
+        ARCH_TYPE      = win64
+    }
+}
+
+MOC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/moc
+UI_DIR         = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+UI_HEADERS_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+UI_SOURCES_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+OBJECTS_DIR    = $${ARCH_DIR}/$${BUILD_TYPE}/obj
+RCC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/rcc
+
+#-----------------------------------------------------
+
 INCLUDEPATH += $$PWD/src
 
 RESOURCES += \

@@ -103,6 +103,8 @@ void WidgetGalpao::updateTables() {
     modelIsSet = true;
   }
 
+  if (currentPallet) { return; }
+
   modelTranspAgend.select();
   modelPallet.select();
   carregarPallets();
@@ -223,8 +225,6 @@ void WidgetGalpao::carregarPallets() {
 }
 
 void WidgetGalpao::salvarPallets() {
-  unselectBloco();
-
   ui->checkBoxCriarPallet->setChecked(false);
   ui->checkBoxMoverPallet->setChecked(false);
 
@@ -245,6 +245,8 @@ void WidgetGalpao::salvarPallets() {
   }
 
   qApp->endTransaction();
+
+  unselectBloco();
 
   qApp->enqueueInformation("Pallets salvos com sucesso!", this);
 
@@ -326,9 +328,10 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
   if (not query.exec("DELETE FROM galpao WHERE idBloco = " + currentPallet->getIdBloco())) { throw RuntimeException("Erro removendo pallet: " + query.lastError().text()); }
 
   delete currentPallet;
-  currentPallet = nullptr;
 
   qApp->endTransaction();
+
+  unselectBloco();
 
   qApp->enqueueInformation("Pallet removido com sucesso!");
 }

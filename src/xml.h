@@ -96,16 +96,18 @@ public:
 
 private:
   // attributes
+  Produto produto;
   Tipo const tipo;
   QWidget *parent = nullptr;
   // methods
-  auto lerCOFINSProduto(const QStandardItem *child, Produto &produto) -> void;
-  auto lerDadosProduto(const QStandardItem *child, Produto &produto) -> void;
-  auto lerICMSProduto(const QStandardItem *child, Produto &produto) -> void;
-  auto lerIPIProduto(const QStandardItem *child, Produto &produto) -> void;
-  auto lerPISProduto(const QStandardItem *child, Produto &produto) -> void;
+  auto lerCOFINSProduto(const QStandardItem *child) -> void;
+  auto lerDadosProduto(const QStandardItem *child) -> void;
+  auto lerICMSProduto(const QStandardItem *child) -> void;
+  auto lerIPIProduto(const QStandardItem *child) -> void;
+  auto lerPISProduto(const QStandardItem *child) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
   auto lerValores(const QStandardItem *item) -> void;
+  auto limparValores() -> void;
   auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
   auto verificaCNPJ() -> void;

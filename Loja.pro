@@ -84,7 +84,7 @@ contains(CONFIG, deploy) {
     QMAKE_CXXFLAGS *= -Wno-global-constructors -Wno-weak-vtables -Wno-missing-variable-declarations -Wno-shadow-field -Wno-zero-as-null-pointer-constant
     QMAKE_CXXFLAGS *= -Wno-header-hygiene -Wno-documentation -Wno-switch-enum -Wno-undefined-reinterpret-cast -Wno-non-virtual-dtor
     QMAKE_CXXFLAGS *= -Wno-comma -Wno-old-style-cast -Wno-shadow -Wno-implicit-fallthrough -Wno-missing-prototypes -Wno-format-nonliteral
-    QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor
+    QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor -Wno-reserved-identifier
 }
 
 win32-msvc {

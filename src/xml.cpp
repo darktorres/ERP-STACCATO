@@ -59,13 +59,14 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
   }
 }
 
+void XML::limparValores() { produto = {}; }
+
 void XML::lerValores(const QStandardItem *item) {
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {
       const QStandardItem *child = item->child(row, col);
       const QString parentText = child->parent()->text();
       QString text = child->text();
-      Produto produto;
 
       if (text.contains("chNFe - ")) { chaveAcesso = text.remove("chNFe - "); }
       if (text.contains("nNF - ")) { nNF = text.remove("nNF - ").rightJustified(9, '0'); }
@@ -75,25 +76,28 @@ void XML::lerValores(const QStandardItem *item) {
       if (parentText == "dest" and text.contains("CNPJ - ")) { cnpjDest = text.remove("CNPJ - "); }
       if (parentText == "transporta" and text.contains("xNome - ")) { xNomeTransp = text.remove("xNome - "); }
 
-      if (parentText == "prod") { lerDadosProduto(child, produto); }
+      if (parentText == "prod") { lerDadosProduto(child); }
       if (parentText == "ICMS" and text.left(4) == "ICMS") { produto.tipoICMS = text; }
-      if (parentText == produto.tipoICMS) { lerICMSProduto(child, produto); }
-      if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child, produto); }
-      if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child, produto); }
-      if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child, produto); }
+      if (parentText == produto.tipoICMS) { lerICMSProduto(child); }
+      if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child); }
+      if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child); }
+      if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child); }
 
       if (parentText == "ICMSTot") { lerTotais(child); }
 
       if (child->hasChildren()) {
         lerValores(child);
 
-        if (parentText == "COFINS") { produtos << produto; }
+        if (parentText == "COFINS") {
+          produtos << produto;
+          limparValores();
+        }
       }
     }
   }
 }
 
-void XML::lerDadosProduto(const QStandardItem *child, Produto &produto) {
+void XML::lerDadosProduto(const QStandardItem *child) {
   QString text = child->text();
 
   if (text.contains("cProd - ")) { produto.codProd = text.remove("cProd - "); }
@@ -120,7 +124,7 @@ void XML::lerDadosProduto(const QStandardItem *child, Produto &produto) {
   if (text.contains("nItemPed - ")) { produto.itemPedido = text.remove("nItemPed - ").toInt(); }
 }
 
-void XML::lerICMSProduto(const QStandardItem *child, Produto &produto) {
+void XML::lerICMSProduto(const QStandardItem *child) {
   QString text = child->text();
 
   if (text.contains("orig - ")) { produto.orig = text.remove("orig - ").toInt(); }
@@ -136,7 +140,7 @@ void XML::lerICMSProduto(const QStandardItem *child, Produto &produto) {
   if (text.contains("vICMSST - ")) { produto.vICMSST = text.remove("vICMSST - ").toDouble(); }
 }
 
-void XML::lerIPIProduto(const QStandardItem *child, Produto &produto) {
+void XML::lerIPIProduto(const QStandardItem *child) {
   QString text = child->text();
 
   if (text.contains("cEnq - ")) { produto.cEnq = text.remove("cEnq - ").toInt(); }
@@ -149,7 +153,7 @@ void XML::lerIPIProduto(const QStandardItem *child, Produto &produto) {
   if (text.contains("CST - ")) { produto.cstIPI = text.remove("CST - ").toInt(); }
 }
 
-void XML::lerPISProduto(const QStandardItem *child, Produto &produto) {
+void XML::lerPISProduto(const QStandardItem *child) {
   QString text = child->text();
 
   if (text.contains("CST - ")) { produto.cstPIS = text.remove("CST - ").toInt(); }
@@ -158,7 +162,7 @@ void XML::lerPISProduto(const QStandardItem *child, Produto &produto) {
   if (text.contains("vPIS - ")) { produto.vPIS = text.remove("vPIS - ").toDouble(); }
 }
 
-void XML::lerCOFINSProduto(const QStandardItem *child, Produto &produto) {
+void XML::lerCOFINSProduto(const QStandardItem *child) {
   QString text = child->text();
 
   if (text.contains("CST - ")) { produto.cstCOFINS = text.remove("CST - ").toInt(); }

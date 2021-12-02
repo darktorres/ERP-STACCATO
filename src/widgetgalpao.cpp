@@ -321,16 +321,17 @@ void WidgetGalpao::on_pushButtonRemoverPallet_clicked() {
 
   if (modelPallet.rowCount() > 0) { throw RuntimeError("Pallet possui produtos! Transfira os produtos para outros pallets antes de remover!"); }
 
-  qApp->startTransaction("WidgetGalpao::on_pushButtonRemoverPallet_clicked");
+  if (not currentPallet->getIdBloco().isEmpty()) {
+    qApp->startTransaction("WidgetGalpao::on_pushButtonRemoverPallet_clicked");
 
-  SqlQuery query;
+    SqlQuery query;
 
-  if (not query.exec("DELETE FROM galpao WHERE idBloco = " + currentPallet->getIdBloco())) { throw RuntimeException("Erro removendo pallet: " + query.lastError().text()); }
+    if (not query.exec("DELETE FROM galpao WHERE idBloco = " + currentPallet->getIdBloco())) { throw RuntimeException("Erro removendo pallet: " + query.lastError().text()); }
+
+    qApp->endTransaction();
+  }
 
   delete currentPallet;
-
-  qApp->endTransaction();
-
   unselectBloco();
 
   qApp->enqueueInformation("Pallet removido com sucesso!");

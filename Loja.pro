@@ -37,9 +37,21 @@ win32 {
     RC_ICONS = Staccato.ico
 }
 
-win32-msvc { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
+win32-msvc {
+    contains(QT_ARCH, i386) {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto
+    } else {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto
+    }
+}
 
-win32-g++ { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
+win32-g++ {
+    contains(QT_ARCH, i386) {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+    } else {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto-1_1-x64
+    }
+}
 
 contains(CONFIG, deploy) {
     message(deploy)

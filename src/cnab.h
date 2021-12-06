@@ -26,6 +26,7 @@ public:
     ulong conta;
     ulong dac;
     QString nome;
+    QString observacao;
     QString codFornecedor;
   };
 

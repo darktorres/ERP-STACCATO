@@ -334,25 +334,25 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
       writeBlanks(stream, 1);
       writeNumber(stream, pagamento.dac, 1);
       // agenciaConta
-      writeText(stream, pagamento.nome, 30);    // X(30) nome do favorecido
-      writeBlanks(stream, 20);                  // X(20) numero docto atribuido pela empresa
-      writeText(stream, pagamento.data, 8);     // 9(08) data prevista para pagto DDMMAAAA
-      writeText(stream, "REA", 3);              // X(03) tipo da moeda
-      writeZeros(stream, 8);                    // X(08) identificacao da instituicao para o SPB
-      writeZeros(stream, 7);                    // 9(07) complemento de registro
-      writeNumber(stream, pagamento.valor, 15); // 9(13)V9(02) valor previsto do pagto
-      writeBlanks(stream, 15);                  // X(15) numero docto atribuido pelo banco ***apenas retorno
-      writeBlanks(stream, 5);                   // X(05) complemento de registro
-      writeZeros(stream, 8);                    // 9(08) data real efetivacao do pagto DDMMAAAA ***apenas retorno
-      writeZeros(stream, 15);                   // 9(13)V9(02) valor real efetivacao do pagto ***apenas retorno
-      writeBlanks(stream, 20);                  // X(20) informacao complementar p/ hist. c/c
-      writeZeros(stream, 6);                    // 9(06) numero do doc/ted/op/cheque no retorno ***apenas retorno
-      writeText(stream, pagamento.cpfDest, 14); // 9(14) numero de inscricao do favorecido (cpf/cnpj)
-      writeBlanks(stream, 2);                   // X(02) finalidade do doc e status do funcionario na empresa
-      writeBlanks(stream, 5);                   // X(05) finalidade do ted
-      writeBlanks(stream, 5);                   // X(05) complemento de registro
-      writeNumber(stream, 0, 1);                // X(01) aviso ao favorecido
-      writeBlanks(stream, 10);                  // X(10) codigo ocorrencias no retorno
+      writeText(stream, pagamento.nome, 30);       // X(30) nome do favorecido
+      writeText(stream, pagamento.observacao, 20); // X(20) numero docto atribuido pela empresa
+      writeText(stream, pagamento.data, 8);        // 9(08) data prevista para pagto DDMMAAAA
+      writeText(stream, "REA", 3);                 // X(03) tipo da moeda
+      writeZeros(stream, 8);                       // X(08) identificacao da instituicao para o SPB
+      writeZeros(stream, 7);                       // 9(07) complemento de registro
+      writeNumber(stream, pagamento.valor, 15);    // 9(13)V9(02) valor previsto do pagto
+      writeBlanks(stream, 15);                     // X(15) numero docto atribuido pelo banco ***apenas retorno
+      writeBlanks(stream, 5);                      // X(05) complemento de registro
+      writeZeros(stream, 8);                       // 9(08) data real efetivacao do pagto DDMMAAAA ***apenas retorno
+      writeZeros(stream, 15);                      // 9(13)V9(02) valor real efetivacao do pagto ***apenas retorno
+      writeBlanks(stream, 20);                     // X(20) informacao complementar p/ hist. c/c
+      writeZeros(stream, 6);                       // 9(06) numero do doc/ted/op/cheque no retorno ***apenas retorno
+      writeText(stream, pagamento.cpfDest, 14);    // 9(14) numero de inscricao do favorecido (cpf/cnpj)
+      writeBlanks(stream, 2);                      // X(02) finalidade do doc e status do funcionario na empresa
+      writeBlanks(stream, 5);                      // X(05) finalidade do ted
+      writeBlanks(stream, 5);                      // X(05) complemento de registro
+      writeNumber(stream, 0, 1);                   // X(01) aviso ao favorecido
+      writeBlanks(stream, 10);                     // X(10) codigo ocorrencias no retorno
       stream << "\r\n";
     }
 

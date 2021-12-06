@@ -13,8 +13,7 @@
  *
  */
 
-#ifndef DOWNLOAD_DIALOG_H
-#define DOWNLOAD_DIALOG_H
+#pragma once
 
 #include <QDateTime>
 #include <QDesktopServices>
@@ -53,5 +52,3 @@ private:
   auto roundNumber(const double &input) -> double;
   auto updateProgress(qint64 received, qint64 total) -> void;
 };
-
-#endif

@@ -23,8 +23,7 @@
 **
 ****************************************************************************/
 
-#ifndef QXLSX_XLSXDOCUMENT_H
-#define QXLSX_XLSXDOCUMENT_H
+#pragma once
 
 #include <QObject>
 #include <QVariant>
@@ -132,5 +131,3 @@ private:
 };
 
 QT_END_NAMESPACE_XLSX
-
-#endif // QXLSX_XLSXDOCUMENT_H

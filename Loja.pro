@@ -26,8 +26,6 @@ CONFIG *= c++latest warn_on
 PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
 
-message($$QMAKESPEC)
-
 win32 {
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
     QMAKE_TARGET_PRODUCT = ERP
@@ -108,7 +106,7 @@ linux-g++ {
 }
 
 linux-clang {
-    QMAKE_LFLAGS *= -fuse-ld=lld-12
+    QMAKE_LFLAGS *= -fuse-ld=lld-13
 }
 
 win32-g++ { # ccache is not compatible with MSVC
@@ -116,9 +114,6 @@ win32-g++ { # ccache is not compatible with MSVC
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
-        message($$QMAKE_CC)
-        message($$QMAKE_CXX)
-
         QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
     }
 }
@@ -131,18 +126,14 @@ linux {
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
         QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
-        message($$QMAKE_CC)
-        message($$QMAKE_CXX)
     }
 }
 
 #-----------------------------------------------------
 
 CONFIG(release, debug|release) {
-    message(Release)
     BUILD_TYPE = release
 } else {
-    message(Debug)
     BUILD_TYPE = debug
 }
 
@@ -157,11 +148,9 @@ unix {
 
     linux {
         !contains(QT_ARCH, x86_64) {
-            message("Compiling for 32bit system")
             ARCH_DIR   = $${OUT_PWD}/linux32
             ARCH_TYPE  = linux32
         } else {
-            message("Compiling for 64bit system")
             ARCH_DIR   = $${OUT_PWD}/linux64
             ARCH_TYPE  = linux64
         }
@@ -170,11 +159,9 @@ unix {
 
 win32 {
     !contains(QT_ARCH, x86_64) {
-        message("Compiling for 32bit system")
         ARCH_DIR       = $${OUT_PWD}/win32
         ARCH_TYPE      = win32
     } else {
-        message("Compiling for 64bit system")
         ARCH_DIR       = $${OUT_PWD}/win64
         ARCH_TYPE      = win64
     }

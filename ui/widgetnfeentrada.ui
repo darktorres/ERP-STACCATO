@@ -78,7 +78,7 @@
         <bool>true</bool>
        </property>
        <property name="placeholderText">
-        <string>NFe/OC/Venda</string>
+        <string>Emitente/NFe/OC/Venda</string>
        </property>
       </widget>
      </item>

@@ -552,6 +552,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
   for (const auto index : selection) {
     const QString grupo = model.data(index.row(), "grupo").toString();
     const QString contraParte = model.data(index.row(), "contraParte").toString();
+    const QString observacao = model.data(index.row(), "observacao").toString();
+    const QString data = model.data(index.row(), "dataPagamento").toDate().toString("ddMMyyyy");
 
     CNAB::Pagamento pagamento;
 
@@ -580,7 +582,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
       pagamento.codBanco = codBanco;
       pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
-      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.observacao = observacao;
+      pagamento.data = data;
       pagamento.cpfDest = cpfDest;
       pagamento.agencia = agencia.toULong();
       pagamento.conta = conta.toULong();
@@ -614,7 +617,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
       pagamento.codBanco = codBanco;
       pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
-      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.observacao = observacao;
+      pagamento.data = data;
       pagamento.cnpjDest = cnpjDest;
       pagamento.agencia = agencia.toULong();
       pagamento.conta = conta.toULong();

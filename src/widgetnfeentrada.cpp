@@ -93,6 +93,7 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
+  ui->table->hideColumn("Fornecedor");
   ui->table->hideColumn("nsu");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
@@ -127,7 +128,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  const QString filtroBusca = "NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
+  const QString filtroBusca = "Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
   if (not text.isEmpty()) { filtros << filtroBusca; }
 
   //------------------------------------- filtro data

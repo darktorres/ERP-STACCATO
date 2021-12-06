@@ -13,8 +13,7 @@
  *
  */
 
-#ifndef Q_SIMPLE_UPDATER_H
-#define Q_SIMPLE_UPDATER_H
+#pragma once
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -77,5 +76,3 @@ private:
   auto processDownloadedChangelog(QNetworkReply *reply) -> void;
   auto showErrorMessage() -> void;
 };
-
-#endif

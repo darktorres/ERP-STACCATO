@@ -4,8 +4,6 @@ isEmpty(BINARY_RESULT_DIR) {
     BINARY_RESULT_DIR = $${PWD}
 }
 
-message(TOP_BUILD_DIR: $$TOP_BUILD_DIR)
-
 #!contains(CONFIG, config_build_dir){
 #    TOP_BUILD_DIR = $${PWD}
 #}
@@ -56,7 +54,6 @@ contains(CONFIG, qtscriptengine){
     CONFIG -= qjsengine
     QT *= script
     DEFINES *= USE_QTSCRIPTENGINE
-    message(qtscriptengine)
 }
 
 #!contains(CONFIG, no_formdesigner){
@@ -82,10 +79,8 @@ lessThan(QT_MAJOR_VERSION, 5){
 }
 
 CONFIG(release, debug|release){
-    message(Release)
     BUILD_TYPE = release
 }else{
-    message(Debug)
     BUILD_TYPE = debug
 }
 
@@ -101,11 +96,9 @@ unix{
     }
     linux{
         !contains(QT_ARCH, x86_64){
-            message("Compiling for 32bit system")
             ARCH_DIR       = $${OUT_PWD}/linux32
             ARCH_TYPE      = linux32
         }else{
-            message("Compiling for 64bit system")
             ARCH_DIR       = $${OUT_PWD}/linux64
             ARCH_TYPE      = linux64
         }
@@ -113,11 +106,9 @@ unix{
 }
 win32 {
     !contains(QT_ARCH, x86_64) {
-        message("Compiling for 32bit system")
         ARCH_DIR       = $${OUT_PWD}/win32
         ARCH_TYPE      = win32
     } else {
-        message("Compiling for 64bit system")
         ARCH_DIR       = $${OUT_PWD}/win64
         ARCH_TYPE      = win64
     }
@@ -149,11 +140,9 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     DEFINES *= HAVE_QT5
     QT *= printsupport widgets
     contains(QT,uitools){
-        message(uitools)
         DEFINES *= HAVE_UI_LOADER
     }
     contains(CONFIG, qjsengine){
-        message(qjsengine)
         DEFINES *= USE_QJSENGINE
         QT *= qml
     }
@@ -162,7 +151,6 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 lessThan(QT_MAJOR_VERSION, 5){
     DEFINES *= HAVE_QT4
     CONFIG(uitools){
-        message(uitools)
         DEFINES *= HAVE_UI_LOADER
     }
 }

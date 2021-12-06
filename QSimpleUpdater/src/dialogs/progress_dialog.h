@@ -12,8 +12,7 @@
  * Lesser General Public License for more details.
  */
 
-#ifndef PROGRESS_DIALOG_H
-#define PROGRESS_DIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -37,5 +36,3 @@ private:
   // methods
   auto cancel() -> void;
 };
-
-#endif // PROGRESS_DIALOG_H

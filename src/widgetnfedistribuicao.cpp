@@ -678,6 +678,14 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
 
   //----------------------------------------------------------
 
+  auto lineDataEmissao = split.filter("xNome=", Qt::CaseInsensitive);
+
+  if (lineDataEmissao.empty()) { throw RuntimeException("Não encontrou o campo 'xNome': " + evento); }
+
+  const QString dataEmissao = lineDataEmissao.first().remove("xNome=", Qt::CaseInsensitive);
+
+  //----------------------------------------------------------
+
   auto lineNome = split.filter("EmixNome=", Qt::CaseInsensitive);
 
   if (lineNome.empty()) { throw RuntimeException("Não encontrou o campo 'EmixNome': " + evento); }
@@ -736,6 +744,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     queryCadastrar.bindValue(":numeroNFe", numeroNFe);
     queryCadastrar.bindValue(":xml", xml);
     queryCadastrar.bindValue(":status", status);
+    queryCadastrar.bindValue(":dataHoraEmissao", dataEmissao);
     queryCadastrar.bindValue(":emitente", nomeEmitente);
     queryCadastrar.bindValue(":cnpjDest", cnpjDest);
     queryCadastrar.bindValue(":cnpjOrig", cnpjOrig);

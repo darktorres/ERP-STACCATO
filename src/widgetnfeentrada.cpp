@@ -88,6 +88,7 @@ void WidgetNfeEntrada::setupTables() {
   model.setTable("view_nfe_entrada");
 
   model.setHeaderData("utilizada", "Utilizada");
+  model.setHeaderData("dataHoraEmissao", "Data Emissão");
 
   ui->table->setModel(&model);
 
@@ -95,6 +96,7 @@ void WidgetNfeEntrada::setupTables() {
   ui->table->hideColumn("chaveAcesso");
   ui->table->hideColumn("Fornecedor");
   ui->table->hideColumn("nsu");
+  ui->table->hideColumn("Importado em");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 

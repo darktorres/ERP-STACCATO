@@ -241,3 +241,4 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
 // TODO: vendedor especial recebe 0,5% nas vendas como consultor
 // TODO: reimplement views as materialized views? https://www.fromdual.com/mysql-materialized-views
+// TODO: nas linhas negativas mostrar a % negativo tambem, ex: -2%

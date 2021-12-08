@@ -82,6 +82,7 @@ public:
   int idNFe = 0;
 
   QString chaveAcesso;
+  QString dataHoraEmissao;
   // identificacao
   QString nNF;
   // emitente

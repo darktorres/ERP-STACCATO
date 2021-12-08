@@ -70,6 +70,7 @@ void XML::lerValores(const QStandardItem *item) {
 
       if (text.contains("chNFe - ")) { chaveAcesso = text.remove("chNFe - "); }
       if (text.contains("nNF - ")) { nNF = text.remove("nNF - ").rightJustified(9, '0'); }
+      if (text.contains("dhEmi - ")) { dataHoraEmissao = text.remove("dhEmi - "); }
 
       if (parentText == "emit" and text.contains("xNome - ")) { xNome = text.remove("xNome - "); }
       if (parentText == "emit" and text.contains("CNPJ - ")) { cnpjOrig = text.remove("CNPJ - "); }

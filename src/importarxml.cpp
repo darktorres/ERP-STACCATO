@@ -686,6 +686,8 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 
   modelNFe.setData(row, "idNFe", xml.idNFe);
   modelNFe.setData(row, "tipo", "ENTRADA");
+  modelNFe.setData(row, "dataHoraEmissao", xml.dataHoraEmissao);
+  modelNFe.setData(row, "emitente", xml.xNome);
   modelNFe.setData(row, "cnpjDest", xml.cnpjDest);
   modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig);
   modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso);

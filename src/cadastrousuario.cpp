@@ -59,6 +59,7 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("webdav_documentos", "Rede - Documentos");
   modelPermissoes.setHeaderData("webdav_compras", "Rede - Compras");
   modelPermissoes.setHeaderData("webdav_financeiro", "Rede - Financeiro");
+  modelPermissoes.setHeaderData("webdav_rh", "Rede - RH");
   modelPermissoes.setHeaderData("webdav_obras", "Rede - Obras");
   modelPermissoes.setHeaderData("webdav_logistica", "Rede - Logística");
 

@@ -23,7 +23,7 @@ public:
 
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
-  auto setFilter(const QString &idCompra) -> void;
+  auto setFilter(const QString &ordemCompra) -> void;
 
 private:
   // attributes

@@ -55,6 +55,8 @@ contains(CONFIG, deploy) {
     message(deploy)
     DEFINES *= DEPLOY
 
+    CONFIG += ltcg
+
     win32-msvc {
         QMAKE_CXXFLAGS_RELEASE *= /O2
     }

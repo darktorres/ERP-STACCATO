@@ -493,10 +493,10 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 //  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
 //}
 
-void InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
+void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
+  if (ordemCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
 
-  QString filtro = "idCompra IN (" + idCompra + ")";
+  QString filtro = "ordemCompra IN (" + ordemCompra + ")";
 
   if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
 
@@ -510,7 +510,7 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   //  setTreeView();
 
-  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("idCompra IN (" + idCompra + ")  AND desativado = FALSE"); }
+  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("ordemCompra IN (" + ordemCompra + ")  AND desativado = FALSE"); }
 
   modelFluxoCaixa.select();
 
@@ -522,8 +522,8 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   }
 
   SqlQuery query;
-  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
-  query.bindValue(":idCompra", idCompra);
+  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.ordemCompra = :ordemCompra");
+  query.bindValue(":ordemCompra", ordemCompra);
 
   if (not query.exec()) { throw RuntimeException("Erro buscando se é representacao: " + query.lastError().text()); }
 

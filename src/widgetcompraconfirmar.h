@@ -26,7 +26,7 @@ private:
   SqlTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  auto confirmarCompra(const QString &idCompra, const QDate dataPrevista, const QDate dataConf) -> void;
+  auto confirmarCompra(const QString &ordemCompra, const QDate dataPrevista, const QDate dataConf) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;

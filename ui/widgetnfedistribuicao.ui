@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NFeDistribuicao</class>
- <widget class="QWidget" name="NFeDistribuicao">
+ <class>WidgetNFeDistribuicao</class>
+ <widget class="QWidget" name="WidgetNFeDistribuicao">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
+    <width>1059</width>
     <height>429</height>
    </rect>
   </property>

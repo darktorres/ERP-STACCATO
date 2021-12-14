@@ -8,7 +8,7 @@
 #include <QWidget>
 
 namespace Ui {
-class NFeDistribuicao;
+class WidgetNFeDistribuicao;
 }
 
 using namespace std::chrono_literals;
@@ -35,7 +35,7 @@ private:
   QString cnpjDest;
   QTimer timer;
   SqlTableModel model;
-  Ui::NFeDistribuicao *ui;
+  Ui::WidgetNFeDistribuicao *ui;
   // methods
   auto agendarOperacao() -> void;
   auto ajustarGroupBoxStatus() -> void;

@@ -74,9 +74,11 @@ void ChartView::removeTooltips() {
 void ChartView::mouseMoveEvent(QMouseEvent *event) {
   const auto point = m_chart->mapToValue(event->pos());
 
+  // TODO: implicit conversion qreal -> qint64
   if (formatX == "QDateTime") { m_coordX->setText(labelX + ": " + QDateTime::fromMSecsSinceEpoch(point.x()).toString("dd/MM/yy")); }
   if (formatX == "QString") { m_coordX->setText(labelX + ": " + QLocale(QLocale::Portuguese).toString(point.x(), 'f', 0)); }
 
+  // TODO: implicit conversion qreal -> qint64
   if (formatY == "QDateTime") { m_coordY->setText(labelY + ": " + QDateTime::fromMSecsSinceEpoch(point.y()).toString("dd/MM/yy")); }
   if (formatY == "QString") { m_coordY->setText(labelY + ": " + QLocale(QLocale::Portuguese).toString(point.y(), 'f', 0)); }
 
@@ -135,7 +137,9 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
     if (qobject_cast<QBarCategoryAxis *>(axisX)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
 
     if (qobject_cast<QDateTimeAxis *>(axisX)) {
+      // TODO: implicit conversion qreal -> qint64
       min_x = QDateTime::fromMSecsSinceEpoch(min_x.toReal());
+      // TODO: implicit conversion qreal -> qint64
       max_x = QDateTime::fromMSecsSinceEpoch(max_x.toReal());
     }
 
@@ -155,7 +159,9 @@ void ChartView::resetRange(const bool startXZero, const bool startYZero) {
     if (qobject_cast<QBarCategoryAxis *>(axisY)) { throw RuntimeException("Não implementado para QBarCategoryAxis"); } // QString
 
     if (qobject_cast<QDateTimeAxis *>(axisY)) {
+      // TODO: implicit conversion qreal -> qint64
       min_y = QDateTime::fromMSecsSinceEpoch(min_y.toReal());
+      // TODO: implicit conversion qreal -> qint64
       max_y = QDateTime::fromMSecsSinceEpoch(max_y.toReal());
     }
 

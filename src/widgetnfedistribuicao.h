@@ -13,12 +13,12 @@ class NFeDistribuicao;
 
 using namespace std::chrono_literals;
 
-class WidgetNFeDistribuicao : public QWidget {
+class WidgetNFeDistribuicao final : public QWidget {
   Q_OBJECT
 
 public:
   explicit WidgetNFeDistribuicao(QWidget *parent);
-  ~WidgetNFeDistribuicao();
+  ~WidgetNFeDistribuicao() final;
 
   auto resetTables() -> void;
   auto updateTables() -> void;

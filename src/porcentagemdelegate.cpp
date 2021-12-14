@@ -1,6 +1,6 @@
 #include "porcentagemdelegate.h"
 
-PorcentagemDelegate::PorcentagemDelegate(const bool multiplicar, QObject *parent) : QStyledItemDelegate(parent), multiplicar(multiplicar) {}
+PorcentagemDelegate::PorcentagemDelegate(const bool multiplicar_, QObject *parent) : QStyledItemDelegate(parent), multiplicar(multiplicar_) {}
 
 QString PorcentagemDelegate::displayText(const QVariant &value, const QLocale &locale) const {
   if (value.userType() == QMetaType::Double or value.userType() == QMetaType::Int) {

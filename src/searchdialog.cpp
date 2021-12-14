@@ -18,9 +18,9 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QList<FullTextIndex> &fullTextIndexes, const QString &filter,
+SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey_, const QStringList &textKeys_, const QList<FullTextIndex> &fullTextIndexes_, const QString &filter_,
                            const QString &sortColumn, const bool naoListar, QWidget *parent)
-    : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes), primaryKey(primaryKey), filter(filter), textKeys(textKeys), model(1000), ui(new Ui::SearchDialog) {
+    : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes_), primaryKey(primaryKey_), filter(filter_), textKeys(textKeys_), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   timer.setSingleShot(true);
@@ -31,7 +31,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
 
   setupTables(table, sortColumn);
 
-  if (fullTextIndexes.isEmpty()) {
+  if (fullTextIndexes_.isEmpty()) {
     ui->frameLineEdit->hide();
     ui->labelBusca->hide();
   }

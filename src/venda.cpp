@@ -1496,6 +1496,7 @@ void Venda::calcularPesoTotal() {
     total += modelItem.data(row, "caixas").toDouble() * kgcx;
   }
 
+  // TODO: implicit conversion double -> int
   ui->spinBoxPesoTotal->setValue(total);
 }
 

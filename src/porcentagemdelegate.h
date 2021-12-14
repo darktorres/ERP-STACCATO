@@ -7,11 +7,11 @@ class PorcentagemDelegate final : public QStyledItemDelegate {
 
 public:
   explicit PorcentagemDelegate(const bool multiplicar, QObject *parent);
-  ~PorcentagemDelegate() = default;
+  ~PorcentagemDelegate() final = default;
 
 private:
   // attributes
   bool const multiplicar;
   // methods
-  auto displayText(const QVariant &value, const QLocale &locale) const -> QString;
+  auto displayText(const QVariant &value, const QLocale &locale) const -> QString override;
 };

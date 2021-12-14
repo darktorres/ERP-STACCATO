@@ -8,7 +8,7 @@ class ReaisDelegate final : public QStyledItemDelegate {
 public:
   explicit ReaisDelegate(const int decimais, const bool readOnly, QObject *parent);
   explicit ReaisDelegate(QObject *parent);
-  ~ReaisDelegate() = default;
+  ~ReaisDelegate() final = default;
 
 private:
   // attributes

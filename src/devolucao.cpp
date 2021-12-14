@@ -13,7 +13,7 @@
 #include <QSqlRecord>
 #include <cmath>
 
-Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao), m_idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao_, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao_), m_idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   setConnections();
@@ -22,7 +22,7 @@ Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget
 
   setWindowTitle(idVenda);
 
-  if (isRepresentacao) {
+  if (isRepresentacao_) {
     ui->doubleSpinBoxPorcentagem->setDisabled(true);
     ui->doubleSpinBoxCredito->setDisabled(true);
   }

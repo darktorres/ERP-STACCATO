@@ -40,6 +40,8 @@ public:
   ACollectionProperty() {}
   ACollectionProperty(const ACollectionProperty &) {}
   virtual ~ACollectionProperty() {}
+
+  ACollectionProperty &operator=(const ACollectionProperty &other) = default;
 };
 Q_DECLARE_METATYPE(ACollectionProperty)
 

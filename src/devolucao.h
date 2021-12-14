@@ -14,7 +14,7 @@ class Devolucao final : public QDialog {
 
 public:
   explicit Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent);
-  ~Devolucao();
+  ~Devolucao() final;
 
 private:
   // attributes

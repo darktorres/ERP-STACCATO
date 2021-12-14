@@ -17,7 +17,7 @@ public:
   Q_ENUM(Tipo)
 
   explicit Contas(const Tipo tipo, QWidget *parent);
-  ~Contas();
+  ~Contas() final;
 
   auto viewContaPagarData(const QString &dataPagamento) -> void;
   auto viewContaPagarOrdemCompra(const QString &ordemCompra) -> void;

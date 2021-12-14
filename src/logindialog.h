@@ -14,7 +14,7 @@ public:
   Q_ENUM(Tipo)
 
   explicit LoginDialog(const Tipo tipo = Tipo::Login, QWidget *parent = nullptr);
-  ~LoginDialog();
+  ~LoginDialog() final;
 
 private:
   // attributes

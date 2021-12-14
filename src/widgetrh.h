@@ -8,12 +8,12 @@ namespace Ui {
 class WidgetRh;
 }
 
-class WidgetRh : public QWidget {
+class WidgetRh final : public QWidget {
   Q_OBJECT
 
 public:
   explicit WidgetRh(QWidget *parent);
-  ~WidgetRh();
+  ~WidgetRh() final;
 
   //  auto resetTables() -> void;
   //  auto updateTables() -> void;

@@ -18,7 +18,7 @@ public:
   enum class TipoPgt { Normal, Frete, ST };
   Q_ENUM(TipoPgt)
 
-  explicit Pagamento(TipoPgt tipoPgt, QWidget *parent) : QWidget(parent), tipoPgt(tipoPgt) {}
+  explicit Pagamento(TipoPgt tipoPgt_, QWidget *parent) : QWidget(parent), tipoPgt(tipoPgt_) {}
 
   int posicao = 0;
   QLabel *label = nullptr;

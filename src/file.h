@@ -8,5 +8,5 @@ class File final : public QFile {
 public:
   explicit File(const QString &name, QObject *parent = nullptr);
 
-  auto open(const OpenMode mode) -> bool;
+  auto open(const OpenMode mode) -> bool override;
 };

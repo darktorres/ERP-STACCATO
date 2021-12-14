@@ -510,7 +510,6 @@ FORMS += \
     ui/inserirtransferencia.ui \
     ui/logindialog.ui \
     ui/mainwindow.ui \
-    ui/nfedistribuicao.ui \
     ui/orcamento.ui \
     ui/pagamentosdia.ui \
     ui/precoestoque.ui \
@@ -554,6 +553,7 @@ FORMS += \
     ui/widgetlogisticaentregues.ui \
     ui/widgetlogisticarecebimento.ui \
     ui/widgetlogisticarepresentacao.ui \
+    ui/widgetnfedistribuicao.ui \
     ui/widgetnfeentrada.ui \
     ui/widgetnfesaida.ui \
     ui/widgetorcamento.ui \

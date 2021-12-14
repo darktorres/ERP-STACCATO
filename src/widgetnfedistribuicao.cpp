@@ -1,5 +1,5 @@
 #include "widgetnfedistribuicao.h"
-#include "ui_nfedistribuicao.h"
+#include "ui_widgetnfedistribuicao.h"
 
 #include "acbrlib.h"
 #include "application.h"
@@ -11,7 +11,7 @@
 #include <QSqlError>
 #include <QTimer>
 
-WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::NFeDistribuicao) {
+WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNFeDistribuicao) {
   ui->setupUi(this);
 
   connect(&timer, &QTimer::timeout, this, &WidgetNFeDistribuicao::downloadAutomatico);

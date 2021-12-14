@@ -45,8 +45,8 @@ private:
   Tipo const tipo;
   Ui::CadastrarNFe *ui;
   // methods
+  auto atualizarNFe(const int idNFe) -> void;
   auto buscarAliquotas() -> void;
-  auto cadastrar(const int idNFe) -> void;
   auto calculaCofins() -> void;
   auto calculaDigitoVerificador() -> void;
   auto calculaIcms() -> void;

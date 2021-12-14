@@ -42,6 +42,7 @@ public:
   auto enqueueException(const QString &exception, QWidget *parent = nullptr) -> void;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
+  auto findTag(const QString &texto, const QString &tag) -> QString;
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;

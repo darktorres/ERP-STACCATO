@@ -126,20 +126,40 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Loja:</string>
+       <widget class="QGroupBox" name="groupBoxLoja">
+        <property name="title">
+         <string>Loja</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ItemBox" name="itemBoxLoja">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <property name="leftMargin">
+          <number>3</number>
+         </property>
+         <property name="topMargin">
+          <number>3</number>
+         </property>
+         <property name="rightMargin">
+          <number>3</number>
+         </property>
+         <property name="bottomMargin">
+          <number>3</number>
+         </property>
+         <property name="spacing">
+          <number>3</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="ItemBox" name="itemBoxLoja">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -250,7 +270,6 @@
   <tabstop>checkBoxDesconhecimento</tabstop>
   <tabstop>checkBoxNaoRealizada</tabstop>
   <tabstop>checkBoxCancelada</tabstop>
-  <tabstop>itemBoxLoja</tabstop>
   <tabstop>table</tabstop>
   <tabstop>pushButtonPesquisar</tabstop>
   <tabstop>pushButtonCiencia</tabstop>

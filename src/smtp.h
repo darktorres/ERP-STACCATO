@@ -26,14 +26,13 @@ class Smtp final : public QObject {
   Q_OBJECT
 
 public:
-  enum class States { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close };
+  enum class States { /*Tls,*/ HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close };
   Q_ENUM(States)
 
   Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port = 465, const int timeout = 5000, QObject *parent = nullptr);
   ~Smtp() final;
 
-  auto sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files = QStringList(), const QString &assinatura = QString())
-      -> void;
+  auto sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files = {}, const QString &assinatura = {}) -> void;
 
 signals:
   void status(const QString &); // TODO: is this used?
@@ -47,7 +46,7 @@ private:
   QString const host;
   QString const pass;
   QString const user;
-  QString from;
+  QString m_from;
   QString message;
   QString response;
   QStringList rcpt;

@@ -22,13 +22,14 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+
 #include "xlsxcell.h"
 #include "xlsxcell_p.h"
-#include "xlsxformat.h"
 #include "xlsxformat_p.h"
 #include "xlsxutility_p.h"
 #include "xlsxworkbook.h"
 #include "xlsxworksheet.h"
+
 #include <QDateTime>
 
 QT_BEGIN_NAMESPACE_XLSX
@@ -129,7 +130,7 @@ bool Cell::isDateTime() const {
  */
 QDateTime Cell::dateTime() const {
   Q_D(const Cell);
-  if (not isDateTime()) return QDateTime();
+  if (not isDateTime()) { return QDateTime(); }
   return datetimeFromNumber(d->value.toDouble(), d->parent->workbook()->isDate1904());
 }
 

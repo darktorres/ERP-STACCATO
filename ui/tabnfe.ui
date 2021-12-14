@@ -90,7 +90,7 @@
         <number>0</number>
        </property>
        <item row="1" column="4">
-        <widget class="NFeDistribuicao" name="widgetDistribuicao" native="true"/>
+        <widget class="WidgetNFeDistribuicao" name="widgetDistribuicao" native="true"/>
        </item>
       </layout>
      </widget>
@@ -112,9 +112,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>NFeDistribuicao</class>
+   <class>WidgetNFeDistribuicao</class>
    <extends>QWidget</extends>
-   <header>src/nfedistribuicao.h</header>
+   <header>src/widgetnfedistribuicao.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

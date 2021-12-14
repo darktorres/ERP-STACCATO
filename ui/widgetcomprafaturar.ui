@@ -78,6 +78,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonLimparFiltro">
+         <property name="text">
+          <string>Limpar filtro fornecedores</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QFrame" name="frame_4">

@@ -31,6 +31,7 @@ private:
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
+  auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_pushButtonMarcarFaturado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableResumo_clicked(const QModelIndex &index) -> void;

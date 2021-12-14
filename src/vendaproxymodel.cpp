@@ -2,7 +2,6 @@
 
 #include "user.h"
 
-#include <QBrush>
 #include <QSqlRecord>
 
 VendaProxyModel::VendaProxyModel(QSqlQueryModel *model, QObject *parent)
@@ -29,11 +28,6 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
 
     if (proxyIndex.column() == diasRestantesIndex) {
       const int dias = proxyIndex.siblingAtColumn(diasRestantesIndex).data().toInt();
-      const QString status = proxyIndex.siblingAtColumn(statusIndex).data().toString();
-
-      if (status == "ENTREGUE") {
-        if (role == Qt::DisplayRole) { return QVariant(); }
-      }
 
       if (dias >= 5) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::green); }

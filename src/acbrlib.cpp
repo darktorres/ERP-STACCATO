@@ -1,4 +1,4 @@
-#if _WIN32
+#ifdef Q_OS_WIN
 
 #include "acbrlib.h"
 
@@ -10,6 +10,8 @@
 #include <QDir>
 #include <QSqlError>
 #include <QUrl>
+
+#define BUFFER_LEN 256
 
 typedef int (*NFE_Inicializar)(const char *eArqConfig, const char *eChaveCrypt);
 typedef int (*NFE_Finalizar)();
@@ -28,11 +30,13 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
 
-  gerarDanfe(query.value("xml").toByteArray(), true);
+  gerarDanfe(query.value("xml"), true);
 }
 
-void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  if (fileContent.contains("<resNFe")) { throw RuntimeError("XML resumido, não é possível gerar DANFE!"); }
+void ACBrLib::gerarDanfe(const QVariant &fileContent, const bool openFile) {
+  const auto fileContent2 = fileContent.toByteArray();
+
+  if (fileContent2.contains("<resNFe")) { throw RuntimeError("XML resumido, não é possível gerar DANFE!"); }
 
   HMODULE nHandler = LoadLibraryW(L"ACBrNFe32.dll");
 
@@ -54,7 +58,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   if (not method_carregar_xml) { throw RuntimeException("Erro ACBrLib NFE_CarregarXML!"); }
 
-  ret = method_carregar_xml(fileContent);
+  ret = method_carregar_xml(fileContent2);
 
   check_result(nHandler, ret);
 
@@ -82,7 +86,7 @@ void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
 
   // ---------------------------------------------
 
-  const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
+  const QString chaveAcesso = fileContent2.mid(fileContent2.indexOf("Id=") + 7, 44);
   const QString filePath = QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf";
 
   if (openFile) {
@@ -130,18 +134,32 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 #include "acbrlib.h"
 
 #include "application.h"
+#include "sqlquery.h"
+#include "xml_viewer.h"
+
+#include <QDebug>
+#include <QSqlError>
 
 void ACBrLib::gerarDanfe(const int idNFe) {
-  Q_UNUSED(idNFe)
+  if (idNFe == 0) { throw RuntimeError("Produto não possui NFe!"); }
 
-  throw RuntimeException("Não implementado para linux!");
+  SqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
+
+  auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
+  viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void ACBrLib::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  Q_UNUSED(fileContent)
+void ACBrLib::gerarDanfe(const QVariant &fileContent, const bool openFile) {
   Q_UNUSED(openFile)
 
-  throw RuntimeException("Não implementado para linux!");
+  auto *viewer = new XML_Viewer(fileContent.toString(), nullptr);
+  viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 #endif

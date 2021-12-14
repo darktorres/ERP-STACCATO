@@ -6,7 +6,6 @@
 #include "sqlquery.h"
 
 #include <QFile>
-#include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
 #include <QXmlStreamReader>

@@ -35,10 +35,10 @@ private:
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarColetado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
-  auto on_pushButtonVenda_clicked() -> void;
-  auto on_pushButtonFollowup_clicked() -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrevColeta) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

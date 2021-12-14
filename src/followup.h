@@ -32,5 +32,5 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

@@ -9,7 +9,6 @@
 #include "file.h"
 #include "reaisdelegate.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QDir>
@@ -89,12 +88,15 @@ void WidgetNfeEntrada::setupTables() {
   model.setTable("view_nfe_entrada");
 
   model.setHeaderData("utilizada", "Utilizada");
+  model.setHeaderData("dataHoraEmissao", "Data Emissão");
 
   ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
+  ui->table->hideColumn("Fornecedor");
   ui->table->hideColumn("nsu");
+  ui->table->hideColumn("Importado em");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 
@@ -114,8 +116,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 void WidgetNfeEntrada::montaFiltro() {
@@ -129,7 +130,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  const QString filtroBusca = "NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
+  const QString filtroBusca = "Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
   if (not text.isEmpty()) { filtros << filtroBusca; }
 
   //------------------------------------- filtro data
@@ -196,8 +197,8 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
   //--------------------------------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Inutilizar?", "Tem certeza que deseja inutilizar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Inutilizar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Inutilizar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
@@ -212,6 +213,8 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 }
 
 void WidgetNfeEntrada::inutilizar(const int row) {
+  // TODO: em vez de deletar linhas apenas marcar como cancelado?
+
   SqlQuery queryPedidoFornecedor;
   queryPedidoFornecedor.prepare(
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
@@ -306,7 +309,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (model.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (model.data(index.row(), "status").toString() == "RESUMO") { continue; }
 
     // pegar XML do MySQL e salvar em arquivo
 
@@ -329,7 +332,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    ACBrLib::gerarDanfe(query.value("xml").toByteArray(), false);
+    ACBrLib::gerarDanfe(query.value("xml"), false);
 
     // copiar para pasta predefinida
 

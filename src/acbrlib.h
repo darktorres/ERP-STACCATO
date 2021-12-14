@@ -1,17 +1,14 @@
 #pragma once
 
-#if _WIN32
+#ifdef Q_OS_WIN
 
-#include <QByteArray>
 #include <windows.h>
-
-#define BUFFER_LEN 256
 
 class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
 
 private:
   static auto check_result(HMODULE nHandler, const int ret) -> void;
@@ -20,13 +17,13 @@ private:
 
 #else
 
-#include <QByteArray>
+#include <QVariant>
 
 class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
 };
 
 #endif

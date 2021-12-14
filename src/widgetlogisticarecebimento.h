@@ -37,7 +37,7 @@ private:
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
-  auto on_pushButtonVenda_clicked() -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrevReceb) -> void;
   auto setConnections() -> void;

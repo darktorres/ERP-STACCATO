@@ -12,7 +12,6 @@
 #include "user.h"
 #include "xlsxdocument.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -109,6 +108,7 @@ void WidgetCompraGerar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked, connectionType);
 }
 
@@ -247,8 +247,8 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
 void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {
   QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Enviar");
-  msgBox.setButtonText(QMessageBox::No, "Pular");
+  msgBox.button(QMessageBox::Yes)->setText("Enviar");
+  msgBox.button(QMessageBox::No)->setText("Pular");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, razaoSocial, this);
@@ -298,8 +298,8 @@ int WidgetCompraGerar::getOrdemCompra() {
 
     if (query2.first()) {
       QMessageBox msgBox(QMessageBox::Question, "Atenção!", "OC já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
-      msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-      msgBox.setButtonText(QMessageBox::No, "Voltar");
+      msgBox.button(QMessageBox::Yes)->setText("Continuar");
+      msgBox.button(QMessageBox::No)->setText("Voltar");
 
       const int choice = msgBox.exec();
 
@@ -349,11 +349,12 @@ bool WidgetCompraGerar::verificaRepresentacao(const QModelIndexList &list) {
 }
 
 QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ordemCompra, const bool isRepresentacao) {
-  const int firstRow = list.first().row();
-  const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
   const QString folderKey = User::getSetting("User/ComprasFolder").toString();
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
+
+  const int firstRow = list.first().row();
+  const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
@@ -490,8 +491,8 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
@@ -522,6 +523,16 @@ void WidgetCompraGerar::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraGerar::on_pushButtonLimparFiltro_clicked() {
+  ui->tableResumo->clearSelection();
+
+  const QString fornecedor = "";
+
+  const QString filtro = fornecedor.isEmpty() ? "0" : "status = 'PENDENTE' AND fornecedor = '" + fornecedor + "'";
+
+  modelProdutos.setFilter(filtro);
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes

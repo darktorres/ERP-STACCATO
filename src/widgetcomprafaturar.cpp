@@ -11,7 +11,6 @@
 #include "sql.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlError>
 
@@ -53,6 +52,7 @@ void WidgetCompraFaturar::setConnections() {
   connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::on_checkBoxRepresentacao_toggled, connectionType);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraFaturar::on_tableResumo_clicked, connectionType);
@@ -218,6 +218,16 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
 void WidgetCompraFaturar::on_tableResumo_clicked(const QModelIndex &index) {
   const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewFaturamento.setFilter(filtro);
+}
+
+void WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked() {
+  ui->tableResumo->clearSelection();
+
+  const QString fornecedor = "";
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 

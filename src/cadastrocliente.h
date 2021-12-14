@@ -24,12 +24,12 @@ private:
   Ui::CadastroCliente *ui;
   // methods
   auto cadastrar() -> void final;
-  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
   auto novoEndereco() -> void;
-  auto on_checkBoxDataNasc_stateChanged(const int state) -> void; // TODO: renamw functions/widgets to aniversario
+  auto on_checkBoxDataNasc_stateChanged(const int state) -> void; // TODO: rename functions/widgets to aniversario
   auto on_checkBoxInscEstIsento_toggled(const bool checked) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
@@ -49,7 +49,7 @@ private:
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
-  auto setEnderecoReadOnly(const bool readOnly) -> void;
+  auto setEnderecoReadOnly(const bool isReadOnly) -> void;
   auto setItemBoxes() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;

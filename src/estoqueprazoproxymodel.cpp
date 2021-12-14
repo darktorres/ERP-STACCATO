@@ -3,8 +3,6 @@
 #include "application.h"
 #include "user.h"
 
-#include <QBrush>
-#include <QDate>
 #include <QSqlRecord>
 
 EstoquePrazoProxyModel::EstoquePrazoProxyModel(QSqlQueryModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->record().indexOf("prazoEntrega")) {

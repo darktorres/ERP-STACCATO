@@ -51,7 +51,7 @@ void WidgetEstoques::setHeaderData() {
   if (ui->radioButtonEstoqueContabil->isChecked()) { model.setHeaderData("unProd", "Un. Prod."); }
   model.setHeaderData("lote", "Lote");
   model.setHeaderData("local", "Local");
-  model.setHeaderData("bloco", "Bloco");
+  model.setHeaderData("label", "Bloco");
   model.setHeaderData("codComercial", "Cód. Com.");
   model.setHeaderData("nfe", "NFe");
   model.setHeaderData("dataPrevColeta", "Prev. Coleta");
@@ -91,6 +91,7 @@ void WidgetEstoques::updateTables() {
   if (not modelIsSet) {
     setupTables();
     modelIsSet = true;
+    return; // to avoid double selecting table
   }
 
   model.select();
@@ -103,8 +104,9 @@ void WidgetEstoques::resetTables() { modelIsSet = false; }
 void WidgetEstoques::on_table_activated(const QModelIndex &index) {
   const QString idEstoque = model.data(index, "idEstoque").toString();
 
-  auto *estoque = new Estoque(idEstoque, true, this);
+  auto *estoque = new Estoque(idEstoque, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
+  estoque->show();
 }
 
 void WidgetEstoques::escolheFiltro() { ui->radioButtonEstoqueContabil->isChecked() ? montaFiltroContabil() : montaFiltro(); }

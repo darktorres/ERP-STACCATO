@@ -2,7 +2,6 @@
 
 #include "user.h"
 
-#include <QBrush>
 #include <QSqlRecord>
 
 OrcamentoProxyModel::OrcamentoProxyModel(QSqlQueryModel *model, QObject *parent)
@@ -34,11 +33,6 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
 
     if (proxyIndex.column() == diasRestantesIndex) {
       const int dias = proxyIndex.siblingAtColumn(diasRestantesIndex).data().toInt();
-      const QString status = proxyIndex.siblingAtColumn(statusIndex).data().toString();
-
-      if (status == "FECHADO") {
-        if (role == Qt::DisplayRole) { return QVariant(); }
-      }
 
       if (dias >= 5) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::green); }

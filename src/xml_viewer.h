@@ -12,14 +12,13 @@ class XML_Viewer final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit XML_Viewer(const QByteArray &content, QWidget *parent);
-  ~XML_Viewer();
+  explicit XML_Viewer(const QString &content, QWidget *parent);
+  ~XML_Viewer() final;
 
   auto on_pushButtonDanfe_clicked() -> void;
 
 private:
   // attributes
-  QByteArray const fileContent;
   XML xml;
   Ui::XML_Viewer *ui;
   // methods

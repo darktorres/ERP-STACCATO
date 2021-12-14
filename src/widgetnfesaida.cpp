@@ -6,11 +6,13 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "file.h"
-#include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "user.h"
-#include "xml_viewer.h"
+
+#if __has_include("lrreportengine.h")
+#include "lrreportengine.h"
+#endif
 
 #include <QDesktopServices>
 #include <QDir>
@@ -113,8 +115,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + model.data(index.row(), "idNFe").toString()); }
 
-  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
-  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 void WidgetNfeSaida::montaFiltro() {
@@ -173,13 +174,14 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   // -------------------------------------------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   // -------------------------------------------------------------------------
 
+  // TODO: adicionar e testar bool ok
   const QString justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 200 caracteres: ");
 
   if (justificativa.size() < 15 or justificativa.size() > 200) { throw RuntimeError("Justificativa fora do tamanho!", this); }
@@ -232,6 +234,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 // TODO: 1botao para gerar relatorio igual ao da receita
 
 void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
+#if __has_include("lrreportengine.h")
   // TODO: 3formatar decimais no padrao BR
   // TODO: 3perguntar um intervalo de tempo para filtrar as notas
   // TODO: 3verificar quais as tags na nota dos campos que faltam preencher
@@ -288,6 +291,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   if (not report.printToPDF(filename)) { throw RuntimeException("Erro gerando relatório: " + report.lastError(), this); }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + filename, this); }
+#else
+  qApp->enqueueWarning("LimeReport desativado!", this);
+#endif
 }
 
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {
@@ -305,8 +311,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
-
-    if (model.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar XML do MySQL e salvar em arquivo
 
@@ -329,7 +333,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    ACBrLib::gerarDanfe(query.value("xml").toByteArray(), false);
+    ACBrLib::gerarDanfe(query.value("xml"), false);
 
     // copiar para pasta predefinida
 

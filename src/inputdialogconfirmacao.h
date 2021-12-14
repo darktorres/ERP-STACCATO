@@ -20,7 +20,6 @@ public:
 
   auto getDate() const -> QDate;
   auto getEntregou() const -> QString;
-  auto getNextDateTime() const -> QDate;
   auto getRecebeu() const -> QString;
   auto setFilterEntrega(const QString &id, const QString &idEvento) -> void;
   auto setFilterRecebe(const QStringList &ids) -> void;
@@ -44,7 +43,6 @@ private:
   auto dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) -> void;
   auto gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) -> void;
   auto getCaixasDefeito(const int row) -> double;
-  auto on_dateEditEvento_dateChanged(const QDate date) -> void;
   auto on_pushButtonFoto_clicked() -> void;
   auto on_pushButtonQuebradoEntrega_clicked() -> void;
   auto on_pushButtonQuebradoReceb_clicked() -> void;

@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "itembox.h"
 #include "user.h"
 
 #include <QDebug>
@@ -156,7 +155,7 @@ void CadastroProfissional::updateMode() {
 bool CadastroProfissional::verificaVinculo() {
   SqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString())) {
+  if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString() + " LIMIT 1")) {
     throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());
   }
 
@@ -249,11 +248,7 @@ void CadastroProfissional::verifyFields() {
 }
 
 void CadastroProfissional::savingProcedures() {
-  if (ui->checkBoxDataNasc->isChecked()) {
-    setData("aniversario", ui->dateEditDataNasc->date());
-  } else {
-    setData("aniversario", QVariant());
-  }
+  setData("aniversario", (ui->checkBoxDataNasc->isChecked()) ? ui->dateEditDataNasc->date() : QVariant());
 
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }
@@ -335,7 +330,7 @@ void CadastroProfissional::on_lineEditCPF_textEdited(const QString &text) { ui->
 
 void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) { ui->lineEditCNPJ->setStyleSheet(validaCNPJ(text) ? "" : "color: rgb(255, 0, 0)"); }
 
-bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -356,16 +351,16 @@ bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
 void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
@@ -457,15 +452,15 @@ void CadastroProfissional::successMessage() {
 }
 
 void CadastroProfissional::verificaEndereco() {
-  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
-
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
-  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
+
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 }
 
 void CadastroProfissional::connectLineEditsToDirty() {

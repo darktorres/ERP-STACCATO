@@ -9,7 +9,6 @@
 #include "sql.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QSqlError>
 
@@ -52,6 +51,7 @@ void WidgetCompraConfirmar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked, connectionType);
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraConfirmar::on_tableResumo_clicked, connectionType);
 }
 
@@ -82,11 +82,11 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   const int row = list.first().row();
 
-  const QString idCompra = modelViewCompras.data(row, "Compra").toString();
+  const QString ordemCompra = modelViewCompras.data(row, "OC").toString();
   const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
   InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
-  inputDlg.setFilter(idCompra);
+  inputDlg.setFilter(ordemCompra);
 
   if (inputDlg.exec() != QDialog::Accepted) { return; }
 
@@ -95,7 +95,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   qApp->startTransaction("WidgetCompraConfirmar::on_pushButtonConfirmarCompra");
 
-  confirmarCompra(idCompra, dataPrevista, dataConf);
+  confirmarCompra(ordemCompra, dataPrevista, dataConf);
 
   Sql::updateVendaStatus(idVenda);
 
@@ -104,13 +104,13 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   updateTables();
 }
 
-void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate dataPrevista, const QDate dataConf) {
+void WidgetCompraConfirmar::confirmarCompra(const QString &ordemCompra, const QDate dataPrevista, const QDate dataConf) {
   SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 IN (SELECT "
-                     "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE)");
+                     "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE ordemCompra = :ordemCompra AND selecionado = TRUE)");
   queryVenda.bindValue(":dataRealConf", dataConf);
   queryVenda.bindValue(":dataPrevFat", dataPrevista);
-  queryVenda.bindValue(":idCompra", idCompra);
+  queryVenda.bindValue(":ordemCompra", ordemCompra);
 
   if (not queryVenda.exec()) { throw RuntimeException("Erro salvando status da venda: " + queryVenda.lastError().text()); }
 
@@ -118,10 +118,10 @@ void WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
   SqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
-                      "AND idCompra = :idCompra AND selecionado = TRUE");
+                      "AND ordemCompra = :ordemCompra AND selecionado = TRUE");
   queryCompra.bindValue(":dataRealConf", dataConf);
   queryCompra.bindValue(":dataPrevFat", dataPrevista);
-  queryCompra.bindValue(":idCompra", idCompra);
+  queryCompra.bindValue(":ordemCompra", ordemCompra);
 
   if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 }
@@ -150,6 +150,16 @@ void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
 
 void WidgetCompraConfirmar::on_tableResumo_clicked(const QModelIndex &index) {
   const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewCompras.setFilter(filtro);
+}
+
+void WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked() {
+  ui->tableResumo->clearSelection();
+
+  const QString fornecedor = "";
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 

@@ -21,13 +21,6 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="pushButtonVenda">
-     <property name="text">
-      <string>Venda</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0" colspan="2">
     <widget class="TableView" name="table">
      <property name="mouseTracking">
@@ -117,7 +110,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>checkBoxMarcarTodos</tabstop>
-  <tabstop>pushButtonVenda</tabstop>
   <tabstop>table</tabstop>
   <tabstop>lineEditBusca</tabstop>
   <tabstop>pushButtonMarcarRecebido</tabstop>

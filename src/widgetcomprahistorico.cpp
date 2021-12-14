@@ -1,4 +1,4 @@
-#include "widgethistoricocompra.h"
+#include "widgetcomprahistorico.h"
 #include "ui_widgethistoricocompra.h"
 
 #include "acbrlib.h"
@@ -11,21 +11,21 @@
 
 #include <QSqlError>
 
-WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
+WidgetCompraHistorico::WidgetCompraHistorico(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
 
-WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
+WidgetCompraHistorico::~WidgetCompraHistorico() { delete ui; }
 
-void WidgetHistoricoCompra::setConnections() {
+void WidgetCompraHistorico::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::delayFiltro, connectionType);
-  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonDanfe_clicked, connectionType);
-  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonFollowup_clicked, connectionType);
-  connect(ui->tablePedidos, &TableView::clicked, this, &WidgetHistoricoCompra::on_tablePedidos_clicked, connectionType);
+  connect(&timer, &QTimer::timeout, this, &WidgetCompraHistorico::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraHistorico::delayFiltro, connectionType);
+  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonDanfe_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->tablePedidos, &TableView::clicked, this, &WidgetCompraHistorico::on_tablePedidos_clicked, connectionType);
 }
 
-void WidgetHistoricoCompra::updateTables() {
+void WidgetCompraHistorico::updateTables() {
   if (not isSet) {
     timer.setSingleShot(true);
     setConnections();
@@ -41,11 +41,11 @@ void WidgetHistoricoCompra::updateTables() {
   modelViewComprasFinanceiro.select();
 }
 
-void WidgetHistoricoCompra::delayFiltro() { timer.start(qApp->delayedTimer); }
+void WidgetCompraHistorico::delayFiltro() { timer.start(qApp->delayedTimer); }
 
-void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
+void WidgetCompraHistorico::resetTables() { modelIsSet = false; }
 
-void WidgetHistoricoCompra::setupTables() {
+void WidgetCompraHistorico::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
 
   ui->tablePedidos->setModel(&modelViewComprasFinanceiro);
@@ -75,7 +75,7 @@ void WidgetHistoricoCompra::setupTables() {
   ui->tableNFe->hideColumn("idNFe");
 }
 
-void WidgetHistoricoCompra::setTreeView() {
+void WidgetCompraHistorico::setTreeView() {
   modelTree.appendModel(&modelProdutos);
   modelTree.appendModel(&modelProdutos2);
 
@@ -136,7 +136,7 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(4, this));
 }
 
-void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
+void WidgetCompraHistorico::on_tablePedidos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
   const QString ordemCompra = modelViewComprasFinanceiro.data(index.row(), "OC").toString();
@@ -156,16 +156,16 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   modelNFe.select();
 }
 
-void WidgetHistoricoCompra::on_lineEditBusca_textChanged() { montaFiltro(); }
+void WidgetCompraHistorico::on_lineEditBusca_textChanged() { montaFiltro(); }
 
-void WidgetHistoricoCompra::montaFiltro() {
+void WidgetCompraHistorico::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = text.isEmpty() ? "0" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);
 }
 
-void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
+void WidgetCompraHistorico::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
   const auto rowCount = ui->tableNFe->rowCount();
 
@@ -177,7 +177,7 @@ void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
   ACBrLib::gerarDanfe(idNFe);
 }
 
-void WidgetHistoricoCompra::on_pushButtonFollowup_clicked() {
+void WidgetCompraHistorico::on_pushButtonFollowup_clicked() {
   const auto selection = ui->tablePedidos->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }

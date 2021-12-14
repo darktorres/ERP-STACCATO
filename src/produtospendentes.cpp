@@ -6,15 +6,12 @@
 #include "editdelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
-#include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
 
-#include <QDate>
 #include <QDebug>
 #include <QInputDialog>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -339,8 +336,11 @@ void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
 }
 
 void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
-  auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
-  estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt(), quantConsumir);
+  const QString idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toString();
+  const int idVendaProduto2 = modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt();
+
+  auto estoque = Estoque(idEstoque, this);
+  estoque.criarConsumo(idVendaProduto2, quantConsumir);
 
   //--------------------------------------------------------------------
 
@@ -377,6 +377,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
 
+  // TODO: retornar se quantConsumir for zero
   if (not ok) { return; }
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();

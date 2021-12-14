@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "comboboxdelegate.h"
-#include "doubledelegate.h"
 #include "editdelegate.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
@@ -39,6 +38,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
   ui->dateEditEvento->setDate(qApp->serverDate());
   ui->dateEditProximo->setDate(qApp->serverDate());
 
+  ui->treeView->hide();
+
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
     ui->frameDataPreco->show();
@@ -49,8 +50,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
     ui->widgetPgts->show();
 
-    ui->treeView->hide();
-
     ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
   }
 
@@ -60,9 +59,18 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
     ui->frameAdicionais->hide();
 
-    ui->treeView->hide();
-
     ui->tableFluxoCaixa->setSelectionMode(QTableView::MultiSelection);
+  }
+
+  if (tipo == Tipo::Historico) {
+    ui->frameDataPreco->show();
+
+    ui->frameAdicionais->hide();
+    ui->framePagamentos->hide();
+    ui->checkBoxMarcarTodos->hide();
+    ui->pushButtonSalvar->hide();
+
+    ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
   }
 
   setConnections();
@@ -154,7 +162,7 @@ void InputDialogFinanceiro::setupTables() {
 
   modelPedidoFornecedor2.setTable("pedido_fornecedor_has_produto2");
 
-  if (tipo == Tipo::Financeiro) {
+  if (tipo == Tipo::Financeiro or tipo == Tipo::Historico) {
     modelPedidoFornecedor2.setHeaderData("status", "Status");
     modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
     modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");
@@ -270,7 +278,7 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
   unsetConnections();
 
   try {
-    [=] {
+    [=, this] {
       if (representacao) { return; }
       if (not ui->widgetPgts->isVisible()) { return; }
 
@@ -422,73 +430,73 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   ui->widgetPgts->resetarPagamentos();
 }
 
-void InputDialogFinanceiro::setTreeView() {
-  modelTree.appendModel(&modelPedidoFornecedor);
-  modelTree.appendModel(&modelPedidoFornecedor2);
+// void InputDialogFinanceiro::setTreeView() {
+//  modelTree.appendModel(&modelPedidoFornecedor);
+//  modelTree.appendModel(&modelPedidoFornecedor2);
 
-  modelTree.updateData();
+//  modelTree.updateData();
 
-  modelTree.setHeaderData("aliquotaSt", "Alíquota ST");
-  modelTree.setHeaderData("st", "ST");
-  modelTree.setHeaderData("status", "Status");
-  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
-  modelTree.setHeaderData("idVenda", "Código");
-  modelTree.setHeaderData("fornecedor", "Fornecedor");
-  modelTree.setHeaderData("descricao", "Produto");
-  modelTree.setHeaderData("obs", "Obs.");
-  modelTree.setHeaderData("colecao", "Coleção");
-  modelTree.setHeaderData("codComercial", "Cód. Com.");
-  modelTree.setHeaderData("quant", "Quant.");
-  modelTree.setHeaderData("un", "Un.");
-  modelTree.setHeaderData("un2", "Un.2");
-  modelTree.setHeaderData("caixas", "Caixas");
-  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
-  modelTree.setHeaderData("preco", "Total");
-  modelTree.setHeaderData("kgcx", "Kg./Cx.");
-  modelTree.setHeaderData("formComercial", "Formato");
+//  modelTree.setHeaderData("aliquotaSt", "Alíquota ST");
+//  modelTree.setHeaderData("st", "ST");
+//  modelTree.setHeaderData("status", "Status");
+//  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+//  modelTree.setHeaderData("idVenda", "Código");
+//  modelTree.setHeaderData("fornecedor", "Fornecedor");
+//  modelTree.setHeaderData("descricao", "Produto");
+//  modelTree.setHeaderData("obs", "Obs.");
+//  modelTree.setHeaderData("colecao", "Coleção");
+//  modelTree.setHeaderData("codComercial", "Cód. Com.");
+//  modelTree.setHeaderData("quant", "Quant.");
+//  modelTree.setHeaderData("un", "Un.");
+//  modelTree.setHeaderData("un2", "Un.2");
+//  modelTree.setHeaderData("caixas", "Caixas");
+//  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
+//  modelTree.setHeaderData("preco", "Total");
+//  modelTree.setHeaderData("kgcx", "Kg./Cx.");
+//  modelTree.setHeaderData("formComercial", "Formato");
 
-  ui->treeView->setModel(&modelTree);
+//  ui->treeView->setModel(&modelTree);
 
-  ui->treeView->hideColumn("idRelacionado");
-  ui->treeView->hideColumn("idPedido2");
-  ui->treeView->hideColumn("idPedidoFK");
-  ui->treeView->hideColumn("selecionado");
-  ui->treeView->hideColumn("statusFinanceiro");
-  ui->treeView->hideColumn("ordemCompra");
-  ui->treeView->hideColumn("idVendaProduto1");
-  ui->treeView->hideColumn("idVendaProduto2");
-  ui->treeView->hideColumn("idCompra");
-  ui->treeView->hideColumn("idProduto");
-  ui->treeView->hideColumn("quantUpd");
-  ui->treeView->hideColumn("codBarras");
-  ui->treeView->hideColumn("dataPrevCompra");
-  ui->treeView->hideColumn("dataRealCompra");
-  ui->treeView->hideColumn("dataPrevConf");
-  ui->treeView->hideColumn("dataRealConf");
-  ui->treeView->hideColumn("dataPrevFat");
-  ui->treeView->hideColumn("dataRealFat");
-  ui->treeView->hideColumn("dataPrevColeta");
-  ui->treeView->hideColumn("dataRealColeta");
-  ui->treeView->hideColumn("dataPrevReceb");
-  ui->treeView->hideColumn("dataRealReceb");
-  ui->treeView->hideColumn("dataPrevEnt");
-  ui->treeView->hideColumn("dataRealEnt");
-  ui->treeView->hideColumn("created");
-  ui->treeView->hideColumn("lastUpdated");
+//  ui->treeView->hideColumn("idRelacionado");
+//  ui->treeView->hideColumn("idPedido2");
+//  ui->treeView->hideColumn("idPedidoFK");
+//  ui->treeView->hideColumn("selecionado");
+//  ui->treeView->hideColumn("statusFinanceiro");
+//  ui->treeView->hideColumn("ordemCompra");
+//  ui->treeView->hideColumn("idVendaProduto1");
+//  ui->treeView->hideColumn("idVendaProduto2");
+//  ui->treeView->hideColumn("idCompra");
+//  ui->treeView->hideColumn("idProduto");
+//  ui->treeView->hideColumn("quantUpd");
+//  ui->treeView->hideColumn("codBarras");
+//  ui->treeView->hideColumn("dataPrevCompra");
+//  ui->treeView->hideColumn("dataRealCompra");
+//  ui->treeView->hideColumn("dataPrevConf");
+//  ui->treeView->hideColumn("dataRealConf");
+//  ui->treeView->hideColumn("dataPrevFat");
+//  ui->treeView->hideColumn("dataRealFat");
+//  ui->treeView->hideColumn("dataPrevColeta");
+//  ui->treeView->hideColumn("dataRealColeta");
+//  ui->treeView->hideColumn("dataPrevReceb");
+//  ui->treeView->hideColumn("dataRealReceb");
+//  ui->treeView->hideColumn("dataPrevEnt");
+//  ui->treeView->hideColumn("dataRealEnt");
+//  ui->treeView->hideColumn("created");
+//  ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegate(new NoEditDelegate(this));
+//  ui->treeView->setItemDelegate(new NoEditDelegate(this));
 
-  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
-  ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
-  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
-}
+//  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
+//  ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
+//  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+//  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+//  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
+//}
 
-void InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
+void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
+  if (ordemCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
 
-  QString filtro = "idCompra IN (" + idCompra + ")";
+  QString filtro = "ordemCompra IN (" + ordemCompra + ")";
 
   if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
 
@@ -502,7 +510,7 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   //  setTreeView();
 
-  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("idCompra IN (" + idCompra + ")  AND desativado = FALSE"); }
+  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("ordemCompra IN (" + ordemCompra + ")  AND desativado = FALSE"); }
 
   modelFluxoCaixa.select();
 
@@ -514,8 +522,8 @@ void InputDialogFinanceiro::setFilter(const QString &idCompra) {
   }
 
   SqlQuery query;
-  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
-  query.bindValue(":idCompra", idCompra);
+  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.ordemCompra = :ordemCompra");
+  query.bindValue(":ordemCompra", ordemCompra);
 
   if (not query.exec()) { throw RuntimeException("Erro buscando se é representacao: " + query.lastError().text()); }
 
@@ -581,8 +589,8 @@ void InputDialogFinanceiro::verifyFields() {
 
       if (ui->widgetPgts->pagamentos.isEmpty()) {
         QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
-        msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-        msgBox.setButtonText(QMessageBox::No, "Voltar");
+        msgBox.button(QMessageBox::Yes)->setText("Continuar");
+        msgBox.button(QMessageBox::No)->setText("Voltar");
 
         if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
       } else {
@@ -633,7 +641,7 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   if (selection.isEmpty()) { throw RuntimeError("Selecione os pagamentos que serão substituídos!", this); }
 
   for (const auto &index : selection) {
-    if (modelFluxoCaixa.data(index.row(), "status").toString() == "SUBSTITUIDO") { throw RuntimeError("Selecionado linhas já substituídas!", this); };
+    if (modelFluxoCaixa.data(index.row(), "status").toString() == "SUBSTITUIDO") { throw RuntimeError("Selecionado linhas já substituídas!", this); }
   }
 
   //--------------------------------------------------
@@ -648,8 +656,6 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged() { calcularTotal(); }
-
-void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged() { montarFluxoCaixa(); }
 
 void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt) {
   unsetConnections();
@@ -723,8 +729,6 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged() {
   montarFluxoCaixa();
 }
 
-void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled() { montarFluxoCaixa(); }
-
 void InputDialogFinanceiro::setMaximumST() {
   const double maximoST = selectedTotal * ui->doubleSpinBoxAliquota->maximum() / 100;
 
@@ -736,7 +740,7 @@ void InputDialogFinanceiro::setCodFornecedor() {
 
   try {
     // clean codFornecedor on unselected rows
-    for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { modelPedidoFornecedor2.setData(row, "codFornecedor", QVariant()); }
+    for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { modelPedidoFornecedor2.setData(row, "codFornecedor", {}); }
 
     //-----------------------------------------------
 
@@ -753,11 +757,11 @@ void InputDialogFinanceiro::setCodFornecedor() {
 }
 
 void InputDialogFinanceiro::on_table_selectionChanged() {
-  setCodFornecedor();
-
-  calcularTotal();
-
-  setMaximumST();
+  if (tipo == Tipo::ConfirmarCompra) {
+    setCodFornecedor();
+    calcularTotal();
+    setMaximumST();
+  }
 }
 
 void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
@@ -818,6 +822,7 @@ void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
     if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val += restoParcela; }
 
     modelFluxoCaixa.setData(row, "valor", val);
+    // TODO: se for ST/FRETE preencher com ST/FRETE no tipo
     modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
     modelFluxoCaixa.setData(row, "parcela", parcela + 1);
     modelFluxoCaixa.setData(row, "observacao", observacaoPgt);

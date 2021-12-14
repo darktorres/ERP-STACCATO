@@ -12,7 +12,8 @@ class CancelaProduto : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { CompraConfirmar, CompraFaturamento, LogisticaColeta, LogisticaRecebimento, LogisticaEntregues, NFeEntrada };
+  // TODO: usar/remover
+  enum class Tipo { CompraConfirmar, CompraFaturamento, /*LogisticaColeta, LogisticaRecebimento, LogisticaEntregues, NFeEntrada*/ };
   Q_ENUM(Tipo)
 
   explicit CancelaProduto(const Tipo tipo, QWidget *parent);

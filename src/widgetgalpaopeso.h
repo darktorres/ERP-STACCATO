@@ -10,12 +10,12 @@ namespace Ui {
 class WidgetGalpaoPeso;
 }
 
-class WidgetGalpaoPeso : public QWidget {
+class WidgetGalpaoPeso final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetGalpaoPeso(QWidget *parent = nullptr);
-  ~WidgetGalpaoPeso();
+  explicit WidgetGalpaoPeso(QWidget *parent);
+  ~WidgetGalpaoPeso() final;
 
   auto resetTables() -> void;
   auto updateTables() -> void;

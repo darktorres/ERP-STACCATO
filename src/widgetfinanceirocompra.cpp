@@ -2,7 +2,6 @@
 #include "ui_widgetfinanceirocompra.h"
 
 #include "application.h"
-#include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 

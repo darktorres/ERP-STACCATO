@@ -17,6 +17,8 @@ class SearchDialog final : public QDialog {
     QString placeHolder;
   };
 
+  // TODO: criar um enum identificando o tipo, no lugar de usar o nome das tabelas para identificar
+
 public:
   // Factory Methods
   static auto cliente(QWidget *parent) -> SearchDialog *;
@@ -36,11 +38,10 @@ public:
   static auto getCacheConta() -> SearchDialog *;
   static auto clearCache() -> void;
 
-  auto getFilter() const -> QString;
   auto getText(const QVariant &id) -> QString;
   auto setFilter(const QString &newFilter) -> void;
   auto setFornecedorRep(const QString &newFornecedorRep) -> void;
-  auto setRepresentacao(const bool isRepresentacao) -> void;
+  auto setRepresentacao(const bool newValue) -> void;
   auto show() -> void;
 
 signals:

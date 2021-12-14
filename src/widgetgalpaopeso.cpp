@@ -4,7 +4,6 @@
 #include "application.h"
 #include "sqlquery.h"
 
-#include <QDebug>
 #include <QSqlError>
 
 WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGalpaoPeso) {
@@ -53,6 +52,7 @@ void WidgetGalpaoPeso::updateChart() {
     const QDateTime xValue = model.data(row, "data").toDateTime();
     const qreal yValue = model.data(row, "kg").toReal();
 
+    // TODO: implicit conversion qint64 -> qreal
     series.append(xValue.toMSecsSinceEpoch(), yValue);
   }
 

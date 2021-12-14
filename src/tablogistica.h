@@ -20,10 +20,13 @@ public:
 
 private:
   // attributes
+  bool isSet = false;
   SqlTableModel modelViewLogistica;
   Ui::TabLogistica *ui;
   // methods
-  auto setConnections() -> void;
-  auto on_tableForn_clicked(const QModelIndex &index) -> void;
+  auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_tabWidgetLogistica_currentChanged() -> void;
+  auto on_tableForn_clicked(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
+  auto setupTables() -> void;
 };

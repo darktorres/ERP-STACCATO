@@ -8,7 +8,7 @@ class CheckBoxDelegate final : public QStyledItemDelegate {
 public:
   explicit CheckBoxDelegate(const bool readOnly, QObject *parent);
   explicit CheckBoxDelegate(QObject *parent);
-  ~CheckBoxDelegate() = default;
+  ~CheckBoxDelegate() final = default;
 
 private:
   // attributes

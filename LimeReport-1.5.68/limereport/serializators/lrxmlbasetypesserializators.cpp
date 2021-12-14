@@ -143,8 +143,8 @@ void XmlFontSerializator::save(const QVariant &value, QString name) {
   _node.setAttribute("Type", "QFont");
   _node.setAttribute("family", font.family());
   _node.setAttribute("pointSize", font.pointSize());
-  //#if QT_VERSION>0x040800
-  //    _node.setAttribute("stylename",font.styleName());
+  //#if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
+  //  _node.setAttribute("stylename", font.styleName());
   //#endif
   _node.setAttribute("weight", font.weight());
   // saveBool(_node,"bold",font.bold());
@@ -157,8 +157,8 @@ QVariant XmlFontSerializator::loadValue() {
   QFont font;
   font.setFamily(node()->attribute("family"));
   font.setPointSize(node()->attribute("pointSize").toInt());
-  //#if QT_VERSION>0x040800
-  //    font.setStyleName(node()->attribute("stylename"));
+  //#if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
+  //  font.setStyleName(node()->attribute("stylename"));
   //#endif
   font.setWeight(node()->attribute("weight").toInt());
   if (!node()->attribute("bold").isEmpty()) font.setBold(node()->attribute("bold").toInt());

@@ -12,29 +12,22 @@ void LineEditTel::setConnections() {
 }
 
 void LineEditTel::processTel(const QString &value) {
+  if (value.isEmpty()) { return; }
+
   QString temp;
-  QString tel;
 
   for (const auto &c : value) {
     if (c.isNumber()) { temp += c; }
   }
 
+  temp = temp.left(11);
+
   const int size = temp.size();
 
-  if (size > 0) { tel = '(' + temp.at(0); }
-  if (size > 1) { tel += temp.at(1); }
-  if (size > 2) { tel += ')'; }
+  if (size > 0) { temp.insert(0, '('); }
+  if (size > 2) { temp.insert(3, ')'); }
+  if (size > 6) { temp.insert(8, '-'); }
+  if (size > 10) { qSwap(temp.data()[8], temp.data()[9]); }
 
-  if (size < 11) {
-    for (int i = 2; i < 6 and i < size; ++i) { tel += temp.at(i); }
-    if (size > 6) { tel += '-'; }
-    for (int i = 6; i < 10 and i < size; ++i) { tel += temp.at(i); }
-  } else {
-    tel += temp.at(2); // + '-';
-    for (int i = 3; i < 7 and i < size; ++i) { tel += temp.at(i); }
-    if (size >= 7) { tel += '-'; }
-    for (int i = 7; i < 11 and i < size; ++i) { tel += temp.at(i); }
-  }
-
-  setText(tel);
+  setText(temp);
 }

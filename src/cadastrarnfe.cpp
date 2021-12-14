@@ -5,28 +5,24 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
-#include "file.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
 
-#include <QDate>
 #include <QDir>
-#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlRecord>
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), idVenda(idVenda), tipo(tipo), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, const Tipo tipo_, QWidget *parent) : QDialog(parent), idVenda(idVenda_), tipo(tipo_), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
 
   const int lojaACBr = User::getSetting("User/lojaACBr").toInt();
 
-  if (lojaACBr == 0) { throw RuntimeError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+  if (lojaACBr == 0) { throw RuntimeError(R"(Escolha a loja a ser utilizada em "Opções->Configurações->ACBr->Loja"!)", this); }
 
   const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
 
@@ -72,9 +68,9 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   ui->itemBoxEnderecoEntrega->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
 
-  if (idVenda.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
+  if (idVenda_.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
 
-  setWindowTitle(windowTitle() + " - " + idVenda);
+  setWindowTitle(windowTitle() + " - " + idVenda_);
 
   ui->frameST->hide();
 
@@ -162,7 +158,7 @@ QString CadastrarNFe::montarXML() {
 
   QTextStream stream(&nfe);
 
-  stream << "NFE.CriarNFe(\"\n";
+  stream << R"(NFE.CriarNFe(")";
 
   writeIdentificacao(stream);
   writeEmitente(stream);
@@ -174,7 +170,7 @@ QString CadastrarNFe::montarXML() {
   writeVolume(stream);
   writeComplemento(stream);
 
-  stream << "\",1)\n"; // return xml
+  stream << R"(",1))"; // return xml
 
   return nfe;
 }
@@ -349,6 +345,8 @@ void CadastrarNFe::removerNota(const int idNFe) {
 }
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NFe para verificar se foi autorizada!"); }
+
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
     qDebug() << "processarResposta -> rejeicao";
 
@@ -394,9 +392,10 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
     enviarEmail(acbrRemoto, filePath);      // close if error
 
-    ACBrLib::gerarDanfe(xml.toLatin1()); // close if error
+    ACBrLib::gerarDanfe(xml); // close if error
   } catch (std::exception &) {
     if (not manterAberto) { close(); }
+
     manterAberto = false;
     throw;
   }
@@ -662,7 +661,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     formato = (formato.isEmpty() ? "" : " - " + formato);
     const QString descricao = produto + formato;
     const QString caixas = modelProduto.data(row, "caixas").toString();
-    stream << "Descricao = " + descricao.left(100).remove("\"") + " (" + caixas + " Cx.)\n";
+    stream << "Descricao = " + descricao.left(100).remove(R"(")") + " (" + caixas + " Cx.)\n";
 
     stream << "Unidade = " + modelProduto.data(row, "un").toString() + "\n";
     stream << "Quantidade = " + modelProduto.data(row, "quant").toString() + "\n";
@@ -2064,8 +2063,8 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Validação apresentou os seguintes problemas:\n" + lines.join("\n") + "\n\n\nDeseja continuar mesmo assim?",
                        QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return false; }
   }

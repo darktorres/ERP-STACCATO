@@ -25,8 +25,8 @@ private:
   Ui::CadastroLoja *ui;
   // methods
   auto cadastrar() -> void final;
-  auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> bool;
-  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> void;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> void;
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;

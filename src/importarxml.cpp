@@ -4,7 +4,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
-#include "estoqueproxymodel.h"
 #include "file.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
@@ -14,7 +13,6 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -96,7 +94,6 @@ void ImportarXML::setupTables() {
   modelEstoque.setHeaderData("descricao", "Produto");
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("local", "Local");
-  modelEstoque.setHeaderData("bloco", "Bloco");
   modelEstoque.setHeaderData("quant", "Quant.");
   modelEstoque.setHeaderData("restante", "Restante");
   modelEstoque.setHeaderData("un", "Un.");
@@ -129,8 +126,11 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("observacao");
   ui->tableEstoque->hideColumn("idBloco");
+  ui->tableEstoque->hideColumn("bloco");
+  ui->tableEstoque->hideColumn("altura");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
+  ui->tableEstoque->hideColumn("contabil");
   ui->tableEstoque->hideColumn("ncm");
   ui->tableEstoque->hideColumn("nve");
   ui->tableEstoque->hideColumn("extipi");
@@ -198,6 +198,7 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->hideColumn("quantUpd");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("idBloco");
+  ui->tableConsumo->hideColumn("altura");
   ui->tableConsumo->hideColumn("idProduto");
   ui->tableConsumo->hideColumn("ncm");
   ui->tableConsumo->hideColumn("cfop");
@@ -503,7 +504,7 @@ void ImportarXML::limparAssociacoes() {
 
   for (int row = 0; row < modelVenda.rowCount(); ++row) {
     modelVenda.setData(row, "status", "EM FATURAMENTO");
-    modelVenda.setData(row, "dataRealFat", QVariant());
+    modelVenda.setData(row, "dataRealFat", {});
   }
 
   modelConsumo.revertAll();
@@ -685,6 +686,8 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 
   modelNFe.setData(row, "idNFe", xml.idNFe);
   modelNFe.setData(row, "tipo", "ENTRADA");
+  modelNFe.setData(row, "dataHoraEmissao", xml.dataHoraEmissao);
+  modelNFe.setData(row, "emitente", xml.xNome);
   modelNFe.setData(row, "cnpjDest", xml.cnpjDest);
   modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig);
   modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso);
@@ -707,7 +710,7 @@ void ImportarXML::usarXMLInutilizado() {
 
   if (query.value("status").toString() != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
 
-  const auto fileContent = query.value("xml").toByteArray();
+  const auto fileContent = query.value("xml").toString();
 
   // ----------------------------------------------------------------
 
@@ -811,9 +814,19 @@ void ImportarXML::perguntarLocal(XML &xml) {
   const QString local = input.textValue();
 
   xml.local = local;
+
+  if (local == "CD") {
+    if (not query.exec("SELECT idBloco FROM galpao WHERE label = 'EM RECEBIMENTO'")) { throw RuntimeException("Erro procurando por bloco de recebimento: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Bloco de recebimento não encontrado!"); }
+
+    idBlocoRecebimento = query.value("idBloco").toInt();
+  }
 }
 
 void ImportarXML::percorrerXml(XML &xml) {
+  if (xml.local == "CD" and idBlocoRecebimento == 0) { throw RuntimeException("Bloco de recebimento não definido!"); }
+
   for (const auto &produto : qAsConst(xml.produtos)) {
     const int idEstoque = qApp->reservarIdEstoque();
 
@@ -827,6 +840,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "idNFe", xml.idNFe);
     modelEstoque.setData(newRow, "fornecedor", xml.xNome);
     modelEstoque.setData(newRow, "local", xml.local);
+    modelEstoque.setData(newRow, "idBloco", idBlocoRecebimento);
     modelEstoque.setData(newRow, "descricao", produto.descricao);
     modelEstoque.setData(newRow, "quant", produto.quant);
     modelEstoque.setData(newRow, "restante", produto.quant);

@@ -22,7 +22,7 @@ QString CustomDelegate::displayText(const QVariant &value, const QLocale &locale
 
 // --------------------------------------------------------------------------
 
-Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Comprovantes) {
+Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(parent), m_idVenda(idVenda), ui(new Ui::Comprovantes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -40,7 +40,6 @@ void Comprovantes::setConnections() {
   connect(ui->pushButtonAbrir, &QPushButton::clicked, this, &Comprovantes::on_pushButtonAbrir_clicked, connectionType);
 }
 
-// TODO: The 'idVenda' function argument possesses the same name as one of the class members, which can result in a confusion.
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE fotoEntrega IS NOT NULL AND idVenda = '" + idVenda + "'");
 
@@ -74,7 +73,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=, this] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
 

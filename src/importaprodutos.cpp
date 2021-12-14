@@ -16,7 +16,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::ImportaProdutos) {
+ImportaProdutos::ImportaProdutos(const Tipo tipo_, QWidget *parent) : QDialog(parent), tipo(tipo_), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -55,11 +55,11 @@ void ImportaProdutos::importarTabela() {
 void ImportaProdutos::verificaSeRepresentacao() {
   SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  queryFornecedor.bindValue(":razaoSocial", fornecedor);
+  queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
 
-  if (not queryFornecedor.first()) { throw RuntimeException("Dados não encontrados para fornecedor: " + fornecedor); }
+  if (not queryFornecedor.first()) { throw RuntimeException("Dados não encontrados para fornecedor: " + m_fornecedor); }
 
   ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
 }
@@ -353,7 +353,7 @@ void ImportaProdutos::setupTables() {
 void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   const int rows = xlsx.dimension().rowCount();
 
-  QStringList m_fornecedores;
+  QStringList fornecedores;
 
   int count = 0;
 
@@ -361,23 +361,23 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
     const QString fornec = xlsx.readValue(row, 1).toString();
 
     if (not fornec.isEmpty()) { ++count; }
-    if (fornec.isEmpty() or m_fornecedores.contains(fornec)) { continue; }
+    if (fornec.isEmpty() or fornecedores.contains(fornec)) { continue; }
 
-    m_fornecedores << xlsx.readValue(row, 1).toString();
+    fornecedores << xlsx.readValue(row, 1).toString();
   }
 
   progressDialog.setMaximum(count);
 
   QStringList ids;
 
-  for (auto const &m_fornecedor : qAsConst(m_fornecedores)) {
-    fornecedor = m_fornecedor;
+  for (auto const &fornecedor : qAsConst(fornecedores)) {
+    m_fornecedor = fornecedor;
 
     const int idFornecedor = buscarCadastrarFornecedor();
 
     ids << QString::number(idFornecedor);
 
-    fornecedores.insert(fornecedor, idFornecedor);
+    m_fornecedores.insert(fornecedor, idFornecedor);
 
     SqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
@@ -389,7 +389,7 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
 
   idsFornecedor = ids.join(",");
 
-  if (fornecedores.isEmpty()) { throw RuntimeException("Erro ao cadastrar fornecedores!"); }
+  if (m_fornecedores.isEmpty()) { throw RuntimeException("Erro ao cadastrar fornecedores!"); }
 }
 
 void ImportaProdutos::mostraApenasEstesFornecedores() {
@@ -411,7 +411,6 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
   const QLocale locale(QLocale::Portuguese);
 
-  // TODO: The 'fornecedor' local variable possesses the same name as one of the class members, which can result in a confusion.
   QVariant fornecedor = xlsx.readValue(row, 1);
   QVariant descricao = xlsx.readValue(row, 2);
   QVariant un = xlsx.readValue(row, 3);
@@ -446,8 +445,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   if (precoVenda.userType() == QMetaType::QString) { precoVenda = locale.toDouble(precoVenda.toString()); }
   precoVenda = qApp->roundDouble(precoVenda.toDouble());
 
-  // TODO: The 'ui' local variable possesses the same name as one of the class members, which can result in a confusion.
-  QVariant ui = xlsx.readValue(row, 15);
+  QVariant ui2 = xlsx.readValue(row, 15);
   QVariant un2 = xlsx.readValue(row, 16);
 
   QVariant minimo = xlsx.readValue(row, 17);
@@ -466,7 +464,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   if (sticms.userType() == QMetaType::QString) { sticms = locale.toDouble(sticms.toString()); }
   sticms = qApp->roundDouble(sticms.toDouble());
 
-  produto.idFornecedor = fornecedores.value(fornecedor.toString().trimmed());
+  produto.idFornecedor = m_fornecedores.value(fornecedor.toString().trimmed());
   produto.fornecedor = fornecedor.toString().toUpper().trimmed();
   produto.descricao = descricao.toString().remove("*").remove("()").replace('_', ' ').toUpper().trimmed();
   produto.un = un.toString().remove("*").toUpper().trimmed();
@@ -481,7 +479,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   produto.qtdPallet = qtdPallet.toDouble();
   produto.custo = custo.toDouble();
   produto.precoVenda = precoVenda.toDouble();
-  produto.ui = ui.toString().remove("*").toUpper().trimmed();
+  produto.ui = ui2.toString().remove("*").toUpper().trimmed();
   produto.un2 = un2.toString().remove("*").toUpper().trimmed();
   produto.minimo = minimo.toDouble();
   produto.mva = mva.toDouble();
@@ -523,7 +521,6 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
   bool changed = false;
 
   // TODO: trocar esses códigos repetidos por um for() dos membros de 'produto'
-  // TODO: change double comparisons to qFuzzyCompare?
 
   if (modelProduto.data(row, "fornecedor").toString() != produto.fornecedor) {
     modelProduto.setData(row, "fornecedor", produto.fornecedor);
@@ -557,7 +554,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "colecaoUpd", white);
   }
 
-  if (modelProduto.data(row, "m2cx").toDouble() != produto.m2cx) {
+  if (not qFuzzyCompare(modelProduto.data(row, "m2cx").toDouble(), produto.m2cx)) {
     modelProduto.setData(row, "m2cx", produto.m2cx);
     modelProduto.setData(row, "m2cxUpd", yellow);
     changed = true;
@@ -565,7 +562,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "m2cxUpd", white);
   }
 
-  if (modelProduto.data(row, "pccx").toDouble() != produto.pccx) {
+  if (not qFuzzyCompare(modelProduto.data(row, "pccx").toDouble(), produto.pccx)) {
     modelProduto.setData(row, "pccx", produto.pccx);
     modelProduto.setData(row, "pccxUpd", yellow);
     changed = true;
@@ -573,7 +570,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "pccxUpd", white);
   }
 
-  if (modelProduto.data(row, "kgcx").toDouble() != produto.kgcx) {
+  if (not qFuzzyCompare(modelProduto.data(row, "kgcx").toDouble(), produto.kgcx)) {
     modelProduto.setData(row, "kgcx", produto.kgcx);
     modelProduto.setData(row, "kgcxUpd", yellow);
     changed = true;
@@ -613,7 +610,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "ncmUpd", white);
   }
 
-  if (modelProduto.data(row, "qtdPallet").toDouble() != produto.qtdPallet) {
+  if (not qFuzzyCompare(modelProduto.data(row, "qtdPallet").toDouble(), produto.qtdPallet)) {
     modelProduto.setData(row, "qtdPallet", produto.qtdPallet);
     modelProduto.setData(row, "qtdPalletUpd", yellow);
     changed = true;
@@ -621,7 +618,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "qtdPalletUpd", white);
   }
 
-  if (modelProduto.data(row, "custo").toDouble() != produto.custo) {
+  if (not qFuzzyCompare(modelProduto.data(row, "custo").toDouble(), produto.custo)) {
     modelProduto.setData(row, "custo", produto.custo);
     modelProduto.setData(row, "custoUpd", yellow);
     changed = true;
@@ -629,7 +626,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "custoUpd", white);
   }
 
-  if (modelProduto.data(row, "precoVenda").toDouble() != produto.precoVenda) {
+  if (not qFuzzyCompare(modelProduto.data(row, "precoVenda").toDouble(), produto.precoVenda)) {
     modelProduto.setData(row, "precoVenda", produto.precoVenda);
     modelProduto.setData(row, "precoVendaUpd", yellow);
     changed = true;
@@ -653,7 +650,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "un2Upd", white);
   }
 
-  if (modelProduto.data(row, "minimo").toDouble() != produto.minimo) {
+  if (not qFuzzyCompare(modelProduto.data(row, "minimo").toDouble(), produto.minimo)) {
     modelProduto.setData(row, "minimo", produto.minimo);
     modelProduto.setData(row, "minimoUpd", yellow);
     changed = true;
@@ -661,7 +658,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "minimoUpd", white);
   }
 
-  if (modelProduto.data(row, "mva").toDouble() != produto.mva) {
+  if (not qFuzzyCompare(modelProduto.data(row, "mva").toDouble(), produto.mva)) {
     modelProduto.setData(row, "mva", produto.mva);
     modelProduto.setData(row, "mvaUpd", yellow);
     changed = true;
@@ -669,7 +666,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "mvaUpd", white);
   }
 
-  if (modelProduto.data(row, "st").toDouble() != produto.st) {
+  if (not qFuzzyCompare(modelProduto.data(row, "st").toDouble(), produto.st)) {
     modelProduto.setData(row, "st", produto.st);
     modelProduto.setData(row, "stUpd", yellow);
     changed = true;
@@ -677,7 +674,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "stUpd", white);
   }
 
-  if (modelProduto.data(row, "sticms").toDouble() != produto.sticms) {
+  if (not qFuzzyCompare(modelProduto.data(row, "sticms").toDouble(), produto.sticms)) {
     modelProduto.setData(row, "sticms", produto.sticms);
     modelProduto.setData(row, "sticmsUpd", yellow);
     changed = true;
@@ -685,7 +682,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "sticmsUpd", white);
   }
 
-  if (modelProduto.data(row, "quantCaixa").toDouble() != produto.quantCaixa) {
+  if (not qFuzzyCompare(modelProduto.data(row, "quantCaixa").toDouble(), produto.quantCaixa)) {
     modelProduto.setData(row, "quantCaixa", produto.quantCaixa);
     modelProduto.setData(row, "quantCaixaUpd", yellow);
     changed = true;
@@ -693,7 +690,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "quantCaixaUpd", white);
   }
 
-  if (modelProduto.data(row, "markup").toDouble() != produto.markup) {
+  if (not qFuzzyCompare(modelProduto.data(row, "markup").toDouble(), produto.markup)) {
     modelProduto.setData(row, "markup", produto.markup);
     modelProduto.setData(row, "markupUpd", yellow);
     changed = true;
@@ -723,7 +720,6 @@ void ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
 void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   const QString ncm = produto.ncm;
   const QString codBarras = produto.codBarras;
-  // TODO: The 'fornecedor' local variable possesses the same name as one of the class members, which can result in a confusion.
   const QString fornecedor = produto.fornecedor;
   const QString un = produto.un;
   const QString codComercial = produto.codComercial;
@@ -915,13 +911,13 @@ void ImportaProdutos::insereEmOk() {
 int ImportaProdutos::buscarCadastrarFornecedor() {
   SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  queryFornecedor.bindValue(":razaoSocial", fornecedor);
+  queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando fornecedor: " + queryFornecedor.lastError().text()); }
 
   if (not queryFornecedor.first()) {
     queryFornecedor.prepare("INSERT INTO fornecedor (razaoSocial) VALUES (:razaoSocial)");
-    queryFornecedor.bindValue(":razaoSocial", fornecedor);
+    queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
 
     if (not queryFornecedor.exec()) { throw RuntimeException("Erro cadastrando fornecedor: " + queryFornecedor.lastError().text()); }
 
@@ -960,8 +956,8 @@ void ImportaProdutos::salvar() {
 void ImportaProdutos::on_pushButtonSalvar_clicked() {
   if (modelErro.rowCount() > 0) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Produtos com erro não serão salvos. Deseja continuar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }

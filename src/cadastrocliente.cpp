@@ -2,7 +2,6 @@
 #include "ui_cadastrocliente.h"
 
 #include "application.h"
-#include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "user.h"
@@ -129,11 +128,8 @@ void CadastroCliente::verifyFields() {
 }
 
 void CadastroCliente::savingProcedures() {
-  if (ui->checkBoxDataNasc->isChecked()) {
-    setData("dataNasc", ui->dateEditDataNasc->date());
-  } else {
-    setData("dataNasc", QVariant());
-  }
+  // TODO: porque em 'profissional' o campo tem outro nome?
+  setData("dataNasc", (ui->checkBoxDataNasc->isChecked()) ? ui->dateEditDataNasc->date() : QVariant());
 
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }
@@ -247,7 +243,9 @@ void CadastroCliente::updateMode() {
 bool CadastroCliente::verificaVinculo() {
   SqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) { throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text()); }
+  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString() + " LIMIT 1")) {
+    throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());
+  }
 
   return query.size() > 0;
 }
@@ -348,7 +346,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
   }
 }
 
-bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -369,8 +367,6 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroCliente::cadastrar() {
@@ -412,11 +408,13 @@ void CadastroCliente::cadastrar() {
 }
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
 void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroCliente::on_lineEditCEP_textChanged(const QString &cep) {
@@ -454,15 +452,14 @@ void CadastroCliente::novoEndereco() {
   setEnderecoReadOnly(false);
 }
 
-// TODO: The 'readOnly' function argument possesses the same name as one of the class members, which can result in a confusion.
-void CadastroCliente::setEnderecoReadOnly(const bool readOnly) {
-  ui->lineEditCEP->setReadOnly(readOnly);
-  ui->lineEditLogradouro->setReadOnly(readOnly);
-  ui->lineEditNumero->setReadOnly(readOnly);
-  ui->lineEditComplemento->setReadOnly(readOnly);
-  ui->lineEditBairro->setReadOnly(readOnly);
-  ui->lineEditCidade->setReadOnly(readOnly);
-  ui->lineEditUF->setReadOnly(readOnly);
+void CadastroCliente::setEnderecoReadOnly(const bool isReadOnly) {
+  ui->lineEditCEP->setReadOnly(isReadOnly);
+  ui->lineEditLogradouro->setReadOnly(isReadOnly);
+  ui->lineEditNumero->setReadOnly(isReadOnly);
+  ui->lineEditComplemento->setReadOnly(isReadOnly);
+  ui->lineEditBairro->setReadOnly(isReadOnly);
+  ui->lineEditCidade->setReadOnly(isReadOnly);
+  ui->lineEditUF->setReadOnly(isReadOnly);
 }
 
 void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
@@ -549,15 +546,15 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(const bool checked) {
 void CadastroCliente::on_checkBoxDataNasc_stateChanged(const int state) { ui->dateEditDataNasc->setEnabled(state); }
 
 void CadastroCliente::verificaEndereco() {
-  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
-
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
-  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
+
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 }
 
 void CadastroCliente::connectLineEditsToDirty() {

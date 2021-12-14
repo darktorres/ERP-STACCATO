@@ -43,19 +43,18 @@ bool NumFormatParser::isDateTime(const QString &formatCode) {
         break;
       } else {
         // condition or color: don't care, ignore
-        while (i < formatCode.length() and formatCode[i] != QLatin1Char(']')) ++i;
+        while (i < formatCode.length() and formatCode[i] != QLatin1Char(']')) { ++i; }
         break;
       }
 
     // quoted plain text block: don't care, ignore
     case '"':
-      while (i < formatCode.length() - 1 and formatCode[++i] != QLatin1Char('"'))
-        ;
+      while (i < formatCode.length() - 1 and formatCode[++i] != QLatin1Char('"')) { ; }
       break;
 
     // escaped char: don't care, ignore
     case '\\':
-      if (i < formatCode.length() - 1) ++i;
+      if (i < formatCode.length() - 1) { ++i; }
       break;
 
     // date/time can only be positive number,

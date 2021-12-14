@@ -70,8 +70,8 @@ public:
   void setChartType(ChartType type);
   void setChartStyle(int id);
 
-  void saveToXmlFile(QIODevice *device) const;
-  bool loadFromXmlFile(QIODevice *device);
+  void saveToXmlFile(QIODevice *device) const override;
+  bool loadFromXmlFile(QIODevice *device) override;
 
 private:
   friend class AbstractSheet;

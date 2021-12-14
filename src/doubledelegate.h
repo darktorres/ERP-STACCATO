@@ -8,7 +8,7 @@ class DoubleDelegate final : public QStyledItemDelegate {
 public:
   explicit DoubleDelegate(const int decimais, QObject *parent);
   explicit DoubleDelegate(QObject *parent);
-  ~DoubleDelegate() = default;
+  ~DoubleDelegate() final = default;
 
 private:
   // attributes

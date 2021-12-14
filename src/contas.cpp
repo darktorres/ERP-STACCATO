@@ -61,40 +61,38 @@ void Contas::unsetConnections() {
   disconnect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher);
 }
 
-bool Contas::validarData(const QModelIndex &index) {
+void Contas::validarData(const QModelIndex &index) {
   Q_UNUSED(index)
 
-  //  if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
-  //    const int row = index.row();
-  //    const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
+  if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
+    const int row = index.row();
+    const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
 
-  //    SqlQuery query;
-  //    query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-  //    query.bindValue(":idPagamento", idPagamento);
+    SqlQuery query;
+    query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
+    query.bindValue(":idPagamento", idPagamento);
 
-  //    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
-  //    const QDate oldDate = query.value("dataPagamento").toDate();
-  //    const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
+    const QDate oldDate = query.value("dataPagamento").toDate();
+    const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
 
-  //    if (oldDate.isNull()) { return true; }
+    if (oldDate.isNull()) { return; }
 
-  //    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
-  //      modelPendentes.setData(row, "dataPagamento", oldDate);
-  //      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
-  //    }
+    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
+      modelPendentes.setData(row, "dataPagamento", oldDate);
+      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
+    }
 
-  //    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
-  //      modelPendentes.setData(row, "dataPagamento", oldDate);
-  //      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
-  //    }
-  //  }
-
-  return true;
+    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
+      modelPendentes.setData(row, "dataPagamento", oldDate);
+      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
+    }
+  }
 }
 
 void Contas::preencher(const QModelIndex &index) {
-  if (not validarData(index)) { return; }
+  //  validarData(index);
 
   unsetConnections();
 
@@ -251,6 +249,7 @@ void Contas::setupTables() {
 
   ui->tablePendentes->hideColumn("idPagamento");
   ui->tablePendentes->hideColumn("idLoja");
+  ui->tablePendentes->hideColumn("desativado");
   ui->tablePendentes->hideColumn("created");
   ui->tablePendentes->hideColumn("lastUpdated");
 
@@ -303,21 +302,24 @@ void Contas::setupTables() {
 
   ui->tableProcessados->hideColumn("idPagamento");
   ui->tableProcessados->hideColumn("idLoja");
+  ui->tableProcessados->hideColumn("desativado");
   ui->tableProcessados->hideColumn("created");
   ui->tableProcessados->hideColumn("lastUpdated");
 }
 
 void Contas::verifyFields() {
   for (int row = 0; row < ui->tablePendentes->rowCount(); ++row) {
+    if (modelPendentes.data(row, "valor") == 0) { throw RuntimeError("'R$' vazio na linha " + QString::number(row + 1) + "!", this); }
+
     const QString status = modelPendentes.data(row, "status").toString();
 
     if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
-      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { throw RuntimeError("'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal") == 0) { throw RuntimeError("'R$ Real' vazio!", this); }
-      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { throw RuntimeError("'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "idConta") == 0) { throw RuntimeError("'Conta' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto") == 0) { throw RuntimeError("'Centro Custo' vazio!", this); }
-      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio!", this); }
+      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { throw RuntimeError("'Data Realizado' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "valorReal") == 0) { throw RuntimeError("'R$ Real' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { throw RuntimeError("'Tipo Real' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "idConta") == 0) { throw RuntimeError("'Conta' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "centroCusto") == 0) { throw RuntimeError("'Centro Custo' vazio na linha " + QString::number(row + 1) + "!", this); }
+      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("'Grupo' vazio na linha " + QString::number(row + 1) + "!", this); }
     }
   }
 }
@@ -395,7 +397,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
   // -------------------------------------------------------------------------
 
@@ -437,6 +439,9 @@ void Contas::on_pushButtonDuplicarLancamento_clicked() {
       if (modelPendentes.fieldIndex("idPagamento") == col) { continue; }
       if (modelPendentes.fieldIndex("nfe") == col) { continue; }
       if (modelPendentes.fieldIndex("valor") == col) { continue; }
+      if (modelPendentes.fieldIndex("grupo") == col) { continue; }
+      if (modelPendentes.fieldIndex("subGrupo") == col) { continue; }
+      if (modelPendentes.fieldIndex("desativado") == col) { continue; }
       if (modelPendentes.fieldIndex("created") == col) { continue; }
       if (modelPendentes.fieldIndex("lastUpdated") == col) { continue; }
 

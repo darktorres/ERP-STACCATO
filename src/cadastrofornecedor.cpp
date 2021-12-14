@@ -275,10 +275,11 @@ void CadastroFornecedor::on_lineEditCNPJ_textEdited(const QString &text) {
 void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) { ui->lineEditContatoCPF->setStyleSheet(validaCPF(text) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)"); }
 
 void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
-  if (cadastrarEndereco()) { novoEndereco(); }
+  cadastrarEndereco();
+  novoEndereco();
 }
 
-bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
+void CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   verificaEndereco();
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
@@ -299,8 +300,6 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
-
-  return true;
 }
 
 void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
@@ -320,7 +319,8 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
 }
 
 void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {
-  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+  cadastrarEndereco(Tipo::Atualizar);
+  novoEndereco();
 }
 
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
@@ -469,15 +469,15 @@ void CadastroFornecedor::on_tabWidget_currentChanged(const int index) {
 }
 
 void CadastroFornecedor::verificaEndereco() {
-  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
-
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
-  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError("Número vazio! Se necessário coloque \"S/N\"!", this); }
+  if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }
 
   if (ui->lineEditCidade->text().isEmpty()) { throw RuntimeError("Cidade vazio!", this); }
 
   if (ui->lineEditUF->text().isEmpty()) { throw RuntimeError("UF vazio!", this); }
+
+  RegisterAddressDialog::verificaEndereco(ui->lineEditCidade->text(), ui->lineEditUF->text());
 }
 
 void CadastroFornecedor::connectLineEditsToDirty() {

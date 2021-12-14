@@ -39,7 +39,6 @@ public:
   ~CellReference() = default;
 
   QString toString(bool row_abs = false, bool col_abs = false) const;
-  static CellReference fromString(const QString &cell);
   bool isValid() const;
   inline void setRow(int row) { _row = row; }
   inline void setColumn(int col) { _column = col; }

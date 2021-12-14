@@ -1,6 +1,5 @@
 #include "sql.h"
 
-#include "application.h"
 #include "sqlquery.h"
 
 #include <QSqlError>
@@ -337,7 +336,7 @@ QString Sql::view_estoque_contabil(const QString &match, const QString &data) {
          "     p.un AS unProd,"
          "     e.lote,"
          "     e.local,"
-         "     e.bloco,"
+         "     g.label,"
          "     e.codComercial,"
          "     e.ncm,"
          "     e.cstICMS,"
@@ -367,6 +366,8 @@ QString Sql::view_estoque_contabil(const QString &match, const QString &data) {
          "     nfe n ON e.idNFe = n.idNFe"
          " LEFT JOIN"
          "     produto p ON e.idProduto = p.idProduto"
+         " LEFT JOIN"
+         "     galpao g ON e.idBloco = g.idBloco"
          " WHERE"
          "     e.status = 'ESTOQUE' AND DATE(e.created) <= '" + data + "' "
          + match +
@@ -388,7 +389,7 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          "     e.un AS unEst,"
          "     e.lote,"
          "     e.local,"
-         "     e.bloco,"
+         "     g.label,"
          "     e.codComercial,"
          "     n.numeroNFe AS nfe,"
          "     ANY_VALUE(pf2.dataPrevColeta) AS dataPrevColeta,"
@@ -405,6 +406,8 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          "     nfe n ON e.idNFe = n.idNFe"
          "         LEFT JOIN"
          "     produto p ON e.idProduto = p.idProduto"
+         "         LEFT JOIN"
+         "     galpao g ON e.idBloco = g.idBloco"
          " WHERE"
          "     e.status NOT IN ('CANCELADO', 'IGNORAR') "
          + match +
@@ -487,8 +490,106 @@ QString Sql::contasReceber(const QString &filtros) {
          "     `cr`.`idPagamento`";
 }
 
+QString Sql::view_estoque(const QString &idEstoque) {
+  return " SELECT "
+         "     e.idEstoque, "
+         "     e.idNFe, "
+         "     e.recebidoPor, "
+         "     e.status, "
+         "     e.idProduto, "
+         "     e.fornecedor, "
+         "     e.descricao, "
+         "     e.observacao, "
+         "     e.lote, "
+         "     e.idBloco, "
+         "     e.local, "
+         "     g.label, "
+         "     e.quant, "
+         "     e.quantUpd, "
+         "     e.restante, "
+         "     e.un, "
+         "     e.caixas, "
+         "     e.codBarras, "
+         "     e.codComercial, "
+         "     e.ncm, "
+         "     e.cfop, "
+         "     e.valorUnid, "
+         "     p.quantCaixa, "
+         "     e.codBarrasTrib, "
+         "     e.unTrib, "
+         "     e.quantTrib, "
+         "     e.valorUnidTrib, "
+         "     e.desconto, "
+         "     e.compoeTotal, "
+         "     e.numeroPedido, "
+         "     e.itemPedido, "
+         "     e.tipoICMS, "
+         "     e.orig, "
+         "     e.cstICMS, "
+         "     e.modBC, "
+         "     e.vBC, "
+         "     e.pICMS, "
+         "     e.vICMS, "
+         "     e.modBCST, "
+         "     e.pMVAST, "
+         "     e.vBCST, "
+         "     e.pICMSST, "
+         "     e.vICMSST, "
+         "     e.cEnq, "
+         "     e.cstIPI, "
+         "     e.cstPIS, "
+         "     e.vBCPIS, "
+         "     e.pPIS, "
+         "     e.vPIS, "
+         "     e.cstCOFINS, "
+         "     e.vBCCOFINS, "
+         "     e.pCOFINS, "
+         "     e.vCOFINS "
+         " FROM "
+         "     estoque e "
+         " LEFT JOIN "
+         "     galpao g ON e.idBloco = g.idBloco "
+         " LEFT JOIN "
+         "     produto p ON e.idProduto = p.idProduto "
+         " WHERE "
+         "     e.idEstoque = " + idEstoque;
+}
+
+QString Sql::view_galpao(const QString &idBloco, const QString &filtroText) {
+  // TODO: adicionar 'EM RECEBIMENTO'
+
+  const QString filtroBloco = (not idBloco.isEmpty()) ? " AND g.idBloco = " + idBloco : "";
+  const QString filtro = (not filtroText.isEmpty()) ? " AND (descricao LIKE '%"+filtroText+"%' OR codComercial LIKE '%" + filtroText + "%' OR numeroNFe LIKE '%" + filtroText + "%' OR "
+                                                      "lote LIKE '%" + filtroText + "%' OR idVenda LIKE '%" + filtroText + "%')"
+                                                    : "";
+
+  return " SELECT "
+         "     g.idBloco, "
+         "     g.label, "
+         "     v.idEstoque_idConsumo, "
+         "     v.idEstoque, "
+         "     v.tipo, "
+         "     v.idVendaProduto2, "
+         "     v.numeroNFe, "
+         "     v.idNFe, "
+         "     v.codComercial, "
+         "     v.lote, "
+         "     v.caixas AS caixas, "
+         "     v.idVenda, "
+         "     v.descricao AS descricao "
+         " FROM "
+         "     galpao g "
+         " LEFT JOIN "
+         "     view_galpao v ON g.idBloco = v.idBloco "
+         " WHERE "
+         "     idEstoque_idConsumo IS NOT NULL " +
+         filtroBloco + filtro;
+}
+
 // clang-format on
 
 // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem
 // FIXME: recebimento de estoque altera os consumos que por sua vez altera venda_has_produto mas depende do pedido_fornecedor_has_produto ter vp.idVenda preenchido para esta função funcionar
 // TODO: centralizar sql das views em forma de código aqui usando parametros para preencher WHERE? (mais rápido usar WHERE dentro da query do que fora da view)
+
+// TODO: substituir e.bloco por g.label

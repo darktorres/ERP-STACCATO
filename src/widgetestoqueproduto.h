@@ -13,7 +13,7 @@ class WidgetEstoqueProduto : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetEstoqueProduto(QWidget *parent = nullptr);
+  explicit WidgetEstoqueProduto(QWidget *parent);
   ~WidgetEstoqueProduto();
 
   auto resetTables() -> void;

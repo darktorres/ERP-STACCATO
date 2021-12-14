@@ -6,6 +6,7 @@
 #include "user.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QIcon>
 #include <QInputDialog>
@@ -13,6 +14,7 @@
 #include <QRegularExpression>
 #include <QSqlError>
 #include <QTimer>
+#include <math.h>
 
 RuntimeException::RuntimeException(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message, parent); }
 
@@ -22,7 +24,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.10.20");
+  setApplicationVersion("0.10.33");
   setStyle("Fusion");
 
   QDir::setCurrent(QCoreApplication::applicationDirPath());
@@ -47,21 +49,11 @@ void Application::enqueueException(const QString &exception, QWidget *parent) {
   showMessages();
 }
 
-bool Application::enqueueException(const bool boolean, const QString &exception, QWidget *parent) {
-  enqueueException(exception, parent);
-  return boolean;
-}
-
 // for user errors
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
   showMessages();
-}
-
-bool Application::enqueueError(const bool boolean, const QString &error, QWidget *parent) {
-  enqueueError(error, parent);
-  return boolean;
 }
 
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
@@ -149,7 +141,7 @@ void Application::loginError() {
   throw RuntimeException(db.lastError().text());
 }
 
-bool Application::dbReconnect(const bool silent) {
+bool Application::dbReconnect(const bool isSilent) {
   db.close();
 
   isConnected = db.open();
@@ -158,7 +150,7 @@ bool Application::dbReconnect(const bool silent) {
 
   if (not isConnected) {
     // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
-    if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
+    if (not isSilent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
     return false;
   }
 
@@ -379,6 +371,8 @@ void Application::updater() {
 
   updaterOpen = true;
 
+  // TODO: abrir updater em um processo separado e fechar erp?
+
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(applicationVersion());
@@ -442,7 +436,7 @@ double Application::roundDouble(const double value, const int decimais) {
 QString Application::sanitizeSQL(const QString &string) {
   QString sanitized = string;
 
-  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove("\\");
+  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove(R"(\)");
 
   return sanitized;
 }

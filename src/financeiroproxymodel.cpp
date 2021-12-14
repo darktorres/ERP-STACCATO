@@ -3,8 +3,6 @@
 #include "application.h"
 #include "user.h"
 
-#include <QBrush>
-#include <QDate>
 #include <QSqlRecord>
 
 FinanceiroProxyModel::FinanceiroProxyModel(QSqlQueryModel *model, QObject *parent)

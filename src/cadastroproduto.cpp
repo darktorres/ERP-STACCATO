@@ -6,7 +6,6 @@
 #include "user.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {

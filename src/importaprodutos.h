@@ -68,10 +68,10 @@ private:
   int validade = 0;
   Produto produto;
   QHash<QString, int> hashModel;
-  QMap<QString, int> fornecedores;
+  QMap<QString, int> m_fornecedores;
   QProgressDialog progressDialog;
   QString file;
-  QString fornecedor;
+  QString m_fornecedor;
   QString idsFornecedor;
   QString validadeString;
   QVector<int> vectorProdutosImportados;

@@ -18,9 +18,9 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QList<FullTextIndex> &fullTextIndexes, const QString &filter,
+SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey_, const QStringList &textKeys_, const QList<FullTextIndex> &fullTextIndexes_, const QString &filter_,
                            const QString &sortColumn, const bool naoListar, QWidget *parent)
-    : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes), primaryKey(primaryKey), filter(filter), textKeys(textKeys), model(1000), ui(new Ui::SearchDialog) {
+    : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes_), primaryKey(primaryKey_), filter(filter_), textKeys(textKeys_), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   timer.setSingleShot(true);
@@ -31,7 +31,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
 
   setupTables(table, sortColumn);
 
-  if (fullTextIndexes.isEmpty()) {
+  if (fullTextIndexes_.isEmpty()) {
     ui->frameLineEdit->hide();
     ui->labelBusca->hide();
   }
@@ -71,9 +71,9 @@ void SearchDialog::setupTables(const QString &table, const QString &sortColumn) 
   model.setTable(table);
 
   setFilter(filter);
+
   if (naoListarBuscaVazia) { model.setFilter("0"); }
   if (table == "profissional") { model.setFilter("idProfissional = 1"); }
-
   if (table == "view_produto") { model.proxyModel = new ProdutoProxyModel(&model, this); }
 
   ui->table->setModel(&model);
@@ -138,7 +138,7 @@ void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelect
 
 void SearchDialog::on_table_clicked(const QModelIndex &index) {
   if (model.tableName() == "view_nfe_inutilizada" and index.isValid()) {
-    XML *xml = new XML(model.data(index.row(), "xml").toByteArray(), XML::Tipo::Nulo, this);
+    XML *xml = new XML(model.data(index.row(), "xml").toString(), XML::Tipo::Entrada, this);
     ui->treeView->setModel(&xml->model);
     ui->treeView->expandAll();
   }
@@ -501,10 +501,8 @@ SearchDialog *SearchDialog::getCacheLoja() {
 
 void SearchDialog::setFornecedorRep(const QString &newFornecedorRep) { fornecedorRep = newFornecedorRep.isEmpty() ? "" : " AND fornecedor = '" + newFornecedorRep + "'"; }
 
-QString SearchDialog::getFilter() const { return filter; }
-
-void SearchDialog::setRepresentacao(const bool isRepresentacao) {
-  this->isRepresentacao = isRepresentacao;
+void SearchDialog::setRepresentacao(const bool newValue) {
+  isRepresentacao = newValue;
   on_lineEditBusca_textChanged();
 }
 
@@ -538,7 +536,7 @@ void SearchDialog::on_pushButtonModelo3d_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=, this] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
 

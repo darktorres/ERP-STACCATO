@@ -4,7 +4,6 @@
 #include "anteciparrecebimento.h"
 #include "application.h"
 #include "contas.h"
-#include "doubledelegate.h"
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
@@ -387,12 +386,12 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Excluir");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Excluir");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     SqlQuery query;
-    query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET desativado = TRUE WHERE idPagamento = :idPagamento");
+    query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'CANCELADO' WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
     if (not query.exec()) { throw RuntimeException("Erro excluindo lançamento: " + query.lastError().text(), this); }
@@ -428,8 +427,8 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Reverter");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Reverter");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
     qApp->startTransaction("");
@@ -553,6 +552,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
   for (const auto index : selection) {
     const QString grupo = model.data(index.row(), "grupo").toString();
     const QString contraParte = model.data(index.row(), "contraParte").toString();
+    const QString observacao = model.data(index.row(), "observacao").toString();
+    const QString data = model.data(index.row(), "dataPagamento").toDate().toString("ddMMyyyy");
 
     CNAB::Pagamento pagamento;
 
@@ -581,7 +582,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.tipo = CNAB::Pagamento::Tipo::Salario;
       pagamento.codBanco = codBanco;
       pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
-      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.observacao = observacao;
+      pagamento.data = data;
       pagamento.cpfDest = cpfDest;
       pagamento.agencia = agencia.toULong();
       pagamento.conta = conta.toULong();
@@ -615,7 +617,8 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
       pagamento.tipo = CNAB::Pagamento::Tipo::Fornecedor;
       pagamento.codBanco = codBanco;
       pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
-      pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+      pagamento.observacao = observacao;
+      pagamento.data = data;
       pagamento.cnpjDest = cnpjDest;
       pagamento.agencia = agencia.toULong();
       pagamento.conta = conta.toULong();

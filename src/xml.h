@@ -18,7 +18,6 @@ private:
     QString cfop;
     QString un;
     double quant = 0;
-    double valorUnid = 0;
     double valor = 0;
     QString codBarrasTrib;
     QString unTrib;
@@ -67,15 +66,15 @@ private:
 public:
   enum class Tipo { Entrada, Saida, Nulo };
 
-  explicit XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent);
-  explicit XML(const QByteArray &fileContent);
+  explicit XML(const QString &fileContent, const Tipo tipo, QWidget *parent);
+  explicit XML(const QString &fileContent);
 
   auto validar() -> void;
   auto verificaNCMs() -> void;
 
   QVector<Produto> produtos;
 
-  QByteArray const fileContent;
+  QString const fileContent;
   QStandardItemModel model;
   QString local;
 
@@ -83,29 +82,15 @@ public:
   int idNFe = 0;
 
   QString chaveAcesso;
+  QString dataHoraEmissao;
   // identificacao
   QString nNF;
-  QString dataHoraEmissao;
   // emitente
-  QString xFant;
   QString xNome;
   QString cnpjOrig;
   // destinatario
   QString cnpjDest;
   // total
-  double vBC_Total = 0;
-  double vICMS_Total = 0;
-  double vICMSDeson_Total = 0;
-  double vBCST_Total = 0;
-  double vST_Total = 0;
-  double vProd_Total = 0;
-  double vFrete_Total = 0;
-  double vSeg_Total = 0;
-  double vDesc_Total = 0;
-  double vII_Total = 0;
-  double vPIS_Total = 0;
-  double vCOFINS_Total = 0;
-  double vOutro_Total = 0;
   double vNF_Total = 0;
   // transportadora
   QString xNomeTransp;

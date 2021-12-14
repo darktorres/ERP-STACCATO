@@ -215,7 +215,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="WidgetHistoricoCompra" name="widgetHistorico" native="true"/>
+        <widget class="WidgetCompraHistorico" name="widgetHistorico" native="true"/>
        </item>
       </layout>
      </widget>
@@ -261,9 +261,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetHistoricoCompra</class>
+   <class>WidgetCompraHistorico</class>
    <extends>QWidget</extends>
-   <header>src/widgethistoricocompra.h</header>
+   <header>src/widgetcomprahistorico.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

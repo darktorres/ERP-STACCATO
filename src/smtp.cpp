@@ -21,12 +21,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "application.h"
 #include "file.h"
 
-#include <QFile>
 #include <QFileInfo>
 #include <QResource>
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout, QObject *parent)
-    : QObject(parent), timeout(timeout), port(port), host(host), pass(pass), user(user) {
+Smtp::Smtp(const QString &user_, const QString &pass_, const QString &host_, const quint16 port_, const int timeout_, QObject *parent)
+    : QObject(parent), timeout(timeout_), port(port_), host(host_), pass(pass_), user(user_) {
   socket = new QSslSocket(this);
 
   setConnections();
@@ -42,7 +41,6 @@ void Smtp::setConnections() {
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected, connectionType);
 }
 
-// TODO: The 'from' function argument possesses the same name as one of the class members, which can result in a confusion.
 void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
@@ -98,7 +96,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.replace(QString::fromLatin1("\n"), QString::fromLatin1("\r\n"));
   message.replace(QString::fromLatin1("\r\n.\r\n"), QString::fromLatin1("\r\n..\r\n"));
 
-  this->from = from;
+  m_from = from;
 
   rcpt.append(to.split(";"));
 
@@ -227,7 +225,7 @@ void Smtp::readyRead() {
 
     // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way -> <email@gmail.com>
     // qDebug() << "MAIL FROM:<" << from << ">";
-    *t << "MAIL FROM:<" << from << ">\r\n";
+    *t << "MAIL FROM:<" << m_from << ">\r\n";
     t->flush();
     state = States::Rcpt;
   } else if (state == States::Rcpt and responseLine == "250") {

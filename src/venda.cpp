@@ -1,6 +1,7 @@
 #include "venda.h"
 #include "ui_venda.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
@@ -20,7 +21,6 @@
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
-#include "xml_viewer.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -240,6 +240,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->hideColumn("subGrupo");
   ui->tableFluxoCaixa->hideColumn("comissao");
   ui->tableFluxoCaixa->hideColumn("taxa");
+  ui->tableFluxoCaixa->hideColumn("desativado");
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
@@ -283,6 +284,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("subGrupo");
   ui->tableFluxoCaixa2->hideColumn("comissao");
   ui->tableFluxoCaixa2->hideColumn("taxa");
+  ui->tableFluxoCaixa2->hideColumn("desativado");
 
   ui->tableFluxoCaixa2->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
@@ -424,22 +426,6 @@ void Venda::verifyFields() {
     ui->checkBoxRT->setChecked(true);
     throw RuntimeError("Por favor preencha a pontuação!");
   }
-}
-
-void Venda::calcPrecoGlobalTotal() {
-  double subTotalBruto = 0.;
-  double subTotalItens = 0.;
-
-  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
-    const double itemBruto = modelItem.data(row, "quant").toDouble() * modelItem.data(row, "prcUnitario").toDouble();
-    const double descItem = modelItem.data(row, "desconto").toDouble() / 100.;
-    const double stItem = itemBruto * (1. - descItem);
-    subTotalBruto += itemBruto;
-    subTotalItens += stItem;
-  }
-
-  ui->doubleSpinBoxSubTotalBruto->setValue(subTotalBruto);
-  ui->doubleSpinBoxSubTotalLiq->setValue(subTotalItens);
 }
 
 void Venda::clearFields() {}
@@ -604,7 +590,7 @@ bool Venda::viewRegister() {
 
       modelFluxoCaixa2.select();
 
-      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(true); }
+      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->show(); }
 
       ui->frameRT->show();
       ui->labelRT->show();
@@ -695,7 +681,7 @@ void Venda::verificaDisponibilidadeEstoque() {
     const QString idProduto = modelItem.data(row, "idProduto").toString();
     const QString quant = modelItem.data(row, "quant").toString();
 
-    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant + " LIMIT 1")) {
       throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text());
     }
 
@@ -1008,8 +994,8 @@ void Venda::criarConsumos() {
   if (not query.exec()) { throw RuntimeException("Erro buscando produtos estoque: " + query.lastError().text()); }
 
   while (query.next()) {
-    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
-    estoque->criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble());
+    auto estoque = Estoque(query.value("idEstoque").toString(), this);
+    estoque.criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble());
   }
 }
 
@@ -1167,8 +1153,8 @@ void Venda::on_pushButtonCancelamento_clicked() {
   // -------------------------------------------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar venda");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar venda");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
@@ -1452,7 +1438,7 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=, this] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
 
@@ -1477,6 +1463,8 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (not index.parent().isValid()) { return; }
   if (not User::isAdmin() and not User::isAdministrativo()) { return; }
 
+  // TODO: se for vendedor abrir a NFe de saida
+
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);
   const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
@@ -1489,8 +1477,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeError("Linha não possui NFe!"); }
 
-  XML_Viewer viewer(query.value("xml").toByteArray(), this);
-  viewer.on_pushButtonDanfe_clicked();
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 void Venda::calcularPesoTotal() {
@@ -1509,6 +1496,7 @@ void Venda::calcularPesoTotal() {
     total += modelItem.data(row, "caixas").toDouble() * kgcx;
   }
 
+  // TODO: implicit conversion double -> int
   ui->spinBoxPesoTotal->setValue(total);
 }
 

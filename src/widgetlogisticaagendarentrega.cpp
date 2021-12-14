@@ -12,7 +12,6 @@
 #include "user.h"
 #include "xml.h"
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -533,8 +532,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
   if (semEstoque) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Um ou mais produtos não estão em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Agendar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Agendar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
@@ -630,8 +629,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (status != "ESTOQUE") {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "O produto não está em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Agendar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Agendar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
@@ -982,7 +981,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   xml.validar();
 
   SqlQuery query;
-  query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso LIMIT 1");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }

@@ -12,7 +12,8 @@ bool User::isAdministrativo() { return (User::tipo == "ADMINISTRADOR" or User::t
 
 bool User::isEspecial() { return (User::tipo == "VENDEDOR ESPECIAL"); }
 
-bool User::isGerente() { return (User::tipo == "GERENTE LOJA"); }
+// TODO: testar a adição dos gerentes dep./fin.
+bool User::isGerente() { return (User::tipo == "GERENTE DEPARTAMENTO" or User::tipo == "GERENTE FINANCEIRO" or User::tipo == "GERENTE LOJA"); }
 
 bool User::isOperacional() { return (User::tipo == "OPERACIONAL"); }
 
@@ -42,6 +43,8 @@ void User::login(const QString &user, const QString &password) {
 }
 
 void User::autorizacao(const QString &user, const QString &password) {
+  // TODO: precisa adicionar 'GERENTE FINANCEIRO'
+
   SqlQuery queryAutorizar;
   queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND password = SHA_PASSWORD(:password) AND desativado = FALSE AND "
                          "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");

@@ -17,7 +17,7 @@ public:
   Q_ENUM(Tipo)
 
   explicit Contas(const Tipo tipo, QWidget *parent);
-  ~Contas();
+  ~Contas() final;
 
   auto viewContaPagarData(const QString &dataPagamento) -> void;
   auto viewContaPagarOrdemCompra(const QString &ordemCompra) -> void;
@@ -39,6 +39,6 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
-  auto validarData(const QModelIndex &index) -> bool;
+  auto validarData(const QModelIndex &index) -> void;
   auto verifyFields() -> void;
 };

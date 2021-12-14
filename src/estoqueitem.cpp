@@ -1,7 +1,5 @@
 #include "estoqueitem.h"
 
-#include "palletitem.h"
-
 #include <QDebug>
 #include <QDrag>
 #include <QGraphicsScene>
@@ -16,14 +14,13 @@ void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsSimpleTextItem::mousePressEvent(event);
 }
 
+// TODO: transferir esse código para WidgetGalpao e apagar essa classe
 void EstoqueItem::startDrag(QPointF pos) {
   Q_UNUSED(pos);
 
   emit startDragSignal();
 
   QPixmap pixmap = QPixmap("://box_medium.png");
-
-  auto *const pallet = dynamic_cast<PalletItem *>(parentItem());
 
   auto *mimeData = new QMimeData;
   mimeData->setText(text());
@@ -33,9 +30,7 @@ void EstoqueItem::startDrag(QPointF pos) {
   drag->setMimeData(mimeData);
   drag->setPixmap(pixmap);
 
-  const auto status = drag->exec();
-
-  if (status != Qt::IgnoreAction) { pallet->reorderChildren(); }
+  drag->exec();
 }
 
 int EstoqueItem::getIdVendaProduto2() const { return idVendaProduto2; }

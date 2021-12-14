@@ -22,16 +22,13 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+
 #include "xlsxcellreference.h"
 #include "xlsxutility_p.h"
 
-#include <QColor>
 #include <QDateTime>
 #include <QDebug>
-#include <QMap>
-#include <QPoint>
 #include <QRegularExpression>
-#include <QString>
 #include <QStringList>
 
 namespace QXlsx {
@@ -65,9 +62,10 @@ double datetimeToNumber(const QDateTime &dt, bool is1904) {
 
   double excel_time = epoch.msecsTo(dt) / (1000 * 60 * 60 * 24.0);
 
-#if QT_VERSION >= 0x050200
-  if (dt.isDaylightTime()) // Add one hour if the date is Daylight
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+  if (dt.isDaylightTime()) { // Add one hour if the date is Daylight
     excel_time += 1.0 / 24.0;
+  }
 #endif
 
   if (not is1904 and excel_time > 59) { // 31+28
@@ -81,17 +79,17 @@ double datetimeToNumber(const QDateTime &dt, bool is1904) {
 double timeToNumber(const QTime &time) { return QTime(0, 0).msecsTo(time) / (1000 * 60 * 60 * 24.0); }
 
 QDateTime datetimeFromNumber(double num, bool is1904) {
-  if (not is1904 and num > 60) num = num - 1;
+  if (not is1904 and num > 60) { num = num - 1; }
 
   qint64 msecs = static_cast<qint64>(num * 1000 * 60 * 60 * 24.0 + 0.5);
   QDateTime epoch(is1904 ? QDate(1904, 1, 1) : QDate(1899, 12, 31), QTime(0, 0));
 
   QDateTime dt = epoch.addMSecs(msecs);
 
-#if QT_VERSION >= 0x050200
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
   // Remove one hour to see whether the date is Daylight
   QDateTime dt2 = dt.addMSecs(-3600);
-  if (dt2.isDaylightTime()) return dt2;
+  if (dt2.isDaylightTime()) { return dt2; }
 #endif
 
   return dt;
@@ -107,17 +105,17 @@ Sheet names must not begin or end with ' (apostrophe)
 Invalid characters are replaced by one space character ' '.
 */
 QString createSafeSheetName(const QString &nameProposal) {
-  if (nameProposal.isEmpty()) return QString();
+  if (nameProposal.isEmpty()) { return QString(); }
 
   QString ret = nameProposal;
-  if (nameProposal.length() > 2 and nameProposal.startsWith(QLatin1Char('\'')) and nameProposal.endsWith(QLatin1Char('\''))) ret = unescapeSheetName(ret);
+  if (nameProposal.length() > 2 and nameProposal.startsWith(QLatin1Char('\'')) and nameProposal.endsWith(QLatin1Char('\''))) { ret = unescapeSheetName(ret); }
 
   // Replace invalid chars with space.
-  if (nameProposal.contains(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")))) ret.replace(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")), QStringLiteral(" "));
-  if (ret.startsWith(QLatin1Char('\''))) ret[0] = QLatin1Char(' ');
-  if (ret.endsWith(QLatin1Char('\''))) ret[ret.size() - 1] = QLatin1Char(' ');
+  if (nameProposal.contains(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")))) { ret.replace(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")), QStringLiteral(" ")); }
+  if (ret.startsWith(QLatin1Char('\''))) { ret[0] = QLatin1Char(' '); }
+  if (ret.endsWith(QLatin1Char('\''))) { ret[ret.size() - 1] = QLatin1Char(' '); }
 
-  if (ret.size() > 31) ret = ret.left(31);
+  if (ret.size() > 31) { ret = ret.left(31); }
   return ret;
 }
 
@@ -129,7 +127,7 @@ QString escapeSheetName(const QString &sheetName) {
   Q_ASSERT(not sheetName.startsWith(QLatin1Char('\'')) and not sheetName.endsWith(QLatin1Char('\'')));
 
   // These is no need to escape
-  if (not sheetName.contains(QRegularExpression(QStringLiteral("[ +\\-,%^=<>'&]")))) return sheetName;
+  if (not sheetName.contains(QRegularExpression(QStringLiteral("[ +\\-,%^=<>'&]")))) { return sheetName; }
 
   // OK, escape is needed.
   QString name = sheetName;
@@ -178,7 +176,7 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
   for (const auto &ch : rootFormula) {
     if (inQuote) {
       segment.append(ch);
-      if (ch == QLatin1Char('"')) inQuote = false;
+      if (ch == QLatin1Char('"')) { inQuote = false; }
     } else {
       if (ch == QLatin1Char('"')) {
         inQuote = true;
@@ -207,10 +205,11 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
       } else if (ch >= QLatin1Char('0') and ch <= QLatin1Char('9')) {
         segment.append(ch);
 
-        if (refState == AZ or refState == PRE_09 or refState == _09)
+        if (refState == AZ or refState == PRE_09 or refState == _09) {
           refState = _09;
-        else
+        } else {
           refState = INVALID;
+        }
       } else {
         if (refState == _09) {
           segments.append(qMakePair(segment, refFlag));
@@ -223,7 +222,7 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
     }
   }
 
-  if (not segment.isEmpty()) segments.append(qMakePair(segment, refState == _09 ? refFlag : -1));
+  if (not segment.isEmpty()) { segments.append(qMakePair(segment, refState == _09 ? refFlag : -1)); }
 
   // Replace "A1", "$A1", "A$1" segment with proper one.
   QStringList result;

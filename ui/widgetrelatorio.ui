@@ -60,6 +60,9 @@
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -98,6 +101,9 @@
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -138,6 +144,9 @@
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -176,6 +185,9 @@
         <property name="prefix">
          <string>Comissão    R$ </string>
         </property>
+        <property name="minimum">
+         <double>-99999999.989999994635582</double>
+        </property>
         <property name="maximum">
          <double>99999999.989999994635582</double>
         </property>
@@ -202,7 +214,7 @@
          <number>2</number>
         </property>
         <property name="maximum">
-         <double>1000000.000000000000000</double>
+         <double>100.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -222,6 +234,9 @@
         </property>
         <property name="prefix">
          <string>Geral    R$ </string>
+        </property>
+        <property name="minimum">
+         <double>-99999999.989999994635582</double>
         </property>
         <property name="maximum">
          <double>99999999.989999994635582</double>

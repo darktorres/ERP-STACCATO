@@ -13,7 +13,7 @@ TEMPLATE = app
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.5.68/limereport/limereport.pri)
+versionAtMost(QT_VERSION, 5.15.2) { include(LimeReport-1.5.68/limereport/limereport.pri) }
 
 QT *= core gui sql network xml charts widgets
 
@@ -21,12 +21,10 @@ DEFINES *= QT_DEPRECATED_WARNINGS
 # VERSION is empty
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-CONFIG *= c++17 warn_on
+CONFIG *= c++latest warn_on
 
 PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
-
-message($$QMAKESPEC)
 
 win32 {
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
@@ -37,13 +35,27 @@ win32 {
     RC_ICONS = Staccato.ico
 }
 
-win32-msvc { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto }
+win32-msvc {
+    contains(QT_ARCH, i386) {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto
+    } else {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto
+    }
+}
 
-win32-g++ { LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1 }
+win32-g++ {
+    contains(QT_ARCH, i386) {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+    } else {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto-1_1-x64
+    }
+}
 
 contains(CONFIG, deploy) {
     message(deploy)
     DEFINES *= DEPLOY
+
+    CONFIG += ltcg
 
     win32-msvc {
         QMAKE_CXXFLAGS_RELEASE *= /O2
@@ -70,25 +82,43 @@ contains(CONFIG, deploy) {
 }
 
 *-g++ {
+    QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic
-    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
+#   QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 }
 
 *-clang {
-    QMAKE_CXXFLAGS *= -Weverything
-    QMAKE_CXXFLAGS *= -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-documentation-unknown-command -Wno-redundant-parens
-    QMAKE_CXXFLAGS *= -Wno-duplicate-enum -Wno-padded -Wno-sign-conversion -Wno-covered-switch-default -Wno-shorten-64-to-32 -Wno-extra-semi-stmt
-    QMAKE_CXXFLAGS *= -Wno-compound-token-split-by-space -Wno-inconsistent-missing-destructor-override -Wno-suggest-override -Wno-float-conversion
-    QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused -Wno-suggest-destructor-override -Wno-implicit-int-float-conversion -Wno-enum-enum-conversion
-    QMAKE_CXXFLAGS *= -Wno-shadow-field-in-constructor -Wno-extra-semi -Wno-implicit-int-conversion -Wno-exit-time-destructors
-    QMAKE_CXXFLAGS *= -Wno-global-constructors -Wno-weak-vtables -Wno-missing-variable-declarations -Wno-shadow-field -Wno-zero-as-null-pointer-constant
-    QMAKE_CXXFLAGS *= -Wno-header-hygiene -Wno-documentation -Wno-switch-enum -Wno-undefined-reinterpret-cast -Wno-non-virtual-dtor
-    QMAKE_CXXFLAGS *= -Wno-comma -Wno-old-style-cast -Wno-shadow -Wno-implicit-fallthrough -Wno-missing-prototypes -Wno-format-nonliteral
-    QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include -isystem /opt/Qt/5.15.2/gcc_64/include/QtCore -isystem /opt/Qt/5.15.2/gcc_64/include/QtGui -isystem /opt/Qt/5.15.2/gcc_64/include/QtGui/5.15.2/QtGui/private
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include/QtPrintSupport -isystem /opt/Qt/5.15.2/gcc_64/include/QtWidgets -isystem /opt/Qt/5.15.2/gcc_64/include/QtSql -isystem /opt/Qt/5.15.2/gcc_64/include/QtNetwork
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include/QtCharts -isystem /opt/Qt/5.15.2/gcc_64/include/QtXml
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include -isystem /opt/Qt/6.2.2/gcc_64/include/QtCore -isystem /opt/Qt/6.2.2/gcc_64/include/QtGui -isystem /opt/Qt/6.2.2/gcc_64/include/QtGui/6.2.2/QtGui/private
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include/QtPrintSupport -isystem /opt/Qt/6.2.2/gcc_64/include/QtWidgets -isystem /opt/Qt/6.2.2/gcc_64/include/QtSql -isystem /opt/Qt/6.2.2/gcc_64/include/QtNetwork
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include/QtCharts -isystem /opt/Qt/6.2.2/gcc_64/include/QtXml
+
+    QMAKE_CXXFLAGS *= -Wno-deprecated-enum-enum-conversion
+
+#   QMAKE_CXXFLAGS *= -Weverything
+#   QMAKE_CXXFLAGS *= -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-pre-c++14-compat
+#   QMAKE_CXXFLAGS *= -Wno-padded
+#   QMAKE_CXXFLAGS *= -Wno-extra-semi-stmt
+#   QMAKE_CXXFLAGS *= -Wno-suggest-destructor-override
+#   QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused
+#   QMAKE_CXXFLAGS *= -Wno-exit-time-destructors -Wno-global-constructors
+#   QMAKE_CXXFLAGS *= -Wno-documentation-unknown-command
+
+#   QMAKE_CXXFLAGS *= -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-documentation-unknown-command -Wno-redundant-parens
+#   QMAKE_CXXFLAGS *= -Wno-duplicate-enum -Wno-padded -Wno-sign-conversion -Wno-covered-switch-default -Wno-shorten-64-to-32 -Wno-extra-semi-stmt
+#   QMAKE_CXXFLAGS *= -Wno-compound-token-split-by-space -Wno-inconsistent-missing-destructor-override -Wno-suggest-override -Wno-float-conversion
+#   QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused -Wno-suggest-destructor-override -Wno-implicit-int-float-conversion -Wno-enum-enum-conversion
+#   QMAKE_CXXFLAGS *= -Wno-shadow-field-in-constructor -Wno-extra-semi -Wno-implicit-int-conversion -Wno-exit-time-destructors
+#   QMAKE_CXXFLAGS *= -Wno-global-constructors -Wno-weak-vtables -Wno-missing-variable-declarations -Wno-shadow-field -Wno-zero-as-null-pointer-constant
+#   QMAKE_CXXFLAGS *= -Wno-header-hygiene -Wno-documentation -Wno-switch-enum -Wno-undefined-reinterpret-cast -Wno-non-virtual-dtor
+#   QMAKE_CXXFLAGS *= -Wno-comma -Wno-old-style-cast -Wno-shadow -Wno-implicit-fallthrough -Wno-missing-prototypes -Wno-format-nonliteral
+#   QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor -Wno-reserved-identifier
 }
 
 win32-msvc {
-   QMAKE_CXXFLAGS += /permissive-
+    QMAKE_CXXFLAGS += /permissive-
 }
 
 linux-g++ {
@@ -96,7 +126,7 @@ linux-g++ {
 }
 
 linux-clang {
-    QMAKE_LFLAGS *= -fuse-ld=lld-12
+    QMAKE_LFLAGS *= -fuse-ld=lld-13
 }
 
 win32-g++ { # ccache is not compatible with MSVC
@@ -104,9 +134,6 @@ win32-g++ { # ccache is not compatible with MSVC
         message("using ccache")
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
-        message($$QMAKE_CC)
-        message($$QMAKE_CXX)
-
         QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
     }
 }
@@ -119,10 +146,55 @@ linux {
         QMAKE_CC = ccache $$QMAKE_CC
         QMAKE_CXX = ccache $$QMAKE_CXX
         QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
-        message($$QMAKE_CC)
-        message($$QMAKE_CXX)
     }
 }
+
+#-----------------------------------------------------
+
+CONFIG(release, debug|release) {
+    BUILD_TYPE = release
+} else {
+    BUILD_TYPE = debug
+}
+
+unix {
+    ARCH_DIR           = $${OUT_PWD}/unix
+    ARCH_TYPE          = unix
+
+    macx {
+        ARCH_DIR       = $${OUT_PWD}/macx
+        ARCH_TYPE      = macx
+    }
+
+    linux {
+        !contains(QT_ARCH, x86_64) {
+            ARCH_DIR   = $${OUT_PWD}/linux32
+            ARCH_TYPE  = linux32
+        } else {
+            ARCH_DIR   = $${OUT_PWD}/linux64
+            ARCH_TYPE  = linux64
+        }
+    }
+}
+
+win32 {
+    !contains(QT_ARCH, x86_64) {
+        ARCH_DIR       = $${OUT_PWD}/win32
+        ARCH_TYPE      = win32
+    } else {
+        ARCH_DIR       = $${OUT_PWD}/win64
+        ARCH_TYPE      = win64
+    }
+}
+
+MOC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/moc
+UI_DIR         = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+UI_HEADERS_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+UI_SOURCES_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
+OBJECTS_DIR    = $${ARCH_DIR}/$${BUILD_TYPE}/obj
+RCC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/rcc
+
+#-----------------------------------------------------
 
 INCLUDEPATH += $$PWD/src
 
@@ -154,7 +226,6 @@ SOURCES += \
     src/checkboxdelegate.cpp \
     src/cnab.cpp \
     src/collapsiblewidget.cpp \
-    src/combobox.cpp \
     src/comboboxdelegate.cpp \
     src/comprovantes.cpp \
     src/contas.cpp \
@@ -172,7 +243,6 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
-    src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -193,7 +263,6 @@ SOURCES += \
     src/logindialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
-    src/nfedistribuicao.cpp \
     src/nfeproxymodel.cpp \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
@@ -231,11 +300,13 @@ SOURCES += \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
+    src/viewgalpao.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
     src/widgetcomprafaturar.cpp \
     src/widgetcompragerar.cpp \
+    src/widgetcomprahistorico.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
     src/widgetconsistencia.cpp \
@@ -249,7 +320,6 @@ SOURCES += \
     src/widgetgalpaopeso.cpp \
     src/widgetgare.cpp \
     src/widgetgraficos.cpp \
-    src/widgethistoricocompra.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
     src/widgetlogisticacalendario.cpp \
@@ -259,6 +329,7 @@ SOURCES += \
     src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
+    src/widgetnfedistribuicao.cpp \
     src/widgetnfeentrada.cpp \
     src/widgetnfesaida.cpp \
     src/widgetorcamento.cpp \
@@ -294,7 +365,6 @@ HEADERS  += \
     src/checkboxdelegate.h \
     src/cnab.h \
     src/collapsiblewidget.h \
-    src/combobox.h \
     src/comboboxdelegate.h \
     src/comprovantes.h \
     src/contas.h \
@@ -312,7 +382,6 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
-    src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
@@ -332,7 +401,6 @@ HEADERS  += \
     src/log.h \
     src/logindialog.h \
     src/mainwindow.h \
-    src/nfedistribuicao.h \
     src/nfeproxymodel.h \
     src/noeditdelegate.h \
     src/orcamento.h \
@@ -370,11 +438,13 @@ HEADERS  += \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
+    src/viewgalpao.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \
     src/widgetcomprafaturar.h \
     src/widgetcompragerar.h \
+    src/widgetcomprahistorico.h \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
     src/widgetconsistencia.h \
@@ -388,7 +458,6 @@ HEADERS  += \
     src/widgetgalpaopeso.h \
     src/widgetgare.h \
     src/widgetgraficos.h \
-    src/widgethistoricocompra.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \
     src/widgetlogisticacalendario.h \
@@ -398,6 +467,7 @@ HEADERS  += \
     src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
+    src/widgetnfedistribuicao.h \
     src/widgetnfeentrada.h \
     src/widgetnfesaida.h \
     src/widgetorcamento.h \

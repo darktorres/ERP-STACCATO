@@ -4,7 +4,6 @@
 #include "application.h"
 #include "baixaorcamento.h"
 #include "cadastrocliente.h"
-#include "cadastroprofissional.h"
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
@@ -18,7 +17,6 @@
 #include "venda.h"
 
 #include <QAuthenticator>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QMessageBox>
@@ -266,9 +264,9 @@ bool Orcamento::viewRegister() {
       ui->pushButtonGerarVenda->show();
     }
 
-    ui->checkBoxFreteManual->setDisabled(ui->checkBoxRepresentacao->isChecked());
+    ui->checkBoxFreteManual->setHidden(ui->checkBoxRepresentacao->isChecked());
 
-    const bool freteManual = ui->checkBoxFreteManual->isChecked();
+    const bool freteManual = ui->checkBoxFreteManual->isChecked() or ui->checkBoxRepresentacao->isChecked();
 
     canChangeFrete = freteManual;
 
@@ -694,7 +692,7 @@ void Orcamento::buscarConsultor() {
 
   if (query.size() == 1 and query.first()) { setData("idUsuarioConsultor", query.value("idUsuario")); }
 
-  if (query.size() == 0) { model.setData(currentRow, "idUsuarioConsultor", QVariant(QVariant::UInt)); }
+  if (query.size() == 0) { model.setData(currentRow, "idUsuarioConsultor", {}); }
 }
 
 void Orcamento::atualizaReplica() {
@@ -777,7 +775,8 @@ void Orcamento::calcPrecoGlobalTotal() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setMinimum(frete);
+    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
+
     ui->doubleSpinBoxFrete->setValue(frete);
   }
 
@@ -1170,7 +1169,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   queryEquivalente.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
   SqlQuery queryEstoque;
-  queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant");
+  queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant LIMIT 1");
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     const bool isEstoque = modelItem.data(row, "estoque").toBool();
@@ -1213,8 +1212,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   if (not produtos.isEmpty()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n    -" + produtos.join("\n    -"), QMessageBox::Yes | QMessageBox::No,
                        this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
@@ -1223,8 +1222,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!",
                        "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada e serão removidos da réplica:\n    -" + estoques.join("\n    -"),
                        QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Voltar");
 
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
@@ -1319,8 +1318,11 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
 }
 
 void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
-  ui->checkBoxFreteManual->setDisabled(checked);
-  ui->checkBoxFreteManual->setChecked(checked);
+  ui->checkBoxFreteManual->setHidden(checked);
+
+  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
+  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
+
   ui->itemBoxProduto->setRepresentacao(checked);
   novoItem();
 }
@@ -1397,7 +1399,8 @@ void Orcamento::on_itemBoxVendedor_textChanged() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setMinimum(frete);
+    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
+
     ui->doubleSpinBoxFrete->setValue(frete);
   }
 }
@@ -1568,7 +1571,7 @@ void Orcamento::verificaDisponibilidadeEstoque() {
     const QString idProduto = modelItem.data(row, "idProduto").toString();
     const QString quant = modelItem.data(row, "quant").toString();
 
-    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant + " LIMIT 1")) {
       throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text());
     }
 
@@ -1606,7 +1609,7 @@ void Orcamento::on_pushButtonModelo3d_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=] {
+  connect(reply, &QNetworkReply::finished, this, [=, this] {
     if (reply->error() != QNetworkReply::NoError) {
       if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
 

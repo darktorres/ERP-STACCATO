@@ -1,6 +1,7 @@
 #pragma once
 
 #include "palletitem.h"
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QGraphicsScene>
@@ -15,7 +16,7 @@ class WidgetGalpao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetGalpao(QWidget *parent = nullptr);
+  explicit WidgetGalpao(QWidget *parent);
   ~WidgetGalpao();
 
   auto resetTables() -> void;
@@ -25,28 +26,37 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  QStack<int> blockingSignals;
+  PalletItem *currentPallet = nullptr;
   QGraphicsScene *scene = nullptr;
+  QStack<int> blockingSignals;
+  SqlQueryModel modelPallet;
   SqlTableModel modelTranspAgend;
-  QHash<QString, PalletItem *> palletsHash;
   Ui::WidgetGalpao *ui;
   // methods
+  auto atualizarPallet(PalletItem *pallet) -> void;
   auto carregarPallets() -> void;
-  auto on_checkBoxConteudo_toggled(bool checked) -> void;
-  auto on_checkBoxCriarApagar_toggled(bool checked) -> void;
-  auto on_checkBoxMover_toggled(bool checked) -> void;
+  auto inserirPallet(PalletItem *pallet) -> void;
+  auto on_checkBoxCriarPallet_toggled(const bool checked) -> void;
+  auto on_checkBoxEdicao_toggled(const bool checked) -> void;
+  auto on_checkBoxMoverPallet_toggled(const bool checked) -> void;
+  auto on_comboBoxPalletAtual_currentTextChanged() -> void;
   auto on_dateTimeEdit_dateChanged() -> void;
-  auto on_groupBoxEdicao_toggled(const bool checked) -> void;
   auto on_itemBoxVeiculo_textChanged() -> void;
-  auto on_pushButtonCriarPallet_clicked() -> void;
+  auto on_lineEditMoverParaPallet_textChanged(const QString &text) -> void;
+  auto on_lineEditNomePallet_textChanged(const QString &text) -> void;
+  auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
+  auto on_pushButtonMover_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
-  auto on_pushButtonSalvar_clicked() -> void;
-  auto on_table_selectionChanged() -> void;
-  auto resizeEvent(QResizeEvent *event) -> void final;
+  auto on_pushButtonSalvarPallets_clicked() -> void;
+  auto on_tablePallet_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableTranspAgend_selectionChanged() -> void;
   auto salvarPallets() -> void;
+  auto selectBloco(PalletItem *const palletPtr) -> void;
   auto setConnections() -> void;
   auto setFilter() -> void;
   auto setupTables() -> void;
-  auto unselectOthers() -> void;
+  auto unselectBloco() -> void;
   auto unsetConnections() -> void;
 };

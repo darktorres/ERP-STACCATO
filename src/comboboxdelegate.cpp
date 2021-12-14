@@ -5,7 +5,6 @@
 
 #include <QComboBox>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}

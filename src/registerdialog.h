@@ -33,7 +33,7 @@ protected:
   SqlTableModel model;
   Tipo tipo = Tipo::Cadastrar;
   // methods
-  auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
+  auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = {}) -> void;
   auto confirmationMessage() -> bool;
   auto data(const QString &key) const -> QVariant;
   auto marcarDirty() -> void;
@@ -53,13 +53,10 @@ protected:
 
 private:
   // attributes
-  QStringList textKeys;
   QDataWidgetMapper mapper;
   QWidget *parent = nullptr;
   // methods
-  auto getTextKeys() const -> QStringList;
   auto requiredStyle() -> QString;
-  auto setTextKeys(const QStringList &value) -> void;
   virtual auto cadastrar() -> void = 0;
   virtual auto closeEvent(QCloseEvent *event) -> void final;
   virtual auto keyPressEvent(QKeyEvent *event) -> void final;

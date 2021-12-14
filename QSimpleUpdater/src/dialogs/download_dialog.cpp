@@ -90,8 +90,8 @@ void DownloadDialog::cancelDownload() {
     _message.setIcon(QMessageBox::Question);
     _message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     _message.setText(tr("Você tem certeza que quer cancelar a atualização?"));
-    _message.setButtonText(QMessageBox::Yes, "Cancelar");
-    _message.setButtonText(QMessageBox::No, "Continuar");
+    _message.button(QMessageBox::Yes)->setText("Cancelar");
+    _message.button(QMessageBox::No)->setText("Continuar");
 
     if (_message.exec() == QMessageBox::Yes) {
       hide();
@@ -175,8 +175,9 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
       } else if (_time_remaining > 60) {
         _time_remaining /= 60;
         _time_string = tr("Por volta de %1 minutos").arg(int(_time_remaining + 0.5));
-      } else
+      } else {
         _time_string = tr("%1 segundos").arg(int(_time_remaining + 0.5));
+      }
 
       ui->timeLabel->setText(tr("Tempo restante") + ": " + _time_string);
     }

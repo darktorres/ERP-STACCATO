@@ -4,7 +4,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
-#include "reaisdelegate.h"
 #include "sql.h"
 
 #include <QMessageBox>
@@ -102,8 +101,8 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   //------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
+  msgBox.button(QMessageBox::Yes)->setText("Continuar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
@@ -129,7 +128,6 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 void WidgetCompraConsumos::desfazerConsumo(const QModelIndexList &list) {
   for (const auto &index : list) {
     const int idVendaProduto2 = modelProduto.data(index.row(), "idVendaProduto2").toInt();
-
     Estoque::desfazerConsumo(idVendaProduto2);
   }
 }

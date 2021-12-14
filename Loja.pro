@@ -151,48 +151,12 @@ linux {
 
 #-----------------------------------------------------
 
-CONFIG(release, debug|release) {
-    BUILD_TYPE = release
-} else {
-    BUILD_TYPE = debug
-}
-
-unix {
-    ARCH_DIR           = $${OUT_PWD}/unix
-    ARCH_TYPE          = unix
-
-    macx {
-        ARCH_DIR       = $${OUT_PWD}/macx
-        ARCH_TYPE      = macx
-    }
-
-    linux {
-        !contains(QT_ARCH, x86_64) {
-            ARCH_DIR   = $${OUT_PWD}/linux32
-            ARCH_TYPE  = linux32
-        } else {
-            ARCH_DIR   = $${OUT_PWD}/linux64
-            ARCH_TYPE  = linux64
-        }
-    }
-}
-
-win32 {
-    !contains(QT_ARCH, x86_64) {
-        ARCH_DIR       = $${OUT_PWD}/win32
-        ARCH_TYPE      = win32
-    } else {
-        ARCH_DIR       = $${OUT_PWD}/win64
-        ARCH_TYPE      = win64
-    }
-}
-
-MOC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/moc
-UI_DIR         = $${ARCH_DIR}/$${BUILD_TYPE}/ui
-UI_HEADERS_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
-UI_SOURCES_DIR = $${ARCH_DIR}/$${BUILD_TYPE}/ui
-OBJECTS_DIR    = $${ARCH_DIR}/$${BUILD_TYPE}/obj
-RCC_DIR        = $${ARCH_DIR}/$${BUILD_TYPE}/rcc
+MOC_DIR        = build_files/moc
+UI_DIR         = build_files/ui
+UI_HEADERS_DIR = build_files/ui
+UI_SOURCES_DIR = build_files/ui
+OBJECTS_DIR    = build_files/obj
+RCC_DIR        = build_files/rcc
 
 #-----------------------------------------------------
 

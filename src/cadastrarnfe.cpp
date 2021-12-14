@@ -185,6 +185,7 @@ QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
 
   const QStringList respostaSplit = resposta.remove("OK: ").split("\r\n", Qt::SkipEmptyParts);
 
+  // TODO: replace QStringList::filter with qApp.findTag due to filter using 'contains', it may find the string in the middle of the text instead of only in the beggining
   if (not respostaSplit.filter("Alertas:", Qt::CaseInsensitive).isEmpty()) { throw RuntimeException(respostaSplit.at(1), this); }
 
   //-------------------------------------------
@@ -206,15 +207,16 @@ int CadastrarNFe::preCadastrarNota() {
   if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) { tipoString = "SAÍDA"; }
 
   SqlQuery queryNota;
-  queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
-                    "VALUES (:idVenda, :numeroNFe, :tipo, :xml, 'NOTA PENDENTE', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
+  queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, emitente, cnpjOrig, cnpjDest, chaveAcesso, valor) "
+                    "VALUES (:idVenda, :numeroNFe, :tipo, :xml, 'NOTA PENDENTE', :emitente, :cnpjOrig, :cnpjDest, :chaveAcesso, :valor)");
   queryNota.bindValue(":idVenda", idVenda);
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", tipoString);
   queryNota.bindValue(":xml", xml);
-  queryNota.bindValue(":chaveAcesso", chaveAcesso);
+  queryNota.bindValue(":emitente", ui->lineEditEmitenteNomeRazao->text());
   queryNota.bindValue(":cnpjOrig", clearStr(ui->lineEditEmitenteCNPJ->text()));
   queryNota.bindValue(":cnpjDest", clearStr(ui->lineEditDestinatarioCPFCNPJ->text()));
+  queryNota.bindValue(":chaveAcesso", chaveAcesso);
   queryNota.bindValue(":valor", ui->doubleSpinBoxValorNota->value());
 
   if (not queryNota.exec()) { throw RuntimeException("Erro guardando nota: " + queryNota.lastError().text()); }
@@ -352,6 +354,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     removerNota(idNFe);
 
+    // TODO: replace QStringList::filter with qApp.findTag due to filter using 'contains', it may find the string in the middle of the text instead of only in the beggining
     const QString rejeicao = resposta.split("\r\n", Qt::SkipEmptyParts).filter("xMotivo=Rejeição").first().remove("xMotivo=");
 
     manterAberto = true;
@@ -403,14 +406,38 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   close();
 }
 
-void CadastrarNFe::cadastrar(const int idNFe) {
-  SqlQuery queryNFe;
-  queryNFe.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
-  queryNFe.bindValue(":xml", xml);
-  queryNFe.bindValue(":idNFe", idNFe);
+void CadastrarNFe::atualizarNFe(const int idNFe) {
+  const QString tagBegin = "<dhEmi>";
+  const QString tagEnd = "</dhEmi>";
 
-  if (xml.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive)) { queryNFe.bindValue(":status", "AUTORIZADO"); }
-  if (xml.contains("Uso Denegado", Qt::CaseInsensitive)) { queryNFe.bindValue(":status", "DENEGADA"); }
+  const int indexBegin = xml.indexOf(tagBegin);
+  const int indexEnd = xml.indexOf(tagEnd);
+
+  if (indexBegin == -1 or indexEnd == -1) { throw RuntimeException("Não encontrou a tag da data/hora!"); }
+
+  const QString dataHoraEmissao = xml.mid(indexBegin + tagBegin.length(), indexEnd - indexBegin - tagBegin.length());
+
+  const QDateTime dateTime = QDateTime::fromString(dataHoraEmissao, Qt::ISODate);
+
+  if (not dateTime.isValid()) { throw RuntimeException("'Data/Hora Emissão' inválido!"); }
+
+  //----------------------------------------------------------
+
+  QString status;
+
+  if (xml.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADO"; }
+  if (xml.contains("Uso Denegado", Qt::CaseInsensitive)) { status = "DENEGADA"; }
+
+  if (status.isEmpty()) { throw RuntimeException("'Status' inválido!"); }
+
+  //----------------------------------------------------------
+
+  SqlQuery queryNFe;
+  queryNFe.prepare("UPDATE nfe SET xml = :xml, status = :status, dataHoraEmissao = :dataHoraEmissao WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
+  queryNFe.bindValue(":xml", xml);
+  queryNFe.bindValue(":status", status);
+  queryNFe.bindValue(":dataHoraEmissao", dataHoraEmissao);
+  queryNFe.bindValue(":idNFe", idNFe);
 
   if (not queryNFe.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + queryNFe.lastError().text()); }
 }
@@ -1456,6 +1483,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
     if (respostaSplit.empty()) { throw RuntimeException("Não foi encontrado a inscrição estadual na consulta!"); }
 
+    // TODO: replace QStringList::filter with qApp.findTag due to filter using 'contains', it may find the string in the middle of the text instead of only in the beggining
     const QString inscricao = respostaSplit.first().remove("IE=", Qt::CaseInsensitive);
 
     if (not inscricao.isEmpty()) {
@@ -1637,7 +1665,7 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 
   qApp->startTransaction("CadastrarNFe::enviarNFe");
 
-  cadastrar(idNFe);
+  atualizarNFe(idNFe);
 
   qApp->endTransaction();
 

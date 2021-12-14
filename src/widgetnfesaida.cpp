@@ -93,8 +93,7 @@ void WidgetNfeSaida::setupTables() {
   model.setTable("view_nfe_saida");
 
   model.setHeaderData("valor", "R$");
-
-  model.setSort("Criado em");
+  model.setHeaderData("dataHoraEmissao", "Data Emissão");
 
   ui->table->setModel(&model);
 

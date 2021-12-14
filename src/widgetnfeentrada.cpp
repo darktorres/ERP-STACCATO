@@ -96,7 +96,6 @@ void WidgetNfeEntrada::setupTables() {
   ui->table->hideColumn("chaveAcesso");
   ui->table->hideColumn("Fornecedor");
   ui->table->hideColumn("nsu");
-  ui->table->hideColumn("Importado em");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 

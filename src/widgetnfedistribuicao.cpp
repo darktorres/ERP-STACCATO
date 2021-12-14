@@ -88,15 +88,16 @@ void WidgetNFeDistribuicao::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
-  connect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->groupBoxLoja, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::buscarNSU, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::montaFiltro, connectionType);
   connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
   connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
   connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
@@ -108,12 +109,13 @@ void WidgetNFeDistribuicao::setConnections() {
 void WidgetNFeDistribuicao::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
-  disconnect(ui->checkBoxCancelada, &QCheckBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
+  disconnect(ui->groupBoxLoja, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::montaFiltro);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNFeDistribuicao::on_groupBoxStatus_toggled);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::buscarNSU);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNFeDistribuicao::montaFiltro);
@@ -126,12 +128,7 @@ void WidgetNFeDistribuicao::unsetConnections() {
 }
 
 void WidgetNFeDistribuicao::setupTables() {
-  // TODO: substituir por uma view para não ficar puxando os xmls, quando precisar do xml buscar pelo idNFe
-  model.setTable("nfe");
-
-  model.setFilter("nsu IS NOT NULL");
-
-  model.setSort("nsu", Qt::DescendingOrder);
+  model.setTable("view_nfe_distribuicao");
 
   model.setHeaderData("numeroNFe", "NFe");
   model.setHeaderData("tipo", "Tipo");
@@ -151,7 +148,8 @@ void WidgetNFeDistribuicao::setupTables() {
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("idVenda");
-  ui->table->hideColumn("xml");
+  ui->table->hideColumn("dataHoraEmissao");
+  ui->table->hideColumn("emitente");
   ui->table->hideColumn("obs");
   ui->table->hideColumn("transportadora");
   ui->table->hideColumn("gare");
@@ -466,25 +464,13 @@ bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<
   qApp->startTransaction("NFeDistribuicao::enviarEvento_" + operacao);
 
   for (const auto &evento : eventos) {
-    const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
-
-    //----------------------------------------------------------
-
-    auto lineMotivo = split.filter("XMotivo=", Qt::CaseInsensitive);
-
-    if (lineMotivo.empty()) { throw RuntimeException("Não encontrou o campo 'XMotivo': " + evento); }
-
-    const QString motivo = lineMotivo.first().remove("XMotivo=", Qt::CaseInsensitive);
+    const QString motivo = qApp->findTag(evento, "XMotivo=");
 
     if (motivo == "Lote de evento processado") { continue; }
 
     //----------------------------------------------------------
 
-    auto lineChave = split.filter("chNFe=", Qt::CaseInsensitive);
-
-    if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chNFe': " + evento); }
-
-    const QString chaveAcesso = lineChave.first().remove("chNFe=", Qt::CaseInsensitive);
+    const QString chaveAcesso = qApp->findTag(evento, "chNFe=");
 
     //----------------------------------------------------------
 
@@ -538,11 +524,15 @@ bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<
 }
 
 void WidgetNFeDistribuicao::on_table_activated(const QModelIndex &index) {
-  const QString xml = model.data(index.row(), "xml").toString();
+  SqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (xml.isEmpty()) { throw RuntimeException("XML vazio!", this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text(), this); }
 
-  ACBrLib::gerarDanfe(xml, true);
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
+
+  ACBrLib::gerarDanfe(query.value("xml"), true);
 }
 
 QString WidgetNFeDistribuicao::encontraInfCpl(const QString &xml) {
@@ -577,8 +567,6 @@ void WidgetNFeDistribuicao::montaFiltro() {
 
   QStringList filtros;
 
-  filtros << "nsu IS NOT NULL";
-
   //------------------------------------- filtro status
 
   QStringList filtroCheck;
@@ -593,17 +581,19 @@ void WidgetNFeDistribuicao::montaFiltro() {
 
   //------------------------------------- filtro loja
 
-  const QString lojaNome = ui->itemBoxLoja->text();
-  const QString idLoja = ui->itemBoxLoja->getId().toString();
+  if (ui->groupBoxLoja->isChecked()) {
+    const QString lojaNome = ui->itemBoxLoja->text();
+    const QString idLoja = ui->itemBoxLoja->getId().toString();
 
-  if (not lojaNome.isEmpty()) {
-    QSqlQuery queryLoja;
+    if (not lojaNome.isEmpty()) {
+      QSqlQuery queryLoja;
 
-    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
+      if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
 
-    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
+      if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
 
-    filtros << "cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
+      filtros << "cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
+    }
   }
 
   //-------------------------------------
@@ -632,17 +622,8 @@ void WidgetNFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
 }
 
 void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, const QString &idLoja) {
-  const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
-
-  //----------------------------------------------------------
-
-  auto lineMaxNSU = split.filter("maxNSU=", Qt::CaseInsensitive);
-  auto lineUltNSU = split.filter("ultNSU=", Qt::CaseInsensitive);
-
-  if (lineMaxNSU.empty() or lineUltNSU.empty()) { throw RuntimeException("Não encontrou o campo 'maxNSU/ultNSU': " + evento); }
-
-  const QString maxNSU = lineMaxNSU.first().remove("maxNSU=", Qt::CaseInsensitive);
-  const QString ultNSU = lineUltNSU.first().remove("ultNSU=", Qt::CaseInsensitive);
+  const QString maxNSU = qApp->findTag(evento, "maxNSU=");
+  const QString ultNSU = qApp->findTag(evento, "ultNSU=");
 
   maximoNSU = maxNSU.toInt();
   ultimoNSU = ultNSU.toInt();
@@ -657,72 +638,16 @@ void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, cons
 }
 
 void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
-  const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
-
-  //----------------------------------------------------------
-
-  auto lineChave = split.filter("chDFe=", Qt::CaseInsensitive);
-
-  if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chDFe': " + evento); }
-
-  const QString chaveAcesso = lineChave.first().remove("chDFe=", Qt::CaseInsensitive);
+  const QString chaveAcesso = qApp->findTag(evento, "chDFe=");
   const QString numeroNFe = chaveAcesso.mid(25, 9);
-
-  //----------------------------------------------------------
-
-  auto lineCnpj = split.filter("CNPJCPF=", Qt::CaseInsensitive);
-
-  if (lineCnpj.empty()) { throw RuntimeException("Não encontrou o campo 'CNPJCPF': " + evento); }
-
-  const QString cnpjOrig = lineCnpj.first().remove("CNPJCPF=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineDataEmissao = split.filter("xNome=", Qt::CaseInsensitive);
-
-  if (lineDataEmissao.empty()) { throw RuntimeException("Não encontrou o campo 'xNome': " + evento); }
-
-  const QString dataEmissao = lineDataEmissao.first().remove("xNome=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineNome = split.filter("EmixNome=", Qt::CaseInsensitive);
-
-  if (lineNome.empty()) { throw RuntimeException("Não encontrou o campo 'EmixNome': " + evento); }
-
-  const QString nomeEmitente = lineNome.first().remove("EmixNome=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineValor = split.filter("vNF=", Qt::CaseInsensitive);
-
-  if (lineValor.empty()) { throw RuntimeException("Não encontrou o campo 'vNF': " + evento); }
-
-  const QString valor = lineValor.first().remove("vNF=", Qt::CaseInsensitive).replace(',', '.');
-
-  //----------------------------------------------------------
-
-  auto lineNSU = split.filter("NSU=", Qt::CaseInsensitive);
-
-  if (lineNSU.empty()) { throw RuntimeException("Não encontrou o campo 'NSU': " + evento); }
-
-  const QString nsu = lineNSU.first().remove("NSU=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineXML = split.filter("XML=", Qt::CaseInsensitive);
-
-  if (lineXML.empty()) { throw RuntimeException("Não encontrou o campo 'XML': " + evento); }
-
-  const QString xml = lineXML.first().remove("XML=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineSchema = split.filter("schema=", Qt::CaseInsensitive);
-
-  if (lineSchema.empty()) { throw RuntimeException("Não encontrou o campo 'schema': " + evento); }
-
-  const QString schemaEvento = lineSchema.first().remove("schema=", Qt::CaseInsensitive);
+  const QString cnpjOrig = qApp->findTag(evento, "CNPJCPF=");
+  const QString dataHoraEmissaoString = qApp->findTag(evento, "dhEmi=");
+  const QDateTime dataHoraEmissao = QDateTime::fromString(dataHoraEmissaoString, "dd/MM/yyyy hh:mm:ss");
+  const QString nomeEmitente = qApp->findTag(evento, "xNome=");
+  const QString valor = qApp->findTag(evento, "vNF=").replace(',', '.');
+  const QString nsu = qApp->findTag(evento, "NSU=");
+  const QString xml = qApp->findTag(evento, "XML=");
+  const QString schemaEvento = qApp->findTag(evento, "schema=");
 
   //----------------------------------------------------------
 
@@ -739,15 +664,16 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     const QString ciencia = (schemaEvento == "procNFe") ? "0" : "1";
 
     SqlQuery queryCadastrar;
-    queryCadastrar.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES "
-                           "(:numeroNFe, 'ENTRADA', :xml, :status, :emitente, :cnpjDest, :cnpjOrig, :chaveAcesso, :transportadora, :valor, :infCpl, :nsu, 'DESCONHECIDO', :ciencia)");
+    queryCadastrar.prepare(
+        "INSERT INTO nfe (numeroNFe, tipo, xml, status, dataHoraEmissao, emitente, cnpjOrig, cnpjDest, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES "
+        "(:numeroNFe, 'ENTRADA', :xml, :status, :dataHoraEmissao, :emitente, :cnpjOrig, :cnpjDest, :chaveAcesso, :transportadora, :valor, :infCpl, :nsu, 'DESCONHECIDO', :ciencia)");
     queryCadastrar.bindValue(":numeroNFe", numeroNFe);
     queryCadastrar.bindValue(":xml", xml);
     queryCadastrar.bindValue(":status", status);
-    queryCadastrar.bindValue(":dataHoraEmissao", dataEmissao);
+    queryCadastrar.bindValue(":dataHoraEmissao", dataHoraEmissao);
     queryCadastrar.bindValue(":emitente", nomeEmitente);
-    queryCadastrar.bindValue(":cnpjDest", cnpjDest);
     queryCadastrar.bindValue(":cnpjOrig", cnpjOrig);
+    queryCadastrar.bindValue(":cnpjDest", cnpjDest);
     queryCadastrar.bindValue(":chaveAcesso", chaveAcesso);
     queryCadastrar.bindValue(":transportadora", encontraTransportadora(xml));
     queryCadastrar.bindValue(":valor", valor);
@@ -767,7 +693,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     if (schemaEvento == "resNFe" or statusCadastrado == "AUTORIZADO") { return; }
 
     SqlQuery queryAtualizar;
-    queryAtualizar.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl, nsu = :nsu WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
+    queryAtualizar.prepare("UPDATE nfe SET xml = :xml, status = 'AUTORIZADO', transportadora = :transportadora, infCpl = :infCpl, nsu = :nsu WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
     queryAtualizar.bindValue(":xml", xml);
     queryAtualizar.bindValue(":transportadora", encontraTransportadora(xml));
     queryAtualizar.bindValue(":infCpl", encontraInfCpl(xml));
@@ -788,31 +714,9 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
 
   //----------------------------------------------------------
 
-  const QStringList split = evento.split("\r\n", Qt::SkipEmptyParts);
-
-  //----------------------------------------------------------
-
-  auto lineEvento = split.filter("xEvento=", Qt::CaseInsensitive);
-
-  if (lineEvento.empty()) { throw RuntimeException("Não encontrou o campo 'xEvento': " + evento); }
-
-  const QString eventoTipo = lineEvento.first().remove("xEvento=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineMotivo = split.filter("xMotivo=", Qt::CaseInsensitive);
-
-  if (lineMotivo.empty()) { throw RuntimeException("Não encontrou o campo 'xMotivo': " + evento); }
-
-  const QString motivo = lineMotivo.first().remove("xMotivo=", Qt::CaseInsensitive);
-
-  //----------------------------------------------------------
-
-  auto lineChave = split.filter("chDFe=", Qt::CaseInsensitive);
-
-  if (lineChave.empty()) { throw RuntimeException("Não encontrou o campo 'chNFe': " + evento); }
-
-  const QString chaveAcesso = lineChave.first().remove("chDFe=", Qt::CaseInsensitive);
+  const QString eventoTipo = qApp->findTag(evento, "xEvento=");
+  const QString motivo = qApp->findTag(evento, "xMotivo=");
+  const QString chaveAcesso = qApp->findTag(evento, "chDFe=");
 
   //----------------------------------------------------------
 

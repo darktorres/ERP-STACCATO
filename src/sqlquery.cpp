@@ -29,3 +29,5 @@ QVariant SqlQuery::value(const int i) const {
 
   return variant;
 }
+
+// TODO: reimplementar bindValue e avisar se o campo não for encontrado na query preparada

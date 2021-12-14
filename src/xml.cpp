@@ -6,9 +6,9 @@
 #include <QDebug>
 #include <QSqlError>
 
-XML::XML(const QString &fileContent, const Tipo tipo, QWidget *parent) : fileContent(fileContent), tipo(tipo), parent(parent) { montarArvore(); }
+XML::XML(const QString &fileContent_, const Tipo tipo_, QWidget *parent_) : fileContent(fileContent_), tipo(tipo_), parent(parent_) { montarArvore(); }
 
-XML::XML(const QString &fileContent) : XML(fileContent, XML::Tipo::Nulo, nullptr) {}
+XML::XML(const QString &fileContent_) : XML(fileContent_, XML::Tipo::Nulo, nullptr) {}
 
 void XML::montarArvore() {
   if (fileContent.isEmpty()) { throw RuntimeException("XML vazio!"); }
@@ -185,6 +185,9 @@ void XML::validar() {
 
 void XML::verificaCNPJ() {
   // TODO: parametrizar CNPJ
+  // usar raiz do primeiro cnpj da tabela loja?
+  // guardar raiz em User
+
   if (tipo == Tipo::Entrada and cnpjDest.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
   if (tipo == Tipo::Saida and cnpjOrig.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
 }
@@ -196,12 +199,12 @@ void XML::verificaValido() {
 void XML::verificaNCMs() {
   QStringList ncms;
 
-  for (const auto &produto : qAsConst(produtos)) {
+  for (const auto &produto_ : qAsConst(produtos)) {
     SqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "' LIMIT 1")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto_.ncm + "' LIMIT 1")) { throw RuntimeException("Erro buscando ncm: " + query.lastError().text()); }
 
-    if (not query.first()) { ncms << produto.ncm; }
+    if (not query.first()) { ncms << produto_.ncm; }
   }
 
   ncms.removeDuplicates();

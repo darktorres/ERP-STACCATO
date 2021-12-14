@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), idVenda(idVenda), tipo(tipo), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, const Tipo tipo_, QWidget *parent) : QDialog(parent), idVenda(idVenda_), tipo(tipo_), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -68,9 +68,9 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   ui->itemBoxEnderecoEntrega->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
 
-  if (idVenda.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
+  if (idVenda_.isEmpty()) { throw RuntimeException("Venda vazio!", this); }
 
-  setWindowTitle(windowTitle() + " - " + idVenda);
+  setWindowTitle(windowTitle() + " - " + idVenda_);
 
   ui->frameST->hide();
 

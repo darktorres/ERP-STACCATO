@@ -5,6 +5,8 @@
 #include "qsimpleupdater.h"
 #include "user.h"
 
+#include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QIcon>
 #include <QInputDialog>
@@ -12,6 +14,7 @@
 #include <QRegularExpression>
 #include <QSqlError>
 #include <QTimer>
+#include <math.h>
 
 RuntimeException::RuntimeException(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message, parent); }
 
@@ -367,6 +370,8 @@ void Application::updater() {
   if (hostname.isEmpty()) { return; }
 
   updaterOpen = true;
+
+  // TODO: abrir updater em um processo separado e fechar erp?
 
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });

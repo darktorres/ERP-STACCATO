@@ -6,9 +6,9 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-SqlTableModel::SqlTableModel(const int limit, QObject *parent) : QSqlTableModel(parent), limit(limit) {}
+SqlTableModel::SqlTableModel(const int limit_, QObject *parent) : QSqlTableModel(parent), limit(limit_) {}
 
-SqlTableModel::SqlTableModel(const int limit) : SqlTableModel(limit, nullptr) {}
+SqlTableModel::SqlTableModel(const int limit_) : SqlTableModel(limit_, nullptr) {}
 
 SqlTableModel::SqlTableModel() : SqlTableModel(0, nullptr) {}
 

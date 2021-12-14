@@ -52,6 +52,7 @@ void WidgetGalpaoPeso::updateChart() {
     const QDateTime xValue = model.data(row, "data").toDateTime();
     const qreal yValue = model.data(row, "kg").toReal();
 
+    // TODO: implicit conversion qint64 -> qreal
     series.append(xValue.toMSecsSinceEpoch(), yValue);
   }
 

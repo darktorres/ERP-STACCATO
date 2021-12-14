@@ -59,6 +59,8 @@ public:
   inline bool operator==(const CellRange &other) const { return top == other.top and bottom == other.bottom and left == other.left and right == other.right; }
   inline bool operator!=(const CellRange &other) const { return top != other.top or bottom != other.bottom or left != other.left or right != other.right; }
 
+  CellRange &operator=(const CellRange &other) = default;
+
 private:
   void init(const QString &range);
   int top, left, bottom, right;

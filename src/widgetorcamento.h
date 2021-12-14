@@ -15,7 +15,7 @@ class WidgetOrcamento final : public QWidget {
 
 public:
   explicit WidgetOrcamento(QWidget *parent);
-  ~WidgetOrcamento();
+  ~WidgetOrcamento() final;
 
   auto resetTables() -> void;
   auto updateTables() -> void;

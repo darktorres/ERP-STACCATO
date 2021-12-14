@@ -13,7 +13,7 @@ class XML_Viewer final : public QDialog {
 
 public:
   explicit XML_Viewer(const QString &content, QWidget *parent);
-  ~XML_Viewer();
+  ~XML_Viewer() final;
 
   auto on_pushButtonDanfe_clicked() -> void;
 

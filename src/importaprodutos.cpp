@@ -16,7 +16,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::ImportaProdutos) {
+ImportaProdutos::ImportaProdutos(const Tipo tipo_, QWidget *parent) : QDialog(parent), tipo(tipo_), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -690,7 +690,7 @@ void ImportaProdutos::atualizaCamposProduto(const int row) {
     modelProduto.setData(row, "quantCaixaUpd", white);
   }
 
-  if (modelProduto.data(row, "markup").toDouble() != produto.markup) {
+  if (not qFuzzyCompare(modelProduto.data(row, "markup").toDouble(), produto.markup)) {
     modelProduto.setData(row, "markup", produto.markup);
     modelProduto.setData(row, "markupUpd", yellow);
     changed = true;

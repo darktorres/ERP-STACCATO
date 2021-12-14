@@ -13,7 +13,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-Estoque::Estoque(const QString &idEstoque, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
+Estoque::Estoque(const QString &idEstoque_, QWidget *parent) : QDialog(parent), idEstoque(idEstoque_), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -26,7 +26,7 @@ Estoque::Estoque(const QString &idEstoque, QWidget *parent) : QDialog(parent), i
 
   if (not User::isAdministrativo()) { ui->pushButtonExibirNfe->hide(); }
 
-  if (idEstoque.isEmpty()) { throw RuntimeException("Estoque não encontrado!", this); }
+  if (idEstoque_.isEmpty()) { throw RuntimeException("Estoque não encontrado!", this); }
 
   setConnections();
 }

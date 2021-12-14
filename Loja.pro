@@ -82,25 +82,43 @@ contains(CONFIG, deploy) {
 }
 
 *-g++ {
+    QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic
-    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
+#   QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 }
 
 *-clang {
-    QMAKE_CXXFLAGS *= -Weverything
-    QMAKE_CXXFLAGS *= -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-documentation-unknown-command -Wno-redundant-parens
-    QMAKE_CXXFLAGS *= -Wno-duplicate-enum -Wno-padded -Wno-sign-conversion -Wno-covered-switch-default -Wno-shorten-64-to-32 -Wno-extra-semi-stmt
-    QMAKE_CXXFLAGS *= -Wno-compound-token-split-by-space -Wno-inconsistent-missing-destructor-override -Wno-suggest-override -Wno-float-conversion
-    QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused -Wno-suggest-destructor-override -Wno-implicit-int-float-conversion -Wno-enum-enum-conversion
-    QMAKE_CXXFLAGS *= -Wno-shadow-field-in-constructor -Wno-extra-semi -Wno-implicit-int-conversion -Wno-exit-time-destructors
-    QMAKE_CXXFLAGS *= -Wno-global-constructors -Wno-weak-vtables -Wno-missing-variable-declarations -Wno-shadow-field -Wno-zero-as-null-pointer-constant
-    QMAKE_CXXFLAGS *= -Wno-header-hygiene -Wno-documentation -Wno-switch-enum -Wno-undefined-reinterpret-cast -Wno-non-virtual-dtor
-    QMAKE_CXXFLAGS *= -Wno-comma -Wno-old-style-cast -Wno-shadow -Wno-implicit-fallthrough -Wno-missing-prototypes -Wno-format-nonliteral
-    QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor -Wno-reserved-identifier
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include -isystem /opt/Qt/5.15.2/gcc_64/include/QtCore -isystem /opt/Qt/5.15.2/gcc_64/include/QtGui -isystem /opt/Qt/5.15.2/gcc_64/include/QtGui/5.15.2/QtGui/private
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include/QtPrintSupport -isystem /opt/Qt/5.15.2/gcc_64/include/QtWidgets -isystem /opt/Qt/5.15.2/gcc_64/include/QtSql -isystem /opt/Qt/5.15.2/gcc_64/include/QtNetwork
+    QMAKE_CXXFLAGS += -isystem /opt/Qt/5.15.2/gcc_64/include/QtCharts -isystem /opt/Qt/5.15.2/gcc_64/include/QtXml
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include -isystem /opt/Qt/6.2.2/gcc_64/include/QtCore -isystem /opt/Qt/6.2.2/gcc_64/include/QtGui -isystem /opt/Qt/6.2.2/gcc_64/include/QtGui/6.2.2/QtGui/private
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include/QtPrintSupport -isystem /opt/Qt/6.2.2/gcc_64/include/QtWidgets -isystem /opt/Qt/6.2.2/gcc_64/include/QtSql -isystem /opt/Qt/6.2.2/gcc_64/include/QtNetwork
+#   QMAKE_CXXFLAGS += -isystem /opt/Qt/6.2.2/gcc_64/include/QtCharts -isystem /opt/Qt/6.2.2/gcc_64/include/QtXml
+
+    QMAKE_CXXFLAGS *= -Wno-deprecated-enum-enum-conversion
+
+#   QMAKE_CXXFLAGS *= -Weverything
+#   QMAKE_CXXFLAGS *= -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-pre-c++14-compat
+#   QMAKE_CXXFLAGS *= -Wno-padded
+#   QMAKE_CXXFLAGS *= -Wno-extra-semi-stmt
+#   QMAKE_CXXFLAGS *= -Wno-suggest-destructor-override
+#   QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused
+#   QMAKE_CXXFLAGS *= -Wno-exit-time-destructors -Wno-global-constructors
+#   QMAKE_CXXFLAGS *= -Wno-documentation-unknown-command
+
+#   QMAKE_CXXFLAGS *= -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-documentation-unknown-command -Wno-redundant-parens
+#   QMAKE_CXXFLAGS *= -Wno-duplicate-enum -Wno-padded -Wno-sign-conversion -Wno-covered-switch-default -Wno-shorten-64-to-32 -Wno-extra-semi-stmt
+#   QMAKE_CXXFLAGS *= -Wno-compound-token-split-by-space -Wno-inconsistent-missing-destructor-override -Wno-suggest-override -Wno-float-conversion
+#   QMAKE_CXXFLAGS *= -Wno-used-but-marked-unused -Wno-suggest-destructor-override -Wno-implicit-int-float-conversion -Wno-enum-enum-conversion
+#   QMAKE_CXXFLAGS *= -Wno-shadow-field-in-constructor -Wno-extra-semi -Wno-implicit-int-conversion -Wno-exit-time-destructors
+#   QMAKE_CXXFLAGS *= -Wno-global-constructors -Wno-weak-vtables -Wno-missing-variable-declarations -Wno-shadow-field -Wno-zero-as-null-pointer-constant
+#   QMAKE_CXXFLAGS *= -Wno-header-hygiene -Wno-documentation -Wno-switch-enum -Wno-undefined-reinterpret-cast -Wno-non-virtual-dtor
+#   QMAKE_CXXFLAGS *= -Wno-comma -Wno-old-style-cast -Wno-shadow -Wno-implicit-fallthrough -Wno-missing-prototypes -Wno-format-nonliteral
+#   QMAKE_CXXFLAGS *= -Wno-float-equal -Wno-unreachable-code-break -Wno-undef -Wno-missing-noreturn -Wno-deprecated-copy-dtor -Wno-reserved-identifier
 }
 
 win32-msvc {
-   QMAKE_CXXFLAGS += /permissive-
+    QMAKE_CXXFLAGS += /permissive-
 }
 
 linux-g++ {

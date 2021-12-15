@@ -394,8 +394,6 @@ void WidgetPagamentos::setFretePagoLoja() {
   //  ui->pushButtonFreteLoja->setDisabled(true);
 }
 
-void WidgetPagamentos::setIdOrcamento(const QString &newIdOrcamento) { idOrcamento = newIdOrcamento; }
-
 void WidgetPagamentos::calcularRestante() {
   if (pagamentos.empty()) { return; }
 
@@ -553,6 +551,8 @@ void WidgetPagamentos::verifyFields() {
   }
 }
 
+void WidgetPagamentos::setIdLoja(const int newIdLoja) { idLoja = QString::number(newIdLoja); }
+
 void WidgetPagamentos::buscarTiposPgtsCompra(QComboBox *comboBoxPgt) {
   SqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
@@ -569,11 +569,11 @@ void WidgetPagamentos::buscarTiposPgtsCompra(QComboBox *comboBoxPgt) {
 }
 
 void WidgetPagamentos::buscarTiposPgtsVenda(QComboBox *comboBoxPgt) {
-  if (idOrcamento.isEmpty()) { throw RuntimeError("Orçamento vazio!"); }
+  if (idLoja.isEmpty()) { throw RuntimeException("idLoja vazio!"); }
 
   SqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE apenasRepresentacao = :apenasRepresentacao AND idLoja = (SELECT idLoja FROM orcamento WHERE idOrcamento = :idOrcamento)");
-  queryPag.bindValue(":idOrcamento", idOrcamento);
+  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE apenasRepresentacao = :apenasRepresentacao AND idLoja = :idLoja");
+  queryPag.bindValue(":idLoja", idLoja);
   queryPag.bindValue(":apenasRepresentacao", representacao);
 
   if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }

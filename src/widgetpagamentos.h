@@ -47,7 +47,7 @@ public:
   auto setCredito(const double creditoCliente) -> void;
   auto setFrete(const double newFrete) -> void;
   auto setFretePagoLoja() -> void;
-  auto setIdOrcamento(const QString &newIdOrcamento) -> void;
+  auto setIdLoja(const int newIdLoja) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setST(const double newSt) -> void;
   auto setTipo(const Tipo novoTipo) -> void;
@@ -70,7 +70,7 @@ private:
   double frete = 0;
   double st = 0;
   double total = 0;
-  QString idOrcamento;
+  QString idLoja;
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetPagamentos *ui;
   // methods

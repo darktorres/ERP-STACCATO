@@ -371,7 +371,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
-  ui->widgetPgts->setIdOrcamento(ui->lineEditIdOrcamento->text());
+  ui->widgetPgts->setIdLoja(idLoja);
   ui->widgetPgts->setRepresentacao(representacao);
   ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
   ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
@@ -625,11 +625,6 @@ bool Venda::viewRegister() {
       ui->labelConsultor->show();
       ui->itemBoxConsultor->show();
     }
-
-    ui->widgetPgts->setIdOrcamento(ui->lineEditIdOrcamento->text());
-    ui->widgetPgts->setRepresentacao(representacao);
-    ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
 
     calcularPesoTotal();
 
@@ -1262,6 +1257,13 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
 }
 
 void Venda::on_pushButtonCorrigirFluxo_clicked() {
+  ui->widgetPgts->setIdLoja(idLoja);
+  ui->widgetPgts->setRepresentacao(representacao);
+  ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
+  ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+
+  // -------------------------------------------------------------------------
+
   SqlQuery queryPag;
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));

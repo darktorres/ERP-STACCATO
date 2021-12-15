@@ -569,3 +569,5 @@ void SearchDialog::setupSearchWidgets() {
     frameLayout->addWidget(lineEdit);
   }
 }
+
+// TODO: colocar um checkbox para indicar que a busca deve ser exata, para quando o usuario sabe exatamente o valor sendo procurado e não deseja valores resultados próximos

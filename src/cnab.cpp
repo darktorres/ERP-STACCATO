@@ -526,7 +526,6 @@ void CNAB::retornoGareItau240(const QString &filePath) {
   for (auto const &line : qAsConst(lines)) {
     // ocorrencias do header lote
     if (line.at(7) == '1') {
-
       QString ocorrencia1 = decodeCodeItau(line.mid(230, 2));
       if (not ocorrencia1.isEmpty()) { ocorrencia1.prepend("    -"); }
       QString ocorrencia2 = decodeCodeItau(line.mid(232, 2));
@@ -545,7 +544,6 @@ void CNAB::retornoGareItau240(const QString &filePath) {
 
     // ocorrencias do segmento N
     if (line.at(13) == 'N') {
-
       QString cnpj = line.mid(195, 8);
       QString nfe = line.mid(206, 9);
 
@@ -583,7 +581,6 @@ void CNAB::retornoGareItau240(const QString &filePath) {
 
     // ocorrencias do trailer lote
     if (line.at(7) == '5') {
-
       QString ocorrencia1 = decodeCodeItau(line.mid(230, 2));
       if (not ocorrencia1.isEmpty()) { ocorrencia1.prepend("    -"); }
       QString ocorrencia2 = decodeCodeItau(line.mid(232, 2));

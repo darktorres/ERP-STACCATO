@@ -3,6 +3,7 @@
 #include "application.h"
 #include "user.h"
 
+#include <QClipboard>
 #include <QDebug>
 #include <QHeaderView>
 #include <QMenu>
@@ -156,4 +157,63 @@ void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, c
   painter->restore();
 
   painter->drawLine(0, options.rect.bottom(), options.rect.width(), options.rect.bottom());
+}
+
+void TreeView::keyPressEvent(QKeyEvent *event) {
+  if (event->matches(QKeySequence::Copy)) {
+    QString headers;
+
+    // dont copy headers if in single cell mode
+    if (selectionBehavior() == SelectRows) {
+      for (int col = 0; col < model()->columnCount(); ++col) {
+        if (isColumnHidden(col)) { continue; }
+
+        headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
+        headers += '\t';
+      }
+
+      headers += '\n';
+    }
+
+    //---------------------------------------
+
+    QString text;
+
+    if (selectionBehavior() == SelectItems) {
+      const QModelIndexList selectedCell = selectionModel()->selectedIndexes();
+
+      QVariant currentText = selectedCell.first().data();
+
+      if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+      if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+
+      text += currentText.toString();
+    }
+
+    if (selectionBehavior() == SelectRows) {
+      const QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+      for (const auto indexRow : selectedRows) {
+        for (int col = 0; col < model()->columnCount(); ++col) {
+          if (isColumnHidden(col)) { continue; }
+
+          QVariant currentText = indexRow.siblingAtColumn(col).data();
+
+          if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+          if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+
+          text += currentText.toString();
+          text += '\t';
+        }
+
+        text += '\n';
+      }
+    }
+
+    QApplication::clipboard()->setText(headers + text);
+
+    return;
+  }
+
+  QTreeView::keyPressEvent(event);
 }

@@ -19,6 +19,7 @@ public:
 protected:
   auto drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const -> void final;
   auto mousePressEvent(QMouseEvent *event) -> void final;
+  auto keyPressEvent(QKeyEvent *event) -> void final;
 
 private:
   // attributes

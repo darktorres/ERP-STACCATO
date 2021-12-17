@@ -510,7 +510,7 @@ void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
 
   //  setTreeView();
 
-  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("ordemCompra IN (" + ordemCompra + ")  AND desativado = FALSE"); }
+  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("idCompra IN (SELECT idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra + ") AND desativado = FALSE"); }
 
   modelFluxoCaixa.select();
 

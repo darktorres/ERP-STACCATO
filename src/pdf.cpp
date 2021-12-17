@@ -144,7 +144,7 @@ void PDF::gerarPdf() {
 
   if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report.lastError()); }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName, parent); }
 
   qApp->enqueueInformation("Arquivo salvo como " + fileName, parent);
 #else

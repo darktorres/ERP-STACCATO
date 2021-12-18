@@ -11,9 +11,9 @@
 TARGET = Loja
 TEMPLATE = app
 
-include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
-include(QSimpleUpdater/qsimpleupdater.pri)
-versionAtMost(QT_VERSION, 5.15.2) { include(LimeReport-1.5.68/limereport/limereport.pri) }
+include(3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include(3rdparty/QSimpleUpdater/qsimpleupdater.pri)
+versionAtMost(QT_VERSION, 5.15.2) { include(3rdparty/LimeReport-1.5.68/limereport/limereport.pri) }
 
 QT *= core gui sql network xml charts widgets
 
@@ -37,17 +37,17 @@ win32 {
 
 win32-msvc {
     contains(QT_ARCH, i386) {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto
+        LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win32 -llibcrypto
     } else {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto
+        LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win64 -llibcrypto
     }
 }
 
 win32-g++ {
     contains(QT_ARCH, i386) {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+        LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win32 -llibcrypto-1_1
     } else {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win64 -llibcrypto-1_1-x64
+        LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win64 -llibcrypto-1_1-x64
     }
 }
 

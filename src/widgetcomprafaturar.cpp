@@ -30,6 +30,8 @@ void WidgetCompraFaturar::setupTables() {
 
   ui->tableResumo->setModel(&modelResumo);
 
+  ui->tableResumo->hideColumn("representacao");
+
   //---------------------------------------------------------------------------
 
   modelViewFaturamento.setTable("view_faturamento");
@@ -124,7 +126,17 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const QDate dataFaturamento = inputDlg.getDate();
 
-  const bool pularNota = (ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER STACCATO");
+  SqlQuery query;
+
+  if (not query.exec("SELECT representacao FROM fornecedor WHERE razaoSocial = '" + fornecedores.first() + "'")) {
+    throw RuntimeException("Erro verificando se fornecedor é representação: " + query.lastError().text());
+  }
+
+  if (not query.first()) { throw RuntimeException("Fornecedor não encontrado!"); }
+
+  const bool isRepresentacao = query.value("representacao").toBool();
+
+  const bool pularNota = (isRepresentacao or fornecedores.first() == "ATELIER STACCATO");
 
   if (pularNota) {
     qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota");
@@ -217,11 +229,23 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetCompraFaturar::on_tableResumo_clicked(const QModelIndex &index) {
-  const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+  if (not index.isValid()) {
+    modelViewFaturamento.setFilter("");
+    ui->checkBoxRepresentacao->setChecked(false);
+    return;
+  }
 
-  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+  const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
+
+  const QString filtro = "fornecedor = '" + fornecedor + "'";
 
   modelViewFaturamento.setFilter(filtro);
+
+  // --------------------------------------------
+
+  const bool isRepresentacao = modelResumo.data(index.row(), "representacao").toBool();
+
+  ui->checkBoxRepresentacao->setChecked(isRepresentacao);
 }
 
 void WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked() {

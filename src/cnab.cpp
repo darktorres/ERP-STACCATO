@@ -505,6 +505,8 @@ QString CNAB::remessaPagamentoItau240(const QVector<CNAB::Pagamento> &pagamentos
 
   qApp->enqueueInformation("Arquivo gerado com sucesso: " + path, parent);
 
+  if (query2.lastInsertId().isNull()) { throw RuntimeException("Erro lastInsertId"); }
+
   return query2.lastInsertId().toString();
 }
 

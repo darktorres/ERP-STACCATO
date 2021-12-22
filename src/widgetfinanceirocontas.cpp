@@ -531,7 +531,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   }
 
   CNAB cnab(this);
-  QString idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
+  const QString idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
 
   QStringList ids;
 

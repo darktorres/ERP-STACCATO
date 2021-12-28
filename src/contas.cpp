@@ -140,21 +140,26 @@ void Contas::preencher(const QModelIndex &index) {
 
         // -------------------------------------------------------------------------
 
-        const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
+        // TODO: substituir esse código por uma coluna 'idRelacionado' no banco de dados
+        if (tipoPagamento.contains("DÉBITO") or tipoPagamento.contains("CRÉDITO")) {
+          const QString parcela = modelPendentes.data(row, "parcela").toString();
 
-        for (const auto &rowMatch : list) {
-          if (modelPendentes.data(rowMatch, "status").toString() == "CANCELADO") { continue; }
+          const auto list = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
 
-          if (queryConta.first()) {
-            if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", queryConta.value("idConta")); }
+          for (const auto &rowMatch : list) {
+            if (modelPendentes.data(rowMatch, "status").toString() == "CANCELADO") { continue; }
+
+            if (queryConta.first()) {
+              if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) { modelPendentes.setData(rowMatch, "idConta", queryConta.value("idConta")); }
+            }
+
+            modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"));
+            modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+            modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"));
+            modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"));
+            modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"));
+            modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"));
           }
-
-          modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"));
-          modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
-          modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"));
-          modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"));
-          modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"));
-          modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"));
         }
       }
 

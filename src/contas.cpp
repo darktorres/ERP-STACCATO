@@ -116,8 +116,10 @@ void Contas::preencher(const QModelIndex &index) {
       //        }
       //      }
 
+      const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
+      const QString parcela = modelPendentes.data(row, "parcela").toString();
+
       if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
-        const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
         const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
         SqlQuery queryConta;
@@ -142,8 +144,6 @@ void Contas::preencher(const QModelIndex &index) {
 
         // TODO: substituir esse código por uma coluna 'idRelacionado' no banco de dados
         if (tipoPagamento.contains("DÉBITO") or tipoPagamento.contains("CRÉDITO")) {
-          const QString parcela = modelPendentes.data(row, "parcela").toString();
-
           const auto list = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
 
           for (const auto &rowMatch : list) {
@@ -167,9 +167,12 @@ void Contas::preencher(const QModelIndex &index) {
       if (index.column() == ui->tablePendentes->columnIndex("idConta")) {
         if (index.data().toInt() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
 
-        const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
+        // TODO: substituir esse código por uma coluna 'idRelacionado' no banco de dados
+        if (tipoPagamento.contains("DÉBITO") or tipoPagamento.contains("CRÉDITO")) {
+          const auto list = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
 
-        for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
+          for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
+        }
       }
 
       if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {

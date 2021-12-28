@@ -71,7 +71,8 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
 
 QSimpleUpdater::~QSimpleUpdater() {
   delete m_progressDialog;
-  delete m_downloadDialog;
+  // TODO: this crashes on exit if updating while the application is open (not on LoginDialog)
+  //  delete m_downloadDialog;
 }
 
 /*!

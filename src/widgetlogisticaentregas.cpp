@@ -97,6 +97,7 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCarga.setTable("view_calendario_carga");
 
   modelCarga.setHeaderData("dataPrevEnt", "Agendado");
+  modelCarga.setHeaderData("modelo", "Veículo");
   modelCarga.setHeaderData("numeroNFe", "NFe");
   modelCarga.setHeaderData("idVenda", "Venda");
   modelCarga.setHeaderData("status", "Status");

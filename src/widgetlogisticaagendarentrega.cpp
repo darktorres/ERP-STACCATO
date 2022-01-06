@@ -931,8 +931,6 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
-  // TODO: bloquear se já houver nfe emitida
-
   if (not ui->tableProdutos->model()) { return; }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
@@ -940,7 +938,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) {
-    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui nota futura!", this); }
+    if (not modelProdutos.data(index.row(), "idNFeSaida").isNull()) { throw RuntimeError("Produto já possui NFe!", this); }
+    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui NFe futura!", this); }
   }
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();

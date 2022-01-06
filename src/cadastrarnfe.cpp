@@ -28,9 +28,9 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, co
 
   if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
+  //  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
-  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  //  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr"));
@@ -1680,9 +1680,10 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
   const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
-  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
+  //  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
-  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
+  //  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
+  acbrRemoto.enviarEmail(emailContabilidade, "", assunto, filePath);
 
   // TODO: enviar email separado para cliente
 }

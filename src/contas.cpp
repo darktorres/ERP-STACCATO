@@ -485,3 +485,4 @@ void Contas::on_checkBoxMostrarCancelados_toggled(const bool checked) {
 // FIXME: quando cancelar uma transferencia cancelar a outra ponta tambem
 // TODO: pagamentos que são agendados para o final de semana devem pular para segunda
 // TODO: parametrizar as regras de cada operadora de cartao e cadastrar uma forma de pagamento para cada
+// TODO: avisar se a data do pagamento for no passado ou muito no futuro

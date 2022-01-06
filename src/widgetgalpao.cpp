@@ -1,8 +1,13 @@
 #include "widgetgalpao.h"
 #include "ui_widgetgalpao.h"
 
+#if __has_include("lrreportengine.h")
+#include "lrreportengine.h"
+#endif
+
 #include "acbrlib.h"
 #include "application.h"
+#include "file.h"
 #include "followup.h"
 #include "logindialog.h"
 #include "sql.h"
@@ -11,6 +16,8 @@
 #include "venda.h"
 
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDir>
 #include <QGraphicsProxyWidget>
 #include <QSqlError>
 
@@ -38,6 +45,7 @@ void WidgetGalpao::setConnections() {
   connect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged, connectionType);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonImprimir_clicked, connectionType);
   connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
@@ -59,6 +67,7 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->lineEditNomePallet, &QLineEdit::textChanged, this, &WidgetGalpao::on_lineEditNomePallet_textChanged);
   disconnect(ui->pushButtonBuscar, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonBuscar_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonFollowup_clicked);
+  disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonImprimir_clicked);
   disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
@@ -144,6 +153,12 @@ void WidgetGalpao::setupTables() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGalpao::on_tableTranspAgend_selectionChanged, connectionType);
+
+  //----------------------
+
+  modelPallet.setQuery("");
+
+  ui->tablePallet->setModel(&modelPallet);
 }
 
 void WidgetGalpao::carregarPallets() {
@@ -419,6 +434,7 @@ void WidgetGalpao::selectBloco(PalletItem *const palletPtr) {
     modelPallet.setHeaderData("tipo", "Tipo");
     modelPallet.setHeaderData("caixas", "Cx.");
     modelPallet.setHeaderData("descricao", "Produto");
+    modelPallet.setHeaderData("formComercial", "Formato");
     modelPallet.setHeaderData("codComercial", "Cód. Com.");
     modelPallet.setHeaderData("numeroNFe", "NFe");
     modelPallet.setHeaderData("lote", "Lote");
@@ -636,6 +652,62 @@ void WidgetGalpao::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetGalpao::on_pushButtonImprimir_clicked() {
+#if __has_include("lrreportengine.h")
+  const auto selection = ui->tablePallet->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+
+  // ------------------------------------------------------
+
+  const int row = selection.first().row();
+
+  // TODO: usar um foreach para imprimir varios pallets de uma vez?
+
+  LimeReport::ReportEngine report;
+  auto *dataManager = report.dataManager();
+
+  const QString modelo = QDir::currentPath() + "/modelos/pallet.lrxml";
+
+  if (not report.loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!"); }
+
+  // set idVenda
+
+  QString idVenda = modelPallet.data(row, "idVenda").toString();
+
+  if (idVenda.isEmpty()) { idVenda = "EST. LOJA"; }
+
+  dataManager->setReportVariable("idVenda", idVenda);
+
+  // set produtos
+
+  const QString produto = modelPallet.data(row, "descricao").toString() + " " + modelPallet.data(row, "formComercial").toString();
+
+  dataManager->setReportVariable("produto", produto);
+  dataManager->setReportVariable("caixas", modelPallet.data(row, "caixas"));
+  dataManager->setReportVariable("nfe", modelPallet.data(row, "numeroNFe").toInt());
+
+  // TODO: falta colocar a quantidade total do produto que veio na NFe
+
+  // ------------------------------------------------------
+
+  const QString fileName = QDir::currentPath() + "/pallet.pdf";
+
+  File file(fileName);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+
+  file.close();
+
+  if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report.lastError()); }
+
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
+
+#else
+  qApp->enqueueWarning("LimeReport desativado!");
+#endif
 }
 
 // TODO: zoom por touch (e zoom por slider?)

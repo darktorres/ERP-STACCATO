@@ -430,35 +430,23 @@ void WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString header = modelEstoque.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Estoque") {
-    auto *estoque = new Estoque(modelEstoque.data(index.row(), "idEstoque").toString(), this);
-    estoque->setAttribute(Qt::WA_DeleteOnClose);
-    estoque->show();
-  }
+  if (header == "Estoque") { return qApp->abrirEstoque(modelEstoque.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { ACBrLib::gerarDanfe(modelEstoque.data(index.row(), "idNFe").toInt()); }
+  if (header == "NFe") { return qApp->abrirNFe(modelEstoque.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
-    QStringList ids = modelEstoque.data(index.row(), "idVenda").toString().split(", ");
+    const QStringList ids = modelEstoque.data(index.row(), "idVenda").toString().split(", ");
 
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
+    for (const auto &id : ids) { qApp->abrirVenda(id); }
+
+    return;
   }
 
-  if (header == "OC") {
-    auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, this);
-    input->setAttribute(Qt::WA_DeleteOnClose);
-    input->setFilter(modelEstoque.data(index.row(), "idCompra").toString());
-
-    input->show();
-  }
+  if (header == "OC") { return qApp->abrirCompra(modelEstoque.data(index.row(), "ordemCompra")); }
 }
 
-// TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de
-// tranferencia
+// TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de tranferencia

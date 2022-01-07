@@ -33,6 +33,7 @@ private:
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_pushButtonGerarNFe_clicked() -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

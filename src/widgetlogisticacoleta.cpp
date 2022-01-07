@@ -290,32 +290,21 @@ void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString header = modelViewColeta.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Estoque") {
-    auto *estoque = new Estoque(modelViewColeta.data(index.row(), "idEstoque").toString(), this);
-    estoque->setAttribute(Qt::WA_DeleteOnClose);
-    estoque->show();
-  }
+  if (header == "Estoque") { return qApp->abrirEstoque(modelViewColeta.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { ACBrLib::gerarDanfe(modelViewColeta.data(index.row(), "idNFe").toInt()); }
+  if (header == "NFe") { return qApp->abrirNFe(modelViewColeta.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
     QStringList ids = modelViewColeta.data(index.row(), "idVenda").toString().split(", ");
 
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
+    for (const auto &id : ids) { qApp->abrirVenda(id); }
+
+    return;
   }
 
-  if (header == "OC") {
-    auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, this);
-    input->setAttribute(Qt::WA_DeleteOnClose);
-    input->setFilter(modelViewColeta.data(index.row(), "idCompra").toString());
-
-    input->show();
-  }
+  if (header == "OC") { return qApp->abrirCompra(modelViewColeta.data(index.row(), "ordemCompra")); }
 }

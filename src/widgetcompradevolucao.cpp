@@ -246,4 +246,5 @@ void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
   followup->show();
 }
 
-// TODO; colocar busca
+// TODO: colocar busca
+// TODO: ao devolver produto para fornecedor a linha na tabela de compra continua o fluxo

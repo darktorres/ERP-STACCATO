@@ -615,30 +615,26 @@ void WidgetGalpao::on_comboBoxPalletAtual_currentTextChanged() {
 }
 
 void WidgetGalpao::on_tableTranspAgend_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString header = modelTranspAgend.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Venda") {
-    auto *venda = new Venda(this);
-    venda->setAttribute(Qt::WA_DeleteOnClose);
-    venda->viewRegisterById(modelTranspAgend.data(index.row(), "idVenda"));
-    venda->show();
-  }
+  if (header == "Venda") { return qApp->abrirVenda(modelTranspAgend.data(index.row(), "idVenda")); }
 }
 
 void WidgetGalpao::on_tablePallet_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString header = modelPallet.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "NFe") { ACBrLib::gerarDanfe(modelPallet.data(index.row(), "idNFe").toInt()); }
+  if (header == "NFe") { return qApp->abrirNFe(modelPallet.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
-    QStringList ids = modelPallet.data(index.row(), "idVenda").toString().split(", ");
+    const QStringList ids = modelPallet.data(index.row(), "idVenda").toString().split(", ");
 
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
+    for (const auto &id : ids) { qApp->abrirVenda(id); }
+
+    return;
   }
 }
 

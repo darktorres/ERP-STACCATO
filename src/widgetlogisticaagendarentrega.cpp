@@ -1,15 +1,18 @@
 #include "widgetlogisticaagendarentrega.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 
+#include "acbrlib.h"
 #include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
+#include "estoque.h"
 #include "file.h"
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
 #include "sql.h"
 #include "user.h"
+#include "venda.h"
 #include "xml.h"
 
 #include <QFileDialog>
@@ -207,6 +210,9 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked, connectionType);
+  connect(ui->tableTranspAgend, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAgend_doubleClicked, connectionType);
+  connect(ui->tableTranspAtual, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked, connectionType);
   connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked, connectionType);
   connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked, connectionType);
 }
@@ -247,6 +253,9 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked);
+  disconnect(ui->tableTranspAgend, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAgend_doubleClicked);
+  disconnect(ui->tableTranspAtual, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked);
   disconnect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
   disconnect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
 }
@@ -917,17 +926,41 @@ void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
 void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  if (index.column() == modelVendas.record().indexOf("novoPrazoEntrega")) {
-    const auto list = ui->tableVendas->selectionModel()->selectedRows();
+  const QString header = modelVendas.headerData(index.column(), Qt::Horizontal).toString();
 
-    if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (header == "Venda") { return qApp->abrirVenda(modelVendas.data(index.row(), "idVenda")); }
+}
 
-    const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
+void WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
 
-    auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
-    followup->setAttribute(Qt::WA_DeleteOnClose);
-    followup->show();
-  }
+  const QString header = modelProdutos.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelProdutos.data(index.row(), "idVenda")); }
+
+  if (header == "NFe") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeSaida")); }
+
+  if (header == "NFe Futura") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeFutura")); }
+
+  if (header == "Estoque") { return qApp->abrirEstoque(modelProdutos.data(index.row(), "idEstoque")); }
+}
+
+void WidgetLogisticaAgendarEntrega::on_tableTranspAgend_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelTranspAgend.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Estoque") { return qApp->abrirEstoque(modelTranspAgend.data(index.row(), "idEstoque")); }
+
+  if (header == "Venda") { return qApp->abrirVenda(modelTranspAgend.data(index.row(), "idVenda")); }
+}
+
+void WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelTranspAtual.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelTranspAtual.data(index.row(), "idVenda").toString()); }
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {

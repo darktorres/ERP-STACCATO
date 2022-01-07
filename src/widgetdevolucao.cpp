@@ -59,6 +59,7 @@ void WidgetDevolucao::setConnections() {
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked, connectionType);
+  connect(ui->table, &QTableView::doubleClicked, this, &WidgetDevolucao::on_table_doubleClicked, connectionType);
 }
 
 void WidgetDevolucao::unsetConnections() {
@@ -66,6 +67,7 @@ void WidgetDevolucao::unsetConnections() {
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro);
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro);
   disconnect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked);
+  disconnect(ui->table, &QTableView::doubleClicked, this, &WidgetDevolucao::on_table_doubleClicked);
 }
 
 void WidgetDevolucao::setupTables() {
@@ -158,6 +160,14 @@ void WidgetDevolucao::ajustarGroupBoxStatus() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetDevolucao::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = model.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(model.data(index.row(), "idVenda")); }
 }
 
 // TODO: renomear classe para WidgetLogisticaDevolucao

@@ -23,7 +23,7 @@ public:
   };
   Q_ENUM(FieldColors)
 
-  explicit Estoque(const QString &idEstoque, QWidget *parent);
+  explicit Estoque(const QVariant &idEstoque, QWidget *parent);
   ~Estoque();
 
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> void;

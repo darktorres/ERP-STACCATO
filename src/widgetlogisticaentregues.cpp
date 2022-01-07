@@ -25,6 +25,8 @@ void WidgetLogisticaEntregues::setConnections() {
   connect(ui->radioButtonParcialEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->radioButtonSemEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->radioButtonTotalEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
+  connect(ui->tableProdutos, &QTableView::doubleClicked, this, &WidgetLogisticaEntregues::on_tableProdutos_doubleClicked, connectionType);
+  connect(ui->tableVendas, &QTableView::doubleClicked, this, &WidgetLogisticaEntregues::on_tableVendas_doubleClicked, connectionType);
   connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaEntregues::on_tableVendas_clicked, connectionType);
 }
 
@@ -184,6 +186,22 @@ void WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
 
     if (not query3.exec()) { throw RuntimeException("Erro atualizando pedido_fornecedor: " + query3.lastError().text()); }
   }
+}
+
+void WidgetLogisticaEntregues::on_tableVendas_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelVendas.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelVendas.data(index.row(), "idVenda")); }
+}
+
+void WidgetLogisticaEntregues::on_tableProdutos_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelProdutos.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelProdutos.data(index.row(), "idVenda")); }
 }
 
 // TODO: 0mostrar quem entregou/recebeu nos produtos

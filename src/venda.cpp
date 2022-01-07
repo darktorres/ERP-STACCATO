@@ -1463,12 +1463,18 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
 void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (not index.parent().isValid()) { return; }
-  if (not User::isAdmin() and not User::isAdministrativo()) { return; }
 
-  // TODO: se for vendedor abrir a NFe de saida
+  // ---------------------------------------------------------------
 
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);
+
+  if (User::isVendedorOrEspecial()) { return qApp->abrirNFe(modelItem2.data(row, "idNFeSaida")); }
+
+  if (not User::isAdmin() and not User::isAdministrativo()) { return; }
+
+  // ---------------------------------------------------------------
+
   const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
 
   QSqlQuery query;

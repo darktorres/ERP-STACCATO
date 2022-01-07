@@ -57,6 +57,9 @@ private:
   auto on_pushButtonImportarNFe_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
+  auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableTranspAtual_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableVendas_clicked(const QModelIndex &index) -> void;
   auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
   auto processRows() -> void;

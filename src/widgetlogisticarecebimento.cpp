@@ -327,34 +327,23 @@ void WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetLogisticaRecebimento::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString header = modelViewRecebimento.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Estoque") {
-    auto *estoque = new Estoque(modelViewRecebimento.data(index.row(), "idEstoque").toString(), this);
-    estoque->setAttribute(Qt::WA_DeleteOnClose);
-    estoque->show();
-  }
+  if (header == "Estoque") { return qApp->abrirEstoque(modelViewRecebimento.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { ACBrLib::gerarDanfe(modelViewRecebimento.data(index.row(), "idNFe").toInt()); }
+  if (header == "NFe") { return qApp->abrirNFe(modelViewRecebimento.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
-    QStringList ids = modelViewRecebimento.data(index.row(), "idVenda").toString().split(", ");
+    const QStringList ids = modelViewRecebimento.data(index.row(), "idVenda").toString().split(", ");
 
-    for (const auto &id : ids) {
-      auto *venda = new Venda(this);
-      venda->setAttribute(Qt::WA_DeleteOnClose);
-      venda->viewRegisterById(id);
-      venda->show();
-    }
+    for (const auto &id : ids) { qApp->abrirVenda(id); }
+
+    return;
   }
 
-  if (header == "OC") {
-    auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, this);
-    input->setAttribute(Qt::WA_DeleteOnClose);
-    input->setFilter(modelViewRecebimento.data(index.row(), "idCompra").toString());
-
-    input->show();
-  }
+  if (header == "OC") { return qApp->abrirCompra(modelViewRecebimento.data(index.row(), "ordemCompra")); }
 }
 
 // TODO: 0marcar em qual bloco foi guardado (opcional?)

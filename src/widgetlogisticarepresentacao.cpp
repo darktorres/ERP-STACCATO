@@ -22,6 +22,7 @@ void WidgetLogisticaRepresentacao::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::delayFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked, connectionType);
+  connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaRepresentacao::on_table_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaRepresentacao::updateTables() {
@@ -76,6 +77,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idVendaProduto2");
+  ui->table->hideColumn("idCompra");
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
@@ -140,6 +142,16 @@ void WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetLogisticaRepresentacao::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelViewLogisticaRepresentacao.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelViewLogisticaRepresentacao.data(index.row(), "idVenda")); }
+
+  if (header == "OC") { return qApp->abrirCompra(modelViewLogisticaRepresentacao.data(index.row(), "ordemCompra")); }
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

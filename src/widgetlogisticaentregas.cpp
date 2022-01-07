@@ -43,6 +43,8 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked, connectionType);
   connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked, connectionType);
+  connect(ui->tableCarga, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
+  connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaEntregas::updateTables() {
@@ -107,7 +109,8 @@ void WidgetLogisticaEntregas::setupTables() {
   ui->tableCarga->setModel(&modelCarga);
 
   ui->tableCarga->hideColumn("idEvento");
-  ui->tableCarga->hideColumn("idNFe");
+  ui->tableCarga->hideColumn("idNFeSaida");
+  ui->tableCarga->hideColumn("idNFeFutura");
   ui->tableCarga->hideColumn("idVeiculo");
 
   ui->tableCarga->setItemDelegateForColumn("kg", new DoubleDelegate(this));
@@ -348,7 +351,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  ACBrLib::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
+  ACBrLib::gerarDanfe(modelCarga.data(list.first().row(), "idNFeSaida").toInt());
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged() { montaFiltro(); }
@@ -436,7 +439,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
-  const int idNFe = modelCarga.data(selection.first().row(), "idNFe").toInt();
+  const int idNFe = modelCarga.data(selection.first().row(), "idNFeSaida").toInt();
 
   ACBr acbrRemoto;
 
@@ -706,5 +709,28 @@ void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {
   followup->show();
 }
 
+void WidgetLogisticaEntregas::on_tableCarga_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelCarga.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "NFe") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeSaida")); }
+
+  if (header == "NFe Futura") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeFutura")); }
+
+  if (header == "Venda") { return qApp->abrirVenda(modelCarga.data(index.row(), "idVenda")); }
+}
+
+void WidgetLogisticaEntregas::on_tableProdutos_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelProdutos.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelProdutos.data(index.row(), "idVenda")); }
+
+  if (header == "Estoque") { return qApp->abrirEstoque(modelProdutos.data(index.row(), "idEstoque")); }
+}
+
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
 // TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
+// TODO: renomear modelCarga/tableCarga para modelPedido/tablePedido

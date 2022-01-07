@@ -33,6 +33,10 @@ public:
   Application(int &argc, char **argv);
   ~Application() final;
 
+  auto abrirCompra(const QVariant &ordemCompra) -> void;
+  auto abrirEstoque(const QVariant &idEstoque) -> void;
+  auto abrirNFe(const QVariant &idNFe) -> void;
+  auto abrirVenda(const QVariant &idVenda) -> void;
   auto ajustarDiaUtil(const QDate date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> void;

@@ -114,7 +114,7 @@ void ItemBox::changeItem(const QVariant &newId) {
 }
 
 void ItemBox::mouseDoubleClickEvent(QMouseEvent *event) {
-  if (readOnlyItemBox) { return; }
+  if (readOnlyItemBox) { return edit(); }
 
   search();
   event->accept();

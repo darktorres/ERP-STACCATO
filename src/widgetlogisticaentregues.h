@@ -33,7 +33,9 @@ private:
   auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
+  auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableVendas_clicked(const QModelIndex &index) -> void;
+  auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

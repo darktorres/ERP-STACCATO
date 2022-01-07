@@ -1,9 +1,13 @@
 #include "application.h"
 
+#include "acbrlib.h"
+#include "estoque.h"
 #include "file.h"
+#include "inputdialogfinanceiro.h"
 #include "log.h"
 #include "qsimpleupdater.h"
 #include "user.h"
+#include "venda.h"
 
 #include <QDebug>
 #include <QDir>
@@ -542,4 +546,26 @@ QString Application::findTag(const QString &texto, const QString &tag) {
   if (index == -1) { throw RuntimeException("Não encontrou o campo '" + tag + "' no evento: " + texto); }
 
   return texto.mid(index + tag.length() + 2).split("\r\n").first();
+}
+
+void Application::abrirVenda(const QVariant &idVenda) {
+  auto *venda = new Venda(nullptr);
+  venda->setAttribute(Qt::WA_DeleteOnClose);
+  venda->viewRegisterById(idVenda);
+  venda->show();
+}
+
+void Application::abrirEstoque(const QVariant &idEstoque) {
+  auto *estoque = new Estoque(idEstoque, nullptr);
+  estoque->setAttribute(Qt::WA_DeleteOnClose);
+  estoque->show();
+}
+
+void Application::abrirNFe(const QVariant &idNFe) { ACBrLib::gerarDanfe(idNFe.toInt()); }
+
+void Application::abrirCompra(const QVariant &ordemCompra) {
+  auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, nullptr);
+  input->setAttribute(Qt::WA_DeleteOnClose);
+  input->setFilter(ordemCompra.toString());
+  input->show(); // TODO: porque esse abre em tela cheia se os outros abrem normal?
 }

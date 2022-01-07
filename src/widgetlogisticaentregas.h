@@ -49,6 +49,8 @@ private:
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
+  auto on_tableCarga_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
   auto processarConsultaNFe(const int idNFe, const QString &xml) -> void;
   auto reagendar(const QModelIndexList &list, const QDateTime &dataVeiculo, const int idVeiculo) -> void;
   auto setConnections() -> void;

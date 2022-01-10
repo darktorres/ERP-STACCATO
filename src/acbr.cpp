@@ -194,7 +194,10 @@ QString ACBr::enviarComando(const QString &comando, const bool local) {
 }
 
 void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) {
-  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
+  Q_UNUSED(emailCopia)
+
+  //    const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
+  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')", true);
 
   // TODO: perguntar se deseja tentar enviar novamente?
   if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) { throw RuntimeException(respostaEmail); }

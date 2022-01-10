@@ -63,6 +63,7 @@ void Venda::setItemBoxes() {
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxEnderecoFat->setSearchDialog(SearchDialog::enderecoCliente(this));
+  ui->itemBoxProfissional->setRegisterDialog("CadastroProfissional");
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 }

@@ -55,7 +55,7 @@ void ItemBox::edit() {
     if (registerDialogType == "CadastroProfissional") { registerDialog = new CadastroProfissional(this); }
     if (registerDialogType == "CadastroTransportadora") { registerDialog = new CadastroTransportadora(this); }
 
-    if (not registerDialog) { throw RuntimeException("RegisterDialog nulo!"); }
+    if (not registerDialog) { throw RuntimeException("RegisterDialogType inválido!"); }
 
     connect(registerDialog, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
   }

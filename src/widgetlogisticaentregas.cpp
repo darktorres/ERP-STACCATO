@@ -44,7 +44,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked, connectionType);
   connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked, connectionType);
   connect(ui->tableCarga, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
-  connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
+  connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableProdutos_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaEntregas::updateTables() {

@@ -658,48 +658,55 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
 
   // ------------------------------------------------------
 
-  const int row = selection.first().row();
+  for (auto index : selection) {
+    const int row = index.row();
 
-  // TODO: usar um foreach para imprimir varios pallets de uma vez?
+    //  const int row = selection.first().row();
 
-  LimeReport::ReportEngine report;
-  auto *dataManager = report.dataManager();
+    // TODO: usar um foreach para imprimir varios pallets de uma vez?
 
-  const QString modelo = QDir::currentPath() + "/modelos/pallet.lrxml";
+    LimeReport::ReportEngine report;
+    auto *dataManager = report.dataManager();
 
-  if (not report.loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!"); }
+    const QString modelo = QDir::currentPath() + "/modelos/pallet.lrxml";
 
-  // set idVenda
+    if (not report.loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!"); }
 
-  QString idVenda = modelPallet.data(row, "idVenda").toString();
+    // set idVenda
 
-  if (idVenda.isEmpty()) { idVenda = "EST. LOJA"; }
+    QString idVenda = modelPallet.data(row, "idVenda").toString();
 
-  dataManager->setReportVariable("idVenda", idVenda);
+    if (idVenda.isEmpty()) { idVenda = "EST. LOJA"; }
 
-  // set produtos
+    dataManager->setReportVariable("idVenda", idVenda);
 
-  const QString produto = modelPallet.data(row, "descricao").toString() + " " + modelPallet.data(row, "formComercial").toString();
+    // set produtos
 
-  dataManager->setReportVariable("produto", produto);
-  dataManager->setReportVariable("caixas", modelPallet.data(row, "caixas"));
-  dataManager->setReportVariable("nfe", modelPallet.data(row, "numeroNFe").toInt());
+    const QString produto = modelPallet.data(row, "descricao").toString() + " " + modelPallet.data(row, "formComercial").toString();
+    const QString caixas = modelPallet.data(row, "caixas").toString();
 
-  // TODO: falta colocar a quantidade total do produto que veio na NFe
+    dataManager->setReportVariable("produto", produto);
+    dataManager->setReportVariable("caixas", caixas);
+    dataManager->setReportVariable("nfe", modelPallet.data(row, "numeroNFe").toInt());
 
-  // ------------------------------------------------------
+    // TODO: falta colocar a quantidade total do produto que veio na NFe
 
-  const QString fileName = QDir::currentPath() + "/pallet.pdf";
+    const QString idEstoque = modelPallet.data(row, "idEstoque").toString();
 
-  File file(fileName);
+    // ------------------------------------------------------
 
-  if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+    const QString fileName = QDir::currentPath() + "/pallet_" + idEstoque + "_" + produto + "_" + caixas + ".pdf";
 
-  file.close();
+    File file(fileName);
 
-  if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report.lastError()); }
+    if (not file.open(QFile::WriteOnly)) { throw RuntimeError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
+    file.close();
+
+    if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF: " + report.lastError()); }
+
+    if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + QDir::currentPath() + fileName); }
+  }
 
 #else
   qApp->enqueueWarning("LimeReport desativado!");

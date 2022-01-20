@@ -17,6 +17,7 @@ public:
   auto resort() -> void;
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
+  auto setCopyHeaders(const bool newCopyHeaders) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
@@ -31,6 +32,7 @@ protected:
 private:
   // attributes
   bool autoResize = true;
+  bool copyHeaders = true;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
   // methods

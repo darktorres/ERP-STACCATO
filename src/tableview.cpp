@@ -42,11 +42,17 @@ int TableView::columnCount() const { return model()->columnCount(); }
 void TableView::showContextMenu(const QPoint pos) {
   QMenu contextMenu;
 
-  QAction action("Autodimensionar", this);
-  action.setCheckable(true);
-  action.setChecked(autoResize);
-  connect(&action, &QAction::triggered, this, &TableView::setAutoResize);
-  contextMenu.addAction(&action);
+  QAction action1("Autodimensionar", this);
+  action1.setCheckable(true);
+  action1.setChecked(autoResize);
+  connect(&action1, &QAction::triggered, this, &TableView::setAutoResize);
+  contextMenu.addAction(&action1);
+
+  QAction action2("Copiar cabeçalhos", this);
+  action2.setCheckable(true);
+  action2.setChecked(copyHeaders);
+  connect(&action2, &QAction::triggered, this, &TableView::setCopyHeaders);
+  contextMenu.addAction(&action2);
 
   contextMenu.exec(mapToGlobal(pos));
 }
@@ -56,6 +62,8 @@ void TableView::resizeEvent(QResizeEvent *event) {
 
   QTableView::resizeEvent(event);
 }
+
+void TableView::setCopyHeaders(const bool newCopyHeaders) { copyHeaders = newCopyHeaders; }
 
 int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
 
@@ -178,7 +186,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     QString headers;
 
     // dont copy headers if in single cell mode
-    if (selectionBehavior() == SelectRows) {
+    if (selectionBehavior() == SelectRows and copyHeaders) {
       for (int col = 0; col < model()->columnCount(); ++col) {
         if (isColumnHidden(col)) { continue; }
 

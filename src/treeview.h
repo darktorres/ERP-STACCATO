@@ -24,6 +24,7 @@ protected:
 private:
   // attributes
   bool autoResize = true;
+  bool copyHeaders = true;
   QStack<int> blockingSignals;
   SqlTreeModel *baseModel = nullptr;
   // methods
@@ -33,6 +34,7 @@ private:
   auto resizeAllColumns() -> void;
   auto setAutoResize(const bool value) -> void;
   auto setConnections() -> void;
+  auto setCopyHeaders(const bool newCopyHeaders) -> void;
   auto showContextMenu(const QPoint pos) -> void;
   auto unsetConnections() -> void;
 };

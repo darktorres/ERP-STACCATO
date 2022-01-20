@@ -51,36 +51,6 @@ win32-g++ {
     }
 }
 
-contains(CONFIG, deploy) {
-    message(deploy)
-    DEFINES *= DEPLOY
-
-    CONFIG += ltcg
-
-    win32-msvc {
-        QMAKE_CXXFLAGS_RELEASE *= /O2
-    }
-
-    *-g++ {
-        QMAKE_CXXFLAGS_RELEASE *= -O3
-        QMAKE_LFLAGS_RELEASE *= -O3
-    }
-} else {
-    win32-msvc {
-        QMAKE_CXXFLAGS_DEBUG -= -O2
-        QMAKE_CXXFLAGS_RELEASE -= -O2
-        QMAKE_CXXFLAGS_DEBUG *= /Od
-        QMAKE_CXXFLAGS_RELEASE *= /Od
-    }
-
-    *-g++ {
-        QMAKE_CXXFLAGS_DEBUG *= -O0
-        QMAKE_CXXFLAGS_RELEASE *= -O0
-        QMAKE_LFLAGS_DEBUG *= -O0
-        QMAKE_LFLAGS_RELEASE *= -O0
-    }
-}
-
 *-g++ {
     QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic

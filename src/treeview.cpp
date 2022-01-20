@@ -59,11 +59,17 @@ void TreeView::showContextMenu(const QPoint pos) {
   connect(&actionCollapse, &QAction::triggered, this, &TreeView::collapseAll);
   contextMenu.addAction(&actionCollapse);
 
-  QAction action("Autodimensionar", this);
-  action.setCheckable(true);
-  action.setChecked(autoResize);
-  connect(&action, &QAction::triggered, this, &TreeView::setAutoResize);
-  contextMenu.addAction(&action);
+  QAction action1("Autodimensionar", this);
+  action1.setCheckable(true);
+  action1.setChecked(autoResize);
+  connect(&action1, &QAction::triggered, this, &TreeView::setAutoResize);
+  contextMenu.addAction(&action1);
+
+  QAction action2("Copiar cabeçalhos", this);
+  action2.setCheckable(true);
+  action2.setChecked(copyHeaders);
+  connect(&action2, &QAction::triggered, this, &TreeView::setCopyHeaders);
+  contextMenu.addAction(&action2);
 
   contextMenu.exec(mapToGlobal(pos));
 }
@@ -164,7 +170,7 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
     QString headers;
 
     // dont copy headers if in single cell mode
-    if (selectionBehavior() == SelectRows) {
+    if (selectionBehavior() == SelectRows and copyHeaders) {
       for (int col = 0; col < model()->columnCount(); ++col) {
         if (isColumnHidden(col)) { continue; }
 
@@ -217,3 +223,5 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
 
   QTreeView::keyPressEvent(event);
 }
+
+void TreeView::setCopyHeaders(const bool newCopyHeaders) { copyHeaders = newCopyHeaders; }

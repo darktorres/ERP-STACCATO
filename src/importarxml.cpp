@@ -692,7 +692,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig);
   modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso);
   modelNFe.setData(row, "numeroNFe", xml.nNF);
-  modelNFe.setData(row, "xml", xml.fileContent);
+  modelNFe.setData(row, "xml", xml.fileContent, false);
   modelNFe.setData(row, "transportadora", xml.xNomeTransp);
   modelNFe.setData(row, "valor", xml.vNF_Total);
   modelNFe.setData(row, "gare", gare);

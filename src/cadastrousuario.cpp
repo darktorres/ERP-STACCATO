@@ -108,7 +108,6 @@ void CadastroUsuario::verifyFields() {
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }
 
 void CadastroUsuario::setupMapper() {
-  addMapping(ui->comboBoxLoja, "idLoja", "currentValue");
   addMapping(ui->comboBoxTipo, "tipo");
   addMapping(ui->lineEditEmail, "email");
   addMapping(ui->lineEditTelefone, "telefone");
@@ -188,6 +187,8 @@ void CadastroUsuario::savingProcedures() {
 
 bool CadastroUsuario::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
+
+  ui->comboBoxLoja->setCurrentIndex(ui->comboBoxLoja->findData(data("idLoja")));
 
   ui->lineEditPasswd->setText("********");
   ui->lineEditPasswd_2->setText("********");

@@ -155,7 +155,7 @@ void CadastroProfissional::updateMode() {
 bool CadastroProfissional::verificaVinculo() {
   SqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString() + " LIMIT 1")) {
+  if (not query.exec("SELECT 0 FROM venda WHERE status NOT IN ('CANCELADO') AND idProfissional = " + data("idProfissional").toString() + " LIMIT 1")) {
     throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());
   }
 

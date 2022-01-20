@@ -448,7 +448,7 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
   // TODO: adicionar 'transportadora'?
   const QList<FullTextIndex> fullTextIndex = {{"modelo", "Modelo"}, {"placa", "Placa"}};
 
-  auto *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, fullTextIndex, "desativado = FALSE", "razaoSocial", false, parent);
+  auto *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, fullTextIndex, "desativado = FALSE", "modelo", false, parent);
 
   sdVeiculo->hideColumns({"idVeiculo", "desativado"});
 

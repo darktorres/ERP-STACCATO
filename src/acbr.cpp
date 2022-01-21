@@ -3,6 +3,7 @@
 #include "application.h"
 #include "sqlquery.h"
 #include "user.h"
+#include "userconfig.h"
 
 #include <QSqlError>
 #include <QThread>
@@ -141,28 +142,30 @@ void ACBr::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-QString ACBr::enviarComando(const QString &comando, const bool local) {
+QString ACBr::enviarComando(const QString &comando) {
   recebido = false;
   enviado = false;
   resposta.clear();
   progressDialog.reset();
 
-  if (local) {
-    if (not qApp->getSilent()) { progressDialog.show(); }
+  SqlQuery queryConfig;
 
-    if (not conectado) { socket.connectToHost("localhost", 3434); }
+  if (not queryConfig.exec("SELECT servidorACBr, portaACBr FROM config")) { throw RuntimeException("Erro buscando dados do emissor de NF-e: " + queryConfig.lastError().text()); }
+
+  if (not queryConfig.first() or queryConfig.value("servidorACBr").toString().isEmpty() or queryConfig.value("portaACBr").toString().isEmpty()) {
+    auto *config = new UserConfig(nullptr);
+    config->setAttribute(Qt::WA_DeleteOnClose);
+    config->show();
+
+    throw RuntimeError("Configure o emissor de NF-e primeiro!");
   }
 
-  if (not local) {
-    const QString servidorConfig = User::getSetting("User/servidorACBr").toString();
-    const QString porta = User::getSetting("User/portaACBr").toString();
+  const QString servidorConfig = queryConfig.value("servidorACBr").toString();
+  const QString porta = queryConfig.value("portaACBr").toString();
 
-    if (servidorConfig.isEmpty() or porta.isEmpty()) { throw RuntimeError("Preencher IP e porta do emissor de NFe ACBr nas configurações!"); }
+  if (not qApp->getSilent()) { progressDialog.show(); }
 
-    if (not qApp->getSilent()) { progressDialog.show(); }
-
-    if (not conectado) { socket.connectToHost(servidorConfig, porta.toUShort()); }
-  }
+  if (not conectado) { socket.connectToHost(servidorConfig, porta.toUShort()); }
 
   while (not pronto) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
@@ -197,7 +200,7 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   Q_UNUSED(emailCopia)
 
   //    const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
-  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')", true);
+  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')");
 
   // TODO: perguntar se deseja tentar enviar novamente?
   if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) { throw RuntimeException(respostaEmail); }

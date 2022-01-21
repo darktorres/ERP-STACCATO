@@ -212,3 +212,5 @@ void WidgetEstoques::on_pushButtonFollowup_clicked() {
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
+
+// TODO: colocar botao para marcar quebra e remover consumos (colocar um followup em cada venda/consumo para ficar o historico de que foi removido o consumo devido uma quebra)

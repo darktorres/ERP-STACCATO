@@ -4,6 +4,7 @@
 
 #include <QSqlQueryModel>
 
+// TODO: esse model pode ser ordenado no banco de dados, mudar tipo base para QIdentityProxyModel
 class NFeProxyModel final : public SortFilterProxyModel {
   Q_OBJECT
 

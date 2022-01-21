@@ -317,6 +317,8 @@ void WidgetLogisticaEntregas::confirmarEntrega(const QDate dataRealEnt, const QS
 void WidgetLogisticaEntregas::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
+  // TODO: permitir enviar mais de uma foto
+
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
@@ -734,3 +736,6 @@ void WidgetLogisticaEntregas::on_tableProdutos_doubleClicked(const QModelIndex &
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
 // TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
 // TODO: renomear modelCarga/tableCarga para modelPedido/tablePedido
+// TODO: na tabela de cima mostrar o followup para os casos onde precisa ligar uns dias antes para o cliente
+// TODO: ao tentar gerar danfe com um danfe ja aberto esta dando erro de arquivo em uso
+// TODO: poder dar baixa de reposicao para quando o cliente nao vai mais querer/precisar do produto

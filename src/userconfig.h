@@ -27,5 +27,6 @@ private:
   auto on_pushButtonOrcamentosFolder_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_pushButtonVendasFolder_clicked() -> void;
+  auto preencherComboBoxMonitorar() -> void;
   auto setConnections() -> void;
 };

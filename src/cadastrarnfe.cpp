@@ -391,6 +391,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const int idNFe = preCadastrarNota();
 
+  // TODO: para simplificar essa lógica não seria apenas separar em dois trys? o primeiro impede a tela de fechar mas o segundo não
   try {
     enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
     enviarEmail(acbrRemoto, filePath);      // close if error
@@ -407,6 +408,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 }
 
 void CadastrarNFe::atualizarNFe(const int idNFe) {
+  // TODO: substituir esse código por qApp->findTag()?
   const QString tagBegin = "<dhEmi>";
   const QString tagEnd = "</dhEmi>";
 
@@ -2110,6 +2112,7 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
 // TODO: colocar um botao para imprimir uma previa da DANFE? utilizar o xml antes do envio
+// TODO: renomear acbrRemoto para apenas acbr
 
 // NFe Devolucao
 

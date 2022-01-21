@@ -56,8 +56,8 @@ void UserConfig::getSettings() {
       ui->groupBoxDownloadNFe->setChecked(User::getSetting("User/monitorarNFe").toBool());
 
       ui->comboBoxMonitorar1->setCurrentIndex(ui->comboBoxMonitorar1->findData(query.value("monitorarCNPJ1")));
-      ui->lineEditMonitorarServidor1->setText(query.value("monitorarServidor2").toString());
-      ui->lineEditMonitorarPorta1->setText(query.value("monitorarPorta2").toString());
+      ui->lineEditMonitorarServidor1->setText(query.value("monitorarServidor1").toString());
+      ui->lineEditMonitorarPorta1->setText(query.value("monitorarPorta1").toString());
 
       ui->comboBoxMonitorar2->setCurrentIndex(ui->comboBoxMonitorar2->findData(query.value("monitorarCNPJ2")));
       ui->lineEditMonitorarServidor2->setText(query.value("monitorarServidor2").toString());

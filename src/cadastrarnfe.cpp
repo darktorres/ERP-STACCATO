@@ -20,20 +20,28 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, co
 
   setWindowFlags(Qt::Window);
 
-  const int lojaACBr = User::getSetting("User/lojaACBr").toInt();
+  SqlQuery query;
+
+  if (not query.exec("SELECT lojaACBr, emailContabilidade, emailLogistica FROM config")) { throw RuntimeException("Erro buscando dados do emissor de NF-e: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
+
+  const int lojaACBr = query.value("lojaACBr").toInt();
+
+  // TODO: em vez de dizer para o usuário onde ir no menu, abrir direto a tela de UserConfig
 
   if (lojaACBr == 0) { throw RuntimeError(R"(Escolha a loja a ser utilizada em "Opções->Configurações->ACBr->Loja"!)", this); }
 
-  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
+  emailContabilidade = query.value("emailContabilidade").toString();
 
   if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  //  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
+  //  emailLogistica = query.value("emailLogistica").toString();
 
   //  if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr"));
+  ui->itemBoxLoja->setId(lojaACBr);
 
   setupTables();
 
@@ -1681,8 +1689,6 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 
 void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
-  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
-  //  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
 
   //  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
   acbrRemoto.enviarEmail(emailContabilidade, "", assunto, filePath);

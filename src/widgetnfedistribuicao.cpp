@@ -33,7 +33,17 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   qApp->setSilent(true);
 
   try {
-    on_pushButtonPesquisar_clicked();
+    SqlQuery query;
+
+    if (not query.exec("SELECT monitorarCNPJ1, monitorarCNPJ2 FROM config")) { throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
+
+    const QString cnpj1 = query.value("monitorarCNPJ1").toString();
+    const QString cnpj2 = query.value("monitorarCNPJ2").toString();
+
+    if (not cnpj1.isEmpty()) { buscarNFes(cnpj1); }
+    if (not cnpj2.isEmpty()) { buscarNFes(cnpj2); }
   } catch (std::exception &) {
     qApp->setSilent(false);
     timer.start(tempoTimer);
@@ -50,9 +60,6 @@ void WidgetNFeDistribuicao::updateTables() {
   if (not isSet) {
     setConnections();
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-
-    if (User::getSetting("User/monitorarNFe").toBool()) { ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr")); }
-
     isSet = true;
   }
 
@@ -165,15 +172,50 @@ void WidgetNFeDistribuicao::setupTables() {
 }
 
 void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT monitorarCNPJ1, monitorarCNPJ2 FROM config")) { throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
+
+  const QString cnpj1 = query.value("monitorarCNPJ1").toString();
+  const QString cnpj2 = query.value("monitorarCNPJ2").toString();
+
+  if (not cnpj1.isEmpty()) { buscarNFes(cnpj1); }
+  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2); }
+}
+
+void WidgetNFeDistribuicao::enviarComando() {
+  qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
+
+  // TODO: parametrizar o código do estado em vez de usar 35
+  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
+
+  // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
+
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { tempoTimer = 1h; }
+  if (resposta.contains("ERRO: Rejeicao: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital")) { throw RuntimeError("Certificado plugado é de outro CNPJ!"); }
+  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
+
+  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado", Qt::CaseInsensitive)) ? 1h : 15min;
+
+  //----------------------------------------------------------
+
+  qApp->startTransaction("NFeDistribuicao::pesquisaTemp");
+
+  processarResposta(resposta, idLoja);
+
+  qApp->endTransaction();
+
+  model.select();
+}
+
+void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz) {
   // 1. chamar funcao DistribuicaoDFePorUltNSU no ACBr
   // 2. guardar resumo e eventos das NFes retornadas
   // 3. enquanto maxNSU != ultNSU repetir os passos
   // 4. fazer evento de ciencia para cada nota
   // 5. repetir passo 1 para pegar os xmls das notas
-
-  if (not ui->itemBoxLoja->getId().isValid()) { throw RuntimeError("Nenhuma loja selecionada!"); }
-
-  const QString idLoja = ui->itemBoxLoja->getId().toString();
 
   //----------------------------------------------------------
 
@@ -191,41 +233,38 @@ void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //----------------------------------------------------------
 
-  buscarNSU();
+  // TODO: verificar se cnpjRaiz é valido
 
-  qDebug() << "pesquisar nsu: " << ultimoNSU;
-  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
+  SqlQuery queryCnpj;
 
-  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { tempoTimer = 1h; }
-  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
-
-  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado", Qt::CaseInsensitive)) ? 1h : 15min;
-
-  //----------------------------------------------------------
-
-  qApp->startTransaction("NFeDistribuicao::on_pushButtonPesquisar");
-
-  pesquisarNFes(resposta, idLoja);
-
-  qApp->endTransaction();
-
-  //----------------------------------------------------------
-
-  model.select();
-
-  if (ultimoNSU < maximoNSU) {
-    qDebug() << "pesquisar novamente";
-    return on_pushButtonPesquisar_clicked();
+  if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj LIKE '" + cnpjRaiz + "%' AND desativado = FALSE")) {
+    throw RuntimeException("Erro buscando filiais: " + queryCnpj.lastError().text());
   }
 
-  qDebug() << "darCiencia";
-  darCiencia(true);
-  qDebug() << "confirmar";
-  confirmar(true);
-  qDebug() << "desconhecer";
-  desconhecer(true);
-  qDebug() << "naoRealizar";
-  naoRealizar(true);
+  if (queryCnpj.size() == 0) { throw RuntimeException("Nenhuma filial encontrada para CNPJ: " + cnpjRaiz); }
+
+  while (queryCnpj.next()) {
+    idLoja = queryCnpj.value("idLoja").toString();
+    cnpjDest = queryCnpj.value("cnpj").toString().remove(".").remove("/").remove("-");
+    ultimoNSU = queryCnpj.value("ultimoNSU").toInt();
+    maximoNSU = queryCnpj.value("maximoNSU").toInt();
+
+    enviarComando();
+
+    //----------------------------------------------------------
+
+    qDebug() << "pesquisar novamente";
+    while (ultimoNSU < maximoNSU) { enviarComando(); }
+
+    qDebug() << "darCiencia";
+    darCiencia(true);
+    qDebug() << "confirmar";
+    confirmar(true);
+    qDebug() << "desconhecer";
+    desconhecer(true);
+    qDebug() << "naoRealizar";
+    naoRealizar(true);
+  }
 
   qDebug() << "maintenance";
   SqlQuery queryMaintenance;
@@ -292,7 +331,7 @@ void WidgetNFeDistribuicao::darCiencia(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void WidgetNFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
+void WidgetNFeDistribuicao::processarResposta(const QString &resposta, const QString &idLoja) {
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
 
   for (const auto &evento : eventos) {

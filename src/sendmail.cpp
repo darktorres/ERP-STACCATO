@@ -57,11 +57,19 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    ui->lineEditEmail->setText(User::getSetting("User/emailCompra").toString());
-    ui->lineEditCopia->setText(User::getSetting("User/emailCopia").toString());
-    ui->lineEditServidor->setText(User::getSetting("User/servidorSMTP").toString());
-    ui->lineEditPorta->setText(User::getSetting("User/portaSMTP").toString());
-    ui->lineEditPasswd->setText(User::getSetting("User/emailSenha").toString());
+    SqlQuery query;
+
+    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
+      throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
+    }
+
+    if (query.first()) {
+      ui->lineEditEmail->setText(query.value("email").toString());
+      ui->lineEditCopia->setText(query.value("emailCopia").toString());
+      ui->lineEditServidor->setText(query.value("servidorEmail").toString());
+      ui->lineEditPorta->setText(query.value("portaEmail").toString());
+      ui->lineEditPasswd->setText(query.value("senhaEmail").toString());
+    }
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);

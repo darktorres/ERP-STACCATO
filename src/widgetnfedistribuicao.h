@@ -33,12 +33,14 @@ private:
   ACBr acbrRemoto;
   QStack<int> blockingSignals;
   QString cnpjDest;
+  QString idLoja;
   QTimer timer;
   SqlTableModel model;
   Ui::WidgetNFeDistribuicao *ui;
   // methods
   auto agendarOperacao() -> void;
   auto ajustarGroupBoxStatus() -> void;
+  auto buscarNFes(const QString &cnpjRaiz) -> void;
   auto buscarNSU() -> void;
   auto confirmar(const bool silent) -> void;
   auto darCiencia(const bool silent) -> void;
@@ -46,6 +48,7 @@ private:
   auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
+  auto enviarComando() -> void;
   auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
   auto houveConsultaEmOutroPc() -> bool;
   auto montaFiltro() -> void;
@@ -57,10 +60,10 @@ private:
   auto on_pushButtonNaoRealizada_clicked() -> void;
   auto on_pushButtonPesquisar_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> void;
   auto processarEventoInformacao(const QString &evento) -> void;
   auto processarEventoNFe(const QString &evento) -> void;
   auto processarEventoPrincipal(const QString &evento, const QString &idLoja) -> void;
+  auto processarResposta(const QString &resposta, const QString &idLoja) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

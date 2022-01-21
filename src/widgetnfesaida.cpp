@@ -162,11 +162,19 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString emailContabilidade = User::getSetting("User/emailContabilidade").toString();
+  // TODO: em vez de dizer para o usuário onde ir no menu, abrir direto a tela de UserConfig
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT lojaACBr, emailContabilidade, emailLogistica FROM config")) { throw RuntimeException("Erro buscando dados do emissor de NF-e: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
+
+  const QString emailContabilidade = query.value("emailContabilidade").toString();
 
   if (emailContabilidade.isEmpty()) { throw RuntimeError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const QString emailLogistica = User::getSetting("User/emailLogistica").toString();
+  const QString emailLogistica = query.value("emailLogistica").toString();
 
   if (emailLogistica.isEmpty()) { throw RuntimeError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 

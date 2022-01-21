@@ -8,15 +8,18 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QSqlError>
 
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  getSettings();
-
   if (User::isVendedorOrEspecial()) { hideWidgets(); }
+
+  if (User::isAdministrativo()) { preencherComboBoxMonitorar(); }
+
+  getSettings();
 
   setConnections();
 
@@ -26,18 +29,57 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 UserConfig::~UserConfig() { delete ui; }
 
 void UserConfig::getSettings() {
-  ui->lineEditACBrServidor->setText(User::getSetting("User/servidorACBr").toString());
-  ui->lineEditACBrPorta->setText(User::getSetting("User/portaACBr").toString());
-  ui->itemBoxLoja->setId(User::getSetting("User/lojaACBr"));
-  ui->lineEditEmailContabilidade->setText(User::getSetting("User/emailContabilidade").toString());
-  ui->lineEditEmailLogistica->setText(User::getSetting("User/emailLogistica").toString());
-  ui->checkBoxMonitorarNFes->setChecked(User::getSetting("User/monitorarNFe").toBool());
+  if (not ui->groupBoxAcbr->isHidden()) {
+    SqlQuery query;
 
-  ui->lineEditServidorSMTP->setText(User::getSetting("User/servidorSMTP").toString());
-  ui->lineEditPortaSMTP->setText(User::getSetting("User/portaSMTP").toString());
-  ui->lineEditEmail->setText(User::getSetting("User/emailCompra").toString());
-  ui->lineEditEmailSenha->setText(User::getSetting("User/emailSenha").toString());
-  ui->lineEditEmailCopia->setText(User::getSetting("User/emailCopia").toString());
+    if (not query.exec("SELECT servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica FROM config")) {
+      throw RuntimeException("Erro buscando dados do emissor de NF-e: " + query.lastError().text());
+    }
+
+    if (query.first()) {
+      ui->lineEditACBrServidor->setText(query.value("servidorACBr").toString());
+      ui->lineEditACBrPorta->setText(query.value("portaACBr").toString());
+      ui->itemBoxLoja->setId(query.value("lojaACBr"));
+      ui->lineEditEmailContabilidade->setText(query.value("emailContabilidade").toString());
+      ui->lineEditEmailLogistica->setText(query.value("emailLogistica").toString());
+    }
+  }
+
+  if (not ui->groupBoxDownloadNFe->isHidden()) {
+    SqlQuery query;
+
+    if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
+      throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
+    }
+
+    if (query.first()) {
+      ui->groupBoxDownloadNFe->setChecked(User::getSetting("User/monitorarNFe").toBool());
+
+      ui->comboBoxMonitorar1->setCurrentIndex(ui->comboBoxMonitorar1->findData(query.value("monitorarCNPJ1")));
+      ui->lineEditMonitorarServidor1->setText(query.value("monitorarServidor2").toString());
+      ui->lineEditMonitorarPorta1->setText(query.value("monitorarPorta2").toString());
+
+      ui->comboBoxMonitorar2->setCurrentIndex(ui->comboBoxMonitorar2->findData(query.value("monitorarCNPJ2")));
+      ui->lineEditMonitorarServidor2->setText(query.value("monitorarServidor2").toString());
+      ui->lineEditMonitorarPorta2->setText(query.value("monitorarPorta2").toString());
+    }
+  }
+
+  if (not ui->groupBoxEmail->isHidden()) {
+    SqlQuery query;
+
+    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
+      throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
+    }
+
+    if (query.first()) {
+      ui->lineEditServidorSMTP->setText(query.value("servidorEmail").toString());
+      ui->lineEditPortaSMTP->setText(query.value("portaEmail").toString());
+      ui->lineEditEmail->setText(query.value("email").toString());
+      ui->lineEditEmailSenha->setText(query.value("senhaEmail").toString());
+      ui->lineEditEmailCopia->setText(query.value("copiaParaEmail").toString());
+    }
+  }
 
   ui->lineEditOrcamentosFolder->setText(User::getSetting("User/OrcamentosFolder").toString());
   ui->lineEditVendasFolder->setText(User::getSetting("User/VendasFolder").toString());
@@ -48,6 +90,7 @@ void UserConfig::getSettings() {
 
 void UserConfig::hideWidgets() {
   ui->groupBoxAcbr->hide();
+  ui->groupBoxDownloadNFe->hide();
   ui->groupBoxEmail->hide();
   ui->labelCompras->hide();
   ui->labelEntregas->hide();
@@ -82,18 +125,55 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
-  User::setSetting("User/servidorACBr", ui->lineEditACBrServidor->text());
-  User::setSetting("User/portaACBr", ui->lineEditACBrPorta->text());
-  User::setSetting("User/lojaACBr", ui->itemBoxLoja->getId());
-  User::setSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
-  User::setSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());
-  User::setSetting("User/monitorarNFe", ui->checkBoxMonitorarNFes->isChecked());
+  SqlQuery queryLoja;
+  queryLoja.prepare("INSERT INTO config (idConfig, servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica, monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, "
+                    "monitorarServidor2, monitorarPorta2) "
+                    "VALUES (1, :servidorACBr, :portaACBr, :lojaACBr, :emailContabilidade, :emailLogistica, :monitorarCNPJ1, :monitorarServidor1, :monitorarPorta1, :monitorarCNPJ2, "
+                    ":monitorarServidor2, :monitorarPorta2) AS new "
+                    "ON DUPLICATE KEY UPDATE servidorACBr = new.servidorACBr, portaACBr = new.portaACBr, lojaACBr = new.lojaACBr, emailContabilidade = new.emailContabilidade, "
+                    "emailLogistica = new.emailLogistica, monitorarCNPJ1 = new.monitorarCNPJ1, monitorarPorta1 = new.monitorarPorta1, monitorarCNPJ2 = new.monitorarCNPJ2, "
+                    "monitorarServidor2 = new.monitorarServidor2, monitorarPorta2 = new.monitorarPorta2");
+  queryLoja.bindValue(":servidorACBr", ui->lineEditACBrServidor->text());
+  queryLoja.bindValue(":portaACBr", ui->lineEditACBrPorta->text());
+  queryLoja.bindValue(":lojaACBr", ui->itemBoxLoja->getId());
+  queryLoja.bindValue(":emailContabilidade", ui->lineEditEmailContabilidade->text());
+  queryLoja.bindValue(":emailLogistica", ui->lineEditEmailLogistica->text());
+  queryLoja.bindValue(":monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
+  queryLoja.bindValue(":monitorarServidor1", ui->lineEditMonitorarServidor1->text());
+  queryLoja.bindValue(":monitorarPorta1", ui->lineEditMonitorarPorta1->text());
+  queryLoja.bindValue(":monitorarCNPJ2", ui->comboBoxMonitorar2->currentData());
+  queryLoja.bindValue(":monitorarServidor2", ui->lineEditMonitorarServidor2->text());
+  queryLoja.bindValue(":monitorarPorta2", ui->lineEditMonitorarPorta2->text());
 
-  User::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
-  User::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
-  User::setSetting("User/emailCompra", ui->lineEditEmail->text());
-  User::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
-  User::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
+  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados da loja: " + queryLoja.lastError().text()); }
+
+  if (not ui->groupBoxAcbr->isHidden()) {
+    User::setSetting("User/servidorACBr", ui->lineEditACBrServidor->text());
+    User::setSetting("User/portaACBr", ui->lineEditACBrPorta->text());
+    User::setSetting("User/lojaACBr", ui->itemBoxLoja->getId());
+    User::setSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
+    User::setSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());
+  }
+
+  if (not ui->groupBoxDownloadNFe->isHidden()) {
+    User::setSetting("User/monitorarNFe", ui->groupBoxDownloadNFe->isChecked());
+
+    User::setSetting("User/monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
+    User::setSetting("User/monitorarServidor1", ui->lineEditMonitorarServidor1->text());
+    User::setSetting("User/monitorarPorta1", ui->lineEditMonitorarPorta1->text());
+
+    User::setSetting("User/monitorarCNPJ2", ui->comboBoxMonitorar2->currentData());
+    User::setSetting("User/monitorarServidor2", ui->lineEditMonitorarServidor2->text());
+    User::setSetting("User/monitorarPorta2", ui->lineEditMonitorarPorta2->text());
+  }
+
+  if (not ui->groupBoxEmail->isHidden()) {
+    User::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
+    User::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
+    User::setSetting("User/emailCompra", ui->lineEditEmail->text());
+    User::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
+    User::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
+  }
 
   // TODO: caso as pastas estejam vazias usar /arquivos como padrao
   User::setSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
@@ -101,6 +181,19 @@ void UserConfig::on_pushButtonSalvar_clicked() {
   User::setSetting("User/ComprasFolder", ui->lineEditComprasFolder->text());
   User::setSetting("User/EntregasXmlFolder", ui->lineEditEntregasXmlFolder->text());
   User::setSetting("User/EntregasPdfFolder", ui->lineEditEntregasPdfFolder->text());
+
+  SqlQuery queryUsuario;
+  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail) "
+                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail) AS new "
+                       "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail");
+  queryUsuario.bindValue(":idUsuario", User::idUsuario);
+  queryUsuario.bindValue(":servidorEmail", ui->lineEditServidorSMTP->text());
+  queryUsuario.bindValue(":portaEmail", ui->lineEditPortaSMTP->text());
+  queryUsuario.bindValue(":email", ui->lineEditEmail->text());
+  queryUsuario.bindValue(":senhaEmail", ui->lineEditEmailSenha->text());
+  queryUsuario.bindValue(":copiaParaEmail", ui->lineEditEmailCopia->text());
+
+  if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
 
   QDialog::accept();
 
@@ -162,4 +255,15 @@ void UserConfig::on_pushButtonEmailTeste_clicked() {
   mail->setAttribute(Qt::WA_DeleteOnClose);
 
   mail->show();
+}
+
+void UserConfig::preencherComboBoxMonitorar() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT DISTINCT(LEFT(cnpj, 10)) AS raiz, razaoSocial FROM loja WHERE cnpj IS NOT NULL")) { throw RuntimeException("Erro buscando empresas: " + query.lastError().text()); }
+
+  while (query.next()) {
+    ui->comboBoxMonitorar1->addItem(query.value("razaoSocial").toString(), query.value("raiz"));
+    ui->comboBoxMonitorar2->addItem(query.value("razaoSocial").toString(), query.value("raiz"));
+  }
 }

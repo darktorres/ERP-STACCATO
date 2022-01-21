@@ -34,6 +34,8 @@ private:
   QString arquivo;
   QString chaveAcesso;
   QString const idVenda;
+  QString emailContabilidade;
+  QString emailLogistica;
   QString xml;
   SqlQuery queryIBGEDest;
   SqlQuery queryIBGEEmit;

@@ -30,7 +30,6 @@ private:
   bool modelIsSet = false;
   int maximoNSU = 0;
   int ultimoNSU = 0;
-  ACBr acbrRemoto;
   QStack<int> blockingSignals;
   QString cnpjDest;
   QString idLoja;
@@ -40,19 +39,19 @@ private:
   // methods
   auto agendarOperacao() -> void;
   auto ajustarGroupBoxStatus() -> void;
-  auto buscarNFes(const QString &cnpjRaiz) -> void;
+  auto buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) -> void;
   auto buscarNSU() -> void;
-  auto confirmar(const bool silent) -> void;
-  auto darCiencia(const bool silent) -> void;
-  auto desconhecer(const bool silent) -> void;
+  auto confirmar(ACBr &acbr, const bool silent) -> void;
+  auto darCiencia(ACBr &acbr, const bool silent) -> void;
+  auto desconhecer(ACBr &acbr, const bool silent) -> void;
   auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
-  auto enviarComando() -> void;
-  auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
+  auto enviarComando(ACBr &acbr) -> void;
+  auto enviarEvento(ACBr &acbr, const QString &operacao, const QVector<int> &selection) -> bool;
   auto houveConsultaEmOutroPc() -> bool;
   auto montaFiltro() -> void;
-  auto naoRealizar(const bool silent) -> void;
+  auto naoRealizar(ACBr &acbr, const bool silent) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCiencia_clicked() -> void;
   auto on_pushButtonConfirmacao_clicked() -> void;

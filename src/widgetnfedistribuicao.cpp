@@ -35,15 +35,26 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   try {
     SqlQuery query;
 
-    if (not query.exec("SELECT monitorarCNPJ1, monitorarCNPJ2 FROM config")) { throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text()); }
+    if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
+      throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
+    }
 
     if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
 
     const QString cnpj1 = query.value("monitorarCNPJ1").toString();
     const QString cnpj2 = query.value("monitorarCNPJ2").toString();
+    const QString servidor1 = query.value("monitorarServidor1").toString();
+    const QString servidor2 = query.value("monitorarServidor2").toString();
+    const QString porta1 = query.value("monitorarPorta1").toString();
+    const QString porta2 = query.value("monitorarPorta2").toString();
 
-    if (not cnpj1.isEmpty()) { buscarNFes(cnpj1); }
-    if (not cnpj2.isEmpty()) { buscarNFes(cnpj2); }
+    if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
+    if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
+
+    qDebug() << "maintenance";
+    SqlQuery queryMaintenance;
+
+    if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
   } catch (std::exception &) {
     qApp->setSilent(false);
     timer.start(tempoTimer);
@@ -174,22 +185,35 @@ void WidgetNFeDistribuicao::setupTables() {
 void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
   SqlQuery query;
 
-  if (not query.exec("SELECT monitorarCNPJ1, monitorarCNPJ2 FROM config")) { throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text()); }
+  if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
+    throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
+  }
 
   if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
 
   const QString cnpj1 = query.value("monitorarCNPJ1").toString();
   const QString cnpj2 = query.value("monitorarCNPJ2").toString();
+  const QString servidor1 = query.value("monitorarServidor1").toString();
+  const QString servidor2 = query.value("monitorarServidor2").toString();
+  const QString porta1 = query.value("monitorarPorta1").toString();
+  const QString porta2 = query.value("monitorarPorta2").toString();
 
-  if (not cnpj1.isEmpty()) { buscarNFes(cnpj1); }
-  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2); }
+  if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
+  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
+
+  qDebug() << "maintenance";
+  SqlQuery queryMaintenance;
+
+  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
+
+  qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-void WidgetNFeDistribuicao::enviarComando() {
+void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
 
   // TODO: parametrizar o código do estado em vez de usar 35
-  const QString resposta = acbrRemoto.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
+  const QString resposta = acbr.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
 
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
@@ -201,7 +225,7 @@ void WidgetNFeDistribuicao::enviarComando() {
 
   //----------------------------------------------------------
 
-  qApp->startTransaction("NFeDistribuicao::pesquisaTemp");
+  qApp->startTransaction("NFeDistribuicao::enviarComando");
 
   processarResposta(resposta, idLoja);
 
@@ -210,7 +234,7 @@ void WidgetNFeDistribuicao::enviarComando() {
   model.select();
 }
 
-void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz) {
+void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) {
   // 1. chamar funcao DistribuicaoDFePorUltNSU no ACBr
   // 2. guardar resumo e eventos das NFes retornadas
   // 3. enquanto maxNSU != ultNSU repetir os passos
@@ -243,45 +267,44 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz) {
 
   if (queryCnpj.size() == 0) { throw RuntimeException("Nenhuma filial encontrada para CNPJ: " + cnpjRaiz); }
 
+  ACBr acbr;
+  acbr.setarServidor(servidor, porta);
+
   while (queryCnpj.next()) {
     idLoja = queryCnpj.value("idLoja").toString();
     cnpjDest = queryCnpj.value("cnpj").toString().remove(".").remove("/").remove("-");
     ultimoNSU = queryCnpj.value("ultimoNSU").toInt();
     maximoNSU = queryCnpj.value("maximoNSU").toInt();
 
-    enviarComando();
+    enviarComando(acbr);
 
     //----------------------------------------------------------
 
-    qDebug() << "pesquisar novamente";
-    while (ultimoNSU < maximoNSU) { enviarComando(); }
+    while (ultimoNSU < maximoNSU) {
+      qDebug() << "pesquisar novamente";
+      enviarComando(acbr);
+    }
 
     qDebug() << "darCiencia";
-    darCiencia(true);
+    darCiencia(acbr, true);
     qDebug() << "confirmar";
-    confirmar(true);
+    confirmar(acbr, true);
     qDebug() << "desconhecer";
-    desconhecer(true);
+    desconhecer(acbr, true);
     qDebug() << "naoRealizar";
-    naoRealizar(true);
+    naoRealizar(acbr, true);
   }
 
-  qDebug() << "maintenance";
-  SqlQuery queryMaintenance;
-
-  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
-
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
-  qDebug() << "end pesquisa";
+  qDebug() << "end pesquisa: " << cnpjRaiz;
 }
 
-void WidgetNFeDistribuicao::confirmar(const bool silent) {
+void WidgetNFeDistribuicao::confirmar(ACBr &acbr, const bool silent) {
   auto match = model.multiMatch({{"confirmar", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
     const auto selection = match.mid(0, 20);
 
-    if (not enviarEvento("CONFIRMAÇÃO", selection)) { return; }
+    if (not enviarEvento(acbr, "CONFIRMAÇÃO", selection)) { return; }
 
     match = model.multiMatch({{"confirmar", true}});
   }
@@ -289,13 +312,13 @@ void WidgetNFeDistribuicao::confirmar(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void WidgetNFeDistribuicao::desconhecer(const bool silent) {
+void WidgetNFeDistribuicao::desconhecer(ACBr &acbr, const bool silent) {
   auto match = model.multiMatch({{"desconhecer", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
     const auto selection = match.mid(0, 20);
 
-    if (not enviarEvento("DESCONHECIMENTO", selection)) { return; }
+    if (not enviarEvento(acbr, "DESCONHECIMENTO", selection)) { return; }
 
     match = model.multiMatch({{"desconhecer", true}});
   }
@@ -303,13 +326,13 @@ void WidgetNFeDistribuicao::desconhecer(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void WidgetNFeDistribuicao::naoRealizar(const bool silent) {
+void WidgetNFeDistribuicao::naoRealizar(ACBr &acbr, const bool silent) {
   auto match = model.multiMatch({{"naoRealizar", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
     const auto selection = match.mid(0, 20);
 
-    if (not enviarEvento("NÃO REALIZADA", selection)) { return; }
+    if (not enviarEvento(acbr, "NÃO REALIZADA", selection)) { return; }
 
     match = model.multiMatch({{"naoRealizar", true}});
   }
@@ -317,13 +340,13 @@ void WidgetNFeDistribuicao::naoRealizar(const bool silent) {
   if (not silent) { qApp->enqueueInformation("Operação realizada com sucesso!", this); }
 }
 
-void WidgetNFeDistribuicao::darCiencia(const bool silent) {
+void WidgetNFeDistribuicao::darCiencia(ACBr &acbr, const bool silent) {
   auto match = model.multiMatch({{"ciencia", true}});
 
   while (not match.isEmpty()) { // processar 20 linhas por vez
     const auto selection = match.mid(0, 20);
 
-    if (not enviarEvento("CIÊNCIA", selection)) { return; }
+    if (not enviarEvento(acbr, "CIÊNCIA", selection)) { return; }
 
     match = model.multiMatch({{"ciencia", true}});
   }
@@ -358,7 +381,9 @@ void WidgetNFeDistribuicao::on_pushButtonCiencia_clicked() {
 
   const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? darCiencia(false) : agendarOperacao();
+  ACBr acbr;
+
+  monitorar ? darCiencia(acbr, false) : agendarOperacao();
 }
 
 void WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked() {
@@ -378,7 +403,9 @@ void WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 
   const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? confirmar(false) : agendarOperacao();
+  ACBr acbr;
+
+  monitorar ? confirmar(acbr, false) : agendarOperacao();
 }
 
 void WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
@@ -398,7 +425,9 @@ void WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
 
   const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? desconhecer(false) : agendarOperacao();
+  ACBr acbr;
+
+  monitorar ? desconhecer(acbr, false) : agendarOperacao();
 }
 
 void WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
@@ -418,7 +447,9 @@ void WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 
   const auto monitorar = User::getSetting("User/monitorarNFe").toBool();
 
-  monitorar ? naoRealizar(false) : agendarOperacao();
+  ACBr acbr;
+
+  monitorar ? naoRealizar(acbr, false) : agendarOperacao();
 }
 
 void WidgetNFeDistribuicao::agendarOperacao() {
@@ -431,7 +462,7 @@ void WidgetNFeDistribuicao::agendarOperacao() {
   qApp->enqueueInformation("Operação agendada com sucesso!", this);
 }
 
-bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &selection) {
+bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, const QVector<int> &selection) {
   QString column;
 
   if (operacao == "CIÊNCIA") { column = "ciencia"; }
@@ -492,7 +523,7 @@ bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<
 
   //----------------------------------------------------------
 
-  const QString resposta = acbrRemoto.enviarComando(comando);
+  const QString resposta = acbr.enviarComando(comando);
 
   if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 

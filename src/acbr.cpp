@@ -148,24 +148,26 @@ QString ACBr::enviarComando(const QString &comando) {
   resposta.clear();
   progressDialog.reset();
 
-  SqlQuery queryConfig;
+  if (servidor.isEmpty() and porta.isEmpty()) {
+    SqlQuery queryConfig;
 
-  if (not queryConfig.exec("SELECT servidorACBr, portaACBr FROM config")) { throw RuntimeException("Erro buscando dados do emissor de NF-e: " + queryConfig.lastError().text()); }
+    if (not queryConfig.exec("SELECT servidorACBr, portaACBr FROM config")) { throw RuntimeException("Erro buscando dados do emissor de NF-e: " + queryConfig.lastError().text()); }
 
-  if (not queryConfig.first() or queryConfig.value("servidorACBr").toString().isEmpty() or queryConfig.value("portaACBr").toString().isEmpty()) {
-    auto *config = new UserConfig(nullptr);
-    config->setAttribute(Qt::WA_DeleteOnClose);
-    config->show();
+    if (not queryConfig.first() or queryConfig.value("servidorACBr").toString().isEmpty() or queryConfig.value("portaACBr").toString().isEmpty()) {
+      auto *config = new UserConfig(nullptr);
+      config->setAttribute(Qt::WA_DeleteOnClose);
+      config->show();
 
-    throw RuntimeError("Configure o emissor de NF-e primeiro!");
+      throw RuntimeError("Configure o emissor de NF-e primeiro!");
+    }
+
+    servidor = queryConfig.value("servidorACBr").toString();
+    porta = queryConfig.value("portaACBr").toString();
+
+    if (not qApp->getSilent()) { progressDialog.show(); }
   }
 
-  const QString servidorConfig = queryConfig.value("servidorACBr").toString();
-  const QString porta = queryConfig.value("portaACBr").toString();
-
-  if (not qApp->getSilent()) { progressDialog.show(); }
-
-  if (not conectado) { socket.connectToHost(servidorConfig, porta.toUShort()); }
+  if (not conectado) { socket.connectToHost(servidor, porta.toUShort()); }
 
   while (not pronto) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
@@ -206,6 +208,11 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) { throw RuntimeException(respostaEmail); }
 
   qApp->enqueueInformation(respostaEmail);
+}
+
+void ACBr::setarServidor(const QString &servidor_, const QString &porta_) {
+  servidor = servidor_;
+  porta = porta_;
 }
 
 // TODO: colocar parent em progressDialog para que a barra fique centralizada com a janela que chamou

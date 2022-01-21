@@ -513,6 +513,8 @@ bool WidgetNFeDistribuicao::enviarEvento(const QString &operacao, const QVector<
       continue;
     }
 
+    // TODO: ao ocorrer um evento não tratado limpar os flags de eventos no banco de dados para evitar que o sistema fique enviando o mesmo evento repetidamente
+
     throw RuntimeException("Evento não tratado: " + evento);
   }
 
@@ -622,11 +624,11 @@ void WidgetNFeDistribuicao::on_groupBoxStatus_toggled(const bool enabled) {
 }
 
 void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, const QString &idLoja) {
-  const QString maxNSU = qApp->findTag(evento, "maxNSU=");
   const QString ultNSU = qApp->findTag(evento, "ultNSU=");
+  const QString maxNSU = qApp->findTag(evento, "maxNSU=");
 
-  maximoNSU = maxNSU.toInt();
   ultimoNSU = ultNSU.toInt();
+  maximoNSU = maxNSU.toInt();
 
   //----------------------------------------------------------
 
@@ -810,3 +812,7 @@ void WidgetNFeDistribuicao::ajustarGroupBoxStatus() {
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario
 // TODO: lidar com mais de um pc tentando baixar nfes (usar maintenance.lastDistribuicao)
 // TODO: autoconfirmar nfes com mais de x dias para evitar perder o prazo e ser multado
+// TODO: substituir itemBoxLoja por comboBoxLoja (copiar de widgetOrcamento)
+// TODO: quando clicar em uma coluna para ordenar na tabela em vez de ordenar localmente pedir para o banco de dados ordenar para ser rápido
+// TODO: criar um cnpj/cpf delegate para formatar o valor na tabela
+// TODO: colocar legenda de cor explicando o que significa cada cor

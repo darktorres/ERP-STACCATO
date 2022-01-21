@@ -450,3 +450,5 @@ void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelInd
 }
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de tranferencia
+// TODO: colocar um botao nessa tela para quando o produto ja chegou e poder marcar direto como recebido
+// TODO: remover o filtro 'estoque' nessa tela de modo de quando buscar uma NFe apareca todas as linhas, seja para um pedido ou estoqueLoja

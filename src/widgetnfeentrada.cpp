@@ -366,3 +366,4 @@ void WidgetNfeEntrada::ajustarGroupBoxStatus() {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
+// TODO: colocar opção de buscar por uma palavra-chave para buscar NFes de um produto especifico, por ex: notebook

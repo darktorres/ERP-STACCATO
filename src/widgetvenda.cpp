@@ -130,6 +130,8 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
+  // TODO: sanitizar SQL aqui em vez de fazer picado?
+
   modelViewVenda.setFilter(filtros.join(" AND "));
 }
 
@@ -322,7 +324,7 @@ void WidgetVenda::fillComboBoxLoja() {
 
     SqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
+    if (not query.exec("SELECT idLoja, descricao FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
   } catch (std::exception &) {

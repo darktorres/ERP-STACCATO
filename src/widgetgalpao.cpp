@@ -659,6 +659,8 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
   // ------------------------------------------------------
 
   for (auto index : selection) {
+    // TODO: imprimir varias etiquetas na mesma folha
+
     const int row = index.row();
 
     //  const int row = selection.first().row();

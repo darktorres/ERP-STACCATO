@@ -64,11 +64,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     }
 
     if (query.first()) {
-      ui->lineEditEmail->setText(query.value("email").toString());
-      ui->lineEditCopia->setText(query.value("emailCopia").toString());
       ui->lineEditServidor->setText(query.value("servidorEmail").toString());
       ui->lineEditPorta->setText(query.value("portaEmail").toString());
+      ui->lineEditEmail->setText(query.value("email").toString());
       ui->lineEditPasswd->setText(query.value("senhaEmail").toString());
+      ui->lineEditCopia->setText(query.value("copiaParaEmail").toString());
     }
   }
 

@@ -125,27 +125,7 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
-  SqlQuery queryLoja;
-  queryLoja.prepare("INSERT INTO config (idConfig, servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica, monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, "
-                    "monitorarServidor2, monitorarPorta2) "
-                    "VALUES (1, :servidorACBr, :portaACBr, :lojaACBr, :emailContabilidade, :emailLogistica, :monitorarCNPJ1, :monitorarServidor1, :monitorarPorta1, :monitorarCNPJ2, "
-                    ":monitorarServidor2, :monitorarPorta2) AS new "
-                    "ON DUPLICATE KEY UPDATE servidorACBr = new.servidorACBr, portaACBr = new.portaACBr, lojaACBr = new.lojaACBr, emailContabilidade = new.emailContabilidade, "
-                    "emailLogistica = new.emailLogistica, monitorarCNPJ1 = new.monitorarCNPJ1, monitorarPorta1 = new.monitorarPorta1, monitorarCNPJ2 = new.monitorarCNPJ2, "
-                    "monitorarServidor2 = new.monitorarServidor2, monitorarPorta2 = new.monitorarPorta2");
-  queryLoja.bindValue(":servidorACBr", ui->lineEditACBrServidor->text());
-  queryLoja.bindValue(":portaACBr", ui->lineEditACBrPorta->text());
-  queryLoja.bindValue(":lojaACBr", ui->itemBoxLoja->getId());
-  queryLoja.bindValue(":emailContabilidade", ui->lineEditEmailContabilidade->text());
-  queryLoja.bindValue(":emailLogistica", ui->lineEditEmailLogistica->text());
-  queryLoja.bindValue(":monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
-  queryLoja.bindValue(":monitorarServidor1", ui->lineEditMonitorarServidor1->text());
-  queryLoja.bindValue(":monitorarPorta1", ui->lineEditMonitorarPorta1->text());
-  queryLoja.bindValue(":monitorarCNPJ2", ui->comboBoxMonitorar2->currentData());
-  queryLoja.bindValue(":monitorarServidor2", ui->lineEditMonitorarServidor2->text());
-  queryLoja.bindValue(":monitorarPorta2", ui->lineEditMonitorarPorta2->text());
-
-  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados da loja: " + queryLoja.lastError().text()); }
+  salvarDadosNFe();
 
   if (not ui->groupBoxAcbr->isHidden()) {
     User::setSetting("User/servidorACBr", ui->lineEditACBrServidor->text());
@@ -167,13 +147,7 @@ void UserConfig::on_pushButtonSalvar_clicked() {
     User::setSetting("User/monitorarPorta2", ui->lineEditMonitorarPorta2->text());
   }
 
-  if (not ui->groupBoxEmail->isHidden()) {
-    User::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
-    User::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
-    User::setSetting("User/emailCompra", ui->lineEditEmail->text());
-    User::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
-    User::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
-  }
+  if (not ui->groupBoxEmail->isHidden()) { salvarDadosEmail(); }
 
   // TODO: caso as pastas estejam vazias usar /arquivos como padrao
   User::setSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
@@ -181,19 +155,6 @@ void UserConfig::on_pushButtonSalvar_clicked() {
   User::setSetting("User/ComprasFolder", ui->lineEditComprasFolder->text());
   User::setSetting("User/EntregasXmlFolder", ui->lineEditEntregasXmlFolder->text());
   User::setSetting("User/EntregasPdfFolder", ui->lineEditEntregasPdfFolder->text());
-
-  SqlQuery queryUsuario;
-  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail) "
-                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail) AS new "
-                       "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail");
-  queryUsuario.bindValue(":idUsuario", User::idUsuario);
-  queryUsuario.bindValue(":servidorEmail", ui->lineEditServidorSMTP->text());
-  queryUsuario.bindValue(":portaEmail", ui->lineEditPortaSMTP->text());
-  queryUsuario.bindValue(":email", ui->lineEditEmail->text());
-  queryUsuario.bindValue(":senhaEmail", ui->lineEditEmailSenha->text());
-  queryUsuario.bindValue(":copiaParaEmail", ui->lineEditEmailCopia->text());
-
-  if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
 
   QDialog::accept();
 
@@ -245,11 +206,7 @@ void UserConfig::on_pushButtonEmailTeste_clicked() {
     throw RuntimeError("Preencha os dados do email!", this);
   }
 
-  User::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
-  User::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
-  User::setSetting("User/emailCompra", ui->lineEditEmail->text());
-  User::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
-  User::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
+  salvarDadosEmail();
 
   auto *mail = new SendMail(SendMail::Tipo::Teste, this);
   mail->setAttribute(Qt::WA_DeleteOnClose);
@@ -266,4 +223,43 @@ void UserConfig::preencherComboBoxMonitorar() {
     ui->comboBoxMonitorar1->addItem(query.value("razaoSocial").toString(), query.value("raiz"));
     ui->comboBoxMonitorar2->addItem(query.value("razaoSocial").toString(), query.value("raiz"));
   }
+}
+
+void UserConfig::salvarDadosEmail() {
+  SqlQuery queryUsuario;
+  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail) "
+                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail) AS new "
+                       "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail");
+  queryUsuario.bindValue(":idUsuario", User::idUsuario);
+  queryUsuario.bindValue(":servidorEmail", ui->lineEditServidorSMTP->text());
+  queryUsuario.bindValue(":portaEmail", ui->lineEditPortaSMTP->text());
+  queryUsuario.bindValue(":email", ui->lineEditEmail->text());
+  queryUsuario.bindValue(":senhaEmail", ui->lineEditEmailSenha->text());
+  queryUsuario.bindValue(":copiaParaEmail", ui->lineEditEmailCopia->text());
+
+  if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
+}
+
+void UserConfig::salvarDadosNFe() {
+  SqlQuery queryLoja;
+  queryLoja.prepare("INSERT INTO config (idConfig, servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica, monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, "
+                    "monitorarServidor2, monitorarPorta2) "
+                    "VALUES (1, :servidorACBr, :portaACBr, :lojaACBr, :emailContabilidade, :emailLogistica, :monitorarCNPJ1, :monitorarServidor1, :monitorarPorta1, :monitorarCNPJ2, "
+                    ":monitorarServidor2, :monitorarPorta2) AS new "
+                    "ON DUPLICATE KEY UPDATE servidorACBr = new.servidorACBr, portaACBr = new.portaACBr, lojaACBr = new.lojaACBr, emailContabilidade = new.emailContabilidade, "
+                    "emailLogistica = new.emailLogistica, monitorarCNPJ1 = new.monitorarCNPJ1, monitorarPorta1 = new.monitorarPorta1, monitorarCNPJ2 = new.monitorarCNPJ2, "
+                    "monitorarServidor2 = new.monitorarServidor2, monitorarPorta2 = new.monitorarPorta2");
+  queryLoja.bindValue(":servidorACBr", ui->lineEditACBrServidor->text());
+  queryLoja.bindValue(":portaACBr", ui->lineEditACBrPorta->text());
+  queryLoja.bindValue(":lojaACBr", ui->itemBoxLoja->getId());
+  queryLoja.bindValue(":emailContabilidade", ui->lineEditEmailContabilidade->text());
+  queryLoja.bindValue(":emailLogistica", ui->lineEditEmailLogistica->text());
+  queryLoja.bindValue(":monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
+  queryLoja.bindValue(":monitorarServidor1", ui->lineEditMonitorarServidor1->text());
+  queryLoja.bindValue(":monitorarPorta1", ui->lineEditMonitorarPorta1->text());
+  queryLoja.bindValue(":monitorarCNPJ2", ui->comboBoxMonitorar2->currentData());
+  queryLoja.bindValue(":monitorarServidor2", ui->lineEditMonitorarServidor2->text());
+  queryLoja.bindValue(":monitorarPorta2", ui->lineEditMonitorarPorta2->text());
+
+  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados da loja: " + queryLoja.lastError().text()); }
 }

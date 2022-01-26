@@ -167,6 +167,17 @@ bool CadastroProfissional::viewRegister() {
 
   //---------------------------------------------------
 
+  const double comissao = data("comissao").toDouble();
+
+  if (comissao > 5) {
+    ui->doubleSpinBoxComissao->setMaximum(comissao);
+    ui->doubleSpinBoxComissao->setValue(comissao);
+  }
+
+  if (not User::isAdmin() and comissao <= 5) { ui->doubleSpinBoxComissao->setMaximum(5); }
+
+  //---------------------------------------------------
+
   const bool inativos = ui->checkBoxMostrarInativos->isChecked();
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
@@ -467,4 +478,12 @@ void CadastroProfissional::connectLineEditsToDirty() {
   const auto children = ui->frame->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroProfissional::marcarDirty); }
+}
+
+bool CadastroProfissional::newRegister() {
+  if (not RegisterAddressDialog::newRegister()) { return false; }
+
+  if (not User::isAdmin()) { ui->doubleSpinBoxComissao->setMaximum(5); }
+
+  return true;
 }

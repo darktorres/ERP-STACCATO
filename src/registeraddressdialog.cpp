@@ -47,6 +47,7 @@ bool RegisterAddressDialog::newRegister() {
 
   currentRowEnd = -1;
 
+  // TODO: replace with exception?
   return true;
 }
 

@@ -25,6 +25,7 @@ private:
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
+  auto newRegister() -> bool override;
   auto novoEndereco() -> void;
   auto on_checkBoxDataNasc_stateChanged(const int state) -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;

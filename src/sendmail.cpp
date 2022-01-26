@@ -42,6 +42,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
       representante = list.join(" ");
 
+      // TODO: porque tem um loop aqui se vai ter apenas um resultado na query?
       do { ui->comboBoxDest->addItem(query.value("email").toString()); } while (query.next());
     }
 

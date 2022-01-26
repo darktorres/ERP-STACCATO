@@ -507,7 +507,11 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 void ImportaProdutos::atualizaPrecoEstoque() {
   SqlQuery query;
 
-  if (not query.exec("UPDATE produto p1, produto p2 SET p2.precoVenda = p1.precoVenda WHERE p2.estoque = 1 AND p1.idProduto = p2.idProdutoRelacionado AND p1.precoVenda <> p2.precoVenda")) {
+  if (not query.exec("UPDATE produto p1, produto p2 "
+                     "SET p2.precoVenda = p1.precoVenda "
+                     "WHERE p1.idFornecedor = p2.idFornecedor AND p1.codComercial = p2.codComercial AND p1.idProduto <> p2.idProduto "
+                     "AND p1.descontinuado = FALSE AND p1.estoque = FALSE AND p1.promocao = FALSE "
+                     "AND p2.estoque = TRUE")) {
     throw RuntimeException("Erro atualizando preço dos estoques: " + query.lastError().text());
   }
 }

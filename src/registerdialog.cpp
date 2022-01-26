@@ -59,7 +59,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 }
 
 bool RegisterDialog::viewRegister() {
-  if (not confirmationMessage()) { return false; }
+  if (not askSaveBeforeClosing()) { return false; }
 
   tipo = Tipo::Atualizar;
 
@@ -88,7 +88,7 @@ void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByte
 
 QString RegisterDialog::requiredStyle() { return (QString("background-color: rgb(255, 255, 127)")); }
 
-void RegisterDialog::closeEvent(QCloseEvent *event) { confirmationMessage() ? event->accept() : event->ignore(); }
+void RegisterDialog::closeEvent(QCloseEvent *event) { askSaveBeforeClosing() ? event->accept() : event->ignore(); }
 
 void RegisterDialog::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
@@ -118,7 +118,7 @@ void RegisterDialog::verifyRequiredField(const QLineEdit &line) {
   if (isEmpty or isZero or isSymbols or isLessMask or isLessPlaceHolder) { throw RuntimeError("Um campo obrigatório não foi preenchido:\n" + line.accessibleName()); }
 }
 
-bool RegisterDialog::confirmationMessage() {
+bool RegisterDialog::askSaveBeforeClosing() {
   if (isDirty) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Deseja salvar as alterações?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgBox.button(QMessageBox::Yes)->setText("Salvar");
@@ -136,7 +136,7 @@ bool RegisterDialog::confirmationMessage() {
 }
 
 bool RegisterDialog::newRegister() {
-  if (not confirmationMessage()) { return false; }
+  if (not askSaveBeforeClosing()) { return false; }
 
   model.setFilter("0");
 

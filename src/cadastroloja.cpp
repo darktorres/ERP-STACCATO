@@ -185,7 +185,7 @@ void CadastroLoja::on_pushButtonNovoCad_clicked() { newRegister(); }
 void CadastroLoja::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroLoja::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdLoja->show();
 }

@@ -332,7 +332,7 @@ void CadastroProfissional::clearEndereco() {
 }
 
 void CadastroProfissional::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdProfissional->show();
 }

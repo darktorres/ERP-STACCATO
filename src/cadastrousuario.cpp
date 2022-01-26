@@ -225,7 +225,7 @@ void CadastroUsuario::on_pushButtonDesativar_clicked() {
 }
 
 void CadastroUsuario::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdUsuario->show();
 }

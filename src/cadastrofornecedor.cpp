@@ -259,7 +259,7 @@ void CadastroFornecedor::on_pushButtonCadastrar_clicked() { save(); }
 void CadastroFornecedor::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroFornecedor::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdFornecedor->show();
 }

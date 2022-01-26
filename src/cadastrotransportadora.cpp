@@ -168,7 +168,7 @@ void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 void CadastroTransportadora::on_pushButtonDesativar_clicked() { remove(); }
 
 void CadastroTransportadora::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdTransportadora->show();
 }

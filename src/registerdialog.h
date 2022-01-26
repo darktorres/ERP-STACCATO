@@ -34,7 +34,7 @@ protected:
   Tipo tipo = Tipo::Cadastrar;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = {}) -> void;
-  auto confirmationMessage() -> bool;
+  auto askSaveBeforeClosing() -> bool;
   auto data(const QString &key) const -> QVariant;
   auto marcarDirty() -> void;
   auto remove() -> void;

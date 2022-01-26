@@ -303,7 +303,7 @@ void CadastroCliente::on_pushButtonDesativar_clicked() { remove(); }
 void CadastroCliente::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroCliente::on_pushButtonBuscar_clicked() {
-  if (not confirmationMessage()) { return; }
+  if (not askSaveBeforeClosing()) { return; }
 
   sdCliente->show();
 }

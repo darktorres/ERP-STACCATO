@@ -42,6 +42,7 @@ private:
   auto buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) -> void;
   auto buscarNSU() -> void;
   auto confirmar(ACBr &acbr, const bool silent) -> void;
+  auto consultarSefaz() -> void;
   auto darCiencia(ACBr &acbr, const bool silent) -> void;
   auto desconhecer(ACBr &acbr, const bool silent) -> void;
   auto downloadAutomatico() -> void;

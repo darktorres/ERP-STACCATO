@@ -179,7 +179,7 @@ void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
 
   // TODO: parametrizar o código do estado em vez de usar 35
-  const QString resposta = acbr.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")");
+  const QString resposta = acbr.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")", "Consultando NF-es do CNPJ " + cnpjDest + "...");
 
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
@@ -500,7 +500,7 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
 
   //----------------------------------------------------------
 
-  const QString resposta = acbr.enviarComando(comando);
+  const QString resposta = acbr.enviarComando(comando, "Enviando evento de " + operacao.toLower() + "...");
 
   if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 

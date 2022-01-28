@@ -83,7 +83,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
 
-  const QString respostaSalvar = enviarComando(R"(NFE.SaveToFile()" + filePath + R"(, ")" + query.value("xml").toString() + R"("))");
+  const QString respostaSalvar = enviarComando(R"(NFE.SaveToFile()" + filePath + R"(, ")" + query.value("xml").toString() + R"("))", "Salvando XML...");
 
   if (not respostaSalvar.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException(respostaSalvar); }
 
@@ -91,7 +91,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   //-------------------------------------------
 
-  const QString respostaConsultar = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
+  const QString respostaConsultar = enviarComando("NFE.ConsultarNFe(" + filePath + ")", "Consultando NF-e...");
 
   //  qDebug() << "respostaConsultar: " << respostaConsultar;
 
@@ -107,7 +107,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   //-------------------------------------------
 
-  QString respostaCarregar = enviarComando("NFe.LoadFromFile(" + filePath + ")");
+  QString respostaCarregar = enviarComando("NFe.LoadFromFile(" + filePath + ")", "Carregando NF-e...");
 
   if (not respostaCarregar.contains("OK", Qt::CaseInsensitive)) { throw RuntimeException(respostaCarregar); }
 
@@ -142,7 +142,7 @@ void ACBr::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-QString ACBr::enviarComando(const QString &comando) {
+QString ACBr::enviarComando(const QString &comando, const QString &labelText) {
   recebido = false;
   enviado = false;
   resposta.clear();
@@ -165,6 +165,7 @@ QString ACBr::enviarComando(const QString &comando) {
     porta = queryConfig.value("portaACBr").toString();
   }
 
+  if (not labelText.isEmpty()) { progressDialog.setLabelText(labelText); }
   if (not qApp->getSilent()) { progressDialog.show(); }
 
   if (not conectado) { socket.connectToHost(servidor, porta.toUShort()); }
@@ -202,7 +203,7 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   Q_UNUSED(emailCopia)
 
   //    const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
-  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')");
+  const QString respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')", "Enviando e-mail...");
 
   // TODO: perguntar se deseja tentar enviar novamente?
   if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) { throw RuntimeException(respostaEmail); }

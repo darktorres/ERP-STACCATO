@@ -33,8 +33,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>114</width>
-        <height>440</height>
+        <width>119</width>
+        <height>426</height>
        </rect>
       </property>
       <property name="autoFillBackground">
@@ -110,14 +110,14 @@
              <item>
               <widget class="QCheckBox" name="checkBox">
                <property name="text">
-                <string>Com NFe</string>
+                <string>Com NF-e</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="checkBox_2">
                <property name="text">
-                <string>Sem NFe</string>
+                <string>Sem NF-e</string>
                </property>
               </widget>
              </item>
@@ -244,7 +244,7 @@
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>Gerar NFe Entrada</string>
+      <string>Gerar NF-e Entrada</string>
      </property>
     </widget>
    </item>

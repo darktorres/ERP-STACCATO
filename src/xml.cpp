@@ -188,12 +188,12 @@ void XML::verificaCNPJ() {
   // usar raiz do primeiro cnpj da tabela loja?
   // guardar raiz em User
 
-  if (tipo == Tipo::Entrada and cnpjDest.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(8) != "09375013") { throw RuntimeError("CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Entrada and cnpjDest.left(8) != "09375013") { throw RuntimeError("CNPJ da NF-e não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(8) != "09375013") { throw RuntimeError("CNPJ da NF-e não é da Staccato!", parent); }
 }
 
 void XML::verificaValido() {
-  if (not fileContent.contains("Autorizado o uso da NF-e")) { throw RuntimeError("NFe não está autorizada pela SEFAZ!", parent); }
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { throw RuntimeError("NF-e não está autorizada pela SEFAZ!", parent); }
 }
 
 void XML::verificaNCMs() {

@@ -127,7 +127,7 @@ void WidgetGare::setupTables() {
   model.setTable("view_gares");
 
   model.setHeaderData("valor", "R$");
-  model.setHeaderData("numeroNFe", "NFe");
+  model.setHeaderData("numeroNFe", "NF-e");
   model.setHeaderData("dataPagamento", "Data Pgt.");
   model.setHeaderData("dataRealizado", "Data Realizado");
   model.setHeaderData("banco", "Banco");
@@ -212,9 +212,9 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe de id: " + model.data(index.row(), "idNFe").toString()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e de id: " + model.data(index.row(), "idNFe").toString()); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }

@@ -311,16 +311,16 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NFe"}, {"xml", "Conteúdo NFe"}, {"chaveAcesso", "Chave Acesso"}};
+  const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NF-e"}, {"xml", "Conteúdo NF-e"}, {"chaveAcesso", "Chave Acesso"}};
 
-  auto *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, fullTextIndex, "", "", true, parent);
+  auto *sdNFe = new SearchDialog("Buscar NF-e", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, fullTextIndex, "", "", true, parent);
 
   sdNFe->ui->table->setAutoResize(false);
 
   sdNFe->hideColumns({"idNFe", "infCpl", "xml"});
   sdNFe->ui->table->showColumn("created");
 
-  sdNFe->setHeaderData("numeroNFe", "NFe");
+  sdNFe->setHeaderData("numeroNFe", "NF-e");
   sdNFe->setHeaderData("status", "Status");
   sdNFe->setHeaderData("chaveAcesso", "Chave Acesso");
   sdNFe->setHeaderData("infCpl", "Inf. Comp.");

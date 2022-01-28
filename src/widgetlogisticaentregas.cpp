@@ -100,7 +100,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelCarga.setHeaderData("dataPrevEnt", "Agendado");
   modelCarga.setHeaderData("modelo", "Veículo");
-  modelCarga.setHeaderData("numeroNFe", "NFe");
+  modelCarga.setHeaderData("numeroNFe", "NF-e");
   modelCarga.setHeaderData("idVenda", "Venda");
   modelCarga.setHeaderData("status", "Status");
   modelCarga.setHeaderData("produtos", "Produtos");
@@ -277,7 +277,7 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
-  const bool isValid = (nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
+  const bool isValid = (nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADA");
 
   ui->pushButtonConsultarNFe->setEnabled(isValid);
 }
@@ -471,11 +471,11 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
 void WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QString &xml) {
   SqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  query.prepare("UPDATE nfe SET status = 'AUTORIZADA', xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro alterando status NF-e: " + query.lastError().text()); }
 
   SqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
@@ -494,7 +494,7 @@ void WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QStrin
     query2.bindValue(":idNFeSaida", idNFe);
     query2.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
-    if (not query2.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query2.lastError().text()); }
+    if (not query2.exec()) { throw RuntimeException("Erro salvando NF-e nos produtos: " + query2.lastError().text()); }
 
     query3.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
     query3.bindValue(":idNFeSaida", idNFe);
@@ -716,9 +716,9 @@ void WidgetLogisticaEntregas::on_tableCarga_doubleClicked(const QModelIndex &ind
 
   const QString header = modelCarga.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "NFe") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeSaida")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeSaida")); }
 
-  if (header == "NFe Futura") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeFutura")); }
+  if (header == "NF-e Futura") { return qApp->abrirNFe(modelCarga.data(index.row(), "idNFeFutura")); }
 
   if (header == "Venda") { return qApp->abrirVenda(modelCarga.data(index.row(), "idVenda")); }
 }

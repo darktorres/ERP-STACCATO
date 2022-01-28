@@ -89,7 +89,7 @@ void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
 void WidgetNfeSaida::setupTables() {
-  // TODO: mudar view para puxar apenas as NFes com cnpjOrig igual a raiz da staccato
+  // TODO: mudar view para puxar apenas as NF-es com cnpjOrig igual a raiz da staccato
   model.setTable("view_nfe_saida");
 
   model.setHeaderData("valor", "R$");
@@ -110,9 +110,9 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com id: " + model.data(index.row(), "idNFe").toString()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: " + model.data(index.row(), "idNFe").toString()); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -227,7 +227,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   // -------------------------------------------------------------------------
 
   //  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
-  //  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  //  const QString assunto = "Cancelamento NF-e - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
@@ -263,7 +263,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   view.setTable("view_relatorio_nfe");
 
   // TODO: trocar 'Criado em' por 'DataEmissao'
-  view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
+  view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADA')");
 
   view.select();
 
@@ -274,7 +274,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   // TODO: trocar 'Criado em' por 'DataEmissao'
   SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
-                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
+                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADA')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
@@ -327,7 +327,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe com chave: " + chaveAcesso); }
+    if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com chave de acesso: " + chaveAcesso); }
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
@@ -408,7 +408,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
   QString status;
 
-  if (resposta.contains("XMotivo=Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADO"; }
+  if (resposta.contains("XMotivo=Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADA"; }
   if (resposta.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive)) { status = "CANCELADA"; }
   if (resposta.contains("XMotivo=Uso Denegado", Qt::CaseInsensitive)) { status = "DENEGADA"; }
 
@@ -420,7 +420,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro atualizando XML da NF-e: " + query.lastError().text()); }
 }
 
 void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
@@ -428,19 +428,19 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   query.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { throw RuntimeException("Erro marcando NFe como cancelada: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro marcando NF-e como cancelada: " + query.lastError().text()); }
 
   const int idNFe = model.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro removendo NFe da venda_produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro removendo NF-e da venda_produto: " + query.lastError().text()); }
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro removendo NFe do veiculo_produto: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro removendo NF-e do veiculo_produto: " + query.lastError().text()); }
 }
 
 void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
@@ -474,4 +474,4 @@ void WidgetNfeSaida::ajustarGroupBoxStatus() {
 
 // TODO: 2tela para importar notas de amostra (aba separada)
 // TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)
-// TODO: alterar status das NFes para feminino -> autorizada, pendente, cancelada, denegada
+// TODO: alterar status das NF-es para feminino -> autorizada, pendente, cancelada, denegada

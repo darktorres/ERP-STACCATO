@@ -202,7 +202,7 @@ void Contas::setupTables() {
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
   modelPendentes.setHeaderData("idVenda", "Venda");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
-  modelPendentes.setHeaderData("nfe", "NFe");
+  modelPendentes.setHeaderData("nfe", "NF-e");
   modelPendentes.setHeaderData("valor", "R$");
   modelPendentes.setHeaderData("tipo", "Tipo");
   modelPendentes.setHeaderData("parcela", "Parcela");
@@ -269,7 +269,7 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
   modelProcessados.setHeaderData("idVenda", "Venda");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
-  modelProcessados.setHeaderData("nfe", "NFe");
+  modelProcessados.setHeaderData("nfe", "NF-e");
   modelProcessados.setHeaderData("valor", "R$");
   modelProcessados.setHeaderData("tipo", "Tipo");
   modelProcessados.setHeaderData("parcela", "Parcela");

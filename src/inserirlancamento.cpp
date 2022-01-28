@@ -37,7 +37,7 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
   modelContaPagamento.setHeaderData("idLoja", "Centro Custo");
   modelContaPagamento.setHeaderData("contraParte", "ContraParte");
-  modelContaPagamento.setHeaderData("nfe", "NFe");
+  modelContaPagamento.setHeaderData("nfe", "NF-e");
   modelContaPagamento.setHeaderData("valor", "R$");
   modelContaPagamento.setHeaderData("tipo", "Tipo");
   modelContaPagamento.setHeaderData("parcela", "Parcela");

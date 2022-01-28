@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>525</width>
-    <height>751</height>
+    <height>776</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -316,7 +316,7 @@
    <item row="0" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBoxAcbr">
      <property name="title">
-      <string>Emissor de NFe - ACBr</string>
+      <string>Emissor de NF-e - ACBr</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -406,7 +406,7 @@
    <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBoxDownloadNFe">
      <property name="title">
-      <string>Download automático de NFes</string>
+      <string>Download automático de NF-es</string>
      </property>
      <property name="checkable">
       <bool>true</bool>

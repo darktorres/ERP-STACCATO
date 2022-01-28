@@ -268,7 +268,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     model.setHeaderData("cp_idVenda", "Venda");
     model.setHeaderData("pf2_idVenda", "Venda");
     model.setHeaderData("ordemCompra", "OC");
-    model.setHeaderData("numeroNFe", "NFe");
+    model.setHeaderData("numeroNFe", "NF-e");
     model.setHeaderData("codFornecedor", "Cód. Forn.");
   }
 

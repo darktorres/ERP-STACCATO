@@ -1481,10 +1481,10 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   QSqlQuery query;
 
   if (not query.exec("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = " + idVendaProduto2 + "))")) {
-    throw RuntimeException("Erro buscando NFe: " + query.lastError().text());
+    throw RuntimeException("Erro buscando NF-e: " + query.lastError().text());
   }
 
-  if (not query.first()) { throw RuntimeError("Linha não possui NFe!"); }
+  if (not query.first()) { throw RuntimeError("Linha não possui NF-e!"); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }

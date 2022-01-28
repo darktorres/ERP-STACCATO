@@ -212,7 +212,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 }
 
 void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(const bool checked) {
-  ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
+  ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NF-e");
   montaFiltro();
 }
 

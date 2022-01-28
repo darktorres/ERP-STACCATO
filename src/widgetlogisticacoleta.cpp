@@ -74,7 +74,7 @@ void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setHeaderData("lote", "Lote");
   modelViewColeta.setHeaderData("local", "Local");
   modelViewColeta.setHeaderData("bloco", "Bloco");
-  modelViewColeta.setHeaderData("numeroNFe", "NFe");
+  modelViewColeta.setHeaderData("numeroNFe", "NF-e");
   modelViewColeta.setHeaderData("idVenda", "Venda");
   modelViewColeta.setHeaderData("ordemCompra", "OC");
   modelViewColeta.setHeaderData("produto", "Produto");
@@ -296,7 +296,7 @@ void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
 
   if (header == "Estoque") { return qApp->abrirEstoque(modelViewColeta.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { return qApp->abrirNFe(modelViewColeta.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelViewColeta.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
     QStringList ids = modelViewColeta.data(index.row(), "idVenda").toString().split(", ");

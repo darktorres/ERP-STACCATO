@@ -75,9 +75,9 @@ void WidgetDevolucao::setupTables() {
 
   model.setHeaderData("status", "Status");
   model.setHeaderData("statusOriginal", "Status Original");
-  model.setHeaderData("idNFeSaida", "NFe Saida");
-  model.setHeaderData("idNFeEntrada", "NFe Entrada");
-  model.setHeaderData("idNFeFutura", "NFe Futura");
+  model.setHeaderData("idNFeSaida", "NF-e Saida");
+  model.setHeaderData("idNFeEntrada", "NF-e Entrada");
+  model.setHeaderData("idNFeFutura", "NF-e Futura");
   model.setHeaderData("idVenda", "Venda");
   model.setHeaderData("produto", "Produto");
   model.setHeaderData("obs", "Obs.");
@@ -109,13 +109,13 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   const int idNFeSaida = model.data(row, "idNFeSaida").toInt();
 
-  if (idNFeSaida == 0) { throw RuntimeError("Linha não possui NFe de saída!", this); }
+  if (idNFeSaida == 0) { throw RuntimeError("Linha não possui NF-e de saída!", this); }
 
   // -------------------------------------------------------------------------
 
   const int idNFeEntrada = model.data(row, "idNFeEntrada").toInt();
 
-  if (idNFeEntrada != 0) { throw RuntimeError("Linha já possui NFe de entrada!", this); }
+  if (idNFeEntrada != 0) { throw RuntimeError("Linha já possui NF-e de entrada!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   nfes.removeDuplicates();
 
-  if (nfes.size() > 1) { throw RuntimeError("Selecionado mais de uma NFe de saída!"); }
+  if (nfes.size() > 1) { throw RuntimeError("Selecionado mais de uma NF-e de saída!"); }
 
   // -------------------------------------------------------------------------
 

@@ -125,26 +125,12 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
-  salvarDadosNFe();
-
-  if (not ui->groupBoxAcbr->isHidden()) {
-    User::setSetting("User/servidorACBr", ui->lineEditACBrServidor->text());
-    User::setSetting("User/portaACBr", ui->lineEditACBrPorta->text());
-    User::setSetting("User/lojaACBr", ui->itemBoxLoja->getId());
-    User::setSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
-    User::setSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());
-  }
+  if (not ui->groupBoxAcbr->isHidden()) { salvarDadosEmissorNFe(); }
 
   if (not ui->groupBoxDownloadNFe->isHidden()) {
     User::setSetting("User/monitorarNFe", ui->groupBoxDownloadNFe->isChecked());
 
-    User::setSetting("User/monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
-    User::setSetting("User/monitorarServidor1", ui->lineEditMonitorarServidor1->text());
-    User::setSetting("User/monitorarPorta1", ui->lineEditMonitorarPorta1->text());
-
-    User::setSetting("User/monitorarCNPJ2", ui->comboBoxMonitorar2->currentData());
-    User::setSetting("User/monitorarServidor2", ui->lineEditMonitorarServidor2->text());
-    User::setSetting("User/monitorarPorta2", ui->lineEditMonitorarPorta2->text());
+    salvarDadosMonitorNFe();
   }
 
   if (not ui->groupBoxEmail->isHidden()) { salvarDadosEmail(); }
@@ -240,20 +226,27 @@ void UserConfig::salvarDadosEmail() {
   if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
 }
 
-void UserConfig::salvarDadosNFe() {
+void UserConfig::salvarDadosEmissorNFe() {
   SqlQuery queryLoja;
-  queryLoja.prepare("INSERT INTO config (idConfig, servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica, monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, "
-                    "monitorarServidor2, monitorarPorta2) "
-                    "VALUES (1, :servidorACBr, :portaACBr, :lojaACBr, :emailContabilidade, :emailLogistica, :monitorarCNPJ1, :monitorarServidor1, :monitorarPorta1, :monitorarCNPJ2, "
-                    ":monitorarServidor2, :monitorarPorta2) AS new "
-                    "ON DUPLICATE KEY UPDATE servidorACBr = new.servidorACBr, portaACBr = new.portaACBr, lojaACBr = new.lojaACBr, emailContabilidade = new.emailContabilidade, "
-                    "emailLogistica = new.emailLogistica, monitorarCNPJ1 = new.monitorarCNPJ1, monitorarPorta1 = new.monitorarPorta1, monitorarCNPJ2 = new.monitorarCNPJ2, "
-                    "monitorarServidor2 = new.monitorarServidor2, monitorarPorta2 = new.monitorarPorta2");
+  queryLoja.prepare(
+      "INSERT INTO config (idConfig, servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica) "
+      "VALUES (1, :servidorACBr, :portaACBr, :lojaACBr, :emailContabilidade, :emailLogistica) AS new "
+      "ON DUPLICATE KEY UPDATE servidorACBr = new.servidorACBr, portaACBr = new.portaACBr, lojaACBr = new.lojaACBr, emailContabilidade = new.emailContabilidade, emailLogistica = new.emailLogistica");
   queryLoja.bindValue(":servidorACBr", ui->lineEditACBrServidor->text());
   queryLoja.bindValue(":portaACBr", ui->lineEditACBrPorta->text());
   queryLoja.bindValue(":lojaACBr", ui->itemBoxLoja->getId());
   queryLoja.bindValue(":emailContabilidade", ui->lineEditEmailContabilidade->text());
   queryLoja.bindValue(":emailLogistica", ui->lineEditEmailLogistica->text());
+
+  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados do emissor de NF-e: " + queryLoja.lastError().text()); }
+}
+
+void UserConfig::salvarDadosMonitorNFe() {
+  SqlQuery queryLoja;
+  queryLoja.prepare("INSERT INTO config (idConfig, monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2) "
+                    "VALUES (1, :monitorarCNPJ1, :monitorarServidor1, :monitorarPorta1, :monitorarCNPJ2, :monitorarServidor2, :monitorarPorta2) AS new "
+                    "ON DUPLICATE KEY UPDATE monitorarCNPJ1 = new.monitorarCNPJ1, monitorarServidor1 = new.monitorarServidor1, monitorarPorta1 = new.monitorarPorta1, "
+                    "monitorarCNPJ2 = new.monitorarCNPJ2, monitorarServidor2 = new.monitorarServidor2, monitorarPorta2 = new.monitorarPorta2");
   queryLoja.bindValue(":monitorarCNPJ1", ui->comboBoxMonitorar1->currentData());
   queryLoja.bindValue(":monitorarServidor1", ui->lineEditMonitorarServidor1->text());
   queryLoja.bindValue(":monitorarPorta1", ui->lineEditMonitorarPorta1->text());
@@ -261,5 +254,5 @@ void UserConfig::salvarDadosNFe() {
   queryLoja.bindValue(":monitorarServidor2", ui->lineEditMonitorarServidor2->text());
   queryLoja.bindValue(":monitorarPorta2", ui->lineEditMonitorarPorta2->text());
 
-  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados da loja: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados do monitor de NF-e: " + queryLoja.lastError().text()); }
 }

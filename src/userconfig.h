@@ -29,6 +29,7 @@ private:
   auto on_pushButtonVendasFolder_clicked() -> void;
   auto preencherComboBoxMonitorar() -> void;
   auto salvarDadosEmail() -> void;
-  auto salvarDadosNFe() -> void;
+  auto salvarDadosEmissorNFe() -> void;
+  auto salvarDadosMonitorNFe() -> void;
   auto setConnections() -> void;
 };

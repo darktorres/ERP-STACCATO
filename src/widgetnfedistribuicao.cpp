@@ -23,38 +23,17 @@ WidgetNFeDistribuicao::~WidgetNFeDistribuicao() { delete ui; }
 
 void WidgetNFeDistribuicao::downloadAutomatico() {
   if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
-  if (houveConsultaEmOutroPc()) { return; }
 
   timer.stop();
 
+  // TODO: is this still needed?
   updateTables();
 
   qDebug() << "download Automatico";
   qApp->setSilent(true);
 
   try {
-    SqlQuery query;
-
-    if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
-      throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
-    }
-
-    if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
-
-    const QString cnpj1 = query.value("monitorarCNPJ1").toString();
-    const QString cnpj2 = query.value("monitorarCNPJ2").toString();
-    const QString servidor1 = query.value("monitorarServidor1").toString();
-    const QString servidor2 = query.value("monitorarServidor2").toString();
-    const QString porta1 = query.value("monitorarPorta1").toString();
-    const QString porta2 = query.value("monitorarPorta2").toString();
-
-    if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
-    if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
-
-    qDebug() << "maintenance";
-    SqlQuery queryMaintenance;
-
-    if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
+    consultarSefaz();
   } catch (std::exception &) {
     qApp->setSilent(false);
     timer.start(tempoTimer);
@@ -183,30 +162,17 @@ void WidgetNFeDistribuicao::setupTables() {
 }
 
 void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
-  SqlQuery query;
+  timer.stop();
 
-  if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
-    throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
+  try {
+    consultarSefaz();
+    qApp->enqueueInformation("Operação realizada com sucesso!", this);
+  } catch (std::exception &) {
+    timer.start(tempoTimer);
+    throw;
   }
 
-  if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
-
-  const QString cnpj1 = query.value("monitorarCNPJ1").toString();
-  const QString cnpj2 = query.value("monitorarCNPJ2").toString();
-  const QString servidor1 = query.value("monitorarServidor1").toString();
-  const QString servidor2 = query.value("monitorarServidor2").toString();
-  const QString porta1 = query.value("monitorarPorta1").toString();
-  const QString porta2 = query.value("monitorarPorta2").toString();
-
-  if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
-  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
-
-  qDebug() << "maintenance";
-  SqlQuery queryMaintenance;
-
-  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
-
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
+  timer.start(tempoTimer);
 }
 
 void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
@@ -276,6 +242,8 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
     ultimoNSU = queryCnpj.value("ultimoNSU").toInt();
     maximoNSU = queryCnpj.value("maximoNSU").toInt();
 
+    if (houveConsultaEmOutroPc()) { continue; }
+
     enviarComando(acbr);
 
     //----------------------------------------------------------
@@ -293,6 +261,15 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
     desconhecer(acbr, true);
     qDebug() << "naoRealizar";
     naoRealizar(acbr, true);
+
+    //----------------------------------------------------------
+
+    qDebug() << "maintenance";
+    SqlQuery queryMaintenance;
+
+    if (not queryMaintenance.exec("UPDATE loja SET lastDistribuicao = NOW() WHERE idLoja = " + idLoja)) {
+      throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this);
+    }
   }
 
   qDebug() << "end pesquisa: " << cnpjRaiz;
@@ -853,11 +830,13 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
 bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM maintenance")) {
+  if (not query.exec("SELECT lastDistribuicao IS NULL, timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM loja WHERE idLoja = " + idLoja)) {
     throw RuntimeException("Erro buscando última consulta: " + query.lastError().text(), this);
   }
 
   if (not query.first()) { throw RuntimeException("Última consulta não encontrada!", this); }
+
+  if (query.value("lastDistribuicao IS NULL").toBool()) { return false; }
 
   return query.value("tempo").toInt() < 60;
 }
@@ -877,6 +856,31 @@ void WidgetNFeDistribuicao::ajustarGroupBoxStatus() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetNFeDistribuicao::consultarSefaz() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
+    throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
+  }
+
+  if (not query.first()) { throw RuntimeError("Dados não configurados para o monitor de NF-e!"); }
+
+  const QString cnpj1 = query.value("monitorarCNPJ1").toString();
+  const QString cnpj2 = query.value("monitorarCNPJ2").toString();
+  const QString servidor1 = query.value("monitorarServidor1").toString();
+  const QString servidor2 = query.value("monitorarServidor2").toString();
+  const QString porta1 = query.value("monitorarPorta1").toString();
+  const QString porta2 = query.value("monitorarPorta2").toString();
+
+  if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
+  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
+
+  qDebug() << "maintenance";
+  SqlQuery queryMaintenance;
+
+  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
 }
 
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

@@ -36,14 +36,14 @@
      <item row="0" column="0">
       <widget class="QPushButton" name="pushButtonCancelarNFe">
        <property name="text">
-        <string>Cancelar NFe</string>
+        <string>Cancelar NF-e</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QPushButton" name="pushButtonConsultarNFe">
        <property name="text">
-        <string>Consultar NFe</string>
+        <string>Consultar NF-e</string>
        </property>
       </widget>
      </item>
@@ -68,7 +68,7 @@
       <bool>true</bool>
      </property>
      <property name="placeholderText">
-      <string>NFe/Venda/CPF/CNPJ/Cliente</string>
+      <string>NF-e/Venda/CPF/CNPJ/Cliente</string>
      </property>
     </widget>
    </item>
@@ -152,7 +152,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Autorizado</string>
+            <string>Autorizada</string>
            </property>
            <property name="checked">
             <bool>true</bool>

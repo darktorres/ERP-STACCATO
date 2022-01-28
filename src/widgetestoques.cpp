@@ -53,7 +53,7 @@ void WidgetEstoques::setHeaderData() {
   model.setHeaderData("local", "Local");
   model.setHeaderData("label", "Bloco");
   model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("nfe", "NFe");
+  model.setHeaderData("nfe", "NF-e");
   model.setHeaderData("dataPrevColeta", "Prev. Coleta");
   model.setHeaderData("dataRealColeta", "Coleta");
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");

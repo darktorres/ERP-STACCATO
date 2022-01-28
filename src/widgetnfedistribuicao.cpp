@@ -148,7 +148,7 @@ void WidgetNFeDistribuicao::unsetConnections() {
 void WidgetNFeDistribuicao::setupTables() {
   model.setTable("view_nfe_distribuicao");
 
-  model.setHeaderData("numeroNFe", "NFe");
+  model.setHeaderData("numeroNFe", "NF-e");
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("status", "Status");
   model.setHeaderData("emitente", "Emitente");
@@ -236,7 +236,7 @@ void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
 
 void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) {
   // 1. chamar funcao DistribuicaoDFePorUltNSU no ACBr
-  // 2. guardar resumo e eventos das NFes retornadas
+  // 2. guardar resumo e eventos das NF-es retornadas
   // 3. enquanto maxNSU != ultNSU repetir os passos
   // 4. fazer evento de ciencia para cada nota
   // 5. repetir passo 1 para pegar os xmls das notas
@@ -551,7 +551,7 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
                          "ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
                          "WHERE chaveAcesso = '" +
                          chaveAcesso + "'")) {
-        throw RuntimeException("Erro atualizando statusDistribuicao da NFe: " + query.lastError().text());
+        throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
       continue;
@@ -564,7 +564,7 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
                          "ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
                          "WHERE chaveAcesso = '" +
                          chaveAcesso + "'")) {
-        throw RuntimeException("Erro atualizando statusDistribuicao da NFe: " + query.lastError().text());
+        throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
       continue;
@@ -577,7 +577,7 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
                          "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
                          "WHERE chaveAcesso = '" +
                          chaveAcesso + "'")) {
-        throw RuntimeException("Erro atualizando statusDistribuicao da NFe: " + query.lastError().text());
+        throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
       continue;
@@ -600,9 +600,9 @@ void WidgetNFeDistribuicao::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: " + model.data(index.row(), "idNFe").toString(), this); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -725,14 +725,14 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
 
   SqlQuery queryNFe;
 
-  if (not queryNFe.exec("SELECT status FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) { throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryNFe.lastError().text()); }
+  if (not queryNFe.exec("SELECT status FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) { throw RuntimeException("Erro verificando se NF-e já cadastrada: " + queryNFe.lastError().text()); }
 
   const bool cadastrado = queryNFe.first();
 
   //----------------------------------------------------------
 
   if (not cadastrado) {
-    const QString status = (schemaEvento == "procNFe") ? "AUTORIZADO" : "RESUMO";
+    const QString status = (schemaEvento == "procNFe") ? "AUTORIZADA" : "RESUMO";
     const QString ciencia = (schemaEvento == "procNFe") ? "0" : "1";
 
     SqlQuery queryCadastrar;
@@ -753,7 +753,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     queryCadastrar.bindValue(":nsu", nsu);
     queryCadastrar.bindValue(":ciencia", ciencia);
 
-    if (not queryCadastrar.exec()) { throw RuntimeException("Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text()); }
+    if (not queryCadastrar.exec()) { throw RuntimeException("Erro cadastrando resumo da NF-e: " + queryCadastrar.lastError().text()); }
 
     return;
   }
@@ -762,10 +762,10 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
   if (cadastrado) {
     const QString statusCadastrado = queryNFe.value("status").toString();
 
-    if (schemaEvento == "resNFe" or statusCadastrado == "AUTORIZADO") { return; }
+    if (schemaEvento == "resNFe" or statusCadastrado == "AUTORIZADA") { return; }
 
     SqlQuery queryAtualizar;
-    queryAtualizar.prepare("UPDATE nfe SET xml = :xml, status = 'AUTORIZADO', transportadora = :transportadora, infCpl = :infCpl, nsu = :nsu WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
+    queryAtualizar.prepare("UPDATE nfe SET xml = :xml, status = 'AUTORIZADA', transportadora = :transportadora, infCpl = :infCpl, nsu = :nsu WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
     queryAtualizar.bindValue(":xml", xml);
     queryAtualizar.bindValue(":transportadora", encontraTransportadora(xml));
     queryAtualizar.bindValue(":infCpl", encontraInfCpl(xml));
@@ -778,7 +778,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
   }
 
   // TODO: unreachable code
-  throw RuntimeException("Evento de NFe não tratado: " + evento);
+  throw RuntimeException("Evento de NF-e não tratado: " + evento);
 }
 
 void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
@@ -795,7 +795,7 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
   SqlQuery queryNFe;
 
   if (not queryNFe.exec("SELECT nsu, statusDistribuicao FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-    throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryNFe.lastError().text());
+    throw RuntimeException("Erro verificando se NF-e já cadastrada: " + queryNFe.lastError().text());
   }
 
   const bool cadastrado = queryNFe.first();
@@ -804,7 +804,7 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
     const int nsuCadastrado = queryNFe.value("nsu").toInt();
     const QString statusCadastrado = queryNFe.value("statusDistribuicao").toString();
 
-    if (nsuCadastrado == 0) { return; } // se NFe foi importada manualmente não fazer eventos de ciência
+    if (nsuCadastrado == 0) { return; } // se NF-e foi importada manualmente não fazer eventos de ciência
 
     if (motivo.contains("Evento registrado e vinculado a NF-e", Qt::CaseInsensitive)) {
       if (eventoTipo == "Ciencia da Operacao" and statusCadastrado == "DESCONHECIDO") {

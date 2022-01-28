@@ -521,7 +521,7 @@
                 <item>
                  <widget class="QLineEdit" name="lineEditBuscaPallet">
                   <property name="placeholderText">
-                   <string>Produto/Código/NFe/Lote/Pedido</string>
+                   <string>Produto/Código/NF-e/Lote/Pedido</string>
                   </property>
                  </widget>
                 </item>
@@ -609,14 +609,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
    <class>ViewGalpao</class>

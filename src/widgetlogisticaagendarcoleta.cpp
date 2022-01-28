@@ -51,7 +51,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("bloco", "Bloco");
-  modelEstoque.setHeaderData("numeroNFe", "NFe");
+  modelEstoque.setHeaderData("numeroNFe", "NF-e");
   modelEstoque.setHeaderData("idVenda", "Venda");
   modelEstoque.setHeaderData("ordemCompra", "OC");
   modelEstoque.setHeaderData("produto", "Produto");
@@ -436,7 +436,7 @@ void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelInd
 
   if (header == "Estoque") { return qApp->abrirEstoque(modelEstoque.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { return qApp->abrirNFe(modelEstoque.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelEstoque.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
     const QStringList ids = modelEstoque.data(index.row(), "idVenda").toString().split(", ");
@@ -451,4 +451,4 @@ void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelInd
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de tranferencia
 // TODO: colocar um botao nessa tela para quando o produto ja chegou e poder marcar direto como recebido
-// TODO: remover o filtro 'estoque' nessa tela de modo de quando buscar uma NFe apareca todas as linhas, seja para um pedido ou estoqueLoja
+// TODO: remover o filtro 'estoque' nessa tela de modo de quando buscar uma NF-e apareca todas as linhas, seja para um pedido ou estoqueLoja

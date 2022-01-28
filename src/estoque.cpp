@@ -171,9 +171,9 @@ void Estoque::exibirNota() {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando NFe: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { return qApp->enqueueWarning("Não encontrou NFe associada!", this); }
+  if (not query.first()) { return qApp->enqueueWarning("Não encontrou NF-e associada!", this); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }

@@ -400,7 +400,7 @@
       <property name="handleWidth">
        <number>15</number>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="labelEntregasCliente">
@@ -463,8 +463,8 @@
               </brush>
              </colorrole>
              <colorrole role="PlaceholderText">
-              <brush brushstyle="NoBrush">
-               <color alpha="128">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
                 <red>255</red>
                 <green>0</green>
                 <blue>0</blue>
@@ -510,8 +510,8 @@
               </brush>
              </colorrole>
              <colorrole role="PlaceholderText">
-              <brush brushstyle="NoBrush">
-               <color alpha="128">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
                 <red>255</red>
                 <green>0</green>
                 <blue>0</blue>
@@ -557,8 +557,8 @@
               </brush>
              </colorrole>
              <colorrole role="PlaceholderText">
-              <brush brushstyle="NoBrush">
-               <color alpha="128">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
                 <red>255</red>
                 <green>0</green>
                 <blue>0</blue>
@@ -651,7 +651,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="TableView" name="tableProdutos">
@@ -775,14 +775,14 @@
             <item>
              <widget class="QPushButton" name="pushButtonImportarNFe">
               <property name="text">
-               <string>Importar NFe</string>
+               <string>Importar NF-e</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButtonGerarNFeFutura">
               <property name="text">
-               <string>Gerar NFe Futura</string>
+               <string>Gerar NF-e Futura</string>
               </property>
              </widget>
             </item>
@@ -1056,14 +1056,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
    <class>ScrollArea</class>

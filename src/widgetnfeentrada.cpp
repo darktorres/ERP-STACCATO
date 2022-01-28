@@ -84,7 +84,7 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
 void WidgetNfeEntrada::setupTables() {
   // TODO: arrumar a coluna n.tipo pois as nfes de tipo 'ENTRADA' de fornecedor são na verdade nfes de saída
-  // TODO: mudar view para puxar apenas as NFes com cnpjDest igual a raiz da staccato
+  // TODO: mudar view para puxar apenas as NF-es com cnpjDest igual a raiz da staccato
   model.setTable("view_nfe_entrada");
 
   model.setHeaderData("utilizada", "Utilizada");
@@ -111,9 +111,9 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML da NFe com id: " + model.data(index.row(), "idNFe").toString(), this); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: " + model.data(index.row(), "idNFe").toString(), this); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -187,11 +187,11 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 
   if (not query.exec()) { throw RuntimeException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
-  if (query.size() > 0) { throw RuntimeError("NFe possui itens 'EM ENTREGA/ENTREGUE'!", this); }
+  if (query.size() > 0) { throw RuntimeError("NF-e possui itens 'EM ENTREGA/ENTREGUE'!", this); }
 
   //--------------------------------------------------------------
 
-  if (model.data(row, "nsu").toInt() > 0 and not model.data(row, "utilizada").toBool()) { throw RuntimeError("NFe não utilizada!", this); }
+  if (model.data(row, "nsu").toInt() > 0 and not model.data(row, "utilizada").toBool()) { throw RuntimeError("NF-e não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -289,7 +289,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
   queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE WHERE idNFe = :idNFe");
   queryUpdateNFe.bindValue(":idNFe", model.data(row, "idNFe"));
 
-  if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NFe como não utilizada: " + queryUpdateNFe.lastError().text()); }
+  if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NF-e como não utilizada: " + queryUpdateNFe.lastError().text()); }
 }
 
 void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
@@ -316,9 +316,9 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-    if (not query.first()) { throw RuntimeException("Não encontrou XML da NFe com chave: " + chaveAcesso); }
+    if (not query.first()) { throw RuntimeException("Não encontrou XML da NF-e com chave de acesso: " + chaveAcesso); }
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
@@ -366,4 +366,4 @@ void WidgetNfeEntrada::ajustarGroupBoxStatus() {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
-// TODO: colocar opção de buscar por uma palavra-chave para buscar NFes de um produto especifico, por ex: notebook
+// TODO: colocar opção de buscar por uma palavra-chave para buscar NF-es de um produto especifico, por ex: notebook

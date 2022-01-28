@@ -399,7 +399,7 @@ void ImportarXML::atualizarNFes() {
     SqlQuery query;
 
     if (not query.exec("UPDATE nfe SET gare = IF(gare IS NULL, " + QString::number(iterator.value()) + ", gare), utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
-      throw RuntimeException("Erro atualizando dados da NFe: " + query.lastError().text());
+      throw RuntimeException("Erro atualizando dados da NF-e: " + query.lastError().text());
     }
 
     iterator++;
@@ -636,7 +636,7 @@ void ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
 bool ImportarXML::verificaExiste(const XML &xml) {
   const auto list = modelNFe.multiMatch({{"chaveAcesso", xml.chaveAcesso}}, false);
 
-  if (not list.isEmpty()) { throw RuntimeError("Nota já cadastrada!", this); }
+  if (not list.isEmpty()) { throw RuntimeError("NF-e já cadastrada!", this); }
 
   // ----------------------------------------------------------------
 
@@ -644,16 +644,16 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   query.prepare("SELECT status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando se NF-e já cadastrada: " + query.lastError().text()); }
 
   if (query.first()) {
-    if (query.value("utilizada").toBool()) { throw RuntimeError("Nota já utilizada!", this); }
+    if (query.value("utilizada").toBool()) { throw RuntimeError("NF-e já utilizada!", this); }
 
-    if (query.value("status").toString() == "CANCELADA") { throw RuntimeError("Nota cancelada!", this); }
+    if (query.value("status").toString() == "CANCELADA") { throw RuntimeError("NF-e cancelada!", this); }
 
     if (query.value("status").toString() == "RESUMO") {
       SqlQuery queryAtualiza;
-      queryAtualiza.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso");
+      queryAtualiza.prepare("UPDATE nfe SET status = 'AUTORIZADA', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso");
       queryAtualiza.bindValue(":xml", xml.fileContent);
       queryAtualiza.bindValue(":transportadora", xml.xNomeTransp);
       queryAtualiza.bindValue(":infCpl", encontraInfCpl(xml.fileContent));
@@ -706,9 +706,9 @@ void ImportarXML::usarXMLInutilizado() {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NFe com chave: " + ui->itemBoxNFe->text()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com chave de acesso: " + ui->itemBoxNFe->text()); }
 
-  if (query.value("status").toString() != "AUTORIZADO") { throw RuntimeError("NFe não está autorizada!", this); }
+  if (query.value("status").toString() != "AUTORIZADA") { throw RuntimeError("NF-e não está autorizada!", this); }
 
   const auto fileContent = query.value("xml").toString();
 
@@ -717,7 +717,7 @@ void ImportarXML::usarXMLInutilizado() {
   XML xml(fileContent, XML::Tipo::Entrada, this);
 
   // verifica se já cadastrado dentre as notas utilizadas nessa importacao
-  if (mapNFes.contains(xml.chaveAcesso)) { throw RuntimeError("Nota já cadastrada!", this); }
+  if (mapNFes.contains(xml.chaveAcesso)) { throw RuntimeError("NF-e já cadastrada!", this); }
 
   xml.verificaNCMs();
 

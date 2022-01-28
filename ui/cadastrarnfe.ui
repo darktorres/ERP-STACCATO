@@ -61,7 +61,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Enviar NFe</string>
+        <string>Enviar NF-e</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -99,7 +99,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>NFe</string>
+          <string>NF-e</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_35">
           <item row="1" column="1">
@@ -1071,7 +1071,7 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1009</width>
+                <width>1004</width>
                 <height>307</height>
                </rect>
               </property>
@@ -3645,14 +3645,14 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

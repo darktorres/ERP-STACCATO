@@ -562,16 +562,18 @@ void CNAB::retornoGareItau240(const QString &filePath) {
       QString ocorrencia5 = decodeCodeItau(line.mid(238, 2));
       if (not ocorrencia4.isEmpty() and not ocorrencia5.isEmpty()) { ocorrencia5.prepend("\n    -"); }
 
-      const QString segmentoN = "CNPJ: " + cnpj + " NFe: " + nfe + " Status:\n" + ocorrencia1 + ocorrencia2 + ocorrencia3 + ocorrencia4 + ocorrencia5;
+      const QString segmentoN = "CNPJ: " + cnpj + " NF-e: " + nfe + " Status:\n" + ocorrencia1 + ocorrencia2 + ocorrencia3 + ocorrencia4 + ocorrencia5;
 
       if (not ocorrencia1.isEmpty()) { resultado << segmentoN; }
 
       if (segmentoN.contains("PAGAMENTO EFETUADO")) {
         SqlQuery query1;
 
-        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj)) { throw RuntimeException("Erro buscando id da NFe: " + query1.lastError().text()); }
+        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj)) {
+          throw RuntimeException("Erro buscando id da NF-e: " + query1.lastError().text());
+        }
 
-        if (not query1.first()) { throw RuntimeException("Não encontrado id da NFe: " + nfe); }
+        if (not query1.first()) { throw RuntimeException("Não encontrado id da NF-e: " + nfe); }
 
         SqlQuery query2;
 

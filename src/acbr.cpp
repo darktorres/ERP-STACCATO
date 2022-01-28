@@ -12,7 +12,7 @@
 ACBr::ACBr(QObject *parent) : QObject(parent) {
   progressDialog.reset();
   progressDialog.setCancelButton(nullptr);
-  progressDialog.setLabelText("Esperando o emissor de NFe ACBr...");
+  progressDialog.setLabelText("Esperando o emissor de NF-e ACBr...");
   progressDialog.setWindowTitle("ERP Staccato");
   progressDialog.setWindowModality(Qt::WindowModal);
   progressDialog.setMaximum(0);
@@ -36,8 +36,8 @@ void ACBr::error(QAbstractSocket::SocketError socketError) {
 
   switch (socketError) {
   case QAbstractSocket::ConnectionRefusedError: [[fallthrough]];
-  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao emissor de NFe ACBr! Verifique se ele está aberto!");
-  case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com o emissor de NFe ACBr encerrada!");
+  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao emissor de NF-e ACBr! Verifique se ele está aberto!");
+  case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com o emissor de NF-e ACBr encerrada!");
   default: throw RuntimeException("Erro socket: " + socket.errorString());
   }
 }
@@ -77,7 +77,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para a NFe com id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com id: " + QString::number(idNFe)); }
 
   //-------------------------------------------
 
@@ -97,7 +97,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   if (respostaConsultar.contains("NF-e não consta na base de dados da SEFAZ", Qt::CaseInsensitive)) {
     removerNota(idNFe);
-    throw RuntimeException("NFe não consta na SEFAZ, removendo do sistema...");
+    throw RuntimeException("NF-e não consta na SEFAZ, removendo do sistema...");
   }
 
   if (not respostaConsultar.contains("XMotivo=Autorizado o uso da NF-e", Qt::CaseInsensitive) and not respostaConsultar.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive) and
@@ -125,19 +125,19 @@ void ACBr::removerNota(const int idNFe) {
   query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
   query2a.bindValue(":idNFeSaida", idNFe);
 
-  if (not query2a.exec()) { throw RuntimeException("Erro removendo nfe da venda: " + query2a.lastError().text()); }
+  if (not query2a.exec()) { throw RuntimeException("Erro removendo NF-e da venda: " + query2a.lastError().text()); }
 
   SqlQuery query3a;
   query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
   query3a.bindValue(":idNFeSaida", idNFe);
 
-  if (not query3a.exec()) { throw RuntimeException("Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+  if (not query3a.exec()) { throw RuntimeException("Erro removendo NF-e do veiculo: " + query3a.lastError().text()); }
 
   SqlQuery queryNota;
   queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
   queryNota.bindValue(":idNFe", idNFe);
 
-  if (not queryNota.exec()) { throw RuntimeException("Erro removendo nota: " + queryNota.lastError().text()); }
+  if (not queryNota.exec()) { throw RuntimeException("Erro removendo NF-e: " + queryNota.lastError().text()); }
 
   qApp->endTransaction();
 }

@@ -158,7 +158,7 @@ QTabWidget::pane {
       </widget>
       <widget class="QWidget" name="tabNFe">
        <attribute name="title">
-        <string>NFe</string>
+        <string>NF-e</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_17" columnminimumwidth="0,0">
         <property name="leftMargin">

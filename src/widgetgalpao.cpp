@@ -436,7 +436,7 @@ void WidgetGalpao::selectBloco(PalletItem *const palletPtr) {
     modelPallet.setHeaderData("descricao", "Produto");
     modelPallet.setHeaderData("formComercial", "Formato");
     modelPallet.setHeaderData("codComercial", "Cód. Com.");
-    modelPallet.setHeaderData("numeroNFe", "NFe");
+    modelPallet.setHeaderData("numeroNFe", "NF-e");
     modelPallet.setHeaderData("lote", "Lote");
     modelPallet.setHeaderData("idVenda", "Venda");
 
@@ -543,7 +543,7 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
   modelPallet.setHeaderData("caixas", "Cx.");
   modelPallet.setHeaderData("descricao", "Produto");
   modelPallet.setHeaderData("codComercial", "Cód. Com.");
-  modelPallet.setHeaderData("numeroNFe", "NFe");
+  modelPallet.setHeaderData("numeroNFe", "NF-e");
   modelPallet.setHeaderData("lote", "Lote");
   modelPallet.setHeaderData("idVenda", "Venda");
 
@@ -627,7 +627,7 @@ void WidgetGalpao::on_tablePallet_doubleClicked(const QModelIndex &index) {
 
   const QString header = modelPallet.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "NFe") { return qApp->abrirNFe(modelPallet.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelPallet.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
     const QStringList ids = modelPallet.data(index.row(), "idVenda").toString().split(", ");
@@ -691,7 +691,7 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
     dataManager->setReportVariable("caixas", caixas);
     dataManager->setReportVariable("nfe", modelPallet.data(row, "numeroNFe").toInt());
 
-    // TODO: falta colocar a quantidade total do produto que veio na NFe
+    // TODO: falta colocar a quantidade total do produto que veio na NF-e
 
     const QString idEstoque = modelPallet.data(row, "idEstoque").toString();
 

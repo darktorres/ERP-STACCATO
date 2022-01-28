@@ -20,15 +20,15 @@ typedef int (*NFE_CarregarXML)(const char *eArquivoOuXML);
 typedef int (*NFE_ImprimirPDF)();
 
 void ACBrLib::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) { throw RuntimeError("Produto não possui NFe!"); }
+  if (idNFe == 0) { throw RuntimeError("Produto não possui NF-e!"); }
 
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: " + QString::number(idNFe)); }
 
   gerarDanfe(query.value("xml"), true);
 }
@@ -141,15 +141,15 @@ void ACBrLib::check_result(HMODULE nHandler, const int ret) {
 #include <QSqlError>
 
 void ACBrLib::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) { throw RuntimeError("Produto não possui NFe!"); }
+  if (idNFe == 0) { throw RuntimeError("Produto não possui NF-e!"); }
 
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NFe: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML para NFe de id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: " + QString::number(idNFe)); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

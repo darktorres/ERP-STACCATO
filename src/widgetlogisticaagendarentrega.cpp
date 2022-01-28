@@ -55,8 +55,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
-  modelProdutos.setHeaderData("idNFeSaida", "NFe");
-  modelProdutos.setHeaderData("idNFeFutura", "NFe Futura");
+  modelProdutos.setHeaderData("idNFeSaida", "NF-e");
+  modelProdutos.setHeaderData("idNFeFutura", "NF-e Futura");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
@@ -761,7 +761,7 @@ void WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   const double caixasConsumo = modelConsumoTemp.data(0, "caixas").toDouble();
   const double valorConsumo = modelConsumoTemp.data(0, "valor").toDouble();
 
-  // dados da NFe
+  // dados da NF-e
   const double quantTrib = modelConsumoTemp.data(0, "quantTrib").toDouble();
   const double desconto = modelConsumoTemp.data(0, "desconto").toDouble();
   const double vBC = modelConsumoTemp.data(0, "vBC").toDouble();
@@ -938,9 +938,9 @@ void WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked(const QModelI
 
   if (header == "Venda") { return qApp->abrirVenda(modelProdutos.data(index.row(), "idVenda")); }
 
-  if (header == "NFe") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeSaida")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeSaida")); }
 
-  if (header == "NFe Futura") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeFutura")); }
+  if (header == "NF-e Futura") { return qApp->abrirNFe(modelProdutos.data(index.row(), "idNFeFutura")); }
 
   if (header == "Estoque") { return qApp->abrirEstoque(modelProdutos.data(index.row(), "idEstoque")); }
 }
@@ -971,8 +971,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) {
-    if (not modelProdutos.data(index.row(), "idNFeSaida").isNull()) { throw RuntimeError("Produto já possui NFe!", this); }
-    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui NFe futura!", this); }
+    if (not modelProdutos.data(index.row(), "idNFeSaida").isNull()) { throw RuntimeError("Produto já possui NF-e!", this); }
+    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui NF-e futura!", this); }
   }
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
@@ -997,7 +997,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
   for (const auto &index : selection) {
-    if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { throw RuntimeError("Pelo menos uma linha selecionada já possui nota!", this); }
+    if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { throw RuntimeError("Pelo menos uma linha selecionada já possui NF-e!", this); }
   }
 
   const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", "", "XML (*.xml)");
@@ -1016,13 +1016,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso LIMIT 1");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando se NF-e já cadastrada: " + query.lastError().text(), this); }
 
-  if (query.first()) { throw RuntimeError("Nota já cadastrada!", this); }
+  if (query.first()) { throw RuntimeError("NF-e já cadastrada!", this); }
 
   SqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
-                   "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
+                   "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'AUTORIZADA', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
   queryNFe.bindValue(":idVenda", modelProdutos.data(0, "idVenda"));
   queryNFe.bindValue(":numeroNFe", xml.nNF);
   queryNFe.bindValue(":xml", xml.fileContent);
@@ -1031,7 +1031,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   queryNFe.bindValue(":cnpjDest", xml.cnpjDest);
   queryNFe.bindValue(":valor", xml.vNF_Total);
 
-  if (not queryNFe.exec()) { throw RuntimeException("Erro importando NFe: " + queryNFe.lastError().text(), this); }
+  if (not queryNFe.exec()) { throw RuntimeException("Erro importando NF-e: " + queryNFe.lastError().text(), this); }
 
   const QVariant id = queryNFe.lastInsertId();
 
@@ -1044,12 +1044,12 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
     queryVenda.bindValue(":idNFeSaida", id);
     queryVenda.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NF-e nos produtos: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();
 
-  qApp->enqueueInformation("Nota importada com sucesso!", this);
+  qApp->enqueueInformation("NF-e importada com sucesso!", this);
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {

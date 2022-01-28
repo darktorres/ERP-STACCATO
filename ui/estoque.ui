@@ -174,7 +174,7 @@ color: rgb(0, 0, 0);</string>
      <item>
       <widget class="QPushButton" name="pushButtonExibirNfe">
        <property name="text">
-        <string>Exibir NFe</string>
+        <string>Exibir NF-e</string>
        </property>
       </widget>
      </item>

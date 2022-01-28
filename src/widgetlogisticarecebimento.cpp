@@ -75,7 +75,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setHeaderData("lote", "Lote");
   modelViewRecebimento.setHeaderData("local", "Local");
   modelViewRecebimento.setHeaderData("bloco", "Bloco");
-  modelViewRecebimento.setHeaderData("numeroNFe", "NFe");
+  modelViewRecebimento.setHeaderData("numeroNFe", "NF-e");
   modelViewRecebimento.setHeaderData("idVenda", "Venda");
   modelViewRecebimento.setHeaderData("ordemCompra", "OC");
   modelViewRecebimento.setHeaderData("produto", "Produto");
@@ -165,7 +165,7 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
 
     queryNFe.bindValue(":idNFe", modelViewRecebimento.data(index.row(), "idNFe"));
 
-    if (not queryNFe.exec()) { throw RuntimeException("Erro marcando NFe para confirmar: " + queryNFe.lastError().text()); }
+    if (not queryNFe.exec()) { throw RuntimeException("Erro marcando NF-e para confirmar: " + queryNFe.lastError().text()); }
   }
 }
 
@@ -333,7 +333,7 @@ void WidgetLogisticaRecebimento::on_table_doubleClicked(const QModelIndex &index
 
   if (header == "Estoque") { return qApp->abrirEstoque(modelViewRecebimento.data(index.row(), "idEstoque")); }
 
-  if (header == "NFe") { return qApp->abrirNFe(modelViewRecebimento.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelViewRecebimento.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
     const QStringList ids = modelViewRecebimento.data(index.row(), "idVenda").toString().split(", ");

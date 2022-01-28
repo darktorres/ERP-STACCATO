@@ -104,7 +104,7 @@ void CadastrarNFe::setupTables() {
 
   //----------------------------------------------------------
 
-  // TODO: verificar porque essa view usa ABS() e IF() para não ter valores negativos, como não é feito NFe de devolução porque esse código para valores negativos?
+  // TODO: verificar porque essa view usa ABS() e IF() para não ter valores negativos, como não é feito NF-e de devolução porque esse código para valores negativos?
   modelProduto.setTable("view_produto_estoque");
 
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
@@ -241,7 +241,7 @@ int CadastrarNFe::preCadastrarNota() {
       query.bindValue(":idNFeEntrada", idNFe);
       query.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
-      if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
+      if (not query.exec()) { throw RuntimeException("Erro salvando NF-e nos produtos: " + query.lastError().text()); }
     }
   }
 
@@ -265,7 +265,7 @@ int CadastrarNFe::preCadastrarNota() {
       queryVenda.bindValue(":idNFeSaida", idNFe);
       queryVenda.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
-      if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text()); }
+      if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NF-e nos produtos: " + queryVenda.lastError().text()); }
 
       //----------------------------------------
 
@@ -286,7 +286,7 @@ int CadastrarNFe::preCadastrarNota() {
       query.bindValue(":idNFeFutura", idNFe);
       query.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));
 
-      if (not query.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + query.lastError().text()); }
+      if (not query.exec()) { throw RuntimeException("Erro salvando NF-e nos produtos: " + query.lastError().text()); }
     }
   }
 
@@ -349,13 +349,13 @@ void CadastrarNFe::removerNota(const int idNFe) {
   queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
   queryNota.bindValue(":idNFe", idNFe);
 
-  if (not queryNota.exec()) { throw RuntimeException("Erro removendo nota: " + queryNota.lastError().text()); }
+  if (not queryNota.exec()) { throw RuntimeException("Erro removendo NF-e: " + queryNota.lastError().text()); }
 
   qApp->endTransaction();
 }
 
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
-  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NFe para verificar se foi autorizada!"); }
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NF-e para verificar se foi autorizada!"); }
 
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
     qDebug() << "processarResposta -> rejeicao";
@@ -394,7 +394,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbrRemoto);
 
-  // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NFe, reativar depois de arrumar os spinBoxs para considerar 4 decimais
+  // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NF-e, reativar depois de arrumar os spinBoxs para considerar 4 decimais
   //  if (not validarRegras(acbrRemoto, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
@@ -435,7 +435,7 @@ void CadastrarNFe::atualizarNFe(const int idNFe) {
 
   QString status;
 
-  if (xml.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADO"; }
+  if (xml.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive)) { status = "AUTORIZADA"; }
   if (xml.contains("Uso Denegado", Qt::CaseInsensitive)) { status = "DENEGADA"; }
 
   if (status.isEmpty()) { throw RuntimeException("'Status' inválido!"); }
@@ -449,7 +449,7 @@ void CadastrarNFe::atualizarNFe(const int idNFe) {
   queryNFe.bindValue(":dataHoraEmissao", dataHoraEmissao);
   queryNFe.bindValue(":idNFe", idNFe);
 
-  if (not queryNFe.exec()) { throw RuntimeException("Erro atualizando XML da NFe: " + queryNFe.lastError().text()); }
+  if (not queryNFe.exec()) { throw RuntimeException("Erro atualizando XML da NF-e: " + queryNFe.lastError().text()); }
 }
 
 void CadastrarNFe::updateTotais() {
@@ -514,7 +514,7 @@ void CadastrarNFe::preencherNumeroNFe() {
     throw RuntimeException("Erro buscando idNFe: " + queryNfe.lastError().text(), this);
   }
 
-  if (not queryNfe.first()) { throw RuntimeException("Número da NFe não encontrado!"); }
+  if (not queryNfe.first()) { throw RuntimeException("Número da NF-e não encontrado!"); }
 
   const QString numeroNFe = queryNfe.value("numeroNFe").toString().rightJustified(9, '0');
 
@@ -596,9 +596,9 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
                   "vp2.idVendaProduto2 = :idVendaProduto2)");
     query.bindValue(":idVendaProduto2", modelProduto.data(0, "idVendaProduto2"));
 
-    if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando NF-e referenciada: " + query.lastError().text(), this); }
 
-    if (not query.first()) { throw RuntimeException("NFe referenciada não encontrada!"); }
+    if (not query.first()) { throw RuntimeException("NF-e referenciada não encontrada!"); }
 
     stream << "[NFRef001]\n";
     stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
@@ -609,9 +609,9 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
     query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2)");
     query.bindValue(":idVendaProduto2", modelProduto.data(0, "idVendaProduto2"));
 
-    if (not query.exec()) { throw RuntimeException("Erro buscando NFe referenciada: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando NF-e referenciada: " + query.lastError().text(), this); }
 
-    if (not query.first()) { throw RuntimeException("NFe referenciada não encontrada!"); }
+    if (not query.first()) { throw RuntimeException("NF-e referenciada não encontrada!"); }
 
     stream << "[NFRef001]\n";
     stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
@@ -1688,7 +1688,7 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
 }
 
 void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
-  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  const QString assunto = "NF-e - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   //  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
   acbrRemoto.enviarEmail(emailContabilidade, "", assunto, filePath);
@@ -1927,7 +1927,7 @@ void CadastrarNFe::preencherImpostos() {
   ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
 
   if (tipo == Tipo::Entrada) {
-    // usar mesmos dados da NFe de saida
+    // usar mesmos dados da NF-e de saida
 
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       for (int col = 0; col < modelProduto.columnCount(); ++col) {
@@ -2119,8 +2119,9 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 // precisa detalhar a partilha no complemento bem como origem e destino
 // TODO: colocar um botao para imprimir uma previa da DANFE? utilizar o xml antes do envio
 // TODO: renomear acbrRemoto para apenas acbr
+// TODO: se der erro de duplicidade avisar usuario para incrementar numeroNFe?
 
-// NFe Devolucao
+// NF-e Devolucao
 
 // TODO: falta colocar a observacao da recusa/devolucao do cliente nas informacoes complementares
 // http://www.spednews.com.br/icms-como-dar-entrada-de-mercadoria-recusada-pelo-destinatario/
@@ -2128,7 +2129,7 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
 // https://cr.inf.br/blog/manual-como-fazer-nota-de-devolucao/
 // https://legislacao.fazenda.sp.gov.br/Paginas/RC20724_2019.aspx
 
-// NFe de serviço
+// NF-e de serviço
 
 // usar NCM 00
 // usar CFOP 59xx/69xx

@@ -163,9 +163,9 @@ QString ACBr::enviarComando(const QString &comando) {
 
     servidor = queryConfig.value("servidorACBr").toString();
     porta = queryConfig.value("portaACBr").toString();
-
-    if (not qApp->getSilent()) { progressDialog.show(); }
   }
+
+  if (not qApp->getSilent()) { progressDialog.show(); }
 
   if (not conectado) { socket.connectToHost(servidor, porta.toUShort()); }
 

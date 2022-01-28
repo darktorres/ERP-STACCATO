@@ -184,7 +184,7 @@ QString CadastrarNFe::montarXML() {
 }
 
 QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
-  QString resposta = acbrRemoto.enviarComando(montarXML());
+  QString resposta = acbrRemoto.enviarComando(montarXML(), "Gerando NF-e...");
   qDebug() << "gerarNota: " << resposta;
 
   //-------------------------------------------
@@ -1486,7 +1486,8 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
   ACBr acbrRemoto;
 
-  const QString resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
+  const QString resposta =
+      acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", "Consultando cadastro do destinatário...");
 
   if (resposta.contains("CStat=111", Qt::CaseInsensitive)) { // Consulta cadastro com uma ocorrência
     QStringList respostaSplit = resposta.split("\r\n", Qt::SkipEmptyParts).filter("IE=", Qt::CaseInsensitive);
@@ -1668,7 +1669,7 @@ void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
 }
 
 void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
-  const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
+  const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)", "Enviando NF-e..."); // lote, assina, imprime, sincrono
   qDebug() << "enviarNFe: " << resposta;
 
   processarResposta(resposta, filePath, idNFe, acbrRemoto);
@@ -1698,7 +1699,7 @@ void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
 
 void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
   // TODO: testar se comando deu ok
-  QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
+  QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")", "Carregando NF-e...");
 
   xml = resposta.remove("OK: ", Qt::CaseInsensitive);
 }
@@ -2092,7 +2093,7 @@ void CadastrarNFe::preencherTransporte() {
 }
 
 bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
-  const QString resposta = acbrRemoto.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")");
+  const QString resposta = acbrRemoto.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")", "Validando NF-e...");
 
   if (not resposta.startsWith("OK:", Qt::CaseInsensitive)) {
     QStringList lines = resposta.split("\r\n", Qt::SkipEmptyParts);

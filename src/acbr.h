@@ -12,7 +12,7 @@ public:
   ~ACBr() final = default;
 
   auto consultarNFe(const int idNFe) -> std::tuple<QString, QString>;
-  auto enviarComando(const QString &comando) -> QString;
+  auto enviarComando(const QString &comando, const QString &labelText) -> QString;
   auto enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) -> void;
   auto setarServidor(const QString &servidor_, const QString &porta_) -> void;
 

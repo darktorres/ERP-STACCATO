@@ -1608,14 +1608,27 @@ color: rgb(0, 0, 0);</string>
            </item>
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_9">
-             <item row="6" column="1">
+             <item row="6" column="2">
+              <widget class="QLineEdit" name="lineEditVenda"/>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="labelVenda">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Venda:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
               <widget class="QLineEdit" name="lineEditReplicaDe"/>
              </item>
-             <item row="7" column="1">
-              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
-             </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="labelBaixa">
+              <widget class="QLabel" name="labelReplicaDe">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -1623,12 +1636,12 @@ color: rgb(0, 0, 0);</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Baixa:</string>
+                <string>Réplica de:</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="labelReplicadoEm">
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelPrazoEntrega_2">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -1636,22 +1649,9 @@ color: rgb(0, 0, 0);</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Replicado em:</string>
+                <string>Peso total:</string>
                </property>
               </widget>
-             </item>
-             <item row="8" column="1">
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-              </spacer>
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="labelPrazoEntrega">
@@ -1663,19 +1663,6 @@ color: rgb(0, 0, 0);</string>
                </property>
                <property name="text">
                 <string>Prazo de entrega:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="labelReplicaDe">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Réplica de:</string>
                </property>
               </widget>
              </item>
@@ -1692,7 +1679,98 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="5" column="2">
+              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="labelReplicadoEm">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Replicado em:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="labelBaixa">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Baixa:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="2">
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="1">
+              <widget class="QPushButton" name="pushButtonAbrirReplicadoEm">
+               <property name="text">
+                <string>Abrir</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QPushButton" name="pushButtonAbrirReplicaDe">
+               <property name="text">
+                <string>Abrir</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QPushButton" name="pushButtonAbrirVenda">
+               <property name="text">
+                <string>Abrir</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1" colspan="2">
+              <widget class="QPlainTextEdit" name="plainTextEditBaixa">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>50</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1" colspan="2">
+              <widget class="QPlainTextEdit" name="plainTextEditObs"/>
+             </item>
+             <item row="1" column="1" colspan="2">
               <widget class="QSpinBox" name="spinBoxPesoTotal">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Validade em dias do orçamento, contando a partir de hoje&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1711,7 +1789,7 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
+             <item row="0" column="1" colspan="2">
               <widget class="QSpinBox" name="spinBoxPrazoEntrega">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Validade em dias do orçamento, contando a partir de hoje&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1724,38 +1802,6 @@ color: rgb(0, 0, 0);</string>
                </property>
                <property name="singleStep">
                 <number>1</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="labelPrazoEntrega_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Peso total:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QPlainTextEdit" name="plainTextEditObs"/>
-             </item>
-             <item row="4" column="1">
-              <widget class="QPlainTextEdit" name="plainTextEditBaixa">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>50</height>
-                </size>
                </property>
               </widget>
              </item>
@@ -1773,14 +1819,14 @@ color: rgb(0, 0, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
    <class>DoubleSpinBox</class>

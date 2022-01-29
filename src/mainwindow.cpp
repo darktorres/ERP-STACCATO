@@ -330,3 +330,7 @@ void MainWindow::on_actionGerenciar_staccatoOff_triggered() {
 // TODO: terminar de implantar quebra/reposicao
 // TODO: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
 // NOTE: add logging to the terminal so qdebug logging can be seen on the user pc when needed
+
+// TODO: QToolButton: para poder ter um pushButton com menu dropdown
+// https://doc.qt.io/qt-5/qtoolbutton.html#details
+// https://www.walletfox.com/course/customqtoolbutton.php

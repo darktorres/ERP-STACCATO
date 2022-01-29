@@ -62,6 +62,7 @@ private:
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxProfissional_textChanged() -> void;
+  auto on_pushButtonAbrirOrcamento_clicked() -> void;
   auto on_pushButtonAdicionarObservacao_clicked() -> void;
   auto on_pushButtonCadastrarPedido_clicked() -> void;
   auto on_pushButtonCancelamento_clicked() -> void;

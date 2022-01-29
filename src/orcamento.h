@@ -36,6 +36,7 @@ private:
   auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
   auto buscarConsultor() -> void;
+  auto buscarIdVenda() -> void;
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
@@ -65,6 +66,9 @@ private:
   auto on_itemBoxProduto_idChanged() -> void;
   auto on_itemBoxProfissional_idChanged() -> void;
   auto on_itemBoxVendedor_textChanged() -> void;
+  auto on_pushButtonAbrirReplicaDe_clicked() -> void;
+  auto on_pushButtonAbrirReplicadoEm_clicked() -> void;
+  auto on_pushButtonAbrirVenda_clicked() -> void;
   auto on_pushButtonAdicionarItem_clicked() -> void;
   auto on_pushButtonApagarOrc_clicked() -> void;
   auto on_pushButtonAtualizarItem_clicked() -> void;

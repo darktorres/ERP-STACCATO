@@ -133,6 +133,9 @@ void Orcamento::setConnections() {
   connect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged, connectionType);
   connect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged, connectionType);
   connect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged, connectionType);
+  connect(ui->pushButtonAbrirReplicaDe, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirReplicaDe_clicked, connectionType);
+  connect(ui->pushButtonAbrirReplicadoEm, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirReplicadoEm_clicked, connectionType);
+  connect(ui->pushButtonAbrirVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirVenda_clicked, connectionType);
   connect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked, connectionType);
   connect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked, connectionType);
   connect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked, connectionType);
@@ -168,6 +171,9 @@ void Orcamento::unsetConnections() {
   disconnect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged);
   disconnect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged);
   disconnect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged);
+  disconnect(ui->pushButtonAbrirReplicaDe, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirReplicaDe_clicked);
+  disconnect(ui->pushButtonAbrirReplicadoEm, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirReplicadoEm_clicked);
+  disconnect(ui->pushButtonAbrirVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirVenda_clicked);
   disconnect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked);
   disconnect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked);
   disconnect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked);
@@ -278,11 +284,13 @@ bool Orcamento::viewRegister() {
 
     if (not data("replicadoDe").toString().isEmpty()) {
       ui->labelReplicaDe->show();
+      ui->pushButtonAbrirReplicaDe->show();
       ui->lineEditReplicaDe->show();
     }
 
     if (not data("replicadoEm").toString().isEmpty()) {
       ui->labelReplicadoEm->show();
+      ui->pushButtonAbrirReplicadoEm->show();
       ui->lineEditReplicadoEm->show();
     }
 
@@ -303,6 +311,7 @@ bool Orcamento::viewRegister() {
     ui->itemBoxEndereco->setFilter("(idCliente = " + idCliente + " OR idEndereco = 1) AND desativado = FALSE");
 
     calcularPesoTotal();
+    buscarIdVenda();
 
     return true;
   }();
@@ -414,9 +423,14 @@ void Orcamento::registerMode() {
   ui->labelConsultor->hide();
   ui->labelReplicaDe->hide();
   ui->labelReplicadoEm->hide();
+  ui->labelVenda->hide();
   ui->lineEditReplicaDe->hide();
   ui->lineEditReplicadoEm->hide();
+  ui->lineEditVenda->hide();
   ui->plainTextEditBaixa->hide();
+  ui->pushButtonAbrirReplicaDe->hide();
+  ui->pushButtonAbrirReplicadoEm->hide();
+  ui->pushButtonAbrirVenda->hide();
   ui->pushButtonAtualizarOrcamento->hide();
   ui->pushButtonCalcularFrete->hide();
   ui->pushButtonReplicar->hide();
@@ -1698,6 +1712,46 @@ void Orcamento::connectLineEditsToDirty() {
   const auto children = ui->tabWidget->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &Orcamento::marcarDirty); }
+}
+
+void Orcamento::on_pushButtonAbrirReplicaDe_clicked() {
+  auto *orcamento = new Orcamento(this);
+  orcamento->setAttribute(Qt::WA_DeleteOnClose);
+  orcamento->viewRegisterById(ui->lineEditReplicaDe->text());
+
+  orcamento->show();
+}
+
+void Orcamento::on_pushButtonAbrirReplicadoEm_clicked() {
+  auto *orcamento = new Orcamento(this);
+  orcamento->setAttribute(Qt::WA_DeleteOnClose);
+  orcamento->viewRegisterById(ui->lineEditReplicadoEm->text());
+
+  orcamento->show();
+}
+
+void Orcamento::on_pushButtonAbrirVenda_clicked() {
+  auto *venda = new Venda(this);
+  venda->setAttribute(Qt::WA_DeleteOnClose);
+  venda->viewRegisterById(ui->lineEditVenda->text());
+
+  venda->show();
+}
+
+void Orcamento::buscarIdVenda() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT idVenda FROM venda WHERE idOrcamento = '" + ui->lineEditOrcamento->text() + "' AND status NOT IN ('CANCELADO')")) {
+    throw RuntimeException("Erro buscando venda: " + query.lastError().text());
+  }
+
+  if (query.first()) {
+    ui->lineEditVenda->setText(query.value("idVenda").toString());
+
+    ui->labelVenda->show();
+    ui->pushButtonAbrirVenda->show();
+    ui->lineEditVenda->show();
+  }
 }
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)

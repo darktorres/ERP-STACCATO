@@ -497,8 +497,9 @@ void Orcamento::generateId() {
   QString id = siglaLoja + "-" + qApp->serverDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
+  const QString siglaReplica = replica.left(4);
 
-  if (replica.isEmpty()) {
+  if (replica.isEmpty() or siglaReplica != siglaLoja) {
     SqlQuery query;
     query.prepare("SELECT MAX(idOrcamento) AS idOrcamento FROM orcamento WHERE idOrcamento LIKE :id");
     query.bindValue(":id", id + "%");

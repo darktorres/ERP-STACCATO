@@ -125,6 +125,7 @@ void WidgetGalpao::setupTables() {
   modelTranspAgend.setHeaderData("data", "Agendado");
   modelTranspAgend.setHeaderData("idVenda", "Venda");
   modelTranspAgend.setHeaderData("status", "Status");
+  modelTranspAgend.setHeaderData("observacao", "Observação");
   modelTranspAgend.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAgend.setHeaderData("produto", "Produto");
   modelTranspAgend.setHeaderData("caixas", "Cx.");

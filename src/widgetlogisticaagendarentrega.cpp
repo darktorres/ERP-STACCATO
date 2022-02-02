@@ -86,6 +86,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAtual.setHeaderData("status", "Status");
   modelTranspAtual.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAtual.setHeaderData("produto", "Produto");
+  modelTranspAtual.setHeaderData("observacao", "Observação");
   modelTranspAtual.setHeaderData("caixas", "Cx.");
   modelTranspAtual.setHeaderData("kg", "Kg.");
   modelTranspAtual.setHeaderData("quant", "Quant.");
@@ -118,6 +119,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("idVenda", "Venda");
   modelTranspAgend.setHeaderData("status", "Status");
+  modelTranspAgend.setHeaderData("observacao", "Observação");
   modelTranspAgend.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAgend.setHeaderData("produto", "Produto");
   modelTranspAgend.setHeaderData("caixas", "Cx.");

@@ -192,6 +192,7 @@ void InputDialogConfirmacao::setupTables() {
 
     modelVeiculo.setHeaderData("idVenda", "Venda");
     modelVeiculo.setHeaderData("status", "Status");
+    modelVeiculo.setHeaderData("observacao", "Observação");
     modelVeiculo.setHeaderData("fornecedor", "Fornecedor");
     modelVeiculo.setHeaderData("produto", "Produto");
     modelVeiculo.setHeaderData("obs", "Obs.");

@@ -15,6 +15,7 @@
 
 #include <QDesktopServices>
 #include <QDir>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QUrl>
@@ -39,6 +40,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked, connectionType);
   connect(ui->pushButtonImprimirDanfe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked, connectionType);
+  connect(ui->pushButtonObservacao, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonObservacao_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked, connectionType);
@@ -105,6 +107,8 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCarga.setHeaderData("status", "Status");
   modelCarga.setHeaderData("produtos", "Produtos");
   modelCarga.setHeaderData("kg", "Kg.");
+  modelCarga.setHeaderData("endereco", "Endereço");
+  modelCarga.setHeaderData("observacao", "Observação");
 
   ui->tableCarga->setModel(&modelCarga);
 
@@ -731,6 +735,25 @@ void WidgetLogisticaEntregas::on_tableProdutos_doubleClicked(const QModelIndex &
   if (header == "Venda") { return qApp->abrirVenda(modelProdutos.data(index.row(), "idVenda")); }
 
   if (header == "Estoque") { return qApp->abrirEstoque(modelProdutos.data(index.row(), "idEstoque")); }
+}
+
+void WidgetLogisticaEntregas::on_pushButtonObservacao_clicked() {
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+
+  const QString observacao = QInputDialog::getText(this, "Observação", "Digite a observação: ");
+  const QString idVenda = modelCarga.data(selection.first().row(), "idVenda").toString();
+
+  qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonObservacao");
+
+  SqlQuery query;
+
+  if (not query.exec("UPDATE veiculo_has_produto SET observacao = '" + observacao + "' WHERE idVenda = '" + idVenda + "'")) {
+    throw RuntimeException("Erro guardando observação: " + query.lastError().text());
+  }
+
+  qApp->endTransaction();
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto

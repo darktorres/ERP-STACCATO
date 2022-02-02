@@ -82,6 +82,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
 
   modelTranspAtual.setHeaderData("idEstoque", "Estoque");
   modelTranspAtual.setHeaderData("status", "Status");
+  modelTranspAtual.setHeaderData("observacao", "Observação");
   modelTranspAtual.setHeaderData("produto", "Produto");
   modelTranspAtual.setHeaderData("caixas", "Cx.");
   modelTranspAtual.setHeaderData("kg", "Kg");
@@ -115,6 +116,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelTranspAgend.setHeaderData("data", "Agendado");
   modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("status", "Status");
+  modelTranspAgend.setHeaderData("observacao", "Observação");
   modelTranspAgend.setHeaderData("produto", "Produto");
   modelTranspAgend.setHeaderData("caixas", "Cx.");
   modelTranspAgend.setHeaderData("kg", "Kg");

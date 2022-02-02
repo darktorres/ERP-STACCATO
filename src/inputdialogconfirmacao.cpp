@@ -204,6 +204,8 @@ void InputDialogConfirmacao::setupTables() {
     modelVeiculo.setHeaderData("codComercial", "Cód. Com.");
     modelVeiculo.setHeaderData("formComercial", "Form. Com.");
 
+    // TODO: colocar um EditDelegate na coluna 'observacao'
+
     modelVeiculo.proxyModel = new SortFilterProxyModel(&modelVeiculo, this);
 
     ui->tableLogistica->setModel(&modelVeiculo);

@@ -98,6 +98,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   // -----------------------------------------------------------------
 
+  // TODO: rename to modelPedido?
   modelCarga.setTable("view_calendario_carga");
 
   modelCarga.setHeaderData("dataPrevEnt", "Agendado");
@@ -109,6 +110,7 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCarga.setHeaderData("kg", "Kg.");
   modelCarga.setHeaderData("endereco", "Endereço");
   modelCarga.setHeaderData("observacao", "Observação");
+  // TODO: adicionar followup aqui
 
   ui->tableCarga->setModel(&modelCarga);
 
@@ -148,11 +150,11 @@ void WidgetLogisticaEntregas::setupTables() {
 }
 
 void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
   const int idVeiculo = modelCarga.data(row, "idVeiculo").toInt();
 
   InputDialog input(InputDialog::Tipo::ReagendarEntrega, this);
@@ -162,7 +164,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonReagendar");
 
-  reagendar(list, input.getDataVeiculo(), input.getVeiculo());
+  reagendar(selection, input.getDataVeiculo(), input.getVeiculo());
 
   qApp->endTransaction();
 
@@ -203,11 +205,11 @@ void WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
 }
 
 void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelCarga.data(selection.first().row(), "idVenda").toString();
 
   QStringList lista;
 
@@ -215,7 +217,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
 
   lista.removeDuplicates();
 
-  const CadastrarNFe::Tipo tipo = (modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0) ? CadastrarNFe::Tipo::Saida : CadastrarNFe::Tipo::SaidaAposFutura;
+  const CadastrarNFe::Tipo tipo = (modelCarga.data(selection.first().row(), "NFe Futura").toInt() == 0) ? CadastrarNFe::Tipo::Saida : CadastrarNFe::Tipo::SaidaAposFutura;
 
   auto *nfe = new CadastrarNFe(idVenda, lista, tipo, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
@@ -236,12 +238,6 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
   modelProdutos.setFilter("0");
 
   //--------------------------------------
-
-  ui->pushButtonReagendar->setDisabled(true);
-  ui->pushButtonConfirmarEntrega->setDisabled(true);
-  ui->pushButtonGerarNFe->setDisabled(true);
-  ui->pushButtonImprimirDanfe->setDisabled(true);
-  ui->pushButtonCancelarEntrega->setDisabled(true);
 
   {
     QSignalBlocker blocker(ui->lineEditBuscar);
@@ -323,16 +319,16 @@ void WidgetLogisticaEntregas::delayFiltro() { timer.start(qApp->delayedTimer); }
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   // TODO: permitir enviar mais de uma foto
 
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // TODO: see if this can be read after InputDialogConfirmacao and place inside confirmarEntrega
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega, this);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
@@ -353,11 +349,11 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 }
 
 void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  ACBrLib::gerarDanfe(modelCarga.data(list.first().row(), "idNFeSaida").toInt());
+  ACBrLib::gerarDanfe(modelCarga.data(selection.first().row(), "idNFeSaida").toInt());
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged() { montaFiltro(); }
@@ -373,9 +369,9 @@ void WidgetLogisticaEntregas::montaFiltro() {
 }
 
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() { // TODO: cancelar entrega não desvincula nfe
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Cancelar");
@@ -385,11 +381,11 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() { // TODO: 
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
 
   qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonCancelarEntrega");
 
-  cancelarEntrega(list);
+  cancelarEntrega(selection);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -443,7 +439,7 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
 void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFeSaida").toInt();
 
@@ -508,14 +504,14 @@ void WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QStrin
 }
 
 void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
-  const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
-  const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
+  const QString idVenda = modelCarga.data(selection.first().row(), "idVenda").toString();
+  const QString idEvento = modelCarga.data(selection.first().row(), "idEvento").toString();
 
   SqlQueryModel modelProdutosAgrupado;
 
@@ -704,11 +700,11 @@ QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const 
 }
 
 void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {
-  const auto list = ui->tableCarga->selectionModel()->selectedRows();
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelCarga.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

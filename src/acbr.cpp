@@ -36,7 +36,7 @@ void ACBr::error(QAbstractSocket::SocketError socketError) {
 
   switch (socketError) {
   case QAbstractSocket::ConnectionRefusedError: [[fallthrough]];
-  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao emissor de NF-e ACBr! Verifique se ele está aberto!");
+  case QAbstractSocket::SocketTimeoutError: throw RuntimeException("Erro conectando ao emissor de NF-e ACBr!\nVerifique se ele está aberto!");
   case QAbstractSocket::RemoteHostClosedError: socket.disconnectFromHost(); throw RuntimeException("Conexão com o emissor de NF-e ACBr encerrada!");
   default: throw RuntimeException("Erro socket: " + socket.errorString());
   }

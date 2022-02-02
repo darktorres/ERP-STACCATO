@@ -159,7 +159,8 @@ void Venda::setConnections() {
   connect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged, connectionType);
   connect(ui->pushButtonAbrirOrcamento, &QPushButton::clicked, this, &Venda::on_pushButtonAbrirOrcamento_clicked, connectionType);
   connect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked, connectionType);
-  connect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked, connectionType);
+  connect(ui->pushButtonAtualizarEnderecoEnt, &QPushButton::clicked, this, &Venda::on_pushButtonAtualizarEnderecoEnt_clicked, connectionType);
+  connect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarVenda_clicked, connectionType);
   connect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked, connectionType);
   connect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked, connectionType);
@@ -189,7 +190,8 @@ void Venda::unsetConnections() {
   disconnect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
   disconnect(ui->pushButtonAbrirOrcamento, &QPushButton::clicked, this, &Venda::on_pushButtonAbrirOrcamento_clicked);
   disconnect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked);
-  disconnect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked);
+  disconnect(ui->pushButtonAtualizarEnderecoEnt, &QPushButton::clicked, this, &Venda::on_pushButtonAtualizarEnderecoEnt_clicked);
+  disconnect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarVenda_clicked);
   disconnect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked);
   disconnect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked);
@@ -456,7 +458,7 @@ void Venda::setupMapper() {
   addMapping(ui->spinBoxPrazoEntrega, "prazoEntrega");
 }
 
-void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
+void Venda::on_pushButtonCadastrarVenda_clicked() { save(); }
 
 void Venda::savingProcedures() {
   generateId();
@@ -496,14 +498,15 @@ void Venda::registerMode() {
   ui->groupBoxFinanceiro->hide();
   ui->itemBoxConsultor->hide();
   ui->labelConsultor->hide();
+  ui->labelRT->hide();
   ui->pushButtonAdicionarObservacao->hide();
+  ui->pushButtonAtualizarEnderecoEnt->hide();
   ui->pushButtonCancelamento->hide();
   ui->pushButtonComprovantes->hide();
   ui->pushButtonDevolucao->hide();
   ui->pushButtonGerarExcel->hide();
   ui->pushButtonGerarPdf->hide();
   ui->tableFluxoCaixa2->hide();
-  ui->labelRT->hide();
 
   ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
@@ -526,6 +529,7 @@ void Venda::updateMode() {
 
   ui->checkBoxRT->hide();
   ui->frameRT->hide();
+  ui->pushButtonAtualizarEnderecoEnt->hide();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
   ui->widgetPgts->hide();
@@ -616,6 +620,14 @@ bool Venda::viewRegister() {
     if (data("status") == "CANCELADO" or data("status") == "DEVOLVIDO") {
       ui->pushButtonCancelamento->hide();
       ui->pushButtonDevolucao->hide();
+    }
+
+    if (User::isAdministrativo()) {
+      // TODO: renomear para itemBoxEnderecoEnt
+      ui->itemBoxEndereco->setReadOnlyItemBox(false);
+      ui->itemBoxEndereco->setFilter("idEndereco = 1 OR (idCliente = " + data("idCliente").toString() + " AND desativado = FALSE)");
+      ui->pushButtonAtualizarEnderecoEnt->show();
+      tipo = Tipo::Atualizar;
     }
 
     if (not User::isAdministrativo() and not User::isGerente()) { ui->pushButtonCancelamento->hide(); }
@@ -1692,6 +1704,22 @@ void Venda::on_pushButtonAbrirOrcamento_clicked() {
   orcamento->viewRegisterById(ui->lineEditIdOrcamento->text());
 
   orcamento->show();
+}
+
+void Venda::on_pushButtonAtualizarEnderecoEnt_clicked() { trocarEnderecoEntrega(); }
+
+void Venda::trocarEnderecoEntrega() {
+  qApp->startTransaction("Venda::trocarEnderecoEntrega");
+
+  SqlQuery query;
+
+  if (not query.exec("UPDATE venda SET idEnderecoEntrega = " + ui->itemBoxEndereco->getId().toString() + " WHERE idVenda = '" + primaryId + "'")) {
+    throw RuntimeException("Erro alterando endereço de entrega: " + query.lastError().text());
+  }
+
+  qApp->endTransaction();
+
+  successMessage();
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

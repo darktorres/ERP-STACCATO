@@ -119,6 +119,7 @@ void CadastroLoja::savingProcedures() {
   setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value());
   setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value());
   setData("custoFuncionario", ui->doubleSpinBoxCustoFuncionario->value());
+  setData("tetoProfissionalRT", ui->doubleSpinBoxTetoProfissional->value());
 }
 
 void CadastroLoja::registerMode() {
@@ -159,6 +160,7 @@ void CadastroLoja::setupMapper() {
   addMapping(ui->doubleSpinBoxCustoTransporte2Ton, "custoTransporte1");
   addMapping(ui->doubleSpinBoxCustoTransporteAcima2Ton, "custoTransporte2");
   addMapping(ui->doubleSpinBoxCustoFuncionario, "custoFuncionario");
+  addMapping(ui->doubleSpinBoxTetoProfissional, "tetoProfissionalRT");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));

@@ -294,7 +294,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
   sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "custoTransporte1", "custoTransporte2",
-                       "custoFuncionario", "lastDistribuicao", "ultimoNSU", "maximoNSU"});
+                       "custoFuncionario", "lastDistribuicao", "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "tetoProfissionalRT"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -304,8 +304,6 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->setHeaderData("inscEstadual", "Insc. Est.");
   sdLoja->setHeaderData("sigla", "Sigla");
   sdLoja->setHeaderData("cnpj", "CNPJ");
-  sdLoja->setHeaderData("porcentagemFrete", "Frete");
-  sdLoja->setHeaderData("valorMinimoFrete", "Mínimo Frete");
 
   return sdLoja;
 }

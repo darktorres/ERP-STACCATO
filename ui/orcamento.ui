@@ -571,7 +571,7 @@ color: rgb(0, 0, 0);</string>
               <enum>Qt::MoveAction</enum>
              </property>
              <property name="selectionMode">
-              <enum>QAbstractItemView::MultiSelection</enum>
+              <enum>QAbstractItemView::SingleSelection</enum>
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>

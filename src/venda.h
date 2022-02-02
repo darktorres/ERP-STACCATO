@@ -64,7 +64,8 @@ private:
   auto on_itemBoxProfissional_textChanged() -> void;
   auto on_pushButtonAbrirOrcamento_clicked() -> void;
   auto on_pushButtonAdicionarObservacao_clicked() -> void;
-  auto on_pushButtonCadastrarPedido_clicked() -> void;
+  auto on_pushButtonAtualizarEnderecoEnt_clicked() -> void;
+  auto on_pushButtonCadastrarVenda_clicked() -> void;
   auto on_pushButtonCancelamento_clicked() -> void;
   auto on_pushButtonComprovantes_clicked() -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
@@ -84,6 +85,7 @@ private:
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
+  auto trocarEnderecoEntrega() -> void;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;

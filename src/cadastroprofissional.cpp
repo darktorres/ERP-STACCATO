@@ -167,14 +167,15 @@ bool CadastroProfissional::viewRegister() {
 
   //---------------------------------------------------
 
+  const double tetoComissao = User::fromLoja("tetoProfissionalRT").toDouble();
   const double comissao = data("comissao").toDouble();
 
-  if (comissao > 5) {
+  if (comissao > tetoComissao) {
     ui->doubleSpinBoxComissao->setMaximum(comissao);
     ui->doubleSpinBoxComissao->setValue(comissao);
   }
 
-  if (not User::isAdmin() and comissao <= 5) { ui->doubleSpinBoxComissao->setMaximum(5); }
+  if (not User::isAdmin() and comissao <= tetoComissao) { ui->doubleSpinBoxComissao->setMaximum(tetoComissao); }
 
   //---------------------------------------------------
 
@@ -483,7 +484,7 @@ void CadastroProfissional::connectLineEditsToDirty() {
 bool CadastroProfissional::newRegister() {
   if (not RegisterAddressDialog::newRegister()) { return false; }
 
-  if (not User::isAdmin()) { ui->doubleSpinBoxComissao->setMaximum(5); }
+  if (not User::isAdmin()) { ui->doubleSpinBoxComissao->setMaximum(User::fromLoja("tetoProfissionalRT").toDouble()); }
 
   return true;
 }

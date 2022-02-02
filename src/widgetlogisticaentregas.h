@@ -45,6 +45,7 @@ private:
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarNFe_clicked() -> void;
   auto on_pushButtonImprimirDanfe_clicked() -> void;
+  auto on_pushButtonObservacao_clicked() -> void;
   auto on_pushButtonProtocoloEntrega_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;

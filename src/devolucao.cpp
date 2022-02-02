@@ -89,7 +89,7 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("formComercial", "Form. Com.");
   modelProdutos2.setHeaderData("total", "Total");
 
-  modelProdutos2.setFilter("idVenda = '" + m_idVenda + "' AND status != 'DEVOLVIDO'");
+  modelProdutos2.setFilter("idVenda = '" + m_idVenda + "' AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'FINALIZADO', 'PENDENTE DEV.', 'QUEBRADO', 'SUBSTITUIDO')");
 
   modelProdutos2.select();
 

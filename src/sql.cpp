@@ -391,6 +391,7 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          "     e.local,"
          "     g.label,"
          "     e.codComercial,"
+         "     p.formComercial,"
          "     n.numeroNFe AS nfe,"
          "     ANY_VALUE(pf2.dataPrevColeta) AS dataPrevColeta,"
          "     ANY_VALUE(pf2.dataRealColeta) AS dataRealColeta,"

@@ -24,9 +24,19 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButtonRelatorio">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Gerar relatório</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="groupBoxRelatorio">
        <property name="title">
-        <string>Relatório Contábil</string>
+        <string>Relatório contábil</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -58,12 +68,12 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QPushButton" name="pushButtonRelatorio">
+         <widget class="QPushButton" name="pushButtonRelatorioContabil">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="text">
-           <string>Gerar Relatório Data</string>
+           <string>Gerar relatório data</string>
           </property>
          </widget>
         </item>
@@ -117,7 +127,7 @@
            <bool>true</bool>
           </property>
           <property name="text">
-           <string>Estoque Contábil</string>
+           <string>Estoque contábil</string>
           </property>
          </widget>
         </item>
@@ -220,7 +230,7 @@ color: rgb(255, 255, 0);</string>
  <tabstops>
   <tabstop>pushButtonFollowup</tabstop>
   <tabstop>dateEditMes</tabstop>
-  <tabstop>pushButtonRelatorio</tabstop>
+  <tabstop>pushButtonRelatorioContabil</tabstop>
   <tabstop>radioButtonMaior</tabstop>
   <tabstop>radioButtonEstoqueZerado</tabstop>
   <tabstop>radioButtonEstoqueContabil</tabstop>

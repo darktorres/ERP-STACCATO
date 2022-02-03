@@ -30,10 +30,12 @@ private:
   auto delayFiltro() -> void;
   auto escolheFiltro() -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> void;
+  auto gerarRelatorio(const QString &data) -> void;
   auto getMatch() const -> QString;
   auto montaFiltro() -> void;
   auto montaFiltroContabil() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
+  auto on_pushButtonRelatorioContabil_clicked() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;

@@ -23,6 +23,7 @@ void WidgetEstoques::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoques::delayFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorio_clicked, connectionType);
+  connect(ui->pushButtonRelatorioContabil, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorioContabil_clicked, connectionType);
   connect(ui->radioButtonEstoqueContabil, &QRadioButton::clicked, this, &WidgetEstoques::montaFiltroContabil, connectionType);
   connect(ui->radioButtonEstoqueZerado, &QRadioButton::clicked, this, &WidgetEstoques::montaFiltro, connectionType);
   connect(ui->radioButtonMaior, &QRadioButton::clicked, this, &WidgetEstoques::montaFiltro, connectionType);
@@ -53,6 +54,7 @@ void WidgetEstoques::setHeaderData() {
   model.setHeaderData("local", "Local");
   model.setHeaderData("label", "Bloco");
   model.setHeaderData("codComercial", "Cód. Com.");
+  model.setHeaderData("formComercial", "Form. Com.");
   model.setHeaderData("nfe", "NF-e");
   model.setHeaderData("dataPrevColeta", "Prev. Coleta");
   model.setHeaderData("dataRealColeta", "Coleta");
@@ -140,7 +142,7 @@ QString WidgetEstoques::getMatch() const {
   return filtroBusca;
 }
 
-void WidgetEstoques::on_pushButtonRelatorio_clicked() {
+void WidgetEstoques::on_pushButtonRelatorioContabil_clicked() {
   // 1. codigo produto
   // 2. descricao
   // 3. ncm
@@ -151,34 +153,7 @@ void WidgetEstoques::on_pushButtonRelatorio_clicked() {
 
   const QString data = ui->dateEditMes->date().toString("yyyy-MM-dd");
 
-  SqlQueryModel modelContabil;
-
-  modelContabil.setQuery(Sql::view_estoque_contabil("", data));
-
-  modelContabil.select();
-
-  const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
-
-  if (dir.isEmpty()) { return; }
-
-  const QString arquivoModelo = QDir::currentPath() + "/modelos/relatorio_contabil.xlsx";
-
-  File modelo(arquivoModelo);
-
-  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
-
-  const QString fileName = dir + "/relatorio_contabil_" + data + ".xlsx";
-
-  File file(fileName);
-
-  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
-
-  file.close();
-
-  gerarExcel(arquivoModelo, fileName, modelContabil);
-
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
+  gerarRelatorio(data);
 }
 
 void WidgetEstoques::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
@@ -211,6 +186,43 @@ void WidgetEstoques::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetEstoques::on_pushButtonRelatorio_clicked() {
+  const QString data = QDate::currentDate().toString("yyyy-MM-dd");
+
+  gerarRelatorio(data);
+}
+
+void WidgetEstoques::gerarRelatorio(const QString &data) {
+  SqlQueryModel modelContabil;
+
+  modelContabil.setQuery(Sql::view_estoque_contabil("", data));
+
+  modelContabil.select();
+
+  const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
+
+  if (dir.isEmpty()) { return; }
+
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/relatorio_contabil.xlsx";
+
+  File modelo(arquivoModelo);
+
+  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
+
+  const QString fileName = dir + "/relatorio_contabil_" + data + ".xlsx";
+
+  File file(fileName);
+
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+
+  file.close();
+
+  gerarExcel(arquivoModelo, fileName, modelContabil);
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
 // TODO: colocar botao para marcar quebra e remover consumos (colocar um followup em cada venda/consumo para ficar o historico de que foi removido o consumo devido uma quebra)

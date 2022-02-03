@@ -19,7 +19,7 @@ QT *= core gui sql network xml charts widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
 # VERSION is empty
-DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
+#DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++latest warn_on
 

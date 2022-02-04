@@ -154,7 +154,7 @@ void Excel::gerarExcel() {
 
     if (not queryUi.exec()) { throw RuntimeException("Erro buscando dados do produto: " + queryUi.lastError().text()); }
 
-    if (not queryUi.first()) { throw RuntimeException("Dados não encontrados do produto com id: " + queryProduto.value("idProduto").toString()); }
+    if (not queryUi.first()) { throw RuntimeException("Dados não encontrados do produto com id: '" + queryProduto.value("idProduto").toString() + "'"); }
 
     const QString loes = queryUi.value("ui").toString().contains("- L") ? " LOES" : "";
 
@@ -215,13 +215,13 @@ void Excel::setQuerys() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados da venda/orçamento: " + id); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados da venda/orçamento: '" + id + "'"); }
 
   //------------------------------------------------------------------------
 
   if (not queryProduto.exec()) { throw RuntimeException("Erro buscando dados dos produtos: " + queryProduto.lastError().text()); }
 
-  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados da Venda: " + id); }
+  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados da Venda: '" + id + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ void Excel::setQuerys() {
 
   if (not queryCliente.exec()) { throw RuntimeException("Erro buscando cliente: " + queryCliente.lastError().text()); }
 
-  if (not queryCliente.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + query.value("idCliente").toString()); }
+  if (not queryCliente.first()) { throw RuntimeException("Dados não encontrados do cliente com id: '" + query.value("idCliente").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@ void Excel::setQuerys() {
 
   if (not queryEndEnt.exec()) { throw RuntimeException("Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
 
-  if (not queryEndEnt.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + query.value("idEnderecoEntrega").toString()); }
+  if (not queryEndEnt.first()) { throw RuntimeException("Dados não encontrados do endereço com id: '" + query.value("idEnderecoEntrega").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -248,7 +248,9 @@ void Excel::setQuerys() {
 
   if (not queryEndFat.exec()) { throw RuntimeException("Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
 
-  if (not queryEndFat.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega").toString()); }
+  if (not queryEndFat.first()) {
+    throw RuntimeException("Dados não encontrados do endereço com id: '" + query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega").toString() + "'");
+  }
 
   //------------------------------------------------------------------------
 
@@ -257,7 +259,7 @@ void Excel::setQuerys() {
 
   if (not queryProfissional.exec()) { throw RuntimeException("Erro buscando profissional: " + queryProfissional.lastError().text()); }
 
-  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados do profissional com id: " + query.value("idProfissional").toString()); }
+  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados do profissional com id: '" + query.value("idProfissional").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -266,7 +268,7 @@ void Excel::setQuerys() {
 
   if (not queryVendedor.exec()) { throw RuntimeException("Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
-  if (not queryVendedor.first()) { throw RuntimeException("Dados não encontrados do vendedor com id: " + query.value("idUsuario").toString()); }
+  if (not queryVendedor.first()) { throw RuntimeException("Dados não encontrados do vendedor com id: '" + query.value("idUsuario").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -275,7 +277,7 @@ void Excel::setQuerys() {
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }
 
-  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + query.value("idLoja").toString()); }
+  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados da loja com id: '" + query.value("idLoja").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -284,5 +286,5 @@ void Excel::setQuerys() {
 
   if (not queryLojaEnd.exec()) { throw RuntimeException("Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
 
-  if (not queryLojaEnd.first()) { throw RuntimeException("Endereço não encontrado da loja com id: " + query.value("idLoja").toString()); }
+  if (not queryLojaEnd.first()) { throw RuntimeException("Endereço não encontrado da loja com id: '" + query.value("idLoja").toString() + "'"); }
 }

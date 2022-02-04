@@ -294,7 +294,7 @@ void Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando idVenda: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para id: " + QString::number(idVendaProduto2)); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para id: '" + QString::number(idVendaProduto2) + "'"); }
 
   const int row = 0;
   const double quantCompra = modelCompra.data(row, "quant").toDouble();

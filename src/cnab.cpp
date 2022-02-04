@@ -573,7 +573,7 @@ void CNAB::retornoGareItau240(const QString &filePath) {
           throw RuntimeException("Erro buscando id da NF-e: " + query1.lastError().text());
         }
 
-        if (not query1.first()) { throw RuntimeException("Não encontrado id da NF-e: " + nfe); }
+        if (not query1.first()) { throw RuntimeException("Não encontrado id da NF-e: '" + nfe + "'"); }
 
         SqlQuery query2;
 

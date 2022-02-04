@@ -279,7 +279,7 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       if (not queryTemp.exec()) { throw RuntimeException("Erro buscando codComercial do estoque: " + queryTemp.lastError().text()); }
 
-      if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: " + QString::number(idEstoque)); }
+      if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: '" + QString::number(idEstoque) + "'"); }
       // TODO: codComercial é selecionado mas não é usado, essa query é apenas para verificar se existe codComercial?
 
     } else {
@@ -309,7 +309,7 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados do veículo: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para veículo de id: " + ui->itemBoxVeiculo->getId().toString(), this); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para veículo de id: '" + ui->itemBoxVeiculo->getId().toString() + "'", this); }
 
   modelTranspAtual.select();
 

@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   if (not query.exec()) { throw RuntimeException("Erro lendo permissões: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Permissões não encontradas para usuário com id: " + User::idUsuario, this); }
+  if (not query.first()) { throw RuntimeException("Permissões não encontradas para usuário com id: '" + User::idUsuario + "'", this); }
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabVendas), query.value("view_tab_venda").toBool());

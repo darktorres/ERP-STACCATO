@@ -167,7 +167,7 @@ void PDF::setQuerys() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados da venda/orçamento não encontrados para id: " + id); }
+  if (not query.first()) { throw RuntimeException("Dados da venda/orçamento não encontrados para id: '" + id + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -176,7 +176,7 @@ void PDF::setQuerys() {
 
   if (not queryCliente.exec()) { throw RuntimeException("Erro buscando cliente: " + queryCliente.lastError().text()); }
 
-  if (not queryCliente.first()) { throw RuntimeException("Dados do cliente não encontrado para id: " + query.value("idCliente").toString()); }
+  if (not queryCliente.first()) { throw RuntimeException("Dados do cliente não encontrado para id: '" + query.value("idCliente").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -185,7 +185,7 @@ void PDF::setQuerys() {
 
   if (not queryEndEnt.exec()) { throw RuntimeException("Erro buscando endereço: " + queryEndEnt.lastError().text()); }
 
-  if (not queryEndEnt.first()) { throw RuntimeException("Dados do endereço não encontrados para id: " + query.value("idEnderecoEntrega").toString()); }
+  if (not queryEndEnt.first()) { throw RuntimeException("Dados do endereço não encontrados para id: '" + query.value("idEnderecoEntrega").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -195,7 +195,7 @@ void PDF::setQuerys() {
 
     if (not queryEndFat.exec()) { throw RuntimeException("Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
 
-    if (not queryEndFat.first()) { throw RuntimeException("Dados do endereço não encontrados para id: " + query.value("idEnderecoFaturamento").toString()); }
+    if (not queryEndFat.first()) { throw RuntimeException("Dados do endereço não encontrados para id: '" + query.value("idEnderecoFaturamento").toString() + "'"); }
   }
 
   //------------------------------------------------------------------------
@@ -205,7 +205,7 @@ void PDF::setQuerys() {
 
   if (not queryProfissional.exec()) { throw RuntimeException("Erro buscando profissional: " + queryProfissional.lastError().text()); }
 
-  if (not queryProfissional.first()) { throw RuntimeException("Dados do profissional não encontrados para id: " + query.value("idProfissional").toString()); }
+  if (not queryProfissional.first()) { throw RuntimeException("Dados do profissional não encontrados para id: '" + query.value("idProfissional").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -214,7 +214,7 @@ void PDF::setQuerys() {
 
   if (not queryVendedor.exec()) { throw RuntimeException("Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
-  if (not queryVendedor.first()) { throw RuntimeException("Dados do vendedor não encontrados para id: " + query.value("idUsuario").toString()); }
+  if (not queryVendedor.first()) { throw RuntimeException("Dados do vendedor não encontrados para id: '" + query.value("idUsuario").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -223,7 +223,7 @@ void PDF::setQuerys() {
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }
 
-  if (not queryLoja.first()) { throw RuntimeException("Dados da loja não encontrados para id: " + query.value("idLoja").toString()); }
+  if (not queryLoja.first()) { throw RuntimeException("Dados da loja não encontrados para id: '" + query.value("idLoja").toString() + "'"); }
 
   //------------------------------------------------------------------------
 
@@ -232,5 +232,5 @@ void PDF::setQuerys() {
 
   if (not queryLojaEnd.exec()) { throw RuntimeException("Erro buscando loja endereço: " + queryLojaEnd.lastError().text()); }
 
-  if (not queryLojaEnd.first()) { throw RuntimeException("Endereço da loja não encontrado para id: " + query.value("idLoja").toString()); }
+  if (not queryLojaEnd.first()) { throw RuntimeException("Endereço da loja não encontrado para id: '" + query.value("idLoja").toString() + "'"); }
 }

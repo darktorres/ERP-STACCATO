@@ -379,7 +379,7 @@ void Devolucao::criarDevolucao() {
 
   if (not query2.exec()) { throw RuntimeException("Erro determinando próximo id: " + query2.lastError().text()); }
 
-  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: " + m_idVenda); }
+  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: '" + m_idVenda + "'"); }
 
   idDevolucao = m_idVenda + "D" + query2.value("number").toString();
 
@@ -463,7 +463,7 @@ void Devolucao::criarComissaoProfissional(const int currentRow) {
     throw RuntimeException("Erro buscando dados do profissional: " + queryProfissional.lastError().text());
   }
 
-  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados para profissional com id: " + idVendaProduto2); }
+  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados para profissional com id: '" + idVendaProduto2 + "'"); }
 
   const double rt = queryProfissional.value("rt").toDouble() / 100;
   const double valor = modelProdutos2.data(currentRow, "total").toDouble() * -1 * rt;
@@ -598,7 +598,7 @@ void Devolucao::atualizarDevolucao() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados da devolução: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para devolução com id: " + idDevolucao); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para devolução com id: '" + idDevolucao + "'"); }
 
   SqlQuery query2;
   query2.prepare("UPDATE venda SET subTotalBru = :subTotalBru, subTotalLiq = :subTotalLiq, total = :total WHERE idVenda = :idVenda");
@@ -675,7 +675,7 @@ void Devolucao::atualizarIdRelacionado(const int currentRow) {
     throw RuntimeException("Erro buscando idVendaProduto2: " + queryBusca.lastError().text());
   }
 
-  if (not queryBusca.first()) { throw RuntimeException("Dados não encontrados para id: " + idVendaProduto1_Devolucao); }
+  if (not queryBusca.first()) { throw RuntimeException("Dados não encontrados para id: '" + idVendaProduto1_Devolucao + "'"); }
 
   //------------------------------------
 

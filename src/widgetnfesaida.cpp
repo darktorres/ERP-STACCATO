@@ -112,7 +112,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: " + model.data(index.row(), "idNFe").toString()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'"); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -279,7 +279,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não foram encontrado dados para a data: " + ui->dateEdit->date().toString("yyyy-MM")); }
+  if (not query.first()) { throw RuntimeException("Não foram encontrado dados para a data: '" + ui->dateEdit->date().toString("yyyy-MM") + "'"); }
 
   dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
@@ -327,7 +327,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
-    if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com chave de acesso: " + chaveAcesso); }
+    if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com chave de acesso: '" + chaveAcesso + "'"); }
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 

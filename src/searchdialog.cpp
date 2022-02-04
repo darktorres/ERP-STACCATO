@@ -194,7 +194,7 @@ QString SearchDialog::getText(const QVariant &id) {
 
   if (not query.exec(queryText)) { throw RuntimeException("Erro na query getText: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Texto não encontrado para id: " + id.toString(), this); }
+  if (not query.first()) { throw RuntimeException("Texto não encontrado para id: '" + id.toString() + "'", this); }
 
   QString res;
 

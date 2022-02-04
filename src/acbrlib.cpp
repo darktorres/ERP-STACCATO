@@ -28,7 +28,7 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: '" + QString::number(idNFe) + "'"); }
 
   gerarDanfe(query.value("xml"), true);
 }
@@ -149,7 +149,7 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML para NF-e de id: '" + QString::number(idNFe) + "'"); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

@@ -77,7 +77,7 @@ std::tuple<QString, QString> ACBr::consultarNFe(const int idNFe) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com id: " + QString::number(idNFe)); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e com id: '" + QString::number(idNFe) + "'"); }
 
   //-------------------------------------------
 

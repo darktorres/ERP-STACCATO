@@ -780,7 +780,7 @@ void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando taxa: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para o pagamento: " + tipoPgt); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o pagamento: '" + tipoPgt + "'"); }
 
   const int idConta = query.value("idConta").toInt();
   const bool centavoPrimeiraParcela = query.value("centavoSobressalente").toBool();

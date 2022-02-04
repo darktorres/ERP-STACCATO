@@ -312,7 +312,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   if (not queryOrc.exec()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
 
-  if (not queryOrc.first()) { throw RuntimeException("Orçamento não encontrado: " + idOrcamento); }
+  if (not queryOrc.first()) { throw RuntimeException("Orçamento não encontrado: '" + idOrcamento + "'"); }
 
   ui->itemBoxVendedor->setId(queryOrc.value("idUsuario"));
   ui->itemBoxConsultor->setId(queryOrc.value("idUsuarioConsultor"));
@@ -711,7 +711,7 @@ void Venda::verificaFreteLoja() {
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
 
-  if (not queryFornecedor.first()) { throw RuntimeException("Frete não encontrado para o produto com id: " + modelItem.data(0, "idProduto").toString()); }
+  if (not queryFornecedor.first()) { throw RuntimeException("Frete não encontrado para o produto com id: '" + modelItem.data(0, "idProduto").toString() + "'"); }
 
   const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
 
@@ -1285,7 +1285,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
   if (not queryPag.exec()) { throw RuntimeException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
 
-  if (not queryPag.first()) { throw RuntimeException("Crédito não encontrado do cliente com id: " + data("idCliente").toString()); }
+  if (not queryPag.first()) { throw RuntimeException("Crédito não encontrado do cliente com id: '" + data("idCliente").toString() + "'"); }
 
   double credito = queryPag.value("credito").toDouble();
 
@@ -1385,7 +1385,7 @@ void Venda::copiaProdutosOrcamento() {
         throw RuntimeException("Erro buscando status do estoque: " + queryStatus.lastError().text());
       }
 
-      if (not queryStatus.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelItem.data(rowItem, "idProduto").toString()); }
+      if (not queryStatus.first()) { throw RuntimeException("Dados não encontrados para produto com id: '" + modelItem.data(rowItem, "idProduto").toString() + "'"); }
 
       modelItem.setData(rowItem, "status", queryStatus.value("status"));
     } else {
@@ -1513,7 +1513,7 @@ void Venda::calcularPesoTotal() {
       throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
     }
 
-    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
+    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
     total += modelItem.data(row, "caixas").toDouble() * kgcx;
@@ -1671,7 +1671,7 @@ void Venda::processarPagamento(Pagamento *pgt) {
 
     if (not query1.exec()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
 
-    if (not query1.first()) { throw RuntimeException("Dados não encontrados do fornecedor: " + fornecedor); }
+    if (not query1.first()) { throw RuntimeException("Dados não encontrados do fornecedor: '" + fornecedor + "'"); }
 
     const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
 

@@ -71,7 +71,7 @@ void WidgetNFeDistribuicao::buscarNSU() {
 
   if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this); }
 
-  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja, this); }
+  if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'", this); }
 
   maximoNSU = queryLoja.value("maximoNSU").toInt();
   ultimoNSU = queryLoja.value("ultimoNSU").toInt();
@@ -579,7 +579,7 @@ void WidgetNFeDistribuicao::on_table_activated(const QModelIndex &index) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: " + model.data(index.row(), "idNFe").toString(), this); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'", this); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -639,7 +639,7 @@ void WidgetNFeDistribuicao::montaFiltro() {
 
       if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
 
-      if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
+      if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'"); }
 
       filtros << "cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
     }

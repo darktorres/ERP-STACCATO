@@ -158,7 +158,7 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text(), this); }
 
-    if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto de id: " + modelProdutos.data(index.row(), "idProduto").toString()); }
+    if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto de id: '" + modelProdutos.data(index.row(), "idProduto").toString() + "'"); }
 
     const double kg = query.value("kgcx").toDouble();
     const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
@@ -462,7 +462,7 @@ void WidgetLogisticaAgendarEntrega::processRows() {
 
     if (not querySelecao.exec()) { throw RuntimeException("Erro buscando dados do produto: " + querySelecao.lastError().text()); }
 
-    if (not querySelecao.first()) { throw RuntimeException("Dados do produto não encontrado para o produto com id: " + idVendaProduto2.toString()); }
+    if (not querySelecao.first()) { throw RuntimeException("Dados do produto não encontrado para o produto com id: '" + idVendaProduto2.toString() + "'"); }
 
     queryCompra.bindValue(":dataPrevEnt", dataPrevEnt);
     queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
@@ -489,7 +489,7 @@ void WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const 
 
   if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto com id: " + modelProdutos.data(row, "idProduto").toString()); }
+  if (not query.first()) { throw RuntimeException("Peso do produto não encontrado para o produto com id: '" + modelProdutos.data(row, "idProduto").toString() + "'"); }
 
   const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
   const double kg = query.value("kgcx").toDouble();
@@ -571,7 +571,7 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Capacidade não encontrado para o veículo com id: " + ui->itemBoxVeiculo->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Capacidade não encontrado para o veículo com id: '" + ui->itemBoxVeiculo->getId().toString() + "'"); }
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 

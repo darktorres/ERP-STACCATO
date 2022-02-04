@@ -1039,7 +1039,7 @@ void Orcamento::setarParametrosProduto() {
 
   if (not query.exec()) { throw RuntimeException("Erro na busca do produto: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados do produto com id: " + ui->itemBoxProduto->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados do produto com id: '" + ui->itemBoxProduto->getId().toString() + "'"); }
 
   // -------------------------------------------------------------------------
 
@@ -1532,7 +1532,7 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
 
-    if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
+    if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
 
     peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
   }
@@ -1652,7 +1652,7 @@ double Orcamento::calcularPeso() {
     throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
   }
 
-  if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + ui->itemBoxProduto->getId().toString()); }
+  if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + ui->itemBoxProduto->getId().toString() + "'"); }
 
   return ui->doubleSpinBoxCaixas->value() * queryProduto.value("kgcx").toDouble();
 }
@@ -1669,7 +1669,7 @@ void Orcamento::calcularPesoTotal() {
       throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
     }
 
-    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: " + modelItem.data(row, "idProduto").toString()); }
+    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
 
     const double kgcx = queryProduto.value("kgcx").toDouble();
     total += modelItem.data(row, "caixas").toDouble() * kgcx;

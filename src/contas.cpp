@@ -371,7 +371,7 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
     throw RuntimeException("Erro buscando OC: " + query.lastError().text());
   }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado idCompra da OC: " + ordemCompra); }
+  if (not query.first()) { throw RuntimeException("Não encontrado idCompra da OC: '" + ordemCompra + "'"); }
 
   const QString idCompra = query.value("idCompra").toString();
 
@@ -395,7 +395,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: " + idPagamento); }
+  if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: '" + idPagamento + "'"); }
 
   const QString idVenda = query.value("idVenda").toString().left(11);
 

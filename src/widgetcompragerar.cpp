@@ -326,7 +326,7 @@ bool WidgetCompraGerar::verificaRepresentacao(const QModelIndexList &list) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados do fornecedor: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: " + fornecedor); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: '" + fornecedor + "'"); }
 
   const bool isRepresentacao = query.value("representacao").toBool();
 

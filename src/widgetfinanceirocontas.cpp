@@ -421,7 +421,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
     if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-    if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: " + model.data(index.row(), "idPagamento").toString()); }
+    if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: '" + model.data(index.row(), "idPagamento").toString() + "'"); }
 
     if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
   }
@@ -489,7 +489,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
       throw RuntimeException("Erro buscando idLoja: " + queryLoja.lastError().text());
     }
 
-    if (not queryLoja.first()) { throw RuntimeError("Loja não encontrada no banco de dados: " + xlsx.readValue(rowExcel, 2).toString()); }
+    if (not queryLoja.first()) { throw RuntimeError("Loja não encontrada no banco de dados: '" + xlsx.readValue(rowExcel, 2).toString() + "'"); }
 
     SqlQuery queryConta;
 
@@ -497,7 +497,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
       throw RuntimeException("Erro buscando idConta: " + queryConta.lastError().text());
     }
 
-    if (not queryConta.first()) { throw RuntimeError("Conta não encontrada no banco de dados: " + xlsx.readValue(rowExcel, 7).toString()); }
+    if (not queryConta.first()) { throw RuntimeError("Conta não encontrada no banco de dados: '" + xlsx.readValue(rowExcel, 7).toString() + "'"); }
 
     const int rowModel = modelImportar.insertRowAtEnd();
 
@@ -564,7 +564,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
         throw RuntimeException("Erro buscando dados báncarios do funcionário: " + queryFuncionario.lastError().text());
       }
 
-      if (not queryFuncionario.first()) { throw RuntimeException("Não encontrou o funcionário: " + contraParte); }
+      if (not queryFuncionario.first()) { throw RuntimeException("Não encontrou o funcionário: '" + contraParte + "'"); }
 
       const int codBanco = queryFuncionario.value("banco").toString().left(3).toInt();
       const QString cpfDest = queryFuncionario.value("cpfBanco").toString().remove(".").remove("/").remove("-");
@@ -599,7 +599,7 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
         throw RuntimeException("Erro buscando dados báncarios do fornecedor: " + queryFornecedor.lastError().text());
       }
 
-      if (not queryFornecedor.first()) { throw RuntimeException("Não encontrou o fornecedor: " + contraParte); }
+      if (not queryFornecedor.first()) { throw RuntimeException("Não encontrou o fornecedor: '" + contraParte + "'"); }
 
       const int codBanco = queryFornecedor.value("banco").toString().left(3).toInt();
       const QString cnpjDest = queryFornecedor.value("cnpjBanco").toString().remove(".").remove("/").remove("-");

@@ -113,7 +113,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: " + model.data(index.row(), "idNFe").toString(), this); }
+  if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'", this); }
 
   ACBrLib::gerarDanfe(query.value("xml"), true);
 }
@@ -159,7 +159,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
     if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = " + idLoja)) { throw RuntimeException("Erro buscando CNPJ loja: " + queryLoja.lastError().text()); }
 
-    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: " + idLoja); }
+    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'"); }
 
     filtros << "`CNPJ Dest` = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
   }
@@ -318,7 +318,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
 
-    if (not query.first()) { throw RuntimeException("Não encontrou XML da NF-e com chave de acesso: " + chaveAcesso); }
+    if (not query.first()) { throw RuntimeException("Não encontrou XML da NF-e com chave de acesso: '" + chaveAcesso + "'"); }
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 

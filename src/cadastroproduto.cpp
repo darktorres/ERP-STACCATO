@@ -168,7 +168,7 @@ void CadastroProduto::savingProcedures() {
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrou fornecedor de id: " + ui->itemBoxFornecedor->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Não encontrou fornecedor de id: '" + ui->itemBoxFornecedor->getId().toString() + "'"); }
 
   const bool representacao = query.value("representacao").toBool();
 

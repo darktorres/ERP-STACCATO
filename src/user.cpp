@@ -63,7 +63,7 @@ QVariant User::fromLoja(const QString &parameter, const QString &user) {
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro na query loja: " + queryLoja.lastError().text()); }
 
-  if (not queryLoja.first()) { throw RuntimeException("Dados da loja/usuário não encontrados para o usuário: " + user); }
+  if (not queryLoja.first()) { throw RuntimeException("Dados da loja/usuário não encontrados para o usuário: '" + user + "'"); }
 
   return queryLoja.value(0);
 }

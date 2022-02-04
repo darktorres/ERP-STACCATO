@@ -273,7 +273,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelEstoque.data(row, "idProduto").toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: '" + modelEstoque.data(row, "idProduto").toString() + "'"); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
 
@@ -445,7 +445,7 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
 
   if (not query.exec()) { throw RuntimeException("Erro buscando cliente: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Cliente não encontrado para Venda: " + idVenda); }
+  if (not query.first()) { throw RuntimeException("Cliente não encontrado para Venda: '" + idVenda + "'"); }
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
@@ -517,7 +517,7 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
   if (not query.exec()) { throw RuntimeException("Erro buscando sobra estoque: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Estoque restante não encontrado para id: " + QString::number(idEstoque)); }
+  if (not query.first()) { throw RuntimeException("Estoque restante não encontrado para id: '" + QString::number(idEstoque) + "'"); }
 
   double restante = query.value("restante").toDouble(); // TODO: divide this by quantCaixa
   qDebug() << "sobra: " << restante;

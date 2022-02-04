@@ -59,7 +59,7 @@ void ImportaProdutos::verificaSeRepresentacao() {
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
 
-  if (not queryFornecedor.first()) { throw RuntimeException("Dados não encontrados para fornecedor: " + m_fornecedor); }
+  if (not queryFornecedor.first()) { throw RuntimeException("Dados não encontrados para fornecedor: '" + m_fornecedor + "'"); }
 
   ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
 }

@@ -504,7 +504,7 @@ void CadastrarNFe::preencherNumeroNFe() {
 
   if (not queryCnpj.exec()) { throw RuntimeException("Erro buscando CNPJ: " + queryCnpj.lastError().text(), this); }
 
-  if (not queryCnpj.first()) { throw RuntimeException("CNPJ não encontrado da loja com id: " + ui->itemBoxLoja->getId().toString()); }
+  if (not queryCnpj.first()) { throw RuntimeException("CNPJ não encontrado da loja com id: '" + ui->itemBoxLoja->getId().toString() + "'"); }
 
   const QString cnpj = clearStr(queryCnpj.value("cnpj").toString());
 
@@ -1129,7 +1129,7 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged() {
 
   if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do cliente: " + queryEndereco.lastError().text(), this); }
 
-  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + ui->itemBoxEnderecoEntrega->getId().toString()); }
+  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: '" + ui->itemBoxEnderecoEntrega->getId().toString() + "'"); }
 
   ui->lineEditDestinatarioLogradouro_2->setText(queryEndereco.value("logradouro").toString());
   ui->lineEditDestinatarioNumero_2->setText(queryEndereco.value("numero").toString());
@@ -1342,7 +1342,7 @@ void CadastrarNFe::on_itemBoxVeiculo_textChanged() {
 
   if (not queryTransp.exec()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
-  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do veículo com id: " + ui->itemBoxVeiculo->getId().toString()); }
+  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do veículo com id: '" + ui->itemBoxVeiculo->getId().toString() + "'"); }
 
   const QString endereco = queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " + queryTransp.value("complemento").toString() + " - " +
                            queryTransp.value("bairro").toString();
@@ -1366,7 +1366,7 @@ void CadastrarNFe::on_itemBoxCliente_textChanged() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados do cliente: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + ui->itemBoxCliente->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados do cliente com id: '" + ui->itemBoxCliente->getId().toString() + "'"); }
 
   ui->lineEditDestinatarioNomeRazao->setText(query.value("nome_razao").toString());
   const QString cpfCnpj = (query.value("pfpj").toString() == "PF") ? "cpf" : "cnpj";
@@ -1731,7 +1731,7 @@ void CadastrarNFe::preencherEmitente() {
 
   if (not queryEmitente.exec()) { throw RuntimeException("Erro lendo dados do emitente: " + queryEmitente.lastError().text(), this); }
 
-  if (not queryEmitente.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
+  if (not queryEmitente.first()) { throw RuntimeException("Dados não encontrados da loja com id: '" + ui->itemBoxLoja->getId().toString() + "'"); }
 
   ui->lineEditEmitenteNomeRazao->setText(queryEmitente.value("razaoSocial").toString());
   ui->lineEditEmitenteFantasia->setText(queryEmitente.value("nomeFantasia").toString());
@@ -1747,7 +1747,7 @@ void CadastrarNFe::preencherEmitente() {
 
   if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEndereco.lastError().text(), this); }
 
-  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados da loja com id: " + ui->itemBoxLoja->getId().toString()); }
+  if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados da loja com id: '" + ui->itemBoxLoja->getId().toString() + "'"); }
 
   ui->lineEditEmitenteLogradouro->setText(queryEndereco.value("logradouro").toString());
   ui->lineEditEmitenteNumero->setText(queryEndereco.value("numero").toString());
@@ -1813,7 +1813,7 @@ void CadastrarNFe::preencherDestinatario() {
 
     if (not queryDestinatario.exec()) { throw RuntimeException("Erro lendo dados do destinatário: " + queryDestinatario.lastError().text(), this); }
 
-    if (not queryDestinatario.first()) { throw RuntimeException("Dados não encontrados do cliente com id: " + modelVenda.data(0, "idCliente").toString()); }
+    if (not queryDestinatario.first()) { throw RuntimeException("Dados não encontrados do cliente com id: '" + modelVenda.data(0, "idCliente").toString() + "'"); }
 
     ui->lineEditDestinatarioNomeRazao->setText(queryDestinatario.value("nome_razao").toString());
     ui->lineEditDestinatarioCPFCNPJ->setText(queryDestinatario.value(queryDestinatario.value("pfpj").toString() == "PF" ? "cpf" : "cnpj").toString());
@@ -1834,7 +1834,7 @@ void CadastrarNFe::preencherDestinatario() {
 
     if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryEndereco.lastError().text(), this); }
 
-    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoFaturamento").toString()); }
+    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: '" + modelVenda.data(0, "idEnderecoFaturamento").toString() + "'"); }
 
     ui->lineEditDestinatarioLogradouro->setText(queryEndereco.value("logradouro").toString());
     ui->lineEditDestinatarioNumero->setText(queryEndereco.value("numero").toString());
@@ -1854,7 +1854,7 @@ void CadastrarNFe::preencherDestinatario() {
 
     if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do destinatário: " + queryEndereco.lastError().text(), this); }
 
-    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: " + modelVenda.data(0, "idEnderecoEntrega").toString()); }
+    if (not queryEndereco.first()) { throw RuntimeException("Dados não encontrados do endereço com id: '" + modelVenda.data(0, "idEnderecoEntrega").toString() + "'"); }
 
     ui->lineEditDestinatarioLogradouro_2->setText(queryEndereco.value("logradouro").toString());
     ui->lineEditDestinatarioNumero_2->setText(queryEndereco.value("numero").toString());
@@ -2045,7 +2045,7 @@ void CadastrarNFe::preencherTransportadora() {
 
   if (not queryTransp.exec()) { throw RuntimeException("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
-  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do id: " + modelProduto.data(0, coluna).toString()); }
+  if (not queryTransp.first()) { throw RuntimeException("Dados não encontrados do id: '" + modelProduto.data(0, coluna).toString() + "'"); }
 
   if (queryTransp.value("razaoSocial").toString() == "RETIRA") { return; }
 

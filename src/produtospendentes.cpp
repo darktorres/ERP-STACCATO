@@ -78,7 +78,7 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   if (not query.exec()) { throw RuntimeException("Erro buscando quantCaixa: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados do produto não encontrados para o id: " + modelViewProdutos.data(0, "idVendaProduto2").toString()); }
+  if (not query.first()) { throw RuntimeException("Dados do produto não encontrados para o id: '" + modelViewProdutos.data(0, "idVendaProduto2").toString() + "'"); }
 
   const double step = query.value("quantCaixa").toDouble();
 

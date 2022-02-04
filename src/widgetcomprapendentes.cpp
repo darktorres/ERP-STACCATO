@@ -34,7 +34,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: " + ui->itemBoxProduto->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: '" + ui->itemBoxProduto->getId().toString() + "'"); }
 
   const QString un = query.value("un").toString();
   const double quantCaixa = query.value("quantCaixa").toDouble();
@@ -277,7 +277,7 @@ void WidgetCompraPendentes::insere(const QDate dataPrevista) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: " + ui->itemBoxProduto->getId().toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o produto com id: '" + ui->itemBoxProduto->getId().toString() + "'"); }
 
   model.setData(newRow, "fornecedor", query.value("fornecedor"));
   model.setData(newRow, "idProduto", query.value("idProduto"));

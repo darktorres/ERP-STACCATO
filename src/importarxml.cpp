@@ -570,7 +570,7 @@ double ImportarXML::buscarCaixas(const int rowEstoque) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando produto " + modelEstoque.data(rowEstoque, "descricao").toString() + ": " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelEstoque.data(rowEstoque, "idProduto").toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: '" + modelEstoque.data(rowEstoque, "idProduto").toString() + "'"); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
@@ -706,7 +706,7 @@ void ImportarXML::usarXMLInutilizado() {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com chave de acesso: " + ui->itemBoxNFe->text()); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com chave de acesso: '" + ui->itemBoxNFe->text() + "'"); }
 
   if (query.value("status").toString() != "AUTORIZADA") { throw RuntimeError("NF-e não está autorizada!", this); }
 
@@ -949,7 +949,7 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   if (not queryProduto.exec()) { throw RuntimeException("Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
 
-  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados para produto com id: " + modelCompra.data(rowCompra, "idProduto").toString()); }
+  if (not queryProduto.first()) { throw RuntimeException("Dados não encontrados para produto com id: '" + modelCompra.data(rowCompra, "idProduto").toString() + "'"); }
 
   const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
   const double caixas = quantConsumo / quantCaixa;
@@ -1217,7 +1217,7 @@ ImportarXML::NCM ImportarXML::buscaNCM(const QString &ncm) {
 
   if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'")) { throw RuntimeException("Erro buscando ncm " + ncm + ": " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeError("NCM " + ncm + " não cadastrado!"); }
+  if (not query.first()) { throw RuntimeError("NCM '" + ncm + "' não cadastrado!"); }
 
   return NCM{query.value("mva4").toDouble() / 100, query.value("mva12").toDouble() / 100, query.value("aliq").toDouble() / 100};
 }

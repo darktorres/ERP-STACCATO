@@ -185,7 +185,7 @@ void InputDialogProduto::setFilter(const QStringList &ids) {
 
   if (not query.exec()) { throw RuntimeException("Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text()); }
 
-  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: " + modelPedidoFornecedor.data(0, "fornecedor").toString()); }
+  if (not query.first()) { throw RuntimeException("Dados não encontrados para o fornecedor: '" + modelPedidoFornecedor.data(0, "fornecedor").toString() + "'"); }
 
   const double aliquotaSt = query.value("aliquotaSt").toDouble();
 

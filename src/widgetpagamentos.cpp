@@ -231,7 +231,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const QString &text) {
 
   if (not query.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não encontrou dados do pagamento: " + pgt->comboTipoPgt->currentText()); }
+  if (not query.first()) { throw RuntimeException("Não encontrou dados do pagamento: '" + pgt->comboTipoPgt->currentText() + "'"); }
 
   const int parcelas = query.value("parcelas").toInt();
 

@@ -542,7 +542,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (not queryCliente.exec()) { throw RuntimeException("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
 
-  if (not queryCliente.first()) { throw RuntimeException("Não foram encontrados dados para a Venda: " + idVenda); }
+  if (not queryCliente.first()) { throw RuntimeException("Não foram encontrados dados para a Venda: '" + idVenda + "'"); }
 
   const QString cliente = queryCliente.value("nome_razao").toString();
 

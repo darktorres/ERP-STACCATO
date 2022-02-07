@@ -42,9 +42,9 @@ private:
   // attributes
   QWidget *parent = nullptr;
   // methods
-  auto decodeCodeItau(const QString &code) -> QString;
-  auto writeBlanks(QTextStream &stream, const int count) -> void;
-  auto writeNumber(QTextStream &stream, const ulong number, const int count) -> void;
-  auto writeText(QTextStream &stream, const QString &text, const int count) -> void;
-  auto writeZeros(QTextStream &stream, const int count) -> void;
+  static auto decodeCodeItau(const QString &code) -> QString;
+  static auto writeBlanks(QTextStream &stream, const int count) -> void;
+  static auto writeNumber(QTextStream &stream, const ulong number, const int count) -> void;
+  static auto writeText(QTextStream &stream, const QString &text, const int count) -> void;
+  static auto writeZeros(QTextStream &stream, const int count) -> void;
 };

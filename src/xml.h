@@ -66,8 +66,8 @@ private:
 public:
   enum class Tipo { Entrada, Saida, Nulo };
 
-  explicit XML(const QString &fileContent, const Tipo tipo, QWidget *parent);
-  explicit XML(const QString &fileContent);
+  explicit XML(const QString &fileContent_, const Tipo tipo_, QWidget *parent_);
+  explicit XML(const QString &fileContent_);
 
   auto validar() -> void;
   auto verificaNCMs() -> void;

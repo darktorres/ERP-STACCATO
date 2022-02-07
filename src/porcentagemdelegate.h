@@ -6,7 +6,7 @@ class PorcentagemDelegate final : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  explicit PorcentagemDelegate(const bool multiplicar, QObject *parent);
+  explicit PorcentagemDelegate(const bool multiplicar_, QObject *parent);
   ~PorcentagemDelegate() final = default;
 
 private:

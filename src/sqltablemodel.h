@@ -16,8 +16,8 @@ class SqlTableModel final : public QSqlTableModel {
   Q_OBJECT
 
 public:
-  explicit SqlTableModel(const int limit, QObject *parent);
-  explicit SqlTableModel(const int limit);
+  explicit SqlTableModel(const int limit_, QObject *parent);
+  explicit SqlTableModel(const int limit_);
   explicit SqlTableModel();
 
   auto data(const int row, const QString &column) const -> QVariant;

@@ -15,7 +15,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (User::isVendedorOrEspecial()) { hideWidgets(); }
+  if (not User::isAdministrativo()) { hideWidgets(); }
 
   if (User::isAdministrativo()) { preencherComboBoxMonitorar(); }
 

@@ -489,8 +489,8 @@ void CadastrarNFe::updateComplemento() {
                                      ui->lineEditDestinatarioBairro_2->text() + " - " + ui->lineEditDestinatarioCidade_2->text() + " - " + ui->lineEditDestinatarioUF_2->text() + " - " +
                                      ui->lineEditDestinatarioCEP_2->text();
 
-  const QString texto = "Venda de código " + modelVenda.data(0, "idVenda").toString() + ";END. ENTREGA: " + endereco +
-                        ";Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;Total Aproximado de tributos federais, estaduais e municipais: R$ " +
+  const QString texto = "Venda de código " + modelVenda.data(0, "idVenda").toString() + "\nEND. ENTREGA: " + endereco +
+                        "\nInformações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y\nTotal Aproximado de tributos federais, estaduais e municipais: R$ " +
                         QLocale(QLocale::Portuguese).toString(total);
 
   ui->infCompSistema->setPlainText(texto);
@@ -852,11 +852,19 @@ void CadastrarNFe::writeComplemento(QTextStream &stream) const {
   if (tipo == Tipo::Entrada) {}
 
   if (tipo == Tipo::Saida or tipo == Tipo::Futura or tipo == Tipo::SaidaAposFutura) {
-    const QString infUsuario = (ui->infCompUsuario->toPlainText().isEmpty()) ? "" : ui->infCompUsuario->toPlainText();
-    const QString infComp = (infUsuario.isEmpty() ? "" : infUsuario + ";") + ui->infCompSistema->toPlainText();
+    QString informacoes;
+
+    const QString infUsuario = ui->infCompUsuario->toPlainText();
+    const QString infComp = ui->infCompSistema->toPlainText();
+
+    informacoes += infUsuario;
+    if (not informacoes.isEmpty()) { informacoes += ";"; }
+    informacoes += infComp;
+
+    informacoes.replace('\n', ';');
 
     stream << "[DadosAdicionais]\n";
-    stream << "infCpl = " + infComp + "\n";
+    stream << "infCpl = " + informacoes + "\n";
   }
 }
 

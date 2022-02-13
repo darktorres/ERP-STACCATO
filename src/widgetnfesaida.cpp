@@ -432,7 +432,7 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 
   const int idNFe = model.data(row, "idNFe").toInt();
 
-  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
+  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL, idNFeFutura = NULL WHERE status = 'EM ENTREGA' AND (idNFeSaida = :idNFe OR idNFeFutura = :idNFe)");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { throw RuntimeException("Erro removendo NF-e da venda_produto: " + query.lastError().text()); }

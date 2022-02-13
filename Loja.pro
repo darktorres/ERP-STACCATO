@@ -18,8 +18,6 @@ versionAtMost(QT_VERSION, 5.15.2) { include(3rdparty/LimeReport-1.5.68/limerepor
 QT *= core gui sql network xml charts widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
-# VERSION is empty
-#DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++latest warn_on
 
@@ -27,12 +25,21 @@ PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
 
 win32 {
+    VERSION = 0.10.48
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
     QMAKE_TARGET_PRODUCT = ERP
     QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
     QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
     RC_ICONS = Staccato.ico
+
+    CONFIG(release, debug|release) {
+        message("sending update to server")
+        versao.input = versao.txt.in
+        versao.output = $$OUT_PWD/release/versao.txt
+        QMAKE_SUBSTITUTES += versao
+        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
+    }
 }
 
 win32-msvc {

@@ -25,10 +25,6 @@ RuntimeException::RuntimeException(const QString &message, QWidget *parent) : st
 RuntimeError::RuntimeError(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message, parent); }
 
 Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
-  setOrganizationName("Staccato");
-  setApplicationName("ERP");
-  setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.10.48");
   setStyle("Fusion");
 
   QDir::setCurrent(QCoreApplication::applicationDirPath());
@@ -367,6 +363,7 @@ void Application::showMessages() {
 }
 
 void Application::updater() {
+#ifdef Q_OS_WIN
   if (updaterOpen) { return; }
 
   const QString hostname = User::getSetting("Login/hostname").toString();
@@ -385,6 +382,7 @@ void Application::updater() {
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
+#endif
 }
 
 QString Application::removerDiacriticos(const QString &s, const bool removerSimbolos) {

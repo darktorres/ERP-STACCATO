@@ -65,8 +65,6 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
 
   connect(m_progressDialog, &ProgressDialog::cancelClicked, this, &QSimpleUpdater::cancel);
   connect(this, &QSimpleUpdater::checkingFinished, this, &QSimpleUpdater::onCheckingFinished);
-
-  setApplicationVersion(qApp->applicationVersion());
 }
 
 QSimpleUpdater::~QSimpleUpdater() {

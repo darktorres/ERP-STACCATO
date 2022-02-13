@@ -471,6 +471,7 @@ FORMS += \
     ui/widgetcompradevolucao.ui \
     ui/widgetcomprafaturar.ui \
     ui/widgetcompragerar.ui \
+    ui/widgetcomprahistorico.ui \
     ui/widgetcomprapendentes.ui \
     ui/widgetcompraresumo.ui \
     ui/widgetconsistencia.ui \
@@ -484,7 +485,6 @@ FORMS += \
     ui/widgetgalpaopeso.ui \
     ui/widgetgare.ui \
     ui/widgetgraficos.ui \
-    ui/widgethistoricocompra.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \
     ui/widgetlogisticacalendario.ui \

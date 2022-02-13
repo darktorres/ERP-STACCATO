@@ -33,7 +33,7 @@
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="lineEditEstoque_2">
+      <widget class="QLineEdit" name="labelStaccatoOFF">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -53,7 +53,7 @@ color: rgb(255, 255, 255);</string>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditEstoque">
+      <widget class="QLineEdit" name="labelEstoque">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -132,6 +132,9 @@ color: rgb(0, 0, 0);</string>
        <property name="text">
         <string>Cadastrar</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -149,20 +152,16 @@ color: rgb(0, 0, 0);</string>
        <property name="text">
         <string>Descadastrar</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Fornecedor:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
+     <item row="0" column="7">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QRadioButton" name="radioButtonTodos">
@@ -190,15 +189,45 @@ color: rgb(0, 0, 0);</string>
        </item>
       </layout>
      </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Produto:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QPushButton" name="pushButtonLimparFiltros">
+       <property name="text">
+        <string>Limpar filtros</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Cód. Com.:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLineEdit" name="lineEditProduto"/>
+     </item>
      <item row="0" column="1">
       <widget class="ItemBox" name="itemBoxFornecedor"/>
      </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="pushButtonLimparFiltroFornecedor">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Limpar filtro</string>
+        <string>Fornecedor:</string>
        </property>
       </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QLineEdit" name="lineEditCodComercial"/>
      </item>
     </layout>
    </item>
@@ -222,8 +251,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>radioButtonStaccatoOFF</tabstop>
   <tabstop>radioButtonEstoque</tabstop>
   <tabstop>tableView</tabstop>
-  <tabstop>lineEditEstoque_2</tabstop>
-  <tabstop>lineEditEstoque</tabstop>
+  <tabstop>labelStaccatoOFF</tabstop>
+  <tabstop>labelEstoque</tabstop>
   <tabstop>doubleSpinBoxDesconto</tabstop>
   <tabstop>dateEditValidade</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>

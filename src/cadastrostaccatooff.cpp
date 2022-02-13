@@ -28,15 +28,35 @@ CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(
 CadastroStaccatoOff::~CadastroStaccatoOff() { delete ui; }
 
 void CadastroStaccatoOff::setConnections() {
+  if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
+
+  if (not blockingSignals.isEmpty()) { return; } // delay setting connections until last unset/set block
+
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged, connectionType);
+  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::montaFiltro, connectionType);
+  connect(ui->lineEditCodComercial, &QLineEdit::textChanged, this, &CadastroStaccatoOff::montaFiltro, connectionType);
+  connect(ui->lineEditProduto, &QLineEdit::textChanged, this, &CadastroStaccatoOff::montaFiltro, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked, connectionType);
   connect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked, connectionType);
-  connect(ui->pushButtonLimparFiltroFornecedor, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonLimparFiltroFornecedor_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltros, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonLimparFiltros_clicked, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled, connectionType);
+}
+
+void CadastroStaccatoOff::unsetConnections() {
+  blockingSignals.push(0);
+
+  disconnect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::montaFiltro);
+  disconnect(ui->lineEditCodComercial, &QLineEdit::textChanged, this, &CadastroStaccatoOff::montaFiltro);
+  disconnect(ui->lineEditProduto, &QLineEdit::textChanged, this, &CadastroStaccatoOff::montaFiltro);
+  disconnect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked);
+  disconnect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked);
+  disconnect(ui->pushButtonLimparFiltros, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonLimparFiltros_clicked);
+  disconnect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled);
+  disconnect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled);
+  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled);
 }
 
 void CadastroStaccatoOff::setupTables() {
@@ -81,12 +101,6 @@ void CadastroStaccatoOff::setupTables() {
   for (int column = 0, columnCount = model.columnCount(); column < columnCount; ++column) {
     if (model.record().fieldName(column).endsWith("Upd")) { ui->tableView->setColumnHidden(column, true); }
   }
-}
-
-void CadastroStaccatoOff::on_itemBoxFornecedor_textChanged(const QString &text) {
-  model.setFilter("fornecedor = '" + text + "' AND estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
-
-  model.select();
 }
 
 void CadastroStaccatoOff::on_radioButtonTodos_toggled(const bool checked) {
@@ -187,8 +201,45 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
 }
 
-void CadastroStaccatoOff::on_pushButtonLimparFiltroFornecedor_clicked() {
+void CadastroStaccatoOff::on_pushButtonLimparFiltros_clicked() {
+  unsetConnections();
+
   ui->itemBoxFornecedor->clear();
+  ui->lineEditProduto->clear();
+  ui->lineEditCodComercial->clear();
+
+  setConnections();
 
   model.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
+}
+
+void CadastroStaccatoOff::montaFiltro() {
+  QStringList filtros;
+
+  //-------------------------------------
+
+  const QString fornecedor = ui->itemBoxFornecedor->text();
+  const QString filtroFornecedor = (not fornecedor.isEmpty()) ? "fornecedor = '" + fornecedor + "'" : "";
+
+  if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
+
+  //-------------------------------------
+
+  const QString produto = ui->lineEditProduto->text();
+  const QString filtroProduto = (not produto.isEmpty()) ? "descricao LIKE '%" + produto + "%'" : "";
+
+  if (not filtroProduto.isEmpty()) { filtros << filtroProduto; }
+
+  //-------------------------------------
+
+  const QString codComercial = ui->lineEditCodComercial->text();
+  const QString filtroCodComercial = (not codComercial.isEmpty()) ? "codComercial LIKE '%" + codComercial + "%'" : "";
+
+  if (not filtroCodComercial.isEmpty()) { filtros << filtroCodComercial; }
+
+  //-------------------------------------
+
+  filtros << "estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE";
+
+  model.setFilter(filtros.join(" AND "));
 }

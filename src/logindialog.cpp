@@ -132,6 +132,7 @@ void LoginDialog::verificaManutencao() {
 }
 
 void LoginDialog::verificaVersao() {
+#ifdef Q_OS_WIN
   SqlQuery query;
 
   if (not query.exec("SELECT versaoAtual FROM versao_erp")) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
@@ -145,6 +146,7 @@ void LoginDialog::verificaVersao() {
     throw RuntimeError("<pre>Versão do ERP não é a mais recente!<br />Sua versão: " + qApp->applicationVersion() + " <br />Versão atual: " + query.value("versaoAtual").toString() +
                        R"(</pre><p><a href="http://)" + qApp->getWebDavIp() + R"(/Instalador.exe">Clique aqui para baixar a última versão</a></p>)");
   }
+#endif
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {

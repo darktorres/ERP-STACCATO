@@ -32,6 +32,7 @@ private:
   auto habilitarBotoes() -> void;
   auto montaFiltro() -> void;
   auto montarGare(const QModelIndexList &selection) -> QVector<CNAB::Gare>;
+  auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonDarBaixaItau_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;
   auto on_pushButtonRetornoItau_clicked() -> void;

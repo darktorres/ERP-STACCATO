@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QSqlError>
 
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) { ui->setupUi(this); }
@@ -22,6 +23,7 @@ void WidgetGare::setConnections() {
   connect(ui->dateEditFiltro, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetGare::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked, connectionType);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked, connectionType);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked, connectionType);
@@ -80,6 +82,7 @@ void WidgetGare::montaFiltro() {
   if (ui->radioButtonLiberado->isChecked()) { filtroRadio = "status = 'LIBERADO GARE'"; }
   if (ui->radioButtonGerado->isChecked()) { filtroRadio = "status = 'GERADO GARE'"; }
   if (ui->radioButtonPago->isChecked()) { filtroRadio = "status = 'PAGO GARE'"; }
+  if (ui->radioButtonCancelado->isChecked()) { filtroRadio = "status = 'CANCELADO GARE'"; }
 
   filtros << filtroRadio;
 
@@ -229,6 +232,35 @@ void WidgetGare::on_tableSelection_changed() {
   ui->doubleSpinBoxTotal->setValue(total);
 }
 
+void WidgetGare::on_pushButtonCancelar_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  // -------------------------------------------------------------------------
+
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
+
+  if (msgBox.exec() == QMessageBox::No) { return; }
+
+  // -------------------------------------------------------------------------
+
+  qApp->startTransaction("WidgetGare::on_pushButtonCancelar_clicked");
+
+  for (const auto index : selection) {
+    SqlQuery query;
+
+    if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO GARE' WHERE idPagamento = " + model.data(index.row(), "idPagamento").toString())) {
+      throw RuntimeException("Erro cancelando GARE: " + query.lastError().text());
+    }
+  }
+
+  qApp->endTransaction();
+
+  qApp->enqueueInformation("GAREs canceladas!");
+}
 // TODO: deve salvar gare/gareData em nfe
 // TODO: quando importar retorno com status de 'agendado' alterar a linha?
 // TODO: renomear classe para WidgetFinanceiroGare

@@ -416,9 +416,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 }
 
 void CadastrarNFe::atualizarNFe(const int idNFe) {
-  // TODO: substituir esse código por qApp->findTag()?
-  const QString tagBegin = "<dhEmi>";
-  const QString tagEnd = "</dhEmi>";
+  const QString tagBegin = "<dhRecbto>";
+  const QString tagEnd = "</dhRecbto>";
 
   const int indexBegin = xml.indexOf(tagBegin);
   const int indexEnd = xml.indexOf(tagEnd);

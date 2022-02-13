@@ -690,8 +690,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
   const QString chaveAcesso = qApp->findTag(evento, "chDFe=");
   const QString numeroNFe = chaveAcesso.mid(25, 9);
   const QString cnpjOrig = qApp->findTag(evento, "CNPJCPF=");
-  const QString dataHoraEmissaoString = qApp->findTag(evento, "dhEmi=");
-  const QDateTime dataHoraEmissao = QDateTime::fromString(dataHoraEmissaoString, "dd/MM/yyyy hh:mm:ss");
+  const QDateTime dataHoraEmissao = QDateTime::fromString(qApp->findTag(evento, "dhRecbto="), "dd/MM/yyyy hh:mm:ss");
   const QString nomeEmitente = qApp->findTag(evento, "xNome=");
   const QString valor = qApp->findTag(evento, "vNF=").replace(',', '.');
   const QString nsu = qApp->findTag(evento, "NSU=");

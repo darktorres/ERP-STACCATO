@@ -53,6 +53,12 @@ void TabLogistica::updateTables() {
   if (currentTab == "Entregues") { ui->widgetEntregues->updateTables(); }
   if (currentTab == "Calendário") { ui->widgetCalendario->updateTables(); }
   if (currentTab == "Devolução") { ui->widgetDevolucao->updateTables(); }
+
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  modelViewLogistica.select();
+
+  if (not selection.isEmpty()) { ui->tableForn->selectRow(selection.first().row()); }
 }
 
 void TabLogistica::on_tableForn_clicked(const QModelIndex &index) {

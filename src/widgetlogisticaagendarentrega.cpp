@@ -324,7 +324,11 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 
   filtroProdutos();
 
-  ui->lineEditAviso->setText((modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") ? "Financeiro não liberou!" : "");
+  const QString statusFinanceiro = modelVendas.data(index.row(), "statusFinanceiro").toString();
+
+  ui->lineEditAviso->setText((statusFinanceiro != "LIBERADO") ? "Financeiro não liberou!" : "");
+
+  if (statusFinanceiro != "LIBERADO") { qApp->enqueueWarning("Financeiro não liberou!"); }
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {

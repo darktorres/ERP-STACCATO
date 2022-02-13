@@ -281,6 +281,18 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
   const int row = index.row();
 
   const double quant = modelProdutos2.data(row, "quant").toDouble();
+
+  const bool isZero = qFuzzyIsNull(quant);
+
+  ui->doubleSpinBoxCaixas->setDisabled(isZero);
+  ui->doubleSpinBoxCredito->setDisabled(isZero);
+  ui->doubleSpinBoxPorcentagem->setDisabled(isZero);
+  ui->doubleSpinBoxPrecoUn->setDisabled(isZero);
+  ui->doubleSpinBoxQuant->setDisabled(isZero);
+  ui->pushButtonDevolverItem->setDisabled(isZero);
+
+  if (qFuzzyIsNull(quant)) { return; }
+
   const double caixas = modelProdutos2.data(row, "caixas").toDouble();
   const double quantCaixa = modelProdutos2.data(row, "quantCaixa").toDouble();
   const double total = modelProdutos2.data(row, "total").toDouble();
@@ -545,14 +557,18 @@ void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2
 }
 
 void Devolucao::limparCampos() {
-  ui->doubleSpinBoxCaixas->clear();
-  ui->doubleSpinBoxCredito->clear();
-  ui->doubleSpinBoxPrecoUn->clear();
-  ui->doubleSpinBoxQuant->setSuffix("");
-  ui->doubleSpinBoxQuant->clear();
-  ui->doubleSpinBoxPorcentagem->clear();
+  ui->doubleSpinBoxCaixas->setEnabled(true);
+  ui->doubleSpinBoxCredito->setEnabled(true);
+  ui->doubleSpinBoxPorcentagem->setEnabled(true);
+  ui->doubleSpinBoxPrecoUn->setEnabled(true);
+  ui->doubleSpinBoxQuant->setEnabled(true);
+  ui->pushButtonDevolverItem->setEnabled(true);
 
-  ui->tableProdutos->clearSelection();
+  ui->doubleSpinBoxCaixas->setValue(0);
+  ui->doubleSpinBoxCredito->setValue(0);
+  ui->doubleSpinBoxPorcentagem->setValue(0);
+  ui->doubleSpinBoxPrecoUn->setValue(0);
+  ui->doubleSpinBoxQuant->setValue(0);
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {

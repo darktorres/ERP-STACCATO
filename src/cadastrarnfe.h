@@ -94,6 +94,7 @@ private:
   auto on_pushButtonConsultarCadastro_clicked() -> void;
   auto on_pushButtonEnviarNFE_clicked() -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
+  auto on_pushButtonPrevia_clicked() -> void;
   auto on_tableItens_dataChanged(const QModelIndex &index) -> void;
   auto preCadastrarNota() -> int;
   auto preencherDadosNFe() -> void;

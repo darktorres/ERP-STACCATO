@@ -1,49 +1,46 @@
 #include "widgetcomprahistorico.h"
-#include "ui_widgethistoricocompra.h"
+#include "ui_widgetcomprahistorico.h"
 
 #include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
 #include "followup.h"
 #include "inputdialogfinanceiro.h"
+#include "noeditdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
 
 #include <QSqlError>
 
-WidgetCompraHistorico::WidgetCompraHistorico(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
+WidgetCompraHistorico::WidgetCompraHistorico(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraHistorico) { ui->setupUi(this); }
 
 WidgetCompraHistorico::~WidgetCompraHistorico() { delete ui; }
 
 void WidgetCompraHistorico::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetCompraHistorico::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraHistorico::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraHistorico::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonFollowup_clicked, connectionType);
-  connect(ui->tablePedidos, &TableView::clicked, this, &WidgetCompraHistorico::on_tablePedidos_clicked, connectionType);
+  connect(ui->tablePedidos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraHistorico::on_tablePedidos_selectionChanged, connectionType);
 }
 
 void WidgetCompraHistorico::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelViewComprasFinanceiro.select();
 }
 
-void WidgetCompraHistorico::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetCompraHistorico::resetTables() { modelIsSet = false; }
+void WidgetCompraHistorico::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetCompraHistorico::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
@@ -73,6 +70,43 @@ void WidgetCompraHistorico::setupTables() {
 
   ui->tableNFe->hideColumn("ordemCompra");
   ui->tableNFe->hideColumn("idNFe");
+
+  //------------------------------------------------------
+
+  modelFinanceiro.setTable("conta_a_pagar_has_pagamento");
+
+  modelFinanceiro.setSort("dataPagamento");
+
+  modelFinanceiro.setHeaderData("tipo", "Tipo");
+  modelFinanceiro.setHeaderData("parcela", "Parcela");
+  modelFinanceiro.setHeaderData("valor", "R$");
+  modelFinanceiro.setHeaderData("dataPagamento", "Data");
+  modelFinanceiro.setHeaderData("observacao", "Obs.");
+  modelFinanceiro.setHeaderData("status", "Status");
+
+  ui->tableFinanceiro->setModel(&modelFinanceiro);
+
+  ui->tableFinanceiro->hideColumn("idPagamento");
+  ui->tableFinanceiro->hideColumn("dataEmissao");
+  ui->tableFinanceiro->hideColumn("idCompra");
+  ui->tableFinanceiro->hideColumn("idVenda");
+  ui->tableFinanceiro->hideColumn("idLoja");
+  ui->tableFinanceiro->hideColumn("contraParte");
+  ui->tableFinanceiro->hideColumn("idNFe");
+  ui->tableFinanceiro->hideColumn("idCnab");
+  ui->tableFinanceiro->hideColumn("nfe");
+  ui->tableFinanceiro->hideColumn("dataRealizado");
+  ui->tableFinanceiro->hideColumn("valorReal");
+  ui->tableFinanceiro->hideColumn("tipoReal");
+  ui->tableFinanceiro->hideColumn("parcelaReal");
+  ui->tableFinanceiro->hideColumn("idConta");
+  ui->tableFinanceiro->hideColumn("tipoDet");
+  ui->tableFinanceiro->hideColumn("centroCusto");
+  ui->tableFinanceiro->hideColumn("grupo");
+  ui->tableFinanceiro->hideColumn("subGrupo");
+  ui->tableFinanceiro->hideColumn("desativado");
+
+  ui->tableFinanceiro->setItemDelegate(new NoEditDelegate(this));
 }
 
 void WidgetCompraHistorico::setTreeView() {
@@ -136,10 +170,12 @@ void WidgetCompraHistorico::setTreeView() {
   ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(4, this));
 }
 
-void WidgetCompraHistorico::on_tablePedidos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetCompraHistorico::on_tablePedidos_selectionChanged() {
+  const auto selection = ui->tablePedidos->selectionModel()->selectedRows();
 
-  const QString ordemCompra = modelViewComprasFinanceiro.data(index.row(), "OC").toString();
+  if (selection.isEmpty()) { return; }
+
+  const QString ordemCompra = modelViewComprasFinanceiro.data(selection.first().row(), "OC").toString();
 
   modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
@@ -154,6 +190,12 @@ void WidgetCompraHistorico::on_tablePedidos_clicked(const QModelIndex &index) {
   modelNFe.setFilter("ordemCompra = " + ordemCompra);
 
   modelNFe.select();
+
+  const QString idCompra = modelViewComprasFinanceiro.data(selection.first().row(), "Compra").toString();
+
+  modelFinanceiro.setFilter("idCompra IN (" + idCompra + ")");
+
+  modelFinanceiro.select();
 }
 
 void WidgetCompraHistorico::on_lineEditBusca_textChanged() { montaFiltro(); }

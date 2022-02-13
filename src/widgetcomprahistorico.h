@@ -7,7 +7,7 @@
 #include <QWidget>
 
 namespace Ui {
-class WidgetHistoricoCompra;
+class WidgetCompraHistorico;
 }
 
 class WidgetCompraHistorico final : public QWidget {
@@ -23,21 +23,19 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
-  SqlTableModel modelViewComprasFinanceiro;
-  SqlTableModel modelProdutos;
-  SqlTableModel modelProdutos2;
+  SqlTableModel modelFinanceiro;
   SqlTableModel modelNFe;
+  SqlTableModel modelProdutos2;
+  SqlTableModel modelProdutos;
+  SqlTableModel modelViewComprasFinanceiro;
   SqlTreeModel modelTree;
-  Ui::WidgetHistoricoCompra *ui;
+  Ui::WidgetCompraHistorico *ui;
   // methods
-  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
-  auto on_tablePedidos_clicked(const QModelIndex &index) -> void;
+  auto on_tablePedidos_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setTreeView() -> void;
   auto setupTables() -> void;

@@ -23,13 +23,10 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> void;
-  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_lineEditBusca_textChanged() -> void;

@@ -51,7 +51,7 @@ private:
   auto on_doubleSpinBoxPorcentagem_valueChanged(const double porcentagem) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
-  auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto on_tableProdutos_selectionChanged() -> void;
   auto salvarCredito() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

@@ -36,7 +36,7 @@ private:
   auto on_pushButtonLimparSelecao_clicked() -> void;
   auto on_pushButtonRemoveAssociacao_clicked() -> void;
   auto on_pushButtonRemoverPagamento_clicked() -> void;
-  auto on_tablePagamentos_clicked(const QModelIndex &index) -> void;
+  auto on_tablePagamentos_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupMapper() -> void;
   auto setupTables() -> void;

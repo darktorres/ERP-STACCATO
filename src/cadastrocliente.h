@@ -45,7 +45,7 @@ private:
   auto on_pushButtonDesativar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_radioButtonPF_toggled(const bool checked) -> void;
-  auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
+  auto on_tableEndereco_selectionChanged() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;

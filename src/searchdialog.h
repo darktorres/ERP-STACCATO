@@ -65,18 +65,16 @@ private:
   QString filter;
   QString fornecedorRep;
   QStringList const textKeys;
-  QTimer timer;
   SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
   auto buscaProduto(const QString &searchFilter) -> void;
-  auto delayFiltro() -> void;
   auto hideColumns(const QStringList &columns) -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonSelecionar_clicked() -> void;
-  auto on_table_clicked(const QModelIndex &index) -> void;
   auto on_table_doubleClicked() -> void;
+  auto on_table_selectionChanged() -> void;
   auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;

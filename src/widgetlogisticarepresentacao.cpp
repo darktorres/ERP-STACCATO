@@ -18,8 +18,7 @@ WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 void WidgetLogisticaRepresentacao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked, connectionType);
   connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaRepresentacao::on_table_doubleClicked, connectionType);
@@ -27,20 +26,14 @@ void WidgetLogisticaRepresentacao::setConnections() {
 
 void WidgetLogisticaRepresentacao::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
+    setupTables();
     setConnections();
     isSet = true;
   }
 
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
-  }
-
   modelViewLogisticaRepresentacao.select();
 }
-
-void WidgetLogisticaRepresentacao::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
@@ -50,7 +43,7 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &for
   modelViewLogisticaRepresentacao.setFilter(filtro);
 }
 
-void WidgetLogisticaRepresentacao::resetTables() { modelIsSet = false; }
+void WidgetLogisticaRepresentacao::resetTables() { setupTables(); }
 
 void WidgetLogisticaRepresentacao::setupTables() {
   modelViewLogisticaRepresentacao.setTable("view_logistica_representacao");

@@ -22,12 +22,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlQueryModel model;
   Ui::WidgetEstoques *ui;
   // methods
-  auto delayFiltro() -> void;
   auto escolheFiltro() -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> void;
   auto gerarRelatorio(const QString &data) -> void;

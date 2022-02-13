@@ -19,29 +19,22 @@ void WidgetConsistencia::setConnections() {
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetConsistencia::setupTables, connectionType);
 }
 
-void WidgetConsistencia::resetTables() { modelIsSet = false; }
+void WidgetConsistencia::resetTables() { setupTables(); }
 
 void WidgetConsistencia::updateTables() {
-  if (not modelIsSet) {
+  if (not isSet) {
     ui->dateEditMes->setDate(qApp->serverDate());
     setupTables();
-    modelIsSet = true;
+    isSet = true;
   }
 
   model1.select();
-
   model2.select();
-
   model3.select();
-
   model4.select();
-
   model5.select();
-
   model6.select();
-
   model7.select();
-
   model8.select();
 }
 

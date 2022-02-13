@@ -183,8 +183,8 @@ QString CadastrarNFe::montarXML() {
   return nfe;
 }
 
-QString CadastrarNFe::gerarNota(ACBr &acbrRemoto) {
-  QString resposta = acbrRemoto.enviarComando(montarXML(), "Gerando NF-e...");
+QString CadastrarNFe::gerarNota(ACBr &acbr) {
+  QString resposta = acbr.enviarComando(montarXML(), "Gerando NF-e...");
   qDebug() << "gerarNota: " << resposta;
 
   //-------------------------------------------
@@ -354,7 +354,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) {
+void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbr) {
   if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NF-e para verificar se foi autorizada!"); }
 
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
@@ -378,7 +378,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
 
-  if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbrRemoto, filePath); }
+  if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbr, filePath); }
 
   // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
   throw RuntimeException("Resposta não tratada:\n" + resposta, this);
@@ -390,19 +390,19 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   validarDados();
   criarChaveAcesso();
 
-  ACBr acbrRemoto;
+  ACBr acbr;
 
-  const QString filePath = gerarNota(acbrRemoto);
+  const QString filePath = gerarNota(acbr);
 
   // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NF-e, reativar depois de arrumar os spinBoxs para considerar 4 decimais
-  //  if (not validarRegras(acbrRemoto, filePath)) { return; }
+  //  if (not validarRegras(acbr, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
 
   // TODO: para simplificar essa lógica não seria apenas separar em dois trys? o primeiro impede a tela de fechar mas o segundo não
   try {
-    enviarNFe(acbrRemoto, filePath, idNFe); // dont close if rejection
-    enviarEmail(acbrRemoto, filePath);      // close if error
+    enviarNFe(acbr, filePath, idNFe); // dont close if rejection
+    enviarEmail(acbr, filePath);      // close if error
 
     ACBrLib::gerarDanfe(xml); // close if error
   } catch (std::exception &) {
@@ -900,8 +900,10 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex &index) {
   updateTotais();
 }
 
-void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
-  if (not index.isValid()) {
+void CadastrarNFe::on_tableItens_selectionChanged() {
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) {
     ui->scrollAreaICMS->setDisabled(true);
     ui->scrollAreaIPI->setDisabled(true);
     ui->scrollAreaPIS->setDisabled(true);
@@ -913,6 +915,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   unsetConnections();
 
   try {
+    const auto index = selection.first();
     const int row = index.row();
 
     ui->scrollAreaICMS->setEnabled(true);
@@ -1491,10 +1494,10 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
   // TODO: validar CPF/CNPJ antes de enviar
 
-  ACBr acbrRemoto;
+  ACBr acbr;
 
   const QString resposta =
-      acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", "Consultando cadastro do destinatário...");
+      acbr.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", "Consultando cadastro do destinatário...");
 
   if (resposta.contains("CStat=111", Qt::CaseInsensitive)) { // Consulta cadastro com uma ocorrência
     QStringList respostaSplit = resposta.split("\r\n", Qt::SkipEmptyParts).filter("IE=", Qt::CaseInsensitive);
@@ -1550,9 +1553,9 @@ void CadastrarNFe::on_itemBoxLoja_textChanged() {
 
   //  if (not query.first()) { throw RuntimeError("A loja selecionada não possui certificado cadastrado no sistema!", this); }
 
-  //  ACBr acbrRemoto;
+  //  ACBr acbr;
 
-  //  const QString resposta = acbrRemoto.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
+  //  const QString resposta = acbr.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
 
   //  if (not resposta.contains("OK", Qt::CaseInsensitive)) {
   //    ui->itemBoxLoja->clear();
@@ -1601,9 +1604,9 @@ void CadastrarNFe::setConnections() {
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged, connectionType);
   connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked, connectionType);
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked, connectionType);
-  connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked, connectionType);
   connect(ui->pushButtonPrevia, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonPrevia_clicked, connectionType);
   connect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged, connectionType);
+  connect(ui->tableItens->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastrarNFe::on_tableItens_selectionChanged, connectionType);
 }
 
 void CadastrarNFe::unsetConnections() {
@@ -1640,9 +1643,9 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
   disconnect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
-  disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
   disconnect(ui->pushButtonPrevia, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonPrevia_clicked);
   disconnect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
+  disconnect(ui->tableItens->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastrarNFe::on_tableItens_selectionChanged);
 }
 
 void CadastrarNFe::listarCfop() {
@@ -1677,11 +1680,11 @@ void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
   if (not checked) { ui->doubleSpinBoxValorNota->setValue(total - frete); }
 }
 
-void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) {
-  const QString resposta = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)", "Enviando NF-e..."); // lote, assina, imprime, sincrono
+void CadastrarNFe::enviarNFe(ACBr &acbr, const QString &filePath, const int idNFe) {
+  const QString resposta = acbr.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)", "Enviando NF-e..."); // lote, assina, imprime, sincrono
   qDebug() << "enviarNFe: " << resposta;
 
-  processarResposta(resposta, filePath, idNFe, acbrRemoto);
+  processarResposta(resposta, filePath, idNFe, acbr);
 
   qApp->startTransaction("CadastrarNFe::enviarNFe");
 
@@ -1697,18 +1700,17 @@ void CadastrarNFe::enviarNFe(ACBr &acbrRemoto, const QString &filePath, const in
   qApp->enqueueInformation("Autorizado o uso da NF-e!", this);
 }
 
-void CadastrarNFe::enviarEmail(ACBr &acbrRemoto, const QString &filePath) {
+void CadastrarNFe::enviarEmail(ACBr &acbr, const QString &filePath) {
   const QString assunto = "NF-e - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  //  acbrRemoto.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
-  acbrRemoto.enviarEmail(emailContabilidade, "", assunto, filePath);
+  acbr.enviarEmail(emailContabilidade, "", assunto, filePath);
 
   // TODO: enviar email separado para cliente
 }
 
-void CadastrarNFe::carregarArquivo(ACBr &acbrRemoto, const QString &filePath) {
+void CadastrarNFe::carregarArquivo(ACBr &acbr, const QString &filePath) {
   // TODO: testar se comando deu ok
-  QString resposta = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")", "Carregando NF-e...");
+  QString resposta = acbr.enviarComando("NFe.LoadFromFile(" + filePath + ")", "Carregando NF-e...");
 
   xml = resposta.remove("OK: ", Qt::CaseInsensitive);
 }
@@ -2101,8 +2103,8 @@ void CadastrarNFe::preencherTransporte() {
   preencherVolumes();
 }
 
-bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
-  const QString resposta = acbrRemoto.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")", "Validando NF-e...");
+bool CadastrarNFe::validarRegras(ACBr &acbr, const QString &filePath) {
+  const QString resposta = acbr.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")", "Validando NF-e...");
 
   if (not resposta.startsWith("OK:", Qt::CaseInsensitive)) {
     QStringList lines = resposta.split("\r\n", Qt::SkipEmptyParts);
@@ -2138,7 +2140,6 @@ void CadastrarNFe::on_pushButtonPrevia_clicked() {
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
 // TODO: colocar um botao para imprimir uma previa da DANFE? utilizar o xml antes do envio
-// TODO: renomear acbrRemoto para apenas acbr
 // TODO: se der erro de duplicidade avisar usuario para incrementar numeroNFe?
 
 // NF-e Devolucao

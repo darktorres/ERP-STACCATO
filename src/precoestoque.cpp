@@ -13,7 +13,7 @@
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
 
-  timer.setSingleShot(true);
+  ui->lineEditBusca->setDelayed();
 
   setWindowFlags(Qt::Window);
   setupTables();
@@ -25,8 +25,7 @@ PrecoEstoque::~PrecoEstoque() { delete ui; }
 void PrecoEstoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &PrecoEstoque::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked, connectionType);
 }
@@ -103,6 +102,7 @@ void PrecoEstoque::on_pushButtonSalvar_clicked() {
   modelProduto.submitAll();
 
   qApp->enqueueInformation("Dados atualizados!", this);
+
   close();
 }
 
@@ -131,5 +131,3 @@ void PrecoEstoque::on_lineEditBusca_textChanged() {
 
   modelProduto.setFilter(filtros.join(" AND "));
 }
-
-void PrecoEstoque::delayFiltro() { timer.start(qApp->delayedTimer); }

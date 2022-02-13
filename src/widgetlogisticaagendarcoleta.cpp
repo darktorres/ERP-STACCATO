@@ -26,11 +26,10 @@ WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 void WidgetLogisticaAgendarColeta::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged, connectionType);
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarColeta::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonAgendarColeta, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked, connectionType);
   connect(ui->pushButtonCancelarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked, connectionType);
@@ -160,23 +159,17 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
   ui->doubleSpinBoxPeso->setSuffix(" Kg (" + QString::number(caixas) + " Cx.)");
 }
 
-void WidgetLogisticaAgendarColeta::delayFiltro() { timer.start(qApp->delayedTimer); }
-
 void WidgetLogisticaAgendarColeta::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
     ui->frameCaminhao->hide();
     ui->pushButtonCancelarCarga->hide();
     ui->dateTimeEdit->setDate(qApp->serverDate());
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelEstoque.select();
@@ -192,7 +185,10 @@ void WidgetLogisticaAgendarColeta::tableFornLogistica_clicked(const QString &for
   montaFiltro();
 }
 
-void WidgetLogisticaAgendarColeta::resetTables() { modelIsSet = false; }
+void WidgetLogisticaAgendarColeta::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   if (not ui->frameCaminhao->isVisible()) {

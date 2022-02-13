@@ -43,7 +43,7 @@ void CadastroPagamento::setConnections() {
   connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonLimparSelecao_clicked, connectionType);
   connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoveAssociacao_clicked, connectionType);
   connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonRemoverPagamento_clicked, connectionType);
-  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroPagamento::on_tablePagamentos_clicked, connectionType);
+  connect(ui->tablePagamentos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroPagamento::on_tablePagamentos_selectionChanged, connectionType);
 }
 
 void CadastroPagamento::setupTables() {
@@ -334,8 +334,12 @@ void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {
   qApp->enqueueInformation("Taxas atualizadas!", this);
 }
 
-void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return limparSelecao(); }
+void CadastroPagamento::on_tablePagamentos_selectionChanged() {
+  const auto selection = ui->tablePagamentos->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return limparSelecao(); }
+
+  const auto index = selection.first();
 
   const int id = modelPagamentos.data(index.row(), "idPagamento").toInt();
 

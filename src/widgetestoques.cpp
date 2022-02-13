@@ -19,8 +19,7 @@ WidgetEstoques::~WidgetEstoques() { delete ui; }
 void WidgetEstoques::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetEstoques::escolheFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoques::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetEstoques::escolheFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->pushButtonRelatorioContabil, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorioContabil_clicked, connectionType);
@@ -78,30 +77,25 @@ void WidgetEstoques::setHeaderData() {
 
 void WidgetEstoques::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
     ui->dateEditMes->setDate(qApp->serverDate());
-    setConnections();
 
     if (User::isVendedorOrEspecial()) {
       ui->groupBoxFiltros->hide();
       ui->groupBoxRelatorio->hide();
     }
 
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
-    modelIsSet = true;
+
+    setConnections();
+    isSet = true;
     return; // to avoid double selecting table
   }
 
   model.select();
 }
 
-void WidgetEstoques::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetEstoques::resetTables() { modelIsSet = false; }
+void WidgetEstoques::resetTables() { setupTables(); }
 
 void WidgetEstoques::on_table_activated(const QModelIndex &index) {
   const QString idEstoque = model.data(index, "idEstoque").toString();

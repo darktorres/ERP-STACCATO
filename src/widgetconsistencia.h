@@ -19,7 +19,7 @@ public:
   auto updateTables() -> void;
 
 private:
-  bool modelIsSet = false;
+  bool isSet = false;
   SqlTableModel model1;
   SqlTableModel model2;
   SqlTableModel model3;

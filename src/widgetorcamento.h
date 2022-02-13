@@ -23,14 +23,11 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   QStack<int> blockingSignals;
-  QTimer timer;
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;
-  auto delayFiltro() -> void;
   auto fillComboBoxFollowup() -> void;
   auto fillComboBoxFornecedor() -> void;
   auto fillComboBoxLoja() -> void;

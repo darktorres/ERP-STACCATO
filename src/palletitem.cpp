@@ -50,6 +50,7 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     const auto yCenter = size.center().y();
 
     painter->setPen(QColor(Qt::red));
+    // TODO: implicit conversion double -> int
     painter->drawText(xCenter - xOffset, yCenter + yOffset, label);
   }
 }

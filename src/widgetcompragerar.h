@@ -24,7 +24,6 @@ signals:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   SqlTableModel modelResumo;
   SqlTableModel modelProdutos;
   Ui::WidgetCompraGerar *ui;
@@ -41,7 +40,7 @@ private:
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarCompra_clicked() -> void;
   auto on_pushButtonLimparFiltro_clicked() -> void;
-  auto on_tableResumo_clicked(const QModelIndex &index) -> void;
+  auto on_tableResumo_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto verificaRepresentacao(const QModelIndexList &list) -> bool;

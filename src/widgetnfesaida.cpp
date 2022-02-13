@@ -32,7 +32,6 @@ void WidgetNfeSaida::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
@@ -40,7 +39,7 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked, connectionType);
@@ -51,7 +50,6 @@ void WidgetNfeSaida::setConnections() {
 void WidgetNfeSaida::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
@@ -59,7 +57,7 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
   disconnect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
@@ -69,31 +67,28 @@ void WidgetNfeSaida::unsetConnections() {
 
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
     ui->dateEdit->setDate(qApp->serverDate());
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   model.select();
 }
 
-void WidgetNfeSaida::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetNfeSaida::resetTables() { modelIsSet = false; }
+void WidgetNfeSaida::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetNfeSaida::setupTables() {
   // TODO: mudar view para puxar apenas as NF-es com cnpjOrig igual a raiz da staccato
   model.setTable("view_nfe_saida");
 
   model.setHeaderData("valor", "R$");
-  model.setHeaderData("dataHoraEmissao", "Data Emissão");
+  model.setHeaderData("dataHoraEmissao", "Data");
 
   ui->table->setModel(&model);
 
@@ -199,9 +194,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
 
-  ACBr acbrRemoto;
+  ACBr acbr;
 
-  const QString resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")", "Cancelando NF-e...");
+  const QString resposta = acbr.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")", "Cancelando NF-e...");
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
   if (not resposta.contains("xEvento=Cancelamento registrado", Qt::CaseInsensitive)) { throw RuntimeException("Resposta: " + resposta); }
@@ -231,10 +226,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
-  // TODO: alterar para usar acbrRemoto de forma que o email precise ser configurado uma unica vez e possa ser usado remotamente de qualquer pc
 
-  //  ACBr acbrLocal;
-  //  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
+  //  ACBr acbr;
+  //  acbr.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -384,9 +378,9 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbrRemoto;
+  ACBr acbr;
 
-  const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
+  const auto [xml, resposta] = acbr.consultarNFe(idNFe);
 
   qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe");
 

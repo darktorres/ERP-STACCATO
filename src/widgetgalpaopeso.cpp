@@ -14,7 +14,10 @@ WidgetGalpaoPeso::WidgetGalpaoPeso(QWidget *parent) : QWidget(parent), ui(new Ui
 
 WidgetGalpaoPeso::~WidgetGalpaoPeso() { delete ui; }
 
-void WidgetGalpaoPeso::resetTables() { modelIsSet = false; }
+void WidgetGalpaoPeso::resetTables() {
+  setupTables();
+  setChart();
+}
 
 void WidgetGalpaoPeso::setChart() {
   axisX.setFormat("dd-MM-yyyy");
@@ -61,14 +64,10 @@ void WidgetGalpaoPeso::updateChart() {
 
 void WidgetGalpaoPeso::updateTables() {
   if (not isSet) {
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     setChart();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   updateChart();

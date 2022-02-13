@@ -62,14 +62,10 @@ void WidgetCompraFaturar::setConnections() {
 
 void WidgetCompraFaturar::updateTables() {
   if (not isSet) {
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelResumo.select();
@@ -79,7 +75,10 @@ void WidgetCompraFaturar::updateTables() {
   modelViewFaturamento.select();
 }
 
-void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
+void WidgetCompraFaturar::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetCompraFaturar::faturarRepresentacao(const QDate dataReal, const QStringList &idsCompra) {
   SqlQuery queryCompra;

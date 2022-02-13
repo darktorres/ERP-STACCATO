@@ -54,12 +54,12 @@ private:
   auto calculaIcms() -> void;
   auto calculaPis() -> void;
   auto calculaSt() -> void;
-  auto carregarArquivo(ACBr &acbrRemoto, const QString &filePath) -> void;
+  auto carregarArquivo(ACBr &acbr, const QString &filePath) -> void;
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> void;
-  auto enviarEmail(ACBr &acbrRemoto, const QString &filePath) -> void;
-  auto enviarNFe(ACBr &acbrRemoto, const QString &filePath, const int idNFe) -> void;
-  auto gerarNota(ACBr &acbrRemoto) -> QString;
+  auto enviarEmail(ACBr &acbr, const QString &filePath) -> void;
+  auto enviarNFe(ACBr &acbr, const QString &filePath, const int idNFe) -> void;
+  auto gerarNota(ACBr &acbr) -> QString;
   auto listarCfop() -> void;
   auto montarXML() -> QString;
   auto on_checkBoxFrete_toggled(const bool checked) -> void;
@@ -93,9 +93,9 @@ private:
   auto on_itemBoxVeiculo_textChanged() -> void;
   auto on_pushButtonConsultarCadastro_clicked() -> void;
   auto on_pushButtonEnviarNFE_clicked() -> void;
-  auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_pushButtonPrevia_clicked() -> void;
   auto on_tableItens_dataChanged(const QModelIndex &index) -> void;
+  auto on_tableItens_selectionChanged() -> void;
   auto preCadastrarNota() -> int;
   auto preencherDadosNFe() -> void;
   auto preencherDestinatario() -> void;
@@ -107,7 +107,7 @@ private:
   auto preencherTransporte() -> void;
   auto preencherVolumes() -> void;
   auto prepararNFe(const QStringList &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbrRemoto) -> void;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbr) -> void;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
@@ -115,7 +115,7 @@ private:
   auto updateComplemento() -> void;
   auto updateTotais() -> void;
   auto validarDados() -> void;
-  auto validarRegras(ACBr &acbrRemoto, const QString &filePath) -> bool;
+  auto validarRegras(ACBr &acbr, const QString &filePath) -> bool;
   auto writeComplemento(QTextStream &stream) const -> void;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;

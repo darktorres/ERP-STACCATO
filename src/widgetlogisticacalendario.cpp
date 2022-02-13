@@ -67,12 +67,10 @@ void WidgetLogisticaCalendario::updateTables() {
     isSet = true;
   }
 
-  if (not modelIsSet) { modelIsSet = true; }
-
   updateFilter();
 }
 
-void WidgetLogisticaCalendario::resetTables() { modelIsSet = false; }
+void WidgetLogisticaCalendario::resetTables() {}
 
 void WidgetLogisticaCalendario::updateFilter() {
   const QDate date = ui->calendarWidget->selectedDate();

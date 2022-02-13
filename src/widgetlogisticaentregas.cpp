@@ -32,8 +32,7 @@ WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
 void WidgetLogisticaEntregas::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged, connectionType);
-  connect(ui->lineEditBuscar, &QLineEdit::textChanged, this, &WidgetLogisticaEntregas::delayFiltro, connectionType);
+  connect(ui->lineEditBuscar, &LineEdit::delayedTextChanged, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged, connectionType);
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked, connectionType);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked, connectionType);
@@ -43,23 +42,19 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonObservacao, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonObservacao_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
-  connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked, connectionType);
-  connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked, connectionType);
+  connect(ui->tableCalendario->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntregas::on_tableCalendario_selectionChanged, connectionType);
   connect(ui->tableCarga, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
+  connect(ui->tableCarga->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntregas::on_tableCarga_selectionChanged, connectionType);
   connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableProdutos_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaEntregas::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBuscar->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   // -----------------------------------------------------------------
@@ -77,7 +72,10 @@ void WidgetLogisticaEntregas::updateTables() {
   modelProdutos.select();
 }
 
-void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
+void WidgetLogisticaEntregas::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setTable("view_calendario_entrega");
@@ -225,8 +223,12 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
   nfe->show();
 }
 
-void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetLogisticaEntregas::on_tableCalendario_selectionChanged() {
+  const auto selection = ui->tableCalendario->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  const auto index = selection.first();
 
   const QString data = modelCalendario.data(index.row(), "data").toString();
   const QString veiculo = modelCalendario.data(index.row(), "idVeiculo").toString();
@@ -245,8 +247,12 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
   }
 }
 
-void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetLogisticaEntregas::on_tableCarga_selectionChanged() {
+  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  const auto index = selection.first();
 
   const QString idVenda = modelCarga.data(index.row(), "idVenda").toString();
   const QString idEvento = modelCarga.data(index.row(), "idEvento").toString();
@@ -313,8 +319,6 @@ void WidgetLogisticaEntregas::confirmarEntrega(const QDate dataRealEnt, const QS
     if (not query3.exec()) { throw RuntimeException("Erro salvando venda_produto: " + query3.lastError().text()); }
   }
 }
-
-void WidgetLogisticaEntregas::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   // TODO: permitir enviar mais de uma foto
@@ -443,10 +447,10 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFeSaida").toInt();
 
-  ACBr acbrRemoto;
+  ACBr acbr;
 
   try {
-    const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
+    const auto [xml, resposta] = acbr.consultarNFe(idNFe);
 
     qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConsultarNFe");
 

@@ -23,12 +23,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel model;
   Ui::WidgetGare *ui;
   // methods
-  auto delayFiltro() -> void;
   auto habilitarBotoes() -> void;
   auto montaFiltro() -> void;
   auto montarGare(const QModelIndexList &selection) -> QVector<CNAB::Gare>;
@@ -36,6 +33,11 @@ private:
   auto on_pushButtonDarBaixaItau_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;
   auto on_pushButtonRetornoItau_clicked() -> void;
+  auto on_radioButtonCancelado_toggled(const bool checked) -> void;
+  auto on_radioButtonGerado_toggled(const bool checked) -> void;
+  auto on_radioButtonLiberado_toggled(const bool checked) -> void;
+  auto on_radioButtonPago_toggled(const bool checked) -> void;
+  auto on_radioButtonPendente_toggled(const bool checked) -> void;
   auto on_tableSelection_changed() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;

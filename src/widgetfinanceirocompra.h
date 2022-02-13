@@ -22,12 +22,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel model;
   Ui::WidgetFinanceiroCompra *ui;
   // methods
-  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;

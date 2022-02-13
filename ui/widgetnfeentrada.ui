@@ -73,7 +73,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditBusca">
+      <widget class="LineEdit" name="lineEditBusca">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -280,14 +280,19 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/lineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

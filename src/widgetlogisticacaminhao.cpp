@@ -14,7 +14,7 @@ void WidgetLogisticaCaminhao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxDesativados, &QCheckBox::toggled, this, &WidgetLogisticaCaminhao::on_checkBoxDesativados_toggled, connectionType);
-  connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaCaminhao::on_table_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaCaminhao::setupTables() {
@@ -42,13 +42,9 @@ void WidgetLogisticaCaminhao::setupTables() {
 
 void WidgetLogisticaCaminhao::updateTables() {
   if (not isSet) {
+    setupTables();
     setConnections();
     isSet = true;
-  }
-
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
   }
 
   modelCaminhao.select();
@@ -56,12 +52,14 @@ void WidgetLogisticaCaminhao::updateTables() {
   modelCarga.select();
 }
 
-void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
+void WidgetLogisticaCaminhao::resetTables() { setupTables(); }
 
-void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetLogisticaCaminhao::on_table_selectionChanged() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
+  if (selection.isEmpty()) { return; }
+
+  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(selection.first().row(), "idVeiculo").toString());
 }
 
 void WidgetLogisticaCaminhao::on_checkBoxDesativados_toggled(const bool checked) { modelCaminhao.setFilter(checked ? "" : "desativado = FALSE"); }

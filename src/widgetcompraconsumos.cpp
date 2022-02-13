@@ -15,15 +15,11 @@ WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 
 void WidgetCompraConsumos::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelPedido.select();
@@ -31,9 +27,10 @@ void WidgetCompraConsumos::updateTables() {
   modelProduto.select();
 }
 
-void WidgetCompraConsumos::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetCompraConsumos::resetTables() { modelIsSet = false; }
+void WidgetCompraConsumos::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetCompraConsumos::setupTables() {
   modelPedido.setTable("view_ordemcompra_resumo");
@@ -65,16 +62,17 @@ void WidgetCompraConsumos::setupTables() {
 void WidgetCompraConsumos::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked, connectionType);
-  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraConsumos::on_tablePedido_clicked, connectionType);
+  connect(ui->tablePedido->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraConsumos::on_tablePedido_selectionChanged, connectionType);
 }
 
-void WidgetCompraConsumos::on_tablePedido_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetCompraConsumos::on_tablePedido_selectionChanged() {
+  const auto selection = ui->tablePedido->selectionModel()->selectedRows();
 
-  const QString idVenda = modelPedido.data(index.row(), "Venda").toString();
+  if (selection.isEmpty()) { return; }
+
+  const QString idVenda = modelPedido.data(selection.first().row(), "Venda").toString();
 
   modelProduto.setFilter("idVenda = '" + idVenda + "'");
 }

@@ -23,7 +23,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   ChartView *chartView = nullptr;
   QChart chart;
   QDateTimeAxis axisX;

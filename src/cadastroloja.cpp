@@ -47,8 +47,8 @@ void CadastroLoja::setConnections() {
   connect(ui->pushButtonDesativarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonDesativarConta_clicked, connectionType);
   connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->tableConta, &TableView::clicked, this, &CadastroLoja::on_tableConta_clicked, connectionType);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroLoja::on_tableEndereco_clicked, connectionType);
+  connect(ui->tableConta->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroLoja::on_tableConta_selectionChanged, connectionType);
+  connect(ui->tableEndereco->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroLoja::on_tableEndereco_selectionChanged, connectionType);
 }
 
 void CadastroLoja::setupUi() {
@@ -281,8 +281,12 @@ void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditUF->setText(cc.getUf());
 }
 
-void CadastroLoja::on_tableEndereco_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoEndereco(); }
+void CadastroLoja::on_tableEndereco_selectionChanged() {
+  const auto selection = ui->tableEndereco->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoEndereco(); }
+
+  const auto index = selection.first();
 
   currentRowEnd = index.row();
 
@@ -379,8 +383,12 @@ void CadastroLoja::cadastrar() {
   }
 }
 
-void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novaConta(); }
+void CadastroLoja::on_tableConta_selectionChanged() {
+  const auto selection = ui->tableConta->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novaConta(); }
+
+  const auto index = selection.first();
 
   currentRowConta = index.row();
   mapperConta.setCurrentModelIndex(index);

@@ -183,6 +183,12 @@ void TableView::setPersistentColumns(const QStringList &value) { persistentColum
 
 void TableView::keyPressEvent(QKeyEvent *event) {
   if (event->matches(QKeySequence::Copy)) {
+    const auto selection = selectionModel()->selectedIndexes();
+
+    if (selection.isEmpty()) { return; }
+
+    //---------------------------------------
+
     QString headers;
 
     // dont copy headers if in single cell mode
@@ -202,9 +208,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     QString text;
 
     if (selectionBehavior() == SelectItems) {
-      const QModelIndexList selectedCell = selectionModel()->selectedIndexes();
-
-      QVariant currentText = selectedCell.first().data();
+      QVariant currentText = selection.first().data();
 
       if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
       if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
@@ -213,9 +217,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     }
 
     if (selectionBehavior() == SelectRows) {
-      const QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-      for (const auto indexRow : selectedRows) {
+      for (const auto indexRow : selection) {
         for (int col = 0; col < model()->columnCount(); ++col) {
           if (isColumnHidden(col)) { continue; }
 
@@ -233,7 +235,6 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     }
 
     QApplication::clipboard()->setText(headers + text);
-
     return;
   }
 

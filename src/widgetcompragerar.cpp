@@ -109,18 +109,14 @@ void WidgetCompraGerar::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked, connectionType);
   connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonLimparFiltro_clicked, connectionType);
-  connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked, connectionType);
+  connect(ui->tableResumo->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraGerar::on_tableResumo_selectionChanged, connectionType);
 }
 
 void WidgetCompraGerar::updateTables() {
   if (not isSet) {
+    setupTables();
     setConnections();
     isSet = true;
-  }
-
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
   }
 
   const auto selection = ui->tableResumo->selectionModel()->selectedRows();
@@ -132,7 +128,7 @@ void WidgetCompraGerar::updateTables() {
   modelProdutos.select();
 }
 
-void WidgetCompraGerar::resetTables() { modelIsSet = false; }
+void WidgetCompraGerar::resetTables() { setupTables(); }
 
 void WidgetCompraGerar::gerarCompra(const QModelIndexList &list, const QDate dataCompra, const QDate dataPrevista, const int ordemCompra) {
   SqlQuery queryId;
@@ -454,8 +450,10 @@ QString WidgetCompraGerar::gerarExcel(const QModelIndexList &list, const int ord
 
 void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
 
-void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
-  const QString fornecedor = index.isValid() ? modelResumo.data(index.row(), "fornecedor").toString() : "";
+void WidgetCompraGerar::on_tableResumo_selectionChanged() {
+  const auto selection = ui->tableResumo->selectionModel()->selectedRows();
+
+  const QString fornecedor = (not selection.isEmpty()) ? modelResumo.data(selection.first().row(), "fornecedor").toString() : "";
 
   const QString filtro = fornecedor.isEmpty() ? "0" : "status = 'PENDENTE' AND fornecedor = '" + fornecedor + "'";
 

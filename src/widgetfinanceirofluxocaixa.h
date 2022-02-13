@@ -21,7 +21,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   SqlQueryModel modelCaixa;
   SqlQueryModel modelCaixa2;
   SqlQueryModel modelFuturo;

@@ -8,25 +8,21 @@ WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::
 
 WidgetDevolucao::~WidgetDevolucao() { delete ui; }
 
-void WidgetDevolucao::resetTables() { modelIsSet = false; }
+void WidgetDevolucao::resetTables() { setupTables(); }
 
 void WidgetDevolucao::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
+    ui->lineEditBusca->setDelayed();
     ui->dateEditMes->setDate(qApp->serverDate());
-    isSet = true;
-  }
 
-  if (not modelIsSet) {
     setupTables();
-    modelIsSet = true;
+
+    setConnections();
+    isSet = true;
   }
 
   model.select();
 }
-
-void WidgetDevolucao::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetDevolucao::montaFiltro() {
   ajustarGroupBoxStatus();
@@ -55,17 +51,15 @@ void WidgetDevolucao::montaFiltro() {
 void WidgetDevolucao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetDevolucao::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetDevolucao::montaFiltro, connectionType);
   connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked, connectionType);
   connect(ui->table, &QTableView::doubleClicked, this, &WidgetDevolucao::on_table_doubleClicked, connectionType);
 }
 
 void WidgetDevolucao::unsetConnections() {
-  disconnect(&timer, &QTimer::timeout, this, &WidgetDevolucao::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetDevolucao::montaFiltro);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetDevolucao::delayFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetDevolucao::montaFiltro);
   disconnect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetDevolucao::on_pushButtonGerarNFe_clicked);
   disconnect(ui->table, &QTableView::doubleClicked, this, &WidgetDevolucao::on_table_doubleClicked);
 }

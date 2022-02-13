@@ -20,7 +20,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   QStack<int> blockingSignals;
   Ui::WidgetLogisticaCalendario *ui;
   // methods

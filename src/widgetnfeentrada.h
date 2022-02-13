@@ -23,14 +23,11 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   QStack<int> blockingSignals;
-  QTimer timer;
   SqlTableModel model;
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;
-  auto delayFiltro() -> void;
   auto inutilizar(const int row) -> void;
   auto montaFiltro() -> void;
   auto on_pushButtonExportar_clicked() -> void;

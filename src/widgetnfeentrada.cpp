@@ -27,7 +27,6 @@ void WidgetNfeEntrada::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
@@ -36,7 +35,7 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
@@ -45,7 +44,6 @@ void WidgetNfeEntrada::setConnections() {
 void WidgetNfeEntrada::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
@@ -54,7 +52,7 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::delayFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
@@ -62,25 +60,22 @@ void WidgetNfeEntrada::unsetConnections() {
 
 void WidgetNfeEntrada::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
     ui->dateEdit->setDate(qApp->serverDate());
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   model.select();
 }
 
-void WidgetNfeEntrada::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
+void WidgetNfeEntrada::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetNfeEntrada::setupTables() {
   // TODO: arrumar a coluna n.tipo pois as nfes de tipo 'ENTRADA' de fornecedor são na verdade nfes de saída
@@ -88,7 +83,7 @@ void WidgetNfeEntrada::setupTables() {
   model.setTable("view_nfe_entrada");
 
   model.setHeaderData("utilizada", "Utilizada");
-  model.setHeaderData("dataHoraEmissao", "Data Emissão");
+  model.setHeaderData("dataHoraEmissao", "Data");
 
   ui->table->setModel(&model);
 

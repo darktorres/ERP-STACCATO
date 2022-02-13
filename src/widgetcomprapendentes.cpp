@@ -54,7 +54,6 @@ void WidgetCompraPendentes::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -72,7 +71,8 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged, connectionType);
   connect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro, connectionType);
+  connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked, connectionType);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked, connectionType);
@@ -83,7 +83,6 @@ void WidgetCompraPendentes::setConnections() {
 void WidgetCompraPendentes::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -101,7 +100,8 @@ void WidgetCompraPendentes::unsetConnections() {
   disconnect(ui->doubleSpinBoxAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged);
   disconnect(ui->doubleSpinBoxAvulsoQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::delayFiltro);
+  disconnect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraPendentes::montaFiltro);
   disconnect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
   disconnect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked);
@@ -111,30 +111,25 @@ void WidgetCompraPendentes::unsetConnections() {
 
 void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-
-    setConnections();
+    ui->lineEditBusca->setDelayed();
 
     ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, true, this));
-    ui->itemBoxProduto->setRepresentacao(false);
+    ui->itemBoxProduto->setRepresentacao(false); // TODO: move this to ctor?
 
-    connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
-
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+
+    setConnections();
+    isSet = true;
   }
 
   modelViewVendaProduto.select();
 }
 
-void WidgetCompraPendentes::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
+void WidgetCompraPendentes::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setTable("view_venda_produto");

@@ -13,8 +13,7 @@ WidgetEstoqueProduto::~WidgetEstoqueProduto() { delete ui; }
 void WidgetEstoqueProduto::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetEstoqueProduto::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoqueProduto::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetEstoqueProduto::montaFiltro, connectionType);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &WidgetEstoqueProduto::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &WidgetEstoqueProduto::on_radioButtonStaccatoOFF_toggled, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetEstoqueProduto::on_radioButtonTodos_toggled, connectionType);
@@ -62,22 +61,16 @@ void WidgetEstoqueProduto::setupTables() {
 
 void WidgetEstoqueProduto::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
+    setupTables();
     setConnections();
     isSet = true;
-  }
-
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
   }
 
   modelProdutos.select();
 }
 
-void WidgetEstoqueProduto::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetEstoqueProduto::resetTables() { modelIsSet = false; }
+void WidgetEstoqueProduto::resetTables() { setupTables(); }
 
 void WidgetEstoqueProduto::montaFiltro() {
   const QString text = ui->lineEditBusca->text();

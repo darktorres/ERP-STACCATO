@@ -24,8 +24,6 @@ public:
   Q_DISABLE_COPY(RuntimeError)
 };
 
-using namespace std::chrono_literals;
-
 class Application final : public QApplication {
   Q_OBJECT
 
@@ -40,7 +38,7 @@ public:
   auto ajustarDiaUtil(const QDate date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> void;
-  auto dbReconnect(const bool isSilent = false) -> bool;
+  auto dbReconnect(const bool isSilent = false) -> void;
   auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueException(const QString &exception, QWidget *parent = nullptr) -> void;
@@ -71,8 +69,6 @@ public:
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;
-
-  auto inline static delayedTimer = 500ms;
 
 signals:
   void setConnectionStatus(const bool conectado);

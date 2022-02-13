@@ -11,6 +11,7 @@ public:
   explicit SqlQueryModel();
 
   auto data(const QModelIndex &index, const QString &column) const -> QVariant;
+  auto data(const QModelIndex &index, int role) const -> QVariant final;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
@@ -29,6 +30,7 @@ private:
   using QSqlQueryModel::sort;
 
   // attributes
+  int statusColumn = -1;
   QString base_query; // to be changed only by setQuery
   QString last_query; // to be used for refreshing tables
   // methods

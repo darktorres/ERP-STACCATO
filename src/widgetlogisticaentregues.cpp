@@ -18,8 +18,7 @@ WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 void WidgetLogisticaEntregues::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaEntregues::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->radioButtonParcialEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
@@ -27,20 +26,16 @@ void WidgetLogisticaEntregues::setConnections() {
   connect(ui->radioButtonTotalEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro, connectionType);
   connect(ui->tableProdutos, &QTableView::doubleClicked, this, &WidgetLogisticaEntregues::on_tableProdutos_doubleClicked, connectionType);
   connect(ui->tableVendas, &QTableView::doubleClicked, this, &WidgetLogisticaEntregues::on_tableVendas_doubleClicked, connectionType);
-  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaEntregues::on_tableVendas_clicked, connectionType);
+  connect(ui->tableVendas->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntregues::on_tableVendas_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaEntregues::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelVendas.select();
@@ -50,9 +45,10 @@ void WidgetLogisticaEntregues::updateTables() {
   modelProdutos.select();
 }
 
-void WidgetLogisticaEntregues::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
+void WidgetLogisticaEntregues::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetLogisticaEntregues::montaFiltro() {
   QStringList filtros;
@@ -88,8 +84,10 @@ void WidgetLogisticaEntregues::setupTables() {
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 }
 
-void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetLogisticaEntregues::on_tableVendas_selectionChanged() {
+  const auto selection = ui->tableVendas->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
 
   // TODO: move query to Sql class
   modelProdutos.setQuery(
@@ -97,7 +95,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
       "AS `status`, `vp2`.`fornecedor` AS `fornecedor`, `vp2`.`idVenda` AS `idVenda`, `vp2`.`produto` AS `produto`, `vp2`.`caixas` AS `caixas`, `vp2`.`quant` AS `quant`, `vp2`.`un` AS "
       "`un`, `vp2`.`quantCaixa` AS `quantCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo`, "
       "vp2.obs FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
-      modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
+      modelVendas.data(selection.first().row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
   modelProdutos.select();
 

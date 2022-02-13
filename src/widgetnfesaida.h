@@ -23,16 +23,13 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   QStack<int> blockingSignals;
-  QTimer timer;
   SqlTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;
   auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> void;
   auto cancelarNFe(const QString &chaveAcesso, const int row) -> void;
-  auto delayFiltro() -> void;
   auto gravarArquivo(const QString &resposta, const QString &chaveAcesso) -> void;
   auto montaFiltro() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

@@ -20,13 +20,11 @@ public:
 private:
   // attributes
   QStack<int> blockingSignals;
-  QTimer timer;
   SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto cadastrar(const QModelIndexList &list) -> void;
   auto calcularTotais() -> void;
-  auto delayFiltro() -> void;
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxPagamento() -> void;
   auto montaFiltro() -> void;

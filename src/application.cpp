@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <math.h>
 
+using namespace std::chrono_literals;
+
 RuntimeException::RuntimeException(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message, parent); }
 
 RuntimeError::RuntimeError(const QString &message, QWidget *parent) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message, parent); }
@@ -141,7 +143,7 @@ void Application::loginError() {
   throw RuntimeException(db.lastError().text());
 }
 
-bool Application::dbReconnect(const bool isSilent) {
+void Application::dbReconnect(const bool isSilent) {
   db.close();
 
   isConnected = db.open();
@@ -151,10 +153,7 @@ bool Application::dbReconnect(const bool isSilent) {
   if (not isConnected) {
     // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
     if (not isSilent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
-    return false;
   }
-
-  return db.isOpen();
 }
 
 void Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {

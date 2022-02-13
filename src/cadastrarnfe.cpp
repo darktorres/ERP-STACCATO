@@ -1602,6 +1602,7 @@ void CadastrarNFe::setConnections() {
   connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked, connectionType);
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked, connectionType);
   connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked, connectionType);
+  connect(ui->pushButtonPrevia, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonPrevia_clicked, connectionType);
   connect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged, connectionType);
 }
 
@@ -1640,6 +1641,7 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
   disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
+  disconnect(ui->pushButtonPrevia, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonPrevia_clicked);
   disconnect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
 }
 
@@ -2115,6 +2117,16 @@ bool CadastrarNFe::validarRegras(ACBr &acbrRemoto, const QString &filePath) {
   }
 
   return true;
+}
+
+void CadastrarNFe::on_pushButtonPrevia_clicked() {
+  validarDados();
+  criarChaveAcesso();
+
+  ACBr acbr;
+  gerarNota(acbr);
+
+  ACBrLib::gerarDanfe(xml);
 }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo

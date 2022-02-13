@@ -4,6 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -134,6 +135,8 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("grupo", "Grupo");
 
   modelContaReceber.select();
+
+  modelContaReceber.proxyModel = new SortFilterProxyModel(&modelContaReceber, this);
 
   ui->table->setModel(&modelContaReceber);
 

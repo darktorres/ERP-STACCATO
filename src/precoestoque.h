@@ -19,10 +19,8 @@ public:
 private:
   // attributes
   SqlTableModel modelProduto;
-  QTimer timer;
   Ui::PrecoEstoque *ui;
   // methods
-  auto delayFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;

@@ -18,12 +18,12 @@ void WidgetCompraResumo::setupTables() {
 }
 
 void WidgetCompraResumo::updateTables() {
-  if (not modelIsSet) {
+  if (not isSet) {
     setupTables();
-    modelIsSet = true;
+    isSet = true;
   }
 
   modelResumo.select();
 }
 
-void WidgetCompraResumo::resetTables() { modelIsSet = false; }
+void WidgetCompraResumo::resetTables() { setupTables(); }

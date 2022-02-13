@@ -16,18 +16,16 @@
 Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao_, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao_), m_idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
-  setConnections();
-
   setWindowFlags(Qt::Window);
-
   setWindowTitle(idVenda);
+  setupTables();
 
   if (isRepresentacao_) {
     ui->doubleSpinBoxPorcentagem->setDisabled(true);
     ui->doubleSpinBoxCredito->setDisabled(true);
   }
 
-  setupTables();
+  setConnections();
 }
 
 Devolucao::~Devolucao() { delete ui; }
@@ -40,22 +38,22 @@ void Devolucao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged, connectionType);
-  connect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged, connectionType);
   connect(ui->doubleSpinBoxCredito, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCredito_valueChanged, connectionType);
   connect(ui->doubleSpinBoxPorcentagem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxPorcentagem_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged, connectionType);
   connect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked, connectionType);
-  connect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked, connectionType);
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Devolucao::on_tableProdutos_selectionChanged, connectionType);
 }
 
 void Devolucao::unsetConnections() {
   blockingSignals.push(0);
 
   disconnect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
-  disconnect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
   disconnect(ui->doubleSpinBoxCredito, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCredito_valueChanged);
   disconnect(ui->doubleSpinBoxPorcentagem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxPorcentagem_valueChanged);
+  disconnect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
   disconnect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked);
-  disconnect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked);
+  disconnect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Devolucao::on_tableProdutos_selectionChanged);
 }
 
 void Devolucao::determinarIdDevolucao() {
@@ -272,13 +270,12 @@ void Devolucao::setupTables() {
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 }
 
-void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) {
-    limparCampos();
-    return;
-  }
+void Devolucao::on_tableProdutos_selectionChanged() {
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  const int row = index.row();
+  if (selection.isEmpty()) { return limparCampos(); }
+
+  const int row = selection.first().row();
 
   const double quant = modelProdutos2.data(row, "quant").toDouble();
 
@@ -469,7 +466,10 @@ void Devolucao::criarComissaoProfissional(const int currentRow) {
 
   SqlQuery queryProfissional;
 
-  if (not queryProfissional.exec("SELECT p.nome_razao, v.rt FROM profissional p LEFT JOIN venda v ON p.idProfissional = v.idProfissional LEFT JOIN venda_has_produto2 vp2 ON v.idVenda = vp2.idVenda "
+  if (not queryProfissional.exec("SELECT p.nome_razao, v.rt "
+                                 "FROM profissional p "
+                                 "LEFT JOIN venda v ON p.idProfissional = v.idProfissional "
+                                 "LEFT JOIN venda_has_produto2 vp2 ON v.idVenda = vp2.idVenda "
                                  "WHERE vp2.idVendaProduto2 = " +
                                  idVendaProduto2)) {
     throw RuntimeException("Erro buscando dados do profissional: " + queryProfissional.lastError().text());
@@ -582,9 +582,9 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   //------------------------------------
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { throw RuntimeError("Não selecionou quantidade!", this); }
 
@@ -596,7 +596,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   qApp->startTransaction("Devolucao::on_pushButtonDevolverItem");
 
-  devolverItem(list.first().row(), novoIdVendaProduto2);
+  devolverItem(selection.first().row(), novoIdVendaProduto2);
 
   qApp->endTransaction();
 

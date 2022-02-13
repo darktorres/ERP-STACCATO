@@ -24,15 +24,12 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   bool financeiro = false;
   QStack<int> blockingSignals;
-  QTimer timer;
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;
-  auto delayFiltro() -> void;
   auto fillComboBoxFornecedor() -> void;
   auto fillComboBoxLoja() -> void;
   auto fillComboBoxVendedor() -> void;

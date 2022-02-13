@@ -50,7 +50,7 @@ void CadastroFornecedor::setConnections() {
   connect(ui->pushButtonSalvarPrazos, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonSalvarPrazos_clicked, connectionType);
   connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked, connectionType);
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastroFornecedor::on_tabWidget_currentChanged, connectionType);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked, connectionType);
+  connect(ui->tableEndereco->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroFornecedor::on_tableEndereco_selectionChanged, connectionType);
 }
 
 void CadastroFornecedor::setupTables() {
@@ -323,8 +323,12 @@ void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {
   novoEndereco();
 }
 
-void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoEndereco(); }
+void CadastroFornecedor::on_tableEndereco_selectionChanged() {
+  const auto selection = ui->tableEndereco->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoEndereco(); }
+
+  const auto index = selection.first();
 
   currentRowEnd = index.row();
 

@@ -170,8 +170,6 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   ui->doubleSpinBoxPeso->setStyleSheet((ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) ? "color: rgb(255, 0, 0);" : "");
 }
 
-void WidgetLogisticaAgendarEntrega::delayFiltro() { timer.start(qApp->delayedTimer); }
-
 void WidgetLogisticaAgendarEntrega::setConnections() {
   if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
 
@@ -179,7 +177,6 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -199,7 +196,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked, connectionType);
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked, connectionType);
@@ -215,14 +212,13 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked, connectionType);
   connect(ui->tableTranspAgend, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAgend_doubleClicked, connectionType);
   connect(ui->tableTranspAtual, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked, connectionType);
-  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked, connectionType);
   connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked, connectionType);
+  connect(ui->tableVendas->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaAgendarEntrega::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
@@ -242,7 +238,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled);
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked);
   disconnect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
   disconnect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
@@ -258,8 +254,8 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->tableProdutos, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_doubleClicked);
   disconnect(ui->tableTranspAgend, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAgend_doubleClicked);
   disconnect(ui->tableTranspAtual, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked);
-  disconnect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
   disconnect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
+  disconnect(ui->tableVendas->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_selectionChanged);
 }
 
 void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled) {
@@ -284,7 +280,9 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
+    setupTables();
+    montaFiltro();
 
     if (User::isVendedor()) {
       ui->tableVendas->hide();
@@ -298,12 +296,6 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
     isSet = true;
   }
 
-  if (not modelIsSet) {
-    setupTables();
-    montaFiltro();
-    modelIsSet = true;
-  }
-
   // -------------------------------------------------------------------------
 
   modelVendas.select();
@@ -315,10 +307,17 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
   calcularDisponivel();
 }
 
-void WidgetLogisticaAgendarEntrega::resetTables() { modelIsSet = false; }
+void WidgetLogisticaAgendarEntrega::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
-void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+void WidgetLogisticaAgendarEntrega::on_tableVendas_selectionChanged() {
+  const auto selection = ui->tableVendas->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  const auto index = selection.first();
 
   selectedIdVenda = modelVendas.data(index.row(), "idVenda").toString();
 

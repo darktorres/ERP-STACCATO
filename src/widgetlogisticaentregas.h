@@ -23,8 +23,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel modelCalendario;
   SqlTableModel modelCarga;
   SqlTableModel modelProdutos;
@@ -32,7 +30,6 @@ private:
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> void;
   auto confirmarEntrega(const QDate dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
-  auto delayFiltro() -> void;
   auto gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
                       const SqlQueryModel &modelProdutosAgrupado) -> QString;
   auto gerarProtocolo(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep,
@@ -48,9 +45,9 @@ private:
   auto on_pushButtonObservacao_clicked() -> void;
   auto on_pushButtonProtocoloEntrega_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
-  auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
-  auto on_tableCarga_clicked(const QModelIndex &index) -> void;
+  auto on_tableCalendario_selectionChanged() -> void;
   auto on_tableCarga_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableCarga_selectionChanged() -> void;
   auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
   auto processarConsultaNFe(const int idNFe, const QString &xml) -> void;
   auto reagendar(const QModelIndexList &list, const QDateTime &dataVeiculo, const int idVeiculo) -> void;

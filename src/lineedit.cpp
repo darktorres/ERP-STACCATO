@@ -2,7 +2,9 @@
 
 #include <QDebug>
 
-LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent) { connect(this, &QLineEdit::textChanged, this, &LineEdit::resizeToContent); }
+using namespace std::chrono_literals;
+
+LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent) {}
 
 void LineEdit::resizeToContent() {
   if (text().isEmpty()) { return setFixedWidth(baseSize().width()); }
@@ -11,6 +13,15 @@ void LineEdit::resizeToContent() {
 
   setFixedWidth(qMax(fmSize + 15, baseSize().width()));
 }
+
+void LineEdit::setDelayed() {
+  timer.setSingleShot(true);
+
+  connect(&timer, &QTimer::timeout, this, [&] { emit delayedTextChanged(text()); });
+  connect(this, &QLineEdit::textChanged, this, [&] { timer.start(500ms); });
+}
+
+void LineEdit::setResizeToText() { connect(this, &QLineEdit::textChanged, this, &LineEdit::resizeToContent); }
 
 // TODO: alterar para que texto grande seja sempre cortado pela direita e não pela esquerda, ex:
 // errado: "RRO AZUL"

@@ -21,7 +21,6 @@ public:
 private:
   // attributes
   //  bool isSet = false;
-  //  bool modelIsSet = false;
   //  SqlTableModel modelRelatorio;
   //  SqlTableModel modelTotal;
   Ui::WidgetRh *ui;

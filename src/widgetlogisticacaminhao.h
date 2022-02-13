@@ -21,13 +21,12 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   SqlTableModel modelCaminhao;
   SqlTableModel modelCarga;
   Ui::WidgetLogisticaCaminhao *ui;
   // methods
   auto on_checkBoxDesativados_toggled(const bool checked) -> void;
-  auto on_table_clicked(const QModelIndex &index) -> void;
+  auto on_table_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

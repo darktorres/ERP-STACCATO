@@ -53,6 +53,10 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->splitter->setStretchFactor(1, 255);
   ui->splitter->setStretchFactor(2, 1);
 
+  ui->lineEditCodComercial->setResizeToText();
+  ui->lineEditFormComercial->setResizeToText();
+  ui->lineEditFornecedor->setResizeToText();
+
   setConnections();
 }
 
@@ -79,10 +83,14 @@ void Orcamento::show() {
   ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
 }
 
-void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
+void Orcamento::on_tableProdutos_selectionChanged() {
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
+
   if (isReadOnly) { return; }
 
-  if (not index.isValid()) { return novoItem(); }
+  if (selection.isEmpty()) { return novoItem(); }
+
+  const auto index = selection.first();
 
   ui->pushButtonAtualizarItem->show();
   ui->pushButtonRemoverItem->show();
@@ -150,7 +158,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
-  connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked, connectionType);
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Orcamento::on_tableProdutos_selectionChanged, connectionType);
 }
 
 void Orcamento::unsetConnections() {
@@ -188,7 +196,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
-  disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
+  disconnect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Orcamento::on_tableProdutos_selectionChanged);
 }
 
 bool Orcamento::viewRegister() {
@@ -1675,6 +1683,7 @@ void Orcamento::calcularPesoTotal() {
     total += modelItem.data(row, "caixas").toDouble() * kgcx;
   }
 
+  // TODO: implicit conversion double -> int
   ui->spinBoxPesoTotal->setValue(total);
 }
 

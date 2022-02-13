@@ -82,7 +82,7 @@ private:
   auto on_pushButtonModelo3d_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
-  auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto on_tableProdutos_selectionChanged() -> void;
   auto redoBackupItem() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;

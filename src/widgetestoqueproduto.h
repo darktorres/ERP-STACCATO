@@ -22,12 +22,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel modelProdutos;
   Ui::WidgetEstoqueProduto *ui;
   // methods
-  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_radioButtonEstoque_toggled(const bool checked) -> void;
   auto on_radioButtonStaccatoOFF_toggled(const bool checked) -> void;

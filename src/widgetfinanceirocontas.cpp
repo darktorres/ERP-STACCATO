@@ -48,7 +48,6 @@ void WidgetFinanceiroContas::setupTables() {
 void WidgetFinanceiroContas::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->dateEditRealizadoAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->dateEditRealizadoDe, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::on_dateEditRealizadoDe_dateChanged, connectionType);
   connect(ui->dateEditVencimentoAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
@@ -61,7 +60,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->groupBoxVencimento, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->groupBoxVencimento, &QGroupBox::toggled, this, &WidgetFinanceiroContas::on_groupBoxVencimento_toggled, connectionType);
   connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroContas::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->pushButtonAdiantarRecebimento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked, connectionType);
   connect(ui->pushButtonExcluirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked, connectionType);
   connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked, connectionType);
@@ -83,7 +82,7 @@ void WidgetFinanceiroContas::setConnections() {
 
 void WidgetFinanceiroContas::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
 
     ui->radioButtonPendente->setChecked(true);
 
@@ -94,26 +93,22 @@ void WidgetFinanceiroContas::updateTables() {
 
     ui->itemBoxLojas->setSearchDialog(SearchDialog::loja(this));
 
+    montaFiltro();
+    setupTables();
+
     setConnections();
     isSet = true;
   }
-
-  if (not modelIsSet) {
-    montaFiltro();
-    setupTables();
-    modelIsSet = true;
-  }
-
-  // -------------------------------------------------------------------------
 
   model.select();
   modelVencidos.select();
   modelVencer.select();
 }
 
-void WidgetFinanceiroContas::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
+void WidgetFinanceiroContas::resetTables() {
+  montaFiltro();
+  setupTables();
+}
 
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }

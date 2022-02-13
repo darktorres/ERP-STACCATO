@@ -62,6 +62,7 @@ win32-g++ {
     QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic
 #   QMAKE_CXXFLAGS *= -Wno-deprecated-copy
+#   QMAKE_CXXFLAGS += -Wreturn-type -Wimplicit-fallthrough -Wnarrowing -Wuninitialized -Wconversion
 }
 
 *-clang {

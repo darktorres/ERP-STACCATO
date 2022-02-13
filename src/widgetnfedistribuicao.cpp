@@ -44,19 +44,18 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   timer.start(tempoTimer);
 }
 
-void WidgetNFeDistribuicao::resetTables() { modelIsSet = false; }
+void WidgetNFeDistribuicao::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetNFeDistribuicao::updateTables() {
   if (not isSet) {
-    setConnections();
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   model.select();
@@ -730,12 +729,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     queryCadastrar.bindValue(":ciencia", ciencia);
 
     if (not queryCadastrar.exec()) { throw RuntimeException("Erro cadastrando resumo da NF-e: " + queryCadastrar.lastError().text()); }
-
-    return;
-  }
-
-  // TODO: condition is always true
-  if (cadastrado) {
+  } else {
     const QString statusCadastrado = queryNFe.value("status").toString();
 
     if (schemaEvento == "resNFe" or statusCadastrado == "AUTORIZADA") { return; }
@@ -749,12 +743,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     queryAtualizar.bindValue(":chaveAcesso", chaveAcesso);
 
     if (not queryAtualizar.exec()) { throw RuntimeException("Erro atualizando xml: " + queryAtualizar.lastError().text()); }
-
-    return;
   }
-
-  // TODO: unreachable code
-  throw RuntimeException("Evento de NF-e não tratado: " + evento);
 }
 
 void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {

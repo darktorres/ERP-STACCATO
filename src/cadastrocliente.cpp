@@ -74,7 +74,7 @@ void CadastroCliente::setConnections() {
   connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonNovoCad_clicked, connectionType);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroCliente::on_radioButtonPF_toggled, connectionType);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroCliente::on_tableEndereco_clicked, connectionType);
+  connect(ui->tableEndereco->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroCliente::on_tableEndereco_selectionChanged, connectionType);
 }
 
 void CadastroCliente::setupUi() {
@@ -462,8 +462,12 @@ void CadastroCliente::setEnderecoReadOnly(const bool isReadOnly) {
   ui->lineEditUF->setReadOnly(isReadOnly);
 }
 
-void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoEndereco(); }
+void CadastroCliente::on_tableEndereco_selectionChanged() {
+  const auto selection = ui->tableEndereco->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoEndereco(); }
+
+  const auto index = selection.first();
 
   currentRowEnd = index.row();
 

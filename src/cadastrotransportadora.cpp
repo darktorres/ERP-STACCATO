@@ -48,8 +48,8 @@ void CadastroTransportadora::setConnections() {
   connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonDesativarVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonDesativarVeiculo_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonNovoCad_clicked, connectionType);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroTransportadora::on_tableEndereco_clicked, connectionType);
-  connect(ui->tableVeiculo, &TableView::clicked, this, &CadastroTransportadora::on_tableVeiculo_clicked, connectionType);
+  connect(ui->tableEndereco->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroTransportadora::on_tableEndereco_selectionChanged, connectionType);
+  connect(ui->tableVeiculo->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroTransportadora::on_tableVeiculo_selectionChanged, connectionType);
 }
 
 void CadastroTransportadora::setupTables() {
@@ -260,8 +260,12 @@ void CadastroTransportadora::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditUF->setText(cc.getUf());
 }
 
-void CadastroTransportadora::on_tableEndereco_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoEndereco(); }
+void CadastroTransportadora::on_tableEndereco_selectionChanged() {
+  const auto selection = ui->tableEndereco->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoEndereco(); }
+
+  const auto index = selection.first();
 
   currentRowEnd = index.row();
 
@@ -427,8 +431,12 @@ void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(const boo
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
-void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoVeiculo(); }
+void CadastroTransportadora::on_tableVeiculo_selectionChanged() {
+  const auto selection = ui->tableVeiculo->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoVeiculo(); }
+
+  const auto index = selection.first();
 
   currentRowVeiculo = index.row();
   mapperVeiculo.setCurrentModelIndex(index);

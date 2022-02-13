@@ -12,7 +12,10 @@ WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : QWidget(parent),
 
 WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 
-void WidgetCompraDevolucao::resetTables() { modelIsSet = false; }
+void WidgetCompraDevolucao::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetCompraDevolucao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
@@ -26,14 +29,10 @@ void WidgetCompraDevolucao::setConnections() {
 
 void WidgetCompraDevolucao::updateTables() {
   if (not isSet) {
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelVendaProduto.select();

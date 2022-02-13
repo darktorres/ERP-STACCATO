@@ -39,6 +39,7 @@ void ImportaTabelaIBPT::importar() {
   progressDialog.setWindowTitle("ERP Staccato");
   progressDialog.setWindowModality(Qt::WindowModal);
   progressDialog.setMinimum(0);
+  // TODO: implicit conversion qint64 -> int
   progressDialog.setMaximum(file.size() + 1);
 
   progressDialog.show();
@@ -71,6 +72,7 @@ void ImportaTabelaIBPT::importar() {
     model.setData(row, "versao", line.takeFirst());
 
     const auto remains = file.bytesAvailable();
+    // TODO: implicit conversion qint64 -> int
     progressDialog.setValue(size - remains);
   }
 

@@ -20,6 +20,7 @@ public:
   explicit SqlTableModel(const int limit_);
   explicit SqlTableModel();
 
+  auto data(const QModelIndex &index, int role) const -> QVariant final;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
@@ -49,6 +50,7 @@ private:
 
   // attributes
   int const limit;
+  int statusColumn = -1;
   // methods
   auto selectStatement() const -> QString final;
 };

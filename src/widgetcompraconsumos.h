@@ -22,18 +22,15 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel modelPedido;
   SqlTableModel modelProduto;
   Ui::WidgetCompraConsumos *ui;
   // methods
-  auto delayFiltro() -> void;
   auto desfazerConsumo(const QModelIndexList &list) -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;
-  auto on_tablePedido_clicked(const QModelIndex &index) -> void;
+  auto on_tablePedido_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

@@ -118,10 +118,9 @@ void WidgetGraficos::setComboBoxLojas() {
 
 void WidgetGraficos::updateTables() {
   if (not isSet) {
-    setConnections();
     setComboBoxLojas();
     setChart();
-
+    setConnections();
     isSet = true;
   }
 

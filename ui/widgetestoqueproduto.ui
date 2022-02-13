@@ -72,7 +72,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditBusca">
+      <widget class="LineEdit" name="lineEditBusca">
        <property name="placeholderText">
         <string>Fornecedor/Produto/Cód. Com.</string>
        </property>
@@ -175,6 +175,11 @@ color: rgb(0, 0, 0);</string>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/lineedit.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

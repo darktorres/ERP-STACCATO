@@ -12,30 +12,26 @@ WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 void WidgetFinanceiroCompra::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated, connectionType);
 }
 
 void WidgetFinanceiroCompra::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   model.select();
 }
 
-void WidgetFinanceiroCompra::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
+void WidgetFinanceiroCompra::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetFinanceiroCompra::setupTables() {
   model.setTable("view_compras_financeiro");

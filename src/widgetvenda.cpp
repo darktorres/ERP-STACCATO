@@ -181,6 +181,8 @@ void WidgetVenda::setWidgets() {
 
     ui->dateEditMes->setDate(qApp->serverDate());
     ui->dateEditDia->setDate(qApp->serverDate());
+
+    ui->lineEditBusca->setDelayed();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -196,7 +198,6 @@ void WidgetVenda::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -224,7 +225,7 @@ void WidgetVenda::setConnections() {
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled, connectionType);
   connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled, connectionType);
@@ -234,7 +235,6 @@ void WidgetVenda::setConnections() {
 void WidgetVenda::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
@@ -263,27 +263,20 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::on_dateEditMes_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
   disconnect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::delayFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
   disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled);
   disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::on_radioButton_toggled);
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
-void WidgetVenda::delayFiltro() { timer.start(qApp->delayedTimer); }
-
 void WidgetVenda::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
     setWidgets();
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelViewVenda.select();
@@ -396,7 +389,10 @@ void WidgetVenda::setFinanceiro() {
   financeiro = true;
 }
 
-void WidgetVenda::resetTables() { modelIsSet = false; }
+void WidgetVenda::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

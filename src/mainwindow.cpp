@@ -180,11 +180,7 @@ void MainWindow::updateTables() {
   qApp->setUpdating(false);
 }
 
-void MainWindow::reconnectDb() {
-  const bool conectado = qApp->dbReconnect();
-
-  setConnectionStatus(conectado);
-}
+void MainWindow::reconnectDb() { qApp->dbReconnect(); }
 
 void MainWindow::setConnectionStatus(const bool conectado) {
   pushButtonStatus->setText(conectado ? "Conectado: " + User::getSetting("Login/hostname").toString() : "Desconectado");

@@ -25,7 +25,7 @@ WidgetGalpao::WidgetGalpao(QWidget *parent) : QWidget(parent), ui(new Ui::Widget
 
 WidgetGalpao::~WidgetGalpao() { delete ui; }
 
-void WidgetGalpao::resetTables() { modelIsSet = false; }
+void WidgetGalpao::resetTables() { setupTables(); }
 
 void WidgetGalpao::setConnections() {
   if (not blockingSignals.isEmpty()) { blockingSignals.pop(); } // avoid crashing on first setConnections
@@ -100,16 +100,12 @@ void WidgetGalpao::updateTables() {
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
-    setConnections();
-
     ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
 
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
-    modelIsSet = true;
+
+    setConnections();
+    isSet = true;
   }
 
   if (currentPallet) { return; }

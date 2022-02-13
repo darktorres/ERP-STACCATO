@@ -57,13 +57,9 @@ void WidgetCompraConfirmar::setConnections() {
 
 void WidgetCompraConfirmar::updateTables() {
   if (not isSet) {
+    setupTables();
     setConnections();
     isSet = true;
-  }
-
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
   }
 
   modelResumo.select();
@@ -71,7 +67,7 @@ void WidgetCompraConfirmar::updateTables() {
   modelViewCompras.select();
 }
 
-void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }
+void WidgetCompraConfirmar::resetTables() { setupTables(); }
 
 void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   // TODO: ao preencher na tabela de compras colocar o grupo como 'produto/venda'

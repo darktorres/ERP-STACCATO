@@ -3,6 +3,7 @@
 #include "application.h"
 
 #include <QDebug>
+#include <QFont>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -106,6 +107,8 @@ bool SqlTableModel::select() {
 
   if (not QSqlTableModel::select()) { throw RuntimeException("Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
+  statusColumn = fieldIndex("status", true);
+
   return true;
 }
 
@@ -134,4 +137,18 @@ int SqlTableModel::fieldIndex(const QString &fieldName, const bool silent) const
   if (field == -1 and not silent) { throw RuntimeException(fieldName + " não encontrado na tabela " + tableName() + "!"); }
 
   return field;
+}
+
+QVariant SqlTableModel::data(const QModelIndex &index, int role) const {
+  if (statusColumn != -1 and role == Qt::FontRole) {
+    const QString status = index.siblingAtColumn(statusColumn).data().toString();
+
+    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
+      QFont font;
+      font.setStrikeOut(true);
+      return font;
+    }
+  }
+
+  return QSqlTableModel::data(index, role);
 }

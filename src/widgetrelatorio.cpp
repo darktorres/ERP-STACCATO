@@ -137,13 +137,9 @@ void WidgetRelatorio::updateTables() {
       ui->frameVendedores->hide();
     }
 
+    setupTables();
     setConnections();
     isSet = true;
-  }
-
-  if (not modelIsSet) {
-    setupTables();
-    modelIsSet = true;
   }
 
   QElapsedTimer time;
@@ -158,7 +154,7 @@ void WidgetRelatorio::updateTables() {
   qDebug() << "calcularTotalGeral: " << time.restart();
 }
 
-void WidgetRelatorio::resetTables() { modelIsSet = false; }
+void WidgetRelatorio::resetTables() { setupTables(); }
 
 void WidgetRelatorio::on_pushButtonExcel_clicked() {
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");

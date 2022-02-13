@@ -23,12 +23,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   SqlTableModel modelViewLogisticaRepresentacao;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
-  auto delayFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonMarcarEntregue_clicked() -> void;

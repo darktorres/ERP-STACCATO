@@ -46,6 +46,8 @@ void WidgetOrcamento::setWidgets() {
     (User::isVendedorOrEspecial()) ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
     ui->dateEditMes->setDate(qApp->serverDate());
+
+    ui->lineEditBusca->setDelayed();
   } catch (std::exception &) {
     setConnections();
     throw;
@@ -77,7 +79,6 @@ void WidgetOrcamento::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro, connectionType);
@@ -91,7 +92,7 @@ void WidgetOrcamento::setConnections() {
   connect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetOrcamento::on_dateEditMes_dateChanged, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetOrcamento::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetOrcamento::montaFiltro, connectionType);
   connect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled, connectionType);
@@ -102,7 +103,6 @@ void WidgetOrcamento::setConnections() {
 void WidgetOrcamento::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxExpirado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->checkBoxFechado, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
@@ -117,15 +117,13 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->comboBoxVendedores, &QComboBox::currentTextChanged, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetOrcamento::on_dateEditMes_dateChanged);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled);
-  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetOrcamento::delayFiltro);
+  disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked);
   disconnect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled);
   disconnect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::on_radioButton_toggled);
   disconnect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
 }
-
-void WidgetOrcamento::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetOrcamento::fillComboBoxVendedor() {
   unsetConnections();
@@ -214,22 +212,20 @@ void WidgetOrcamento::fillComboBoxFornecedor() {
 
 void WidgetOrcamento::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
     setWidgets();
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelViewOrcamento.select();
 }
 
-void WidgetOrcamento::resetTables() { modelIsSet = false; }
+void WidgetOrcamento::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);

@@ -32,7 +32,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   ui->dateEditDe->setDate(qApp->serverDate());
   ui->dateEditAte->setDate(qApp->serverDate());
 
-  timer.setSingleShot(true);
+  ui->lineEditVenda->setDelayed();
 
   setConnections();
 }
@@ -46,7 +46,6 @@ void AnteciparRecebimento::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro, connectionType);
   connect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro, connectionType);
   connect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged, connectionType);
@@ -56,7 +55,7 @@ void AnteciparRecebimento::setConnections() {
   connect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais, connectionType);
   connect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged, connectionType);
   connect(ui->groupBoxData, &QGroupBox::toggled, this, &AnteciparRecebimento::montaFiltro, connectionType);
-  connect(ui->lineEditVenda, &QLineEdit::textChanged, this, &AnteciparRecebimento::delayFiltro, connectionType);
+  connect(ui->lineEditVenda, &LineEdit::delayedTextChanged, this, &AnteciparRecebimento::montaFiltro, connectionType);
   connect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked, connectionType);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::selecionarTaxa, connectionType);
 }
@@ -64,7 +63,6 @@ void AnteciparRecebimento::setConnections() {
 void AnteciparRecebimento::unsetConnections() {
   blockingSignals.push(0);
 
-  disconnect(&timer, &QTimer::timeout, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->comboBoxPagamento, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged);
@@ -74,7 +72,7 @@ void AnteciparRecebimento::unsetConnections() {
   disconnect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   disconnect(ui->doubleSpinBoxValorPresente, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
   disconnect(ui->groupBoxData, &QGroupBox::toggled, this, &AnteciparRecebimento::montaFiltro);
-  disconnect(ui->lineEditVenda, &QLineEdit::textChanged, this, &AnteciparRecebimento::delayFiltro);
+  disconnect(ui->lineEditVenda, &LineEdit::delayedTextChanged, this, &AnteciparRecebimento::montaFiltro);
   disconnect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked);
   disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::selecionarTaxa);
 }
@@ -97,8 +95,8 @@ void AnteciparRecebimento::calcularTotais() {
 
     liquido += valor;
 
-    // valor aqui deve considerar a taxa cartao
-    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor;
+    // TODO: implicit conversion qint64 -> double
+    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor; // valor aqui deve considerar a taxa cartao
 
     prazoMedio += prazo;
   }
@@ -414,8 +412,6 @@ void AnteciparRecebimento::on_comboBoxPagamento_currentTextChanged(const QString
 
   montaFiltro();
 }
-
-void AnteciparRecebimento::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void AnteciparRecebimento::selecionarTaxa() {
   if (ui->comboBoxPagamento->currentText() == "COMISSÃO") { return calcularTotais(); }

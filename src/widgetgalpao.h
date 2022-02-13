@@ -25,7 +25,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   PalletItem *currentPallet = nullptr;
   QGraphicsScene *scene = nullptr;
   QStack<int> blockingSignals;

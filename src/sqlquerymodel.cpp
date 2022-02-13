@@ -3,6 +3,7 @@
 #include "application.h"
 
 #include <QDebug>
+#include <QFont>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -41,6 +42,8 @@ void SqlQueryModel::select(const QString &query) {
   QSqlQueryModel::setQuery(query);
 
   if (lastError().isValid()) { throw RuntimeException("Erro lendo dados: " + lastError().text()); }
+
+  statusColumn = fieldIndex("status", true);
 }
 
 void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
@@ -61,3 +64,17 @@ int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const
 void SqlQueryModel::sort(const int column, const Qt::SortOrder order) { select(base_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }
 
 void SqlQueryModel::sort(const QString &column, const Qt::SortOrder order) { select(base_query + " ORDER BY " + column + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }
+
+QVariant SqlQueryModel::data(const QModelIndex &index, int role) const {
+  if (statusColumn != -1 and role == Qt::FontRole) {
+    const QString status = index.siblingAtColumn(statusColumn).data().toString();
+
+    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
+      QFont font;
+      font.setStrikeOut(true);
+      return font;
+    }
+  }
+
+  return QSqlQueryModel::data(index, role);
+}

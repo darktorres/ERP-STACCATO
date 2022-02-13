@@ -27,7 +27,6 @@ private:
   // attributes
   auto inline static tempoTimer = 15min;
   bool isSet = false;
-  bool modelIsSet = false;
   int maximoNSU = 0;
   int ultimoNSU = 0;
   QStack<int> blockingSignals;

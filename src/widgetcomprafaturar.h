@@ -21,7 +21,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   SqlTableModel modelViewFaturamento;
   SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;

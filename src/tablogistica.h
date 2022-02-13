@@ -26,7 +26,7 @@ private:
   // methods
   auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_tabWidgetLogistica_currentChanged() -> void;
-  auto on_tableForn_clicked(const QModelIndex &index) -> void;
+  auto on_tableForn_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

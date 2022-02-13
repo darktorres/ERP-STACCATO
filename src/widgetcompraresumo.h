@@ -20,7 +20,7 @@ public:
 
 private:
   // attributes
-  bool modelIsSet = false;
+  bool isSet = false;
   Ui::WidgetCompraResumo *ui;
   SqlTableModel modelResumo;
   // methods

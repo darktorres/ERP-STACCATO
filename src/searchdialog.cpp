@@ -4,6 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "file.h"
+#include "lineedit.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
@@ -22,8 +23,6 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
                            const QString &sortColumn, const bool naoListar, QWidget *parent)
     : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes_), primaryKey(primaryKey_), filter(filter_), textKeys(textKeys_), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
-
-  timer.setSingleShot(true);
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);
@@ -57,15 +56,12 @@ SearchDialog::~SearchDialog() { delete ui; }
 void SearchDialog::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &SearchDialog::on_lineEditBusca_textChanged, connectionType);
   connect(ui->checkBoxDescontinuados, &QCheckBox::toggled, this, &SearchDialog::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &SearchDialog::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked, connectionType);
-  connect(ui->table, &TableView::clicked, this, &SearchDialog::on_table_clicked, connectionType);
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SearchDialog::on_table_selectionChanged, connectionType);
 }
-
-void SearchDialog::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void SearchDialog::setupTables(const QString &table, const QString &sortColumn) {
   model.setTable(table);
@@ -136,9 +132,11 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
 void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(model.data(index.row(), primaryKey)); }
 
-void SearchDialog::on_table_clicked(const QModelIndex &index) {
-  if (model.tableName() == "view_nfe_inutilizada" and index.isValid()) {
-    XML *xml = new XML(model.data(index.row(), "xml").toString(), XML::Tipo::Entrada, this);
+void SearchDialog::on_table_selectionChanged() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (model.tableName() == "view_nfe_inutilizada" and not selection.isEmpty()) {
+    XML *xml = new XML(model.data(selection.first().row(), "xml").toString(), XML::Tipo::Entrada, this);
     ui->treeView->setModel(&xml->model);
     ui->treeView->expandAll();
   }
@@ -559,10 +557,11 @@ void SearchDialog::setupSearchWidgets() {
   auto *frameLayout = ui->frameLineEdit->layout();
 
   for (const auto &fullText : fullTextIndexes) {
-    auto *lineEdit = new QLineEdit(this);
+    auto *lineEdit = new LineEdit(this);
+    lineEdit->setDelayed();
     lineEdit->setPlaceholderText(fullText.placeHolder);
     lineEdit->setClearButtonEnabled(true);
-    connect(lineEdit, &QLineEdit::textChanged, this, &SearchDialog::delayFiltro);
+    connect(lineEdit, &LineEdit::delayedTextChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
 
     frameLayout->addWidget(lineEdit);
   }

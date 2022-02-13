@@ -23,8 +23,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
-  QTimer timer;
   QString m_fornecedor;
   SqlTableModel modelEstoque;
   SqlTableModel modelTranspAtual;
@@ -33,7 +31,6 @@ private:
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> void;
   auto calcularPeso() -> void;
-  auto delayFiltro() -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxEstoque_toggled() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate date) -> void;

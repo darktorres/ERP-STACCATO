@@ -22,7 +22,6 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   SqlTableModel modelViewRelatorio;
   SqlQueryModel modelViewRelatorioLoja;
   SqlQueryModel modelViewRelatorioVendedor;

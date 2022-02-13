@@ -19,44 +19,39 @@ WidgetGare::~WidgetGare() { delete ui; }
 void WidgetGare::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->dateEditFiltro, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetGare::montaFiltro, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetGare::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked, connectionType);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked, connectionType);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked, connectionType);
-  connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
-  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
-  connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro, connectionType);
+  connect(ui->radioButtonCancelado, &QRadioButton::toggled, this, &WidgetGare::on_radioButtonCancelado_toggled, connectionType);
+  connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::on_radioButtonGerado_toggled, connectionType);
+  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::on_radioButtonLiberado_toggled, connectionType);
+  connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::on_radioButtonPago_toggled, connectionType);
+  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::on_radioButtonPendente_toggled, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated, connectionType);
 }
 
-void WidgetGare::resetTables() { modelIsSet = false; }
+void WidgetGare::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetGare::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
     ui->dateEditBaixa->setDate(qApp->serverDate());
     ui->dateEditFiltro->setDate(qApp->serverDate());
-
-    setConnections();
-
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   model.select();
 }
-
-void WidgetGare::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetGare::habilitarBotoes() {
   const bool desabilitar = ui->radioButtonPago->isChecked();
@@ -261,6 +256,37 @@ void WidgetGare::on_pushButtonCancelar_clicked() {
 
   qApp->enqueueInformation("GAREs canceladas!");
 }
+
+void WidgetGare::on_radioButtonPendente_toggled(const bool checked) {
+  ui->pushButtonCancelar->setEnabled(true);
+
+  if (checked) { montaFiltro(); }
+}
+
+void WidgetGare::on_radioButtonLiberado_toggled(const bool checked) {
+  ui->pushButtonCancelar->setEnabled(true);
+
+  if (checked) { montaFiltro(); }
+}
+
+void WidgetGare::on_radioButtonGerado_toggled(const bool checked) {
+  ui->pushButtonCancelar->setEnabled(true);
+
+  if (checked) { montaFiltro(); }
+}
+
+void WidgetGare::on_radioButtonPago_toggled(const bool checked) {
+  ui->pushButtonCancelar->setDisabled(true);
+
+  if (checked) { montaFiltro(); }
+}
+
+void WidgetGare::on_radioButtonCancelado_toggled(const bool checked) {
+  ui->pushButtonCancelar->setDisabled(true);
+
+  if (checked) { montaFiltro(); }
+}
+
 // TODO: deve salvar gare/gareData em nfe
 // TODO: quando importar retorno com status de 'agendado' alterar a linha?
 // TODO: renomear classe para WidgetFinanceiroGare

@@ -55,7 +55,7 @@ void CadastroProfissional::setConnections() {
   connect(ui->pushButtonDesativarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonDesativarEnd_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonNovoCad_clicked, connectionType);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled, connectionType);
-  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked, connectionType);
+  connect(ui->tableEndereco->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CadastroProfissional::on_tableEndereco_selectionChanged, connectionType);
 }
 
 void CadastroProfissional::setupTables() {
@@ -391,8 +391,12 @@ void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditUF->setText(cc.getUf());
 }
 
-void CadastroProfissional::on_tableEndereco_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoEndereco(); }
+void CadastroProfissional::on_tableEndereco_selectionChanged() {
+  const auto selection = ui->tableEndereco->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return novoEndereco(); }
+
+  const auto index = selection.first();
 
   currentRowEnd = index.row();
 

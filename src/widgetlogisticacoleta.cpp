@@ -23,9 +23,8 @@ WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }
 void WidgetLogisticaColeta::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged, connectionType);
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaColeta::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked, connectionType);
@@ -35,21 +34,15 @@ void WidgetLogisticaColeta::setConnections() {
 
 void WidgetLogisticaColeta::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
+    ui->lineEditBusca->setDelayed();
+    setupTables();
+    montaFiltro();
     setConnections();
     isSet = true;
   }
 
-  if (not modelIsSet) {
-    setupTables();
-    montaFiltro();
-    modelIsSet = true;
-  }
-
   modelViewColeta.select();
 }
-
-void WidgetLogisticaColeta::delayFiltro() { timer.start(qApp->delayedTimer); }
 
 void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
@@ -61,7 +54,10 @@ void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor
   ui->checkBoxMarcarTodos->setChecked(false);
 }
 
-void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
+void WidgetLogisticaColeta::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setTable("view_coleta");

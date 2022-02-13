@@ -24,10 +24,8 @@ public:
 private:
   // attributes
   bool isSet = false;
-  bool modelIsSet = false;
   QStack<int> blockingSignals;
   QString selectedIdVenda;
-  QTimer timer;
   SqlQueryModel modelProdutos;
   SqlQueryModel modelVendas;
   SqlTableModel modelTranspAgend;
@@ -40,7 +38,6 @@ private:
   auto ajustarGroupBoxStatus() -> void;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
-  auto delayFiltro() -> void;
   auto dividirCompra(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> void;
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
@@ -60,8 +57,8 @@ private:
   auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableTranspAtual_doubleClicked(const QModelIndex &index) -> void;
-  auto on_tableVendas_clicked(const QModelIndex &index) -> void;
   auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableVendas_selectionChanged() -> void;
   auto processRows() -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrev, const QString &observacao) -> void;
   auto setConnections() -> void;

@@ -24,9 +24,8 @@ WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
 void WidgetLogisticaRecebimento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(&timer, &QTimer::timeout, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged, connectionType);
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked, connectionType);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::delayFiltro, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked, connectionType);
@@ -36,23 +35,20 @@ void WidgetLogisticaRecebimento::setConnections() {
 
 void WidgetLogisticaRecebimento::updateTables() {
   if (not isSet) {
-    timer.setSingleShot(true);
-    setConnections();
-    isSet = true;
-  }
-
-  if (not modelIsSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
-    modelIsSet = true;
+    setConnections();
+    isSet = true;
   }
 
   modelViewRecebimento.select();
 }
 
-void WidgetLogisticaRecebimento::delayFiltro() { timer.start(qApp->delayedTimer); }
-
-void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
+void WidgetLogisticaRecebimento::resetTables() {
+  setupTables();
+  montaFiltro();
+}
 
 void WidgetLogisticaRecebimento::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();

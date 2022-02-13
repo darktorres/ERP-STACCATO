@@ -1106,29 +1106,31 @@ void Venda::on_pushButtonCancelamento_clicked() {
   // TODO: perguntar e salvar motivo do cancelamento
   // TODO: caso haja agendamento de entrega cancelar o agendamento primeiro?
 
-  const QDate dataVenda = data("data").toDate();
-  const QDate dataSeguinte = dataVenda.addMonths(1);
-  const QDate dataAtual = qApp->serverDate();
+  if (not User::isAdmin()) {
+    const QDate dataVenda = data("data").toDate();
+    const QDate dataSeguinte = dataVenda.addMonths(1);
+    const QDate dataAtual = qApp->serverDate();
 
-  const bool mesmoMes = (dataAtual.year() == dataVenda.year() and dataAtual.month() == dataVenda.month());
-  const bool mesSeguinte = (dataAtual.year() == dataSeguinte.year() and dataAtual.month() == dataSeguinte.month());
+    const bool mesmoMes = (dataAtual.year() == dataVenda.year() and dataAtual.month() == dataVenda.month());
+    const bool mesSeguinte = (dataAtual.year() == dataSeguinte.year() and dataAtual.month() == dataSeguinte.month());
 
-  if (not mesmoMes and not mesSeguinte) { throw RuntimeError("Fora do período de cancelamento!"); }
+    if (not mesmoMes and not mesSeguinte) { throw RuntimeError("Fora do período de cancelamento!"); }
 
-  if (mesSeguinte) {
-    const int diaSemana = dataAtual.dayOfWeek();
-    const int dia = dataAtual.day();
+    if (mesSeguinte) {
+      const int diaSemana = dataAtual.dayOfWeek();
+      const int dia = dataAtual.day();
 
-    bool allowed = false;
+      bool allowed = false;
 
-    // aceita qualquer dia da semana
-    if (diaSemana >= 1 and diaSemana <= 5 and dia == 1) { allowed = true; }
-    // sabado aceita segunda 3
-    if (diaSemana == 6 and dia < 3) { allowed = true; }
-    // domingo aceita segunda 2
-    if (diaSemana == 7 and dia < 2) { allowed = true; }
+      // aceita qualquer dia da semana
+      if (diaSemana >= 1 and diaSemana <= 5 and dia == 1) { allowed = true; }
+      // sabado aceita segunda 3
+      if (diaSemana == 6 and dia < 3) { allowed = true; }
+      // domingo aceita segunda 2
+      if (diaSemana == 7 and dia < 2) { allowed = true; }
 
-    if (not allowed) { throw RuntimeError("Não está no primeiro dia útil do mês seguinte!", this); }
+      if (not allowed) { throw RuntimeError("Não está no primeiro dia útil do mês seguinte!", this); }
+    }
   }
 
   // -------------------------------------------------------------------------

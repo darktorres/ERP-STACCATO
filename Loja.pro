@@ -152,6 +152,7 @@ SOURCES += \
     src/cadastrarnfe.cpp \
     src/cadastrocliente.cpp \
     src/cadastrofornecedor.cpp \
+    src/cadastrofuncionario.cpp \
     src/cadastroloja.cpp \
     src/cadastroncm.cpp \
     src/cadastropagamento.cpp \
@@ -291,6 +292,7 @@ HEADERS  += \
     src/cadastrarnfe.h \
     src/cadastrocliente.h \
     src/cadastrofornecedor.h \
+    src/cadastrofuncionario.h \
     src/cadastroloja.h \
     src/cadastroncm.h \
     src/cadastropagamento.h \
@@ -427,6 +429,7 @@ FORMS += \
     ui/cadastroStaccatoOff.ui \
     ui/cadastrocliente.ui \
     ui/cadastrofornecedor.ui \
+    ui/cadastrofuncionario.ui \
     ui/cadastroloja.ui \
     ui/cadastroncm.ui \
     ui/cadastropagamento.ui \

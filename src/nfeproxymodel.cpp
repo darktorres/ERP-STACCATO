@@ -7,7 +7,9 @@
 #include <QSqlRecord>
 
 NFeProxyModel::NFeProxyModel(QSqlQueryModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), dataColumn(model->record().indexOf("dataDistribuicao")), statusColumn(model->record().indexOf("statusDistribuicao")) {
+    : QIdentityProxyModel(parent), dataColumn(model->record().indexOf("dataDistribuicao")), statusColumn(model->record().indexOf("statusDistribuicao")) {
+  setSourceModel(model);
+
   if (dataColumn == -1 or statusColumn == -1) { throw RuntimeException("NFeProxyModel Coluna -1!"); }
 }
 
@@ -39,5 +41,5 @@ QVariant NFeProxyModel::data(const QModelIndex &proxyIndex, const int role) cons
     return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
   }
 
-  return SortFilterProxyModel::data(proxyIndex, role);
+  return QIdentityProxyModel::data(proxyIndex, role);
 }

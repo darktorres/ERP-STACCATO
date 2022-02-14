@@ -285,8 +285,8 @@ void BaseDesignIntf::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void BaseDesignIntf::paint(QPainter *ppainter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-  Q_UNUSED(option);
-  Q_UNUSED(widget);
+  Q_UNUSED(option)
+  Q_UNUSED(widget)
   ppainter->save();
   setupPainter(ppainter);
   drawBorder(ppainter, rect());
@@ -795,8 +795,8 @@ void BaseDesignIntf::setGeometry(QRectF rect) {
 }
 
 void BaseDesignIntf::geometryChangedEvent(QRectF newRect, QRectF oldRect) {
-  Q_UNUSED(oldRect);
-  Q_UNUSED(newRect);
+  Q_UNUSED(oldRect)
+  Q_UNUSED(newRect)
 }
 
 void BaseDesignIntf::beforeDelete() {}
@@ -842,7 +842,7 @@ void BaseDesignIntf::initFlags() {
   }
 }
 
-void BaseDesignIntf::initMode(ItemMode mode) { Q_UNUSED(mode); }
+void BaseDesignIntf::initMode(ItemMode mode) { Q_UNUSED(mode) }
 
 QVariant BaseDesignIntf::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
 
@@ -1072,8 +1072,8 @@ ReportEnginePrivate *BaseDesignIntf::reportEditor() {
 }
 
 void BaseDesignIntf::updateItemSize(DataSourceManager *dataManager, RenderPass pass, int maxHeight) {
-  Q_UNUSED(maxHeight);
-  Q_UNUSED(dataManager);
+  Q_UNUSED(maxHeight)
+  Q_UNUSED(dataManager)
   m_currentPass = pass;
   updateItemAlign();
 }
@@ -1153,30 +1153,30 @@ void BaseDesignIntf::initFromItem(BaseDesignIntf *source) {
 }
 
 bool BaseDesignIntf::canBeSplitted(int height) const {
-  Q_UNUSED(height);
+  Q_UNUSED(height)
   return false;
 }
 
 bool BaseDesignIntf::isEmpty() const { return false; }
 
 BaseDesignIntf *BaseDesignIntf::cloneUpperPart(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return 0;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneBottomPart(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return 0;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneEmpty(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return 0;
 }
 

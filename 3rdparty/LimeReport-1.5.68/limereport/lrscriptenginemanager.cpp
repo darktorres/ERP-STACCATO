@@ -1069,7 +1069,7 @@ QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index
   return 0;
 }
 
-void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName); }
+void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName) }
 
 ReportPages *ScriptEngineContext::reportPages() const { return m_reportPages; }
 

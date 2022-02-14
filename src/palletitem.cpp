@@ -108,7 +108,7 @@ void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 //}
 
 // void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
-//  Q_UNUSED(event);
+//  Q_UNUSED(event)
 
 //  const QStringList text = event->mimeData()->text().split(" - ", Qt::SkipEmptyParts);
 

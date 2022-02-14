@@ -43,15 +43,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (not User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
 
   if (not User::isAdministrativo()) {
-    ui->actionGerenciar_Lojas->setDisabled(true);
-    ui->actionGerenciar_pagamentos->setDisabled(true);
-    ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionCadastrarFornecedor->setDisabled(true);
     ui->actionCadastrarProdutos->setDisabled(true);
-    ui->actionGerenciar_preco_estoque->setDisabled(true);
+    ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_NCMs->setDisabled(true);
-    ui->actionGerenciar_staccatoOff->setDisabled(true);
+    ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionGerenciar_dados_bancarios->setDisabled(true);
+    ui->actionGerenciar_pagamentos->setDisabled(true);
+    ui->actionGerenciar_preco_estoque->setDisabled(true);
+    ui->actionGerenciar_staccatoOff->setDisabled(true);
 
     ui->menuImportar_tabela_fornecedor->setDisabled(true);
     ui->actionImportar_tabela_IBPT->setDisabled(true);

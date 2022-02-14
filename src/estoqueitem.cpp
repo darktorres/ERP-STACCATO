@@ -16,7 +16,7 @@ void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
 // TODO: transferir esse código para WidgetGalpao e apagar essa classe
 void EstoqueItem::startDrag(QPointF pos) {
-  Q_UNUSED(pos);
+  Q_UNUSED(pos)
 
   emit startDragSignal();
 

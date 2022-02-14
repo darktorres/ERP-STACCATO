@@ -1,11 +1,9 @@
 #pragma once
 
-#include "sortfilterproxymodel.h"
-
+#include <QIdentityProxyModel>
 #include <QSqlQueryModel>
 
-// TODO: esse model pode ser ordenado no banco de dados, mudar tipo base para QIdentityProxyModel
-class NFeProxyModel final : public SortFilterProxyModel {
+class NFeProxyModel final : public QIdentityProxyModel {
   Q_OBJECT
 
 public:

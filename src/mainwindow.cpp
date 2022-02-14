@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
+#include "cadastrofuncionario.h"
 #include "cadastroloja.h"
 #include "cadastroncm.h"
 #include "cadastropagamento.h"
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->actionGerenciar_preco_estoque->setDisabled(true);
     ui->actionGerenciar_NCMs->setDisabled(true);
     ui->actionGerenciar_staccatoOff->setDisabled(true);
+    ui->actionGerenciar_dados_bancarios->setDisabled(true);
 
     ui->menuImportar_tabela_fornecedor->setDisabled(true);
     ui->actionImportar_tabela_IBPT->setDisabled(true);
@@ -125,6 +127,7 @@ void MainWindow::setConnections() {
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered, connectionType);
   connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered, connectionType);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered, connectionType);
+  connect(ui->actionGerenciar_dados_bancarios, &QAction::triggered, this, &MainWindow::on_actionGerenciar_dados_bancarios_triggered, connectionType);
   connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered, connectionType);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered, connectionType);
   connect(ui->actionGerenciar_staccatoOff, &QAction::triggered, this, &MainWindow::on_actionGerenciar_staccatoOff_triggered, connectionType);
@@ -310,6 +313,12 @@ void MainWindow::on_actionGerenciar_staccatoOff_triggered() {
   auto *promocao = new CadastroStaccatoOff(this);
   promocao->setAttribute(Qt::WA_DeleteOnClose);
   promocao->show();
+}
+
+void MainWindow::on_actionGerenciar_dados_bancarios_triggered() {
+  auto funcionarios = new CadastroFuncionario(this);
+  funcionarios->setAttribute(Qt::WA_DeleteOnClose);
+  funcionarios->show();
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

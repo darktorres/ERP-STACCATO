@@ -405,6 +405,7 @@ QTabWidget::pane {
     <property name="title">
      <string>Administração</string>
     </property>
+    <addaction name="actionGerenciar_dados_bancarios"/>
     <addaction name="actionCadastrarFornecedor"/>
     <addaction name="actionGerenciar_Lojas"/>
     <addaction name="actionGerenciar_NCMs"/>
@@ -573,6 +574,11 @@ QTabWidget::pane {
   <action name="actionGerenciar_staccatoOff">
    <property name="text">
     <string>Gerenciar STACCATO OFF</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_dados_bancarios">
+   <property name="text">
+    <string>Gerenciar dados bancários</string>
    </property>
   </action>
  </widget>

@@ -17,7 +17,7 @@ namespace LimeReport {
 PDFExporter::PDFExporter(ReportEnginePrivate *parent) : QObject(parent), m_reportEngine(parent) {}
 
 bool PDFExporter::exportPages(ReportPages pages, const QString &fileName, const QMap<QString, QVariant> &params) {
-  Q_UNUSED(params);
+  Q_UNUSED(params)
   if (!fileName.isEmpty()) {
     QPrinter printer;
     printer.setOutputFileName(fileName);

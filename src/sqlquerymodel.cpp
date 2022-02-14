@@ -47,7 +47,7 @@ void SqlQueryModel::select(const QString &query) {
 }
 
 void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
-  Q_UNUSED(db);
+  Q_UNUSED(db)
 
   base_query = query;
   last_query = query;

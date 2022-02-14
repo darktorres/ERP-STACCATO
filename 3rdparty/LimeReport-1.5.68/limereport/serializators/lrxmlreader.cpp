@@ -50,7 +50,7 @@ XMLReader::XMLReader() : m_doc(new QDomDocument) {}
 XMLReader::XMLReader(QSharedPointer<QDomDocument> doc) : m_doc(doc) {}
 
 bool XMLReader::prepareReader(QDomDocument *doc) {
-  Q_UNUSED(doc);
+  Q_UNUSED(doc)
   m_error = QLatin1String("Context not initialized");
   return false;
 }

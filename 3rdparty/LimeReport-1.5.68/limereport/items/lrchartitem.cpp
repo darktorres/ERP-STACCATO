@@ -140,7 +140,7 @@ BaseDesignIntf *ChartItem::createSameTypeItem(QObject *owner, QGraphicsItem *par
 }
 
 QObject *ChartItem::createElement(const QString &collectionName, const QString &elementType) {
-  Q_UNUSED(elementType);
+  Q_UNUSED(elementType)
   if (collectionName.compare("series") == 0) {
     SeriesItem *seriesItem = new SeriesItem();
     m_series.append(seriesItem);

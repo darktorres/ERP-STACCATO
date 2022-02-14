@@ -368,8 +368,8 @@ template <typename T> BaseDesignIntf *PageDesignIntf::internalAddBand(T bandType
 }
 
 void PageDesignIntf::bandGeometryChanged(QObject * /*object*/, QRectF newGeometry, QRectF oldGeometry) {
-  Q_UNUSED(newGeometry);
-  Q_UNUSED(oldGeometry);
+  Q_UNUSED(newGeometry)
+  Q_UNUSED(oldGeometry)
   pageItem()->relocateBands();
 }
 

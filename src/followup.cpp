@@ -44,6 +44,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   verifyFields();
 
   SqlQuery query;
+
   if (tipo == Tipo::Orcamento) {
     query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idOrcamentoBase, idLoja, idUsuario, semaforo, observacao, dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idOrcamentoBase, "
                   ":idLoja, :idUsuario, :semaforo, :observacao, :dataFollowup, :dataProxFollowup)");
@@ -52,7 +53,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
     query.bindValue(":semaforo", ui->radioButtonQuente->isChecked() ? 1 : ui->radioButtonMorno->isChecked() ? 2 : ui->radioButtonFrio->isChecked() ? 3 : 0);
-    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":observacao", ui->lineEditObservacao->text());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
     query.bindValue(":dataProxFollowup", ui->dateProxFollowup->dateTime());
   }
@@ -64,7 +65,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idVendaBase", id.left(11));
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":observacao", ui->lineEditObservacao->text());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -73,7 +74,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":ordemCompra", id);
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":observacao", ui->lineEditObservacao->text());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -82,7 +83,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idEstoque", id);
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
+    query.bindValue(":observacao", ui->lineEditObservacao->text());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -97,7 +98,7 @@ void FollowUp::verifyFields() {
     throw RuntimeError("Deve selecionar uma temperatura!", this);
   }
 
-  if (ui->plainTextEdit->toPlainText().isEmpty()) { throw RuntimeError("Deve escrever uma observação!", this); }
+  if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Deve escrever uma observação!", this); }
 }
 
 void FollowUp::setupTables() {
@@ -146,9 +147,12 @@ void FollowUp::setupTables() {
     const QString motivoCancelamento = modelOrcamento.data(0, "motivoCancelamento").toString();
     const QString observacaoCancelamento = modelOrcamento.data(0, "observacaoCancelamento").toString();
 
-    ui->plainTextEditBaixa->setPlainText(motivoCancelamento + "\n\n" + observacaoCancelamento);
+    ui->lineEditBaixa->setText(motivoCancelamento + "\n\n" + observacaoCancelamento);
 
-    if (motivoCancelamento.isEmpty() and observacaoCancelamento.isEmpty()) { ui->plainTextEditBaixa->hide(); }
+    if (motivoCancelamento.isEmpty() and observacaoCancelamento.isEmpty()) {
+      ui->labelBaixa->hide();
+      ui->lineEditBaixa->hide();
+    }
   }
 }
 

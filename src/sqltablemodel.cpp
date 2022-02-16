@@ -134,7 +134,7 @@ void SqlTableModel::setTable(const QString &tableName) {
 int SqlTableModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = QSqlTableModel::fieldIndex(fieldName);
 
-  if (field == -1 and not silent) { throw RuntimeException(fieldName + " não encontrado na tabela " + tableName() + "!"); }
+  if (field == -1 and not silent) { throw RuntimeException("\"" + fieldName + "\" não encontrado na tabela " + tableName() + "!"); }
 
   return field;
 }

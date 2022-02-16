@@ -56,7 +56,7 @@ void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
 int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = record().indexOf(fieldName);
 
-  if (field == -1 and not silent) { throw RuntimeException(fieldName + " não encontrado na tabela!"); }
+  if (field == -1 and not silent) { throw RuntimeException("\"" + fieldName + "\" não encontrado na tabela!"); }
 
   return field;
 }

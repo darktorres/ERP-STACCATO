@@ -36,13 +36,22 @@ void WidgetCompraFaturar::setupTables() {
 
   modelViewFaturamento.setTable("view_faturamento");
 
-  modelViewFaturamento.setSort("OC");
+  modelViewFaturamento.setSort("ordemCompra");
 
+  modelViewFaturamento.setHeaderData("ordemCompra", "OC");
+  modelViewFaturamento.setHeaderData("fornecedor", "Fornecedor");
+  modelViewFaturamento.setHeaderData("data", "Data Venda");
+  modelViewFaturamento.setHeaderData("produtos", "Produtos");
+  modelViewFaturamento.setHeaderData("total", "Total");
   modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
+  modelViewFaturamento.setHeaderData("vendedor", "Vendedor");
+  modelViewFaturamento.setHeaderData("idVenda", "Venda");
+  modelViewFaturamento.setHeaderData("dataFollowup", "Data Followup");
+  modelViewFaturamento.setHeaderData("observacao", "Observação");
 
   ui->table->setModel(&modelViewFaturamento);
 
-  ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("representacao");
@@ -111,7 +120,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   for (const auto &index : list) {
     idsCompra << modelViewFaturamento.data(index.row(), "idCompra").toString();
     fornecedores << modelViewFaturamento.data(index.row(), "fornecedor").toString();
-    idVendas << modelViewFaturamento.data(index.row(), "Código").toString();
+    idVendas << modelViewFaturamento.data(index.row(), "idVenda").toString();
   }
 
   const int size = fornecedores.size();
@@ -172,7 +181,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   auto *cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
-  cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "OC").toString());
+  cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "ordemCompra").toString());
 }
 
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
@@ -220,7 +229,7 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString ordemCompra = modelViewFaturamento.data(selection.first().row(), "OC").toString();
+  const QString ordemCompra = modelViewFaturamento.data(selection.first().row(), "ordemCompra").toString();
 
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

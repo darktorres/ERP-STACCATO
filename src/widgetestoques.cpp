@@ -155,16 +155,14 @@ void WidgetEstoques::gerarExcel(const QString &arquivoModelo, const QString &fil
 
   xlsx.selectSheet("Sheet1");
 
-  char column = 'A';
+  const int columnCount = (User::isAdministrativo()) ? modelContabil.columnCount() : modelContabil.fieldIndex("codComercial") + 1;
 
-  for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelContabil.headerData(col, Qt::Horizontal).toString()); }
+  // write header
+  for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString(cell) + QString::number(1), modelContabil.headerData(column, Qt::Horizontal).toString()); }
 
-  column = 'A';
-
-  for (int row = 0; row < modelContabil.rowCount(); ++row) {
-    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(row, col)); }
-
-    column = 'A';
+  // write data
+  for (int row = 0, rowCount = modelContabil.rowCount(); row < rowCount; ++row) {
+    for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString(cell) + QString::number(row + 2), modelContabil.data(row, column)); }
   }
 
   if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!"); }

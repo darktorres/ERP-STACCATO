@@ -139,16 +139,20 @@ void MainWindow::setConnections() {
 }
 
 void MainWindow::resetTables() {
-  ui->widgetOrcamento->resetTables();
-  ui->widgetVenda->resetTables();
-  ui->widgetCompra->resetTables();
-  ui->widgetLogistica->resetTables();
-  ui->widgetNFe->resetTables();
-  ui->widgetEstoque->resetTables();
-  ui->widgetFinanceiro->resetTables();
-  ui->widgetRelatorio->resetTables();
-  ui->widgetGraficos->resetTables();
-  ui->widgetConsistencia->resetTables();
+  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+
+  if (currentTab == "Orçamentos") { ui->widgetOrcamento->resetTables(); }
+  if (currentTab == "Vendas") { ui->widgetVenda->resetTables(); }
+  if (currentTab == "Compras") { ui->widgetCompra->resetTables(); }
+  if (currentTab == "Logística") { ui->widgetLogistica->resetTables(); }
+  if (currentTab == "NF-e") { ui->widgetNFe->resetTables(); }
+  if (currentTab == "Estoque") { ui->widgetEstoque->resetTables(); }
+  if (currentTab == "Galpão") { ui->widgetGalpao->resetTables(); }
+  if (currentTab == "Financeiro") { ui->widgetFinanceiro->resetTables(); }
+  if (currentTab == "Relatórios") { ui->widgetRelatorio->resetTables(); }
+  if (currentTab == "Gráfico") { ui->widgetGraficos->resetTables(); }
+  //    if (currentTab == "RH") { ui->widgetRh->resetTables(); }
+  if (currentTab == "Consistência") { ui->widgetConsistencia->resetTables(); }
 
   updateTables();
 }

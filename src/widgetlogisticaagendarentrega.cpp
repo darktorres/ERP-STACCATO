@@ -324,10 +324,16 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_selectionChanged() {
   filtroProdutos();
 
   const QString statusFinanceiro = modelVendas.data(index.row(), "statusFinanceiro").toString();
+  const bool naoLiberado = (statusFinanceiro == "PENDENTE");
 
-  ui->lineEditAviso->setText((statusFinanceiro != "LIBERADO") ? "Financeiro não liberou!" : "");
+  ui->pushButtonAdicionarParcial->setDisabled(naoLiberado);
+  ui->pushButtonAdicionarProduto->setDisabled(naoLiberado);
+  ui->pushButtonAgendarCarga->setDisabled(naoLiberado);
+  ui->pushButtonGerarNFeFutura->setDisabled(naoLiberado);
+  ui->pushButtonImportarNFe->setDisabled(naoLiberado);
+  ui->pushButtonRemoverProduto->setDisabled(naoLiberado);
 
-  if (statusFinanceiro != "LIBERADO") { qApp->enqueueWarning("Financeiro não liberou!"); }
+  if (statusFinanceiro == "CONFERIDO") { qApp->enqueueWarning("Financeiro não liberou!"); }
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {

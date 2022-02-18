@@ -30,15 +30,15 @@ void WidgetCompraConfirmar::setupTables() {
 
   //---------------------------------------------------------------------------------------
 
-  modelViewCompras.setTable("view_compras");
+  modelCompras.setTable("view_compras");
 
-  modelViewCompras.setFilter("");
+  modelCompras.setFilter("");
 
-  modelViewCompras.setSort("OC");
+  modelCompras.setSort("OC");
 
-  modelViewCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
+  modelCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
 
-  ui->table->setModel(&modelViewCompras);
+  ui->table->setModel(&modelCompras);
 
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
 
@@ -64,7 +64,7 @@ void WidgetCompraConfirmar::updateTables() {
 
   modelResumo.select();
 
-  modelViewCompras.select();
+  modelCompras.select();
 }
 
 void WidgetCompraConfirmar::resetTables() { setupTables(); }
@@ -72,14 +72,14 @@ void WidgetCompraConfirmar::resetTables() { setupTables(); }
 void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   // TODO: ao preencher na tabela de compras colocar o grupo como 'produto/venda'
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
-  const QString ordemCompra = modelViewCompras.data(row, "OC").toString();
-  const QString idVenda = modelViewCompras.data(row, "Venda").toString();
+  const QString ordemCompra = modelCompras.data(row, "OC").toString();
+  const QString idVenda = modelCompras.data(row, "Venda").toString();
 
   InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
   inputDlg.setFilter(ordemCompra);
@@ -123,13 +123,13 @@ void WidgetCompraConfirmar::confirmarCompra(const QString &ordemCompra, const QD
 }
 
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   auto *cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
-  cancelaProduto->setFilter(modelViewCompras.data(list.first().row(), "OC").toString());
+  cancelaProduto->setFilter(modelCompras.data(selection.first().row(), "OC").toString());
 }
 
 void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
@@ -137,7 +137,7 @@ void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString ordemCompra = modelViewCompras.data(selection.first().row(), "OC").toString();
+  const QString ordemCompra = modelCompras.data(selection.first().row(), "OC").toString();
 
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -149,7 +149,7 @@ void WidgetCompraConfirmar::on_tableResumo_clicked(const QModelIndex &index) {
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewCompras.setFilter(filtro);
+  modelCompras.setFilter(filtro);
 }
 
 void WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked() {
@@ -159,7 +159,7 @@ void WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked() {
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewCompras.setFilter(filtro);
+  modelCompras.setFilter(filtro);
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

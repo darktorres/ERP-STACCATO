@@ -31,9 +31,9 @@ WidgetCompraGerar::~WidgetCompraGerar() { delete ui; }
 void WidgetCompraGerar::calcularPreco() {
   double preco = 0;
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (const auto &index : list) { preco += modelProdutos.data(index.row(), "preco").toDouble(); }
+  for (const auto &index : selection) { preco += modelProdutos.data(index.row(), "preco").toDouble(); }
 
   ui->doubleSpinBox->setValue(preco);
 }
@@ -193,38 +193,38 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   if (folderKey.isEmpty()) { throw RuntimeError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //
 
-  const bool isRepresentacao = verificaRepresentacao(list);
+  const bool isRepresentacao = verificaRepresentacao(selection);
 
   // oc
 
   const int ordemCompra = getOrdemCompra();
 
-  const auto [dataCompra, dataPrevista] = getDates(list);
+  const auto [dataCompra, dataPrevista] = getDates(selection);
 
   // email --------------------------------
 
   // reload data after getDates
   modelProdutos.select();
 
-  const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
+  const QString razaoSocial = modelProdutos.data(selection.first().row(), "fornecedor").toString();
 
-  const QString anexo = gerarExcel(list, ordemCompra, isRepresentacao);
+  const QString anexo = gerarExcel(selection, ordemCompra, isRepresentacao);
 
   // -------------------------------------------------------------------------
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
   qApp->startTransaction("WidgetCompraGerar::on_pushButtonGerarCompra");
 
-  gerarCompra(list, dataCompra, dataPrevista, ordemCompra);
+  gerarCompra(selection, dataCompra, dataPrevista, ordemCompra);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -484,9 +484,9 @@ void WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 }
 
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Cancelar");
@@ -496,11 +496,11 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
   qApp->startTransaction("WidgetCompraGerar::on_pushButtonCancelarCompra");
 
-  cancelar(list);
+  cancelar(selection);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -512,11 +512,11 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 }
 
 void WidgetCompraGerar::on_pushButtonFollowup_clicked() {
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProdutos.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

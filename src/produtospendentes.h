@@ -22,8 +22,8 @@ private:
   // attributes
   SqlQueryModel modelEstoque;
   SqlTableModel modelCompra;
+  SqlTableModel modelPendentes;
   SqlTableModel modelProdutos;
-  SqlTableModel modelViewProdutos;
   Ui::ProdutosPendentes *ui;
   // methods
   auto atualizarVenda(const int rowProduto) -> void;

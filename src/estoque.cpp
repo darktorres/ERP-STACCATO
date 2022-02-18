@@ -107,27 +107,27 @@ void Estoque::setupTables() {
 
   //--------------------------------------------------------------------
 
-  modelViewConsumo.setTable("view_estoque_consumo");
+  modelConsumo.setTable("view_estoque_consumo");
 
-  modelViewConsumo.setFilter("idEstoque = " + idEstoque);
+  modelConsumo.setFilter("idEstoque = " + idEstoque);
 
-  modelViewConsumo.select();
+  modelConsumo.select();
 
-  modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
-  modelViewConsumo.setHeaderData("status", "Status Consumo");
-  modelViewConsumo.setHeaderData("bloco", "Bloco");
-  modelViewConsumo.setHeaderData("fornecedor", "Fornecedor");
-  modelViewConsumo.setHeaderData("descricao", "Produto");
-  modelViewConsumo.setHeaderData("quant", "Quant.");
-  modelViewConsumo.setHeaderData("un", "Un.");
-  modelViewConsumo.setHeaderData("caixas", "Caixas");
-  modelViewConsumo.setHeaderData("codComercial", "Cód. Com.");
-  modelViewConsumo.setHeaderData("dataRealEnt", "Entrega");
-  modelViewConsumo.setHeaderData("created", "Criado");
+  modelConsumo.setHeaderData("statusProduto", "Status Pedido");
+  modelConsumo.setHeaderData("status", "Status Consumo");
+  modelConsumo.setHeaderData("bloco", "Bloco");
+  modelConsumo.setHeaderData("fornecedor", "Fornecedor");
+  modelConsumo.setHeaderData("descricao", "Produto");
+  modelConsumo.setHeaderData("quant", "Quant.");
+  modelConsumo.setHeaderData("un", "Un.");
+  modelConsumo.setHeaderData("caixas", "Caixas");
+  modelConsumo.setHeaderData("codComercial", "Cód. Com.");
+  modelConsumo.setHeaderData("dataRealEnt", "Entrega");
+  modelConsumo.setHeaderData("created", "Criado");
 
-  modelViewConsumo.proxyModel = new EstoqueProxyModel(&modelViewConsumo, this);
+  modelConsumo.proxyModel = new EstoqueProxyModel(&modelConsumo, this);
 
-  ui->tableConsumo->setModel(&modelViewConsumo);
+  ui->tableConsumo->setModel(&modelConsumo);
 
   ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 

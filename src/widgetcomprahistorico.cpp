@@ -34,7 +34,7 @@ void WidgetCompraHistorico::updateTables() {
     isSet = true;
   }
 
-  modelViewComprasFinanceiro.select();
+  modelCompras.select();
 }
 
 void WidgetCompraHistorico::resetTables() {
@@ -43,9 +43,9 @@ void WidgetCompraHistorico::resetTables() {
 }
 
 void WidgetCompraHistorico::setupTables() {
-  modelViewComprasFinanceiro.setTable("view_compras_financeiro");
+  modelCompras.setTable("view_compras_financeiro");
 
-  ui->tablePedidos->setModel(&modelViewComprasFinanceiro);
+  ui->tablePedidos->setModel(&modelCompras);
 
   ui->tablePedidos->setItemDelegateForColumn("Total", new ReaisDelegate(this));
 
@@ -175,7 +175,7 @@ void WidgetCompraHistorico::on_tablePedidos_selectionChanged() {
 
   if (selection.isEmpty()) { return; }
 
-  const QString ordemCompra = modelViewComprasFinanceiro.data(selection.first().row(), "OC").toString();
+  const QString ordemCompra = modelCompras.data(selection.first().row(), "OC").toString();
 
   modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
@@ -191,7 +191,7 @@ void WidgetCompraHistorico::on_tablePedidos_selectionChanged() {
 
   modelNFe.select();
 
-  const QString idCompra = modelViewComprasFinanceiro.data(selection.first().row(), "Compra").toString();
+  const QString idCompra = modelCompras.data(selection.first().row(), "Compra").toString();
 
   modelFinanceiro.setFilter("idCompra IN (" + idCompra + ")");
 
@@ -204,16 +204,16 @@ void WidgetCompraHistorico::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = text.isEmpty() ? "0" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
-  modelViewComprasFinanceiro.setFilter(filtroBusca);
+  modelCompras.setFilter(filtroBusca);
 }
 
 void WidgetCompraHistorico::on_pushButtonDanfe_clicked() {
-  const auto list = ui->tableNFe->selectionModel()->selectedRows();
+  const auto selection = ui->tableNFe->selectionModel()->selectedRows();
   const auto rowCount = ui->tableNFe->rowCount();
 
-  if (list.isEmpty() and rowCount != 1) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty() and rowCount != 1) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
-  const int row = (list.isEmpty()) ? 0 : list.first().row();
+  const int row = (selection.isEmpty()) ? 0 : selection.first().row();
   const int idNFe = modelNFe.data(row, "idNFe").toInt();
 
   ACBrLib::gerarDanfe(idNFe);
@@ -224,7 +224,7 @@ void WidgetCompraHistorico::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString ordemCompra = modelViewComprasFinanceiro.data(selection.first().row(), "OC").toString();
+  const QString ordemCompra = modelCompras.data(selection.first().row(), "OC").toString();
 
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

@@ -151,9 +151,9 @@ void WidgetNfeSaida::montaFiltro() {
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   // TODO: como no cancelamento o acbr nao atualiza o xml, fazer a consulta para atualizar o xml como cancelado antes de enviar para a contabilidade?
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -190,7 +190,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
 
@@ -300,14 +300,14 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   // TODO: 5zipar arquivos exportados com nome descrevendo mes/notas/etc
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui

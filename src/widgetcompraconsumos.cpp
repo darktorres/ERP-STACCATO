@@ -78,13 +78,13 @@ void WidgetCompraConsumos::on_tablePedido_selectionChanged() {
 }
 
 void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
-  const auto list = ui->tableProduto->selectionModel()->selectedRows();
+  const auto selection = ui->tableProduto->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //------------------------------------
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     const int row = index.row();
 
     const QString status = modelProduto.data(row, "status").toString();
@@ -106,11 +106,11 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   //------------------------------------
 
-  const QString idVenda = modelProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProduto.data(selection.first().row(), "idVenda").toString();
 
   qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo");
 
-  desfazerConsumo(list);
+  desfazerConsumo(selection);
 
   Sql::updateVendaStatus(idVenda);
 

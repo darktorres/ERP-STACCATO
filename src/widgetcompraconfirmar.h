@@ -21,7 +21,7 @@ public:
 private:
   // attributes
   bool isSet = false;
-  SqlTableModel modelViewCompras;
+  SqlTableModel modelCompras;
   SqlTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods

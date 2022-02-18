@@ -165,13 +165,13 @@ void WidgetNfeEntrada::montaFiltro() {
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
+  if (selection.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   //--------------------------------------------------------------
 
@@ -290,14 +290,14 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   // TODO: 5zipar arquivos exportados com nome descrevendo mes/notas/etc
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui

@@ -981,16 +981,16 @@ void CadastrarNFe::on_tableItens_selectionChanged() {
 }
 
 void CadastrarNFe::calculaSt() {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
   unsetConnections();
 
   try {
     ui->doubleSpinBoxICMSvicmsst->setValue(ui->doubleSpinBoxICMSvbcst->value() * ui->doubleSpinBoxICMSpicmsst->value() / 100);
 
-    const int row = list.first().row();
+    const int row = selection.first().row();
 
     modelProduto.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value());
     modelProduto.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value());
@@ -1012,16 +1012,16 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged() { calculaSt(); }
 void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged() { calculaSt(); }
 
 void CadastrarNFe::calculaIcms() {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
   unsetConnections();
 
   try {
     ui->doubleSpinBoxICMSvicms->setValue(ui->doubleSpinBoxICMSvbc->value() * ui->doubleSpinBoxICMSpicms->value() / 100);
 
-    const int row = list.first().row();
+    const int row = selection.first().row();
 
     modelProduto.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value());
     modelProduto.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value());
@@ -1043,16 +1043,16 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged() { calculaIcms(); }
 void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged() { calculaIcms(); }
 
 void CadastrarNFe::calculaPis() {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
   unsetConnections();
 
   try {
     ui->doubleSpinBoxPISvpis->setValue(ui->doubleSpinBoxPISvbc->value() * ui->doubleSpinBoxPISppis->value() / 100);
 
-    const int row = list.first().row();
+    const int row = selection.first().row();
 
     modelProduto.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value());
     modelProduto.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value());
@@ -1074,16 +1074,16 @@ void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged() { calculaPis(); }
 void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged() { calculaPis(); }
 
 void CadastrarNFe::calculaCofins() {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
   unsetConnections();
 
   try {
     ui->doubleSpinBoxCOFINSvbc->setValue(ui->doubleSpinBoxCOFINSvcofins->value() * 100 / ui->doubleSpinBoxCOFINSpcofins->value());
 
-    const int row = list.first().row();
+    const int row = selection.first().row();
 
     modelProduto.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value());
     modelProduto.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value());
@@ -1189,11 +1189,11 @@ void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
 }
 
 void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QString &text) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   const bool tribNormal = (ui->comboBoxRegime->currentText() == "Tributação Normal");
 
@@ -1269,11 +1269,11 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
 void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {
   if (index == 0) { return; }
 
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "orig", index - 1);
+  modelProduto.setData(selection.first().row(), "orig", index - 1);
 }
 
 void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
@@ -1281,11 +1281,11 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
 
   if (index == 0) { return; }
 
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   unsetConnections();
 
@@ -1312,35 +1312,35 @@ void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(const int index) {
 
   if (index == 0) { return; }
 
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "modBCST", index - 1);
+  modelProduto.setData(selection.first().row(), "modBCST", index - 1);
 }
 
 void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "cstIPI", text.left(2));
+  modelProduto.setData(selection.first().row(), "cstIPI", text.left(2));
 }
 
 void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "cstPIS", text.left(2));
+  modelProduto.setData(selection.first().row(), "cstPIS", text.left(2));
 }
 
 void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "cstCOFINS", text.left(2));
+  modelProduto.setData(selection.first().row(), "cstCOFINS", text.left(2));
 }
 
 void CadastrarNFe::on_itemBoxVeiculo_textChanged() {
@@ -1481,11 +1481,11 @@ void CadastrarNFe::buscarAliquotas() {
 }
 
 void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return; }
+  if (selection.isEmpty()) { return; }
 
-  modelProduto.setData(list.first().row(), "cfop", text.left(4));
+  modelProduto.setData(selection.first().row(), "cfop", text.left(4));
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {

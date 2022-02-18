@@ -23,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   SqlTableModel modelFornecedor;
-  SqlTableModel modelViewRecebimento;
+  SqlTableModel modelRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> void;

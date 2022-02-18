@@ -34,33 +34,33 @@ void WidgetLogisticaRepresentacao::updateTables() {
     isSet = true;
   }
 
-  modelViewLogisticaRepresentacao.select();
+  modelRepresentacao.select();
   modelFornecedor.select();
 }
 
 void WidgetLogisticaRepresentacao::resetTables() { setupTables(); }
 
 void WidgetLogisticaRepresentacao::setupTables() {
-  modelViewLogisticaRepresentacao.setTable("view_logistica_representacao");
+  modelRepresentacao.setTable("view_logistica_representacao");
 
-  modelViewLogisticaRepresentacao.setFilter("");
+  modelRepresentacao.setFilter("");
 
-  modelViewLogisticaRepresentacao.setHeaderData("idVenda", "Venda");
-  modelViewLogisticaRepresentacao.setHeaderData("cliente", "Cliente");
-  modelViewLogisticaRepresentacao.setHeaderData("descricao", "Produto");
-  modelViewLogisticaRepresentacao.setHeaderData("codComercial", "Cód. Com.");
-  modelViewLogisticaRepresentacao.setHeaderData("quant", "Quant.");
-  modelViewLogisticaRepresentacao.setHeaderData("un", "Un.");
-  modelViewLogisticaRepresentacao.setHeaderData("caixas", "Cx.");
-  modelViewLogisticaRepresentacao.setHeaderData("kgcx", "Kg./Cx.");
-  modelViewLogisticaRepresentacao.setHeaderData("ordemCompra", "OC");
-  modelViewLogisticaRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelRepresentacao.setHeaderData("idVenda", "Venda");
+  modelRepresentacao.setHeaderData("cliente", "Cliente");
+  modelRepresentacao.setHeaderData("descricao", "Produto");
+  modelRepresentacao.setHeaderData("codComercial", "Cód. Com.");
+  modelRepresentacao.setHeaderData("quant", "Quant.");
+  modelRepresentacao.setHeaderData("un", "Un.");
+  modelRepresentacao.setHeaderData("caixas", "Cx.");
+  modelRepresentacao.setHeaderData("kgcx", "Kg./Cx.");
+  modelRepresentacao.setHeaderData("ordemCompra", "OC");
+  modelRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelViewLogisticaRepresentacao.setSort("prazoEntrega");
+  modelRepresentacao.setSort("prazoEntrega");
 
-  modelViewLogisticaRepresentacao.proxyModel = new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this);
+  modelRepresentacao.proxyModel = new EstoquePrazoProxyModel(&modelRepresentacao, this);
 
-  ui->table->setModel(&modelViewLogisticaRepresentacao);
+  ui->table->setModel(&modelRepresentacao);
 
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("fornecedor");
@@ -79,13 +79,13 @@ void WidgetLogisticaRepresentacao::setupTables() {
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelViewLogisticaRepresentacao.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelRepresentacao.data(index.row(), "idVenda").toString(); }
 
   InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao, this);
 
@@ -93,7 +93,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   qApp->startTransaction("WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue");
 
-  processRows(list, input.getDate(), input.getRecebeu());
+  processRows(selection, input.getDate(), input.getRecebeu());
 
   Sql::updateVendaStatus(idVendas);
 
@@ -114,12 +114,12 @@ void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 
   for (const auto &index : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
-    query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
+    query1.bindValue(":idVendaProduto2", modelRepresentacao.data(index.row(), "idVendaProduto2"));
 
     if (not query1.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
-    query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
+    query2.bindValue(":idVendaProduto2", modelRepresentacao.data(index.row(), "idVendaProduto2"));
     query2.bindValue(":recebeu", recebeu);
 
     if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
@@ -129,15 +129,15 @@ void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged() {
   const QString text = ui->lineEditBusca->text();
 
-  modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
+  modelRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelViewLogisticaRepresentacao.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelRepresentacao.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -147,11 +147,11 @@ void WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked() {
 void WidgetLogisticaRepresentacao::on_table_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString header = modelViewLogisticaRepresentacao.headerData(index.column(), Qt::Horizontal).toString();
+  const QString header = modelRepresentacao.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Venda") { return qApp->abrirVenda(modelViewLogisticaRepresentacao.data(index.row(), "idVenda")); }
+  if (header == "Venda") { return qApp->abrirVenda(modelRepresentacao.data(index.row(), "idVenda")); }
 
-  if (header == "OC") { return qApp->abrirCompra(modelViewLogisticaRepresentacao.data(index.row(), "ordemCompra")); }
+  if (header == "OC") { return qApp->abrirCompra(modelRepresentacao.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonLimparFiltro_clicked() {
@@ -168,7 +168,7 @@ void WidgetLogisticaRepresentacao::on_tableForn_selectionChanged() {
 
   const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewLogisticaRepresentacao.setFilter(filtro);
+  modelRepresentacao.setFilter(filtro);
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

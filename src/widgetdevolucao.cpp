@@ -93,13 +93,13 @@ void WidgetDevolucao::setupTables() {
 void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
   // TODO: não deixar misturar idVendas diferentes na mesma nfe?
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // -------------------------------------------------------------------------
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   const int idNFeSaida = model.data(row, "idNFeSaida").toInt();
 
@@ -115,7 +115,7 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   QStringList nfes;
 
-  for (const auto &index : list) { nfes << model.data(index.row(), "idNFeSaida").toString(); }
+  for (const auto &index : selection) { nfes << model.data(index.row(), "idNFeSaida").toString(); }
 
   nfes.removeDuplicates();
 
@@ -127,7 +127,7 @@ void WidgetDevolucao::on_pushButtonGerarNFe_clicked() {
 
   QStringList lista;
 
-  for (const auto &index : list) { lista << model.data(index.row(), "idVendaProduto2").toString(); }
+  for (const auto &index : selection) { lista << model.data(index.row(), "idVendaProduto2").toString(); }
 
   lista.removeDuplicates();
 

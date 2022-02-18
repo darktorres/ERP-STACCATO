@@ -262,13 +262,13 @@ void CadastroPagamento::atualizarPagamento() {
 }
 
 void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
-  const auto list = ui->tablePagamentos->selectionModel()->selectedRows();
+  const auto selection = ui->tablePagamentos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //--------------------------------------
 
-  for (const auto &index : list) { modelPagamentos.removeRow(index.row()); }
+  for (const auto &index : selection) { modelPagamentos.removeRow(index.row()); }
 
   modelPagamentos.submitAll();
 
@@ -281,16 +281,16 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 }
 
 void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
-  const auto list = ui->tableAssocia1->selectionModel()->selectedRows();
+  const auto selection = ui->tableAssocia1->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
   SqlQuery query;
   query.prepare("INSERT INTO loja_has_forma_pagamento (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
@@ -305,16 +305,16 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
 }
 
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
-  const auto list = ui->tableAssocia2->selectionModel()->selectedRows();
+  const auto selection = ui->tableAssocia2->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
   SqlQuery query;
   query.prepare("DELETE FROM loja_has_forma_pagamento WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 

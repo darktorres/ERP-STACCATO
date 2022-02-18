@@ -524,20 +524,20 @@ void WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
   bool semEstoque = false;
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     const int row = index.row();
 
-    const auto listMatch = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
+    const auto match = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
+    if (not match.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
     if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
 
@@ -560,7 +560,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
   // -------------------------------------------------------------------------
 
-  adicionarProduto(list);
+  adicionarProduto(selection);
 
   ui->tableProdutos->clearSelection();
 }
@@ -622,17 +622,17 @@ void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate date
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (list.size() > 1) { throw RuntimeError("Deve selecionar apenas um item para agendamento parcial!", this); }
+  if (selection.size() > 1) { throw RuntimeError("Deve selecionar apenas um item para agendamento parcial!", this); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
-  const auto list2 = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
+  const auto match = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
 
-  if (not list2.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
+  if (not match.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
   // TODO: calcular o peso parcial e não o total para comparar
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
@@ -888,9 +888,9 @@ void WidgetLogisticaAgendarEntrega::dividirCompra(const int row, const double ca
 void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
   // get idVenda from view_entrega_pendente/modelVendas and set 'novoPrazo'
 
-  const auto list = ui->tableVendas->selectionModel()->selectedRows();
+  const auto selection = ui->tableVendas->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::ReagendarPedido, this);
 
@@ -898,7 +898,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido");
 
-  reagendar(list, input.getNextDate(), input.getObservacao());
+  reagendar(selection, input.getNextDate(), input.getObservacao());
 
   qApp->endTransaction();
 
@@ -977,22 +977,22 @@ void WidgetLogisticaAgendarEntrega::on_tableTranspAtual_doubleClicked(const QMod
 void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   if (not ui->tableProdutos->model()) { return; }
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     if (not modelProdutos.data(index.row(), "idNFeSaida").isNull()) { throw RuntimeError("Produto já possui NF-e!", this); }
     if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui NF-e futura!", this); }
   }
 
-  const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProdutos.data(selection.first().row(), "idVenda").toString();
 
   if (idVenda.isEmpty()) { throw RuntimeException("Erro buscando 'Venda'!", this); }
 
   QStringList lista;
 
-  for (const auto &index : list) { lista << modelProdutos.data(index.row(), "idVendaProduto2").toString(); }
+  for (const auto &index : selection) { lista << modelProdutos.data(index.row(), "idVendaProduto2").toString(); }
 
   lista.removeDuplicates();
 
@@ -1064,11 +1064,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked() {
-  const auto list = ui->tableVendas->selectionModel()->selectedRows();
+  const auto selection = ui->tableVendas->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelVendas.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelVendas.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

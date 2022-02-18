@@ -305,13 +305,13 @@ void WidgetGalpao::on_tableTranspAgend_selectionChanged() {
     if (auto *pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlagHighlight(false); }
   }
 
-  const auto list = ui->tableTranspAgend->selectionModel()->selectedRows();
+  const auto selection = ui->tableTranspAgend->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return scene->update(); }
+  if (selection.isEmpty()) { return scene->update(); }
 
   QStringList ids;
 
-  for (const auto &index : list) { ids << modelTranspAgend.data(index.row(), "idVendaProduto2").toString(); }
+  for (const auto &index : selection) { ids << modelTranspAgend.data(index.row(), "idVendaProduto2").toString(); }
 
   SqlQuery query;
 

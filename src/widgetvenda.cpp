@@ -19,14 +19,14 @@ WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVe
 WidgetVenda::~WidgetVenda() { delete ui; }
 
 void WidgetVenda::setupTables() {
-  modelViewVenda.setTable("view_venda");
+  modelVenda.setTable("view_venda");
 
-  modelViewVenda.setHeaderData("statusFinanceiro", "Financeiro");
-  modelViewVenda.setHeaderData("dataFinanceiro", "Data Financ.");
+  modelVenda.setHeaderData("statusFinanceiro", "Financeiro");
+  modelVenda.setHeaderData("dataFinanceiro", "Data Financ.");
 
-  modelViewVenda.proxyModel = new VendaProxyModel(&modelViewVenda, this);
+  modelVenda.proxyModel = new VendaProxyModel(&modelVenda, this);
 
-  ui->table->setModel(&modelViewVenda);
+  ui->table->setModel(&modelVenda);
 
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
@@ -132,7 +132,7 @@ void WidgetVenda::montaFiltro() {
 
   // TODO: sanitizar SQL aqui em vez de fazer picado?
 
-  modelViewVenda.setFilter(filtros.join(" AND "));
+  modelVenda.setFilter(filtros.join(" AND "));
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
@@ -279,7 +279,7 @@ void WidgetVenda::updateTables() {
     isSet = true;
   }
 
-  modelViewVenda.select();
+  modelVenda.select();
 }
 
 void WidgetVenda::fillComboBoxVendedor() {
@@ -353,7 +353,7 @@ void WidgetVenda::on_table_activated(const QModelIndex &index) {
   auto *venda = new Venda(this);
   venda->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { venda->setFinanceiro(); }
-  venda->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
+  venda->viewRegisterById(modelVenda.data(index.row(), "Código"));
 
   venda->show();
 }
@@ -395,11 +395,11 @@ void WidgetVenda::resetTables() {
 }
 
 void WidgetVenda::on_pushButtonFollowup_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelViewVenda.data(list.first().row(), "Código").toString();
+  const QString idVenda = modelVenda.data(selection.first().row(), "Código").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

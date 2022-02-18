@@ -125,11 +125,11 @@ void WidgetLogisticaEntregues::on_tableVendas_selectionChanged() {
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   // TODO: se for pedido de representacao voltar status para 'EM ENTREGA' no lugar de 'ESTOQUE', senão não dá para marcar entregue
 
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     const QString status = modelProdutos.data(index.row(), "status").toString();
 
     if (status != "ENTREGUE") { throw RuntimeError("Produto não marcado como 'ENTREGUE'!", this); }
@@ -137,7 +137,7 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Cancelar");
@@ -149,7 +149,7 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaEntregues::on_pushButtonCancelar");
 
-  cancelar(list);
+  cancelar(selection);
 
   Sql::updateVendaStatus(idVendas);
 

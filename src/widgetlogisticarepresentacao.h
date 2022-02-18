@@ -23,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   SqlTableModel modelFornecedor;
-  SqlTableModel modelViewLogisticaRepresentacao;
+  SqlTableModel modelRepresentacao;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
   auto on_lineEditBusca_textChanged() -> void;

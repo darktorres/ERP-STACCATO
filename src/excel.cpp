@@ -72,7 +72,7 @@ void Excel::gerarExcel() {
   if (tipo == Tipo::Venda) {
     if (anexoCompra) {
       xlsx.write("C2", "Pedido:");
-      xlsx.write("D2", "OC " + QString::number(ordemCompra) + " " + id);
+      xlsx.write("D2", "O.C. " + QString::number(ordemCompra) + " " + id);
       QXlsx::Format format;
       format.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
       format.setFontBold(true);

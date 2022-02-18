@@ -44,7 +44,7 @@ WidgetRh::~WidgetRh() { delete ui; }
 
 //  ui->table->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
 //  ui->table->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-//  ui->table->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+//  ui->table->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
 
 //  ui->table->hideColumn("idVendaProduto1");
 //  ui->table->hideColumn("idComissao");
@@ -59,7 +59,7 @@ WidgetRh::~WidgetRh() { delete ui; }
 
 //  ui->tableTotal->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
 //  ui->tableTotal->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-//  ui->tableTotal->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+//  ui->tableTotal->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
 
 //  ui->tableTotal->hideColumn("idUsuario");
 //  ui->tableTotal->hideColumn("Mês");
@@ -108,7 +108,7 @@ WidgetRh::~WidgetRh() { delete ui; }
 //    modelRelatorio.setData(newRow, "Mês", queryRelatorio.value("Mês"));
 //    modelRelatorio.setData(newRow, "Faturamento", queryRelatorio.value("Faturamento"));
 //    modelRelatorio.setData(newRow, "Comissão", queryRelatorio.value("Comissão"));
-//    modelRelatorio.setData(newRow, "%", queryRelatorio.value("%"));
+//    modelRelatorio.setData(newRow, "porcentagem", queryRelatorio.value("porcentagem"));
 //  }
 
 //  modelRelatorio.submitAll();

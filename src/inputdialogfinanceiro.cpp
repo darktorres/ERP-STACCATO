@@ -541,7 +541,7 @@ void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
 
   ui->widgetPgts->setRepresentacao(representacao);
 
-  setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
+  setWindowTitle("O.C.: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
 
   // -------------------------------------------------------------------------
 

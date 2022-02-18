@@ -256,13 +256,13 @@ void WidgetFinanceiroContas::montaFiltro() {
 
   if (tipo == Tipo::Receber) {
     model.setHeaderData("idVenda", "Venda");
-    model.setHeaderData("ordemRepresentacao", "OC Rep.");
+    model.setHeaderData("ordemRepresentacao", "O.C. Rep.");
   }
 
   if (tipo == Tipo::Pagar) {
     model.setHeaderData("cp_idVenda", "Venda");
     model.setHeaderData("pf2_idVenda", "Venda");
-    model.setHeaderData("ordemCompra", "OC");
+    model.setHeaderData("ordemCompra", "O.C.");
     model.setHeaderData("numeroNFe", "NF-e");
     model.setHeaderData("codFornecedor", "Cód. Forn.");
   }
@@ -316,14 +316,14 @@ void WidgetFinanceiroContas::setTipo(const Tipo novoTipo) {
   if (tipo == Tipo::Pagar) {
     ui->pushButtonAdiantarRecebimento->hide();
     ui->radioButtonRecebido->hide();
-    ui->lineEditBusca->setPlaceholderText("OC/Contraparte/NFe/Venda/Obs./Cód. Forn.");
+    ui->lineEditBusca->setPlaceholderText("O.C./Contraparte/NF-e/Venda/Obs./Cód. Forn.");
   }
 
   if (tipo == Tipo::Receber) {
     ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
     ui->radioButtonAgendado->hide();
-    ui->lineEditBusca->setPlaceholderText("Venda/OC Rep./Contraparte");
+    ui->lineEditBusca->setPlaceholderText("Venda/O.C. Rep./Contraparte");
   }
 }
 

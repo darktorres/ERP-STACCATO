@@ -17,7 +17,7 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   if (tipo == Tipo::Orcamento) { setWindowTitle("Orçamento: " + id); }
   if (tipo == Tipo::Venda) { setWindowTitle("Pedido: " + id); }
-  if (tipo == Tipo::Compra) { setWindowTitle("OC: " + id); }
+  if (tipo == Tipo::Compra) { setWindowTitle("O.C.: " + id); }
   if (tipo == Tipo::Estoque) { setWindowTitle("Estoque: " + id); }
 
   ui->dateFollowup->setDateTime(qApp->serverDateTime());
@@ -114,7 +114,7 @@ void FollowUp::setupTables() {
 
   if (tipo == Tipo::Venda) { modelFollowup.setHeaderData("idVenda", "Venda"); }
 
-  if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "OC"); }
+  if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "O.C."); }
 
   if (tipo == Tipo::Estoque) { modelFollowup.setHeaderData("idEstoque", "Estoque"); }
 

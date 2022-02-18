@@ -59,6 +59,22 @@ void WidgetOrcamento::setWidgets() {
 void WidgetOrcamento::setupTables() {
   modelOrcamento.setTable("view_orcamento");
 
+  modelOrcamento.setHeaderData("status", "Status");
+  modelOrcamento.setHeaderData("diasRestantes", "Dias Restantes");
+  modelOrcamento.setHeaderData("idOrcamento", "Código");
+  modelOrcamento.setHeaderData("vendedor", "Vendedor");
+  modelOrcamento.setHeaderData("consultor", "Consultor");
+  modelOrcamento.setHeaderData("cliente", "Cliente");
+  modelOrcamento.setHeaderData("profissional", "Profissional");
+  modelOrcamento.setHeaderData("tel", "Telefone");
+  modelOrcamento.setHeaderData("telCel", "Celular");
+  modelOrcamento.setHeaderData("telProf", "Tel. Prof.");
+  modelOrcamento.setHeaderData("data", "Data");
+  modelOrcamento.setHeaderData("total", "Total");
+  modelOrcamento.setHeaderData("dataFollowup", "Data Followup");
+  modelOrcamento.setHeaderData("dataProxFollowup", "Data Próx. Followup");
+  modelOrcamento.setHeaderData("observacao", "Observação");
+
   modelOrcamento.proxyModel = new OrcamentoProxyModel(&modelOrcamento, this);
 
   ui->table->setModel(&modelOrcamento);
@@ -230,7 +246,7 @@ void WidgetOrcamento::resetTables() {
 void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-  orcamento->viewRegisterById(modelOrcamento.data(index.row(), "Código"));
+  orcamento->viewRegisterById(modelOrcamento.data(index.row(), "idOrcamento"));
 
   orcamento->show();
 }
@@ -275,7 +291,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroData = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroData = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
 
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
@@ -295,7 +311,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + User::nome + "'" + " OR Consultor = '" + User::nome + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + User::nome + "'" + " OR consultor = '" + User::nome + "')";
 
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
@@ -320,7 +336,7 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = "(idOrcamento LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
@@ -334,7 +350,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idOrcamento = modelOrcamento.data(selection.first().row(), "Código").toString();
+  const QString idOrcamento = modelOrcamento.data(selection.first().row(), "idOrcamento").toString();
 
   auto *followup = new FollowUp(idOrcamento, FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

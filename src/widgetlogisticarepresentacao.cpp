@@ -53,7 +53,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
   modelRepresentacao.setHeaderData("un", "Un.");
   modelRepresentacao.setHeaderData("caixas", "Cx.");
   modelRepresentacao.setHeaderData("kgcx", "Kg./Cx.");
-  modelRepresentacao.setHeaderData("ordemCompra", "OC");
+  modelRepresentacao.setHeaderData("ordemCompra", "O.C.");
   modelRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelRepresentacao.setSort("prazoEntrega");

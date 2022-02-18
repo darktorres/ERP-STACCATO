@@ -24,7 +24,7 @@ private:
   // attributes
   bool isSet = false;
   QStack<int> blockingSignals;
-  SqlTableModel modelViewVendaProduto;
+  SqlTableModel modelProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;

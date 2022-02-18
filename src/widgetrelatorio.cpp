@@ -35,11 +35,11 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   const QString loja = (User::isGerente()) ? User::fromLoja("descricao").toString() : "";
 
-  modelViewRelatorioVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
+  modelVendedor.setQuery(Sql::view_relatorio_vendedor(mes, idUsuario, idUsuarioConsultor, loja));
 
-  modelViewRelatorioVendedor.select();
+  modelVendedor.select();
 
-  ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
+  ui->tableTotalVendedor->setModel(&modelVendedor);
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
@@ -59,11 +59,11 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   const QString loja = (User::isGerente()) ? User::fromLoja("descricao").toString() : "";
 
-  modelViewRelatorioLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
+  modelLoja.setQuery(Sql::view_relatorio_loja(mes, idUsuario, idUsuarioConsultor, loja));
 
-  modelViewRelatorioLoja.select();
+  modelLoja.select();
 
-  ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
+  ui->tableTotalLoja->setModel(&modelLoja);
 
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
@@ -74,11 +74,11 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 }
 
 void WidgetRelatorio::setupTables() {
-  modelViewRelatorio.setTable("view_relatorio");
+  modelRelatorio.setTable("view_relatorio");
 
-  modelViewRelatorio.setHeaderData("idVenda", "Venda");
+  modelRelatorio.setHeaderData("idVenda", "Venda");
 
-  ui->tableRelatorio->setModel(&modelViewRelatorio);
+  ui->tableRelatorio->setModel(&modelRelatorio);
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
@@ -94,15 +94,15 @@ void WidgetRelatorio::calcularTotalGeral() {
   double comissao = 0;
   double porcentagem = 0;
 
-  for (int row = 0; row < modelViewRelatorioLoja.rowCount(); ++row) {
-    totalGeral += modelViewRelatorioLoja.data(row, "Faturamento").toDouble();
-    comissao += modelViewRelatorioLoja.data(row, "Comissão").toDouble();
-    porcentagem += modelViewRelatorioLoja.data(row, "%").toDouble();
+  for (int row = 0; row < modelLoja.rowCount(); ++row) {
+    totalGeral += modelLoja.data(row, "Faturamento").toDouble();
+    comissao += modelLoja.data(row, "Comissão").toDouble();
+    porcentagem += modelLoja.data(row, "%").toDouble();
   }
 
   ui->doubleSpinBoxGeral->setValue(totalGeral);
   ui->doubleSpinBoxValorComissao->setValue(comissao);
-  if (modelViewRelatorioLoja.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount()); }
+  if (modelLoja.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelLoja.rowCount()); }
 }
 
 void WidgetRelatorio::setFilterRelatorio() {
@@ -117,11 +117,11 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 
-  modelViewRelatorio.setFilter(filter);
+  modelRelatorio.setFilter(filter);
 
-  qDebug() << "filter_Pedidos: " << modelViewRelatorio.filter();
+  qDebug() << "filter_Pedidos: " << modelRelatorio.filter();
 
-  modelViewRelatorio.select();
+  modelRelatorio.select();
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged() { updateTables(); }
@@ -192,20 +192,20 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
   char column = 'A';
 
-  for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelViewRelatorio.headerData(col, Qt::Horizontal).toString()); }
+  for (int col = 0; col < modelRelatorio.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelRelatorio.headerData(col, Qt::Horizontal).toString()); }
 
   column = 'A';
 
-  for (int row = 0; row < modelViewRelatorio.rowCount(); ++row) {
-    for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) {
+  for (int row = 0; row < modelRelatorio.rowCount(); ++row) {
+    for (int col = 0; col < modelRelatorio.columnCount(); ++col, ++column) {
       if (col == 5) { // ajustar data
-        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelViewRelatorio.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
+        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelRelatorio.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
       } else if (col == 6) { // ajustar data
-        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col).toDate().toString("dd-MM-yyyy"));
+        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col).toDate().toString("dd-MM-yyyy"));
       } else if (col == 9) { // ajustar porcentagem
-        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col).toDouble() / 100);
+        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col).toDouble() / 100);
       } else {
-        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col));
+        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col));
       }
     }
 
@@ -214,18 +214,18 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
   xlsx.selectSheet("Sheet2");
 
-  for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelViewRelatorioVendedor.headerData(col, Qt::Horizontal).toString()); }
+  for (int col = 0; col < modelVendedor.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelVendedor.headerData(col, Qt::Horizontal).toString()); }
 
   column = 'A';
 
-  for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
-    for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) {
+  for (int row = 0; row < modelVendedor.rowCount(); ++row) {
+    for (int col = 0; col < modelVendedor.columnCount(); ++col, ++column) {
       if (col == 6) { // ajustar porcentagem
-        xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col).toDouble() / 100);
+        xlsx.write(column + QString::number(row + 2), modelVendedor.data(row, col).toDouble() / 100);
       } else if (col == 7) { // ajustar data
-        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelViewRelatorioVendedor.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
+        xlsx.write(column + QString::number(row + 2), QDate::fromString(modelVendedor.data(row, col).toString(), "yyyy-MM").toString("MM-yyyy"));
       } else {
-        xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col));
+        xlsx.write(column + QString::number(row + 2), modelVendedor.data(row, col));
       }
     }
 

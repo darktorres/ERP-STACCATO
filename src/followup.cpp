@@ -102,38 +102,38 @@ void FollowUp::verifyFields() {
 }
 
 void FollowUp::setupTables() {
-  if (tipo == Tipo::Orcamento) { modelViewFollowup.setTable("view_followup_orcamento"); }
-  if (tipo == Tipo::Venda) { modelViewFollowup.setTable("view_followup_venda"); }
-  if (tipo == Tipo::Compra) { modelViewFollowup.setTable("view_followup_pedido_fornecedor"); }
-  if (tipo == Tipo::Estoque) { modelViewFollowup.setTable("view_followup_estoque"); }
+  if (tipo == Tipo::Orcamento) { modelFollowup.setTable("view_followup_orcamento"); }
+  if (tipo == Tipo::Venda) { modelFollowup.setTable("view_followup_venda"); }
+  if (tipo == Tipo::Compra) { modelFollowup.setTable("view_followup_pedido_fornecedor"); }
+  if (tipo == Tipo::Estoque) { modelFollowup.setTable("view_followup_estoque"); }
 
   if (tipo == Tipo::Orcamento) {
-    modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
-    modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
+    modelFollowup.setHeaderData("idOrcamento", "Orçamento");
+    modelFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
   }
 
-  if (tipo == Tipo::Venda) { modelViewFollowup.setHeaderData("idVenda", "Venda"); }
+  if (tipo == Tipo::Venda) { modelFollowup.setHeaderData("idVenda", "Venda"); }
 
-  if (tipo == Tipo::Compra) { modelViewFollowup.setHeaderData("ordemCompra", "OC"); }
+  if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "OC"); }
 
-  if (tipo == Tipo::Estoque) { modelViewFollowup.setHeaderData("idEstoque", "Estoque"); }
+  if (tipo == Tipo::Estoque) { modelFollowup.setHeaderData("idEstoque", "Estoque"); }
 
-  modelViewFollowup.setHeaderData("nome", "Usuário");
-  modelViewFollowup.setHeaderData("observacao", "Observação");
-  modelViewFollowup.setHeaderData("dataFollowup", "Data");
+  modelFollowup.setHeaderData("nome", "Usuário");
+  modelFollowup.setHeaderData("observacao", "Observação");
+  modelFollowup.setHeaderData("dataFollowup", "Data");
 
-  if (tipo == Tipo::Orcamento) { modelViewFollowup.setFilter("idOrcamento LIKE '" + id.left(12) + "%'"); }
-  if (tipo == Tipo::Venda) { modelViewFollowup.setFilter("idVenda LIKE '" + id.left(11) + "%'"); }
-  if (tipo == Tipo::Compra) { modelViewFollowup.setFilter("ordemCompra = " + id); }
-  if (tipo == Tipo::Estoque) { modelViewFollowup.setFilter("idEstoque = " + id); }
+  if (tipo == Tipo::Orcamento) { modelFollowup.setFilter("idOrcamento LIKE '" + id.left(12) + "%'"); }
+  if (tipo == Tipo::Venda) { modelFollowup.setFilter("idVenda LIKE '" + id.left(11) + "%'"); }
+  if (tipo == Tipo::Compra) { modelFollowup.setFilter("ordemCompra = " + id); }
+  if (tipo == Tipo::Estoque) { modelFollowup.setFilter("idEstoque = " + id); }
 
-  modelViewFollowup.setSort("dataFollowup");
+  modelFollowup.setSort("dataFollowup");
 
-  modelViewFollowup.select();
+  modelFollowup.select();
 
-  modelViewFollowup.proxyModel = new FollowUpProxyModel(&modelViewFollowup, this);
+  modelFollowup.proxyModel = new FollowUpProxyModel(&modelFollowup, this);
 
-  ui->table->setModel(&modelViewFollowup);
+  ui->table->setModel(&modelFollowup);
 
   if (tipo == Tipo::Orcamento) {
     modelOrcamento.setTable("orcamento");

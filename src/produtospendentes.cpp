@@ -37,7 +37,7 @@ void ProdutosPendentes::recalcularQuantidade() {
   const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();
   double quant = 0;
 
-  for (const auto &index : selectedRows) { quant += modelViewProdutos.data(index.row(), "quant").toDouble(); }
+  for (const auto &index : selectedRows) { quant += modelPendentes.data(index.row(), "quant").toDouble(); }
 
   ui->doubleSpinBoxQuantTotal->setValue(quant);
   ui->doubleSpinBoxComprar->setValue(quant);
@@ -54,10 +54,9 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   //-----------------------------------------------
 
-  modelViewProdutos.setFilter("fornecedor = '" + fornecedor + "' AND codComercial = '" + codComercial + "' AND idVenda = '" + idVenda +
-                              "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
+  modelPendentes.setFilter("fornecedor = '" + fornecedor + "' AND codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
-  modelViewProdutos.select();
+  modelPendentes.select();
 
   //-----------------------------------------------
 
@@ -67,18 +66,18 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   //-----------------------------------------------
 
-  ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
-  ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
+  ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelPendentes.data(0, "un").toString());
+  ui->doubleSpinBoxComprar->setSuffix(" " + modelPendentes.data(0, "un").toString());
 
   //-----------------------------------------------
 
   SqlQuery query;
   query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
-  query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
+  query.bindValue(":idVendaProduto2", modelPendentes.data(0, "idVendaProduto2"));
 
   if (not query.exec()) { throw RuntimeException("Erro buscando quantCaixa: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Dados do produto não encontrados para o id: '" + modelViewProdutos.data(0, "idVendaProduto2").toString() + "'"); }
+  if (not query.first()) { throw RuntimeException("Dados do produto não encontrados para o id: '" + modelPendentes.data(0, "idVendaProduto2").toString() + "'"); }
 
   const double step = query.value("quantCaixa").toDouble();
 
@@ -117,7 +116,7 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
 
   //-----------------------------------------------
 
-  if (modelViewProdutos.rowCount() == 1) { ui->tableProdutos->selectRow(0); }
+  if (modelPendentes.rowCount() == 1) { ui->tableProdutos->selectRow(0); }
   if (modelEstoque.rowCount() == 1) { ui->tableEstoque->selectRow(0); }
 }
 
@@ -126,25 +125,25 @@ void ProdutosPendentes::setupTables() {
 
   //--------------------------------------------------------------------
 
-  modelViewProdutos.setTable("view_produto_pendente");
+  modelPendentes.setTable("view_produto_pendente");
 
-  modelViewProdutos.setHeaderData("status", "Status");
-  modelViewProdutos.setHeaderData("fornecedor", "Fornecedor");
-  modelViewProdutos.setHeaderData("produto", "Descrição");
-  modelViewProdutos.setHeaderData("colecao", "Coleção");
-  modelViewProdutos.setHeaderData("formComercial", "Form. Com.");
-  modelViewProdutos.setHeaderData("caixas", "Caixas");
-  modelViewProdutos.setHeaderData("kgcx", "Kg./Cx.");
-  modelViewProdutos.setHeaderData("quant", "Quant.");
-  modelViewProdutos.setHeaderData("un", "Un.");
-  modelViewProdutos.setHeaderData("un2", "Un.2");
-  modelViewProdutos.setHeaderData("codComercial", "Cód. Com.");
-  modelViewProdutos.setHeaderData("codBarras", "Cód. Barras");
-  modelViewProdutos.setHeaderData("custo", "Custo");
-  modelViewProdutos.setHeaderData("custoVenda", "Custo Rep.");
-  modelViewProdutos.setHeaderData("obs", "Obs.");
+  modelPendentes.setHeaderData("status", "Status");
+  modelPendentes.setHeaderData("fornecedor", "Fornecedor");
+  modelPendentes.setHeaderData("produto", "Descrição");
+  modelPendentes.setHeaderData("colecao", "Coleção");
+  modelPendentes.setHeaderData("formComercial", "Form. Com.");
+  modelPendentes.setHeaderData("caixas", "Caixas");
+  modelPendentes.setHeaderData("kgcx", "Kg./Cx.");
+  modelPendentes.setHeaderData("quant", "Quant.");
+  modelPendentes.setHeaderData("un", "Un.");
+  modelPendentes.setHeaderData("un2", "Un.2");
+  modelPendentes.setHeaderData("codComercial", "Cód. Com.");
+  modelPendentes.setHeaderData("codBarras", "Cód. Barras");
+  modelPendentes.setHeaderData("custo", "Custo");
+  modelPendentes.setHeaderData("custoVenda", "Custo Rep.");
+  modelPendentes.setHeaderData("obs", "Obs.");
 
-  ui->tableProdutos->setModel(&modelViewProdutos);
+  ui->tableProdutos->setModel(&modelPendentes);
 
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
@@ -226,32 +225,32 @@ void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate dataPre
 
 void ProdutosPendentes::recarregarTabelas() {
   modelProdutos.select();
-  modelViewProdutos.select();
+  modelPendentes.select();
   modelEstoque.select();
 
   ui->tableProdutos->clearSelection();
 
-  if (modelViewProdutos.rowCount() == 1) { ui->tableProdutos->selectRow(0); }
-  if (modelViewProdutos.rowCount() == 0) { close(); }
+  if (modelPendentes.rowCount() == 1) { ui->tableProdutos->selectRow(0); }
+  if (modelPendentes.rowCount() == 0) { close(); }
 }
 
 void ProdutosPendentes::on_pushButtonComprar_clicked() {
-  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { throw RuntimeError("Para comprar menos que o total selecione uma linha por vez!", this); }
+  if (selection.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { throw RuntimeError("Para comprar menos que o total selecione uma linha por vez!", this); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { throw RuntimeError("Quantidade 0!", this); }
 
-  const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelPendentes.data(selection.first().row(), "idVenda").toString();
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
   qApp->startTransaction("ProdutosPendentes::on_pushButtonComprar");
 
-  comprar(list, inputDlg.getNextDate());
+  comprar(selection, inputDlg.getNextDate());
 
   Sql::updateVendaStatus(idVenda);
 
@@ -291,22 +290,22 @@ void ProdutosPendentes::consumirCompra(const int rowProduto, const int rowCompra
 }
 
 void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
-  const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selectionProdutos = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (listProduto.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
+  if (selectionProdutos.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
 
-  if (listProduto.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
+  if (selectionProdutos.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  const auto listCompra = ui->tableCompra->selectionModel()->selectedRows();
+  const auto selectionCompra = ui->tableCompra->selectionModel()->selectedRows();
 
-  if (listCompra.isEmpty()) { throw RuntimeError("Nenhuma compra selecionada!", this); }
+  if (selectionCompra.isEmpty()) { throw RuntimeError("Nenhuma compra selecionada!", this); }
 
   //--------------------------------------------------------------------
 
-  const int rowProduto = listProduto.first().row();
-  const int rowCompra = listCompra.first().row();
+  const int rowProduto = selectionProdutos.first().row();
+  const int rowCompra = selectionCompra.first().row();
 
-  const double quantVenda = modelViewProdutos.data(rowProduto, "quant").toDouble();
+  const double quantVenda = modelPendentes.data(rowProduto, "quant").toDouble();
   const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
 
   bool ok = false;
@@ -316,7 +315,7 @@ void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
 
   if (not ok) { return; }
 
-  const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
+  const QString idVenda = modelPendentes.data(rowProduto, "idVenda").toString();
 
   //--------------------------------------------------------------------
 
@@ -337,7 +336,7 @@ void ProdutosPendentes::on_pushButtonConsumirCompra_clicked() {
 
 void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
   const QString idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toString();
-  const int idVendaProduto2 = modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt();
+  const int idVendaProduto2 = modelPendentes.data(rowProduto, "idVendaProduto2").toInt();
 
   auto estoque = Estoque(idEstoque, this);
   estoque.criarConsumo(idVendaProduto2, quantConsumir);
@@ -354,22 +353,22 @@ void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 }
 
 void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
-  const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
+  const auto selectionProduto = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (listProduto.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
+  if (selectionProduto.size() > 1) { throw RuntimeError("Selecione apenas um item na tabela de produtos!", this); }
 
-  if (listProduto.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
+  if (selectionProduto.isEmpty()) { throw RuntimeError("Nenhum produto selecionado!", this); }
 
-  const auto listEstoque = ui->tableEstoque->selectionModel()->selectedRows();
+  const auto selectionEstoque = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (listEstoque.isEmpty()) { throw RuntimeError("Nenhum estoque selecionado!", this); }
+  if (selectionEstoque.isEmpty()) { throw RuntimeError("Nenhum estoque selecionado!", this); }
 
   //--------------------------------------------------------------------
 
-  const int rowProduto = listProduto.first().row();
-  const int rowEstoque = listEstoque.first().row();
+  const int rowProduto = selectionProduto.first().row();
+  const int rowEstoque = selectionEstoque.first().row();
 
-  const double quantVenda = modelViewProdutos.data(rowProduto, "quant").toDouble();
+  const double quantVenda = modelPendentes.data(rowProduto, "quant").toDouble();
   const double quantEstoque = modelEstoque.data(rowEstoque, "restante").toDouble();
 
   bool ok = false;
@@ -380,7 +379,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   // TODO: retornar se quantConsumir for zero
   if (not ok) { return; }
 
-  const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
+  const QString idVenda = modelPendentes.data(rowProduto, "idVenda").toString();
 
   //--------------------------------------------------------------------
 
@@ -407,20 +406,20 @@ void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate dat
     query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
                   "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, "
                   ":dataPrevCompra)");
-    query.bindValue(":fornecedor", modelViewProdutos.data(row, "fornecedor"));
-    query.bindValue(":idProduto", modelViewProdutos.data(row, "idProduto"));
-    query.bindValue(":descricao", modelViewProdutos.data(row, "produto"));
-    query.bindValue(":colecao", modelViewProdutos.data(row, "colecao"));
+    query.bindValue(":fornecedor", modelPendentes.data(row, "fornecedor"));
+    query.bindValue(":idProduto", modelPendentes.data(row, "idProduto"));
+    query.bindValue(":descricao", modelPendentes.data(row, "produto"));
+    query.bindValue(":colecao", modelPendentes.data(row, "colecao"));
     query.bindValue(":quant", excedente);
-    query.bindValue(":un", modelViewProdutos.data(row, "un"));
-    query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
+    query.bindValue(":un", modelPendentes.data(row, "un"));
+    query.bindValue(":un2", modelPendentes.data(row, "un2"));
     query.bindValue(":caixas", excedente / modelProdutos.data(row, "quantCaixa").toDouble());
-    query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo"));
-    query.bindValue(":preco", modelViewProdutos.data(row, "custo").toDouble() * excedente);
-    query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
-    query.bindValue(":formComercial", modelViewProdutos.data(row, "formComercial"));
-    query.bindValue(":codComercial", modelViewProdutos.data(row, "codComercial"));
-    query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
+    query.bindValue(":prcUnitario", modelPendentes.data(row, "custo"));
+    query.bindValue(":preco", modelPendentes.data(row, "custo").toDouble() * excedente);
+    query.bindValue(":kgcx", modelPendentes.data(row, "kgcx"));
+    query.bindValue(":formComercial", modelPendentes.data(row, "formComercial"));
+    query.bindValue(":codComercial", modelPendentes.data(row, "codComercial"));
+    query.bindValue(":codBarras", modelPendentes.data(row, "codBarras"));
     query.bindValue(":dataPrevCompra", dataPrevista);
 
     if (not query.exec()) { throw RuntimeException("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
@@ -433,28 +432,28 @@ void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate dataP
 
   const int newRow = model.insertRowAtEnd();
 
-  const QString idVenda = modelViewProdutos.data(row, "idVenda").toString();
+  const QString idVenda = modelPendentes.data(row, "idVenda").toString();
   const bool isRepresentacao = (idVenda.size() >= 12 and idVenda.at(11) == 'R');
 
-  const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelViewProdutos.data(row, "quant").toDouble();
-  const double custo = (isRepresentacao) ? modelViewProdutos.data(row, "custoVenda").toDouble() : modelViewProdutos.data(row, "custo").toDouble();
+  const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelPendentes.data(row, "quant").toDouble();
+  const double custo = modelPendentes.data(row, (isRepresentacao) ? "custoVenda" : "custo").toDouble();
   const double step = ui->doubleSpinBoxQuantTotal->singleStep();
 
-  model.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"));
-  model.setData(newRow, "idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"));
-  model.setData(newRow, "idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"));
-  model.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"));
-  model.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"));
-  model.setData(newRow, "descricao", modelViewProdutos.data(row, "produto"));
-  model.setData(newRow, "obs", modelViewProdutos.data(row, "obs"));
-  model.setData(newRow, "colecao", modelViewProdutos.data(row, "colecao"));
-  model.setData(newRow, "un", modelViewProdutos.data(row, "un"));
-  model.setData(newRow, "un2", modelViewProdutos.data(row, "un2"));
+  model.setData(newRow, "idVenda", modelPendentes.data(row, "idVenda"));
+  model.setData(newRow, "idVendaProduto1", modelPendentes.data(row, "idVendaProdutoFK"));
+  model.setData(newRow, "idVendaProduto2", modelPendentes.data(row, "idVendaProduto2"));
+  model.setData(newRow, "fornecedor", modelPendentes.data(row, "fornecedor"));
+  model.setData(newRow, "idProduto", modelPendentes.data(row, "idProduto"));
+  model.setData(newRow, "descricao", modelPendentes.data(row, "produto"));
+  model.setData(newRow, "obs", modelPendentes.data(row, "obs"));
+  model.setData(newRow, "colecao", modelPendentes.data(row, "colecao"));
+  model.setData(newRow, "un", modelPendentes.data(row, "un"));
+  model.setData(newRow, "un2", modelPendentes.data(row, "un2"));
   model.setData(newRow, "prcUnitario", custo);
-  model.setData(newRow, "kgcx", modelViewProdutos.data(row, "kgcx"));
-  model.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"));
-  model.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"));
-  model.setData(newRow, "codBarras", modelViewProdutos.data(row, "codBarras"));
+  model.setData(newRow, "kgcx", modelPendentes.data(row, "kgcx"));
+  model.setData(newRow, "formComercial", modelPendentes.data(row, "formComercial"));
+  model.setData(newRow, "codComercial", modelPendentes.data(row, "codComercial"));
+  model.setData(newRow, "codBarras", modelPendentes.data(row, "codBarras"));
   model.setData(newRow, "dataPrevCompra", dataPrevista);
   model.setData(newRow, "quant", quant);
   model.setData(newRow, "preco", quant * custo);

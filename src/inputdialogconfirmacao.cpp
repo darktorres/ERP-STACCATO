@@ -259,11 +259,11 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
   // 3. a parte que veio prossegue para estoque
   // 4. verificar se precisa desfazer algum consumo caso a quant. nao seja suficiente
 
-  const auto list = ui->tableLogistica->selectionModel()->selectedRows();
+  const auto selection = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
 
   // -------------------------------------------------------------------------
 
@@ -296,13 +296,13 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
   // 3. a parte que veio prossegue para estoque
   // 4. verificar se precisa desfazer algum consumo caso a quant. nao seja suficiente
 
-  const auto list = ui->tableLogistica->selectionModel()->selectedRows();
+  const auto selection = ui->tableLogistica->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
-  const int row = list.first().row();
+  const int row = selection.first().row();
   QString obs;
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);

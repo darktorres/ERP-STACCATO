@@ -161,11 +161,11 @@ void InserirLancamento::unsetConnections() {
 }
 
 void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
 
-  for (const auto index : list) {
+  for (const auto index : selection) {
     const int row = index.row();
     const int newRow = modelContaPagamento.insertRowAtEnd();
 

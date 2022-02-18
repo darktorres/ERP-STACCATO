@@ -18,11 +18,11 @@ PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::Paga
 PagamentosDia::~PagamentosDia() { delete ui; }
 
 void PagamentosDia::setupTables() {
-  modelViewFluxoCaixa.setTable("view_fluxo_caixa_realizado");
+  modelFluxoCaixa.setTable("view_fluxo_caixa_realizado");
 
-  modelViewFluxoCaixa.setHeaderData("contaDestino", "Conta Destino");
+  modelFluxoCaixa.setHeaderData("contaDestino", "Conta Destino");
 
-  ui->tableView->setModel(&modelViewFluxoCaixa);
+  ui->tableView->setModel(&modelFluxoCaixa);
 
   // TODO: 5usar outra coluna no lugar de idCompra?
   // TODO: 5renomear/esconder colunas de data
@@ -37,9 +37,9 @@ void PagamentosDia::setupTables() {
 void PagamentosDia::setFilter(const QDate date, const QString &idConta) {
   const QString filtroConta = idConta.isEmpty() ? "" : "AND idConta = " + idConta;
 
-  modelViewFluxoCaixa.setFilter("`dataRealizado` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'PAGO GARE', 'RECEBIDO') " + filtroConta);
+  modelFluxoCaixa.setFilter("`dataRealizado` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'PAGO GARE', 'RECEBIDO') " + filtroConta);
 
-  modelViewFluxoCaixa.select();
+  modelFluxoCaixa.select();
 
   setWindowTitle(date.toString("dd/MM/yyyy"));
 }

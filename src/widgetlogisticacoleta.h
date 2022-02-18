@@ -22,8 +22,8 @@ public:
 private:
   // attributes
   bool isSet = false;
+  SqlTableModel modelColeta;
   SqlTableModel modelFornecedor;
-  SqlTableModel modelViewColeta;
   Ui::WidgetLogisticaColeta *ui;
   // methods
   auto cadastrar(const QModelIndexList &list, const QDate dataColeta, const QDate dataPrevReceb) -> void;

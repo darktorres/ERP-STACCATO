@@ -105,15 +105,15 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
   // TODO: 2criar nota de devolucao caso tenha recebido nota (troca cfop, inverte remetente/destinario, nat. 'devolucao
   // de mercadoria'
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
-  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelVendaProduto.data(selection.first().row(), "idVenda").toString();
 
   qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor");
 
-  retornarFornecedor(list);
+  retornarFornecedor(selection);
 
   Sql::updateVendaStatus(idVenda);
 
@@ -185,15 +185,15 @@ void WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
 }
 
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
-  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelVendaProduto.data(selection.first().row(), "idVenda").toString();
 
   qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonRetornarEstoque");
 
-  retornarEstoque(list);
+  retornarEstoque(selection);
 
   Sql::updateVendaStatus(idVenda);
 
@@ -218,11 +218,11 @@ void WidgetCompraDevolucao::montaFiltro() {
 }
 
 void WidgetCompraDevolucao::on_table_selectionChanged() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
   QStringList status;
 
-  for (auto index : list) { status << modelVendaProduto.data(index.row(), "statusOriginal").toString(); }
+  for (auto index : selection) { status << modelVendaProduto.data(index.row(), "statusOriginal").toString(); }
 
   status.removeDuplicates();
 
@@ -234,11 +234,11 @@ void WidgetCompraDevolucao::on_table_selectionChanged() {
 }
 
 void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelVendaProduto.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

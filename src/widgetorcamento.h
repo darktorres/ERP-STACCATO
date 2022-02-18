@@ -24,7 +24,7 @@ private:
   // attributes
   bool isSet = false;
   QStack<int> blockingSignals;
-  SqlTableModel modelViewOrcamento;
+  SqlTableModel modelOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;

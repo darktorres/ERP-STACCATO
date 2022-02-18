@@ -158,9 +158,9 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
   double peso = 0;
   double caixas = 0;
 
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+  const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     const double kg = modelEstoque.data(index.row(), "kgcx").toDouble();
     const double caixa = modelEstoque.data(index.row(), "caixas").toDouble();
     peso += kg * caixa;
@@ -224,9 +224,9 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+  const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::AgendarColeta, this);
   // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
@@ -235,7 +235,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
 
   qApp->startTransaction("WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta");
 
-  processRows(list, input.getNextDate());
+  processRows(selection, input.getNextDate());
 
   qApp->endTransaction();
 
@@ -349,19 +349,19 @@ void WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
   if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+  const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
-  for (const auto &index : list) {
-    const auto listMatch = modelTranspAtual.match("idEstoque", modelEstoque.data(index.row(), "idEstoque"), 1, Qt::MatchExactly);
+  for (const auto &index : selection) {
+    const auto match = modelTranspAtual.match("idEstoque", modelEstoque.data(index.row(), "idEstoque"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
+    if (not match.isEmpty()) { throw RuntimeError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
   }
 
-  adicionarProduto(list);
+  adicionarProduto(selection);
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {

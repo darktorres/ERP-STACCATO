@@ -374,9 +374,9 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Excluir");
@@ -385,7 +385,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (msgBox.exec() == QMessageBox::Yes) {
     SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'CANCELADO' WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
+    query.bindValue(":idPagamento", model.data(selection.first().row(), "idPagamento"));
 
     if (not query.exec()) { throw RuntimeException("Erro excluindo lançamento: " + query.lastError().text(), this); }
 
@@ -402,14 +402,14 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   // TODO: verificar se precisa limpar os campos que foram preenchidos
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   SqlQuery queryPagamento;
   queryPagamento.prepare("SELECT grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     queryPagamento.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
 
     if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
@@ -429,7 +429,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
 
-    for (const auto &index : list) {
+    for (const auto &index : selection) {
       query.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
 
       if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }

@@ -123,7 +123,7 @@ void WidgetCompraPendentes::updateTables() {
     isSet = true;
   }
 
-  modelViewVendaProduto.select();
+  modelProduto.select();
 }
 
 void WidgetCompraPendentes::resetTables() {
@@ -132,28 +132,28 @@ void WidgetCompraPendentes::resetTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
-  modelViewVendaProduto.setTable("view_venda_produto");
+  modelProduto.setTable("view_venda_produto");
 
-  modelViewVendaProduto.setSort("idVenda");
+  modelProduto.setSort("idVenda");
 
-  modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
-  modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
-  modelViewVendaProduto.setHeaderData("dataFinanceiro", "Financeiro");
-  modelViewVendaProduto.setHeaderData("idVenda", "Venda");
-  modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
-  modelViewVendaProduto.setHeaderData("produto", "Produto");
-  modelViewVendaProduto.setHeaderData("caixas", "Caixas");
-  modelViewVendaProduto.setHeaderData("quant", "Quant.");
-  modelViewVendaProduto.setHeaderData("un", "Un.");
-  modelViewVendaProduto.setHeaderData("codComercial", "Cód. Com.");
-  modelViewVendaProduto.setHeaderData("formComercial", "Form. Com.");
-  modelViewVendaProduto.setHeaderData("status", "Status");
-  modelViewVendaProduto.setHeaderData("statusFinanceiro", "Financeiro");
-  modelViewVendaProduto.setHeaderData("obs", "Obs.");
+  modelProduto.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelProduto.setHeaderData("dataFinanceiro", "Financeiro");
+  modelProduto.setHeaderData("idVenda", "Venda");
+  modelProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelProduto.setHeaderData("produto", "Produto");
+  modelProduto.setHeaderData("caixas", "Caixas");
+  modelProduto.setHeaderData("quant", "Quant.");
+  modelProduto.setHeaderData("un", "Un.");
+  modelProduto.setHeaderData("codComercial", "Cód. Com.");
+  modelProduto.setHeaderData("formComercial", "Form. Com.");
+  modelProduto.setHeaderData("status", "Status");
+  modelProduto.setHeaderData("statusFinanceiro", "Financeiro");
+  modelProduto.setHeaderData("obs", "Obs.");
 
-  modelViewVendaProduto.proxyModel = new FinanceiroProxyModel(&modelViewVendaProduto, this);
+  modelProduto.proxyModel = new FinanceiroProxyModel(&modelProduto, this);
 
-  ui->table->setModel(&modelViewVendaProduto);
+  ui->table->setModel(&modelProduto);
 
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
 }
@@ -161,14 +161,14 @@ void WidgetCompraPendentes::setupTables() {
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   const int row = index.row();
 
-  const QString status = modelViewVendaProduto.data(row, "status").toString();
+  const QString status = modelProduto.data(row, "status").toString();
 
   if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { throw RuntimeError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
-  const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
-  const QString fornecedor = modelViewVendaProduto.data(row, "fornecedor").toString();
-  const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
-  const QString idVenda = modelViewVendaProduto.data(row, "idVenda").toString();
+  const QString financeiro = modelProduto.data(row, "statusFinanceiro").toString();
+  const QString fornecedor = modelProduto.data(row, "fornecedor").toString();
+  const QString codComercial = modelProduto.data(row, "codComercial").toString();
+  const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
   if (financeiro == "PENDENTE") {
     QMessageBox msgBox(QMessageBox::Question, "Pendente!", "Financeiro não liberou! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
@@ -239,7 +239,7 @@ void WidgetCompraPendentes::montaFiltro() {
 
   filtros << "quant > 0";
 
-  modelViewVendaProduto.setFilter(filtros.join(" AND "));
+  modelProduto.setFilter(filtros.join(" AND "));
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
@@ -335,11 +335,11 @@ void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const doubl
 }
 
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProduto.data(selection.first().row(), "idVenda").toString();
 
   Excel excel(idVenda, Excel::Tipo::Venda, this);
   excel.mostrarRT = true;
@@ -347,11 +347,11 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 }
 
 void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProduto.data(selection.first().row(), "idVenda").toString();
 
   PDF impressao(idVenda, PDF::Tipo::Venda, this);
   impressao.mostrarRT = true;
@@ -359,11 +359,11 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 }
 
 void WidgetCompraPendentes::on_pushButtonFollowup_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+  const QString idVenda = modelProduto.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  SqlTableModel modelViewFluxoCaixa;
+  SqlTableModel modelFluxoCaixa;
   Ui::PagamentosDia *ui;
   // methods
   auto setupTables() -> void;

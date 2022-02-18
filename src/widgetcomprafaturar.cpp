@@ -34,22 +34,22 @@ void WidgetCompraFaturar::setupTables() {
 
   //---------------------------------------------------------------------------
 
-  modelViewFaturamento.setTable("view_faturamento");
+  modelFaturamento.setTable("view_faturamento");
 
-  modelViewFaturamento.setSort("ordemCompra");
+  modelFaturamento.setSort("ordemCompra");
 
-  modelViewFaturamento.setHeaderData("ordemCompra", "OC");
-  modelViewFaturamento.setHeaderData("fornecedor", "Fornecedor");
-  modelViewFaturamento.setHeaderData("data", "Data Venda");
-  modelViewFaturamento.setHeaderData("produtos", "Produtos");
-  modelViewFaturamento.setHeaderData("total", "Total");
-  modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
-  modelViewFaturamento.setHeaderData("vendedor", "Vendedor");
-  modelViewFaturamento.setHeaderData("idVenda", "Venda");
-  modelViewFaturamento.setHeaderData("dataFollowup", "Data Followup");
-  modelViewFaturamento.setHeaderData("observacao", "Observação");
+  modelFaturamento.setHeaderData("ordemCompra", "OC");
+  modelFaturamento.setHeaderData("fornecedor", "Fornecedor");
+  modelFaturamento.setHeaderData("data", "Data Venda");
+  modelFaturamento.setHeaderData("produtos", "Produtos");
+  modelFaturamento.setHeaderData("total", "Total");
+  modelFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
+  modelFaturamento.setHeaderData("vendedor", "Vendedor");
+  modelFaturamento.setHeaderData("idVenda", "Venda");
+  modelFaturamento.setHeaderData("dataFollowup", "Data Followup");
+  modelFaturamento.setHeaderData("observacao", "Observação");
 
-  ui->table->setModel(&modelViewFaturamento);
+  ui->table->setModel(&modelFaturamento);
 
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
@@ -81,7 +81,7 @@ void WidgetCompraFaturar::updateTables() {
 
   //--------------------------------------
 
-  modelViewFaturamento.select();
+  modelFaturamento.select();
 }
 
 void WidgetCompraFaturar::resetTables() {
@@ -109,18 +109,18 @@ void WidgetCompraFaturar::faturarRepresentacao(const QDate dataReal, const QStri
 }
 
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma compra!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma compra!", this); }
 
   QStringList idsCompra;
   QStringList fornecedores;
   QStringList idVendas;
 
-  for (const auto &index : list) {
-    idsCompra << modelViewFaturamento.data(index.row(), "idCompra").toString();
-    fornecedores << modelViewFaturamento.data(index.row(), "fornecedor").toString();
-    idVendas << modelViewFaturamento.data(index.row(), "idVenda").toString();
+  for (const auto &index : selection) {
+    idsCompra << modelFaturamento.data(index.row(), "idCompra").toString();
+    fornecedores << modelFaturamento.data(index.row(), "fornecedor").toString();
+    idVendas << modelFaturamento.data(index.row(), "idVenda").toString();
   }
 
   const int size = fornecedores.size();
@@ -169,25 +169,25 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
 
-  modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
+  modelFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
 }
 
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
+  if (selection.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
   auto *cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
-  cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "ordemCompra").toString());
+  cancelaProduto->setFilter(modelFaturamento.data(selection.first().row(), "ordemCompra").toString());
 }
 
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::ReagendarFaturamento, this);
   if (input.exec() != InputDialog::Accepted) { return; }
@@ -200,8 +200,8 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   SqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
-  for (const auto &index : list) {
-    const int idCompra = modelViewFaturamento.data(index.row(), "idCompra").toInt();
+  for (const auto &index : selection) {
+    const int idCompra = modelFaturamento.data(index.row(), "idCompra").toInt();
 
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
@@ -229,7 +229,7 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString ordemCompra = modelViewFaturamento.data(selection.first().row(), "ordemCompra").toString();
+  const QString ordemCompra = modelFaturamento.data(selection.first().row(), "ordemCompra").toString();
 
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -238,7 +238,7 @@ void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
 
 void WidgetCompraFaturar::on_tableResumo_clicked(const QModelIndex &index) {
   if (not index.isValid()) {
-    modelViewFaturamento.setFilter("");
+    modelFaturamento.setFilter("");
     ui->checkBoxRepresentacao->setChecked(false);
     return;
   }
@@ -247,7 +247,7 @@ void WidgetCompraFaturar::on_tableResumo_clicked(const QModelIndex &index) {
 
   const QString filtro = "fornecedor = '" + fornecedor + "'";
 
-  modelViewFaturamento.setFilter(filtro);
+  modelFaturamento.setFilter(filtro);
 
   // --------------------------------------------
 
@@ -263,7 +263,7 @@ void WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked() {
 
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewFaturamento.setFilter(filtro);
+  modelFaturamento.setFilter(filtro);
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

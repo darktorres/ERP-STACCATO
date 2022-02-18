@@ -22,9 +22,9 @@ public:
 private:
   // attributes
   bool isSet = false;
-  SqlTableModel modelViewRelatorio;
-  SqlQueryModel modelViewRelatorioLoja;
-  SqlQueryModel modelViewRelatorioVendedor;
+  SqlQueryModel modelLoja;
+  SqlQueryModel modelVendedor;
+  SqlTableModel modelRelatorio;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;

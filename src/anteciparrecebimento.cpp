@@ -78,13 +78,13 @@ void AnteciparRecebimento::unsetConnections() {
 }
 
 void AnteciparRecebimento::calcularTotais() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
   double bruto = 0;
   double liquido = 0;
   double prazoMedio = 0;
 
-  for (const auto &index : list) {
+  for (const auto &index : selection) {
     const int row = index.row();
 
     const QString tipo = modelContaReceber.data(row, "tipo").toString();
@@ -320,15 +320,15 @@ void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  verifyFields(list);
+  verifyFields(selection);
 
   qApp->startTransaction("AnteciparRecebimento::on_pushButtonGerar");
 
-  cadastrar(list);
+  cadastrar(selection);
 
   qApp->endTransaction();
 
@@ -422,16 +422,16 @@ void AnteciparRecebimento::selecionarTaxa() {
     const int vpos = ui->table->verticalScrollBar()->sliderPosition();
     const int hpos = ui->table->horizontalScrollBar()->sliderPosition();
 
-    const auto listSelection = ui->table->selectionModel()->selectedRows();
+    const auto selection = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : listSelection) {
+    for (const auto &index : selection) {
       const QString idVenda = modelContaReceber.data(index.row(), "idVenda").toString();
       const QString tipo = modelContaReceber.data(index.row(), "tipo").toString().left(1) + ". TAXA CARTÃO";
       const QString parcela = modelContaReceber.data(index.row(), "parcela").toString();
 
-      const auto listMatch = modelContaReceber.multiMatch({{"idVenda", idVenda}, {"tipo", tipo}, {"parcela", parcela}});
+      const auto match = modelContaReceber.multiMatch({{"idVenda", idVenda}, {"tipo", tipo}, {"parcela", parcela}});
 
-      for (const auto &rowMatch : listMatch) { ui->table->selectRow(rowMatch); }
+      for (const auto &rowMatch : match) { ui->table->selectRow(rowMatch); }
     }
 
     ui->table->verticalScrollBar()->setSliderPosition(vpos);

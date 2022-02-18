@@ -368,19 +368,19 @@ void ImportarXML::salvarDadosVenda() {
   for (int row = 0; row < modelConsumo.rowCount(); ++row) {
     const int idEstoque = modelConsumo.data(row, "idEstoque").toInt();
 
-    const auto list = modelEstoque.multiMatch({{"idEstoque", idEstoque}}, false);
+    const auto match = modelEstoque.multiMatch({{"idEstoque", idEstoque}}, false);
 
-    if (list.isEmpty()) { throw RuntimeException("Erro buscando lote!"); }
+    if (match.isEmpty()) { throw RuntimeException("Erro buscando lote!"); }
 
-    const QString lote = modelEstoque.data(list.first(), "lote").toString();
+    const QString lote = modelEstoque.data(match.first(), "lote").toString();
 
     const int idVendaProduto2 = modelConsumo.data(row, "idVendaProduto2").toInt();
 
-    const auto list2 = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
+    const auto match2 = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-    if (list2.isEmpty()) { throw RuntimeException("Erro buscando lote!"); }
+    if (match2.isEmpty()) { throw RuntimeException("Erro buscando lote!"); }
 
-    modelVenda.setData(list2.first(), "lote", lote);
+    modelVenda.setData(match2.first(), "lote", lote);
   }
 
   modelVenda.submitAll();
@@ -430,11 +430,11 @@ void ImportarXML::importar() {
 }
 
 void ImportarXML::salvarDadosCompra() {
-  const auto list = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}});
+  const auto match = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}});
 
-  if (list.isEmpty()) { throw RuntimeException("Erro buscando produtos da compra!"); }
+  if (match.isEmpty()) { throw RuntimeException("Erro buscando produtos da compra!"); }
 
-  for (const auto &row : list) {
+  for (const auto &row : match) {
     modelCompra.setData(row, "status", "EM COLETA");
     modelCompra.setData(row, "dataRealFat", dataFaturamento);
   }
@@ -452,15 +452,15 @@ void ImportarXML::salvarDadosCompra() {
 }
 
 void ImportarXML::verifyFields() {
-  const auto list = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}}, false);
+  const auto match = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}}, false);
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma compra pareada!", this); }
+  if (match.isEmpty()) { throw RuntimeError("Nenhuma compra pareada!", this); }
 
   //----------------------------------------------------------------
 
-  const auto list2 = modelEstoque.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+  const auto match2 = modelEstoque.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-  if (not list2.isEmpty()) { throw RuntimeError("Nem todos os estoques estão ok!", this); }
+  if (not match2.isEmpty()) { throw RuntimeError("Nem todos os estoques estão ok!", this); }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     if (modelEstoque.data(row, "lote").toString().isEmpty()) { throw RuntimeError("Lote vazio! Se não há coloque 'N/D'!", this); }
@@ -493,9 +493,9 @@ void ImportarXML::on_pushButtonImportar_clicked() {
 }
 
 void ImportarXML::limparAssociacoes() {
-  const auto list = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}});
+  const auto match = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}});
 
-  for (const auto row : list) { modelCompra.setData(row, "quantUpd", static_cast<int>(FieldColors::None)); }
+  for (const auto row : match) { modelCompra.setData(row, "quantUpd", static_cast<int>(FieldColors::None)); }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     modelEstoque.setData(row, "quantUpd", static_cast<int>(FieldColors::Red));
@@ -520,9 +520,9 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
     usarXMLInutilizado();
     parear();
 
-    const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+    const auto match = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-    if (list.isEmpty()) {
+    if (match.isEmpty()) {
       ui->pushButtonProcurar->setDisabled(true);
       ui->itemBoxNFe->setReadOnly(true);
     }
@@ -547,9 +547,9 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
 
       parear();
 
-      const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+      const auto match = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-      if (list.isEmpty()) {
+      if (match.isEmpty()) {
         ui->pushButtonProcurar->setDisabled(true);
         ui->itemBoxNFe->setReadOnly(true);
       }
@@ -634,9 +634,9 @@ void ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
 }
 
 bool ImportarXML::verificaExiste(const XML &xml) {
-  const auto list = modelNFe.multiMatch({{"chaveAcesso", xml.chaveAcesso}}, false);
+  const auto match = modelNFe.multiMatch({{"chaveAcesso", xml.chaveAcesso}}, false);
 
-  if (not list.isEmpty()) { throw RuntimeError("NF-e já cadastrada!", this); }
+  if (not match.isEmpty()) { throw RuntimeError("NF-e já cadastrada!", this); }
 
   // ----------------------------------------------------------------
 
@@ -903,11 +903,11 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   // -------------------------------------
 
-  const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
+  const auto match = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-  if (list.isEmpty()) { throw RuntimeException("Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
+  if (match.isEmpty()) { throw RuntimeException("Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
 
-  const int rowVenda = list.first();
+  const int rowVenda = match.first();
 
   const double quantVenda = qApp->roundDouble(modelVenda.data(rowVenda, "quant").toDouble());
   const double restanteEstoque = qApp->roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
@@ -1096,11 +1096,11 @@ void ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
   const int idVendaProduto2 = modelCompra.data(rowCompra, "idVendaProduto2").toInt();
 
   if (idVendaProduto2 != 0) {
-    const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
+    const auto match = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-    if (list.isEmpty()) { throw RuntimeException("Erro procurando produto da venda!"); }
+    if (match.isEmpty()) { throw RuntimeException("Erro procurando produto da venda!"); }
 
-    const int rowVenda = list.first();
+    const int rowVenda = match.first();
 
     const int novoIdVenda = dividirVenda(rowVenda, quantAdicionar);
 

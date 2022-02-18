@@ -43,7 +43,7 @@ void WidgetLogisticaColeta::updateTables() {
     isSet = true;
   }
 
-  modelViewColeta.select();
+  modelColeta.select();
   modelFornecedor.select();
 }
 
@@ -53,29 +53,29 @@ void WidgetLogisticaColeta::resetTables() {
 }
 
 void WidgetLogisticaColeta::setupTables() {
-  modelViewColeta.setTable("view_coleta");
+  modelColeta.setTable("view_coleta");
 
-  modelViewColeta.setSort("prazoEntrega");
+  modelColeta.setSort("prazoEntrega");
 
-  modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
-  modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
-  modelViewColeta.setHeaderData("idEstoque", "Estoque");
-  modelViewColeta.setHeaderData("lote", "Lote");
-  modelViewColeta.setHeaderData("local", "Local");
-  modelViewColeta.setHeaderData("bloco", "Bloco");
-  modelViewColeta.setHeaderData("numeroNFe", "NF-e");
-  modelViewColeta.setHeaderData("idVenda", "Venda");
-  modelViewColeta.setHeaderData("ordemCompra", "OC");
-  modelViewColeta.setHeaderData("produto", "Produto");
-  modelViewColeta.setHeaderData("codComercial", "Cód. Com.");
-  modelViewColeta.setHeaderData("quant", "Quant.");
-  modelViewColeta.setHeaderData("un", "Un.");
-  modelViewColeta.setHeaderData("caixas", "Caixas");
-  modelViewColeta.setHeaderData("kgcx", "Kg./Cx.");
+  modelColeta.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
+  modelColeta.setHeaderData("idEstoque", "Estoque");
+  modelColeta.setHeaderData("lote", "Lote");
+  modelColeta.setHeaderData("local", "Local");
+  modelColeta.setHeaderData("bloco", "Bloco");
+  modelColeta.setHeaderData("numeroNFe", "NF-e");
+  modelColeta.setHeaderData("idVenda", "Venda");
+  modelColeta.setHeaderData("ordemCompra", "OC");
+  modelColeta.setHeaderData("produto", "Produto");
+  modelColeta.setHeaderData("codComercial", "Cód. Com.");
+  modelColeta.setHeaderData("quant", "Quant.");
+  modelColeta.setHeaderData("un", "Un.");
+  modelColeta.setHeaderData("caixas", "Caixas");
+  modelColeta.setHeaderData("kgcx", "Kg./Cx.");
 
-  modelViewColeta.proxyModel = new EstoquePrazoProxyModel(&modelViewColeta, this);
+  modelColeta.proxyModel = new EstoquePrazoProxyModel(&modelColeta, this);
 
-  ui->table->setModel(&modelViewColeta);
+  ui->table->setModel(&modelColeta);
 
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idNFe");
@@ -93,13 +93,13 @@ void WidgetLogisticaColeta::setupTables() {
 }
 
 void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelViewColeta.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelColeta.data(index.row(), "idVenda").toString(); }
 
   InputDialog input(InputDialog::Tipo::Coleta, this);
 
@@ -107,7 +107,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonMarcarColetado");
 
-  cadastrar(list, input.getDate(), input.getNextDate());
+  cadastrar(selection, input.getDate(), input.getNextDate());
 
   Sql::updateVendaStatus(idVendas);
 
@@ -136,25 +136,25 @@ void WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate d
   query4.prepare("UPDATE veiculo_has_produto SET status = 'COLETADO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {
-    query1.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query1.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query1.exec()) { throw RuntimeException("Erro salvando status do estoque: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealColeta", dataColeta);
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
-    query2.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query2.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query2.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query2.lastError().text()); }
 
     query3.bindValue(":dataRealColeta", dataColeta);
     query3.bindValue(":dataPrevReceb", dataPrevReceb);
-    query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query3.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query3.exec()) { throw RuntimeException("Erro atualizando status da compra: " + query3.lastError().text()); }
 
     // -------------------------------------------------------------------------
 
-    query4.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query4.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query4.exec()) { throw RuntimeException("Erro atualizando veiculo_has_produto: " + query4.lastError().text()); }
   }
@@ -167,13 +167,13 @@ void WidgetLogisticaColeta::on_lineEditBusca_textChanged() { montaFiltro(); }
 void WidgetLogisticaColeta::montaFiltro() {
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  modelViewColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
+  modelColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
 }
 
 void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::AgendarColeta, this);
 
@@ -181,7 +181,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonReagendar");
 
-  reagendar(list, input.getNextDate());
+  reagendar(selection, input.getNextDate());
 
   qApp->endTransaction();
 
@@ -202,8 +202,8 @@ void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate d
   query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {
-    const int idEstoque = modelViewColeta.data(index.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewColeta.data(index.row(), "codComercial").toString();
+    const int idEstoque = modelColeta.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelColeta.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":dataPrevColeta", dataPrevColeta);
     query1.bindValue(":idEstoque", idEstoque);
@@ -218,7 +218,7 @@ void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate d
     if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
 
     query3.bindValue(":data", dataPrevColeta);
-    query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query3.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query3.exec()) { throw RuntimeException("Erro atualizando data no veiculo: " + query3.lastError().text()); }
   }
@@ -237,8 +237,8 @@ void WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
   query3.prepare("UPDATE veiculo_has_produto SET data = NULL WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &index : list) {
-    const int idEstoque = modelViewColeta.data(index.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewColeta.data(index.row(), "codComercial").toString();
+    const int idEstoque = modelColeta.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelColeta.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
@@ -250,16 +250,16 @@ void WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
 
     if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
 
-    query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
+    query3.bindValue(":idEstoque", modelColeta.data(index.row(), "idEstoque"));
 
     if (not query3.exec()) { throw RuntimeException("Erro atualizando data no veiculo: " + query3.lastError().text()); }
   }
 }
 
 void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Cancelar");
@@ -269,7 +269,7 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonCancelar");
 
-  cancelar(list);
+  cancelar(selection);
 
   qApp->endTransaction();
 
@@ -283,7 +283,7 @@ void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString idEstoque = modelViewColeta.data(selection.first().row(), "idEstoque").toString();
+  const QString idEstoque = modelColeta.data(selection.first().row(), "idEstoque").toString();
 
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -293,21 +293,21 @@ void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
 void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString header = modelViewColeta.headerData(index.column(), Qt::Horizontal).toString();
+  const QString header = modelColeta.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Estoque") { return qApp->abrirEstoque(modelViewColeta.data(index.row(), "idEstoque")); }
+  if (header == "Estoque") { return qApp->abrirEstoque(modelColeta.data(index.row(), "idEstoque")); }
 
-  if (header == "NF-e") { return qApp->abrirNFe(modelViewColeta.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelColeta.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
-    QStringList ids = modelViewColeta.data(index.row(), "idVenda").toString().split(", ");
+    QStringList ids = modelColeta.data(index.row(), "idVenda").toString().split(", ");
 
     for (const auto &id : ids) { qApp->abrirVenda(id); }
 
     return;
   }
 
-  if (header == "OC") { return qApp->abrirCompra(modelViewColeta.data(index.row(), "ordemCompra")); }
+  if (header == "OC") { return qApp->abrirCompra(modelColeta.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaColeta::on_pushButtonLimparFiltro_clicked() {
@@ -324,7 +324,7 @@ void WidgetLogisticaColeta::on_tableForn_selectionChanged() {
 
   const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewColeta.setFilter(filtro);
+  modelColeta.setFilter(filtro);
 
   ui->checkBoxMarcarTodos->setChecked(false);
 }

@@ -23,11 +23,11 @@ public:
 private:
   // attributes
   bool isSet = false;
+  SqlTableModel modelCompras;
   SqlTableModel modelFinanceiro;
   SqlTableModel modelNFe;
   SqlTableModel modelProdutos2;
   SqlTableModel modelProdutos;
-  SqlTableModel modelViewComprasFinanceiro;
   SqlTreeModel modelTree;
   Ui::WidgetCompraHistorico *ui;
   // methods

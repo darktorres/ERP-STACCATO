@@ -22,8 +22,8 @@ public:
 private:
   // attributes
   QString const id;
+  SqlTableModel modelFollowup;
   SqlTableModel modelOrcamento;
-  SqlTableModel modelViewFollowup;
   Tipo const tipo;
   Ui::FollowUp *ui;
   // methods

@@ -44,7 +44,7 @@ void WidgetLogisticaRecebimento::updateTables() {
     isSet = true;
   }
 
-  modelViewRecebimento.select();
+  modelRecebimento.select();
   modelFornecedor.select();
 }
 
@@ -54,28 +54,28 @@ void WidgetLogisticaRecebimento::resetTables() {
 }
 
 void WidgetLogisticaRecebimento::setupTables() {
-  modelViewRecebimento.setTable("view_recebimento");
+  modelRecebimento.setTable("view_recebimento");
 
-  modelViewRecebimento.setSort("prazoEntrega");
+  modelRecebimento.setSort("prazoEntrega");
 
-  modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
-  modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
-  modelViewRecebimento.setHeaderData("idEstoque", "Estoque");
-  modelViewRecebimento.setHeaderData("lote", "Lote");
-  modelViewRecebimento.setHeaderData("local", "Local");
-  modelViewRecebimento.setHeaderData("bloco", "Bloco");
-  modelViewRecebimento.setHeaderData("numeroNFe", "NF-e");
-  modelViewRecebimento.setHeaderData("idVenda", "Venda");
-  modelViewRecebimento.setHeaderData("ordemCompra", "OC");
-  modelViewRecebimento.setHeaderData("produto", "Produto");
-  modelViewRecebimento.setHeaderData("codComercial", "Cód. Com.");
-  modelViewRecebimento.setHeaderData("quant", "Quant.");
-  modelViewRecebimento.setHeaderData("un", "Un.");
-  modelViewRecebimento.setHeaderData("caixas", "Caixas");
+  modelRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
+  modelRecebimento.setHeaderData("idEstoque", "Estoque");
+  modelRecebimento.setHeaderData("lote", "Lote");
+  modelRecebimento.setHeaderData("local", "Local");
+  modelRecebimento.setHeaderData("bloco", "Bloco");
+  modelRecebimento.setHeaderData("numeroNFe", "NF-e");
+  modelRecebimento.setHeaderData("idVenda", "Venda");
+  modelRecebimento.setHeaderData("ordemCompra", "OC");
+  modelRecebimento.setHeaderData("produto", "Produto");
+  modelRecebimento.setHeaderData("codComercial", "Cód. Com.");
+  modelRecebimento.setHeaderData("quant", "Quant.");
+  modelRecebimento.setHeaderData("un", "Un.");
+  modelRecebimento.setHeaderData("caixas", "Caixas");
 
-  modelViewRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelViewRecebimento, this);
+  modelRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelRecebimento, this);
 
-  ui->table->setModel(&modelViewRecebimento);
+  ui->table->setModel(&modelRecebimento);
 
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idNFe");
@@ -123,17 +123,17 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   const int idBloco = queryBloco.value("idBloco").toInt();
 
   for (const auto &index : list) {
-    const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");
+    const bool isCD = (modelRecebimento.data(index.row(), "local").toString() == "CD");
 
     queryEstoque.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
     queryEstoque.bindValue(":recebidoPor", recebidoPor);
-    queryEstoque.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryEstoque.bindValue(":idEstoque", modelRecebimento.data(index.row(), "idEstoque"));
 
     if (not queryEstoque.exec()) { throw RuntimeException("Erro atualizando status do estoque: " + queryEstoque.lastError().text()); }
 
     //-----------------------------------------------------------------
 
-    queryConsumo.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryConsumo.bindValue(":idEstoque", modelRecebimento.data(index.row(), "idEstoque"));
     queryConsumo.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
 
     if (not queryConsumo.exec()) { throw RuntimeException("Erro atualizando status da venda: " + queryConsumo.lastError().text()); }
@@ -141,44 +141,44 @@ void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     //-----------------------------------------------------------------
 
     queryCompra.bindValue(":dataRealReceb", dataReceb);
-    queryCompra.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
-    queryCompra.bindValue(":codComercial", modelViewRecebimento.data(index.row(), "codComercial"));
+    queryCompra.bindValue(":idEstoque", modelRecebimento.data(index.row(), "idEstoque"));
+    queryCompra.bindValue(":codComercial", modelRecebimento.data(index.row(), "codComercial"));
 
     if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 
     //-----------------------------------------------------------------
 
     queryVenda.bindValue(":dataRealReceb", dataReceb);
-    queryVenda.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryVenda.bindValue(":idEstoque", modelRecebimento.data(index.row(), "idEstoque"));
 
     if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + queryVenda.lastError().text()); }
 
     //-----------------------------------------------------------------
 
     queryGare.bindValue(":dataRealReceb", qApp->ajustarDiaUtil(dataReceb.addDays(1)));
-    queryGare.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    queryGare.bindValue(":idEstoque", modelRecebimento.data(index.row(), "idEstoque"));
 
     if (not queryGare.exec()) { throw RuntimeException("Erro atualizando pagamento gare: " + queryGare.lastError().text()); }
 
     //-----------------------------------------------------------------
 
-    queryNFe.bindValue(":idNFe", modelViewRecebimento.data(index.row(), "idNFe"));
+    queryNFe.bindValue(":idNFe", modelRecebimento.data(index.row(), "idNFe"));
 
     if (not queryNFe.exec()) { throw RuntimeException("Erro marcando NF-e para confirmar: " + queryNFe.lastError().text()); }
   }
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList ids;
   QStringList idVendas;
 
-  for (const auto &index : list) {
-    ids << modelViewRecebimento.data(index.row(), "idEstoque").toString();
-    idVendas << modelViewRecebimento.data(index.row(), "idVenda").toString();
+  for (const auto &index : selection) {
+    ids << modelRecebimento.data(index.row(), "idEstoque").toString();
+    idVendas << modelRecebimento.data(index.row(), "idVenda").toString();
   }
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
@@ -188,7 +188,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido");
 
-  processRows(list, inputDlg.getDate(), inputDlg.getRecebeu());
+  processRows(selection, inputDlg.getDate(), inputDlg.getRecebeu());
 
   Sql::updateVendaStatus(idVendas);
 
@@ -207,13 +207,13 @@ void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged() { montaFiltro();
 void WidgetLogisticaRecebimento::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  modelViewRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
+  modelRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::ReagendarRecebimento, this);
 
@@ -221,7 +221,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonReagendar");
 
-  reagendar(list, input.getNextDate());
+  reagendar(selection, input.getNextDate());
 
   qApp->endTransaction();
 
@@ -239,8 +239,8 @@ void WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
                  "AND status = 'EM RECEBIMENTO'");
 
   for (const auto &index : list) {
-    const int idEstoque = modelViewRecebimento.data(index.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewRecebimento.data(index.row(), "codComercial").toString();
+    const int idEstoque = modelRecebimento.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelRecebimento.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":dataPrevReceb", dataPrevReceb);
     query1.bindValue(":idEstoque", idEstoque);
@@ -257,13 +257,13 @@ void WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList idVendas;
 
-  for (const auto &index : list) { idVendas << modelViewRecebimento.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) { idVendas << modelRecebimento.data(index.row(), "idVenda").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Cancelar");
@@ -273,7 +273,7 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonCancelar");
 
-  cancelar(list);
+  cancelar(selection);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -296,8 +296,8 @@ void WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
                  "estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &index : list) {
-    const int idEstoque = modelViewRecebimento.data(index.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewRecebimento.data(index.row(), "codComercial").toString();
+    const int idEstoque = modelRecebimento.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelRecebimento.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":idEstoque", idEstoque);
 
@@ -320,7 +320,7 @@ void WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
 
-  const QString idEstoque = modelViewRecebimento.data(selection.first().row(), "idEstoque").toString();
+  const QString idEstoque = modelRecebimento.data(selection.first().row(), "idEstoque").toString();
 
   auto *followup = new FollowUp(idEstoque, FollowUp::Tipo::Estoque, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -330,21 +330,21 @@ void WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked() {
 void WidgetLogisticaRecebimento::on_table_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString header = modelViewRecebimento.headerData(index.column(), Qt::Horizontal).toString();
+  const QString header = modelRecebimento.headerData(index.column(), Qt::Horizontal).toString();
 
-  if (header == "Estoque") { return qApp->abrirEstoque(modelViewRecebimento.data(index.row(), "idEstoque")); }
+  if (header == "Estoque") { return qApp->abrirEstoque(modelRecebimento.data(index.row(), "idEstoque")); }
 
-  if (header == "NF-e") { return qApp->abrirNFe(modelViewRecebimento.data(index.row(), "idNFe")); }
+  if (header == "NF-e") { return qApp->abrirNFe(modelRecebimento.data(index.row(), "idNFe")); }
 
   if (header == "Venda") {
-    const QStringList ids = modelViewRecebimento.data(index.row(), "idVenda").toString().split(", ");
+    const QStringList ids = modelRecebimento.data(index.row(), "idVenda").toString().split(", ");
 
     for (const auto &id : ids) { qApp->abrirVenda(id); }
 
     return;
   }
 
-  if (header == "OC") { return qApp->abrirCompra(modelViewRecebimento.data(index.row(), "ordemCompra")); }
+  if (header == "OC") { return qApp->abrirCompra(modelRecebimento.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonLimparFiltro_clicked() {
@@ -361,7 +361,7 @@ void WidgetLogisticaRecebimento::on_tableForn_selectionChanged() {
 
   const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
 
-  modelViewRecebimento.setFilter(filtro);
+  modelRecebimento.setFilter(filtro);
 
   ui->checkBoxMarcarTodos->setChecked(false);
 }

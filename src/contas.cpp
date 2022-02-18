@@ -144,9 +144,9 @@ void Contas::preencher(const QModelIndex &index) {
 
         // TODO: substituir esse código por uma coluna 'idRelacionado' no banco de dados
         if (tipoPagamento.contains("DÉBITO") or tipoPagamento.contains("CRÉDITO")) {
-          const auto list = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
+          const auto match = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
 
-          for (const auto &rowMatch : list) {
+          for (const auto &rowMatch : match) {
             if (modelPendentes.data(rowMatch, "status").toString() == "CANCELADO") { continue; }
 
             if (queryConta.first()) {
@@ -169,9 +169,9 @@ void Contas::preencher(const QModelIndex &index) {
 
         // TODO: substituir esse código por uma coluna 'idRelacionado' no banco de dados
         if (tipoPagamento.contains("DÉBITO") or tipoPagamento.contains("CRÉDITO")) {
-          const auto list = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
+          const auto match = modelPendentes.multiMatch({{"tipo", tipoPagamento.left(1) + ". TAXA CARTÃO"}, {"parcela", parcela}});
 
-          for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
+          for (const auto &rowMatch : match) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
         }
       }
 
@@ -435,11 +435,11 @@ void Contas::on_pushButtonCriarLancamento_clicked() {
 }
 
 void Contas::on_pushButtonDuplicarLancamento_clicked() {
-  const auto list = ui->tablePendentes->selectionModel()->selectedRows();
+  const auto selection = ui->tablePendentes->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Deve selecionar uma linha primeiro!", this); }
 
-  for (const auto index : list) {
+  for (const auto index : selection) {
     const int row = index.row();
     const int newRow = modelPendentes.insertRowAtEnd();
 

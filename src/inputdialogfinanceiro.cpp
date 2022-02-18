@@ -126,9 +126,9 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
   try {
     double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+    const auto selection = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) {
+    for (const auto &index : selection) {
       const int row = index.row();
 
       modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota);
@@ -335,9 +335,9 @@ void InputDialogFinanceiro::calcularTotal() {
 
     double total = 0;
 
-    const auto list = table->selectionModel()->selectedRows();
+    const auto selection = table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += qApp->roundDouble(model->data(index.row(), coluna).toDouble(), 2); }
+    for (const auto &index : selection) { total += qApp->roundDouble(model->data(index.row(), coluna).toDouble(), 2); }
 
     selectedTotal = total;
     ui->widgetPgts->setTotal(selectedTotal);
@@ -346,9 +346,9 @@ void InputDialogFinanceiro::calcularTotal() {
 
     double totalSt = 0;
 
-    const auto list2 = ui->table->selectionModel()->selectedRows();
+    const auto selection2 = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list2) {
+    for (const auto &index : selection2) {
       const int row = index.row();
       const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
       const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
@@ -612,14 +612,14 @@ void InputDialogFinanceiro::verifyFields() {
 }
 
 void InputDialogFinanceiro::cadastrar() {
-  const auto list = ui->table->selectionModel()->selectedRows();
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (tipo == Tipo::ConfirmarCompra) {
-    for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "selecionado", true); }
+    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "selecionado", true); }
   }
 
   if (tipo == Tipo::Financeiro) {
-    for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText()); }
+    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText()); }
   }
 
   modelPedidoFornecedor.submitAll();
@@ -663,15 +663,15 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
   try {
     double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+    const auto selection = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
+    for (const auto &index : selection) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
     const double aliquota = valueSt * 100 / total;
 
     ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-    for (const auto &index : list) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
+    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota); }
 
     calcularTotal();
   } catch (std::exception &) {
@@ -711,9 +711,9 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged() {
 
     on_doubleSpinBoxAliquota_valueChanged(ui->doubleSpinBoxAliquota->value());
 
-    const auto list = ui->table->selectionModel()->selectedRows();
+    const auto selection = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) {
+    for (const auto &index : selection) {
       modelPedidoFornecedor2.setData(index.row(), "st", text);
       modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value());
     }

@@ -134,13 +134,13 @@ void CadastroStaccatoOff::on_radioButtonEstoque_toggled(const bool checked) {
 }
 
 void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
-  auto list = ui->tableView->selectionModel()->selectedRows();
+  const auto selection = ui->tableView->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxDesconto->value())) { throw RuntimeError("Selecione um desconto!", this); }
 
-  for (auto index : list) {
+  for (auto index : selection) {
     if (model.data(index.row(), "promocao").toInt() == 2) { throw RuntimeError("Linha com promoção selecionada!", this); }
   }
 
@@ -152,7 +152,7 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
 
   //--------------------------------------------
 
-  for (auto index : list) {
+  for (auto index : selection) {
     const QString idProduto = model.data(index.row(), "idProduto").toString();
 
     SqlQuery query;
@@ -169,11 +169,11 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
 }
 
 void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
-  auto list = ui->tableView->selectionModel()->selectedRows();
+  const auto selection = ui->tableView->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  for (auto index : list) {
+  for (auto index : selection) {
     if (model.data(index.row(), "promocao").toInt() != 2) { throw RuntimeError("Linha sem promoção selecionada!", this); }
   }
 
@@ -185,7 +185,7 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
 
   //--------------------------------------------
 
-  for (auto index : list) {
+  for (auto index : selection) {
     const QString idProduto = model.data(index.row(), "idProduto").toString();
 
     SqlQuery query;

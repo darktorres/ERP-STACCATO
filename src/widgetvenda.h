@@ -26,7 +26,7 @@ private:
   bool isSet = false;
   bool financeiro = false;
   QStack<int> blockingSignals;
-  SqlTableModel modelViewVenda;
+  SqlTableModel modelVenda;
   Ui::WidgetVenda *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;

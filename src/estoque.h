@@ -33,7 +33,7 @@ private:
   // attributes
   QString const idEstoque;
   SqlQueryModel modelEstoque;
-  SqlTableModel modelViewConsumo;
+  SqlTableModel modelConsumo;
   Ui::Estoque *ui;
   // methods
   auto dividirCompra(const int idVendaProduto2, const double quant) -> void;

@@ -26,6 +26,12 @@ QVariant SqlTableModel::data(const int row, const QString &column) const { retur
 void SqlTableModel::setData(const int row, const int column, const QVariant &value, const bool adjustValue) {
   if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlTableModel"); }
 
+  // TODO: apenas senha e XML não podem ser alterados
+  // XML pode ser detectado verificando se começa com < ou marcador BOM
+  // verificar aqui se a string é XML para evitar alterar setData em vários locais, podendo esquecer de alterar e o XML ser corrompido
+  // para remover BOM do XML:
+  // UPDATE nfe SET xml = REPLACE(xml, UNHEX('EFBBBF'), '') WHERE xml NOT LIKE '<%'
+
   QVariant adjustedValue = value;
 
   if (adjustValue and adjustedValue.userType() == QMetaType::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }

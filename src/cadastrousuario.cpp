@@ -271,7 +271,7 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   // those query's below commit transaction so have to be done outside transaction
   SqlQuery query;
-  query.prepare("CREATE USER :user@'%' IDENTIFIED WITH mysql_native_password BY '" + password + "'");
+  query.prepare("CREATE USER :user@'%' IDENTIFIED WITH mysql_native_password BY '" + password + "'"); // TODO: why isn't 'password' binded?
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
   if (not query.exec()) { throw RuntimeException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
@@ -341,3 +341,4 @@ void CadastroUsuario::connectLineEditsToDirty() {
 // FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais
 // FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
 // TODO: colocar combobox para escolher regime CLT/PJ/Outros
+// TODO: não dá para visualizar cadastros desativados

@@ -18,7 +18,7 @@
 #include <QRegularExpression>
 #include <QSqlError>
 #include <QTimer>
-#include <math.h>
+#include <cmath>
 
 using namespace std::chrono_literals;
 

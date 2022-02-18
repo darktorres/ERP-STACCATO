@@ -64,6 +64,7 @@ void WidgetCompraConsumos::setConnections() {
 
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked, connectionType);
+  connect(ui->tablePedido, &TableView::doubleClicked, this, &WidgetCompraConsumos::on_tablePedido_doubleClicked, connectionType);
   connect(ui->tablePedido->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraConsumos::on_tablePedido_selectionChanged, connectionType);
 }
 
@@ -137,6 +138,14 @@ void WidgetCompraConsumos::montaFiltro() {
   const QString filtroBusca = text.isEmpty() ? "0" : "Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'";
 
   modelPedido.setFilter(filtroBusca);
+}
+
+void WidgetCompraConsumos::on_tablePedido_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelPedido.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelPedido.data(index.row(), "Venda")); }
 }
 
 // TODO: converter tabela inferior para arvore e permitir o desconsumo apenas das sublinhas (vp2)

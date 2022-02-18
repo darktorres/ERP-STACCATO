@@ -203,9 +203,9 @@
    <item row="2" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButtonPesquisar">
+      <widget class="QPushButton" name="pushButtonBaixarNFe">
        <property name="text">
-        <string>Pesquisar NF-e</string>
+        <string>Baixar NF-es</string>
        </property>
       </widget>
      </item>
@@ -255,14 +255,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -274,7 +274,7 @@
   <tabstop>checkBoxNaoRealizada</tabstop>
   <tabstop>checkBoxCancelada</tabstop>
   <tabstop>table</tabstop>
-  <tabstop>pushButtonPesquisar</tabstop>
+  <tabstop>pushButtonBaixarNFe</tabstop>
   <tabstop>pushButtonCiencia</tabstop>
   <tabstop>pushButtonConfirmacao</tabstop>
   <tabstop>pushButtonDesconhecimento</tabstop>

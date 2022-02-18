@@ -307,7 +307,7 @@ void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
     return;
   }
 
-  if (header == "OC") { return qApp->abrirCompra(modelColeta.data(index.row(), "ordemCompra")); }
+  if (header == "O.C.") { return qApp->abrirCompra(modelColeta.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaColeta::on_pushButtonLimparFiltro_clicked() {

@@ -23,4 +23,5 @@ private:
   Ui::PagamentosDia *ui;
   // methods
   auto setupTables() -> void;
+  auto on_tableView_doubleClicked(const QModelIndex &index) -> void;
 };

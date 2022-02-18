@@ -32,9 +32,9 @@ void WidgetCompraConfirmar::setupTables() {
 
   modelCompras.setTable("view_compras");
 
-  modelCompras.setFilter("");
+  modelCompras.setHeaderData("OC", "O.C.");
 
-  modelCompras.setSort("OC");
+  modelCompras.setFilter("");
 
   modelCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
 
@@ -52,7 +52,8 @@ void WidgetCompraConfirmar::setConnections() {
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked, connectionType);
-  connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraConfirmar::on_tableResumo_clicked, connectionType);
+  connect(ui->table, &TableView::doubleClicked, this, &WidgetCompraConfirmar::on_table_doubleClicked, connectionType);
+  connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraConfirmar::on_tableResumo_clicked, connectionType);
 }
 
 void WidgetCompraConfirmar::updateTables() {
@@ -160,6 +161,14 @@ void WidgetCompraConfirmar::on_pushButtonLimparFiltro_clicked() {
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
   modelCompras.setFilter(filtro);
+}
+
+void WidgetCompraConfirmar::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelCompras.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelCompras.data(index.row(), "Venda")); }
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

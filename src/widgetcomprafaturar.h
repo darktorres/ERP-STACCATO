@@ -34,6 +34,7 @@ private:
   auto on_pushButtonMarcarFaturado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableResumo_clicked(const QModelIndex &index) -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

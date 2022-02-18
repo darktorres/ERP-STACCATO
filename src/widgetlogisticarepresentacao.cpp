@@ -151,7 +151,7 @@ void WidgetLogisticaRepresentacao::on_table_doubleClicked(const QModelIndex &ind
 
   if (header == "Venda") { return qApp->abrirVenda(modelRepresentacao.data(index.row(), "idVenda")); }
 
-  if (header == "OC") { return qApp->abrirCompra(modelRepresentacao.data(index.row(), "ordemCompra")); }
+  if (header == "O.C.") { return qApp->abrirCompra(modelRepresentacao.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonLimparFiltro_clicked() {

@@ -25,6 +25,7 @@ void WidgetCompraDevolucao::setConnections() {
   connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked, connectionType);
   connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked, connectionType);
   connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked, connectionType);
+  connect(ui->table, &TableView::doubleClicked, this, &WidgetCompraDevolucao::on_table_doubleClicked, connectionType);
 }
 
 void WidgetCompraDevolucao::updateTables() {
@@ -243,6 +244,14 @@ void WidgetCompraDevolucao::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraDevolucao::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelVendaProduto.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelVendaProduto.data(index.row(), "idVenda")); }
 }
 
 // TODO: colocar busca

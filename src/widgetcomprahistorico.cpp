@@ -23,6 +23,7 @@ void WidgetCompraHistorico::setConnections() {
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->tablePedidos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraHistorico::on_tablePedidos_selectionChanged, connectionType);
+  connect(ui->treeView, &TreeView::doubleClicked, this, &WidgetCompraHistorico::on_treeView_doubleClicked, connectionType);
 }
 
 void WidgetCompraHistorico::updateTables() {
@@ -229,6 +230,14 @@ void WidgetCompraHistorico::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(ordemCompra, FollowUp::Tipo::Compra, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetCompraHistorico::on_treeView_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelTree.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelTree.data(modelTree.index(index.row(), modelTree.fieldIndex("idVenda")))); }
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

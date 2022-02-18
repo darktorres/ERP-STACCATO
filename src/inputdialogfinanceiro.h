@@ -49,6 +49,7 @@ private:
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto on_table_selectionChanged() -> void;
   auto processarPagamento(Pagamento *pgt) -> void;
   auto setCodFornecedor() -> void;

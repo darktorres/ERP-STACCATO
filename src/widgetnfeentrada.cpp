@@ -102,6 +102,12 @@ void WidgetNfeEntrada::setupTables() {
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
+  const QString header = model.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(model.data(index.row(), "Venda")); }
+
+  // -------------------------------------------------------------------------
+
   SqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));

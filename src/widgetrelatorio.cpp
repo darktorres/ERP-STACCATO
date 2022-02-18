@@ -24,6 +24,7 @@ void WidgetRelatorio::setConnections() {
 
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged, connectionType);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetRelatorio::on_pushButtonExcel_clicked, connectionType);
+  connect(ui->tableRelatorio, &TableView::doubleClicked, this, &WidgetRelatorio::on_tableRelatorio_doubleClicked, connectionType);
 }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
@@ -238,6 +239,14 @@ void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
   }
 
   if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!"); }
+}
+
+void WidgetRelatorio::on_tableRelatorio_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelRelatorio.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelRelatorio.data(index.row(), "idVenda")); }
 }
 
 // TODO: vendedor especial recebe 0,5% nas vendas como consultor

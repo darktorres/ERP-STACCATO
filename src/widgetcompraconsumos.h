@@ -30,6 +30,7 @@ private:
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;
+  auto on_tablePedido_doubleClicked(const QModelIndex &index) -> void;
   auto on_tablePedido_selectionChanged() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

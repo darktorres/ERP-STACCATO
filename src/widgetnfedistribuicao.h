@@ -57,7 +57,7 @@ private:
   auto on_pushButtonConfirmacao_clicked() -> void;
   auto on_pushButtonDesconhecimento_clicked() -> void;
   auto on_pushButtonNaoRealizada_clicked() -> void;
-  auto on_pushButtonPesquisar_clicked() -> void;
+  auto on_pushButtonBaixarNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto processarEventoInformacao(const QString &evento) -> void;
   auto processarEventoNFe(const QString &evento) -> void;

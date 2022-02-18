@@ -96,6 +96,7 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::setCodFornecedor, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->table, &TableView::doubleClicked, this, &InputDialogFinanceiro::on_table_doubleClicked, connectionType);
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged, connectionType);
   connect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal, connectionType);
@@ -114,6 +115,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::setCodFornecedor);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
+  disconnect(ui->table, &TableView::doubleClicked, this, &InputDialogFinanceiro::on_table_doubleClicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
   disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::on_table_selectionChanged);
   disconnect(ui->tableFluxoCaixa->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
@@ -836,6 +838,14 @@ void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
 
     modelFluxoCaixa.setData(row, "grupo", grupo);
   }
+}
+
+void InputDialogFinanceiro::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelPedidoFornecedor2.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelPedidoFornecedor2.data(index.row(), "idVenda")); }
 }
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos

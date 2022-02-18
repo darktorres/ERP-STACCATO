@@ -34,9 +34,11 @@ void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->pushButtonAgendarColeta, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked, connectionType);
   connect(ui->pushButtonCancelarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMontarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked, connectionType);
   connect(ui->tableEstoque, &QTableView::doubleClicked, this, &WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked, connectionType);
+  connect(ui->tableForn->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::on_tableForn_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaAgendarColeta::setupTables() {
@@ -140,6 +142,16 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAgend->hideColumn("quantCaixa");
   ui->tableTranspAgend->hideColumn("obs");
   ui->tableTranspAgend->hideColumn("formComercial");
+
+  // -------------------------------------------------------------------------
+
+  modelFornecedor.setTable("view_fornecedor_logistica_agendar_coleta");
+
+  modelFornecedor.setFilter("");
+
+  ui->tableForn->setModel(&modelFornecedor);
+
+  ui->tableForn->sortByColumn("Fornecedor");
 }
 
 void WidgetLogisticaAgendarColeta::calcularPeso() {
@@ -173,16 +185,8 @@ void WidgetLogisticaAgendarColeta::updateTables() {
   }
 
   modelEstoque.select();
-
   modelTranspAgend.select();
-}
-
-void WidgetLogisticaAgendarColeta::tableFornLogistica_clicked(const QString &fornecedor) {
-  m_fornecedor = fornecedor;
-
-  ui->lineEditBusca->clear();
-
-  montaFiltro();
+  modelFornecedor.select();
 }
 
 void WidgetLogisticaAgendarColeta::resetTables() {
@@ -234,6 +238,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   processRows(list, input.getNextDate());
 
   qApp->endTransaction();
+
+  ui->tableEstoque->clearSelection();
 
   updateTables();
   qApp->enqueueInformation("Agendado com sucesso!", this);
@@ -393,9 +399,17 @@ void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled() { montaFiltro();
 void WidgetLogisticaAgendarColeta::montaFiltro() {
   QStringList filtros;
 
-  const QString filtroFornecedor = "fornecedor = '" + m_fornecedor + "'";
+  //-------------------------------------
 
-  if (not m_fornecedor.isEmpty()) { filtros << filtroFornecedor; }
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  if (not selection.isEmpty()) {
+    const QString fornecedor = modelFornecedor.data(selection.first().row(), "fornecedor").toString();
+
+    const QString filtroFornecedor = "fornecedor = '" + fornecedor + "'";
+
+    if (not fornecedor.isEmpty()) { filtros << filtroFornecedor; }
+  }
 
   //-------------------------------------
 
@@ -445,6 +459,19 @@ void WidgetLogisticaAgendarColeta::on_tableEstoque_doubleClicked(const QModelInd
   }
 
   if (header == "OC") { return qApp->abrirCompra(modelEstoque.data(index.row(), "ordemCompra")); }
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonLimparFiltro_clicked() {
+  ui->tableEstoque->clearSelection();
+  ui->tableForn->clearSelection();
+}
+
+void WidgetLogisticaAgendarColeta::on_tableForn_selectionChanged() {
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  ui->lineEditBusca->clear();
+
+  montaFiltro();
 }
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de tranferencia

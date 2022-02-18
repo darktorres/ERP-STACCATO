@@ -27,9 +27,11 @@ void WidgetLogisticaColeta::setConnections() {
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaColeta::on_table_doubleClicked, connectionType);
+  connect(ui->tableForn->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaColeta::on_tableForn_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaColeta::updateTables() {
@@ -42,16 +44,7 @@ void WidgetLogisticaColeta::updateTables() {
   }
 
   modelViewColeta.select();
-}
-
-void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {
-  ui->lineEditBusca->clear();
-
-  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
-
-  modelViewColeta.setFilter(filtro);
-
-  ui->checkBoxMarcarTodos->setChecked(false);
+  modelFornecedor.select();
 }
 
 void WidgetLogisticaColeta::resetTables() {
@@ -87,6 +80,16 @@ void WidgetLogisticaColeta::setupTables() {
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("idCompra");
+
+  // -------------------------------------------------------------------------
+
+  modelFornecedor.setTable("view_fornecedor_logistica_coleta");
+
+  modelFornecedor.setFilter("");
+
+  ui->tableForn->setModel(&modelFornecedor);
+
+  ui->tableForn->sortByColumn("Fornecedor");
 }
 
 void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
@@ -109,6 +112,8 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
   Sql::updateVendaStatus(idVendas);
 
   qApp->endTransaction();
+
+  ui->table->clearSelection();
 
   updateTables();
   qApp->enqueueInformation("Confirmado coleta!", this);
@@ -303,4 +308,23 @@ void WidgetLogisticaColeta::on_table_doubleClicked(const QModelIndex &index) {
   }
 
   if (header == "OC") { return qApp->abrirCompra(modelViewColeta.data(index.row(), "ordemCompra")); }
+}
+
+void WidgetLogisticaColeta::on_pushButtonLimparFiltro_clicked() {
+  ui->table->clearSelection();
+  ui->tableForn->clearSelection();
+}
+
+void WidgetLogisticaColeta::on_tableForn_selectionChanged() {
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  ui->lineEditBusca->clear();
+
+  const QString fornecedor = (selection.isEmpty()) ? "" : modelFornecedor.data(selection.first().row(), "fornecedor").toString();
+
+  const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewColeta.setFilter(filtro);
+
+  ui->checkBoxMarcarTodos->setChecked(false);
 }

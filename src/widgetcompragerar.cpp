@@ -271,14 +271,14 @@ int WidgetCompraGerar::getOrdemCompra() {
   SqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto")) {
-    throw RuntimeException("Erro buscando próxima OC: " + queryOC.lastError().text());
+    throw RuntimeException("Erro buscando próxima O.C.: " + queryOC.lastError().text());
   }
 
-  if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima OC!"); }
+  if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima O.C.!"); }
 
   bool ok = false;
 
-  int oc = QInputDialog::getInt(this, "OC", "Qual a Ordem de Compra?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
+  int oc = QInputDialog::getInt(this, "O.C.", "Qual a Ordem de Compra?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
 
   if (not ok) { throw std::exception(); }
 
@@ -293,7 +293,7 @@ int WidgetCompraGerar::getOrdemCompra() {
     if (not query2.first()) { break; }
 
     if (query2.first()) {
-      QMessageBox msgBox(QMessageBox::Question, "Atenção!", "OC já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+      QMessageBox msgBox(QMessageBox::Question, "Atenção!", "O.C. já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
       msgBox.button(QMessageBox::Yes)->setText("Continuar");
       msgBox.button(QMessageBox::No)->setText("Voltar");
 
@@ -303,7 +303,7 @@ int WidgetCompraGerar::getOrdemCompra() {
 
       bool ok2 = false;
 
-      oc = QInputDialog::getInt(this, "OC", "Qual a Ordem de Compra?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
+      oc = QInputDialog::getInt(this, "O.C.", "Qual a Ordem de Compra?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
 
       if (not ok2) { throw std::exception(); }
     }

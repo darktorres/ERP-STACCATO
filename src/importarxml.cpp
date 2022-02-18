@@ -240,7 +240,7 @@ void ImportarXML::setupTables() {
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
   modelCompra.setHeaderData("status", "Status");
-  modelCompra.setHeaderData("ordemCompra", "OC");
+  modelCompra.setHeaderData("ordemCompra", "O.C.");
   modelCompra.setHeaderData("idVenda", "Venda");
   modelCompra.setHeaderData("fornecedor", "Fornecedor");
   modelCompra.setHeaderData("descricao", "Produto");

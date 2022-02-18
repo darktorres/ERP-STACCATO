@@ -23,6 +23,18 @@ void WidgetVenda::setupTables() {
 
   modelVenda.setHeaderData("statusFinanceiro", "Financeiro");
   modelVenda.setHeaderData("dataFinanceiro", "Data Financ.");
+  modelVenda.setHeaderData("status", "Status");
+  modelVenda.setHeaderData("diasRestantes", "Dias restantes");
+  modelVenda.setHeaderData("idVenda", "Código");
+  modelVenda.setHeaderData("ordemRepresentacao", "O.C. Rep.");
+  modelVenda.setHeaderData("vendedor", "Vendedor");
+  modelVenda.setHeaderData("consultor", "Consultor");
+  modelVenda.setHeaderData("cliente", "Cliente");
+  modelVenda.setHeaderData("profissional", "Profissional");
+  modelVenda.setHeaderData("data", "Data");
+  modelVenda.setHeaderData("total", "Total R$");
+  modelVenda.setHeaderData("dataFollowup", "Data Followup");
+  modelVenda.setHeaderData("observacao", "Observação");
 
   modelVenda.proxyModel = new VendaProxyModel(&modelVenda, this);
 
@@ -33,7 +45,7 @@ void WidgetVenda::setupTables() {
   ui->table->hideColumn("idUsuarioConsultor");
   ui->table->hideColumn("fornecedores");
 
-  ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
 
 void WidgetVenda::ajustarGroupBoxStatus() {
@@ -69,12 +81,12 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroMes = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroMes = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
   if (not filtroMes.isEmpty()) { filtros << filtroMes; }
 
   //-------------------------------------
 
-  const QString filtroDia = (ui->checkBoxDia->isChecked()) ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  const QString filtroDia = (ui->checkBoxDia->isChecked()) ? "DATE_FORMAT(data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
   if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
@@ -91,7 +103,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(Vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -123,8 +135,8 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
-                              "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca +
+                              "%' OR `ordemRepresentacao` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
@@ -353,7 +365,7 @@ void WidgetVenda::on_table_activated(const QModelIndex &index) {
   auto *venda = new Venda(this);
   venda->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { venda->setFinanceiro(); }
-  venda->viewRegisterById(modelVenda.data(index.row(), "Código"));
+  venda->viewRegisterById(modelVenda.data(index.row(), "idVenda"));
 
   venda->show();
 }
@@ -399,7 +411,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  const QString idVenda = modelVenda.data(selection.first().row(), "Código").toString();
+  const QString idVenda = modelVenda.data(selection.first().row(), "idVenda").toString();
 
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

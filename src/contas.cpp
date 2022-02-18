@@ -361,17 +361,17 @@ void Contas::viewContaPagarData(const QString &dataPagamento) {
 }
 
 void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
-  setWindowTitle(windowTitle() + " - OC: " + ordemCompra);
+  setWindowTitle(windowTitle() + " - O.C.: " + ordemCompra);
 
   // -------------------------------------------------------------------------
 
   SqlQuery query;
 
   if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra)) {
-    throw RuntimeException("Erro buscando OC: " + query.lastError().text());
+    throw RuntimeException("Erro buscando O.C.: " + query.lastError().text());
   }
 
-  if (not query.first()) { throw RuntimeException("Não encontrado idCompra da OC: '" + ordemCompra + "'"); }
+  if (not query.first()) { throw RuntimeException("Não encontrado idCompra da O.C.: '" + ordemCompra + "'"); }
 
   const QString idCompra = query.value("idCompra").toString();
 

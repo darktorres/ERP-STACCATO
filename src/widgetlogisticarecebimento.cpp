@@ -66,7 +66,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   modelRecebimento.setHeaderData("bloco", "Bloco");
   modelRecebimento.setHeaderData("numeroNFe", "NF-e");
   modelRecebimento.setHeaderData("idVenda", "Venda");
-  modelRecebimento.setHeaderData("ordemCompra", "OC");
+  modelRecebimento.setHeaderData("ordemCompra", "O.C.");
   modelRecebimento.setHeaderData("produto", "Produto");
   modelRecebimento.setHeaderData("codComercial", "Cód. Com.");
   modelRecebimento.setHeaderData("quant", "Quant.");

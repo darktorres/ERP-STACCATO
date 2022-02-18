@@ -39,11 +39,13 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   modelVendedor.select();
 
+  modelVendedor.setHeaderData("porcentagem", "%");
+
   ui->tableTotalVendedor->setModel(&modelVendedor);
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
 
   ui->tableTotalVendedor->hideColumn("Mês");
   ui->tableTotalVendedor->hideColumn("idUsuario");
@@ -63,11 +65,13 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   modelLoja.select();
 
+  modelLoja.setHeaderData("porcentagem", "%");
+
   ui->tableTotalLoja->setModel(&modelLoja);
 
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+  ui->tableTotalLoja->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
 
   ui->tableTotalLoja->hideColumn("Mês");
@@ -77,12 +81,13 @@ void WidgetRelatorio::setupTables() {
   modelRelatorio.setTable("view_relatorio");
 
   modelRelatorio.setHeaderData("idVenda", "Venda");
+  modelRelatorio.setHeaderData("porcentagem", "%");
 
   ui->tableRelatorio->setModel(&modelRelatorio);
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
+  ui->tableRelatorio->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
 
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
@@ -97,7 +102,7 @@ void WidgetRelatorio::calcularTotalGeral() {
   for (int row = 0; row < modelLoja.rowCount(); ++row) {
     totalGeral += modelLoja.data(row, "Faturamento").toDouble();
     comissao += modelLoja.data(row, "Comissão").toDouble();
-    porcentagem += modelLoja.data(row, "%").toDouble();
+    porcentagem += modelLoja.data(row, "porcentagem").toDouble();
   }
 
   ui->doubleSpinBoxGeral->setValue(totalGeral);

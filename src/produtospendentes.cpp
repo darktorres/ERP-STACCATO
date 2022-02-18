@@ -164,7 +164,7 @@ void ProdutosPendentes::setupTables() {
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
   modelCompra.setHeaderData("status", "Status");
-  modelCompra.setHeaderData("ordemCompra", "OC");
+  modelCompra.setHeaderData("ordemCompra", "O.C.");
   modelCompra.setHeaderData("descricao", "Descrição");
   modelCompra.setHeaderData("obs", "Obs.");
   modelCompra.setHeaderData("quant", "Quant.");

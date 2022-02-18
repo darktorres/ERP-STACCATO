@@ -5,6 +5,19 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+// void SqlQuery::bindValue(const QString &placeholder, const QVariant &val, const bool adjustValue, QSql::ParamType type) {
+//  QVariant adjustedValue = val;
+
+// TODO: apenas senha e XML não podem ser alterados
+// XML pode ser detectado verificando se começa com < ou marcador BOM
+// verificar aqui se a string é XML para evitar alterar setData em vários locais, podendo esquecer de alterar e o XML ser corrompido
+
+//  if (adjustValue and adjustedValue.userType() == QMetaType::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+//  if (adjustValue and adjustedValue.userType() == QMetaType::QString) { adjustedValue.setValue(adjustedValue.toString().toUpper().trimmed()); }
+
+//  QSqlQuery::bindValue(placeholder, adjustedValue, type);
+//}
+
 QVariant SqlQuery::value(const QString &name) const {
   const int index = record().indexOf(name);
 

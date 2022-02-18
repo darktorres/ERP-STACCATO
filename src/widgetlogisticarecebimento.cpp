@@ -28,9 +28,11 @@ void WidgetLogisticaRecebimento::setConnections() {
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaRecebimento::on_table_doubleClicked, connectionType);
+  connect(ui->tableForn->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaRecebimento::on_tableForn_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaRecebimento::updateTables() {
@@ -43,21 +45,12 @@ void WidgetLogisticaRecebimento::updateTables() {
   }
 
   modelViewRecebimento.select();
+  modelFornecedor.select();
 }
 
 void WidgetLogisticaRecebimento::resetTables() {
   setupTables();
   montaFiltro();
-}
-
-void WidgetLogisticaRecebimento::tableFornLogistica_clicked(const QString &fornecedor) {
-  ui->lineEditBusca->clear();
-
-  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
-
-  modelViewRecebimento.setFilter(filtro);
-
-  ui->checkBoxMarcarTodos->setChecked(false);
 }
 
 void WidgetLogisticaRecebimento::setupTables() {
@@ -87,6 +80,16 @@ void WidgetLogisticaRecebimento::setupTables() {
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("idCompra");
+
+  // -------------------------------------------------------------------------
+
+  modelFornecedor.setTable("view_fornecedor_logistica_recebimento");
+
+  modelFornecedor.setFilter("");
+
+  ui->tableForn->setModel(&modelFornecedor);
+
+  ui->tableForn->sortByColumn("Fornecedor");
 }
 
 void WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) {
@@ -190,6 +193,8 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   Sql::updateVendaStatus(idVendas);
 
   qApp->endTransaction();
+
+  ui->table->clearSelection();
 
   updateTables();
   qApp->enqueueInformation("Confirmado recebimento!", this);
@@ -340,6 +345,25 @@ void WidgetLogisticaRecebimento::on_table_doubleClicked(const QModelIndex &index
   }
 
   if (header == "OC") { return qApp->abrirCompra(modelViewRecebimento.data(index.row(), "ordemCompra")); }
+}
+
+void WidgetLogisticaRecebimento::on_pushButtonLimparFiltro_clicked() {
+  ui->table->clearSelection();
+  ui->tableForn->clearSelection();
+}
+
+void WidgetLogisticaRecebimento::on_tableForn_selectionChanged() {
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  ui->lineEditBusca->clear();
+
+  const QString fornecedor = (selection.isEmpty()) ? "" : modelFornecedor.data(selection.first().row(), "fornecedor").toString();
+
+  const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewRecebimento.setFilter(filtro);
+
+  ui->checkBoxMarcarTodos->setChecked(false);
 }
 
 // TODO: 0marcar em qual bloco foi guardado (opcional?)

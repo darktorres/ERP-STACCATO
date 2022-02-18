@@ -20,8 +20,10 @@ void WidgetLogisticaRepresentacao::setConnections() {
 
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked, connectionType);
   connect(ui->table, &QTableView::doubleClicked, this, &WidgetLogisticaRepresentacao::on_table_doubleClicked, connectionType);
+  connect(ui->tableForn->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaRepresentacao::on_tableForn_selectionChanged, connectionType);
 }
 
 void WidgetLogisticaRepresentacao::updateTables() {
@@ -33,14 +35,7 @@ void WidgetLogisticaRepresentacao::updateTables() {
   }
 
   modelViewLogisticaRepresentacao.select();
-}
-
-void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
-  ui->lineEditBusca->clear();
-
-  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
-
-  modelViewLogisticaRepresentacao.setFilter(filtro);
+  modelFornecedor.select();
 }
 
 void WidgetLogisticaRepresentacao::resetTables() { setupTables(); }
@@ -71,6 +66,16 @@ void WidgetLogisticaRepresentacao::setupTables() {
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
+
+  // -------------------------------------------------------------------------
+
+  modelFornecedor.setTable("view_fornecedor_logistica_representacao");
+
+  modelFornecedor.setFilter("");
+
+  ui->tableForn->setModel(&modelFornecedor);
+
+  ui->tableForn->sortByColumn("Fornecedor");
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
@@ -93,6 +98,8 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   Sql::updateVendaStatus(idVendas);
 
   qApp->endTransaction();
+
+  ui->table->clearSelection();
 
   updateTables();
   qApp->enqueueInformation("Entrega confirmada!", this);
@@ -145,6 +152,23 @@ void WidgetLogisticaRepresentacao::on_table_doubleClicked(const QModelIndex &ind
   if (header == "Venda") { return qApp->abrirVenda(modelViewLogisticaRepresentacao.data(index.row(), "idVenda")); }
 
   if (header == "OC") { return qApp->abrirCompra(modelViewLogisticaRepresentacao.data(index.row(), "ordemCompra")); }
+}
+
+void WidgetLogisticaRepresentacao::on_pushButtonLimparFiltro_clicked() {
+  ui->table->clearSelection();
+  ui->tableForn->clearSelection();
+}
+
+void WidgetLogisticaRepresentacao::on_tableForn_selectionChanged() {
+  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+
+  ui->lineEditBusca->clear();
+
+  const QString fornecedor = (selection.isEmpty()) ? "" : modelFornecedor.data(selection.first().row(), "fornecedor").toString();
+
+  const QString filtro = (fornecedor.isEmpty()) ? "" : "fornecedor = '" + fornecedor + "'";
+
+  modelViewLogisticaRepresentacao.setFilter(filtro);
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

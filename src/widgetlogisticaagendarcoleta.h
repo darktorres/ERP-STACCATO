@@ -17,16 +17,15 @@ public:
   ~WidgetLogisticaAgendarColeta();
 
   auto resetTables() -> void;
-  auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;
 
 private:
   // attributes
   bool isSet = false;
-  QString m_fornecedor;
   SqlTableModel modelEstoque;
-  SqlTableModel modelTranspAtual;
+  SqlTableModel modelFornecedor;
   SqlTableModel modelTranspAgend;
+  SqlTableModel modelTranspAtual;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> void;
@@ -40,9 +39,11 @@ private:
   auto on_pushButtonAgendarColeta_clicked() -> void;
   auto on_pushButtonCancelarCarga_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
+  auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_tableEstoque_doubleClicked(const QModelIndex &index) -> void;
+  auto on_tableForn_selectionChanged() -> void;
   auto processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga = false) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

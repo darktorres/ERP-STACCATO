@@ -17,12 +17,12 @@ public:
   ~WidgetLogisticaRecebimento();
 
   auto resetTables() -> void;
-  auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;
 
 private:
   // attributes
   bool isSet = false;
+  SqlTableModel modelFornecedor;
   SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
@@ -32,8 +32,10 @@ private:
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
+  auto on_pushButtonLimparFiltro_clicked() -> void;
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
+  auto on_tableForn_selectionChanged() -> void;
   auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrevReceb) -> void;

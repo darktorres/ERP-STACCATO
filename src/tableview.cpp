@@ -91,6 +91,24 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTabl
 
 int TableView::rowCount() const { return model()->rowCount(); }
 
+void TableView::storeSelection() {
+  const auto selection = selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  selectedRows.clear();
+
+  for (auto index : selection) { selectedRows << index.row(); }
+}
+
+void TableView::restoreSelection() {
+  if (selectedRows.isEmpty()) { return; }
+
+  QSignalBlocker blocker(selectionModel());
+
+  for (auto row : selectedRows) { selectRow(row); }
+}
+
 void TableView::redoView() {
   if (persistentColumns.isEmpty()) { return; }
   if (rowCount() == 0) { return; }
@@ -145,6 +163,9 @@ void TableView::setModel(QAbstractItemModel *model) {
   //  });
 
   //  connect(baseModel, &QSqlQueryModel::modelReset, this, [=] { setEnabled(true); });
+
+  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
+  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
 
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);

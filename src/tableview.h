@@ -35,10 +35,13 @@ private:
   bool copyHeaders = true;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
+  QVector<int> selectedRows;
   // methods
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
   auto resizeColumnsToContents() -> void;
+  auto restoreSelection() -> void;
   auto setConnections() -> void;
   auto showContextMenu(const QPoint pos) -> void;
+  auto storeSelection() -> void;
 };

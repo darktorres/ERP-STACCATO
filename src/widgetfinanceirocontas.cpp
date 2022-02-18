@@ -100,18 +100,9 @@ void WidgetFinanceiroContas::updateTables() {
     isSet = true;
   }
 
-  // TODO: move this to TableView
-  auto selection = ui->table->selectionModel()->selectedRows();
-
-  QVector<int> rows;
-
-  for (auto index : selection) { rows << index.row(); }
-
   model.select();
   modelVencidos.select();
   modelVencer.select();
-
-  for (auto row : rows) { ui->table->selectRow(row); }
 }
 
 void WidgetFinanceiroContas::resetTables() {

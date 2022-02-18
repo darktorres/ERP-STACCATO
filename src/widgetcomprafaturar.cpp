@@ -66,6 +66,7 @@ void WidgetCompraFaturar::setConnections() {
   connect(ui->pushButtonLimparFiltro, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked, connectionType);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked, connectionType);
+  connect(ui->table, &TableView::doubleClicked, this, &WidgetCompraFaturar::on_table_doubleClicked, connectionType);
   connect(ui->tableResumo, &QTableView::clicked, this, &WidgetCompraFaturar::on_tableResumo_clicked, connectionType);
 }
 
@@ -264,6 +265,14 @@ void WidgetCompraFaturar::on_pushButtonLimparFiltro_clicked() {
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
   modelFaturamento.setFilter(filtro);
+}
+
+void WidgetCompraFaturar::on_table_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelFaturamento.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelFaturamento.data(index.row(), "idVenda")); }
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

@@ -1,6 +1,7 @@
 #include "pagamentosdia.h"
 #include "ui_pagamentosdia.h"
 
+#include "application.h"
 #include "reaisdelegate.h"
 
 #include <QDate>
@@ -13,6 +14,8 @@ PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::Paga
   setWindowFlags(Qt::Window);
 
   setupTables();
+
+  connect(ui->tableView, &TableView::doubleClicked, this, &PagamentosDia::on_tableView_doubleClicked);
 }
 
 PagamentosDia::~PagamentosDia() { delete ui; }
@@ -42,4 +45,12 @@ void PagamentosDia::setFilter(const QDate date, const QString &idConta) {
   modelFluxoCaixa.select();
 
   setWindowTitle(date.toString("dd/MM/yyyy"));
+}
+
+void PagamentosDia::on_tableView_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelFluxoCaixa.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Compra/Venda") { return qApp->abrirVenda(modelFluxoCaixa.data(index.row(), "Compra/Venda")); }
 }

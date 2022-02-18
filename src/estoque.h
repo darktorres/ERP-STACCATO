@@ -40,6 +40,7 @@ private:
   auto exibirNota() -> void;
   auto limitarAlturaTabela() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
+  auto on_tableConsumo_doubleClicked(const QModelIndex &index) -> void;
   auto preencherRestante() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

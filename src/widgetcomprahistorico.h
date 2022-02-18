@@ -36,6 +36,7 @@ private:
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_tablePedidos_selectionChanged() -> void;
+  auto on_treeView_doubleClicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setTreeView() -> void;
   auto setupTables() -> void;

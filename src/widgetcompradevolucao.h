@@ -30,6 +30,7 @@ private:
   auto on_pushButtonRetornarEstoque_clicked() -> void;
   auto on_radioButtonFiltroDevolvido_clicked() -> void;
   auto on_radioButtonFiltroPendente_clicked() -> void;
+  auto on_table_doubleClicked(const QModelIndex &index) -> void;
   auto on_table_selectionChanged() -> void;
   auto retornarEstoque(const QModelIndexList &list) -> void;
   auto retornarFornecedor(const QModelIndexList &list) -> void;

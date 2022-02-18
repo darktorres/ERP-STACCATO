@@ -546,6 +546,8 @@ QString Application::findTag(const QString &texto, const QString &tag) {
 }
 
 void Application::abrirVenda(const QVariant &idVenda) {
+  if (not idVenda.isValid() or idVenda.toString().isEmpty()) { return; }
+
   auto *venda = new Venda(nullptr);
   venda->setAttribute(Qt::WA_DeleteOnClose);
   venda->viewRegisterById(idVenda);
@@ -553,14 +555,22 @@ void Application::abrirVenda(const QVariant &idVenda) {
 }
 
 void Application::abrirEstoque(const QVariant &idEstoque) {
+  if (not idEstoque.isValid() or idEstoque.toString().isEmpty()) { return; }
+
   auto *estoque = new Estoque(idEstoque, nullptr);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
   estoque->show();
 }
 
-void Application::abrirNFe(const QVariant &idNFe) { ACBrLib::gerarDanfe(idNFe.toInt()); }
+void Application::abrirNFe(const QVariant &idNFe) {
+  if (not idNFe.isValid() or idNFe.toString().isEmpty()) { return; }
+
+  ACBrLib::gerarDanfe(idNFe.toInt());
+}
 
 void Application::abrirCompra(const QVariant &ordemCompra) {
+  if (not ordemCompra.isValid() or ordemCompra.toString().isEmpty()) { return; }
+
   auto *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Historico, nullptr);
   input->setAttribute(Qt::WA_DeleteOnClose);
   input->setFilter(ordemCompra.toString());

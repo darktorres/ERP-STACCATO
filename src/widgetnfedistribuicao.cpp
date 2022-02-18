@@ -98,7 +98,7 @@ void WidgetNFeDistribuicao::setConnections() {
   connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
   connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
   connect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked, connectionType);
-  connect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked, connectionType);
+  connect(ui->pushButtonBaixarNFe, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNFeDistribuicao::on_table_activated, connectionType);
 }
 
@@ -119,7 +119,7 @@ void WidgetNFeDistribuicao::unsetConnections() {
   disconnect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked);
   disconnect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked);
   disconnect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked);
-  disconnect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked);
+  disconnect(ui->pushButtonBaixarNFe, &QPushButton::clicked, this, &WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNFeDistribuicao::on_table_activated);
 }
 
@@ -160,7 +160,7 @@ void WidgetNFeDistribuicao::setupTables() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 }
 
-void WidgetNFeDistribuicao::on_pushButtonPesquisar_clicked() {
+void WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked() {
   timer.stop();
 
   try {

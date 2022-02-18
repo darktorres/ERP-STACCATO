@@ -37,6 +37,7 @@ void Estoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked, connectionType);
+  connect(ui->tableConsumo, &TableView::doubleClicked, this, &Estoque::on_tableConsumo_doubleClicked, connectionType);
 }
 
 void Estoque::setupTables() {
@@ -396,6 +397,14 @@ void Estoque::desfazerConsumo(const int idVendaProduto2) {
                           QString::number(idVendaProduto2) + " AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')")) {
     throw RuntimeException("Erro atualizando pedido venda: " + queryVenda.lastError().text());
   }
+}
+
+void Estoque::on_tableConsumo_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
+  const QString header = modelConsumo.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelConsumo.data(index.row(), "Venda")); }
 }
 
 // TODO: 1colocar o botao de desvincular consumo nesta tela

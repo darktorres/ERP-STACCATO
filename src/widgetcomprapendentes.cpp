@@ -159,6 +159,12 @@ void WidgetCompraPendentes::setupTables() {
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
+  const QString header = modelProduto.headerData(index.column(), Qt::Horizontal).toString();
+
+  if (header == "Venda") { return qApp->abrirVenda(modelProduto.data(index.row(), "idVenda")); }
+
+  // -------------------------------------------------------------------------
+
   const int row = index.row();
 
   const QString status = modelProduto.data(row, "status").toString();

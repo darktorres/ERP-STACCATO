@@ -31,6 +31,7 @@ private:
   auto dateEditMes_dateChanged() -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName) -> void;
   auto on_pushButtonExcel_clicked() -> void;
+  auto on_tableRelatorio_doubleClicked(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setFilterRelatorio() -> void;
   auto setFilterTotaisLoja() -> void;

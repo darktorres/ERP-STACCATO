@@ -344,7 +344,7 @@ void WidgetLogisticaRecebimento::on_table_doubleClicked(const QModelIndex &index
     return;
   }
 
-  if (header == "OC") { return qApp->abrirCompra(modelRecebimento.data(index.row(), "ordemCompra")); }
+  if (header == "O.C.") { return qApp->abrirCompra(modelRecebimento.data(index.row(), "ordemCompra")); }
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonLimparFiltro_clicked() {

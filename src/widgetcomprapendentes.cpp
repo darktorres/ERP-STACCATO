@@ -397,3 +397,4 @@ void WidgetCompraPendentes::ajustarGroupBoxStatus() {
 // o Conrado confirmar, apenas com um botão de ok ou cancelar.
 // TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra
 // TODO: não listar produto_estoque no SearchDialog da compra avulsa
+// TODO: adicionar coluna mostrando observacao do followup

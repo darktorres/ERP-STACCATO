@@ -164,8 +164,9 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   //  connect(baseModel, &QSqlQueryModel::modelReset, this, [=] { setEnabled(true); });
 
-  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
-  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
+  // TODO: readicionar apos arrumar os bugs
+  //  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
+  //  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
 
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);

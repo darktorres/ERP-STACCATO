@@ -13,14 +13,14 @@ class Devolucao final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent);
+  explicit Devolucao(const QString &idVenda_, const bool isRepresentacao, QWidget *parent);
   ~Devolucao() final;
 
 private:
   // attributes
   bool const isRepresentacao;
   QStack<int> blockingSignals;
-  QString const m_idVenda;
+  QString const idVenda;
   QString idDevolucao;
   SqlTableModel modelCliente;
   SqlTableModel modelCompra;

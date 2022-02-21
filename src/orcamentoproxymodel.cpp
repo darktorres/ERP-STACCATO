@@ -5,8 +5,8 @@
 #include <QSqlRecord>
 
 OrcamentoProxyModel::OrcamentoProxyModel(QSqlQueryModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("Dias restantes")), followupIndex(model->record().indexOf("Observação")),
-      semaforoIndex(model->record().indexOf("semaforo")), statusIndex(model->record().indexOf("Status")) {
+    : QIdentityProxyModel(parent), diasRestantesIndex(model->record().indexOf("diasRestantes")), followupIndex(model->record().indexOf("observacao")),
+      semaforoIndex(model->record().indexOf("semaforo")), statusIndex(model->record().indexOf("status")) {
   setSourceModel(model);
 }
 

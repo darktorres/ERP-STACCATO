@@ -63,6 +63,18 @@ void TableView::resizeEvent(QResizeEvent *event) {
   QTableView::resizeEvent(event);
 }
 
+void TableView::setStoredSelection(bool newStoredSelection) {
+  storedSelection = newStoredSelection;
+
+  if (storedSelection) {
+    connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
+    connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
+  } else {
+    disconnect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
+    disconnect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
+  }
+}
+
 void TableView::setCopyHeaders(const bool newCopyHeaders) { copyHeaders = newCopyHeaders; }
 
 int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }

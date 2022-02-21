@@ -20,7 +20,6 @@ void Sql::updateVendaStatus(const QString &idVendas) {
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {
   return " SELECT "
-         "     `v`.`statusFinanceiro` AS `statusFinanceiro`,"
          "     SUM(p.kgcx * vp2.caixas) AS kg,"
          "     `che`.`bairro` AS `Bairro`,"
          "     `che`.`logradouro` AS `Logradouro`,"
@@ -30,6 +29,7 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          "     CAST(`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY AS DATE) AS `prazoEntrega`,"
          "     CAST(`v`.`data` + INTERVAL `v`.`novoPrazoEntrega` DAY AS DATE) AS `novoPrazoEntrega`,"
          "     CAST(MIN(`vp2`.`dataRealReceb`) AS DATE) AS `dataRealReceb`,"
+         "     `v`.`statusFinanceiro` AS `statusFinanceiro`,"
          "     `vp2`.`idVenda` AS `idVenda`,"
          "     SUM(`vp2`.`status` = 'ESTOQUE') AS `Estoque`,"
          "     SUM(`vp2`.`status` IN ('ENTREGUE' , 'EM ENTREGA', 'ENTREGA AGEND.')) AS `Agend/Entregue`,"

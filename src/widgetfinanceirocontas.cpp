@@ -279,6 +279,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
   ui->table->setModel(&model);
+  ui->table->setStoredSelection(true);
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 

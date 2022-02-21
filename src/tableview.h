@@ -21,6 +21,7 @@ public:
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
+  auto setStoredSelection(bool newStoredSelection) -> void;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 
@@ -33,6 +34,7 @@ private:
   // attributes
   bool autoResize = true;
   bool copyHeaders = true;
+  bool storedSelection = false;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
   QVector<int> selectedRows;

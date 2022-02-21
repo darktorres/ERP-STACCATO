@@ -83,7 +83,14 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="TableView" name="tableFinanceiro"/>
+      <widget class="TableView" name="tableFinanceiro">
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

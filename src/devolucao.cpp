@@ -13,7 +13,7 @@
 #include <QSqlRecord>
 #include <cmath>
 
-Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao_, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao_), m_idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda_, const bool isRepresentacao_, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao_), idVenda(idVenda_), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -59,7 +59,7 @@ void Devolucao::unsetConnections() {
 void Devolucao::determinarIdDevolucao() {
   SqlQuery query;
   query.prepare("SELECT idVenda FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())");
-  query.bindValue(":idVenda", m_idVenda + "D%");
+  query.bindValue(":idVenda", idVenda + "D%");
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se existe devolução: " + query.lastError().text()); }
 
@@ -87,7 +87,7 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("formComercial", "Form. Com.");
   modelProdutos2.setHeaderData("total", "Total");
 
-  modelProdutos2.setFilter("idVenda = '" + m_idVenda + "' AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'FINALIZADO', 'PENDENTE DEV.', 'QUEBRADO', 'SUBSTITUIDO')");
+  modelProdutos2.setFilter("idVenda = '" + idVenda + "' AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'FINALIZADO', 'PENDENTE DEV.', 'QUEBRADO', 'SUBSTITUIDO')");
 
   modelProdutos2.select();
 
@@ -156,7 +156,7 @@ void Devolucao::setupTables() {
   modelDevolvidos1.setHeaderData("formComercial", "Form. Com.");
   modelDevolvidos1.setHeaderData("total", "Total");
 
-  modelDevolvidos1.setFilter("idVenda LIKE '" + m_idVenda + "D%'");
+  modelDevolvidos1.setFilter("idVenda LIKE '" + idVenda + "D%'");
 
   modelDevolvidos1.select();
 
@@ -215,7 +215,7 @@ void Devolucao::setupTables() {
   modelPagamentos.setHeaderData("status", "Status");
   modelPagamentos.setHeaderData("representacao", "Representação");
 
-  modelPagamentos.setFilter("idVenda LIKE '" + m_idVenda + "D%'");
+  modelPagamentos.setFilter("idVenda LIKE '" + idVenda + "D%'");
 
   modelPagamentos.select();
 
@@ -249,7 +249,7 @@ void Devolucao::setupTables() {
 
   modelVenda.setTable("venda");
 
-  modelVenda.setFilter("idVenda = '" + m_idVenda + "'");
+  modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
   modelVenda.select();
 
@@ -384,13 +384,13 @@ void Devolucao::on_doubleSpinBoxCredito_valueChanged(const double credito) {
 void Devolucao::criarDevolucao() {
   SqlQuery query2;
   query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
-  query2.bindValue(":idVenda", m_idVenda + "D%");
+  query2.bindValue(":idVenda", idVenda + "D%");
 
   if (not query2.exec()) { throw RuntimeException("Erro determinando próximo id: " + query2.lastError().text()); }
 
-  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: '" + m_idVenda + "'"); }
+  if (not query2.first()) { throw RuntimeException("Não encontrou próximo idVenda para id: '" + idVenda + "'"); }
 
-  idDevolucao = m_idVenda + "D" + query2.value("number").toString();
+  idDevolucao = idVenda + "D" + query2.value("number").toString();
 
   // -------------------------------------------------------------------------
 
@@ -463,9 +463,9 @@ void Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 void Devolucao::criarComissaoProfissional(const int currentRow) {
   SqlQuery queryVenda;
 
-  if (not queryVenda.exec("SELECT rt FROM venda WHERE idVenda = '" + m_idVenda + "'")) { throw RuntimeException("Erro buscando dados da venda: " + queryVenda.lastError().text()); }
+  if (not queryVenda.exec("SELECT rt FROM venda WHERE idVenda = '" + idVenda + "'")) { throw RuntimeException("Erro buscando dados da venda: " + queryVenda.lastError().text()); }
 
-  if (not queryVenda.first()) { throw RuntimeException("Dados não encontrados para venda com id: '" + m_idVenda + "'"); }
+  if (not queryVenda.first()) { throw RuntimeException("Dados não encontrados para venda com id: '" + idVenda + "'"); }
 
   SqlQuery queryProfissional;
 
@@ -473,11 +473,11 @@ void Devolucao::criarComissaoProfissional(const int currentRow) {
                                  "FROM profissional p "
                                  "LEFT JOIN venda v ON p.idProfissional = v.idProfissional "
                                  "WHERE v.idVenda = '" +
-                                 m_idVenda + "'")) {
+                                 idVenda + "'")) {
     throw RuntimeException("Erro buscando dados do profissional: " + queryProfissional.lastError().text());
   }
 
-  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados para profissional da venda: '" + m_idVenda + "'"); }
+  if (not queryProfissional.first()) { throw RuntimeException("Dados não encontrados para profissional da venda: '" + idVenda + "'"); }
 
   const QString profissional = queryProfissional.value("nome_razao").toString();
 
@@ -560,7 +560,7 @@ void Devolucao::devolverItem(const int currentRow, const int novoIdVendaProduto2
   inserirItens(currentRow, novoIdVendaProduto2);
   atualizarDevolucao();
 
-  Sql::updateVendaStatus(m_idVenda);
+  Sql::updateVendaStatus(idVenda);
 }
 
 void Devolucao::limparCampos() {

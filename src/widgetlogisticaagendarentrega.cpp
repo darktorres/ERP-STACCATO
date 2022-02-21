@@ -329,8 +329,6 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_selectionChanged() {
   ui->pushButtonAdicionarParcial->setDisabled(naoLiberado);
   ui->pushButtonAdicionarProduto->setDisabled(naoLiberado);
   ui->pushButtonAgendarCarga->setDisabled(naoLiberado);
-  ui->pushButtonGerarNFeFutura->setDisabled(naoLiberado);
-  ui->pushButtonImportarNFe->setDisabled(naoLiberado);
   ui->pushButtonRemoverProduto->setDisabled(naoLiberado);
 
   if (statusFinanceiro == "CONFERIDO") { qApp->enqueueWarning("Financeiro não liberou!"); }

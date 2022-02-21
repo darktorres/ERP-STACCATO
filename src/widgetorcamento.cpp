@@ -79,13 +79,13 @@ void WidgetOrcamento::setupTables() {
 
   ui->table->setModel(&modelOrcamento);
 
-  ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
-
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->hideColumn("idUsuarioConsultor");
   ui->table->hideColumn("semaforo");
   ui->table->hideColumn("fornecedores");
+
+  ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
 
 void WidgetOrcamento::setConnections() {

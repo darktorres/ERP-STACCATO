@@ -357,6 +357,11 @@ void CadastrarNFe::removerNota(const int idNFe) {
 void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int idNFe, ACBr &acbr) {
   if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { throw RuntimeException("Consumo indevido! Consulte a NF-e para verificar se foi autorizada!"); }
 
+  if (resposta.contains("Rejeição: IE do destinatário não informada", Qt::CaseInsensitive)) {
+    qApp->enqueueError("Rejeição: IE do destinatário não informada\nFazendo consulta do CNPJ...");
+    on_pushButtonConsultarCadastro_clicked();
+  }
+
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
     qDebug() << "processarResposta -> rejeicao";
 

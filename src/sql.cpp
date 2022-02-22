@@ -338,6 +338,7 @@ QString Sql::view_estoque_contabil(const QString &match, const QString &data) {
          "     e.local,"
          "     g.label,"
          "     e.codComercial,"
+         "     p.formComercial,"
          "     e.ncm,"
          "     e.cstICMS,"
          "     e.pICMS,"

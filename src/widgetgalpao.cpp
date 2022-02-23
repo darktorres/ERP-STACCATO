@@ -638,7 +638,7 @@ void WidgetGalpao::on_tablePallet_doubleClicked(const QModelIndex &index) {
 void WidgetGalpao::on_pushButtonFollowup_clicked() {
   const auto selection = ui->tablePallet->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   const QString idEstoque = modelPallet.data(selection.first().row(), "idEstoque").toString();
 
@@ -651,7 +651,7 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
 #if __has_include("lrreportengine.h")
   const auto selection = ui->tablePallet->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   // ------------------------------------------------------
 

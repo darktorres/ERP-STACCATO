@@ -136,7 +136,7 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraConfirmar::on_pushButtonFollowup_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   const QString ordemCompra = modelCompras.data(selection.first().row(), "OC").toString();
 

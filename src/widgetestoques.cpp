@@ -171,7 +171,7 @@ void WidgetEstoques::gerarExcel(const QString &arquivoModelo, const QString &fil
 void WidgetEstoques::on_pushButtonFollowup_clicked() {
   const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   const QString idEstoque = model.data(selection.first().row(), "idEstoque").toString();
 

@@ -154,7 +154,7 @@ void WidgetOrcamento::fillComboBoxVendedor() {
     SqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      throw RuntimeException("Erro: " + query.lastError().text());
+      throw RuntimeException("Erro buscando vendedores: " + query.lastError().text());
     }
 
     while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
@@ -176,7 +176,9 @@ void WidgetOrcamento::fillComboBoxLoja() {
 
     SqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) { throw RuntimeException("Erro: " + query.lastError().text()); }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE descricao <> '' AND desativado = FALSE ORDER BY descricao")) {
+      throw RuntimeException("Erro buscando lojas: " + query.lastError().text());
+    }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
   } catch (std::exception &) {

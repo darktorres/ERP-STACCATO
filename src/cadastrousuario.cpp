@@ -269,6 +269,8 @@ void CadastroUsuario::criarUsuarioMySQL() {
 
   const QString password = file.readAll().trimmed();
 
+  if (password.isEmpty()) { throw RuntimeException("mysql.txt vazio!"); }
+
   // those query's below commit transaction so have to be done outside transaction
   SqlQuery query;
   query.prepare("CREATE USER :user@'%' IDENTIFIED WITH mysql_native_password BY '" + password + "'"); // TODO: why isn't 'password' binded?

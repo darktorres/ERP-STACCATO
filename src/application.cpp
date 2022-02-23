@@ -106,6 +106,8 @@ void Application::genericLogin(const QString &hostname) {
 
   const QString systemPassword = file.readAll().trimmed();
 
+  if (systemPassword.isEmpty()) { throw RuntimeException("mysql.txt vazio!"); }
+
   // ------------------------------------------------------------
 
   if (not QSqlDatabase::contains()) { db = QSqlDatabase::addDatabase("QMYSQL"); }

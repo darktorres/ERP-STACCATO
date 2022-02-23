@@ -81,6 +81,9 @@ void Application::readSettingsFile() {
   }
 
   QString fileContent = file.readAll();
+
+  if (fileContent.isEmpty()) { throw RuntimeException("lojas.txt vazio!"); }
+
   fileContent.replace("\r\n", "\n"); // so it works with both Windows and Unix line endings
 
   const QStringList lines = fileContent.split("\n", Qt::SkipEmptyParts);

@@ -16,6 +16,7 @@ public:
   auto data(const int row, const int column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
   auto select() -> void;
+  auto setDataColumn(const QString &columnString) -> void;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setQuery(const QString &query, const QSqlDatabase &db = QSqlDatabase()) -> void;
   auto sort(const QString &column, const Qt::SortOrder order = Qt::AscendingOrder) -> void;
@@ -30,6 +31,7 @@ private:
   using QSqlQueryModel::sort;
 
   // attributes
+  int dataColumn = -1;
   int statusColumn = -1;
   QString base_query; // to be changed only by setQuery
   QString last_query; // to be used for refreshing tables

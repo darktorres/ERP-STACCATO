@@ -31,6 +31,7 @@ public:
   auto select() -> bool final;
   auto setData(const int row, const QString &column, const QVariant &value, const bool adjustValue = true) -> void;
   auto setData(const int row, const int column, const QVariant &value, const bool adjustValue = true) -> void;
+  auto setDataColumn(const QString &columnString) -> void;
   auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
@@ -50,6 +51,7 @@ private:
 
   // attributes
   int const limit;
+  int dataColumn = -1;
   int statusColumn = -1;
   // methods
   auto selectStatement() const -> QString final;

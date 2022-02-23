@@ -457,7 +457,7 @@ void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chave
 
 void WidgetNfeSaida::ajustarGroupBoxStatus() {
   bool empty = true;
-  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (auto *checkBox : filtrosStatus) {
     if (checkBox->isChecked()) { empty = false; }

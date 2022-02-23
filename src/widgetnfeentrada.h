@@ -28,8 +28,11 @@ private:
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;
+  auto ajustarGroupBoxUtilizada() -> void;
   auto inutilizar(const int row) -> void;
   auto montaFiltro() -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
+  auto on_groupBoxUtilizada_toggled(const bool enabled) -> void;
   auto on_pushButtonExportar_clicked() -> void;
   auto on_pushButtonInutilizarNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;

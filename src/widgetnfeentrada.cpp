@@ -29,11 +29,14 @@ void WidgetNfeEntrada::setConnections() {
 
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->checkBoxInutilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->checkBoxUtilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
-  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxStatus_toggled, connectionType);
+  connect(ui->groupBoxUtilizada, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxUtilizada_toggled, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
@@ -46,11 +49,14 @@ void WidgetNfeEntrada::unsetConnections() {
 
   disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->checkBoxInutilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->checkBoxUtilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
-  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxStatus_toggled);
+  disconnect(ui->groupBoxUtilizada, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxUtilizada_toggled);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
@@ -121,6 +127,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
 void WidgetNfeEntrada::montaFiltro() {
   ajustarGroupBoxStatus();
+  ajustarGroupBoxUtilizada();
 
   //-------------------------------------
 
@@ -149,6 +156,15 @@ void WidgetNfeEntrada::montaFiltro() {
   }
 
   if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
+
+  //------------------------------------- filtro utilizada
+
+  QStringList filtroutilizada;
+
+  if (ui->checkBoxUtilizada->isChecked()) { filtroutilizada << "1"; }
+  if (ui->checkBoxInutilizada->isChecked()) { filtroutilizada << "0"; }
+
+  if (not filtroutilizada.isEmpty()) { filtros << "utilizada IN (" + filtroutilizada.join(", ") + ")"; }
 
   //------------------------------------- filtro loja
 
@@ -349,9 +365,49 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);
 }
 
+void WidgetNfeEntrada::on_groupBoxStatus_toggled(const bool enabled) {
+  unsetConnections();
+
+  try {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+
+  montaFiltro();
+}
+
+void WidgetNfeEntrada::on_groupBoxUtilizada_toggled(const bool enabled) {
+  unsetConnections();
+
+  try {
+    const auto children = ui->groupBoxUtilizada->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+
+  montaFiltro();
+}
+
 void WidgetNfeEntrada::ajustarGroupBoxStatus() {
   bool empty = true;
-  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  auto filtrosStatus = ui->groupBoxStatus->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
 
   for (auto *checkBox : filtrosStatus) {
     if (checkBox->isChecked()) { empty = false; }
@@ -366,6 +422,22 @@ void WidgetNfeEntrada::ajustarGroupBoxStatus() {
   setConnections();
 }
 
+void WidgetNfeEntrada::ajustarGroupBoxUtilizada() {
+  bool empty = true;
+  auto filtrosStatus = ui->groupBoxUtilizada->findChildren<QCheckBox *>(QRegularExpression("checkBox"));
+
+  for (auto *checkBox : filtrosStatus) {
+    if (checkBox->isChecked()) { empty = false; }
+  }
+
+  unsetConnections();
+
+  ui->groupBoxUtilizada->setChecked(not empty);
+
+  for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
+
+  setConnections();
+}
+
 // TODO: colocar opção de buscar por uma palavra-chave para buscar NF-es de um produto especifico, por ex: notebook
 // TODO: colocar followup
-// TODO: adicionar filtro 'utilizado'

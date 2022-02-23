@@ -318,7 +318,7 @@ void WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
 void WidgetLogisticaRecebimento::on_pushButtonFollowup_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   const QString idEstoque = modelRecebimento.data(selection.first().row(), "idEstoque").toString();
 

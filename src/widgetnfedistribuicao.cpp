@@ -742,7 +742,7 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
     queryAtualizar.bindValue(":nsu", nsu);
     queryAtualizar.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not queryAtualizar.exec()) { throw RuntimeException("Erro atualizando xml: " + queryAtualizar.lastError().text()); }
+    if (not queryAtualizar.exec()) { throw RuntimeException("Erro atualizando XML: " + queryAtualizar.lastError().text()); }
   }
 }
 

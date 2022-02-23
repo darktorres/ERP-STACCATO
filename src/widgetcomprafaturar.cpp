@@ -228,7 +228,7 @@ void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(const bool checked) {
 void WidgetCompraFaturar::on_pushButtonFollowup_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeException("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
   const QString ordemCompra = modelFaturamento.data(selection.first().row(), "ordemCompra").toString();
 

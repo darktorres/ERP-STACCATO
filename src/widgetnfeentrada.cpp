@@ -323,7 +323,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     File fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
-    if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
+    if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita XML: " + fileXml.errorString()); }
 
     fileXml.write(query.value("xml").toByteArray());
 
@@ -343,7 +343,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     if (filePdf.exists()) { filePdf.remove(); }
 
-    if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
+    if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando PDF!"); }
   }
 
   qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);

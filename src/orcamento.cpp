@@ -57,6 +57,8 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->lineEditFormComercial->setResizeToText();
   ui->lineEditFornecedor->setResizeToText();
 
+  ui->lineEditOrcamento->setResizeToText();
+
   setConnections();
 }
 

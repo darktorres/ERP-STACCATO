@@ -53,6 +53,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->splitter_3->setStretchFactor(0, 1);
   ui->splitter_3->setStretchFactor(1, 255);
   ui->splitter_3->setStretchFactor(2, 1);
+
+  ui->lineEditVenda->setResizeToText();
 }
 
 Venda::~Venda() { delete ui; }

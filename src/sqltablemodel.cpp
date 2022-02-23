@@ -23,6 +23,30 @@ QVariant SqlTableModel::data(const int row, const int column) const {
 
 QVariant SqlTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
+QVariant SqlTableModel::data(const QModelIndex &index, int role) const {
+  if (statusColumn != -1 and role == Qt::FontRole) {
+    const QString status = index.siblingAtColumn(statusColumn).data().toString();
+
+    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
+      QFont font;
+      font.setStrikeOut(true);
+      return font;
+    }
+  }
+
+  if (dataColumn != -1 and role == Qt::FontRole) {
+    const QDate date = index.siblingAtColumn(dataColumn).data().toDate();
+
+    if (date == qApp->serverDate()) {
+      QFont font;
+      font.setBold(true);
+      return font;
+    }
+  }
+
+  return QSqlTableModel::data(index, role);
+}
+
 void SqlTableModel::setData(const int row, const int column, const QVariant &value, const bool adjustValue) {
   if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlTableModel"); }
 
@@ -52,6 +76,8 @@ void SqlTableModel::setData(const int row, const QString &column, const QVariant
 bool SqlTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 
 Qt::DropActions SqlTableModel::supportedDropActions() const { return Qt::MoveAction; }
+
+void SqlTableModel::setDataColumn(const QString &columnString) { dataColumn = fieldIndex(columnString); }
 
 int SqlTableModel::insertRowAtEnd() {
   const int row = rowCount();
@@ -143,18 +169,4 @@ int SqlTableModel::fieldIndex(const QString &fieldName, const bool silent) const
   if (field == -1 and not silent) { throw RuntimeException("\"" + fieldName + "\" não encontrado na tabela " + tableName() + "!"); }
 
   return field;
-}
-
-QVariant SqlTableModel::data(const QModelIndex &index, int role) const {
-  if (statusColumn != -1 and role == Qt::FontRole) {
-    const QString status = index.siblingAtColumn(statusColumn).data().toString();
-
-    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
-      QFont font;
-      font.setStrikeOut(true);
-      return font;
-    }
-  }
-
-  return QSqlTableModel::data(index, role);
 }

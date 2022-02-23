@@ -88,6 +88,8 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setHeaderData("razaoSocial", "Transp.");
   modelCalendario.setHeaderData("idVenda", "Venda");
 
+  modelCalendario.setDataColumn("data");
+
   ui->tableCalendario->setModel(&modelCalendario);
 
   ui->tableCalendario->hideColumn("idVeiculo");

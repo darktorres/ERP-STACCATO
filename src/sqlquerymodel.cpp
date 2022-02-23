@@ -23,6 +23,30 @@ QVariant SqlQueryModel::data(const QModelIndex &index, const QString &column) co
 
 QVariant SqlQueryModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
+QVariant SqlQueryModel::data(const QModelIndex &index, int role) const {
+  if (statusColumn != -1 and role == Qt::FontRole) {
+    const QString status = index.siblingAtColumn(statusColumn).data().toString();
+
+    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
+      QFont font;
+      font.setStrikeOut(true);
+      return font;
+    }
+  }
+
+  if (dataColumn != -1 and role == Qt::FontRole) {
+    const QDate date = index.siblingAtColumn(dataColumn).data().toDate();
+
+    if (date == qApp->serverDate()) {
+      QFont font;
+      font.setBold(true);
+      return font;
+    }
+  }
+
+  return QSqlQueryModel::data(index, role);
+}
+
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
   const int field = fieldIndex(column);
 
@@ -65,16 +89,4 @@ void SqlQueryModel::sort(const int column, const Qt::SortOrder order) { select(b
 
 void SqlQueryModel::sort(const QString &column, const Qt::SortOrder order) { select(base_query + " ORDER BY " + column + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }
 
-QVariant SqlQueryModel::data(const QModelIndex &index, int role) const {
-  if (statusColumn != -1 and role == Qt::FontRole) {
-    const QString status = index.siblingAtColumn(statusColumn).data().toString();
-
-    if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
-      QFont font;
-      font.setStrikeOut(true);
-      return font;
-    }
-  }
-
-  return QSqlQueryModel::data(index, role);
-}
+void SqlQueryModel::setDataColumn(const QString &columnString) { dataColumn = fieldIndex(columnString); }

@@ -99,6 +99,7 @@ private:
   auto genericLogin(const QString &hostname) -> void;
   auto loginError() -> void;
   auto readSettingsFile() -> void;
+  auto runSqlJobs() -> void;
   auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;

@@ -169,8 +169,31 @@ void Application::dbConnect(const QString &hostname, const QString &user, const 
 
   isConnected = true;
 
+  runSqlJobs();
+
   startSqlPing();
   startUpdaterPing();
+}
+
+void Application::runSqlJobs() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT lastInvalidated FROM maintenance")) { throw RuntimeException("Erro verificando lastInvalidated: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Erro verificando lastInvalidated!"); }
+
+  if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
+    if (not query.exec("CALL invalidar_produtos_expirados()")) { throw RuntimeException("Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
+
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { throw RuntimeException("Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
+
+    if (not query.exec("CALL invalidar_staccatoOff()")) { throw RuntimeException("Erro executando invalidar_staccatoOff: " + query.lastError().text()); }
+
+    query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
+    query.bindValue(":lastInvalidated", serverDateTime().toString("yyyy-MM-dd"));
+
+    if (not query.exec()) { throw RuntimeException("Erro atualizando lastInvalidated: " + query.lastError().text()); }
+  }
 }
 
 void Application::startSqlPing() {

@@ -217,12 +217,6 @@ void TableView::setPersistentColumns(const QStringList &value) { persistentColum
 
 void TableView::keyPressEvent(QKeyEvent *event) {
   if (event->matches(QKeySequence::Copy)) {
-    const auto selection = selectionModel()->selectedIndexes();
-
-    if (selection.isEmpty()) { return; }
-
-    //---------------------------------------
-
     QString headers;
 
     // dont copy headers if in single cell mode
@@ -242,6 +236,10 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     QString text;
 
     if (selectionBehavior() == SelectItems) {
+      const auto selection = selectionModel()->selectedIndexes();
+
+      if (selection.isEmpty()) { return; }
+
       QVariant currentText = selection.first().data();
 
       if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
@@ -251,6 +249,10 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     }
 
     if (selectionBehavior() == SelectRows) {
+      const auto selection = selectionModel()->selectedRows();
+
+      if (selection.isEmpty()) { return; }
+
       for (const auto indexRow : selection) {
         for (int col = 0; col < model()->columnCount(); ++col) {
           if (isColumnHidden(col)) { continue; }

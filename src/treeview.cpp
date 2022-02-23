@@ -186,9 +186,11 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
     QString text;
 
     if (selectionBehavior() == SelectItems) {
-      const QModelIndexList selectedCell = selectionModel()->selectedIndexes();
+      const auto selection = selectionModel()->selectedIndexes();
 
-      QVariant currentText = selectedCell.first().data();
+      if (selection.isEmpty()) { return; }
+
+      QVariant currentText = selection.first().data();
 
       if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
       if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
@@ -197,9 +199,11 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
     }
 
     if (selectionBehavior() == SelectRows) {
-      const QModelIndexList selectedRows = selectionModel()->selectedRows();
+      const auto selection = selectionModel()->selectedRows();
 
-      for (const auto indexRow : selectedRows) {
+      if (selection.isEmpty()) { return; }
+
+      for (const auto indexRow : selection) {
         for (int col = 0; col < model()->columnCount(); ++col) {
           if (isColumnHidden(col)) { continue; }
 
@@ -217,7 +221,6 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
     }
 
     QApplication::clipboard()->setText(headers + text);
-
     return;
   }
 

@@ -4,14 +4,12 @@
 
 using namespace std::chrono_literals;
 
-LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent) {}
+LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent) { setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed); }
 
 void LineEdit::resizeToContent() {
-  if (text().isEmpty()) { return setFixedWidth(baseSize().width()); }
-
   const int fmSize = fontMetrics().boundingRect(text()).width();
 
-  setFixedWidth(qMax(fmSize + 15, baseSize().width()));
+  setMinimumWidth(fmSize + 15);
 }
 
 void LineEdit::setDelayed() {
@@ -26,5 +24,6 @@ void LineEdit::setResizeToText() { connect(this, &QLineEdit::textChanged, this, 
 // TODO: alterar para que texto grande seja sempre cortado pela direita e não pela esquerda, ex:
 // errado: "RRO AZUL"
 // certo:  "CARRO AZ"
+// para isso usar QLineEdit::home(false)
 
 // TODO: colocar sizeHint usando tamanho do texto atual?

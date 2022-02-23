@@ -297,7 +297,7 @@
                 <widget class="ItemBox" name="itemBoxConsultor"/>
                </item>
                <item row="0" column="0">
-                <widget class="QLineEdit" name="lineEditOrcamento">
+                <widget class="LineEdit" name="lineEditOrcamento">
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código de Orçamento:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;O código de orçamento é composto de:&lt;/p&gt;&lt;p&gt;* Sigla da loja &lt;/p&gt;&lt;p&gt;* Data (AA)&lt;/p&gt;&lt;p&gt;* Sequência de 4 dígitos&lt;/p&gt;&lt;p&gt;* 'R' se representação&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -1819,24 +1819,24 @@ color: rgb(0, 0, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>DoubleSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header>src/doublespinbox.h</header>
-  </customwidget>
-  <customwidget>
    <class>LineEdit</class>
    <extends>QLineEdit</extends>
    <header>src/lineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>src/doublespinbox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -864,15 +864,9 @@ void WidgetNFeDistribuicao::consultarSefaz() {
 
   if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
   if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
-
-  qDebug() << "maintenance";
-  SqlQuery queryMaintenance;
-
-  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
 }
 
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario
-// TODO: lidar com mais de um pc tentando baixar nfes (usar maintenance.lastDistribuicao)
 // TODO: autoconfirmar nfes com mais de x dias para evitar perder o prazo e ser multado
 // TODO: substituir itemBoxLoja por comboBoxLoja (copiar de widgetOrcamento)
 // TODO: quando clicar em uma coluna para ordenar na tabela em vez de ordenar localmente pedir para o banco de dados ordenar para ser rápido

@@ -292,7 +292,28 @@ void Devolucao::on_tableProdutos_selectionChanged() {
 
   const double caixas = modelProdutos2.data(row, "caixas").toDouble();
   const double quantCaixa = modelProdutos2.data(row, "quantCaixa").toDouble();
-  const double total = modelProdutos2.data(row, "total").toDouble();
+  double total = modelProdutos2.data(row, "total").toDouble();
+
+  const bool reposicao = modelProdutos2.data(row, "reposicaoEntrega").toBool();
+
+  if (reposicao) {
+    const QString idRelacionado = modelProdutos2.data(row, "idRelacionado").toString();
+
+    SqlQuery query;
+
+    if (not query.exec("SELECT caixas, total FROM venda_has_produto2 WHERE idVendaProduto2 = " + idRelacionado)) {
+      throw RuntimeException("Erro buscando total do produto: " + query.lastError().text());
+    }
+
+    if (not query.first()) { throw RuntimeException("Total não encontrado para id: " + idRelacionado); }
+
+    const double caixasRelacionado = query.value("caixas").toDouble();
+
+    if (caixasRelacionado != caixas) { throw RuntimeException("Quantidade da reposição diferente da linha de quebra!"); }
+
+    total = query.value("total").toDouble();
+  }
+
   const double prcUnitario = total / quant;
   const double credito = quant * prcUnitario;
 

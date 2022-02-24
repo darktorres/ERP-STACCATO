@@ -694,7 +694,7 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
 
     // ------------------------------------------------------
 
-    const QString fileName = QDir::currentPath() + "/pallet_" + idEstoque + "_" + produto + "_" + caixas + ".pdf";
+    const QString fileName = QDir::currentPath() + "/pallet_" + idEstoque + ".pdf";
 
     File file(fileName);
 

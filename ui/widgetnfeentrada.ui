@@ -55,6 +55,16 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonFollowup">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Followup</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="2" column="1">

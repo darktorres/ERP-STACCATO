@@ -19,6 +19,7 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
   if (tipo == Tipo::Venda) { setWindowTitle("Pedido: " + id); }
   if (tipo == Tipo::Compra) { setWindowTitle("O.C.: " + id); }
   if (tipo == Tipo::Estoque) { setWindowTitle("Estoque: " + id); }
+  if (tipo == Tipo::NFe) { setWindowTitle("NFe: " + id); }
 
   ui->dateFollowup->setDateTime(qApp->serverDateTime());
   ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
@@ -53,7 +54,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
     query.bindValue(":semaforo", ui->radioButtonQuente->isChecked() ? 1 : ui->radioButtonMorno->isChecked() ? 2 : ui->radioButtonFrio->isChecked() ? 3 : 0);
-    query.bindValue(":observacao", ui->lineEditObservacao->text());
+    query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
     query.bindValue(":dataProxFollowup", ui->dateProxFollowup->dateTime());
   }
@@ -65,7 +66,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idVendaBase", id.left(11));
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->lineEditObservacao->text());
+    query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -74,7 +75,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":ordemCompra", id);
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->lineEditObservacao->text());
+    query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -83,7 +84,16 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":idEstoque", id);
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
-    query.bindValue(":observacao", ui->lineEditObservacao->text());
+    query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
+    query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
+  }
+
+  if (tipo == Tipo::NFe) {
+    query.prepare("INSERT INTO nfe_has_followup (idNFe, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idNFe, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.bindValue(":idNFe", id);
+    query.bindValue(":idLoja", User::idLoja);
+    query.bindValue(":idUsuario", User::idUsuario);
+    query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
@@ -106,6 +116,7 @@ void FollowUp::setupTables() {
   if (tipo == Tipo::Venda) { modelFollowup.setTable("view_followup_venda"); }
   if (tipo == Tipo::Compra) { modelFollowup.setTable("view_followup_pedido_fornecedor"); }
   if (tipo == Tipo::Estoque) { modelFollowup.setTable("view_followup_estoque"); }
+  if (tipo == Tipo::NFe) { modelFollowup.setTable("view_followup_nfe"); }
 
   if (tipo == Tipo::Orcamento) {
     modelFollowup.setHeaderData("idOrcamento", "Orçamento");
@@ -113,10 +124,9 @@ void FollowUp::setupTables() {
   }
 
   if (tipo == Tipo::Venda) { modelFollowup.setHeaderData("idVenda", "Venda"); }
-
   if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "O.C."); }
-
   if (tipo == Tipo::Estoque) { modelFollowup.setHeaderData("idEstoque", "Estoque"); }
+  if (tipo == Tipo::NFe) { modelFollowup.setHeaderData("idNFe", "NF-e"); }
 
   modelFollowup.setHeaderData("nome", "Usuário");
   modelFollowup.setHeaderData("observacao", "Observação");
@@ -126,6 +136,7 @@ void FollowUp::setupTables() {
   if (tipo == Tipo::Venda) { modelFollowup.setFilter("idVenda LIKE '" + id.left(11) + "%'"); }
   if (tipo == Tipo::Compra) { modelFollowup.setFilter("ordemCompra = " + id); }
   if (tipo == Tipo::Estoque) { modelFollowup.setFilter("idEstoque = " + id); }
+  if (tipo == Tipo::NFe) { modelFollowup.setFilter("idNFe = " + id); }
 
   modelFollowup.setSort("dataFollowup");
 

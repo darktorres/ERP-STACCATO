@@ -36,6 +36,7 @@ private:
   auto on_pushButtonCancelarNFe_clicked() -> void;
   auto on_pushButtonConsultarNFe_clicked() -> void;
   auto on_pushButtonExportar_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;

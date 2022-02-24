@@ -6,6 +6,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "file.h"
+#include "followup.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "user.h"
@@ -43,6 +44,7 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated, connectionType);
 }
@@ -61,6 +63,7 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
   disconnect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
 }
@@ -470,6 +473,18 @@ void WidgetNfeSaida::ajustarGroupBoxStatus() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetNfeSaida::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString idVenda = model.data(selection.first().row(), "idNFe").toString();
+
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::NFe, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)

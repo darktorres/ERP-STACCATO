@@ -7,6 +7,7 @@
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "file.h"
+#include "followup.h"
 #include "reaisdelegate.h"
 #include "user.h"
 
@@ -40,6 +41,7 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
@@ -60,6 +62,7 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
 }
@@ -437,6 +440,18 @@ void WidgetNfeEntrada::ajustarGroupBoxUtilizada() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetNfeEntrada::on_pushButtonFollowup_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  const QString idVenda = model.data(selection.first().row(), "idNFe").toString();
+
+  auto *followup = new FollowUp(idVenda, FollowUp::Tipo::NFe, this);
+  followup->setAttribute(Qt::WA_DeleteOnClose);
+  followup->show();
 }
 
 // TODO: colocar opção de buscar por uma palavra-chave para buscar NF-es de um produto especifico, por ex: notebook

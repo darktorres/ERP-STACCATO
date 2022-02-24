@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>914</width>
-    <height>701</height>
+    <width>903</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,13 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="1" colspan="2">
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButtonConsultarNFe">
+       <property name="text">
+        <string>Consultar NF-e</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="pushButtonRelatorio">
        <property name="enabled">
@@ -26,13 +33,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <widget class="QPushButton" name="pushButtonExportar">
-       <property name="text">
-        <string>Exportar XML/PDF</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QPushButton" name="pushButtonCancelarNFe">
        <property name="text">
@@ -40,10 +40,17 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButtonConsultarNFe">
+     <item row="0" column="3">
+      <widget class="QPushButton" name="pushButtonExportar">
        <property name="text">
-        <string>Consultar NF-e</string>
+        <string>Exportar XML/PDF</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QPushButton" name="pushButtonFollowup">
+       <property name="text">
+        <string>Followup</string>
        </property>
       </widget>
      </item>

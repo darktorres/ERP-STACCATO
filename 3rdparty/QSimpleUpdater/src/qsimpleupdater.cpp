@@ -133,6 +133,8 @@ QString QSimpleUpdater::installedVersion() const { return m_installed_version; }
  */
 
 void QSimpleUpdater::downloadLatestVersion() {
+  emit beginDownload();
+
   if (not m_download_url.isEmpty()) { m_downloadDialog->beginDownload(m_download_url); }
 }
 

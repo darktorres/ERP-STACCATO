@@ -177,7 +177,6 @@ void Application::dbConnect(const QString &hostname, const QString &user, const 
   runSqlJobs();
 
   startSqlPing();
-  startUpdaterPing();
 }
 
 void Application::runSqlJobs() {
@@ -203,18 +202,12 @@ void Application::runSqlJobs() {
 
 void Application::startSqlPing() {
   auto *timer = new QTimer(this);
+
   connect(timer, &QTimer::timeout, this, [&] {
-    const bool conectado = QSqlQuery().exec("DO 0");
-
-    if (not conectado) { dbReconnect(true); }
+    if (not QSqlQuery().exec("DO 0")) { dbReconnect(true); }
   });
-  timer->start(1min);
-}
 
-void Application::startUpdaterPing() {
-  auto *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, [&] { updater(); });
-  timer->start(10min);
+  timer->start(1min);
 }
 
 void Application::darkTheme() {

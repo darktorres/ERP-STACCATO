@@ -18,10 +18,13 @@
 #include "importatabelaibpt.h"
 #include "orcamento.h"
 #include "precoestoque.h"
+#include "qsimpleupdater.h"
 #include "user.h"
 #include "userconfig.h"
 
 #include <QSqlError>
+
+using namespace std::chrono_literals;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
@@ -99,6 +102,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   const QString nomeUsuario = User::nome;
 
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "RODRIGO TORRES") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
+
+  //---------------------------------------------------------------------------
+
+  auto *timer = new QTimer(this);
+  connect(timer, &QTimer::timeout, this, [&] { updater(); });
+  timer->start(10min);
 
   //---------------------------------------------------------------------------
 
@@ -323,6 +332,30 @@ void MainWindow::on_actionGerenciar_dados_bancarios_triggered() {
   auto funcionarios = new CadastroFuncionario(this);
   funcionarios->setAttribute(Qt::WA_DeleteOnClose);
   funcionarios->show();
+}
+
+void MainWindow::updater() {
+#ifdef Q_OS_WIN
+  if (updaterOpen) { return; }
+
+  const QString hostname = User::getSetting("Login/hostname").toString();
+
+  if (hostname.isEmpty()) { return; }
+
+  updaterOpen = true;
+
+  // TODO: abrir updater em um processo separado e fechar erp?
+
+  auto *updater = new QSimpleUpdater(this);
+  connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
+  connect(updater, &QSimpleUpdater::beginDownload, this, &MainWindow::close);
+  updater->setApplicationVersion(qApp->applicationVersion());
+  updater->setReferenceUrl("http://" + hostname + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname + "/Instalador.exe");
+  updater->setSilent(true);
+  updater->setShowNewestVersionMessage(true);
+  updater->checkForUpdates();
+#endif
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

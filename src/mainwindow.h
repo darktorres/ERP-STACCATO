@@ -19,8 +19,9 @@ public:
 
 private:
   // attributes
-  Ui::MainWindow *ui;
+  bool updaterOpen = false;
   QPushButton *pushButtonStatus = nullptr;
+  Ui::MainWindow *ui;
   // methods
   auto event(QEvent *event) -> bool final;
   auto on_actionCadastrarCliente_triggered() -> void;
@@ -50,4 +51,5 @@ private:
   auto resetTables() -> void;
   auto setConnectionStatus(const bool conectado) -> void;
   auto setConnections() -> void;
+  auto updater() -> void;
 };

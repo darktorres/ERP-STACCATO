@@ -358,6 +358,9 @@ color: rgb(0, 0, 0);</string>
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonAtualizarVeiculo">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Atualizar Veíc.</string>
                 </property>

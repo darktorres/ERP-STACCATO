@@ -347,6 +347,8 @@ void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
+  // NOTE: desativado para nao ser alterado o historico, se necessario desativar um cadastro e cadastrar outro
+
   cadastrarVeiculo(Tipo::Atualizar);
   novoVeiculo();
 }
@@ -441,7 +443,6 @@ void CadastroTransportadora::on_tableVeiculo_selectionChanged() {
   currentRowVeiculo = index.row();
   mapperVeiculo.setCurrentModelIndex(index);
 
-  ui->pushButtonAtualizarVeiculo->show();
   ui->pushButtonAdicionarVeiculo->hide();
   ui->pushButtonDesativarVeiculo->show();
 }

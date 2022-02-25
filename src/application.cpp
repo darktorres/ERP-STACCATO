@@ -119,9 +119,10 @@ void Application::genericLogin(const QString &hostname) {
   db.setUserName("loginUser");
   db.setPassword(systemPassword);
   db.setDatabaseName("staccato");
+  //  db.setDatabaseName("empty"); // for testing
   db.setPort(3306);
 
-  db.setConnectOptions("MYSQL_OPT_CONNECT_TIMEOUT=1");
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
 
   if (not db.open()) {
     bool connected = false;

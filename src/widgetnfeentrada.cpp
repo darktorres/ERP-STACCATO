@@ -93,6 +93,8 @@ void WidgetNfeEntrada::setupTables() {
 
   model.setHeaderData("utilizada", "Utilizada");
   model.setHeaderData("dataHoraEmissao", "Data");
+  model.setHeaderData("dataFollowup", "Data Followup");
+  model.setHeaderData("observacao", "Observação");
 
   ui->table->setModel(&model);
 

@@ -136,20 +136,22 @@ void WidgetCompraPendentes::setupTables() {
 
   modelProduto.setSort("idVenda");
 
-  modelProduto.setHeaderData("prazoEntrega", "Prazo Limite");
-  modelProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelProduto.setHeaderData("status", "Status");
+  modelProduto.setHeaderData("statusFinanceiro", "Financeiro");
   modelProduto.setHeaderData("dataFinanceiro", "Financeiro");
   modelProduto.setHeaderData("idVenda", "Venda");
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
   modelProduto.setHeaderData("produto", "Produto");
+  modelProduto.setHeaderData("obs", "Obs.");
   modelProduto.setHeaderData("caixas", "Caixas");
   modelProduto.setHeaderData("quant", "Quant.");
   modelProduto.setHeaderData("un", "Un.");
   modelProduto.setHeaderData("codComercial", "Cód. Com.");
   modelProduto.setHeaderData("formComercial", "Form. Com.");
-  modelProduto.setHeaderData("status", "Status");
-  modelProduto.setHeaderData("statusFinanceiro", "Financeiro");
-  modelProduto.setHeaderData("obs", "Obs.");
+  modelProduto.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelProduto.setHeaderData("dataFollowup", "Data Followup");
+  modelProduto.setHeaderData("observacao", "Observação");
 
   modelProduto.proxyModel = new FinanceiroProxyModel(&modelProduto, this);
 

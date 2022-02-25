@@ -92,6 +92,8 @@ void WidgetNfeSaida::setupTables() {
 
   model.setHeaderData("valor", "R$");
   model.setHeaderData("dataHoraEmissao", "Data");
+  model.setHeaderData("dataFollowup", "Data Followup");
+  model.setHeaderData("observacao", "Observação");
 
   ui->table->setModel(&model);
 

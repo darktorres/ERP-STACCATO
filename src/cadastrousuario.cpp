@@ -344,3 +344,4 @@ void CadastroUsuario::connectLineEditsToDirty() {
 // FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
 // TODO: colocar combobox para escolher regime CLT/PJ/Outros
 // TODO: não dá para visualizar cadastros desativados
+// TODO: se usuario alterar a senha deve atualizar em User::senha senao o envio de arquivos para o servidor vai falhar na autenticacao

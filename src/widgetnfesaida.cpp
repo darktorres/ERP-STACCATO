@@ -44,7 +44,7 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked, connectionType);
-  connect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked, connectionType);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated, connectionType);
 }
@@ -63,7 +63,7 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
   disconnect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
-  disconnect(ui->pushButtonFollowup, &QPushButton::toggled, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked);
+  disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
 }

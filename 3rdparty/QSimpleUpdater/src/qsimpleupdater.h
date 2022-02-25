@@ -51,6 +51,7 @@ public:
   auto silent() const -> bool;
 
 signals:
+  void beginDownload();
   void checkingFinished();
   void done();
 

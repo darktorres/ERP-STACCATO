@@ -102,7 +102,6 @@ private:
   auto runSqlJobs() -> void;
   auto showMessages() -> void;
   auto startSqlPing() -> void;
-  auto startUpdaterPing() -> void;
   auto userLogin(const QString &user) -> void;
 
   // for multiple comparison without repetition

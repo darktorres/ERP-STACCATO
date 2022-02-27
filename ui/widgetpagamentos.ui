@@ -113,6 +113,9 @@
           <property name="prefix">
            <string>R$ </string>
           </property>
+          <property name="minimum">
+           <double>-999999.989999999990687</double>
+          </property>
           <property name="maximum">
            <double>999999.989999999990687</double>
           </property>

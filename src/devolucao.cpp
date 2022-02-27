@@ -546,14 +546,14 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "idVenda", idDevolucao);
   // TODO: porque usa o idLoja do usuario?
   modelPagamentos.setData(newRow, "idLoja", User::idLoja);
-  modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value() * -1);
+  modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value());
   modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
   modelPagamentos.setData(newRow, "parcela", 1);
   modelPagamentos.setData(newRow, "observacao", "");
   modelPagamentos.setData(newRow, "status", "RECEBIDO");
   modelPagamentos.setData(newRow, "dataPagamento", qApp->serverDate());
   modelPagamentos.setData(newRow, "dataRealizado", qApp->serverDate());
-  modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value() * -1);
+  modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value());
   // TODO: adicionar observacao dizendo qual porcentagem e de qual produto
 
   const int contaCreditos = 11;

@@ -1077,6 +1077,7 @@ void Venda::cancelamento() {
 
     if (status == "RECEBIDO" and tipo.contains("CONTA CLIENTE")) {
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
+      const double credito = modelFluxoCaixa.data(row, "valor").toDouble() * -1;
 
       SqlQuery query6;
       query6.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");
@@ -1297,7 +1298,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) { credito += modelFluxoCaixa.data(row, "valor").toDouble(); }
   }
 
-  ui->widgetPgts->setCredito(credito);
+  ui->widgetPgts->setCredito(credito * -1);
 
   // -------------------------------------------------------------------------
 
@@ -1555,7 +1556,7 @@ void Venda::processarPagamento(Pagamento *pgt) {
     modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
     modelFluxoCaixa.setData(row, "idLoja", idLoja);
     modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao);
-    modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value());
+    modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value() * -1);
     modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
     modelFluxoCaixa.setData(row, "parcela", 1);
     modelFluxoCaixa.setData(row, "observacao", pgt->observacao->text());

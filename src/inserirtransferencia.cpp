@@ -92,7 +92,11 @@ void InserirTransferencia::cadastrar() {
   modelPara.setData(rowPara, "grupo", "Transferência");
   modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
-  if (ui->frameCliente->isVisible()) { modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text()); }
+  if (ui->frameCliente->isVisible()) {
+    modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value() * -1);
+    modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value() * -1);
+    modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text());
+  }
 
   modelDe.submitAll();
 

@@ -540,16 +540,18 @@ void WidgetPagamentos::verifyFields() {
   if (pgtSt) {
     if (pgtSt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { throw RuntimeError("Por favor escolha a forma de pagamento da ST!"); }
     if (qFuzzyIsNull(pgtSt->valorPgt->value())) { throw RuntimeError("Pagamento da ST está com valor 0!"); }
-    if (pgtSt->valorPgt->value() < 0) { throw RuntimeError("Pagamento da ST´ está com valor negativo!"); }
+    if (pgtSt->valorPgt->value() < 0) { throw RuntimeError("Pagamento da ST está com valor negativo!"); }
   }
 
   if (ui->doubleSpinBoxCreditoDisponivel->value() < 0) { throw RuntimeError("Crédito restante negativo!"); }
 
   for (auto *pagamento : qAsConst(pagamentos)) {
-    if (pagamento->comboTipoPgt->currentText() == "") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pagamento->posicao) + "!"); }
-    if (qFuzzyIsNull(pagamento->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(pagamento->posicao) + " está com valor 0!"); }
-    if (pagamento->valorPgt->value() < 0) { throw RuntimeError("Pagamento " + QString::number(pagamento->posicao) + " está com valor negativo!"); }
-    if (tipo == Tipo::Venda and pagamento->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + QString::number(pagamento->posicao) + "!"); }
+    const QString posicao = QString::number(pagamento->posicao);
+
+    if (pagamento->comboTipoPgt->currentText() == "") { throw RuntimeError("Por favor escolha a forma de pagamento " + posicao + "!"); }
+    if (qFuzzyIsNull(pagamento->valorPgt->value())) { throw RuntimeError("Pagamento " + posicao + " está com valor 0!"); }
+    if (pagamento->valorPgt->value() < 0) { throw RuntimeError("Pagamento " + posicao + " está com valor negativo!"); }
+    if (tipo == Tipo::Venda and pagamento->observacao->text().isEmpty()) { throw RuntimeError("Faltou preencher observação do pagamento " + posicao + "!"); }
   }
 }
 

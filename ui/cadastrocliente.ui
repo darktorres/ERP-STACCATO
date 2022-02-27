@@ -763,6 +763,9 @@ QLineEdit:!read-only {
                  <property name="prefix">
                   <string>R$ </string>
                  </property>
+                 <property name="minimum">
+                  <double>-99999.990000000005239</double>
+                 </property>
                  <property name="maximum">
                   <double>99999.990000000005239</double>
                  </property>

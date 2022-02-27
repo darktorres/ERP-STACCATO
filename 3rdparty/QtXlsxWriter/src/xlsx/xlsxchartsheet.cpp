@@ -73,7 +73,7 @@ Chartsheet::Chartsheet(const QString &name, int id, Workbook *workbook, CreateFl
  */
 
 Chartsheet *Chartsheet::copy(const QString &distName, int distId) const {
-  //:Todo
+  //: Todo
   Q_UNUSED(distName)
   Q_UNUSED(distId)
   return nullptr;

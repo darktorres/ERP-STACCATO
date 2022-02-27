@@ -543,6 +543,8 @@ void WidgetPagamentos::verifyFields() {
     if (pgtSt->valorPgt->value() < 0) { throw RuntimeError("Pagamento da ST´ está com valor negativo!"); }
   }
 
+  if (ui->doubleSpinBoxCreditoDisponivel->value() < 0) { throw RuntimeError("Crédito restante negativo!"); }
+
   for (auto *pagamento : qAsConst(pagamentos)) {
     if (pagamento->comboTipoPgt->currentText() == "") { throw RuntimeError("Por favor escolha a forma de pagamento " + QString::number(pagamento->posicao) + "!"); }
     if (qFuzzyIsNull(pagamento->valorPgt->value())) { throw RuntimeError("Pagamento " + QString::number(pagamento->posicao) + " está com valor 0!"); }

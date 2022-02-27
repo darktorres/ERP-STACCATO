@@ -1075,8 +1075,7 @@ void Venda::cancelamento() {
     const QString status = modelFluxoCaixa.data(row, "status").toString();
     const QString tipo = modelFluxoCaixa.data(row, "tipo").toString();
 
-    if (status == "RECEBIDO" and tipo.contains("CONTA CLIENTE")) {
-      const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
+    if ((status == "PENDENTE" or status == "RECEBIDO") and tipo.contains("CONTA CLIENTE")) {
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble() * -1;
 
       SqlQuery query6;

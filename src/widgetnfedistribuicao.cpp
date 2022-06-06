@@ -559,6 +559,18 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
       continue;
     }
 
+    if (motivo.contains("Rejeicao: Evento apresentado apos o prazo permitido para o evento: [10 dias]")) {
+        SqlQuery query;
+
+        if (not query.exec("UPDATE nfe SET confirmar = TRUE, ciencia = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
+                           "WHERE chaveAcesso = '" +
+                           chaveAcesso + "'")) {
+          throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
+        }
+
+        continue;
+    }
+
     // TODO: ao ocorrer um evento não tratado limpar os flags de eventos no banco de dados para evitar que o sistema fique enviando o mesmo evento repetidamente
 
     throw RuntimeException("Evento não tratado: " + evento);

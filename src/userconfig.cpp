@@ -201,6 +201,9 @@ void UserConfig::on_pushButtonEmailTeste_clicked() {
 }
 
 void UserConfig::preencherComboBoxMonitorar() {
+  ui->comboBoxMonitorar1->addItem("");
+  ui->comboBoxMonitorar2->addItem("");
+
   SqlQuery query;
 
   if (not query.exec("SELECT DISTINCT(LEFT(cnpj, 10)) AS raiz, razaoSocial FROM loja WHERE cnpj IS NOT NULL")) { throw RuntimeException("Erro buscando empresas: " + query.lastError().text()); }

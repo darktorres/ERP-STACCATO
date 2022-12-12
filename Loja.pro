@@ -33,12 +33,12 @@ win32 {
 
     RC_ICONS = Staccato.ico
 
-    CONFIG(release, debug|release) {
-        versao.input = versao.txt.in
-        versao.output = $$OUT_PWD/release/versao.txt
-        QMAKE_SUBSTITUTES += versao
-        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
-    }
+#    CONFIG(release, debug|release) {
+#        versao.input = versao.txt.in
+#        versao.output = $$OUT_PWD/release/versao.txt
+#        QMAKE_SUBSTITUTES += versao
+#        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
+#    }
 }
 
 win32-msvc {

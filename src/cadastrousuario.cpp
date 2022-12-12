@@ -345,3 +345,4 @@ void CadastroUsuario::connectLineEditsToDirty() {
 // TODO: colocar combobox para escolher regime CLT/PJ/Outros
 // TODO: não dá para visualizar cadastros desativados
 // TODO: se usuario alterar a senha deve atualizar em User::senha senao o envio de arquivos para o servidor vai falhar na autenticacao
+// TODO: limitar tamanho do nome para 32 (limite do mysql)

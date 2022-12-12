@@ -389,7 +389,7 @@ void WidgetPagamentos::setST(const double newSt) {
 void WidgetPagamentos::setFretePagoLoja() {
   fretePagoLoja = true;
 
-  if (pgtFrete) { pgtFrete->checkBoxRep->setChecked(not fretePagoLoja); }
+  if (pgtFrete) { pgtFrete->checkBoxRep->setChecked(false); }
 
   //  ui->pushButtonFreteLoja->setDisabled(true);
 }

@@ -25,7 +25,7 @@ PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
 
 win32 {
-    VERSION = 0.10.64
+    VERSION = 0.10.65
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
     QMAKE_TARGET_PRODUCT = ERP
     QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
@@ -33,12 +33,12 @@ win32 {
 
     RC_ICONS = Staccato.ico
 
-#    CONFIG(release, debug|release) {
-#        versao.input = versao.txt.in
-#        versao.output = $$OUT_PWD/release/versao.txt
-#        QMAKE_SUBSTITUTES += versao
-#        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
-#    }
+    CONFIG(release, debug|release) {
+        versao.input = versao.txt.in
+        versao.output = $$OUT_PWD/release/versao.txt
+        QMAKE_SUBSTITUTES += versao
+        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
+    }
 }
 
 win32-msvc {

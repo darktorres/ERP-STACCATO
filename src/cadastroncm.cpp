@@ -97,9 +97,9 @@ void CadastroNCM::on_lineEditBusca_textChanged(const QString &text) { model.setF
 void CadastroNCM::on_pushButtonAdicionar_clicked() {
   const int row = model.insertRowAtEnd();
 
-  model.setData(row, "mva4", 0);
-  model.setData(row, "mva12", 0);
-  model.setData(row, "aliq", 0);
+  model.setData(row, "mva4", 0.);
+  model.setData(row, "mva12", 0.);
+  model.setData(row, "aliq", 0.);
 
   ui->table->selectRow(row);
 }

@@ -43,24 +43,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipo + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
-  if (not User::isAdmin()) { ui->actionCadastrarUsuario->setDisabled(true); }
+  if (not User::isAdmin()) { ui->actionCadastrarUsuario->setVisible(false); }
 
   if (not User::isAdministrativo()) {
-    ui->actionCadastrarFornecedor->setDisabled(true);
-    ui->actionCadastrarProdutos->setDisabled(true);
-    ui->actionGerenciar_Lojas->setDisabled(true);
-    ui->actionGerenciar_NCMs->setDisabled(true);
-    ui->actionGerenciar_Transportadoras->setDisabled(true);
-    ui->actionGerenciar_dados_bancarios->setDisabled(true);
-    ui->actionGerenciar_pagamentos->setDisabled(true);
-    ui->actionGerenciar_preco_estoque->setDisabled(true);
-    ui->actionGerenciar_staccatoOff->setDisabled(true);
+      ui->actionCadastrarFornecedor->setVisible(false);
+      ui->actionCadastrarProdutos->setVisible(false);
+      ui->actionGerenciar_Lojas->setVisible(false);
+      ui->actionGerenciar_NCMs->setVisible(false);
+      ui->actionGerenciar_Transportadoras->setVisible(false);
+      ui->actionGerenciar_dados_bancarios->setVisible(false);
+      ui->actionGerenciar_pagamentos->setVisible(false);
+      ui->actionGerenciar_preco_estoque->setVisible(false);
+      ui->actionGerenciar_staccatoOff->setVisible(false);
 
-    ui->menuImportar_tabela_fornecedor->setDisabled(true);
-    ui->actionImportar_tabela_IBPT->setDisabled(true);
+      ui->menuImportar_tabela_fornecedor->menuAction()->setVisible(false);
+      ui->actionImportar_tabela_IBPT->setVisible(false);
+
+      ui->actionCalcular_frete->setVisible(false);
   }
-
-  ui->actionCalcular_frete->setDisabled(true);
 
   // -------------------------------------------------------------------------
 

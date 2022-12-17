@@ -291,8 +291,8 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(false, parent));
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
-  sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "custoTransporte1", "custoTransporte2",
-                       "lastDistribuicao", "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "precoCombustivel", "capacidadeCaminhaoGrande", "custoMotoristaCaminhaoGrande",
+  sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "lastDistribuicao",
+                       "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "precoCombustivel", "capacidadeCaminhaoGrande", "custoMotoristaCaminhaoGrande",
                        "custoAjudantesCaminhaoGrande", "eixosCaminhaoGrande", "consumoCaminhaoGrande", "capacidadeCaminhaoPequeno", "custoMotoristaCaminhaoPequeno", "custoAjudantesCaminhaoPequeno",
                        "eixosCaminhaoPequeno", "consumoCaminhaoPequeno", "tetoProfissionalRT", "apiQualp", "cabecalhosQualp"});
 

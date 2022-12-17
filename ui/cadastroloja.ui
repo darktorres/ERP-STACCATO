@@ -646,16 +646,19 @@ color: rgb(0, 0, 0);</string>
              <layout class="QGridLayout" name="gridLayout_11">
               <item row="0" column="0">
                <layout class="QGridLayout" name="gridLayout_5">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                <item row="2" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBoxPrecoCombustivel">
+                  <property name="prefix">
+                   <string>R$ </string>
                   </property>
-                  <property name="text">
-                   <string>Valor mínimo:</string>
+                  <property name="suffix">
+                   <string/>
+                  </property>
+                  <property name="maximum">
+                   <double>9999.989999999999782</double>
+                  </property>
+                  <property name="value">
+                   <double>0.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -678,10 +681,10 @@ color: rgb(0, 0, 0);</string>
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_2">
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_3">
                   <property name="text">
-                   <string>Porcentagem:</string>
+                   <string>Preço Combustível:</string>
                   </property>
                  </widget>
                 </item>
@@ -695,26 +698,10 @@ color: rgb(0, 0, 0);</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_3">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_2">
                   <property name="text">
-                   <string>Preço Combustível:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxPrecoCombustivel">
-                  <property name="prefix">
-                   <string>R$ </string>
-                  </property>
-                  <property name="suffix">
-                   <string/>
-                  </property>
-                  <property name="maximum">
-                   <double>9999.989999999999782</double>
-                  </property>
-                  <property name="value">
-                   <double>0.000000000000000</double>
+                   <string>Porcentagem:</string>
                   </property>
                  </widget>
                 </item>
@@ -731,6 +718,19 @@ color: rgb(0, 0, 0);</string>
                   </property>
                  </widget>
                 </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Valor mínimo:</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="3" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransportePorTon">
                   <property name="showGroupSeparator" stdset="0">
@@ -741,52 +741,6 @@ color: rgb(0, 0, 0);</string>
                   </property>
                   <property name="maximum">
                    <double>9999.989999999999782</double>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0">
-                 <widget class="QLabel" name="label_9">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Custo até 2 ton.:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransporte2Ton">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="suffix">
-                   <string> %</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="0">
-                 <widget class="QLabel" name="label_10">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Custo acima 2 ton.:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransporteAcima2Ton">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="suffix">
-                   <string> %</string>
                   </property>
                  </widget>
                 </item>

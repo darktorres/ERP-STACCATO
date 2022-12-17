@@ -1172,26 +1172,10 @@ void Orcamento::on_itemBoxCliente_textChanged() {
 }
 
 void Orcamento::on_itemBoxEndereco_idChanged() {
-    // se for 'não há/retira' calcular usando qMax(valorMinimo/porcentagemFrete)
-    // senão calcular usando CalculoFrete (caso CalculoFrete dê erro usar a formula acima como fallback)
-
-    // TODO: se não tiver endereço do cliente cadastrado usar a regra do qMax(valorMinimo, porcentagemFrete)
-
-//    if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
-//        qDebug() << "frete antigo: " << ui->doubleSpinBoxFrete->value();
-//    } else {
-//        auto calculoFrete = new CalculoFrete(this);
-//        // TODO: se orcamento nao estiver salvo o CalculoFrete nao vai conseguir ler os produtos/peso
-//        calculoFrete->setOrcamento(ui->lineEditOrcamento->text(), ui->itemBoxEndereco->text());
-
-//        qDebug() << "frete qualp: " << calculoFrete->getFrete();
-//    }
-
-    qDebug() << "--------------------------------------";
-
     double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
 
     double freteTemp = qMax(fretePorcentagem, minimoFrete);
+    ui->doubleSpinBoxFrete->setMinimum(freteTemp);
 
     qDebug() << "fretePorcentagem: " << fretePorcentagem;
     qDebug() << "freteMinimo: " << minimoFrete;
@@ -1233,95 +1217,28 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
         // --------------------------------------------
 
         CalculoFrete calculoFrete;
-//        auto calculoFrete = CalculoFrete(this);
         calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
 
         double freteQualp = 0.;
         try {
           freteQualp = calculoFrete.getFrete();
-        } catch (...) {
-          // log
+        } catch (std::exception &e) {
+          Log::createLog("Exceção", e.what());
         }
 
         qDebug() << "freteQualp: " << freteQualp;
+
+        if (freteQualp > freteTemp) {
+          ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
+        }
+
         freteTemp = qMax(freteTemp, freteQualp);
     }
 
     qDebug() << "freteFinal: " << freteTemp;
 
-    ui->doubleSpinBoxFrete->setMinimum(freteTemp);
     ui->doubleSpinBoxFrete->setValue(freteTemp);
-
-//    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
-
-//    ui->doubleSpinBoxFrete->setValue(frete);
-
-    return;
-
-    // ----------------------------------------------
-
-    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
-
-    if (dialog.exec() == QDialog::Rejected) { return; }
-
-    CalculoFrete frete;
-//    auto frete = CalculoFrete(this);
-    frete.setCliente(ui->itemBoxCliente->getId());
-    frete.exec();
-
-    const double dist = frete.getDistancia();
-
-    if (qFuzzyIsNull(dist)) { throw RuntimeException("Não foi possível determinar a distância!"); }
-
-    int peso = 0;
-
-    SqlQuery query;
-    query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
-
-      if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
-
-      if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
-
-      peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
-    }
-
-    // REDO
-    if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'")) {
-      throw RuntimeException("Erro buscando parâmetros: " + query.lastError().text());
-    }
-
-    if (not query.first()) { throw RuntimeException("Dados da loja 'Geral' não encontrados!"); }
-
-    const double custoTon = query.value("custoTransporteTon").toDouble();
-    const double custo1 = query.value("custoTransporte1").toDouble();
-    const double custo2 = query.value("custoTransporte2").toDouble();
-    const double custoFuncionario = query.value("custoFuncionario").toDouble();
-
-    qDebug() << "peso: " << peso;
-
-    int cargas = peso / 4500;
-    int restante = peso % 4500;
-
-    qDebug() << "inteiro: " << cargas;
-    qDebug() << "resto: " << restante;
-
-    // TODO: se endereco for 'nao há/retira' calcular apenas o valorPeso
-    const double valorPeso = (peso / 1000.0 * custoTon);
-
-    const double valorDistCargaCheia = (cargas * custo2 * dist) + (cargas * 3 * custoFuncionario);
-    const double valorDistMeiaCarga =
-        cargas > 0 and restante < 200 ? 0 : (restante < 2000 ? dist * custo1 + (2 * custoFuncionario / 2000.0 * restante) : dist * custo2 + (3 * custoFuncionario / 4500.0 * restante));
-    const double valorFrete = valorPeso + valorDistCargaCheia + valorDistMeiaCarga;
-
-    qDebug() << "valorPeso: " << valorPeso;
-    qDebug() << "valorDistCargaCheia: " << valorDistCargaCheia;
-    qDebug() << "valorDistMeiaCarga: " << valorDistMeiaCarga;
-    qDebug() << "frete: " << valorFrete;
-
-    // frete = (pesoProduto(ton.) * 180) + (pesoProduto < 2ton. ? dist. * 1.5 : pesoProduto < 4.5 ? dist. * 2 : fracionar cargas)
+    qDebug() << "--------------------------------------";
 }
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {

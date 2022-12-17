@@ -192,6 +192,8 @@ void CalculoFrete::on_pushButtonCalcular_clicked() {
   //. TODO: pintar de cor diferente o campo do frete no orcamento/venda para indicar se é dentro ou fora da cidade/estado, com ou sem autorizacao
   //. TODO: ao autorizar colocar o valorMinimoFrete no spinBox do frete
 
+  // TODO: precisa copiar a logica do orcamento na tela de venda?
+
   qualp();
 }
 
@@ -300,7 +302,7 @@ void CalculoFrete::qualp() {
     const QString pedagioFmt = fmtObj.value("total_tolls").toString();
     const QString totalViagemFmt = fmtObj.value("total_trip").toString();
 
-    const QString cargasStr = QString::number(cargas) + "x ";
+    const QString cargasStr = (cargas == 1) ? "" : QString::number(cargas) + "x ";
     const QString multiplicadorCarga = (cargas == 1) ? "" : " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * pedagio, 'f', 2);
 
     ui->lineEditPedagio->setText(cargasStr + pedagioFmt + multiplicadorCarga);
@@ -311,13 +313,15 @@ void CalculoFrete::qualp() {
     ui->doubleSpinBoxTotal->setValue(total * 1.2);
 }
 
-void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
+void CalculoFrete::on_itemBoxCliente_textChanged(const QString &text) {
   ui->comboBoxOrcamento->clear();
   ui->comboBoxVenda->clear();
   ui->itemBoxDestino->clear();
   ui->lineEditPedagio->clear();
   ui->lineEditDistancia->clear();
   ui->lineEditCombustivel->clear();
+
+  if (text.isEmpty()) { return; }
 
   // -------------------------------------------------------------------------
 
@@ -342,8 +346,10 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   while (queryVenda.next()) { ui->comboBoxVenda->addItem(queryVenda.value("idVenda").toString()); }
 }
 
-void CalculoFrete::on_itemBoxDestino_textChanged(const QString &)
+void CalculoFrete::on_itemBoxDestino_textChanged(const QString &text)
 {
+  if (text.isEmpty()) { return; }
+
   SqlQuery queryEndereco2;
 
   if (not queryEndereco2.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {

@@ -117,8 +117,6 @@ void CadastroLoja::savingProcedures() {
   setData("porcentagemFrete", ui->doubleSpinBoxPorcFrete->value());
   setData("precoCombustivel", ui->doubleSpinBoxPrecoCombustivel->value());
   setData("custoTransporteTon", ui->doubleSpinBoxCustoTransportePorTon->value());
-  setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value());
-  setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value());
   setData("capacidadeCaminhaoGrande", ui->spinBoxCapacidadeCaminhaoGrande->value());
   setData("custoMotoristaCaminhaoGrande", ui->doubleSpinBoxCustoMotoristaCaminhaoGrande->value());
   setData("custoAjudantesCaminhaoGrande", ui->doubleSpinBoxCustoAjudantesCaminhaoGrande->value());
@@ -162,8 +160,6 @@ void CadastroLoja::setupMapper() {
   addMapping(ui->doubleSpinBoxValorMinimoFrete, "valorMinimoFrete");
   addMapping(ui->doubleSpinBoxPrecoCombustivel, "precoCombustivel");
   addMapping(ui->doubleSpinBoxCustoTransportePorTon, "custoTransporteTon");
-  addMapping(ui->doubleSpinBoxCustoTransporte2Ton, "custoTransporte1");
-  addMapping(ui->doubleSpinBoxCustoTransporteAcima2Ton, "custoTransporte2");
   addMapping(ui->spinBoxCapacidadeCaminhaoGrande, "capacidadeCaminhaoGrande");
   addMapping(ui->doubleSpinBoxCustoMotoristaCaminhaoGrande, "custoMotoristaCaminhaoGrande");
   addMapping(ui->doubleSpinBoxCustoAjudantesCaminhaoGrande, "custoAjudantesCaminhaoGrande");

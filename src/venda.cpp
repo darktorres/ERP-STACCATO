@@ -750,8 +750,9 @@ void Venda::montarFluxoCaixa() {
   for (auto *pgt : qAsConst(ui->widgetPgts->pagamentos)) { processarPagamento(pgt); }
 
   if (ui->widgetPgts->pgtFrete) {
-      ui->widgetPgts->pgtFrete->posicao = ui->widgetPgts->pagamentos.size() + 1;
-      processarPagamento(ui->widgetPgts->pgtFrete); }
+    ui->widgetPgts->pgtFrete->posicao = ui->widgetPgts->pagamentos.size() + 1;
+    processarPagamento(ui->widgetPgts->pgtFrete);
+  }
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {

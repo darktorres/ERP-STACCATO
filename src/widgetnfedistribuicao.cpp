@@ -183,7 +183,10 @@ void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
 
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
-  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) { tempoTimer = 1h; return; }
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) {
+    tempoTimer = 1h;
+    return;
+  }
   if (resposta.contains("ERRO: Rejeicao: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital")) { throw RuntimeError("Certificado plugado é de outro CNPJ!"); }
   if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 
@@ -228,7 +231,7 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
   SqlQuery queryCnpj;
 
   if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj LIKE '" + cnpjRaiz + "%' AND desativado = FALSE")) {
-//  if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj = '09.375.013/0005-43' AND desativado = FALSE")) {
+    //  if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj = '09.375.013/0005-43' AND desativado = FALSE")) {
     throw RuntimeException("Erro buscando filiais: " + queryCnpj.lastError().text());
   }
 
@@ -362,7 +365,7 @@ void WidgetNFeDistribuicao::on_pushButtonCiencia_clicked() {
   ACBr acbr;
 
   monitorar ? darCiencia(acbr, false) : agendarOperacao();
-//  darCiencia(acbr, false);
+  //  darCiencia(acbr, false);
 }
 
 void WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked() {
@@ -385,7 +388,7 @@ void WidgetNFeDistribuicao::on_pushButtonConfirmacao_clicked() {
   ACBr acbr;
 
   monitorar ? confirmar(acbr, false) : agendarOperacao();
-//  confirmar(acbr, false);
+  //  confirmar(acbr, false);
 }
 
 void WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
@@ -408,7 +411,7 @@ void WidgetNFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   ACBr acbr;
 
   monitorar ? desconhecer(acbr, false) : agendarOperacao();
-//  desconhecer(acbr, false);
+  //  desconhecer(acbr, false);
 }
 
 void WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
@@ -431,7 +434,7 @@ void WidgetNFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
   ACBr acbr;
 
   monitorar ? naoRealizar(acbr, false) : agendarOperacao();
-//  naoRealizar(acbr, false);
+  //  naoRealizar(acbr, false);
 }
 
 void WidgetNFeDistribuicao::agendarOperacao() {
@@ -448,13 +451,13 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
   qDebug() << selection;
 
   if (cnpjDest.isEmpty()) {
-      SqlQuery queryLoja;
+    SqlQuery queryLoja;
 
-      if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = (SELECT lojaACBr FROM config)")) { throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this); }
+    if (not queryLoja.exec("SELECT cnpj FROM loja WHERE idLoja = (SELECT lojaACBr FROM config)")) { throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this); }
 
-      if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'", this); }
+    if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'", this); }
 
-      cnpjDest = queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-");
+    cnpjDest = queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-");
   }
 
   QString column;
@@ -497,14 +500,15 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
     const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
 
     if (statusDistribuicao == "CANCELADA" or (operacao == "CIÊNCIA" and statusDistribuicao != "DESCONHECIDO")) {
-        SqlQuery query;
+      SqlQuery query;
 
-        if (not query.exec("UPDATE nfe SET ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
-                           "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-          throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
-        }
+      if (not query.exec("UPDATE nfe SET ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
+                         "WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
+        throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
+      }
 
-        continue;
+      continue;
     }
 
     const QString numEvento = QString::number(++count).rightJustified(3, '0'); // padding with zeros
@@ -552,7 +556,8 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
 
       if (not query.exec("UPDATE nfe SET statusDistribuicao = 'FINALIZADA', dataDistribuicao = NOW(), "
                          "ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
-                         "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                         "WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
         throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
@@ -564,7 +569,8 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
 
       if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', "
                          "ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
-                         "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                         "WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
         throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
@@ -576,7 +582,8 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
 
       if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
                          "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
-                         "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                         "WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
         throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
       }
 
@@ -584,21 +591,23 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
     }
 
     if (motivo.contains("Rejeicao: Evento apresentado apos o prazo permitido para o evento:")) {
-        SqlQuery query;
+      SqlQuery query;
 
-        if (not query.exec("UPDATE nfe SET statusDistribuicao = 'FINALIZADA', dataDistribuicao = NOW(), ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
-                           "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-          throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
-        }
+      if (not query.exec("UPDATE nfe SET statusDistribuicao = 'FINALIZADA', dataDistribuicao = NOW(), ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
+                         "WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
+        throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
+      }
 
-        continue;
+      continue;
     }
 
     // TODO: ao ocorrer um evento não tratado limpar os flags de eventos no banco de dados para evitar que o sistema fique enviando o mesmo evento repetidamente
     SqlQuery query;
 
     if (not query.exec("UPDATE nfe SET confirmar = -1, ciencia = -1, desconhecer = -1, naoRealizar = -1 "
-                       "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                       "WHERE chaveAcesso = '" +
+                       chaveAcesso + "'")) {
       throw RuntimeException("Erro atualizando statusDistribuicao da NF-e: " + query.lastError().text());
     }
 
@@ -818,7 +827,8 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
         SqlQuery queryAtualiza;
 
         if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE "
-                                   "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                                   "WHERE chaveAcesso = '" +
+                                   chaveAcesso + "'")) {
           throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
         }
 
@@ -829,7 +839,8 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
         SqlQuery queryAtualiza;
 
         if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
-                                   "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+                                   "WHERE chaveAcesso = '" +
+                                   chaveAcesso + "'")) {
           throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
         }
 
@@ -839,9 +850,9 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
       if (eventoTipo == "CANCELAMENTO" and statusCadastrado != "CANCELADA") {
         SqlQuery queryAtualiza;
 
-        if (not queryAtualiza.exec(
-                "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
-                "WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+        if (not queryAtualiza.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = -1, confirmar = -1, desconhecer = -1, naoRealizar = -1 "
+                                   "WHERE chaveAcesso = '" +
+                                   chaveAcesso + "'")) {
           throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
         }
 

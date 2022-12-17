@@ -127,17 +127,17 @@ void Application::genericLogin(const QString &hostname) {
   if (not db.open()) {
     bool connected = false;
 
-//    for (const auto &loja : qAsConst(mapLojas)) {
-//      db.setHostName(loja);
+    //    for (const auto &loja : qAsConst(mapLojas)) {
+    //      db.setHostName(loja);
 
-//      if (db.open()) {
-//        User::setSetting("Login/hostname", loja);
-//        User::setSetting("Login/loja", mapLojas.key(loja));
-//        updater();
-//        connected = true;
-//        break;
-//      }
-//    }
+    //      if (db.open()) {
+    //        User::setSetting("Login/hostname", loja);
+    //        User::setSetting("Login/loja", mapLojas.key(loja));
+    //        updater();
+    //        connected = true;
+    //        break;
+    //      }
+    //    }
 
     if (not connected) { loginError(); }
   }

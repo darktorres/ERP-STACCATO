@@ -101,9 +101,77 @@ void CalculoFrete::setConnections() {
 
 void CalculoFrete::setCliente(const QVariant &idCliente) { ui->itemBoxCliente->setId(idCliente); }
 
-void CalculoFrete::setOrcamento(const QString &idOrcamento, const QString &endereco) {
-    ui->comboBoxOrcamento->setCurrentText(idOrcamento);
-    ui->lineEditDestino->setText(endereco);
+void CalculoFrete::setOrcamento(const int idEndereco, const double pesoSul, const double pesoTotal) {
+    SqlQuery queryEndereco;
+    queryEndereco.prepare("SELECT descricao, logradouro, numero, complemento, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryEndereco.bindValue(":idEndereco", idEndereco);
+
+    if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço do cliente: " + queryEndereco.lastError().text(), this); }
+
+    if (queryEndereco.first()) {
+      if (queryEndereco.value("descricao").toString() == "NÃO HÁ/RETIRA") {
+        ui->lineEditDestino->setText("NÃO HÁ/RETIRA");
+      } else {
+        const QString logradouro = queryEndereco.value("logradouro").toString();
+        const QString numero = queryEndereco.value("numero").toString();
+        const QString complemento = queryEndereco.value("complemento").toString();
+        const QString cidade = queryEndereco.value("cidade").toString();
+        const QString uf = queryEndereco.value("uf").toString();
+
+        ui->lineEditDestino->setText(logradouro + " - " + numero + " - " + complemento + " - " + cidade + " - " + uf);
+      }
+    }
+
+    // ------------------------------
+
+    ui->spinBoxPesoSul->setValue(pesoSul);
+    ui->spinBoxPesoTotal->setValue(pesoTotal);
+
+    SqlQuery queryCustos;
+
+    if (not queryCustos.exec("SELECT custoTransporteTon, precoCombustivel, capacidadeCaminhaoGrande, custoMotoristaCaminhaoGrande, custoAjudantesCaminhaoGrande, consumoCaminhaoGrande, "
+                             "capacidadeCaminhaoPequeno, custoMotoristaCaminhaoPequeno, custoAjudantesCaminhaoPequeno, consumoCaminhaoPequeno "
+                             "FROM loja "
+                             "WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or
+        not queryCustos.first()) {
+      throw RuntimeException("Erro buscando dados do caminhão: " + queryCustos.lastError().text());
+    }
+
+    const double custoMotoristaCaminhaoGrande = queryCustos.value("custoMotoristaCaminhaoGrande").toDouble();
+    const double custoAjudantesCaminhaoGrande = queryCustos.value("custoAjudantesCaminhaoGrande").toDouble();
+    const double custoMotoristaCaminhaoPequeno = queryCustos.value("custoMotoristaCaminhaoPequeno").toDouble();
+    const double custoAjudantesCaminhaoPequeno = queryCustos.value("custoAjudantesCaminhaoPequeno").toDouble();
+    const int capacidadeCaminhaoGrande = queryCustos.value("capacidadeCaminhaoGrande").toInt();
+    const int capacidadeCaminhaoPequeno = queryCustos.value("capacidadeCaminhaoPequeno").toInt();
+    const double consumoCaminhaoGrande = queryCustos.value("consumoCaminhaoGrande").toDouble();
+    const double consumoCaminhaoPequeno = queryCustos.value("consumoCaminhaoPequeno").toDouble();
+
+    if (capacidadeCaminhaoGrande == 0) { throw RuntimeException("Capacidade do caminhão grande está zerada!"); }
+
+    const int cargas = static_cast<int>(pesoTotal / capacidadeCaminhaoGrande);
+    const int resto =  static_cast<int>(pesoTotal) % capacidadeCaminhaoGrande;
+
+    if (resto < capacidadeCaminhaoPequeno) {
+      ui->spinBoxCaminhoesGrandes->setSuffix(" - " + QString::number(capacidadeCaminhaoGrande) + " kg - Motorista: R$ " + QString::number(custoMotoristaCaminhaoGrande) + " - Ajudantes: R$ " +
+                                             QString::number(custoAjudantesCaminhaoGrande) + " - Km/L: " + QString::number(consumoCaminhaoGrande));
+      ui->spinBoxCaminhoesGrandes->setValue(cargas);
+      ui->spinBoxCaminhoesPequenos->setSuffix(" - " + QString::number(capacidadeCaminhaoPequeno) + " kg - Motorista: R$ " + QString::number(custoMotoristaCaminhaoPequeno) + " - Ajudantes: R$ " +
+                                              QString::number(custoAjudantesCaminhaoPequeno) + " - Km/L: " + QString::number(consumoCaminhaoPequeno));
+      ui->spinBoxCaminhoesPequenos->setValue(1);
+      const double custoCaminhao = ((custoMotoristaCaminhaoGrande + custoAjudantesCaminhaoGrande) * cargas) + custoMotoristaCaminhaoPequeno + custoAjudantesCaminhaoPequeno;
+      ui->doubleSpinBoxMotoristaAjudantes->setValue(custoCaminhao);
+    } else {
+      ui->spinBoxCaminhoesGrandes->setValue(cargas + 1);
+      ui->spinBoxCaminhoesPequenos->setValue(0);
+      const double custoCaminhao = (custoMotoristaCaminhaoGrande + custoAjudantesCaminhaoGrande) * (cargas + 1);
+      ui->doubleSpinBoxMotoristaAjudantes->setValue(custoCaminhao);
+    }
+
+    const double custoTransporteTon = queryCustos.value("custoTransporteTon").toDouble();
+    const double custoSul = ui->spinBoxPesoSul->value() / 1000. * custoTransporteTon;
+
+    ui->doubleSpinBoxFreteSul->setValue(custoSul);
+    ui->doubleSpinBoxPrecoCombustivel->setValue(queryCustos.value("precoCombustivel").toDouble());
 }
 
 double CalculoFrete::getDistancia() {
@@ -307,16 +375,6 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
 
   // ------------------------------
 
-  SqlQuery queryCustos;
-
-  if (not queryCustos.exec("SELECT custoTransporteTon, precoCombustivel, capacidadeCaminhaoGrande, custoMotoristaCaminhaoGrande, custoAjudantesCaminhaoGrande, consumoCaminhaoGrande, "
-                           "capacidadeCaminhaoPequeno, custoMotoristaCaminhaoPequeno, custoAjudantesCaminhaoPequeno, consumoCaminhaoPequeno "
-                           "FROM loja "
-                           "WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or
-      not queryCustos.first()) {
-    throw RuntimeException("Erro buscando dados do caminhão: " + queryCustos.lastError().text());
-  }
-
   double pesoSul = 0.;
   double pesoTotal = 0.;
 
@@ -339,6 +397,18 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
   ui->spinBoxPesoSul->setValue(pesoSul);
   ui->spinBoxPesoTotal->setValue(pesoTotal);
 
+  // ------------------------------
+
+  SqlQuery queryCustos;
+
+  if (not queryCustos.exec("SELECT custoTransporteTon, precoCombustivel, capacidadeCaminhaoGrande, custoMotoristaCaminhaoGrande, custoAjudantesCaminhaoGrande, consumoCaminhaoGrande, "
+                           "capacidadeCaminhaoPequeno, custoMotoristaCaminhaoPequeno, custoAjudantesCaminhaoPequeno, consumoCaminhaoPequeno "
+                           "FROM loja "
+                           "WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or
+      not queryCustos.first()) {
+    throw RuntimeException("Erro buscando dados do caminhão: " + queryCustos.lastError().text());
+  }
+
   const double custoMotoristaCaminhaoGrande = queryCustos.value("custoMotoristaCaminhaoGrande").toDouble();
   const double custoAjudantesCaminhaoGrande = queryCustos.value("custoAjudantesCaminhaoGrande").toDouble();
   const double custoMotoristaCaminhaoPequeno = queryCustos.value("custoMotoristaCaminhaoPequeno").toDouble();
@@ -351,7 +421,7 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
   if (capacidadeCaminhaoGrande == 0) { throw RuntimeException("Capacidade do caminhão grande está zerada!"); }
 
   const int cargas = static_cast<int>(pesoTotal / capacidadeCaminhaoGrande);
-  const int resto = ui->spinBoxPesoTotal->value() % capacidadeCaminhaoGrande;
+  const int resto =  static_cast<int>(pesoTotal) % capacidadeCaminhaoGrande;
 
   if (resto < capacidadeCaminhaoPequeno) {
     ui->spinBoxCaminhoesGrandes->setSuffix(" - " + QString::number(capacidadeCaminhaoGrande) + " kg - Motorista: R$ " + QString::number(custoMotoristaCaminhaoGrande) + " - Ajudantes: R$ " +

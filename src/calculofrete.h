@@ -12,13 +12,13 @@ class CalculoFrete : public QDialog {
   Q_OBJECT
 
 public:
-  explicit CalculoFrete(QWidget *parent);
+  explicit CalculoFrete(QWidget *parent = nullptr);
   ~CalculoFrete();
 
   auto getDistancia() -> double;
   auto getFrete() -> double;
   auto setCliente(const QVariant &idCliente) -> void;
-  auto setOrcamento(const QString &idOrcamento, const QString &endereco) -> void;
+  auto setOrcamento(const int idEndereco, const double pesoSul, const double pesoTotal) -> void;
 
 private:
   // attributes

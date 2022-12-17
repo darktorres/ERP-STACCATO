@@ -1197,9 +1197,52 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
     qDebug() << "freteMinimo: " << minimoFrete;
 
     if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
-        auto calculoFrete = new CalculoFrete(this);
-        calculoFrete->setOrcamento(ui->lineEditOrcamento->text(), ui->itemBoxEndereco->text());
-        double freteQualp = calculoFrete->getFrete();
+        double pesoSul = 0.;
+        double pesoTotal = 0.;
+
+        for (int row = 0; row < modelItem.rowCount(); ++row) {
+          const QString idProduto = modelItem.data(row, "idProduto").toString();
+
+          SqlQuery sqlQueryKgCx;
+
+          if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
+              throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
+          }
+
+          const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
+          const double caixas = modelItem.data(row, "caixas").toDouble();
+          const double peso = caixas * kgcx;
+
+          SqlQuery queryFornecedor;
+
+          if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
+            throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
+          }
+
+          if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
+
+          if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
+
+
+          pesoTotal += peso;
+        }
+
+        qDebug() << "pesoSul: " << pesoSul;
+        qDebug() << "pesoTotal: " << pesoTotal;
+
+        // --------------------------------------------
+
+        CalculoFrete calculoFrete;
+//        auto calculoFrete = CalculoFrete(this);
+        calculoFrete.setOrcamento(ui->itemBoxEndereco->getId().toInt(), pesoSul, pesoTotal);
+
+        double freteQualp = 0.;
+        try {
+          freteQualp = calculoFrete.getFrete();
+        } catch (...) {
+          // log
+        }
+
         qDebug() << "freteQualp: " << freteQualp;
         freteTemp = qMax(freteTemp, freteQualp);
     }
@@ -1220,11 +1263,12 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
 
     if (dialog.exec() == QDialog::Rejected) { return; }
 
-    auto *frete = new CalculoFrete(this);
-    frete->setCliente(ui->itemBoxCliente->getId());
-    frete->exec();
+    CalculoFrete frete;
+//    auto frete = CalculoFrete(this);
+    frete.setCliente(ui->itemBoxCliente->getId());
+    frete.exec();
 
-    const double dist = frete->getDistancia();
+    const double dist = frete.getDistancia();
 
     if (qFuzzyIsNull(dist)) { throw RuntimeException("Não foi possível determinar a distância!"); }
 

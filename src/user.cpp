@@ -23,6 +23,18 @@ bool User::isVendedorOrEspecial() { return (User::tipo == "VENDEDOR" or User::ti
 
 void User::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
+bool User::temPermissao(const QString &permissao) {
+  if (permissao.isEmpty()) { throw RuntimeException("Erro na consulta de permissão!"); }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT " + permissao + " FROM usuario_has_permissao WHERE idUsuario = " + idUsuario)) { throw RuntimeException("Erro lendo permissões: " + query.lastError().text()); }
+
+  if (not query.first()) { throw RuntimeException("Permissões não encontradas para usuário com id: '" + User::idUsuario + "'"); }
+
+  return query.value(permissao).toBool();
+}
+
 void User::login(const QString &user, const QString &password) {
   if (not query) { query = new SqlQuery(); }
 
@@ -45,15 +57,19 @@ void User::login(const QString &user, const QString &password) {
 void User::autorizacao(const QString &user, const QString &password) {
   // TODO: precisa adicionar 'GERENTE FINANCEIRO'
 
-  SqlQuery queryAutorizar;
-  queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND password = SHA_PASSWORD(:password) AND desativado = FALSE AND "
-                         "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
-  queryAutorizar.bindValue(":user", user);
-  queryAutorizar.bindValue(":password", password);
+  SqlQuery query;
+  query.prepare(
+      "SELECT idUsuario FROM usuario WHERE user = :user AND senhaUsoUnico = :senhaUsoUnico AND tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA')");
+  query.bindValue(":user", user);
+  query.bindValue(":senhaUsoUnico", password);
 
-  if (not queryAutorizar.exec()) { throw RuntimeException("Erro no login: " + queryAutorizar.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro ao consultar senha: " + query.lastError().text()); }
 
-  if (not queryAutorizar.first()) { throw RuntimeError("Login inválido!"); }
+  if (not query.first()) { throw RuntimeError("Senha não confere!"); }
+
+  SqlQuery query2;
+
+  if (not query2.exec("UPDATE usuario SET senhaUsoUnico = NULL WHERE user = '" + user + "'")) { throw RuntimeException("Erro ao apagar senha de uso único: " + query2.lastError().text()); }
 }
 
 QVariant User::fromLoja(const QString &parameter, const QString &user) {

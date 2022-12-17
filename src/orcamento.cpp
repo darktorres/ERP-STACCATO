@@ -9,6 +9,7 @@
 #include "excel.h"
 #include "file.h"
 #include "log.h"
+#include "logindialog.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
@@ -140,6 +141,7 @@ void Orcamento::setConnections() {
   connect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotal_valueChanged, connectionType);
   connect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged, connectionType);
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &Orcamento::on_itemBoxCliente_textChanged, connectionType);
+  connect(ui->itemBoxEndereco, &ItemBox::idChanged, this, &Orcamento::on_itemBoxEndereco_idChanged, connectionType);
   connect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged, connectionType);
   connect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged, connectionType);
   connect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged, connectionType);
@@ -152,7 +154,6 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked, connectionType);
-  connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
@@ -178,6 +179,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotal_valueChanged);
   disconnect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged);
   disconnect(ui->itemBoxCliente, &ItemBox::textChanged, this, &Orcamento::on_itemBoxCliente_textChanged);
+  disconnect(ui->itemBoxEndereco, &ItemBox::idChanged, this, &Orcamento::on_itemBoxEndereco_idChanged);
   disconnect(ui->itemBoxProduto, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProduto_idChanged);
   disconnect(ui->itemBoxProfissional, &ItemBox::idChanged, this, &Orcamento::on_itemBoxProfissional_idChanged);
   disconnect(ui->itemBoxVendedor, &ItemBox::textChanged, this, &Orcamento::on_itemBoxVendedor_textChanged);
@@ -190,7 +192,6 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked);
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
   disconnect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
-  disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
@@ -442,7 +443,6 @@ void Orcamento::registerMode() {
   ui->pushButtonAbrirReplicadoEm->hide();
   ui->pushButtonAbrirVenda->hide();
   ui->pushButtonAtualizarOrcamento->hide();
-  ui->pushButtonCalcularFrete->hide();
   ui->pushButtonReplicar->hide();
 
   ui->itemBoxConsultor->setReadOnlyItemBox(true);
@@ -680,7 +680,19 @@ void Orcamento::savingProcedures() {
   setData("idEnderecoEntrega", ui->itemBoxEndereco->getId());
   setData("idProfissional", ui->itemBoxProfissional->getId());
   setData("idUsuario", ui->itemBoxVendedor->getId());
-  setData("observacao", ui->plainTextEditObs->toPlainText());
+
+  const QString disclaimer = "O valor calculado para o frete é válido apenas para as regiões de São Paulo, Barueri e Jundiaí.";
+  QString observacao = ui->plainTextEditObs->toPlainText();
+
+  if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
+    if (!observacao.contains(disclaimer, Qt::CaseInsensitive)) { observacao += disclaimer; }
+
+  } else {
+    observacao.remove(disclaimer, Qt::CaseInsensitive);
+  }
+
+  setData("observacao", observacao);
+
   setData("prazoEntrega", ui->spinBoxPrazoEntrega->value());
   setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value());
   setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value());
@@ -798,6 +810,7 @@ void Orcamento::calcPrecoGlobalTotal() {
   // calcula totais considerando desconto global atual
 
   if (not ui->checkBoxFreteManual->isChecked()) {
+    // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
     if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
@@ -1158,20 +1171,133 @@ void Orcamento::on_itemBoxCliente_textChanged() {
   ui->itemBoxEndereco->clear();
 }
 
-void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
-  if (not canChangeFrete) {
-    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
+void Orcamento::on_itemBoxEndereco_idChanged() {
+    // se for 'não há/retira' calcular usando qMax(valorMinimo/porcentagemFrete)
+    // senão calcular usando CalculoFrete (caso CalculoFrete dê erro usar a formula acima como fallback)
+
+    // TODO: se não tiver endereço do cliente cadastrado usar a regra do qMax(valorMinimo, porcentagemFrete)
+
+//    if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
+//        qDebug() << "frete antigo: " << ui->doubleSpinBoxFrete->value();
+//    } else {
+//        auto calculoFrete = new CalculoFrete(this);
+//        // TODO: se orcamento nao estiver salvo o CalculoFrete nao vai conseguir ler os produtos/peso
+//        calculoFrete->setOrcamento(ui->lineEditOrcamento->text(), ui->itemBoxEndereco->text());
+
+//        qDebug() << "frete qualp: " << calculoFrete->getFrete();
+//    }
+
+    qDebug() << "--------------------------------------";
+
+    double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+
+    double freteTemp = qMax(fretePorcentagem, minimoFrete);
+
+    qDebug() << "fretePorcentagem: " << fretePorcentagem;
+    qDebug() << "freteMinimo: " << minimoFrete;
+
+    if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
+        auto calculoFrete = new CalculoFrete(this);
+        calculoFrete->setOrcamento(ui->lineEditOrcamento->text(), ui->itemBoxEndereco->text());
+        double freteQualp = calculoFrete->getFrete();
+        qDebug() << "freteQualp: " << freteQualp;
+        freteTemp = qMax(freteTemp, freteQualp);
+    }
+
+    qDebug() << "freteFinal: " << freteTemp;
+
+    ui->doubleSpinBoxFrete->setValue(freteTemp);
+
+//    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
+
+//    ui->doubleSpinBoxFrete->setValue(frete);
+
+    return;
+
+    // ----------------------------------------------
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
-    if (dialog.exec() != QDialog::Accepted) {
-      ui->checkBoxFreteManual->setChecked(not checked);
-      return;
+    if (dialog.exec() == QDialog::Rejected) { return; }
+
+    auto *frete = new CalculoFrete(this);
+    frete->setCliente(ui->itemBoxCliente->getId());
+    frete->exec();
+
+    const double dist = frete->getDistancia();
+
+    if (qFuzzyIsNull(dist)) { throw RuntimeException("Não foi possível determinar a distância!"); }
+
+    int peso = 0;
+
+    SqlQuery query;
+    query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
+
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
+
+      if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
+
+      if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
+
+      peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
     }
 
-    canChangeFrete = true;
+    // REDO
+    if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'")) {
+      throw RuntimeException("Erro buscando parâmetros: " + query.lastError().text());
+    }
+
+    if (not query.first()) { throw RuntimeException("Dados da loja 'Geral' não encontrados!"); }
+
+    const double custoTon = query.value("custoTransporteTon").toDouble();
+    const double custo1 = query.value("custoTransporte1").toDouble();
+    const double custo2 = query.value("custoTransporte2").toDouble();
+    const double custoFuncionario = query.value("custoFuncionario").toDouble();
+
+    qDebug() << "peso: " << peso;
+
+    int cargas = peso / 4500;
+    int restante = peso % 4500;
+
+    qDebug() << "inteiro: " << cargas;
+    qDebug() << "resto: " << restante;
+
+    // TODO: se endereco for 'nao há/retira' calcular apenas o valorPeso
+    const double valorPeso = (peso / 1000.0 * custoTon);
+
+    const double valorDistCargaCheia = (cargas * custo2 * dist) + (cargas * 3 * custoFuncionario);
+    const double valorDistMeiaCarga =
+        cargas > 0 and restante < 200 ? 0 : (restante < 2000 ? dist * custo1 + (2 * custoFuncionario / 2000.0 * restante) : dist * custo2 + (3 * custoFuncionario / 4500.0 * restante));
+    const double valorFrete = valorPeso + valorDistCargaCheia + valorDistMeiaCarga;
+
+    qDebug() << "valorPeso: " << valorPeso;
+    qDebug() << "valorDistCargaCheia: " << valorDistCargaCheia;
+    qDebug() << "valorDistMeiaCarga: " << valorDistMeiaCarga;
+    qDebug() << "frete: " << valorFrete;
+
+    // frete = (pesoProduto(ton.) * 180) + (pesoProduto < 2ton. ? dist. * 1.5 : pesoProduto < 4.5 ? dist. * 2 : fracionar cargas)
+}
+
+void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
+  if (not canChangeFrete) {
+    if (User::temPermissao("ajusteFrete")) {
+      canChangeFrete = true;
+    } else {
+      qApp->enqueueInformation("Necessário autorização do administrativo!", this);
+
+      LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+      if (dialog.exec() != QDialog::Accepted) {
+        ui->checkBoxFreteManual->setChecked(not checked);
+        return;
+      }
+
+      canChangeFrete = true;
+    }
   }
 
+  // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
   const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
   ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
@@ -1422,6 +1548,7 @@ void Orcamento::on_itemBoxVendedor_textChanged() {
   buscarParametrosFrete();
 
   if (not ui->checkBoxFreteManual->isChecked()) {
+      // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
     if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
@@ -1518,69 +1645,6 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged() {
 void Orcamento::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!", this); }
 
 void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
-
-void Orcamento::on_pushButtonCalcularFrete_clicked() {
-  LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
-
-  if (dialog.exec() == QDialog::Rejected) { return; }
-
-  auto *frete = new CalculoFrete(this);
-  frete->setCliente(ui->itemBoxCliente->getId());
-  frete->exec();
-
-  const double dist = frete->getDistancia();
-
-  if (qFuzzyIsNull(dist)) { throw RuntimeException("Não foi possível determinar a distância!"); }
-
-  int peso = 0;
-
-  SqlQuery query;
-  query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
-
-    if (not query.exec()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text()); }
-
-    if (not query.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
-
-    peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
-  }
-
-  if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'")) {
-    throw RuntimeException("Erro buscando parâmetros: " + query.lastError().text());
-  }
-
-  if (not query.first()) { throw RuntimeException("Dados da loja 'Geral' não encontrados!"); }
-
-  const double custoTon = query.value("custoTransporteTon").toDouble();
-  const double custo1 = query.value("custoTransporte1").toDouble();
-  const double custo2 = query.value("custoTransporte2").toDouble();
-  const double custoFuncionario = query.value("custoFuncionario").toDouble();
-
-  qDebug() << "peso: " << peso;
-
-  int cargas = peso / 4500;
-  int restante = peso % 4500;
-
-  qDebug() << "inteiro: " << cargas;
-  qDebug() << "resto: " << restante;
-
-  // TODO: se endereco for 'nao há/retira' calcular apenas o valorPeso
-  const double valorPeso = (peso / 1000.0 * custoTon);
-
-  const double valorDistCargaCheia = (cargas * custo2 * dist) + (cargas * 3 * custoFuncionario);
-  const double valorDistMeiaCarga =
-      cargas > 0 and restante < 200 ? 0 : (restante < 2000 ? dist * custo1 + (2 * custoFuncionario / 2000.0 * restante) : dist * custo2 + (3 * custoFuncionario / 4500.0 * restante));
-  const double valorFrete = valorPeso + valorDistCargaCheia + valorDistMeiaCarga;
-
-  qDebug() << "valorPeso: " << valorPeso;
-  qDebug() << "valorDistCargaCheia: " << valorDistCargaCheia;
-  qDebug() << "valorDistMeiaCarga: " << valorDistMeiaCarga;
-  qDebug() << "frete: " << valorFrete;
-
-  // frete = (pesoProduto(ton.) * 180) + (pesoProduto < 2ton. ? dist. * 1.5 : pesoProduto < 4.5 ? dist. * 2 : fracionar cargas)
-}
 
 void Orcamento::on_dataEmissao_dateChanged(const QDate date) { ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day()); }
 

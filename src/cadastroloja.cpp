@@ -115,10 +115,22 @@ void CadastroLoja::savingProcedures() {
   setData("tel2", ui->lineEditTel2->text());
   setData("valorMinimoFrete", ui->doubleSpinBoxValorMinimoFrete->value());
   setData("porcentagemFrete", ui->doubleSpinBoxPorcFrete->value());
+  setData("precoCombustivel", ui->doubleSpinBoxPrecoCombustivel->value());
   setData("custoTransporteTon", ui->doubleSpinBoxCustoTransportePorTon->value());
   setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value());
   setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value());
-  setData("custoFuncionario", ui->doubleSpinBoxCustoFuncionario->value());
+  setData("capacidadeCaminhaoGrande", ui->spinBoxCapacidadeCaminhaoGrande->value());
+  setData("custoMotoristaCaminhaoGrande", ui->doubleSpinBoxCustoMotoristaCaminhaoGrande->value());
+  setData("custoAjudantesCaminhaoGrande", ui->doubleSpinBoxCustoAjudantesCaminhaoGrande->value());
+  setData("eixosCaminhaoGrande", ui->spinBoxEixosCaminhaoGrande->value());
+  setData("consumoCaminhaoGrande", ui->doubleSpinBoxConsumoCaminhaoGrande->value());
+  setData("capacidadeCaminhaoPequeno", ui->spinBoxCapacidadeCaminhaoPequeno->value());
+  setData("custoMotoristaCaminhaoPequeno", ui->doubleSpinBoxCustoMotoristaCaminhaoPequeno->value());
+  setData("custoAjudantesCaminhaoPequeno", ui->doubleSpinBoxCustoAjudantesCaminhaoPequeno->value());
+  setData("eixosCaminhaoPequeno", ui->spinBoxEixosCaminhaoPequeno->value());
+  setData("consumoCaminhaoPequeno", ui->doubleSpinBoxConsumoCaminhaoPequeno->value());
+  setData("apiQualp", ui->plainTextEditApiQualp->toPlainText(), false);
+  setData("cabecalhosQualp", ui->plainTextEditCabecalhosQualp->toPlainText(), false);
   setData("tetoProfissionalRT", ui->doubleSpinBoxTetoProfissional->value());
 }
 
@@ -148,6 +160,23 @@ void CadastroLoja::updateMode() {
 void CadastroLoja::setupMapper() {
   addMapping(ui->doubleSpinBoxPorcFrete, "porcentagemFrete");
   addMapping(ui->doubleSpinBoxValorMinimoFrete, "valorMinimoFrete");
+  addMapping(ui->doubleSpinBoxPrecoCombustivel, "precoCombustivel");
+  addMapping(ui->doubleSpinBoxCustoTransportePorTon, "custoTransporteTon");
+  addMapping(ui->doubleSpinBoxCustoTransporte2Ton, "custoTransporte1");
+  addMapping(ui->doubleSpinBoxCustoTransporteAcima2Ton, "custoTransporte2");
+  addMapping(ui->spinBoxCapacidadeCaminhaoGrande, "capacidadeCaminhaoGrande");
+  addMapping(ui->doubleSpinBoxCustoMotoristaCaminhaoGrande, "custoMotoristaCaminhaoGrande");
+  addMapping(ui->doubleSpinBoxCustoAjudantesCaminhaoGrande, "custoAjudantesCaminhaoGrande");
+  addMapping(ui->spinBoxEixosCaminhaoGrande, "eixosCaminhaoGrande");
+  addMapping(ui->doubleSpinBoxConsumoCaminhaoGrande, "consumoCaminhaoGrande");
+  addMapping(ui->spinBoxCapacidadeCaminhaoPequeno, "capacidadeCaminhaoPequeno");
+  addMapping(ui->doubleSpinBoxCustoMotoristaCaminhaoPequeno, "custoMotoristaCaminhaoPequeno");
+  addMapping(ui->doubleSpinBoxCustoAjudantesCaminhaoPequeno, "custoAjudantesCaminhaoPequeno");
+  addMapping(ui->spinBoxEixosCaminhaoPequeno, "eixosCaminhaoPequeno");
+  addMapping(ui->doubleSpinBoxConsumoCaminhaoPequeno, "consumoCaminhaoPequeno");
+  addMapping(ui->plainTextEditApiQualp, "apiQualp");
+  addMapping(ui->plainTextEditCabecalhosQualp, "cabecalhosQualp");
+  addMapping(ui->doubleSpinBoxTetoProfissional, "tetoProfissionalRT");
   addMapping(ui->lineEditCNPJ, "cnpj");
   addMapping(ui->lineEditDescricao, "descricao");
   addMapping(ui->lineEditInscEstadual, "inscEstadual");
@@ -156,11 +185,6 @@ void CadastroLoja::setupMapper() {
   addMapping(ui->lineEditSIGLA, "sigla");
   addMapping(ui->lineEditTel, "tel");
   addMapping(ui->lineEditTel2, "tel2");
-  addMapping(ui->doubleSpinBoxCustoTransportePorTon, "custoTransporteTon");
-  addMapping(ui->doubleSpinBoxCustoTransporte2Ton, "custoTransporte1");
-  addMapping(ui->doubleSpinBoxCustoTransporteAcima2Ton, "custoTransporte2");
-  addMapping(ui->doubleSpinBoxCustoFuncionario, "custoFuncionario");
-  addMapping(ui->doubleSpinBoxTetoProfissional, "tetoProfissionalRT");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));

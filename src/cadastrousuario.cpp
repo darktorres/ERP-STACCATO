@@ -63,6 +63,8 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("webdav_obras", "Rede - Obras");
   modelPermissoes.setHeaderData("webdav_logistica", "Rede - Logística");
 
+  modelPermissoes.setHeaderData("ajusteFrete", "Ajustar Frete");
+
   auto *transposeProxyModel = new QTransposeProxyModel(this);
   transposeProxyModel->setSourceModel(&modelPermissoes);
 

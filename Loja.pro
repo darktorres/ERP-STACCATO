@@ -44,6 +44,7 @@ win32 {
 win32-msvc {
     contains(QT_ARCH, i386) {
         LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win32 -llibcrypto
+        LIBS += -L$$_PRO_FILE_PWD_/3rdparty/cURL_x86-msvc/lib -llibcurl
     } else {
         LIBS += -L$$_PRO_FILE_PWD_/3rdparty/OpenSSL-1.1-Win64 -llibcrypto
     }
@@ -143,6 +144,7 @@ RESOURCES += \
     qrs/resources.qrc
 
 SOURCES += \
+    src/QtCUrl.cpp \
     src/acbr.cpp \
     src/acbrlib.cpp \
     src/anteciparrecebimento.cpp \
@@ -283,6 +285,7 @@ SOURCES += \
     src/xml_viewer.cpp
 
 HEADERS  += \
+    src/QtCUrl.h \
     src/acbr.h \
     src/acbrlib.h \
     src/anteciparrecebimento.h \

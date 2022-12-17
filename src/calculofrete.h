@@ -1,7 +1,8 @@
 #pragma once
 
+#include "sqltablemodel.h"
+
 #include <QDialog>
-#include <QNetworkAccessManager>
 
 namespace Ui {
 class CalculoFrete;
@@ -14,17 +15,21 @@ public:
   explicit CalculoFrete(QWidget *parent);
   ~CalculoFrete();
 
-  auto setCliente(const QVariant &idCliente) -> void;
   auto getDistancia() -> double;
+  auto getFrete() -> double;
+  auto setCliente(const QVariant &idCliente) -> void;
+  auto setOrcamento(const QString &idOrcamento, const QString &endereco) -> void;
 
 private:
   // attributes
-  QNetworkAccessManager networkManager;
-  QString const searchUrl = "https://maps.googleapis.com/maps/api/distancematrix/xml?origins=%1&destinations=%2&key=%3";
+  SqlTableModel modelItem;
   Ui::CalculoFrete *ui;
   // methods
-  auto handleNetworkData(QNetworkReply *networkReply) -> void;
-  auto on_itemBoxCliente_textChanged() -> void;
-  auto on_pushButton_clicked() -> void;
+  auto on_comboBoxOrcamento_currentTextChanged(const QString &orcamento) -> void;
+  auto on_comboBoxVenda_currentTextChanged(const QString &venda) -> void;
+  auto on_itemBoxCliente_textChanged(const QString &) -> void;
+  auto on_pushButtonCalcular_clicked() -> void;
+  auto qualp() -> void;
   auto setConnections() -> void;
+  auto setupTables() -> void;
 };

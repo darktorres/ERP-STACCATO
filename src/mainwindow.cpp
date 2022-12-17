@@ -46,20 +46,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (not User::isAdmin()) { ui->actionCadastrarUsuario->setVisible(false); }
 
   if (not User::isAdministrativo()) {
-      ui->actionCadastrarFornecedor->setVisible(false);
-      ui->actionCadastrarProdutos->setVisible(false);
-      ui->actionGerenciar_Lojas->setVisible(false);
-      ui->actionGerenciar_NCMs->setVisible(false);
-      ui->actionGerenciar_Transportadoras->setVisible(false);
-      ui->actionGerenciar_dados_bancarios->setVisible(false);
-      ui->actionGerenciar_pagamentos->setVisible(false);
-      ui->actionGerenciar_preco_estoque->setVisible(false);
-      ui->actionGerenciar_staccatoOff->setVisible(false);
+    ui->actionCadastrarFornecedor->setVisible(false);
+    ui->actionCadastrarProdutos->setVisible(false);
+    ui->actionGerenciar_Lojas->setVisible(false);
+    ui->actionGerenciar_NCMs->setVisible(false);
+    ui->actionGerenciar_Transportadoras->setVisible(false);
+    ui->actionGerenciar_dados_bancarios->setVisible(false);
+    ui->actionGerenciar_pagamentos->setVisible(false);
+    ui->actionGerenciar_preco_estoque->setVisible(false);
+    ui->actionGerenciar_staccatoOff->setVisible(false);
 
-      ui->menuImportar_tabela_fornecedor->menuAction()->setVisible(false);
-      ui->actionImportar_tabela_IBPT->setVisible(false);
-
-      ui->actionCalcular_frete->setVisible(false);
+    ui->menuImportar_tabela_fornecedor->menuAction()->setVisible(false);
+    ui->actionImportar_tabela_IBPT->setVisible(false);
   }
 
   // -------------------------------------------------------------------------
@@ -83,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), query.value("view_tab_grafico").toBool());
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
+
+  ui->actionCalcular_frete->setVisible(query.value("ajusteFrete").toBool());
 
   // -------------------------------------------------------------------------
 

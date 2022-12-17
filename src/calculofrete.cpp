@@ -25,6 +25,7 @@ CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::Calcul
   setWindowFlags(Qt::Window);
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
+  ui->itemBoxDestino->setSearchDialog(SearchDialog::enderecoCliente(this));
 
   // -------------------------------------------------------------------------
 
@@ -96,31 +97,14 @@ void CalculoFrete::setConnections() {
   connect(ui->comboBoxOrcamento, &QComboBox::currentTextChanged, this, &CalculoFrete::on_comboBoxOrcamento_currentTextChanged, connectionType);
   connect(ui->comboBoxVenda, &QComboBox::currentTextChanged, this, &CalculoFrete::on_comboBoxVenda_currentTextChanged, connectionType);
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxCliente_textChanged, connectionType);
+  connect(ui->itemBoxDestino, &ItemBox::textChanged, this, &CalculoFrete::on_itemBoxDestino_textChanged, connectionType);
   connect(ui->pushButtonCalcular, &QPushButton::clicked, this, &CalculoFrete::on_pushButtonCalcular_clicked, connectionType);
 }
 
 void CalculoFrete::setCliente(const QVariant &idCliente) { ui->itemBoxCliente->setId(idCliente); }
 
-void CalculoFrete::setOrcamento(const int idEndereco, const double pesoSul, const double pesoTotal) {
-    SqlQuery queryEndereco;
-    queryEndereco.prepare("SELECT descricao, logradouro, numero, complemento, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-    queryEndereco.bindValue(":idEndereco", idEndereco);
-
-    if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço do cliente: " + queryEndereco.lastError().text(), this); }
-
-    if (queryEndereco.first()) {
-      if (queryEndereco.value("descricao").toString() == "NÃO HÁ/RETIRA") {
-        ui->lineEditDestino->setText("NÃO HÁ/RETIRA");
-      } else {
-        const QString logradouro = queryEndereco.value("logradouro").toString();
-        const QString numero = queryEndereco.value("numero").toString();
-        const QString complemento = queryEndereco.value("complemento").toString();
-        const QString cidade = queryEndereco.value("cidade").toString();
-        const QString uf = queryEndereco.value("uf").toString();
-
-        ui->lineEditDestino->setText(logradouro + " - " + numero + " - " + complemento + " - " + cidade + " - " + uf);
-      }
-    }
+void CalculoFrete::setOrcamento(const QVariant idEndereco, const double pesoSul, const double pesoTotal) {
+    ui->itemBoxDestino->setId(idEndereco);
 
     // ------------------------------
 
@@ -217,45 +201,71 @@ void CalculoFrete::qualp() {
   ui->lineEditCombustivel->clear();
   ui->doubleSpinBoxTotal->clear();
 
-  if (ui->lineEditDestino->text().isEmpty() or ui->lineEditDestino->text() == "NÃO HÁ/RETIRA") { throw RuntimeException("Sem endereço de destino!"); }
+  if (ui->itemBoxDestino->text().isEmpty() or ui->itemBoxDestino->text() == "NÃO HÁ/RETIRA") { throw RuntimeException("Sem endereço de destino!"); }
+
+  QString result;
 
   // ------------------------------
 
-  SqlQuery query;
+  SqlQuery queryEndereco;
 
-  if (not query.exec("SELECT apiQualp, CabecalhosQualp, precoCombustivel, eixosCaminhaoGrande, consumoCaminhaoGrande FROM loja WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or not query.first()) {
-    throw RuntimeException("Erro buscando dados do caminhão: " + query.lastError().text());
+  if (not queryEndereco.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
+    throw RuntimeException("Erro buscando dados do endereço: " + queryEndereco.lastError().text());
   }
 
-  if (query.value("apiQualp").toString().isEmpty() or query.value("cabecalhosQualp").toString().isEmpty()) { throw RuntimeError("QualP não está configurado!"); }
+  if (queryEndereco.first() and !queryEndereco.value("qualpJson").toString().isEmpty()) {
+    result = queryEndereco.value("qualpJson").toString();
+  } else {
+    SqlQuery queryLoja;
 
-  QString urlString = query.value("apiQualp").toString();
+    if (not queryLoja.exec("SELECT apiQualp, CabecalhosQualp, precoCombustivel, eixosCaminhaoGrande, consumoCaminhaoGrande FROM loja WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or not queryLoja.first()) {
+      throw RuntimeException("Erro buscando dados do caminhão: " + queryLoja.lastError().text());
+    }
 
-  const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
-  if (origemSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de origem!"); }
-  const QString origem = origemSplit.at(0) + ", " + origemSplit.at(1) + ", " + origemSplit.at(3) + " / " + origemSplit.at(4);
+    if (queryLoja.value("apiQualp").toString().isEmpty() or queryLoja.value("cabecalhosQualp").toString().isEmpty()) { throw RuntimeError("QualP não está configurado!"); }
 
-  const QStringList destinoSplit = ui->lineEditDestino->text().split(" - ");
-  if (destinoSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de destino!"); }
-  const QString destino = destinoSplit.at(0) + ", " + destinoSplit.at(1) + ", " + destinoSplit.at(3) + " / " + destinoSplit.at(4);
+    QString urlString = queryLoja.value("apiQualp").toString();
 
-  urlString.replace("_origem_", origem);
-  urlString.replace("_destino_", destino);
-  urlString.replace("_eixos_", query.value("eixosCaminhaoGrande").toString());
-  urlString.replace("_preco_combustivel_", query.value("precoCombustivel").toString());
-  urlString.replace("_consumo_combustivel_", query.value("consumoCaminhaoGrande").toString());
+    const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
+    if (origemSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de origem!"); }
+    const QString origem = origemSplit.at(0) + ", " + origemSplit.at(1) + ", " + origemSplit.at(3) + " / " + origemSplit.at(4);
 
-  QUrl url(urlString);
+    const QStringList destinoSplit = ui->itemBoxDestino->text().split(" - ");
+    if (destinoSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de destino!"); }
+    const QString destino = destinoSplit.at(0) + ", " + destinoSplit.at(1) + ", " + destinoSplit.at(3) + " / " + destinoSplit.at(4);
 
-  QtCUrl cUrl;
-  QtCUrl::Options opt;
-  opt[CURLOPT_URL] = url;
-  QStringList headers;
-  headers = query.value("cabecalhosQualp").toString().split("\n").replaceInStrings("  -H '", "").replaceInStrings("' \\", "");
-  opt[CURLOPT_HTTPHEADER] = headers;
-  const QString result = cUrl.exec(opt);
+    urlString.replace("_origem_", origem);
+    urlString.replace("_destino_", destino);
+    urlString.replace("_eixos_", queryLoja.value("eixosCaminhaoGrande").toString());
+    urlString.replace("_preco_combustivel_", queryLoja.value("precoCombustivel").toString());
+    urlString.replace("_consumo_combustivel_", queryLoja.value("consumoCaminhaoGrande").toString());
 
-  if (cUrl.lastError().isOk()) {
+    QUrl url(urlString);
+
+    QtCUrl cUrl;
+    QtCUrl::Options opt;
+    opt[CURLOPT_URL] = url;
+    QStringList headers;
+    headers = queryLoja.value("cabecalhosQualp").toString().split("\n").replaceInStrings("  -H '", "").replaceInStrings("' \\", "");
+    opt[CURLOPT_HTTPHEADER] = headers;
+    result = cUrl.exec(opt);
+
+    if (!cUrl.lastError().isOk()) {
+      throw RuntimeException("Erro consultando QualP: \n" + cUrl.lastError().text() + "\n" + cUrl.errorBuffer());
+    }
+
+    QSqlQuery queryJson;
+    queryJson.prepare("UPDATE cliente_has_endereco SET qualpJson = :json, qualpData = CURDATE() WHERE idEndereco = :idEndereco");
+    queryJson.bindValue(":json", result);
+    queryJson.bindValue(":idEndereco", ui->itemBoxDestino->getId());
+
+    if (not queryJson.exec()) {
+      throw RuntimeException("Erro salvando consulta do QualP: " + queryJson.lastError().text());
+    }
+  }
+
+  // ------------------------------
+
     QJsonParseError errorPtr;
     QJsonDocument json = QJsonDocument::fromJson(result.toUtf8(), &errorPtr);
 
@@ -274,34 +284,37 @@ void CalculoFrete::qualp() {
     QJsonValue fmt = summaryObj.value("fmt");
     QJsonObject fmtObj = fmt.toObject();
 
-    const double distance = rawObj.value("distance").toDouble();
-    const double fuelConsumption = rawObj.value("total_consumption").toDouble();
-    const double tolls = rawObj.value("total_tolls").toDouble();
-    const double trip = rawObj.value("total_trip").toDouble();
-
-    const QString distanceFmt = fmtObj.value("distance").toString();
-    const QString fuelConsumptionFmt = fmtObj.value("total_consumption").toString();
-    const QString tollsFmt = fmtObj.value("total_tolls").toString();
-    const QString tripFmt = fmtObj.value("total_trip").toString();
-
     const int cargas = ui->spinBoxCaminhoesGrandes->value() + ui->spinBoxCaminhoesPequenos->value();
+
+    const double distancia = rawObj.value("distance").toDouble();
+    const double combustivel = rawObj.value("total_consumption").toDouble();
+    const double pedagio = rawObj.value("total_tolls").toDouble();
+    const double totalViagem = rawObj.value("total_trip").toDouble();
+
+    const QString distanciaFmt = fmtObj.value("distance").toString();
+    const QString multiplicadorDistancia = (cargas == 1) ? "" : " -> " + QLocale(QLocale::Portuguese).toString(cargas * distancia, 'f', 2) + " KM";
+
+    const QString combustivelFmt = fmtObj.value("total_consumption").toString();
+    const QString multiplicadorCombustivel = (cargas == 1) ? "" : " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * combustivel, 'f', 2);
+
+    const QString pedagioFmt = fmtObj.value("total_tolls").toString();
+    const QString totalViagemFmt = fmtObj.value("total_trip").toString();
+
     const QString cargasStr = QString::number(cargas) + "x ";
+    const QString multiplicadorCarga = (cargas == 1) ? "" : " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * pedagio, 'f', 2);
 
-    ui->lineEditPedagio->setText(cargasStr + tollsFmt + " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * tolls, 'f', 2));
-    ui->lineEditDistancia->setText(cargasStr + distanceFmt + " -> " + QLocale(QLocale::Portuguese).toString(cargas * distance, 'f', 2) + " KM");
-    ui->lineEditCombustivel->setText(cargasStr + fuelConsumptionFmt + " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * fuelConsumption, 'f', 2));
+    ui->lineEditPedagio->setText(cargasStr + pedagioFmt + multiplicadorCarga);
+    ui->lineEditDistancia->setText(cargasStr + distanciaFmt + multiplicadorDistancia);
+    ui->lineEditCombustivel->setText(cargasStr + combustivelFmt + multiplicadorCombustivel);
 
-    const double total = ui->doubleSpinBoxFreteSul->value() + ui->doubleSpinBoxMotoristaAjudantes->value() + (cargas * trip);
+    const double total = ui->doubleSpinBoxFreteSul->value() + ui->doubleSpinBoxMotoristaAjudantes->value() + (cargas * totalViagem);
     ui->doubleSpinBoxTotal->setValue(total * 1.2);
-  } else {
-    throw RuntimeException("Erro consultando QualP: \n" + cUrl.lastError().text() + "\n" + cUrl.errorBuffer());
-  }
 }
 
 void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   ui->comboBoxOrcamento->clear();
   ui->comboBoxVenda->clear();
-  ui->lineEditDestino->clear();
+  ui->itemBoxDestino->clear();
   ui->lineEditPedagio->clear();
   ui->lineEditDistancia->clear();
   ui->lineEditCombustivel->clear();
@@ -329,8 +342,21 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   while (queryVenda.next()) { ui->comboBoxVenda->addItem(queryVenda.value("idVenda").toString()); }
 }
 
+void CalculoFrete::on_itemBoxDestino_textChanged(const QString &)
+{
+  SqlQuery queryEndereco2;
+
+  if (not queryEndereco2.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
+    throw RuntimeException("Erro buscando dados do endereço: " + queryEndereco2.lastError().text());
+  }
+
+  if (queryEndereco2.first() and !queryEndereco2.value("qualpJson").toString().isEmpty()) {
+    qualp();
+  }
+}
+
 void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcamento) {
-  ui->lineEditDestino->clear();
+  ui->itemBoxDestino->clear();
   ui->spinBoxPesoSul->clear();
   ui->spinBoxPesoTotal->clear();
   ui->spinBoxCaminhoesGrandes->setSuffix("");
@@ -353,25 +379,16 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
 
   // ------------------------------
 
-  SqlQuery queryEndereco;
-  queryEndereco.prepare("SELECT descricao, logradouro, numero, complemento, cidade, uf FROM cliente_has_endereco WHERE idEndereco IN (SELECT idEnderecoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento)");
-  queryEndereco.bindValue(":idOrcamento", ui->comboBoxOrcamento->currentText());
+    SqlQuery queryEndereco;
+    queryEndereco.prepare("SELECT idCliente, idEnderecoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");
+    queryEndereco.bindValue(":idOrcamento", ui->comboBoxOrcamento->currentText());
 
-  if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço do cliente: " + queryEndereco.lastError().text(), this); }
+    if (not queryEndereco.exec()) { throw RuntimeException("Erro buscando endereço do cliente: " + queryEndereco.lastError().text(), this); }
 
-  if (queryEndereco.first()) {
-    if (queryEndereco.value("descricao").toString() == "NÃO HÁ/RETIRA") {
-      ui->lineEditDestino->setText("NÃO HÁ/RETIRA");
-    } else {
-      const QString logradouro = queryEndereco.value("logradouro").toString();
-      const QString numero = queryEndereco.value("numero").toString();
-      const QString complemento = queryEndereco.value("complemento").toString();
-      const QString cidade = queryEndereco.value("cidade").toString();
-      const QString uf = queryEndereco.value("uf").toString();
-
-      ui->lineEditDestino->setText(logradouro + " - " + numero + " - " + complemento + " - " + cidade + " - " + uf);
+    if (queryEndereco.first()) {
+        ui->itemBoxDestino->setId(queryEndereco.value("idEnderecoEntrega"));
+        ui->itemBoxDestino->setFilter("(idCliente = " + queryEndereco.value("idCliente").toString() + " OR idEndereco = 1) AND desativado = FALSE");
     }
-  }
 
   // ------------------------------
 
@@ -444,6 +461,18 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
 
   ui->doubleSpinBoxFreteSul->setValue(custoSul);
   ui->doubleSpinBoxPrecoCombustivel->setValue(queryCustos.value("precoCombustivel").toDouble());
+
+  // ------------------------------
+
+  SqlQuery queryEndereco2;
+
+  if (not queryEndereco2.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
+    throw RuntimeException("Erro buscando dados do endereço: " + queryEndereco2.lastError().text());
+  }
+
+  if (queryEndereco2.first() and !queryEndereco2.value("qualpJson").toString().isEmpty()) {
+    qualp();
+  }
 }
 
 void CalculoFrete::on_comboBoxVenda_currentTextChanged(const QString &venda) {

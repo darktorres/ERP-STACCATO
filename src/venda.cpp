@@ -793,16 +793,20 @@ void Venda::on_checkBoxMostrarCancelados_toggled(const bool checked) {
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
   if (not canChangeFrete) {
-    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
+    if (User::temPermissao("ajusteFrete")) {
+      canChangeFrete = true;
+    } else {
+      qApp->enqueueInformation("Necessário autorização do administrativo!", this);
 
-    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+      LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
-    if (dialog.exec() != QDialog::Accepted) {
-      ui->checkBoxFreteManual->setChecked(not checked);
-      return;
+      if (dialog.exec() != QDialog::Accepted) {
+        ui->checkBoxFreteManual->setChecked(not checked);
+        return;
+      }
+
+      canChangeFrete = true;
     }
-
-    canChangeFrete = true;
   }
 
   const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);

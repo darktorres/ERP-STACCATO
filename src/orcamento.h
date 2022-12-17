@@ -63,6 +63,7 @@ private:
   auto on_doubleSpinBoxTotalItem_valueChanged() -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxCliente_textChanged() -> void;
+  auto on_itemBoxEndereco_idChanged() -> void;
   auto on_itemBoxProduto_idChanged() -> void;
   auto on_itemBoxProfissional_idChanged() -> void;
   auto on_itemBoxVendedor_textChanged() -> void;
@@ -75,7 +76,6 @@ private:
   auto on_pushButtonAtualizarOrcamento_clicked() -> void;
   auto on_pushButtonCadastrarOrcamento_clicked() -> void;
   auto on_pushButtonCalculadora_clicked() -> void;
-  auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonGerarVenda_clicked() -> void;

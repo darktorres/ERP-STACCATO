@@ -249,7 +249,7 @@ SearchDialog *SearchDialog::conta(QWidget *parent) {
 SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
   auto *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", "", false, parent);
 
-  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "desativado"});
+  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "pedagio", "pedagioData", "desativado"});
 
   sdEndereco->setHeaderData("descricao", "Descrição");
   sdEndereco->setHeaderData("cep", "CEP");
@@ -292,7 +292,9 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
   sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "custoTransporte1", "custoTransporte2",
-                       "custoFuncionario", "lastDistribuicao", "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "tetoProfissionalRT"});
+                       "lastDistribuicao", "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "precoCombustivel", "capacidadeCaminhaoGrande", "custoMotoristaCaminhaoGrande",
+                       "custoAjudantesCaminhaoGrande", "eixosCaminhaoGrande", "consumoCaminhaoGrande", "capacidadeCaminhaoPequeno", "custoMotoristaCaminhaoPequeno", "custoAjudantesCaminhaoPequeno",
+                       "eixosCaminhaoPequeno", "consumoCaminhaoPequeno", "tetoProfissionalRT", "apiQualp", "cabecalhosQualp"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -465,8 +467,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   auto *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, fullTextIndex, filtro + filtroLoja + filtroAdmin, "nome", false, parent);
 
-  sdVendedor->hideColumns(
-      {"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "desativado"});
+  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "senhaUsoUnico", "valorMinimoFrete", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");

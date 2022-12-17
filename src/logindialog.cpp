@@ -51,6 +51,8 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     ui->pushButtonConfig->hide();
     ui->lineEditUser->clear();
     ui->lineEditUser->setFocus();
+    ui->labelPass->setText("Senha de uso único:");
+    ui->lineEditPass->setEchoMode(QLineEdit::Normal);
     setWindowTitle("Autorização");
   }
 

@@ -558,9 +558,8 @@ void WidgetGalpao::on_pushButtonBuscar_clicked() {
 }
 
 void WidgetGalpao::on_checkBoxEdicao_toggled(const bool checked) {
-  // TODO: o loginDialog de autorizacao aceita qualquer pessoa que seja do administrativo, refazer a lógica abaixo para considerar isso
-  if (checked and not User::isAdmin() and not User::isGerente()) {
-    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
+  if (checked and not User::temPermissao("ajusteFrete")) {
+    qApp->enqueueInformation("Necessário autorização do administrativo!", this);
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 

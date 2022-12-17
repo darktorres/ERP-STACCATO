@@ -1,6 +1,5 @@
 #pragma once
 
-#include "logindialog.h"
 #include "sqlquery.h"
 
 #include <QSettings>
@@ -22,6 +21,7 @@ public:
   static auto isVendedorOrEspecial() -> bool; // vendedor, vendedor especial
   static auto login(const QString &user, const QString &password) -> void;
   static auto setSetting(const QString &key, const QVariant &value) -> void;
+  static auto temPermissao(const QString &permissao) -> bool;
 
   inline static QString idLoja = "";
   inline static QString idUsuario = "";

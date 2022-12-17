@@ -1234,7 +1234,7 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
 
         CalculoFrete calculoFrete;
 //        auto calculoFrete = CalculoFrete(this);
-        calculoFrete.setOrcamento(ui->itemBoxEndereco->getId().toInt(), pesoSul, pesoTotal);
+        calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
 
         double freteQualp = 0.;
         try {
@@ -1249,6 +1249,7 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
 
     qDebug() << "freteFinal: " << freteTemp;
 
+    ui->doubleSpinBoxFrete->setMinimum(freteTemp);
     ui->doubleSpinBoxFrete->setValue(freteTemp);
 
 //    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }

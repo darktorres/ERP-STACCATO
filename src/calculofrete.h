@@ -18,7 +18,7 @@ public:
   auto getDistancia() -> double;
   auto getFrete() -> double;
   auto setCliente(const QVariant &idCliente) -> void;
-  auto setOrcamento(const int idEndereco, const double pesoSul, const double pesoTotal) -> void;
+  auto setOrcamento(const QVariant idEndereco, const double pesoSul, const double pesoTotal) -> void;
 
 private:
   // attributes
@@ -28,6 +28,7 @@ private:
   auto on_comboBoxOrcamento_currentTextChanged(const QString &orcamento) -> void;
   auto on_comboBoxVenda_currentTextChanged(const QString &venda) -> void;
   auto on_itemBoxCliente_textChanged(const QString &) -> void;
+  auto on_itemBoxDestino_textChanged(const QString &) -> void;
   auto on_pushButtonCalcular_clicked() -> void;
   auto qualp() -> void;
   auto setConnections() -> void;

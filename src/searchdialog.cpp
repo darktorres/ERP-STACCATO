@@ -249,7 +249,7 @@ SearchDialog *SearchDialog::conta(QWidget *parent) {
 SearchDialog *SearchDialog::enderecoCliente(QWidget *parent) {
   auto *sdEndereco = new SearchDialog("Buscar Endereço", "cliente_has_endereco", "idEndereco", {"logradouro", "numero", "bairro", "cidade", "uf"}, {}, "idEndereco = 1", "", false, parent);
 
-  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "pedagio", "pedagioData", "desativado"});
+  sdEndereco->hideColumns({"idEndereco", "idCliente", "codUF", "qualpJson", "qualpData", "desativado"});
 
   sdEndereco->setHeaderData("descricao", "Descrição");
   sdEndereco->setHeaderData("cep", "CEP");

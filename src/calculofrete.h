@@ -27,8 +27,8 @@ private:
   // methods
   auto on_comboBoxOrcamento_currentTextChanged(const QString &orcamento) -> void;
   auto on_comboBoxVenda_currentTextChanged(const QString &venda) -> void;
-  auto on_itemBoxCliente_textChanged(const QString &) -> void;
-  auto on_itemBoxDestino_textChanged(const QString &) -> void;
+  auto on_itemBoxCliente_textChanged(const QString &text) -> void;
+  auto on_itemBoxDestino_textChanged(const QString &text) -> void;
   auto on_pushButtonCalcular_clicked() -> void;
   auto qualp() -> void;
   auto setConnections() -> void;

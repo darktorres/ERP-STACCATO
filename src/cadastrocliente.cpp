@@ -96,6 +96,8 @@ void CadastroCliente::setupTables() {
   ui->tableEndereco->hideColumn("idEndereco");
   ui->tableEndereco->hideColumn("idCliente");
   ui->tableEndereco->hideColumn("codUF");
+  ui->tableEndereco->hideColumn("qualpJson");
+  ui->tableEndereco->hideColumn("qualpData");
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 

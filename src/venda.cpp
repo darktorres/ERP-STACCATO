@@ -3,7 +3,7 @@
 
 #include "acbrlib.h"
 #include "application.h"
-#include "cadastrocliente.h"
+#include "calculofrete.h"
 #include "checkboxdelegate.h"
 #include "comprovantes.h"
 #include "devolucao.h"
@@ -12,6 +12,7 @@
 #include "estoque.h"
 #include "excel.h"
 #include "file.h"
+#include "log.h"
 #include "logindialog.h"
 #include "noeditdelegate.h"
 #include "orcamento.h"
@@ -158,6 +159,7 @@ void Venda::setConnections() {
   connect(ui->doubleSpinBoxDescontoGlobalReais, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged, connectionType);
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged, connectionType);
   connect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged, connectionType);
+  connect(ui->itemBoxEndereco, &ItemBox::idChanged, this, &Venda::on_itemBoxEndereco_idChanged, connectionType);
   connect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged, connectionType);
   connect(ui->pushButtonAbrirOrcamento, &QPushButton::clicked, this, &Venda::on_pushButtonAbrirOrcamento_clicked, connectionType);
   connect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked, connectionType);
@@ -189,6 +191,7 @@ void Venda::unsetConnections() {
   disconnect(ui->doubleSpinBoxDescontoGlobalReais, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxTotal, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged);
+  disconnect(ui->itemBoxEndereco, &ItemBox::idChanged, this, &Venda::on_itemBoxEndereco_idChanged);
   disconnect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
   disconnect(ui->pushButtonAbrirOrcamento, &QPushButton::clicked, this, &Venda::on_pushButtonAbrirOrcamento_clicked);
   disconnect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked);
@@ -331,10 +334,14 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   const bool freteManual = queryOrc.value("freteManual").toBool();
   const double frete = queryOrc.value("frete").toDouble();
 
-  ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : frete);
+  ui->doubleSpinBoxFrete->setMinimum(User::temPermissao("ajusteFrete") ? 0 : frete);
   ui->doubleSpinBoxFrete->setValue(frete);
-  ui->checkBoxFreteManual->setChecked(freteManual);
   canChangeFrete = freteManual;
+
+  if (freteManual) {
+    ui->checkBoxFreteManual->setChecked(true);
+    ui->checkBoxFreteManual->setDisabled(true);
+  }
 
   ui->doubleSpinBoxDescontoGlobal->setValue(queryOrc.value("descontoPorc").toDouble());
   ui->doubleSpinBoxDescontoGlobalReais->setValue(queryOrc.value("descontoReais").toDouble());
@@ -792,6 +799,8 @@ void Venda::on_checkBoxMostrarCancelados_toggled(const bool checked) {
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
+  Q_UNUSED(checked)
+
   if (not canChangeFrete) {
     if (User::temPermissao("ajusteFrete")) {
       canChangeFrete = true;
@@ -806,14 +815,17 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
       }
 
       canChangeFrete = true;
+      ui->checkBoxFreteManual->setDisabled(true);
     }
   }
 
-  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
-
-  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
-
-  if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
+  if (User::temPermissao("ajusteFrete")) {
+    ui->doubleSpinBoxFrete->setMinimum(0);
+  } else {
+    ui->doubleSpinBoxFrete->setMinimum(User::valorMinimoFrete);
+    ui->doubleSpinBoxFrete->setValue(User::valorMinimoFrete);
+    User::valorMinimoFrete = -1;
+  }
 }
 
 void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
@@ -1357,6 +1369,85 @@ void Venda::on_checkBoxRT_toggled(const bool checked) {
   for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(checked); }
 
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");
+}
+
+void Venda::on_itemBoxEndereco_idChanged() {
+  canChangeFrete = false;
+  ui->checkBoxFreteManual->setChecked(false);
+  ui->checkBoxFreteManual->setEnabled(true);
+
+  calcularFrete();
+}
+
+void Venda::calcularFrete() {
+  double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+
+  double freteTemp = qMax(fretePorcentagem, minimoFrete);
+//  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(freteTemp); }
+
+  qDebug() << "fretePorcentagem: " << fretePorcentagem;
+  qDebug() << "freteMinimo: " << minimoFrete;
+
+  if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
+      double pesoSul = 0.;
+      double pesoTotal = 0.;
+
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        const QString idProduto = modelItem.data(row, "idProduto").toString();
+
+        SqlQuery sqlQueryKgCx;
+
+        if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
+            throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
+        }
+
+        const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
+        const double caixas = modelItem.data(row, "caixas").toDouble();
+        const double peso = caixas * kgcx;
+
+        SqlQuery queryFornecedor;
+
+        if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
+          throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
+        }
+
+        if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
+
+        if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
+
+
+        pesoTotal += peso;
+      }
+
+      qDebug() << "pesoSul: " << pesoSul;
+      qDebug() << "pesoTotal: " << pesoTotal;
+
+      // --------------------------------------------
+
+      CalculoFrete calculoFrete;
+      calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
+
+      double freteQualp = 0.;
+      try {
+        freteQualp = calculoFrete.getFrete();
+      } catch (std::exception &e) {
+        Log::createLog("Exceção", e.what());
+      }
+
+      qDebug() << "freteQualp: " << freteQualp;
+
+//      if (freteQualp > freteTemp and User::isGerente()) {
+//        ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
+//      }
+
+      freteTemp = qMax(freteTemp, freteQualp);
+  }
+
+  qDebug() << "freteFinal: " << freteTemp;
+
+  ui->doubleSpinBoxFrete->setMinimum(freteTemp);
+  ui->doubleSpinBoxFrete->setValue(freteTemp);
+  qDebug() << "--------------------------------------";
 }
 
 void Venda::on_itemBoxProfissional_textChanged() {

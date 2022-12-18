@@ -41,6 +41,7 @@ private:
   // methods
   auto atualizarCredito() -> void;
   auto cadastrar() -> void final;
+  auto calcularFrete() -> void;
   auto calcularPesoTotal() -> void;
   auto cancelamento() -> void;
   auto clearFields() -> void final;
@@ -61,6 +62,7 @@ private:
   auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
+  auto on_itemBoxEndereco_idChanged() -> void;
   auto on_itemBoxProfissional_textChanged() -> void;
   auto on_pushButtonAbrirOrcamento_clicked() -> void;
   auto on_pushButtonAdicionarObservacao_clicked() -> void;

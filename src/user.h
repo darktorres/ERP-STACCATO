@@ -29,6 +29,7 @@ public:
   inline static QString tipo = "";
   inline static QString usuario = "";
   inline static QString senha = "";
+  inline static double valorMinimoFrete = -1;
 
 private:
   inline static SqlQuery *query = nullptr; // defer creating query until database is set

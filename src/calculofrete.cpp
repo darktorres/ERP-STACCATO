@@ -172,8 +172,6 @@ double CalculoFrete::getFrete()
 }
 
 void CalculoFrete::on_pushButtonCalcular_clicked() {
-  //. TODO: guardar o valor do pedagio em cliente_has_endereco para não ficar fazendo varias consultas no qualp para o mesmo endereco. se a data da consulta for outro dia refazer a consulta
-
   //. TODO: quando permitir que o gerente altere o valor:
   //. 1. valor inicial R$1000
   //. 2. valor minimo R$800

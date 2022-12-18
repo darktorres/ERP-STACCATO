@@ -59,7 +59,7 @@ void User::autorizacao(const QString &user, const QString &password) {
 
   SqlQuery query;
   query.prepare(
-      "SELECT idUsuario FROM usuario WHERE user = :user AND senhaUsoUnico = :senhaUsoUnico AND tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA')");
+      "SELECT idUsuario, valorMinimoFrete FROM usuario WHERE user = :user AND senhaUsoUnico = :senhaUsoUnico AND tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA')");
   query.bindValue(":user", user);
   query.bindValue(":senhaUsoUnico", password);
 
@@ -67,9 +67,11 @@ void User::autorizacao(const QString &user, const QString &password) {
 
   if (not query.first()) { throw RuntimeError("Senha não confere!"); }
 
+  valorMinimoFrete = query.value("valorMinimoFrete").toDouble();
+
   SqlQuery query2;
 
-  if (not query2.exec("UPDATE usuario SET senhaUsoUnico = NULL WHERE user = '" + user + "'")) { throw RuntimeException("Erro ao apagar senha de uso único: " + query2.lastError().text()); }
+  if (not query2.exec("UPDATE usuario SET senhaUsoUnico = NULL, valorMinimoFrete = NULL WHERE user = '" + user + "'")) { throw RuntimeException("Erro ao apagar senha de uso único: " + query2.lastError().text()); }
 }
 
 QVariant User::fromLoja(const QString &parameter, const QString &user) {

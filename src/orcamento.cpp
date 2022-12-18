@@ -287,11 +287,19 @@ bool Orcamento::viewRegister() {
 
     canChangeFrete = freteManual;
 
-    ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : ui->doubleSpinBoxFrete->value());
+    ui->doubleSpinBoxFrete->setMinimum(ui->doubleSpinBoxFrete->value());
+
+    if (canChangeFrete) {
+      ui->checkBoxFreteManual->setDisabled(true);
+      ui->doubleSpinBoxFrete->setMinimum(User::temPermissao("ajusteFrete") ? 0 : ui->doubleSpinBoxFrete->value());
+    }
 
     ui->doubleSpinBoxDescontoGlobalReais->setMaximum(ui->doubleSpinBoxSubTotalLiq->value());
 
-    if (ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setRepresentacao(true); }
+    if (ui->checkBoxRepresentacao->isChecked()) {
+      ui->itemBoxProduto->setRepresentacao(true);
+      ui->doubleSpinBoxFrete->setMinimum(0);
+    }
 
     if (not data("replicadoDe").toString().isEmpty()) {
       ui->labelReplicaDe->show();
@@ -809,14 +817,7 @@ void Orcamento::calcPrecoGlobalTotal() {
 
   // calcula totais considerando desconto global atual
 
-  if (not ui->checkBoxFreteManual->isChecked()) {
-    // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
-    const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
-
-    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
-
-    ui->doubleSpinBoxFrete->setValue(frete);
-  }
+  if (not ui->checkBoxFreteManual->isChecked()) { calcularFrete(); }
 
   const double frete = ui->doubleSpinBoxFrete->value();
   const double descGlobal = ui->doubleSpinBoxDescontoGlobal->value();
@@ -1172,76 +1173,86 @@ void Orcamento::on_itemBoxCliente_textChanged() {
 }
 
 void Orcamento::on_itemBoxEndereco_idChanged() {
-    double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+  canChangeFrete = false;
+  ui->checkBoxFreteManual->setChecked(false);
+  ui->checkBoxFreteManual->setEnabled(true);
 
-    double freteTemp = qMax(fretePorcentagem, minimoFrete);
-    ui->doubleSpinBoxFrete->setMinimum(freteTemp);
+  calcularFrete();
+}
 
-    qDebug() << "fretePorcentagem: " << fretePorcentagem;
-    qDebug() << "freteMinimo: " << minimoFrete;
+void Orcamento::calcularFrete() {
+  double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
 
-    if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
-        double pesoSul = 0.;
-        double pesoTotal = 0.;
+  double freteTemp = qMax(fretePorcentagem, minimoFrete);
 
-        for (int row = 0; row < modelItem.rowCount(); ++row) {
-          const QString idProduto = modelItem.data(row, "idProduto").toString();
+  qDebug() << "fretePorcentagem: " << fretePorcentagem;
+  qDebug() << "freteMinimo: " << minimoFrete;
 
-          SqlQuery sqlQueryKgCx;
+  if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
+      double pesoSul = 0.;
+      double pesoTotal = 0.;
 
-          if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
-              throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
-          }
+      for (int row = 0; row < modelItem.rowCount(); ++row) {
+        const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-          const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
-          const double caixas = modelItem.data(row, "caixas").toDouble();
-          const double peso = caixas * kgcx;
+        SqlQuery sqlQueryKgCx;
 
-          SqlQuery queryFornecedor;
-
-          if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
-            throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
-          }
-
-          if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
-
-          if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
-
-
-          pesoTotal += peso;
+        if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
+            throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
         }
 
-        qDebug() << "pesoSul: " << pesoSul;
-        qDebug() << "pesoTotal: " << pesoTotal;
+        const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
+        const double caixas = modelItem.data(row, "caixas").toDouble();
+        const double peso = caixas * kgcx;
 
-        // --------------------------------------------
+        SqlQuery queryFornecedor;
 
-        CalculoFrete calculoFrete;
-        calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
-
-        double freteQualp = 0.;
-        try {
-          freteQualp = calculoFrete.getFrete();
-        } catch (std::exception &e) {
-          Log::createLog("Exceção", e.what());
+        if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
+          throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
         }
 
-        qDebug() << "freteQualp: " << freteQualp;
+        if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
 
-        if (freteQualp > freteTemp) {
-          ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
-        }
+        if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
 
-        freteTemp = qMax(freteTemp, freteQualp);
-    }
 
-    qDebug() << "freteFinal: " << freteTemp;
+        pesoTotal += peso;
+      }
 
-    ui->doubleSpinBoxFrete->setValue(freteTemp);
-    qDebug() << "--------------------------------------";
+      qDebug() << "pesoSul: " << pesoSul;
+      qDebug() << "pesoTotal: " << pesoTotal;
+
+      // --------------------------------------------
+
+      CalculoFrete calculoFrete;
+      calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
+
+      double freteQualp = 0.;
+      try {
+        freteQualp = calculoFrete.getFrete();
+      } catch (std::exception &e) {
+        Log::createLog("Exceção", e.what());
+      }
+
+      qDebug() << "freteQualp: " << freteQualp;
+
+//      if (freteQualp > freteTemp and User::isGerente()) {
+//        ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
+//      }
+
+      freteTemp = qMax(freteTemp, freteQualp);
+  }
+
+  qDebug() << "freteFinal: " << freteTemp;
+
+  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(freteTemp); }
+  ui->doubleSpinBoxFrete->setValue(freteTemp);
+  qDebug() << "--------------------------------------";
 }
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
+  Q_UNUSED(checked)
+
   if (not canChangeFrete) {
     if (User::temPermissao("ajusteFrete")) {
       canChangeFrete = true;
@@ -1251,22 +1262,22 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
       LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
       if (dialog.exec() != QDialog::Accepted) {
-        ui->checkBoxFreteManual->setChecked(not checked);
+        ui->checkBoxFreteManual->setChecked(false);
         return;
       }
 
       canChangeFrete = true;
+      ui->checkBoxFreteManual->setDisabled(true);
     }
   }
 
-  // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
-  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
-
-  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
-
-  if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
-
-  ui->doubleSpinBoxFrete->setFocus();
+  if (User::temPermissao("ajusteFrete")) {
+    ui->doubleSpinBoxFrete->setMinimum(0);
+  } else {
+    ui->doubleSpinBoxFrete->setMinimum(User::valorMinimoFrete);
+    ui->doubleSpinBoxFrete->setValue(User::valorMinimoFrete);
+    User::valorMinimoFrete = -1;
+  }
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
@@ -1509,14 +1520,7 @@ void Orcamento::on_itemBoxVendedor_textChanged() {
 
   buscarParametrosFrete();
 
-  if (not ui->checkBoxFreteManual->isChecked()) {
-      // TODO: extrair uma funcao devido o frete ser calculodo em varios pontos
-    const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
-
-    if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(frete); }
-
-    ui->doubleSpinBoxFrete->setValue(frete);
-  }
+  if (not ui->checkBoxFreteManual->isChecked()) { calcularFrete(); }
 }
 
 void Orcamento::buscarParametrosFrete() {

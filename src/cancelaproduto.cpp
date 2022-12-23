@@ -86,6 +86,7 @@ void CancelaProduto::setupTables() {
   ui->table->hideColumn("dataRealEnt");
   ui->table->hideColumn("aliquotaSt");
   ui->table->hideColumn("st");
+  ui->table->hideColumn("desconto");
 
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));

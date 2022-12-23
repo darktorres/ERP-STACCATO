@@ -298,6 +298,7 @@ void ImportarXML::setupTables() {
   ui->tableCompra->hideColumn("dataRealEnt");
   ui->tableCompra->hideColumn("aliquotaSt");
   ui->tableCompra->hideColumn("st");
+  ui->tableCompra->hideColumn("desconto");
 
   // -------------------------------------------------------------------------
 

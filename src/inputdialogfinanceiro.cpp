@@ -183,6 +183,7 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor2.setHeaderData("caixas", "Caixas");
   modelPedidoFornecedor2.setHeaderData("prcUnitario", "R$ Unit.");
   modelPedidoFornecedor2.setHeaderData("preco", "Total");
+  modelPedidoFornecedor2.setHeaderData("desconto", "Desc. %");
 
   modelPedidoFornecedor2.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor2, this);
 
@@ -228,6 +229,7 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
   //--------------------------------------------------

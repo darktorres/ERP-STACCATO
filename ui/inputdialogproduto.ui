@@ -183,6 +183,23 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="labelDescontoGlobal">
+           <property name="text">
+            <string>Desc. global:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxDescontoGlobal">
+           <property name="suffix">
+            <string> %</string>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_6">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>

@@ -54,5 +54,6 @@ private:
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto somarSelecao() -> void;
   auto verificaCabecalho(QXlsx::Document &xlsx) -> void;
 };

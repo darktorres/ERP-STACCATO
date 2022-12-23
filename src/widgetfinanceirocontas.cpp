@@ -79,6 +79,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated, connectionType);
   connect(ui->tableVencer, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencer_doubleClicked, connectionType);
   connect(ui->tableVencidos, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencidos_doubleClicked, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetFinanceiroContas::somarSelecao, connectionType);
 }
 
 void WidgetFinanceiroContas::updateTables() {
@@ -654,6 +655,19 @@ void WidgetFinanceiroContas::on_pushButtonAbrirDANFE_clicked()
   for (auto id : idNFe) {
     ACBrLib::gerarDanfe(id.toInt());
   }
+}
+
+void WidgetFinanceiroContas::somarSelecao() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  double soma = 0.;
+
+  for (auto index : selection) {
+    soma += model.data(index.row(), "valor").toDouble();
+  }
+
+  ui->doubleSpinBoxSomaSelecao->setValue(soma);
+  ui->doubleSpinBoxSomaSelecao->setSuffix(" - " + QString::number(selection.size()) + " linha(s)");
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

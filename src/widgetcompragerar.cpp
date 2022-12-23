@@ -47,7 +47,7 @@ void WidgetCompraGerar::setupTables() {
 
   //---------------------------------------------------------------------------------------
 
-  modelProdutos.setTable("pedido_fornecedor_has_produto");
+  modelProdutos.setTable("view_compras_gerar");
 
   modelProdutos.setHeaderData("idVenda", "Venda");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -61,6 +61,8 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("dataPrevCompra", "Prev. Compra");
   modelProdutos.setHeaderData("obs", "Obs.");
+  modelProdutos.setHeaderData("dataFollowup", "Data Followup");
+  modelProdutos.setHeaderData("observacao", "Observação");
 
   ui->tableProdutos->setModel(&modelProdutos);
 

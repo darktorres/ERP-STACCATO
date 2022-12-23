@@ -218,21 +218,6 @@ void TableView::setPersistentColumns(const QStringList &value) { persistentColum
 void TableView::keyPressEvent(QKeyEvent *event) {
   if (event->matches(QKeySequence::Copy)) {
     QString headers;
-
-    // dont copy headers if in single cell mode
-    if (selectionBehavior() == SelectRows and copyHeaders) {
-      for (int col = 0; col < model()->columnCount(); ++col) {
-        if (isColumnHidden(col)) { continue; }
-
-        headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
-        headers += '\t';
-      }
-
-      headers += '\n';
-    }
-
-    //---------------------------------------
-
     QString text;
 
     if (selectionBehavior() == SelectItems) {
@@ -240,18 +225,53 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
       if (selection.isEmpty()) { return; }
 
-      QVariant currentText = selection.first().data();
+      int currentRow = selection.first().row();
 
-      if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
-      if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+      if (copyHeaders) {
+        for (const auto index : selection) {
+          if (index.row() != currentRow) { break; }
+          if (isColumnHidden(index.column())) { continue; }
 
-      text += currentText.toString();
+          headers += model()->headerData(index.column(), Qt::Horizontal, Qt::DisplayRole).toString();
+          headers += '\t';
+        }
+
+        headers += '\n';
+      }
+
+      for (const auto index : selection) {
+        if (index.row() != currentRow) {
+          text += '\n';
+          currentRow = index.row();
+        }
+
+        if (isColumnHidden(index.column())) { continue; }
+
+        QVariant currentText = index.data();
+
+        if (currentText.userType() == QMetaType::QDateTime) { currentText = currentText.toString().replace("T", " ").replace(".000", ""); }
+        if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
+
+        text += currentText.toString();
+        text += '\t';
+      }
     }
 
     if (selectionBehavior() == SelectRows) {
       const auto selection = selectionModel()->selectedRows();
 
       if (selection.isEmpty()) { return; }
+
+      if (copyHeaders) {
+        for (int col = 0; col < model()->columnCount(); ++col) {
+          if (isColumnHidden(col)) { continue; }
+
+          headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
+          headers += '\t';
+        }
+
+        headers += '\n';
+      }
 
       for (const auto indexRow : selection) {
         for (int col = 0; col < model()->columnCount(); ++col) {

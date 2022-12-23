@@ -44,7 +44,6 @@
          <property name="font">
           <font>
            <pointsize>14</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -143,7 +142,7 @@
         </widget>
        </item>
        <item row="2" column="0" colspan="3">
-        <widget class="QDoubleSpinBox" name="doubleSpinBox">
+        <widget class="QDoubleSpinBox" name="doubleSpinBoxSomaSelecao">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -178,7 +177,7 @@
   <tabstop>tableResumo</tabstop>
   <tabstop>checkBoxMarcarTodos</tabstop>
   <tabstop>tableProdutos</tabstop>
-  <tabstop>doubleSpinBox</tabstop>
+  <tabstop>doubleSpinBoxSomaSelecao</tabstop>
   <tabstop>pushButtonGerarCompra</tabstop>
   <tabstop>pushButtonCancelarCompra</tabstop>
  </tabstops>

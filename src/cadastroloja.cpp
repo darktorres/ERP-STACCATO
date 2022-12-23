@@ -117,6 +117,7 @@ void CadastroLoja::savingProcedures() {
   setData("porcentagemFrete", ui->doubleSpinBoxPorcFrete->value());
   setData("precoCombustivel", ui->doubleSpinBoxPrecoCombustivel->value());
   setData("custoTransporteTon", ui->doubleSpinBoxCustoTransportePorTon->value());
+  setData("cidadesSemQualp", ui->lineEditCidadesSemQualP->text());
   setData("capacidadeCaminhaoGrande", ui->spinBoxCapacidadeCaminhaoGrande->value());
   setData("custoMotoristaCaminhaoGrande", ui->doubleSpinBoxCustoMotoristaCaminhaoGrande->value());
   setData("custoAjudantesCaminhaoGrande", ui->doubleSpinBoxCustoAjudantesCaminhaoGrande->value());
@@ -160,6 +161,7 @@ void CadastroLoja::setupMapper() {
   addMapping(ui->doubleSpinBoxValorMinimoFrete, "valorMinimoFrete");
   addMapping(ui->doubleSpinBoxPrecoCombustivel, "precoCombustivel");
   addMapping(ui->doubleSpinBoxCustoTransportePorTon, "custoTransporteTon");
+  addMapping(ui->lineEditCidadesSemQualP, "cidadesSemQualp");
   addMapping(ui->spinBoxCapacidadeCaminhaoGrande, "capacidadeCaminhaoGrande");
   addMapping(ui->doubleSpinBoxCustoMotoristaCaminhaoGrande, "custoMotoristaCaminhaoGrande");
   addMapping(ui->doubleSpinBoxCustoAjudantesCaminhaoGrande, "custoAjudantesCaminhaoGrande");

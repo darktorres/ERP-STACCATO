@@ -294,7 +294,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "lastDistribuicao",
                        "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "precoCombustivel", "capacidadeCaminhaoGrande", "custoMotoristaCaminhaoGrande",
                        "custoAjudantesCaminhaoGrande", "eixosCaminhaoGrande", "consumoCaminhaoGrande", "capacidadeCaminhaoPequeno", "custoMotoristaCaminhaoPequeno", "custoAjudantesCaminhaoPequeno",
-                       "eixosCaminhaoPequeno", "consumoCaminhaoPequeno", "tetoProfissionalRT", "apiQualp", "cabecalhosQualp"});
+                       "eixosCaminhaoPequeno", "consumoCaminhaoPequeno", "tetoProfissionalRT", "apiQualp", "cabecalhosQualp", "cidadesSemQualp"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");

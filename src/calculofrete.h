@@ -22,6 +22,7 @@ public:
 
 private:
   // attributes
+  bool returnZero = false;
   SqlTableModel modelItem;
   Ui::CalculoFrete *ui;
   // methods

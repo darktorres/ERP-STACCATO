@@ -209,6 +209,7 @@ void ProdutosPendentes::setupTables() {
   ui->tableCompra->hideColumn("dataRealReceb");
   ui->tableCompra->hideColumn("dataPrevEnt");
   ui->tableCompra->hideColumn("dataRealEnt");
+  ui->tableCompra->hideColumn("desconto");
 }
 
 void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate dataPrevista) {

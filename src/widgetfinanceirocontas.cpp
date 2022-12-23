@@ -1,6 +1,7 @@
 #include "widgetfinanceirocontas.h"
 #include "ui_widgetfinanceirocontas.h"
 
+#include "acbrlib.h"
 #include "anteciparrecebimento.h"
 #include "application.h"
 #include "contas.h"
@@ -60,6 +61,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->groupBoxVencimento, &QGroupBox::toggled, this, &WidgetFinanceiroContas::on_groupBoxVencimento_toggled, connectionType);
   connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->pushButtonAbrirDANFE, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonAbrirDANFE_clicked, connectionType);
   connect(ui->pushButtonAdiantarRecebimento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked, connectionType);
   connect(ui->pushButtonExcluirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked, connectionType);
   connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked, connectionType);
@@ -69,9 +71,9 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked, connectionType);
   connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
+  connect(ui->radioButtonConferido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
-  connect(ui->radioButtonConferido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonRecebido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated, connectionType);
@@ -283,7 +285,12 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
   if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
-  if (tipo == Tipo::Pagar) { ui->table->hideColumn("grupo"); }
+
+  if (tipo == Tipo::Pagar) {
+    ui->table->hideColumn("idNFe");
+    ui->table->hideColumn("grupo");
+  }
+
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
 }
@@ -627,6 +634,26 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
   }
 
   return pagamentos;
+}
+
+void WidgetFinanceiroContas::on_pushButtonAbrirDANFE_clicked()
+{
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  QStringList idNFe;
+
+  for (auto index : selection) {
+    idNFe << model.data(index.row(), "idNFe").toString().split(", ");
+  }
+
+  idNFe.removeDuplicates();
+  idNFe.removeAll({});
+
+  for (auto id : idNFe) {
+    ACBrLib::gerarDanfe(id.toInt());
+  }
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

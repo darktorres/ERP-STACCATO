@@ -41,6 +41,7 @@ private:
   auto on_doubleSpinBoxDe_valueChanged(const double value) -> void;
   auto on_groupBoxRealizado_toggled(const bool enabled) -> void;
   auto on_groupBoxVencimento_toggled(const bool enabled) -> void;
+  auto on_pushButtonAbrirDANFE_clicked() -> void;
   auto on_pushButtonAdiantarRecebimento_clicked() -> void;
   auto on_pushButtonExcluirLancamento_clicked() -> void;
   auto on_pushButtonImportarFolhaPag_clicked() -> void;

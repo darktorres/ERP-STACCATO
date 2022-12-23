@@ -19,14 +19,14 @@
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate dataFaturamento, QWidget *parent)
     : QDialog(parent), dataFaturamento(dataFaturamento), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
+  setWindowFlags(Qt::Window);
 
   setupTables();
 
   setConnections();
 
   ui->itemBoxNFe->setSearchDialog(SearchDialog::nfe(this));
-
-  setWindowFlags(Qt::Window);
+  ui->tableCompra->setCopyHeaders(false);
 }
 
 ImportarXML::~ImportarXML() { delete ui; }

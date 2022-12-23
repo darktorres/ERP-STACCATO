@@ -233,7 +233,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
           if (isColumnHidden(index.column())) { continue; }
 
           headers += model()->headerData(index.column(), Qt::Horizontal, Qt::DisplayRole).toString();
-          headers += '\t';
+          if (index != selection.last()) { headers += '\t'; }
         }
 
         headers += '\n';
@@ -253,7 +253,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
         if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
 
         text += currentText.toString();
-        text += '\t';
+        if (index != selection.last()) { text += '\t'; }
       }
     }
 
@@ -267,7 +267,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
           if (isColumnHidden(col)) { continue; }
 
           headers += model()->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString();
-          headers += '\t';
+          if (col != model()->columnCount() - 1) { headers += '\t'; }
         }
 
         headers += '\n';
@@ -283,7 +283,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
           if (currentText.userType() == QMetaType::Double) { currentText = QLocale(QLocale::Portuguese).toString(currentText.toDouble(), 'f', 2); }
 
           text += currentText.toString();
-          text += '\t';
+          if (col != model()->columnCount() - 1) { text += '\t'; }
         }
 
         text += '\n';

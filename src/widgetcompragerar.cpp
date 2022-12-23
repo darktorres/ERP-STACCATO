@@ -35,7 +35,8 @@ void WidgetCompraGerar::calcularPreco() {
 
   for (const auto &index : selection) { preco += modelProdutos.data(index.row(), "preco").toDouble(); }
 
-  ui->doubleSpinBox->setValue(preco);
+  ui->doubleSpinBoxSomaSelecao->setValue(preco);
+  ui->doubleSpinBoxSomaSelecao->setSuffix(" - " + QString::number(selection.size()) + " linha(s)");
 }
 
 void WidgetCompraGerar::setupTables() {

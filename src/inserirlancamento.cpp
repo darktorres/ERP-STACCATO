@@ -109,6 +109,11 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 void InserirLancamento::on_pushButtonSalvar_clicked() {
   verifyFields();
 
+  for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
+    QString observacao = modelContaPagamento.data(row, "observacao").toString();
+    modelContaPagamento.setData(row, "observacao", observacao.trimmed());
+  }
+
   qApp->startTransaction("InserirLancamento::on_pushButtonSalvar_clicked");
 
   modelContaPagamento.submitAll();

@@ -335,6 +335,11 @@ void Contas::verifyFields() {
 void Contas::on_pushButtonSalvar_clicked() {
   verifyFields();
 
+  for (int row = 0; row < modelPendentes.rowCount(); ++row) {
+    QString observacao = modelPendentes.data(row, "observacao").toString();
+    modelPendentes.setData(row, "observacao", observacao.trimmed());
+  }
+
   qApp->startTransaction("Contas::on_pushButtonSalvar_clicked");
 
   modelPendentes.submitAll();

@@ -618,7 +618,7 @@ color: rgb(0, 0, 0);</string>
                 </widget>
                </item>
                <item row="4" column="1" colspan="3">
-                <widget class="QPlainTextEdit" name="plainTextEdit"/>
+                <widget class="QPlainTextEdit" name="plainTextEditObs"/>
                </item>
                <item row="3" column="1" colspan="3">
                 <widget class="ItemBox" name="itemBoxEnderecoFat"/>
@@ -1386,14 +1386,14 @@ endereço entrega</string>
    <header>src/lineedit.h</header>
   </customwidget>
   <customwidget>
-   <class>TreeView</class>
-   <extends>QTreeView</extends>
-   <header>src/treeview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>src/treeview.h</header>
   </customwidget>
   <customwidget>
    <class>WidgetPagamentos</class>
@@ -1420,7 +1420,7 @@ endereço entrega</string>
   <tabstop>spinBoxPrazoEntrega</tabstop>
   <tabstop>spinBoxPesoTotal</tabstop>
   <tabstop>itemBoxEnderecoFat</tabstop>
-  <tabstop>plainTextEdit</tabstop>
+  <tabstop>plainTextEditObs</tabstop>
   <tabstop>dateTimeEditOrc</tabstop>
   <tabstop>lineEditIdOrcamento</tabstop>
   <tabstop>checkBoxRT</tabstop>

@@ -688,19 +688,7 @@ void Orcamento::savingProcedures() {
   setData("idEnderecoEntrega", ui->itemBoxEndereco->getId());
   setData("idProfissional", ui->itemBoxProfissional->getId());
   setData("idUsuario", ui->itemBoxVendedor->getId());
-
-  const QString disclaimer = "O valor calculado para o frete é válido apenas para as regiões de São Paulo, Barueri e Jundiaí.";
-  QString observacao = ui->plainTextEditObs->toPlainText();
-
-  if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
-    if (!observacao.contains(disclaimer, Qt::CaseInsensitive)) { observacao += disclaimer; }
-
-  } else {
-    observacao.remove(disclaimer, Qt::CaseInsensitive);
-  }
-
-  setData("observacao", observacao);
-
+  setData("observacao", ui->plainTextEditObs->toPlainText());
   setData("prazoEntrega", ui->spinBoxPrazoEntrega->value());
   setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value());
   setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value());
@@ -1173,14 +1161,31 @@ void Orcamento::on_itemBoxCliente_textChanged() {
 }
 
 void Orcamento::on_itemBoxEndereco_idChanged() {
+  if (User::isGerente()) { minimoGerente = 0.; }
   canChangeFrete = false;
   ui->checkBoxFreteManual->setChecked(false);
   ui->checkBoxFreteManual->setEnabled(true);
 
+  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(0); }
   calcularFrete();
+  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(not qFuzzyIsNull(minimoGerente) ? minimoGerente : ui->doubleSpinBoxFrete->value()); }
+
+  const QString disclaimer = "O VALOR CALCULADO PARA O FRETE É VÁLIDO APENAS PARA AS REGIÕES DE SÃO PAULO, BARUERI E JUNDIAÍ.";
+  QString observacao = ui->plainTextEditObs->toPlainText();
+
+  if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
+    if (!observacao.contains(disclaimer, Qt::CaseInsensitive)) { observacao += disclaimer; }
+
+  } else {
+    observacao.remove(disclaimer, Qt::CaseInsensitive);
+  }
+
+  ui->plainTextEditObs->setPlainText(observacao);
 }
 
 void Orcamento::calcularFrete() {
+  if (ui->checkBoxFreteManual->isChecked()) { return; }
+
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
 
   double freteTemp = qMax(fretePorcentagem, minimoFrete);
@@ -1236,16 +1241,16 @@ void Orcamento::calcularFrete() {
 
       qDebug() << "freteQualp: " << freteQualp;
 
-//      if (freteQualp > freteTemp and User::isGerente()) {
-//        ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
-//      }
+      if (freteQualp > freteTemp and User::isGerente()) {
+        minimoGerente = freteQualp - ((freteQualp - freteTemp) / 2);
+        ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
+      }
 
       freteTemp = qMax(freteTemp, freteQualp);
   }
 
   qDebug() << "freteFinal: " << freteTemp;
 
-  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(freteTemp); }
   ui->doubleSpinBoxFrete->setValue(freteTemp);
   qDebug() << "--------------------------------------";
 }
@@ -1385,7 +1390,9 @@ void Orcamento::cadastrar() {
 
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
+    unsetConnections();
     savingProcedures();
+    setConnections();
 
     model.submitAll();
 

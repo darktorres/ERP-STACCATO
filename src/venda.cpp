@@ -327,7 +327,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->itemBoxProfissional->setId(queryOrc.value("idProfissional"));
   ui->itemBoxEndereco->setId(queryOrc.value("idEnderecoEntrega"));
   ui->dateTimeEditOrc->setDateTime(queryOrc.value("data").toDateTime());
-  ui->plainTextEdit->setPlainText(queryOrc.value("observacao").toString());
+  ui->plainTextEditObs->setPlainText(queryOrc.value("observacao").toString());
   ui->doubleSpinBoxSubTotalBruto->setValue(queryOrc.value("subTotalBru").toDouble());
   ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
 
@@ -463,7 +463,7 @@ void Venda::setupMapper() {
   addMapping(ui->itemBoxVendedor, "idUsuario", "id");
   addMapping(ui->lineEditIdOrcamento, "idOrcamento");
   addMapping(ui->lineEditVenda, "idVenda");
-  addMapping(ui->plainTextEdit, "observacao");
+  addMapping(ui->plainTextEditObs, "observacao");
   addMapping(ui->spinBoxPrazoEntrega, "prazoEntrega");
 }
 
@@ -489,7 +489,7 @@ void Venda::savingProcedures() {
   setData("idVenda", ui->lineEditVenda->text());
   setData("idVendaBase", ui->lineEditVenda->text().left(11));
   setData("novoPrazoEntrega", ui->spinBoxPrazoEntrega->value());
-  setData("observacao", ui->plainTextEdit->toPlainText());
+  setData("observacao", ui->plainTextEditObs->toPlainText());
   setData("prazoEntrega", ui->spinBoxPrazoEntrega->value());
   setData("representacao", ui->lineEditVenda->text().endsWith("R") ? 1 : 0);
   setData("rt", ui->doubleSpinBoxPontuacao->value());
@@ -558,7 +558,7 @@ void Venda::updateMode() {
   ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
   ui->doubleSpinBoxFrete->setReadOnly(true);
   ui->doubleSpinBoxTotal->setReadOnly(true);
-  ui->plainTextEdit->setReadOnly(true);
+  ui->plainTextEditObs->setReadOnly(true);
   ui->spinBoxPrazoEntrega->setReadOnly(true);
 
   ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -947,7 +947,10 @@ void Venda::cadastrar() {
 
     currentRow = model.insertRowAtEnd();
 
+    unsetConnections();
     savingProcedures();
+    setConnections();
+
     atualizarCredito();
     criarComissaoProfissional();
 
@@ -1372,18 +1375,34 @@ void Venda::on_checkBoxRT_toggled(const bool checked) {
 }
 
 void Venda::on_itemBoxEndereco_idChanged() {
+  if (User::isGerente()) { minimoGerente = 0.; }
   canChangeFrete = false;
   ui->checkBoxFreteManual->setChecked(false);
   ui->checkBoxFreteManual->setEnabled(true);
 
+  if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(0); }
   calcularFrete();
+  if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(not qFuzzyIsNull(minimoGerente) ? minimoGerente : ui->doubleSpinBoxFrete->value()); }
+
+  const QString disclaimer = "O VALOR CALCULADO PARA O FRETE É VÁLIDO APENAS PARA AS REGIÕES DE SÃO PAULO, BARUERI E JUNDIAÍ.";
+  QString observacao = ui->plainTextEditObs->toPlainText();
+
+  if (ui->itemBoxEndereco->text() == "NÃO HÁ/RETIRA") {
+    if (!observacao.contains(disclaimer, Qt::CaseInsensitive)) { observacao += disclaimer; }
+
+  } else {
+    observacao.remove(disclaimer, Qt::CaseInsensitive);
+  }
+
+  ui->plainTextEditObs->setPlainText(observacao);
 }
 
 void Venda::calcularFrete() {
+  if (ui->checkBoxFreteManual->isChecked()) { return; }
+
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
 
   double freteTemp = qMax(fretePorcentagem, minimoFrete);
-//  if (not ui->checkBoxRepresentacao->isChecked()) { ui->doubleSpinBoxFrete->setMinimum(freteTemp); }
 
   qDebug() << "fretePorcentagem: " << fretePorcentagem;
   qDebug() << "freteMinimo: " << minimoFrete;
@@ -1436,16 +1455,16 @@ void Venda::calcularFrete() {
 
       qDebug() << "freteQualp: " << freteQualp;
 
-//      if (freteQualp > freteTemp and User::isGerente()) {
-//        ui->doubleSpinBoxFrete->setMinimum(freteQualp - ((freteQualp - freteTemp) / 2));
-//      }
+      if (freteQualp > freteTemp and User::isGerente()) {
+        minimoGerente = freteQualp - ((freteQualp - freteTemp) / 2);
+        ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
+      }
 
       freteTemp = qMax(freteTemp, freteQualp);
   }
 
   qDebug() << "freteFinal: " << freteTemp;
 
-  ui->doubleSpinBoxFrete->setMinimum(freteTemp);
   ui->doubleSpinBoxFrete->setValue(freteTemp);
   qDebug() << "--------------------------------------";
 }

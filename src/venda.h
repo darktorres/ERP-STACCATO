@@ -28,6 +28,7 @@ private:
   bool financeiro = false;
   bool representacao = false;
   double minimoFrete = 0;
+  double minimoGerente = 0.;
   double porcFrete = 0;
   int idLoja = 0;
   QList<QSqlRecord> backupItem;

@@ -7,7 +7,6 @@
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
-#include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "sqlquery.h"
 
@@ -183,7 +182,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = text.isEmpty() ? ""
-                                         : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR cp_idVenda LIKE '%" + text +
+                                         : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text +
                                                "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%' OR codFornecedor LIKE '%" + text + "%')";
 
     //-------------------------------------
@@ -260,7 +259,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   }
 
   if (tipo == Tipo::Pagar) {
-    model.setHeaderData("cp_idVenda", "Venda");
+    model.setHeaderData("idVenda", "Venda");
     model.setHeaderData("pf2_idVenda", "Venda");
     model.setHeaderData("ordemCompra", "O.C.");
     model.setHeaderData("numeroNFe", "NF-e");

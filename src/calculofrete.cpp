@@ -114,11 +114,19 @@ void CalculoFrete::setOrcamento(const QVariant idEndereco, const double pesoSul,
     SqlQuery queryCustos;
 
     if (not queryCustos.exec("SELECT custoTransporteTon, precoCombustivel, capacidadeCaminhaoGrande, custoMotoristaCaminhaoGrande, custoAjudantesCaminhaoGrande, consumoCaminhaoGrande, "
-                             "capacidadeCaminhaoPequeno, custoMotoristaCaminhaoPequeno, custoAjudantesCaminhaoPequeno, consumoCaminhaoPequeno "
+                             "capacidadeCaminhaoPequeno, custoMotoristaCaminhaoPequeno, custoAjudantesCaminhaoPequeno, consumoCaminhaoPequeno, cidadesSemQualp "
                              "FROM loja "
                              "WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or
         not queryCustos.first()) {
       throw RuntimeException("Erro buscando dados do caminhão: " + queryCustos.lastError().text());
+    }
+
+    const QStringList cidadesSemQualp = queryCustos.value("cidadesSemQualp").toString().split(";");
+    const QString cidade = ui->itemBoxDestino->text().split(" - ").at(3);
+
+    if (cidadesSemQualp.contains(cidade, Qt::CaseInsensitive)) {
+      returnZero = true;
+      return;
     }
 
     const double custoMotoristaCaminhaoGrande = queryCustos.value("custoMotoristaCaminhaoGrande").toDouble();
@@ -167,6 +175,7 @@ double CalculoFrete::getDistancia() {
 
 double CalculoFrete::getFrete()
 {
+  if (returnZero) { return 0.; }
   qualp();
   return ui->doubleSpinBoxTotal->value();
 }

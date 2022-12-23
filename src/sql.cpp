@@ -435,6 +435,7 @@ QString Sql::contasPagar(const QString &filtros, const QString &busca) {
          "          `cp`.`idVenda` AS `idVenda`, "
          "          GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
          "          GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, "
+         "          GROUP_CONCAT(DISTINCT `n`.`idNFe` SEPARATOR ', ') AS `idNFe`, "
          "          `cp`.`status` AS `status`, "
          "          `cp`.`valor` AS `valor`, "
          "          `cp`.`tipo` AS `tipo`, "

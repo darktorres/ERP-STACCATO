@@ -1193,7 +1193,7 @@ void Orcamento::calcularFrete() {
   qDebug() << "fretePorcentagem: " << fretePorcentagem;
   qDebug() << "freteMinimo: " << minimoFrete;
 
-  if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
+  if (!ui->itemBoxEndereco->text().isEmpty() and ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
       double pesoSul = 0.;
       double pesoTotal = 0.;
 

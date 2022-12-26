@@ -104,6 +104,8 @@ void CalculoFrete::setConnections() {
 void CalculoFrete::setCliente(const QVariant &idCliente) { ui->itemBoxCliente->setId(idCliente); }
 
 void CalculoFrete::setOrcamento(const QVariant idEndereco, const double pesoSul, const double pesoTotal) {
+  if (idEndereco.isNull()) { return; }
+
     ui->itemBoxDestino->setId(idEndereco);
 
     // ------------------------------
@@ -210,7 +212,7 @@ void CalculoFrete::qualp() {
   ui->lineEditCombustivel->clear();
   ui->doubleSpinBoxTotal->clear();
 
-  if (ui->itemBoxDestino->text().isEmpty() or ui->itemBoxDestino->text() == "NÃO HÁ/RETIRA") { throw RuntimeException("Sem endereço de destino!"); }
+  if (ui->itemBoxDestino->text().isEmpty() or ui->itemBoxDestino->text() == "NÃO HÁ/RETIRA") { throw RuntimeError("Sem endereço de destino!"); }
 
   QString result;
 

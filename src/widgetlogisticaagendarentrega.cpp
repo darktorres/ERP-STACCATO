@@ -1,18 +1,15 @@
 #include "widgetlogisticaagendarentrega.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 
-#include "acbrlib.h"
 #include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
-#include "estoque.h"
 #include "file.h"
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
 #include "sql.h"
 #include "user.h"
-#include "venda.h"
 #include "xml.h"
 
 #include <QFileDialog>

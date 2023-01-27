@@ -2,7 +2,6 @@
 #include "ui_xml_viewer.h"
 
 #include "acbrlib.h"
-#include "application.h"
 
 XML_Viewer::XML_Viewer(const QString &content, QWidget *parent) : QDialog(parent), xml(content), ui(new Ui::XML_Viewer) {
   ui->setupUi(this);

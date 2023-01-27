@@ -20,7 +20,7 @@ void Sql::updateVendaStatus(const QString &idVendas) {
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {
   return " SELECT "
-         "     SUM(p.kgcx * vp2.caixas) AS kg,"
+         "     SUM(IF(vp2.status NOT IN ('ENTREGUE' , 'CANCELADO', 'DEVOLVIDO'), p.kgcx * vp2.caixas, 0)) AS kg,"
          "     `che`.`cep` AS `CEP`,"
          "     `che`.`bairro` AS `Bairro`,"
          "     `che`.`logradouro` AS `Logradouro`,"

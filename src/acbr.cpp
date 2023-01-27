@@ -2,7 +2,6 @@
 
 #include "application.h"
 #include "sqlquery.h"
-#include "user.h"
 #include "userconfig.h"
 
 #include <QSqlError>

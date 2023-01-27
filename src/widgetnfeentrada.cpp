@@ -9,7 +9,9 @@
 #include "file.h"
 #include "followup.h"
 #include "reaisdelegate.h"
-#include "user.h"
+#include "sqlquery.h"
+#include "xlsxdocument.h"
+#include "xml.h"
 
 #include <QDebug>
 #include <QDir>
@@ -41,6 +43,7 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
+  connect(ui->pushButtonExportarExcel, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarExcel_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
@@ -62,6 +65,7 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
+  disconnect(ui->pushButtonExportarExcel, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarExcel_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
@@ -368,6 +372,47 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   }
 
   qApp->enqueueInformation("Arquivos exportados com sucesso para:\n" + QDir::currentPath() + "/arquivos/", this);
+}
+
+void WidgetNfeEntrada::on_pushButtonExportarExcel_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+
+  QString fileName = "dados_nfe.xlsx";
+
+  QXlsx::Document xlsx(fileName, this);
+  xlsx.write("A1", "Fornecedor");
+  xlsx.write("B1", "CNPJ");
+  xlsx.write("C1", "UF");
+  xlsx.write("D1", "Produto");
+  xlsx.write("E1", "NCM");
+  xlsx.write("F1", "CST");
+
+  SqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
+
+  int row = 2;
+
+  for (const auto &index : selection) {
+    if (model.data(index.row(), "status").toString() == "RESUMO") { continue; }
+
+    const QString chaveAcesso = model.data(index.row(), "chaveAcesso").toString();
+
+    query.bindValue(":chaveAcesso", chaveAcesso);
+
+    if (not query.exec()) { throw RuntimeException("Erro buscando XML da NF-e: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Não encontrou XML da NF-e com chave de acesso: '" + chaveAcesso + "'"); }
+
+    XML xml(query.value("xml").toByteArray());
+    xml.exportarDados(xlsx, row);
+  }
+
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Erro ao salvar arquivo!"); }
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
 void WidgetNfeEntrada::on_groupBoxStatus_toggled(const bool enabled) {

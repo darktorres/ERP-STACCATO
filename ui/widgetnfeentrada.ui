@@ -56,6 +56,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButtonExportarExcel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Exportar Excel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButtonFollowup">
        <property name="enabled">
         <bool>true</bool>

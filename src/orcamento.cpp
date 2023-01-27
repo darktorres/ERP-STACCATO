@@ -1194,59 +1194,56 @@ void Orcamento::calcularFrete() {
   qDebug() << "freteMinimo: " << minimoFrete;
 
   if (!ui->itemBoxEndereco->text().isEmpty() and ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
-      double pesoSul = 0.;
-      double pesoTotal = 0.;
+    double pesoSul = 0.;
+    double pesoTotal = 0.;
 
-      for (int row = 0; row < modelItem.rowCount(); ++row) {
-        const QString idProduto = modelItem.data(row, "idProduto").toString();
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-        SqlQuery sqlQueryKgCx;
+      SqlQuery sqlQueryKgCx;
 
-        if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
-            throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
-        }
-
-        const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
-        const double caixas = modelItem.data(row, "caixas").toDouble();
-        const double peso = caixas * kgcx;
-
-        SqlQuery queryFornecedor;
-
-        if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
-          throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
-        }
-
-        if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
-
-        if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
-
-
-        pesoTotal += peso;
+      if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
+        throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
       }
 
-      qDebug() << "pesoSul: " << pesoSul;
-      qDebug() << "pesoTotal: " << pesoTotal;
+      const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
+      const double caixas = modelItem.data(row, "caixas").toDouble();
+      const double peso = caixas * kgcx;
 
-      // --------------------------------------------
+      SqlQuery queryFornecedor;
 
-      CalculoFrete calculoFrete;
-      calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
-
-      double freteQualp = 0.;
-      try {
-        freteQualp = calculoFrete.getFrete();
-      } catch (std::exception &e) {
-        Log::createLog("Exceção", e.what());
+      if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
+        throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
       }
 
-      qDebug() << "freteQualp: " << freteQualp;
+      if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
 
-      if (freteQualp > freteTemp and User::isGerente()) {
-        minimoGerente = freteQualp - ((freteQualp - freteTemp) / 2);
-        ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
-      }
+      if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
 
-      freteTemp = qMax(freteTemp, freteQualp);
+      pesoTotal += peso;
+    }
+
+    qDebug() << "pesoSul: " << pesoSul;
+    qDebug() << "pesoTotal: " << pesoTotal;
+
+    // --------------------------------------------
+
+    CalculoFrete calculoFrete;
+    calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
+
+    double freteQualp = 0.;
+    try {
+      freteQualp = calculoFrete.getFrete();
+    } catch (std::exception &e) { Log::createLog("Exceção", e.what()); }
+
+    qDebug() << "freteQualp: " << freteQualp;
+
+    if (freteQualp > freteTemp and User::isGerente()) {
+      minimoGerente = freteQualp - ((freteQualp - freteTemp) / 2);
+      ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
+    }
+
+    freteTemp = qMax(freteTemp, freteQualp);
   }
 
   qDebug() << "freteFinal: " << freteTemp;

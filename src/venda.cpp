@@ -331,14 +331,13 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->doubleSpinBoxSubTotalBruto->setValue(queryOrc.value("subTotalBru").toDouble());
   ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
 
-  const bool freteManual = queryOrc.value("freteManual").toBool();
   const double frete = queryOrc.value("frete").toDouble();
 
-  ui->doubleSpinBoxFrete->setMinimum(User::temPermissao("ajusteFrete") ? 0 : frete);
+  if (User::isGerente()) { calcularFrete(false); }
   ui->doubleSpinBoxFrete->setValue(frete);
-  canChangeFrete = freteManual;
+  canChangeFrete = queryOrc.value("freteManual").toBool();
 
-  if (freteManual) {
+  if (canChangeFrete) {
     ui->checkBoxFreteManual->setChecked(true);
     ui->checkBoxFreteManual->setDisabled(true);
   }
@@ -1381,7 +1380,7 @@ void Venda::on_itemBoxEndereco_idChanged() {
   ui->checkBoxFreteManual->setEnabled(true);
 
   if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(0); }
-  calcularFrete();
+  calcularFrete(true);
   if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(not qFuzzyIsNull(minimoGerente) ? minimoGerente : ui->doubleSpinBoxFrete->value()); }
 
   const QString disclaimer = "O VALOR CALCULADO PARA O FRETE É VÁLIDO APENAS PARA AS REGIÕES DE SÃO PAULO, BARUERI E JUNDIAÍ.";
@@ -1397,15 +1396,14 @@ void Venda::on_itemBoxEndereco_idChanged() {
   ui->plainTextEditObs->setPlainText(observacao);
 }
 
-void Venda::calcularFrete() {
+void Venda::calcularFrete(const bool updateSpinBox) {
   if (ui->checkBoxFreteManual->isChecked()) { return; }
 
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+  double freteMaior = qMax(fretePorcentagem, minimoFrete);
 
-  double freteTemp = qMax(fretePorcentagem, minimoFrete);
-
-  qDebug() << "fretePorcentagem: " << fretePorcentagem;
-  qDebug() << "freteMinimo: " << minimoFrete;
+  qDebug() << "fretePorcentagem: R$" << fretePorcentagem;
+  qDebug() << "freteMinimo: R$" << minimoFrete;
 
   if (ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
     double pesoSul = 0.;
@@ -1437,8 +1435,8 @@ void Venda::calcularFrete() {
       pesoTotal += peso;
     }
 
-    qDebug() << "pesoSul: " << pesoSul;
-    qDebug() << "pesoTotal: " << pesoTotal;
+    qDebug() << "pesoSul:" << pesoSul << "kg";
+    qDebug() << "pesoTotal:" << pesoTotal << "kg";
 
     // --------------------------------------------
 
@@ -1446,23 +1444,29 @@ void Venda::calcularFrete() {
     calculoFrete.setOrcamento(ui->itemBoxEndereco->getId(), pesoSul, pesoTotal);
 
     double freteQualp = 0.;
+
     try {
       freteQualp = calculoFrete.getFrete();
     } catch (std::exception &e) { Log::createLog("Exceção", e.what()); }
 
-    qDebug() << "freteQualp: " << freteQualp;
+    qDebug() << "freteQualp: R$" << freteQualp;
 
-    if (freteQualp > freteTemp and User::isGerente()) {
-      minimoGerente = freteQualp - ((freteQualp - freteTemp) / 2);
+    freteMaior = qMax(freteMaior, freteQualp);
+
+    if (User::isGerente()) {
+      const double freteMenor = qMin(freteQualp, freteMaior);
+      minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 1.2;
       ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
     }
-
-    freteTemp = qMax(freteTemp, freteQualp);
   }
 
-  qDebug() << "freteFinal: " << freteTemp;
+  qDebug() << "minimoGerente: R$" << minimoGerente;
 
-  ui->doubleSpinBoxFrete->setValue(freteTemp);
+  if (updateSpinBox) {
+    qDebug() << "freteFinal: R$" << freteMaior;
+    ui->doubleSpinBoxFrete->setValue(freteMaior);
+  }
+
   qDebug() << "--------------------------------------";
 }
 

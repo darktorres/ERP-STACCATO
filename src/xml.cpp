@@ -13,7 +13,6 @@ XML::XML(const QString &fileContent_) : XML(fileContent_, XML::Tipo::Nulo, nullp
 void XML::montarArvore() {
   if (fileContent.isEmpty()) { throw RuntimeException("XML vazio!"); }
 
-  QDomDocument document;
   QString errorText;
 
   if (not document.setContent(fileContent, &errorText)) { throw RuntimeException("Erro lendo arquivo: " + errorText); }
@@ -210,4 +209,21 @@ void XML::verificaNCMs() {
   ncms.removeDuplicates();
 
   if (not ncms.isEmpty()) { throw RuntimeError("Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
+}
+
+void XML::exportarDados(QXlsx::Document &xlsx, int &row) {
+  auto produtos = document.elementsByTagName("xProd");
+  auto ncms = document.elementsByTagName("NCM");
+  auto csts = document.elementsByTagName("ICMS");
+
+  for (int i = 0; i < produtos.length(); ++i) {
+    xlsx.write("A" + QString::number(row), document.elementsByTagName("emit").item(0).toElement().elementsByTagName("xNome").item(0).toElement().text());
+    xlsx.write("B" + QString::number(row), document.elementsByTagName("emit").item(0).toElement().elementsByTagName("CNPJ").item(0).toElement().text());
+    xlsx.write("C" + QString::number(row), document.elementsByTagName("enderEmit").item(0).toElement().elementsByTagName("UF").item(0).toElement().text());
+    xlsx.write("D" + QString::number(row), produtos.item(i).toElement().text());
+    xlsx.write("E" + QString::number(row), ncms.item(i).toElement().text());
+    auto icms = csts.item(i).firstChild();
+    xlsx.write("F" + QString::number(row), icms.toElement().elementsByTagName("orig").item(0).toElement().text() + icms.toElement().elementsByTagName("orig").item(0).nextSibling().toElement().text());
+    ++row;
+  }
 }

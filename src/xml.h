@@ -1,5 +1,7 @@
 #pragma once
 
+#include "xlsxdocument.h"
+
 #include <QDomElement>
 #include <QStandardItemModel>
 
@@ -69,6 +71,7 @@ public:
   explicit XML(const QString &fileContent_, const Tipo tipo_, QWidget *parent_);
   explicit XML(const QString &fileContent_);
 
+  auto exportarDados(QXlsx::Document &xlsx, int &row) -> void;
   auto validar() -> void;
   auto verificaNCMs() -> void;
 
@@ -97,6 +100,7 @@ public:
 
 private:
   // attributes
+  QDomDocument document;
   Produto produto;
   Tipo const tipo;
   QWidget *parent = nullptr;

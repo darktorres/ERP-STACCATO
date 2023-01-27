@@ -102,6 +102,7 @@ private:
   auto verificaCadastroCliente() -> void;
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaSeFoiAlterado() -> void;
+  auto verificaServicosEspeciais() -> bool;
   auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;

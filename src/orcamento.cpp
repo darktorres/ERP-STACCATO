@@ -1181,8 +1181,26 @@ void Orcamento::on_itemBoxEndereco_idChanged() {
   ui->plainTextEditObs->setPlainText(observacao);
 }
 
+bool Orcamento::verificaServicosEspeciais() {
+  QStringList fornecedores;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
+
+  fornecedores.removeDuplicates();
+
+  if (fornecedores.size() == 1 and fornecedores.first() == "STACCATO SERVIÇOS ESPECIAIS (SSE)") {
+    ui->doubleSpinBoxFrete->setMinimum(0);
+    ui->doubleSpinBoxFrete->setValue(0);
+    return true;
+  }
+
+  return false;
+}
+
 void Orcamento::calcularFrete(const bool updateSpinBox) {
   if (ui->checkBoxFreteManual->isChecked()) { return; }
+
+  if (verificaServicosEspeciais()) { return; }
 
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);

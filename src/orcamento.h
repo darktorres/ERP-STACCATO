@@ -41,7 +41,7 @@ private:
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
-  auto calcularFrete() -> void;
+  auto calcularFrete(const bool updateSpinBox) -> void;
   auto calcularPeso() -> double;
   auto calcularPesoTotal() -> void;
   auto calcularTotais() -> std::tuple<double, double, double>;

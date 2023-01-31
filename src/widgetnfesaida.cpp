@@ -434,12 +434,23 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 
   if (not query.exec()) { throw RuntimeException("Erro marcando NF-e como cancelada: " + query.lastError().text()); }
 
+  // ---------------------------------------------------------
+
   const int idNFe = model.data(row, "idNFe").toInt();
 
-  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL, idNFeFutura = NULL WHERE status = 'EM ENTREGA' AND (idNFeSaida = :idNFe OR idNFeFutura = :idNFe)");
+  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { throw RuntimeException("Erro removendo NF-e da venda_produto: " + query.lastError().text()); }
+
+  // ---------------------------------------------------------
+
+  query.prepare("UPDATE venda_has_produto2 SET idNFeFutura = NULL WHERE idNFeFutura = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) { throw RuntimeException("Erro removendo NF-e da venda_produto: " + query.lastError().text()); }
+
+  // ---------------------------------------------------------
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);

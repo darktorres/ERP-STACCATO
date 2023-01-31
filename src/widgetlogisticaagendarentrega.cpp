@@ -52,8 +52,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
-  modelProdutos.setHeaderData("idNFeSaida", "NF-e");
-  modelProdutos.setHeaderData("idNFeFutura", "NF-e Futura");
+  modelProdutos.setHeaderData("nFeSaida", "NF-e");
+  modelProdutos.setHeaderData("nfeFutura", "NF-e Futura");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
@@ -71,6 +71,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataRealEnt");
+  ui->tableProdutos->hideColumn("idNFeSaida");
+  ui->tableProdutos->hideColumn("idNFeFutura");
   ui->tableProdutos->hideColumn("idConsumo");
 
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarEntrega::calcularPeso);

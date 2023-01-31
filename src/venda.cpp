@@ -1396,8 +1396,26 @@ void Venda::on_itemBoxEndereco_idChanged() {
   ui->plainTextEditObs->setPlainText(observacao);
 }
 
+bool Venda::verificaServicosEspeciais() {
+  QStringList fornecedores;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
+
+  fornecedores.removeDuplicates();
+
+  if (fornecedores.size() == 1 and fornecedores.first() == "STACCATO SERVIÇOS ESPECIAIS (SSE)") {
+    ui->doubleSpinBoxFrete->setMinimum(0);
+    ui->doubleSpinBoxFrete->setValue(0);
+    return true;
+  }
+
+  return false;
+}
+
 void Venda::calcularFrete(const bool updateSpinBox) {
   if (ui->checkBoxFreteManual->isChecked()) { return; }
+
+  if (verificaServicosEspeciais()) { return; }
 
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);
@@ -1456,11 +1474,11 @@ void Venda::calcularFrete(const bool updateSpinBox) {
     if (User::isGerente()) {
       const double freteMenor = qMin(freteQualp, freteMaior);
       minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 1.2;
-      ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
+      qDebug() << "minimoGerente: R$" << minimoGerente;
     }
   }
 
-  qDebug() << "minimoGerente: R$" << minimoGerente;
+  ui->doubleSpinBoxFrete->setMinimum(User::isGerente() ? minimoGerente : freteMaior);
 
   if (updateSpinBox) {
     qDebug() << "freteFinal: R$" << freteMaior;

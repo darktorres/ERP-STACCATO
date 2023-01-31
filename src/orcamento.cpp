@@ -288,7 +288,7 @@ bool Orcamento::viewRegister() {
 
     if (canChangeFrete) {
       ui->checkBoxFreteManual->setDisabled(true);
-      ui->doubleSpinBoxFrete->setMinimum(User::temPermissao("ajusteFrete") ? 0 : ui->doubleSpinBoxFrete->value());
+      if (User::temPermissao("ajusteFrete")) { ui->doubleSpinBoxFrete->setMinimum(0); }
     }
 
     if (User::isGerente()) { calcularFrete(false); }
@@ -1259,11 +1259,11 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
     if (User::isGerente()) {
       const double freteMenor = qMin(freteQualp, freteMaior);
       minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 1.2;
-      ui->doubleSpinBoxFrete->setMinimum(minimoGerente);
+      qDebug() << "minimoGerente: R$" << minimoGerente;
     }
   }
 
-  qDebug() << "minimoGerente: R$" << minimoGerente;
+  ui->doubleSpinBoxFrete->setMinimum(User::isGerente() ? minimoGerente : freteMaior);
 
   if (updateSpinBox) {
     qDebug() << "freteFinal: R$" << freteMaior;

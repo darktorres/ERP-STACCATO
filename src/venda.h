@@ -93,6 +93,7 @@ private:
   auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaFreteLoja() -> void;
+  auto verificaServicosEspeciais() -> bool;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

@@ -2,6 +2,7 @@
 
 #include "user.h"
 
+#include <QBrush>
 #include <QSqlRecord>
 
 VendaProxyModel::VendaProxyModel(QSqlQueryModel *model, QObject *parent)

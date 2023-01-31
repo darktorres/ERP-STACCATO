@@ -14,10 +14,12 @@
 #include "xml.h"
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QUrl>
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
@@ -131,7 +133,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'", this); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void WidgetNfeEntrada::montaFiltro() {
@@ -357,7 +359,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    ACBrLib::gerarDanfe(query.value("xml"), false);
+    ACBrLib::gerarDanfe(query.value("xml").toString(), false);
 
     // copiar para pasta predefinida
 
@@ -405,7 +407,7 @@ void WidgetNfeEntrada::on_pushButtonExportarExcel_clicked() {
 
     if (not query.first()) { throw RuntimeException("Não encontrou XML da NF-e com chave de acesso: '" + chaveAcesso + "'"); }
 
-    XML xml(query.value("xml").toByteArray());
+    XML xml(query.value("xml").toString());
     xml.exportarDados(xlsx, row);
   }
 

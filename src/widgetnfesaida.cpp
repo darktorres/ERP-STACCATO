@@ -9,7 +9,6 @@
 #include "followup.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
-#include "user.h"
 
 #if __has_include("lrreportengine.h")
 #include "lrreportengine.h"
@@ -120,7 +119,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'"); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void WidgetNfeSaida::montaFiltro() {
@@ -345,7 +344,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    ACBrLib::gerarDanfe(query.value("xml"), false);
+    ACBrLib::gerarDanfe(query.value("xml").toString(), false);
 
     // copiar para pasta predefinida
 

@@ -176,7 +176,7 @@ void Estoque::exibirNota() {
 
   if (not query.first()) { return qApp->enqueueWarning("Não encontrou NF-e associada!", this); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {

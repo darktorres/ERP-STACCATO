@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 

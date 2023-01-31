@@ -214,7 +214,7 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para a NF-e de id: '" + model.data(index.row(), "idNFe").toString() + "'"); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void WidgetGare::on_tableSelection_changed() {

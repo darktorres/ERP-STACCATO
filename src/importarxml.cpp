@@ -594,6 +594,8 @@ void ImportarXML::associarIgual(const int rowCompra, const int rowEstoque) {
   modelEstoque_compra.setData(rowEstoque_compra, "idCompra", modelCompra.data(rowCompra, "idCompra"));
   modelEstoque_compra.setData(rowEstoque_compra, "idPedido2", modelCompra.data(rowCompra, "idPedido2"));
 
+  if (modelCompra.data(rowCompra, "prcUnitario").toDouble() != modelEstoque.data(rowEstoque, "valorUnid").toDouble()) { divergenciaPreco = true; }
+
   criarConsumo(rowCompra, rowEstoque);
 }
 
@@ -630,6 +632,8 @@ void ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
   modelEstoque_compra.setData(rowEstoque_compra, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"));
   modelEstoque_compra.setData(rowEstoque_compra, "idCompra", modelCompra.data(rowCompra, "idCompra"));
   modelEstoque_compra.setData(rowEstoque_compra, "idPedido2", modelCompra.data(rowCompra, "idPedido2"));
+
+  if (modelCompra.data(rowCompra, "prcUnitario").toDouble() != modelEstoque.data(rowEstoque, "valorUnid").toDouble()) { divergenciaPreco = true; }
 
   criarConsumo(rowCompra, rowEstoque);
 }
@@ -1174,6 +1178,11 @@ void ImportarXML::parear() {
   }
 
   setConnections();
+
+  if (divergenciaPreco) {
+    QMessageBox::warning(this, "Aviso", "Um ou mais produtos da NF-e possuem preço diferente da compra!\nPor favor avise o financeiro!");
+    divergenciaPreco = false;
+  }
 }
 
 void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {

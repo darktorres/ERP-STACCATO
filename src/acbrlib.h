@@ -8,7 +8,7 @@ class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QString &fileContent, const bool openFile) -> void;
 
 private:
   static auto check_result(HMODULE nHandler, const int ret) -> void;
@@ -23,7 +23,7 @@ class ACBrLib {
 
 public:
   static auto gerarDanfe(const int idNFe) -> void;
-  static auto gerarDanfe(const QVariant &fileContent, const bool openFile = true) -> void;
+  static auto gerarDanfe(const QString &fileContent, const bool openFile) -> void;
 };
 
 #endif

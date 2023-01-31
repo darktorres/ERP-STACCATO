@@ -409,7 +409,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     enviarNFe(acbr, filePath, idNFe); // dont close if rejection
     enviarEmail(acbr, filePath);      // close if error
 
-    ACBrLib::gerarDanfe(xml); // close if error
+    ACBrLib::gerarDanfe(xml, true); // close if error
   } catch (std::exception &) {
     if (not manterAberto) { close(); }
 
@@ -2133,7 +2133,7 @@ void CadastrarNFe::on_pushButtonPrevia_clicked() {
   ACBr acbr;
   gerarNota(acbr);
 
-  ACBrLib::gerarDanfe(xml);
+  ACBrLib::gerarDanfe(xml, true);
 }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo

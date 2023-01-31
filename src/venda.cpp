@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
+#include <QSqlRecord>
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
@@ -1640,7 +1641,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeError("Linha não possui NF-e!"); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void Venda::calcularPesoTotal() {

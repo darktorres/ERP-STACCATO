@@ -2,6 +2,7 @@
 
 #include "user.h"
 
+#include <QBrush>
 #include <QSqlRecord>
 
 OrcamentoProxyModel::OrcamentoProxyModel(QSqlQueryModel *model, QObject *parent)

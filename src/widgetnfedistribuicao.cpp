@@ -631,7 +631,7 @@ void WidgetNFeDistribuicao::on_table_activated(const QModelIndex &index) {
 
   if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'", this); }
 
-  ACBrLib::gerarDanfe(query.value("xml"), true);
+  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 QString WidgetNFeDistribuicao::encontraInfCpl(const QString &xml) {

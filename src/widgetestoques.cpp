@@ -20,6 +20,7 @@ void WidgetEstoques::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetEstoques::escolheFiltro, connectionType);
+  connect(ui->pushButtonExportarNCM, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonExportarNCM_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorio_clicked, connectionType);
   connect(ui->pushButtonRelatorioContabil, &QPushButton::clicked, this, &WidgetEstoques::on_pushButtonRelatorioContabil_clicked, connectionType);
@@ -212,6 +213,36 @@ void WidgetEstoques::gerarRelatorio(const QString &data) {
   file.close();
 
   gerarExcel(arquivoModelo, fileName, modelContabil);
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
+}
+
+void WidgetEstoques::on_pushButtonExportarNCM_clicked() {
+  QString fileName = "ncm_estoque.xlsx";
+
+  QXlsx::Document xlsx(fileName, this);
+  xlsx.write("A1", "Fornecedor");
+  xlsx.write("B1", "CNPJ");
+  xlsx.write("C1", "UF");
+  xlsx.write("D1", "Produto");
+  xlsx.write("E1", "NCM");
+  xlsx.write("F1", "CST");
+
+  SqlQueryModel tempModel;
+  tempModel.setQuery(Sql::queryExportarNCM());
+  tempModel.select();
+
+  for (int row = 0; row < tempModel.rowCount(); ++row) {
+    xlsx.write("A" + QString::number(row + 2), tempModel.data(row, "fornecedor"));
+    xlsx.write("B" + QString::number(row + 2), tempModel.data(row, "cnpj"));
+    xlsx.write("C" + QString::number(row + 2), tempModel.data(row, "uf"));
+    xlsx.write("D" + QString::number(row + 2), tempModel.data(row, "descricao"));
+    xlsx.write("E" + QString::number(row + 2), tempModel.data(row, "ncm"));
+    xlsx.write("F" + QString::number(row + 2), tempModel.data(row, "cst"));
+  }
+
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Erro ao salvar arquivo!"); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);

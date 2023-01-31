@@ -12,6 +12,7 @@ public:
   static auto contasPagar(const QString &filtros, const QString &busca) -> QString;
   static auto contasReceber(const QString &filtros) -> QString;
   static auto queryEstoque(const QString &match, const QString &having) -> QString;
+  static auto queryExportarNCM() -> QString;
   static auto updateVendaStatus(const QString &idVendas) -> void;
   static auto updateVendaStatus(const QStringList &idVendas) -> void;
   static auto view_a_pagar_vencer() -> QString;

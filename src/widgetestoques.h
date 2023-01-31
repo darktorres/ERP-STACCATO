@@ -31,6 +31,7 @@ private:
   auto getMatch() const -> QString;
   auto montaFiltro() -> void;
   auto montaFiltroContabil() -> void;
+  auto on_pushButtonExportarNCM_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonRelatorioContabil_clicked() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;

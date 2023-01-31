@@ -422,6 +422,22 @@ QString Sql::queryEstoque(const QString &match, const QString &having) {
          + having;
 }
 
+QString Sql::queryExportarNCM() {
+  return " SELECT "
+         "     e.fornecedor,"
+         "     EXTRACTVALUE(n.xml, '/nfeProc/NFe/infNFe/emit/CNPJ') AS cnpj,"
+         "     EXTRACTVALUE(n.xml, '/nfeProc/NFe/infNFe/emit/enderEmit/UF') AS uf,"
+         "     e.descricao,"
+         "     e.ncm,"
+         "     LPAD(e.cstICMS, 3, '0') AS cst"
+         " FROM"
+         "     estoque e"
+         "         LEFT JOIN"
+         "     nfe n ON e.idNFe = n.idNFe"
+         " WHERE"
+         "     e.contabil > 0";
+}
+
 QString Sql::contasPagar(const QString &filtros, const QString &busca) {
   QString where;
   if (not filtros.isEmpty()) { where = "WHERE " + filtros; }

@@ -43,6 +43,7 @@ public:
 
 private:
   // attributes
+  bool divergenciaPreco = false;
   int idBlocoRecebimento = 0;
   QDate const dataFaturamento;
   QMap<QString, double> mapNFes;

@@ -107,7 +107,10 @@ void CadastroCliente::setupTables() {
 void CadastroCliente::verifyFields() {
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) { verifyRequiredField(*line); }
+  for (const auto &line : children) {
+    line->setText(line->text().remove("\r").remove("\n").trimmed());
+    verifyRequiredField(*line);
+  }
 
   if (ui->radioButtonPF->isChecked()) { validaCPF(ui->lineEditCPF->text()); }
 
@@ -139,7 +142,7 @@ void CadastroCliente::savingProcedures() {
   setData("contatoCPF", (ui->lineEditContatoCPF->text() == "..-") ? "" : ui->lineEditContatoCPF->text());
   setData("cpf", (ui->lineEditCPF->text() == "..-") ? "" : ui->lineEditCPF->text());
   setData("cnpj", (ui->lineEditCNPJ->text() == "../-") ? "" : ui->lineEditCNPJ->text());
-  setData("nome_razao", ui->lineEditCliente->text().remove("\r").remove("\n"));
+  setData("nome_razao", ui->lineEditCliente->text());
   setData("nomeFantasia", ui->lineEditNomeFantasia->text());
   setData("contatoNome", ui->lineEditContatoNome->text());
   setData("contatoApelido", ui->lineEditContatoApelido->text());
@@ -552,6 +555,10 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(const bool checked) {
 void CadastroCliente::on_checkBoxDataNasc_stateChanged(const int state) { ui->dateEditDataNasc->setEnabled(state); }
 
 void CadastroCliente::verificaEndereco() {
+  const auto children = ui->groupBoxEndereco->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { line->setText(line->text().remove("\r").remove("\n").trimmed()); }
+
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
   if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }

@@ -69,7 +69,10 @@ void CadastroProduto::registerMode() {
 void CadastroProduto::verifyFields() {
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) { verifyRequiredField(*line); }
+  for (const auto &line : children) {
+    line->setText(line->text().remove("\r").remove("\n").trimmed());
+    verifyRequiredField(*line);
+  }
 
   if (ui->comboBoxUn->currentText().isEmpty()) { throw RuntimeError("Faltou preencher unidade!"); }
 

@@ -101,7 +101,10 @@ void CadastroLoja::clearFields() {
 void CadastroLoja::verifyFields() {
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) { verifyRequiredField(*line); }
+  for (const auto &line : children) {
+    line->setText(line->text().remove("\r").remove("\n").trimmed());
+    verifyRequiredField(*line);
+  }
 }
 
 void CadastroLoja::savingProcedures() {
@@ -486,6 +489,10 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(const bool checked) {
 }
 
 void CadastroLoja::verificaEndereco() {
+  const auto children = ui->groupBoxEndereco->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { line->setText(line->text().remove("\r").remove("\n").trimmed()); }
+
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
   if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }

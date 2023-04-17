@@ -4,10 +4,10 @@
 #include "application.h"
 #include "comboboxdelegate.h"
 #include "dateformatdelegate.h"
-#include "itembox.h"
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "reaisdelegate.h"
+#include "searchdialog.h"
 #include "sqlquery.h"
 
 #include <QDebug>

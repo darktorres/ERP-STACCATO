@@ -1,16 +1,12 @@
 #include "widgetlogisticaagendarcoleta.h"
 #include "ui_widgetlogisticaagendarcoleta.h"
 
-#include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
-#include "estoque.h"
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
-#include "inputdialogfinanceiro.h"
-#include "user.h"
-#include "venda.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QDesktopServices>

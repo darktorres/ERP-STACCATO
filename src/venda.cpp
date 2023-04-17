@@ -234,6 +234,7 @@ void Venda::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
+  ui->tableFluxoCaixa->hideColumn("idNFe");
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
   ui->tableFluxoCaixa->hideColumn("idVenda");
@@ -282,6 +283,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("dataEmissao");
   ui->tableFluxoCaixa2->hideColumn("idVenda");
   ui->tableFluxoCaixa2->hideColumn("idLoja");
+  ui->tableFluxoCaixa2->hideColumn("idNFe");
   ui->tableFluxoCaixa2->hideColumn("nfe");
   ui->tableFluxoCaixa2->hideColumn("representacao");
   ui->tableFluxoCaixa2->hideColumn("dataRealizado");

@@ -708,11 +708,11 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 void ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
-  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'")) {
+  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE idNFe = " + ui->itemBoxNFe->getId().toString())) {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com chave de acesso: '" + ui->itemBoxNFe->text() + "'"); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + ui->itemBoxNFe->getId().toString() + "'"); }
 
   if (query.value("status").toString() != "AUTORIZADA") { throw RuntimeError("NF-e não está autorizada!", this); }
 

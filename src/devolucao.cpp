@@ -221,6 +221,7 @@ void Devolucao::setupTables() {
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
+  ui->tablePagamentos->hideColumn("idNFe");
   ui->tablePagamentos->hideColumn("nfe");
   ui->tablePagamentos->hideColumn("idVenda");
   ui->tablePagamentos->hideColumn("idLoja");

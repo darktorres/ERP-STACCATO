@@ -311,7 +311,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
   const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NF-e"}, {"xml", "Conteúdo NF-e"}, {"chaveAcesso", "Chave Acesso"}};
 
-  auto *sdNFe = new SearchDialog("Buscar NF-e", "view_nfe_inutilizada", "idNFe", {"chaveAcesso"}, fullTextIndex, "", "", true, parent);
+  auto *sdNFe = new SearchDialog("Buscar NF-e", "view_nfe_inutilizada", "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
 
   sdNFe->ui->table->setAutoResize(false);
 

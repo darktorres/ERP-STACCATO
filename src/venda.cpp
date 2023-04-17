@@ -1627,21 +1627,19 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 
   if (User::isVendedorOrEspecial()) { return qApp->abrirNFe(modelItem2.data(row, "idNFeSaida")); }
 
-  if (not User::isAdmin() and not User::isAdministrativo()) { return; }
+  if (User::isAdmin() or User::isAdministrativo()) {
+    const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
 
-  // ---------------------------------------------------------------
+    QSqlQuery query;
 
-  const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
+    if (not query.exec("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = " + idVendaProduto2 + "))")) {
+      throw RuntimeException("Erro buscando NF-e: " + query.lastError().text());
+    }
 
-  QSqlQuery query;
+    if (not query.first()) { throw RuntimeError("Linha não possui NF-e!"); }
 
-  if (not query.exec("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = " + idVendaProduto2 + "))")) {
-    throw RuntimeException("Erro buscando NF-e: " + query.lastError().text());
+    ACBrLib::gerarDanfe(query.value("xml").toString(), true);
   }
-
-  if (not query.first()) { throw RuntimeError("Linha não possui NF-e!"); }
-
-  ACBrLib::gerarDanfe(query.value("xml").toString(), true);
 }
 
 void Venda::calcularPesoTotal() {

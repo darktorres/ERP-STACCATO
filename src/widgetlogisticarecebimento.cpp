@@ -1,17 +1,13 @@
 #include "widgetlogisticarecebimento.h"
 #include "ui_widgetlogisticarecebimento.h"
 
-#include "acbrlib.h"
 #include "application.h"
-#include "estoque.h"
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
-#include "inputdialogfinanceiro.h"
 #include "sql.h"
 #include "sqlquery.h"
-#include "venda.h"
 
 #include <QDebug>
 #include <QMessageBox>

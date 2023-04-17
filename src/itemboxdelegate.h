@@ -9,7 +9,7 @@ public:
   enum class Tipo { Loja, Conta };
   Q_ENUM(Tipo)
 
-  ItemBoxDelegate(const Tipo tipo, const bool readOnly, QObject *parent);
+  ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent);
   ~ItemBoxDelegate() final = default;
 
 private:

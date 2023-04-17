@@ -41,5 +41,6 @@ private:
   auto setConnections() -> void;
   auto setarDadosAvulso() -> void;
   auto setupTables() -> void;
+  auto somarSelecao() -> void;
   auto unsetConnections() -> void;
 };

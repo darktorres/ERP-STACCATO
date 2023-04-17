@@ -155,6 +155,7 @@ void InserirLancamento::setConnections() {
   connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonDuplicarLancamento_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InserirLancamento::preencher, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InserirLancamento::somarSelecao, connectionType);
 }
 
 void InserirLancamento::unsetConnections() {
@@ -164,6 +165,7 @@ void InserirLancamento::unsetConnections() {
   disconnect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonDuplicarLancamento_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonSalvar_clicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InserirLancamento::preencher);
+  disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InserirLancamento::somarSelecao);
 }
 
 void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
@@ -225,4 +227,19 @@ void InserirLancamento::preencher(const QModelIndex &index) {
   }
 
   setConnections();
+}
+
+void InserirLancamento::somarSelecao() {
+  const auto selection = ui->table->selectionModel()->selectedIndexes();
+
+  QSet<int> rows;
+
+  for (auto index : selection) { rows << index.row(); }
+
+  double soma = 0.;
+
+  for (auto row : rows) { soma += modelContaPagamento.data(row, "valor").toDouble(); }
+
+  ui->doubleSpinBoxSomaSelecao->setValue(soma);
+  ui->doubleSpinBoxSomaSelecao->setSuffix(" - " + QString::number(rows.size()) + " linha(s)");
 }

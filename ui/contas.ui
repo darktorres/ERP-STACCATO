@@ -36,6 +36,16 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxSomaProcessados">
+        <property name="prefix">
+         <string>R$ </string>
+        </property>
+        <property name="maximum">
+         <double>9999999.990000000223517</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -45,6 +55,16 @@
       <string>Eventos pendentes</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
+      <item row="1" column="0">
+       <widget class="TableView" name="tablePendentes">
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="2">
@@ -76,13 +96,22 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="TableView" name="tablePendentes">
-        <property name="mouseTracking">
+      <item row="2" column="0">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxSomaPendentes">
+        <property name="readOnly">
          <bool>true</bool>
         </property>
-        <property name="sortingEnabled">
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="showGroupSeparator" stdset="0">
          <bool>true</bool>
+        </property>
+        <property name="prefix">
+         <string>R$ </string>
+        </property>
+        <property name="maximum">
+         <double>9999999.990000000223517</double>
         </property>
        </widget>
       </item>

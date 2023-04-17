@@ -22,7 +22,40 @@
         <enum>QFrame::Box</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0" colspan="2">
+        <item row="1" column="1">
+         <widget class="QLabel" name="labelPedidosCompra_2">
+          <property name="text">
+           <string>Buscar:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="LineEdit" name="lineEditBusca">
+          <property name="placeholderText">
+           <string>Venda/Fornecedor/Produto/Cód. Com</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxSomaSelecao">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="prefix">
+           <string>Quant: </string>
+          </property>
+          <property name="maximum">
+           <double>9999999.990000000223517</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="3">
          <widget class="TableView" name="table">
           <property name="mouseTracking">
            <bool>true</bool>
@@ -31,27 +64,13 @@
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
+           <enum>QAbstractItemView::MultiSelection</enum>
           </property>
           <property name="selectionBehavior">
            <enum>QAbstractItemView::SelectRows</enum>
           </property>
           <property name="sortingEnabled">
            <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="labelPedidosCompra_2">
-          <property name="text">
-           <string>Buscar:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="LineEdit" name="lineEditBusca">
-          <property name="placeholderText">
-           <string>Venda/Fornecedor/Produto/Cód. Com</string>
           </property>
          </widget>
         </item>
@@ -154,8 +173,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>158</width>
-          <height>481</height>
+          <width>133</width>
+          <height>482</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">

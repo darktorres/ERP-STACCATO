@@ -32,6 +32,7 @@ private:
   auto preencher(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto somarSelecao() -> void;
   auto unsetConnections() -> void;
   auto verifyFields() -> void;
 };

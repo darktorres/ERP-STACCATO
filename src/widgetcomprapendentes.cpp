@@ -78,6 +78,7 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated, connectionType);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraPendentes::somarSelecao, connectionType);
 }
 
 void WidgetCompraPendentes::unsetConnections() {
@@ -107,6 +108,7 @@ void WidgetCompraPendentes::unsetConnections() {
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
+  disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraPendentes::somarSelecao);
 }
 
 void WidgetCompraPendentes::updateTables() {
@@ -393,6 +395,17 @@ void WidgetCompraPendentes::ajustarGroupBoxStatus() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetCompraPendentes::somarSelecao() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  double soma = 0.;
+
+  for (auto index : selection) { soma += modelProduto.data(index.row(), "quant").toDouble(); }
+
+  ui->doubleSpinBoxSomaSelecao->setValue(soma);
+  ui->doubleSpinBoxSomaSelecao->setSuffix(" - " + QString::number(selection.size()) + " linha(s)");
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para

@@ -49,6 +49,8 @@ void Contas::setConnections() {
   connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher, connectionType);
+  connect(ui->tablePendentes->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Contas::somarPendentes, connectionType);
+  connect(ui->tableProcessados->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Contas::somarProcessados, connectionType);
 }
 
 void Contas::unsetConnections() {
@@ -59,6 +61,8 @@ void Contas::unsetConnections() {
   disconnect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &Contas::on_pushButtonDuplicarLancamento_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
   disconnect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher);
+  disconnect(ui->tablePendentes->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Contas::somarPendentes);
+  disconnect(ui->tableProcessados->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Contas::somarProcessados);
 }
 
 void Contas::validarData(const QModelIndex &index) {
@@ -485,6 +489,32 @@ void Contas::on_checkBoxMostrarCancelados_toggled(const bool checked) {
   (checked) ? filter.replace(a, b) : filter.replace(b, a);
 
   modelPendentes.setFilter(filter);
+}
+
+void Contas::somarPendentes() {
+  const auto selection = ui->tablePendentes->selectionModel()->selectedIndexes();
+
+  QSet<int> rows;
+
+  for (auto index : selection) { rows << index.row(); }
+
+  double soma = 0.;
+
+  for (auto row : rows) { soma += modelPendentes.data(row, "valor").toDouble(); }
+
+  ui->doubleSpinBoxSomaPendentes->setValue(soma);
+  ui->doubleSpinBoxSomaPendentes->setSuffix(" - " + QString::number(rows.size()) + " linha(s)");
+}
+
+void Contas::somarProcessados() {
+  const auto selection = ui->tableProcessados->selectionModel()->selectedRows();
+
+  double soma = 0.;
+
+  for (auto index : selection) { soma += modelProcessados.data(index.row(), "valor").toDouble(); }
+
+  ui->doubleSpinBoxSomaProcessados->setValue(soma);
+  ui->doubleSpinBoxSomaProcessados->setSuffix(" - " + QString::number(selection.size()) + " linha(s)");
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

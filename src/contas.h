@@ -38,6 +38,8 @@ private:
   auto preencher(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto somarPendentes() -> void;
+  auto somarProcessados() -> void;
   auto unsetConnections() -> void;
   auto validarData(const QModelIndex &index) -> void;
   auto verifyFields() -> void;

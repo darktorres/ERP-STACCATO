@@ -140,6 +140,7 @@ void AnteciparRecebimento::setupTables() {
 
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
+  ui->table->hideColumn("idNFe");
   ui->table->hideColumn("nfe");
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("dataRealizado");

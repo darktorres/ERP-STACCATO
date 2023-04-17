@@ -6,7 +6,7 @@ class ItemBoxDelegate final : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  enum class Tipo { Loja, Conta };
+  enum class Tipo { Loja, Conta, NFe };
   Q_ENUM(Tipo)
 
   ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent);

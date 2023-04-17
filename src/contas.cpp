@@ -202,6 +202,7 @@ void Contas::setupTables() {
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
   modelPendentes.setHeaderData("idVenda", "Venda");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
+  modelPendentes.setHeaderData("idNFe", "NF-e cadastrada");
   modelPendentes.setHeaderData("nfe", "NF-e");
   modelPendentes.setHeaderData("valor", "R$");
   modelPendentes.setHeaderData("tipo", "Tipo");
@@ -236,11 +237,12 @@ void Contas::setupTables() {
   if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
   if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
 
+  ui->tablePendentes->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
   ui->tablePendentes->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
 
-  ui->tablePendentes->setPersistentColumns({"status"});
+  ui->tablePendentes->setPersistentColumns({"status", "idNFe"});
 
   if (tipo == Tipo::Receber) {
     ui->tablePendentes->hideColumn("representacao");
@@ -252,7 +254,6 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) {
     ui->tablePendentes->hideColumn("idCompra");
     ui->tablePendentes->hideColumn("idCnab");
-    ui->tablePendentes->hideColumn("idNFe");
   }
 
   ui->tablePendentes->hideColumn("idPagamento");
@@ -269,6 +270,7 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
   modelProcessados.setHeaderData("idVenda", "Venda");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
+  modelProcessados.setHeaderData("idNFe", "NF-e cadastrada");
   modelProcessados.setHeaderData("nfe", "NF-e");
   modelProcessados.setHeaderData("valor", "R$");
   modelProcessados.setHeaderData("tipo", "Tipo");
@@ -290,10 +292,13 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setModel(&modelProcessados);
 
+  ui->tableProcessados->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, true, this));
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
+
+  ui->tableProcessados->setPersistentColumns({"idNFe"});
 
   if (tipo == Tipo::Receber) {
     ui->tableProcessados->hideColumn("representacao");
@@ -305,7 +310,6 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) {
     ui->tableProcessados->hideColumn("idCompra");
     ui->tableProcessados->hideColumn("idCnab");
-    ui->tableProcessados->hideColumn("idNFe");
   }
 
   ui->tableProcessados->hideColumn("idPagamento");

@@ -10,12 +10,12 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
   Q_UNUSED(option)
   Q_UNUSED(index)
 
-  if (readOnly) { return nullptr; }
-
   auto *editor = new ItemBox(parent);
+  editor->setReadOnlyItemBox(readOnly);
 
   if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); }
   if (tipo == Tipo::Conta) { editor->setSearchDialog(SearchDialog::conta(parent)); }
+  if (tipo == Tipo::NFe) { editor->setSearchDialog(SearchDialog::nfe(parent)); }
 
   connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitEditor);
 

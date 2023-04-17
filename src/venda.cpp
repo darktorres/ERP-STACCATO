@@ -1625,7 +1625,7 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   const auto index2 = modelTree.proxyModel->mapToSource(index);
   const auto row = modelTree.mappedRow(index2);
 
-  if (User::isVendedorOrEspecial()) { return qApp->abrirNFe(modelItem2.data(row, "idNFeSaida")); }
+  if (User::isVendedorOrEspecial() or User::isGerente()) { return qApp->abrirNFe(modelItem2.data(row, "idNFeSaida")); }
 
   if (User::isAdmin() or User::isAdministrativo()) {
     const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();

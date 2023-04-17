@@ -336,8 +336,11 @@ void Contas::on_pushButtonSalvar_clicked() {
   verifyFields();
 
   for (int row = 0; row < modelPendentes.rowCount(); ++row) {
+    QString contraParte = modelPendentes.data(row, "contraParte").toString();
+    modelPendentes.setData(row, "contraParte", contraParte.remove("\r").remove("\n").trimmed());
+
     QString observacao = modelPendentes.data(row, "observacao").toString();
-    modelPendentes.setData(row, "observacao", observacao.trimmed());
+    modelPendentes.setData(row, "observacao", observacao.remove("\r").remove("\n").trimmed());
   }
 
   qApp->startTransaction("Contas::on_pushButtonSalvar_clicked");

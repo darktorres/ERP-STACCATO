@@ -102,7 +102,10 @@ void CadastroFornecedor::novoEndereco() {
 void CadastroFornecedor::verifyFields() {
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) { verifyRequiredField(*line); }
+  for (const auto &line : children) {
+    line->setText(line->text().remove("\r").remove("\n").trimmed());
+    verifyRequiredField(*line);
+  }
 
   validaCNPJ(ui->lineEditCNPJ->text());
 }
@@ -473,6 +476,10 @@ void CadastroFornecedor::on_tabWidget_currentChanged(const int index) {
 }
 
 void CadastroFornecedor::verificaEndereco() {
+  const auto children = ui->groupBoxEndereco->findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
+
+  for (const auto &line : children) { line->setText(line->text().remove("\r").remove("\n").trimmed()); }
+
   if (not ui->lineEditCEP->isValid()) { throw RuntimeError("CEP inválido!", this); }
 
   if (ui->lineEditNumero->text().isEmpty()) { throw RuntimeError(R"(Número vazio! Se necessário coloque "S/N"!)", this); }

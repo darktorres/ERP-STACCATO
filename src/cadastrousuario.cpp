@@ -100,7 +100,10 @@ void CadastroUsuario::verifyFields() {
 
   const auto children = findChildren<QLineEdit *>(QRegularExpression("lineEdit"));
 
-  for (const auto &line : children) { verifyRequiredField(*line); }
+  for (const auto &line : children) {
+    line->setText(line->text().remove("\r").remove("\n").trimmed());
+    verifyRequiredField(*line);
+  }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
 

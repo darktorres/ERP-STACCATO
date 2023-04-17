@@ -114,7 +114,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->setItemDelegateForColumn("codComercial", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("lote", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("bloco", new EditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
+  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->tableEstoque->setItemDelegateForColumn("un", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("descricao", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));

@@ -647,7 +647,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   // ----------------------------------------------------------------
 
   SqlQuery query;
-  query.prepare("SELECT status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.prepare("SELECT idNFe, status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
   if (not query.exec()) { throw RuntimeException("Erro verificando se NF-e já cadastrada: " + query.lastError().text()); }
@@ -669,8 +669,8 @@ bool ImportarXML::verificaExiste(const XML &xml) {
     }
 
     // nota já autorizada ou recém atualizada para autorizada
-    ui->itemBoxNFe->setText(xml.chaveAcesso);
-    on_itemBoxNFe_textChanged(xml.chaveAcesso);
+    ui->itemBoxNFe->setId(query.value("idNFe"));
+    on_itemBoxNFe_textChanged(ui->itemBoxNFe->text());
 
     return true;
   }

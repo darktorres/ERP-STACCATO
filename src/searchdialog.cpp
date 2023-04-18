@@ -106,20 +106,36 @@ void SearchDialog::on_lineEditBusca_textChanged() {
   // ----------------------------------------
 
   // TODO: MySQL Full-Text doesn't support prefix, use Sphinx/Manticore instead
+  QString searchFilter;
 
-  QStringList filtroLike;
+  if (model.tableName().startsWith("view_nfe")) {
+    QStringList filtro1;
+    QStringList filtro2;
 
-  for (int i = 0; i < fullTextIndexes.size(); ++i) {
-    QStringList parteFiltro;
+    for (int i = 0; i < fullTextIndexes.size(); ++i) {
+      filtro1 << fullTextIndexes.at(i).index;
 
-    if (lineEdits.at(i)->text().isEmpty()) { continue; }
+      if (lineEdits.at(i)->text().isEmpty()) { continue; }
 
-    parteFiltro << fullTextIndexes.at(i).index + " LIKE '%" + qApp->sanitizeSQL(lineEdits.at(i)->text()) + "%'";
+      filtro2 << "+" + qApp->sanitizeSQL(lineEdits.at(i)->text()) + "*";
+    }
 
-    filtroLike << ("(" + parteFiltro.join(" AND ") + ")");
+    searchFilter = "MATCH(" + filtro1.join(", ") + ") AGAINST('" + filtro2.join(" ") + "' IN BOOLEAN MODE) ORDER BY numeroNFe";
+  } else {
+    QStringList filtroLike;
+
+    for (int i = 0; i < fullTextIndexes.size(); ++i) {
+      if (lineEdits.at(i)->text().isEmpty()) { continue; }
+
+      QStringList parteFiltro;
+
+      parteFiltro << fullTextIndexes.at(i).index + " LIKE '%" + qApp->sanitizeSQL(lineEdits.at(i)->text()) + "%'";
+
+      filtroLike << ("(" + parteFiltro.join(" AND ") + ")");
+    }
+
+    searchFilter = filtroLike.join(" AND ").prepend("(").append(")");
   }
-
-  QString searchFilter = filtroLike.join(" AND ").prepend("(").append(")");
 
   // ----------------------------------------
 
@@ -135,7 +151,7 @@ void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelect
 void SearchDialog::on_table_selectionChanged() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (model.tableName() == "view_nfe_inutilizada" and not selection.isEmpty()) {
+  if (model.tableName().startsWith("view_nfe") and not selection.isEmpty()) {
     XML *xml = new XML(model.data(selection.first().row(), "xml").toString(), XML::Tipo::Entrada, this);
     ui->treeView->setModel(&xml->model);
     ui->treeView->expandAll();
@@ -291,10 +307,34 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(false, parent));
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
-  sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "lastDistribuicao",
-                       "ultimoNSU", "maximoNSU", "porcentagemFrete", "valorMinimoFrete", "precoCombustivel", "capacidadeCaminhaoGrande", "custoMotoristaCaminhaoGrande",
-                       "custoAjudantesCaminhaoGrande", "eixosCaminhaoGrande", "consumoCaminhaoGrande", "capacidadeCaminhaoPequeno", "custoMotoristaCaminhaoPequeno", "custoAjudantesCaminhaoPequeno",
-                       "eixosCaminhaoPequeno", "consumoCaminhaoPequeno", "tetoProfissionalRT", "apiQualp", "cabecalhosQualp", "cidadesSemQualp"});
+  sdLoja->hideColumns({"idLoja",
+                       "codUF",
+                       "desativado",
+                       "certificadoSerie",
+                       "certificadoSenha",
+                       "porcentagemPIS",
+                       "porcentagemCOFINS",
+                       "custoTransporteTon",
+                       "lastDistribuicao",
+                       "ultimoNSU",
+                       "maximoNSU",
+                       "porcentagemFrete",
+                       "valorMinimoFrete",
+                       "precoCombustivel",
+                       "capacidadeCaminhaoGrande",
+                       "custoMotoristaCaminhaoGrande",
+                       "custoAjudantesCaminhaoGrande",
+                       "eixosCaminhaoGrande",
+                       "consumoCaminhaoGrande",
+                       "capacidadeCaminhaoPequeno",
+                       "custoMotoristaCaminhaoPequeno",
+                       "custoAjudantesCaminhaoPequeno",
+                       "eixosCaminhaoPequeno",
+                       "consumoCaminhaoPequeno",
+                       "tetoProfissionalRT",
+                       "apiQualp",
+                       "cabecalhosQualp",
+                       "cidadesSemQualp"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -308,10 +348,10 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   return sdLoja;
 }
 
-SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NF-e"}, {"xml", "Conteúdo NF-e"}, {"chaveAcesso", "Chave Acesso"}};
+SearchDialog *SearchDialog::nfe(const bool todasNFes, QWidget *parent) {
+  const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NF-e"}};
 
-  auto *sdNFe = new SearchDialog("Buscar NF-e", "view_nfe_inutilizada", "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
+  auto *sdNFe = new SearchDialog("Buscar NF-e", todasNFes ? "view_nfe_todas" : "view_nfe_inutilizada", "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
 
   sdNFe->ui->table->setAutoResize(false);
 
@@ -467,7 +507,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   auto *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, fullTextIndex, filtro + filtroLoja + filtroAdmin, "nome", false, parent);
 
-  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco", "senhaUsoUnico", "valorMinimoFrete", "desativado"});
+  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "password", "telefone", "especialidade", "regime", "banco", "agencia", "cc", "poupanca", "nomeBanco", "cpfBanco", "cnpjBanco",
+                           "senhaUsoUnico", "valorMinimoFrete", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");

@@ -15,7 +15,7 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
   if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); }
   if (tipo == Tipo::Conta) { editor->setSearchDialog(SearchDialog::conta(parent)); }
-  if (tipo == Tipo::NFe) { editor->setSearchDialog(SearchDialog::nfe(parent)); }
+  if (tipo == Tipo::NFe) { editor->setSearchDialog(SearchDialog::nfe(true, parent)); }
 
   connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitEditor);
 

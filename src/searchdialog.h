@@ -26,7 +26,7 @@ public:
   static auto enderecoCliente(QWidget *parent) -> SearchDialog *;
   static auto fornecedor(QWidget *parent) -> SearchDialog *;
   static auto loja(QWidget *parent) -> SearchDialog *;
-  static auto nfe(QWidget *parent) -> SearchDialog *;
+  static auto nfe(const bool todasNFes, QWidget *parent) -> SearchDialog *;
   static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) -> SearchDialog *;
   static auto profissional(const bool mostrarNaoHa, QWidget *parent) -> SearchDialog *;
   static auto transportadora(QWidget *parent) -> SearchDialog *;

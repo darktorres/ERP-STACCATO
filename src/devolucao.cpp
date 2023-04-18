@@ -617,6 +617,8 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { throw RuntimeError("Não selecionou quantidade!", this); }
 
+  if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Não preencheu observação!", this); }
+
   // -------------------------------------------------------------------------
 
   const int novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
@@ -692,6 +694,7 @@ void Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
   modelDevolvidos1.setData(newRow, "idRelacionado", modelProdutos2.data(currentRow, "idVendaProdutoFK"));
   modelDevolvidos1.setData(newRow, "status", "PENDENTE DEV.");
   modelDevolvidos1.setData(newRow, "statusOriginal", modelProdutos2.data(currentRow, "status"));
+  modelDevolvidos1.setData(newRow, "obs", ui->lineEditObservacao->text());
   modelDevolvidos1.setData(newRow, "prcUnitario", prcUnitario);
   modelDevolvidos1.setData(newRow, "descUnitario", prcUnitario);
   modelDevolvidos1.setData(newRow, "caixas", caixas);
@@ -930,6 +933,7 @@ void Devolucao::alterarLinhaOriginal(const int currentRow) {
   modelProdutos2.setData(currentRow, "total", totalRestante);
   modelProdutos2.setData(currentRow, "statusOriginal", modelProdutos2.data(currentRow, "status"));
   modelProdutos2.setData(currentRow, "status", "DEVOLVIDO");
+  modelProdutos2.setData(currentRow, "obs", ui->lineEditObservacao->text());
 }
 
 // TODO: 0. lidar com os casos em que o produto estava agendado e é feita a devolucao, alterando os consumos

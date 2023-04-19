@@ -105,7 +105,7 @@
      <item>
       <widget class="QPushButton" name="pushButtonAgendarColeta">
        <property name="text">
-        <string>Agendar coleta</string>
+        <string>Marcar recebido</string>
        </property>
       </widget>
      </item>
@@ -125,7 +125,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Montar carga</string>
+        <string>Montar veículo coleta</string>
        </property>
       </widget>
      </item>

@@ -55,7 +55,7 @@ void WidgetFinanceiroCompra::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetFinanceiroCompra::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
+  const QString filtroBusca = text.isEmpty() ? "" : "(OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%')";
 
   model.setFilter(filtroBusca);
 }

@@ -543,6 +543,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
     if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/REPO. ENTREGA!"); }
 
     if (status != "ESTOQUE") { semEstoque = true; }
+
+    if (qFuzzyIsNull(modelProdutos.data(row, "quant").toDouble())) { throw RuntimeError("Produto com quantidade zero!", this); }
   }
 
   // -------------------------------------------------------------------------

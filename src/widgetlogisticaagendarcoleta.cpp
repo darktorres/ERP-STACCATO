@@ -6,6 +6,8 @@
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "inputdialogconfirmacao.h"
+#include "sql.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -206,7 +208,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 
   qApp->startTransaction("WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga");
 
-  processRows(list, ui->dateTimeEdit->date(), true);
+  processRows(list, ui->dateTimeEdit->date());
 
   qApp->endTransaction();
 
@@ -220,28 +222,115 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
+  // NOTE: quando não é montado carga as linhas selecionadas pulam a etapa de recebimento e vão direto para estoque
   const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarColeta, this);
-  // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
+  QStringList ids;
+  QStringList idVendas;
 
-  if (input.exec() != InputDialog::Accepted) { return; }
+  for (const auto &index : selection) {
+    ids << modelEstoque.data(index.row(), "idEstoque").toString();
+    idVendas << modelEstoque.data(index.row(), "idVenda").toString();
+  }
+
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
+  inputDlg.setFilterRecebe(ids);
+
+  if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
   qApp->startTransaction("WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta");
 
-  processRows(selection, input.getNextDate());
+  processRows(selection, inputDlg.getDate(), inputDlg.getRecebeu());
+
+  Sql::updateVendaStatus(idVendas);
 
   qApp->endTransaction();
 
   ui->tableEstoque->clearSelection();
 
   updateTables();
-  qApp->enqueueInformation("Agendado com sucesso!", this);
+  qApp->enqueueInformation("Confirmado recebimento!", this);
 }
 
-void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga) {
+void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) {
+  SqlQuery queryEstoque;
+  queryEstoque.prepare("UPDATE estoque SET status = 'ESTOQUE', idBloco = :idBloco, recebidoPor = :recebidoPor WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
+
+  SqlQuery queryConsumo;
+  queryConsumo.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', idBloco = :idBloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
+
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM COLETA' AND "
+                      "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
+
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM COLETA' AND "
+                     "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+
+  SqlQuery queryGare;
+  queryGare.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
+                    "idEstoque = :idEstoque)");
+
+  SqlQuery queryNFe;
+  queryNFe.prepare("UPDATE nfe SET confirmar = TRUE WHERE idNFe = :idNFe AND nsu IS NOT NULL AND statusDistribuicao = 'CIÊNCIA'");
+
+  SqlQuery queryBloco;
+
+  if (not queryBloco.exec("SELECT idBloco FROM galpao WHERE label = 'ENTRADA'")) { throw RuntimeException("Erro buscando id do bloco de entrada: " + queryBloco.lastError().text()); }
+
+  if (not queryBloco.first()) { throw RuntimeException("Bloco de entrada não encontrado!"); }
+
+  const int idBloco = queryBloco.value("idBloco").toInt();
+
+  for (const auto &index : list) {
+    const bool isCD = (modelEstoque.data(index.row(), "local").toString() == "CD");
+
+    queryEstoque.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
+    queryEstoque.bindValue(":recebidoPor", recebidoPor);
+    queryEstoque.bindValue(":idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+
+    if (not queryEstoque.exec()) { throw RuntimeException("Erro atualizando status do estoque: " + queryEstoque.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryConsumo.bindValue(":idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+    queryConsumo.bindValue(":idBloco", (isCD) ? idBloco : QVariant());
+
+    if (not queryConsumo.exec()) { throw RuntimeException("Erro atualizando status da venda: " + queryConsumo.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryCompra.bindValue(":dataRealReceb", dataReceb);
+    queryCompra.bindValue(":idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+    queryCompra.bindValue(":codComercial", modelEstoque.data(index.row(), "codComercial"));
+
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryVenda.bindValue(":dataRealReceb", dataReceb);
+    queryVenda.bindValue(":idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando produtos venda: " + queryVenda.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryGare.bindValue(":dataRealReceb", qApp->ajustarDiaUtil(dataReceb.addDays(1)));
+    queryGare.bindValue(":idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+
+    if (not queryGare.exec()) { throw RuntimeException("Erro atualizando pagamento gare: " + queryGare.lastError().text()); }
+
+    //-----------------------------------------------------------------
+
+    queryNFe.bindValue(":idNFe", modelEstoque.data(index.row(), "idNFe"));
+
+    if (not queryNFe.exec()) { throw RuntimeException("Erro marcando NF-e para confirmar: " + queryNFe.lastError().text()); }
+  }
+}
+
+void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate dataPrevColeta) {
   SqlQuery queryTemp;
   queryTemp.prepare("SELECT codComercial FROM estoque WHERE idEstoque = :idEstoque");
 
@@ -256,33 +345,28 @@ void WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
   for (const auto &index : list) {
     int idEstoque;
 
-    if (montarCarga) {
-      SqlQuery query;
-      if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto")) { throw RuntimeException("Erro buscando próximo idEvento: " + query.lastError().text()); }
+    SqlQuery query;
+    if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto")) { throw RuntimeException("Erro buscando próximo idEvento: " + query.lastError().text()); }
 
-      if (not query.first()) { throw RuntimeException("Erro buscando próximo idEvento!"); }
+    if (not query.first()) { throw RuntimeException("Erro buscando próximo idEvento!"); }
 
-      const int idEvento = query.value(0).toInt();
+    const int idEvento = query.value(0).toInt();
 
-      //-------------------------------------------------
+    //-------------------------------------------------
 
-      modelTranspAtual.setData(index.row(), "data", dataPrevColeta);
-      modelTranspAtual.setData(index.row(), "idEvento", idEvento);
+    modelTranspAtual.setData(index.row(), "data", dataPrevColeta);
+    modelTranspAtual.setData(index.row(), "idEvento", idEvento);
 
-      //-------------------------------------------------
+    //-------------------------------------------------
 
-      idEstoque = modelTranspAtual.data(index.row(), "idEstoque").toInt();
+    idEstoque = modelTranspAtual.data(index.row(), "idEstoque").toInt();
 
-      queryTemp.bindValue(":idEstoque", idEstoque);
+    queryTemp.bindValue(":idEstoque", idEstoque);
 
-      if (not queryTemp.exec()) { throw RuntimeException("Erro buscando codComercial do estoque: " + queryTemp.lastError().text()); }
+    if (not queryTemp.exec()) { throw RuntimeException("Erro buscando codComercial do estoque: " + queryTemp.lastError().text()); }
 
-      if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: '" + QString::number(idEstoque) + "'"); }
-      // TODO: codComercial é selecionado mas não é usado, essa query é apenas para verificar se existe codComercial?
-
-    } else {
-      idEstoque = modelEstoque.data(index.row(), "idEstoque").toInt();
-    }
+    if (not queryTemp.first()) { throw RuntimeException("Dados não encontrados para estoque de id: '" + QString::number(idEstoque) + "'"); }
+    // TODO: codComercial é selecionado mas não é usado, essa query é apenas para verificar se existe codComercial?
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);

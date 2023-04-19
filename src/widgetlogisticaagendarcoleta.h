@@ -44,7 +44,8 @@ private:
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_tableEstoque_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableForn_selectionChanged() -> void;
-  auto processRows(const QModelIndexList &list, const QDate dataPrevColeta, const bool montarCarga = false) -> void;
+  auto processRows(const QModelIndexList &list, const QDate dataPrevColeta) -> void;
+  auto processRows(const QModelIndexList &list, const QDate dataReceb, const QString &recebidoPor) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

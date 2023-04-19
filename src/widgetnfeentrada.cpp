@@ -148,7 +148,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  const QString filtroBusca = "Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'";
+  const QString filtroBusca = "(Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%')";
   if (not text.isEmpty()) { filtros << filtroBusca; }
 
   //------------------------------------- filtro data

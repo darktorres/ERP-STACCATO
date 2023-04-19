@@ -203,7 +203,7 @@ void WidgetCompraHistorico::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetCompraHistorico::montaFiltro() {
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = text.isEmpty() ? "0" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
+  const QString filtroBusca = text.isEmpty() ? "0" : "(OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%')";
 
   modelCompras.setFilter(filtroBusca);
 }

@@ -1982,7 +1982,7 @@ void CadastrarNFe::preencherImpostos() {
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       for (int col = 0; col < modelProduto.columnCount(); ++col) {
         if (modelProduto.data(row, col).isNull()) {
-          modelProduto.setData(row, col, 0); // limpar campos dos imposto
+          modelProduto.setData(row, col, 0.0); // limpar campos dos imposto
         }
       }
 

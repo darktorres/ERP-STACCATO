@@ -185,11 +185,11 @@ void Contas::preencher(const QModelIndex &index) {
         modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"));
       }
 
-      if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
-        if (index.data().toString() == "PENDENTE") { return; }
+      //      if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
+      //        if (index.data().toString() == "PENDENTE") { return; }
 
-        if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
-      }
+      //        if (modelPendentes.data(row, "status").toString() == "PENDENTE") { modelPendentes.setData(row, "status", "CONFERIDO"); }
+      //      }
     }();
   } catch (std::exception &) {
     setConnections();

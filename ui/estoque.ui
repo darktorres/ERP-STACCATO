@@ -179,6 +179,13 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButtonAjustarQuant">
+       <property name="text">
+        <string>Ajustar quant.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

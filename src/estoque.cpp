@@ -24,7 +24,10 @@ Estoque::Estoque(const QVariant &idEstoque_, QWidget *parent) : QDialog(parent),
 
   limitarAlturaTabela();
 
-  if (not User::isAdministrativo()) { ui->pushButtonExibirNfe->hide(); }
+  if (not User::isAdministrativo()) {
+    ui->pushButtonExibirNfe->hide();
+    ui->pushButtonAjustarQuant->hide();
+  }
 
   if (idEstoque.isEmpty()) { throw RuntimeException("Estoque não encontrado!", this); }
 
@@ -36,6 +39,7 @@ Estoque::~Estoque() { delete ui; }
 void Estoque::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->pushButtonAjustarQuant, &QPushButton::clicked, this, &Estoque::on_pushButtonAjustarQuant_clicked, connectionType);
   connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked, connectionType);
   connect(ui->tableConsumo, &TableView::doubleClicked, this, &Estoque::on_tableConsumo_doubleClicked, connectionType);
 }
@@ -405,6 +409,43 @@ void Estoque::on_tableConsumo_doubleClicked(const QModelIndex &index) {
   const QString header = modelConsumo.headerData(index.column(), Qt::Horizontal).toString();
 
   if (header == "Venda") { return qApp->abrirVenda(modelConsumo.data(index.row(), "Venda")); }
+}
+
+void Estoque::on_pushButtonAjustarQuant_clicked() {
+  // criar linha de consumo 'ajuste'
+  // TODO: salvar foto dos produtos quebrados
+  // TODO: se a quantidade quebrada for maior que o estoque loja, pedir para o usuario escolher qual consumo remover e fazer um followup no pedido dizendo que o consumo
+  // foi removido devido a quebra
+
+  const double quantCx = modelEstoque.data(0, "quantCaixa").toDouble();
+
+  bool ok = false;
+  const double ajuste = QInputDialog::getDouble(this, "Ajuste quant.", "Ajustar quantidade: ", 0, ui->doubleSpinBoxQuantRestante->value() * -1, INT_MAX, 4, &ok);
+
+  if (not ok or qFuzzyIsNull(ajuste)) { return; }
+
+  QString observacao = QInputDialog::getText(this, "Observação", "Digite a observação: ", QLineEdit::Normal, QString(), &ok);
+
+  if (not ok) { return; }
+
+  if (observacao.isEmpty()) { throw RuntimeError("É necessário preencher a observação!", this); }
+
+  observacao.prepend("Ajuste feito por " + User::usuario + ". Obs: ");
+
+  SqlQuery queryConsumo;
+
+  QString quant = QString::number(ajuste);
+  QString caixas = QString::number(ajuste / quantCx);
+
+  if (not queryConsumo.exec("INSERT INTO estoque_has_consumo (idEstoque, status, descricao, quant, caixas) VALUES (" + idEstoque + ", 'AJUSTE', '" + observacao.toUpper() + "', " + quant + ", " +
+                            caixas + ")")) {
+    throw RuntimeException("Erro criando consumo de ajuste: " + queryConsumo.lastError().text());
+  }
+
+  setupTables();
+  preencherRestante();
+
+  qApp->enqueueInformation("Ajuste feito com sucesso!");
 }
 
 // TODO: 1colocar o botao de desvincular consumo nesta tela

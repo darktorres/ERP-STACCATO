@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
+#include "financeiroproxymodel.h"
 #include "followup.h"
 #include "importarxml.h"
 #include "inputdialog.h"
@@ -46,8 +47,12 @@ void WidgetCompraFaturar::setupTables() {
   modelFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
   modelFaturamento.setHeaderData("vendedor", "Vendedor");
   modelFaturamento.setHeaderData("idVenda", "Venda");
+  modelFaturamento.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelFaturamento.setHeaderData("novoPrazoEntrega", "Novo Prazo");
   modelFaturamento.setHeaderData("dataFollowup", "Data Followup");
   modelFaturamento.setHeaderData("observacao", "Observação");
+
+  modelFaturamento.proxyModel = new FinanceiroProxyModel(&modelFaturamento, this);
 
   ui->table->setModel(&modelFaturamento);
 

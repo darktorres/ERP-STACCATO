@@ -4,7 +4,6 @@
 #include "application.h"
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
-#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>

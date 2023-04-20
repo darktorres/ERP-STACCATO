@@ -1,7 +1,6 @@
 #include "widgetestoqueproduto.h"
 #include "ui_widgetestoqueproduto.h"
 
-#include "application.h"
 #include "produtoproxymodel.h"
 
 #include <QDebug>

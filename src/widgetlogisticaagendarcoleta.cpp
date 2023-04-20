@@ -5,7 +5,6 @@
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
-#include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
 #include "sqlquery.h"

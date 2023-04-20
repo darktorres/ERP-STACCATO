@@ -1,10 +1,10 @@
 #include "widgetrh.h"
 #include "ui_widgetrh.h"
 
-#include "application.h"
-#include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
-#include "sqlquery.h"
+//#include "application.h"
+//#include "porcentagemdelegate.h"
+//#include "reaisdelegate.h"
+//#include "sqlquery.h"
 
 #include <QMessageBox>
 #include <QSqlError>

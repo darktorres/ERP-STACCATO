@@ -1,11 +1,11 @@
 #include "application.h"
 
+#include "QSimpleUpdater.h"
 #include "acbrlib.h"
 #include "estoque.h"
 #include "file.h"
 #include "inputdialogfinanceiro.h"
 #include "log.h"
-#include "qsimpleupdater.h"
 #include "user.h"
 #include "venda.h"
 

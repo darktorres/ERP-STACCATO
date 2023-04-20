@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "QSimpleUpdater.h"
 #include "application.h"
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
@@ -18,7 +19,6 @@
 #include "importatabelaibpt.h"
 #include "orcamento.h"
 #include "precoestoque.h"
-#include "qsimpleupdater.h"
 #include "user.h"
 #include "userconfig.h"
 

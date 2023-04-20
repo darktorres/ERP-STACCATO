@@ -89,8 +89,8 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
   // TODO: move query to Sql class
   modelEstoque.setQuery(
       "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, e.restante / p.quantCaixa AS `Caixas`, `e`.`lote` AS `lote`, "
-      "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` WHERE e.status NOT IN "
-      "('CANCELADO' , 'IGNORAR') AND p.fornecedor = '" +
+      "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, e.valorUnid AS custo FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` "
+      "WHERE e.status NOT IN ('CANCELADO' , 'IGNORAR') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
   modelEstoque.select();
@@ -104,9 +104,11 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("bloco", "Bloco");
+  modelEstoque.setHeaderData("custo", "Custo");
 
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(3, this));
+  ui->tableEstoque->setItemDelegateForColumn("custo", new ReaisDelegate(this));
 
   //-----------------------------------------------
 
@@ -170,6 +172,7 @@ void ProdutosPendentes::setupTables() {
   modelCompra.setHeaderData("quant", "Quant.");
   modelCompra.setHeaderData("un", "Un.");
   modelCompra.setHeaderData("caixas", "Caixas");
+  modelCompra.setHeaderData("prcUnitario", "Custo");
   modelCompra.setHeaderData("dataPrevCompra", "Prev. Compra");
   modelCompra.setHeaderData("dataRealCompra", "Data Compra");
   modelCompra.setHeaderData("dataPrevConf", "Prev. Confirm.");
@@ -177,6 +180,8 @@ void ProdutosPendentes::setupTables() {
   modelCompra.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->tableCompra->setModel(&modelCompra);
+
+  ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
 
   ui->tableCompra->hideColumn("idPedido2");
   ui->tableCompra->hideColumn("idPedidoFK");
@@ -197,7 +202,6 @@ void ProdutosPendentes::setupTables() {
   ui->tableCompra->hideColumn("codComercial");
   ui->tableCompra->hideColumn("quantUpd");
   ui->tableCompra->hideColumn("un2");
-  ui->tableCompra->hideColumn("prcUnitario");
   ui->tableCompra->hideColumn("preco");
   ui->tableCompra->hideColumn("kgcx");
   ui->tableCompra->hideColumn("formComercial");

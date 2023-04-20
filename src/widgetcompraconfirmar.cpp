@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
+#include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
@@ -36,7 +37,11 @@ void WidgetCompraConfirmar::setupTables() {
 
   modelCompras.setFilter("");
 
+  modelCompras.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelCompras.setHeaderData("novoPrazoEntrega", "Novo Prazo");
   modelCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
+
+  modelCompras.proxyModel = new FinanceiroProxyModel(&modelCompras, this);
 
   ui->table->setModel(&modelCompras);
 

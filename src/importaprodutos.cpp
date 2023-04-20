@@ -511,7 +511,15 @@ void ImportaProdutos::atualizaPrecoEstoque() {
                      "SET p2.precoVenda = p1.precoVenda "
                      "WHERE p1.idFornecedor = p2.idFornecedor AND p1.codComercial = p2.codComercial AND p1.idProduto <> p2.idProduto "
                      "AND p1.descontinuado = FALSE AND p1.estoque = FALSE AND p1.promocao = FALSE "
-                     "AND p2.estoque = TRUE")) {
+                     "AND p2.estoque = TRUE AND p2.promocao = FALSE")) {
+    throw RuntimeException("Erro atualizando preço dos estoques: " + query.lastError().text());
+  }
+
+  if (not query.exec("UPDATE produto p1, produto p2 "
+                     "SET p2.oldPrecoVenda = p1.precoVenda "
+                     "WHERE p1.idFornecedor = p2.idFornecedor AND p1.codComercial = p2.codComercial AND p1.idProduto <> p2.idProduto "
+                     "AND p1.descontinuado = FALSE AND p1.estoque = FALSE AND p1.promocao = FALSE "
+                     "AND p2.estoque = TRUE AND p2.promocao = 2")) {
     throw RuntimeException("Erro atualizando preço dos estoques: " + query.lastError().text());
   }
 }

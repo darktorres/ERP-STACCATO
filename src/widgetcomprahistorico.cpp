@@ -5,7 +5,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "followup.h"
-#include "inputdialogfinanceiro.h"
 #include "noeditdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"

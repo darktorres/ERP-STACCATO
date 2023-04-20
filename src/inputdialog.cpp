@@ -2,8 +2,6 @@
 #include "ui_inputdialog.h"
 
 #include "application.h"
-#include "doubledelegate.h"
-#include "user.h"
 
 #include <QDebug>
 #include <QSqlError>

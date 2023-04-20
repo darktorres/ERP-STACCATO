@@ -1,6 +1,5 @@
 #include "produtoproxymodel.h"
 
-#include "application.h"
 #include "user.h"
 
 #include <QDebug>

@@ -1,7 +1,5 @@
 #include "palletitem.h"
 
-#include "application.h"
-
 #include <QDebug>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsScene>

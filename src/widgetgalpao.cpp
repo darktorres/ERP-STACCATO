@@ -5,7 +5,6 @@
 #include "lrreportengine.h"
 #endif
 
-#include "acbrlib.h"
 #include "application.h"
 #include "file.h"
 #include "followup.h"
@@ -13,7 +12,6 @@
 #include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
-#include "venda.h"
 
 #include <QDebug>
 #include <QDesktopServices>

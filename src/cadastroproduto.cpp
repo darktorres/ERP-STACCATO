@@ -2,7 +2,6 @@
 #include "ui_cadastroproduto.h"
 
 #include "application.h"
-#include "cadastrofornecedor.h"
 #include "user.h"
 
 #include <QDebug>

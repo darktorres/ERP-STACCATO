@@ -274,9 +274,7 @@ std::tuple<QDate, QDate> WidgetCompraGerar::getDates(const QModelIndexList &list
 int WidgetCompraGerar::getOrdemCompra() {
   SqlQuery queryOC;
 
-  if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto")) {
-    throw RuntimeException("Erro buscando próxima O.C.: " + queryOC.lastError().text());
-  }
+  if (not queryOC.exec("SELECT ordemCompra_pf + 1 AS ordemCompra FROM maxId WHERE id = 1")) { throw RuntimeException("Erro buscando próxima O.C.: " + queryOC.lastError().text()); }
 
   if (not queryOC.first()) { throw RuntimeException("Erro buscando próxima O.C.!"); }
 
@@ -312,6 +310,12 @@ int WidgetCompraGerar::getOrdemCompra() {
       if (not ok2) { throw std::exception(); }
     }
   }
+
+  SqlQuery query3;
+  query3.prepare("UPDATE maxId SET ordemCompra_pf = :oc WHERE id = 1");
+  query3.bindValue(":oc", oc);
+
+  if (not query3.exec()) { throw RuntimeException("Erro cadastrando O.C.!"); }
 
   return oc;
 }

@@ -1337,7 +1337,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
         if (queryEquivalente.first()) {
           modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"));
         } else {
-          produtos << QString::number(row + 1) + " - " + modelItem.data(row, "produto").toString();
+          produtos << "Linha " + QString::number(row + 1) + " - " + modelItem.data(row, "produto").toString() + " - Cód. " + modelItem.data(row, "codComercial").toString();
           skipRows << row;
         }
       }
@@ -1350,14 +1350,14 @@ void Orcamento::on_pushButtonReplicar_clicked() {
       if (not queryEstoque.exec()) { throw RuntimeException("Erro verificando estoque: " + queryEstoque.lastError().text()); }
 
       if (not queryEstoque.first()) {
-        estoques << modelItem.data(row, "produto").toString();
+        estoques << "Linha " + QString::number(row + 1) + " - " + modelItem.data(row, "produto").toString() + " - Cód. " + modelItem.data(row, "codComercial").toString();
         skipRows << row;
       }
     }
   }
 
   if (not produtos.isEmpty()) {
-    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n    -" + produtos.join("\n    -"), QMessageBox::Yes | QMessageBox::No,
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n    " + produtos.join("\n    "), QMessageBox::Yes | QMessageBox::No,
                        this);
     msgBox.button(QMessageBox::Yes)->setText("Continuar");
     msgBox.button(QMessageBox::No)->setText("Voltar");
@@ -1367,7 +1367,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 
   if (not estoques.isEmpty()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!",
-                       "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada e serão removidos da réplica:\n    -" + estoques.join("\n    -"),
+                       "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada e serão removidos da réplica:\n    " + estoques.join("\n    "),
                        QMessageBox::Yes | QMessageBox::No, this);
     msgBox.button(QMessageBox::Yes)->setText("Continuar");
     msgBox.button(QMessageBox::No)->setText("Voltar");

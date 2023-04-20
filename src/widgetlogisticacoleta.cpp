@@ -62,6 +62,7 @@ void WidgetLogisticaColeta::setupTables() {
   modelColeta.setHeaderData("numeroNFe", "NF-e");
   modelColeta.setHeaderData("idVenda", "Venda");
   modelColeta.setHeaderData("ordemCompra", "O.C.");
+  modelColeta.setHeaderData("codFornecedor", "Cód. Forn.");
   modelColeta.setHeaderData("produto", "Produto");
   modelColeta.setHeaderData("codComercial", "Cód. Com.");
   modelColeta.setHeaderData("quant", "Quant.");

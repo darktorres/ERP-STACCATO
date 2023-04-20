@@ -40,6 +40,7 @@ void WidgetCompraFaturar::setupTables() {
   modelFaturamento.setSort("ordemCompra");
 
   modelFaturamento.setHeaderData("ordemCompra", "O.C.");
+  modelFaturamento.setHeaderData("codFornecedor", "Cód. Forn.");
   modelFaturamento.setHeaderData("fornecedor", "Fornecedor");
   modelFaturamento.setHeaderData("data", "Data Venda");
   modelFaturamento.setHeaderData("produtos", "Produtos");

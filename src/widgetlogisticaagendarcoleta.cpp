@@ -52,6 +52,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("numeroNFe", "NF-e");
   modelEstoque.setHeaderData("idVenda", "Venda");
   modelEstoque.setHeaderData("ordemCompra", "O.C.");
+  modelEstoque.setHeaderData("codFornecedor", "Cód. Forn.");
   modelEstoque.setHeaderData("produto", "Produto");
   modelEstoque.setHeaderData("codComercial", "Cód. Com.");
   modelEstoque.setHeaderData("quant", "Quant.");

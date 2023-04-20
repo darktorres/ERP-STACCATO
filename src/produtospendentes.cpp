@@ -89,8 +89,8 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
   // TODO: move query to Sql class
   modelEstoque.setQuery(
       "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, e.restante / p.quantCaixa AS `Caixas`, `e`.`lote` AS `lote`, "
-      "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, e.valorUnid AS custo FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` "
-      "WHERE e.status NOT IN ('CANCELADO' , 'IGNORAR') AND p.fornecedor = '" +
+      "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, e.valorUnid AS custo, e.created FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = "
+      "`p`.`idProduto` WHERE e.status NOT IN ('CANCELADO' , 'IGNORAR') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
   modelEstoque.select();
@@ -105,10 +105,14 @@ void ProdutosPendentes::viewProduto(const QString &fornecedor, const QString &co
   modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("bloco", "Bloco");
   modelEstoque.setHeaderData("custo", "Custo");
+  modelEstoque.setHeaderData("created", "Cadastrado");
 
   ui->tableEstoque->setModel(&modelEstoque);
+
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(3, this));
   ui->tableEstoque->setItemDelegateForColumn("custo", new ReaisDelegate(this));
+
+  ui->tableEstoque->showColumn("created");
 
   //-----------------------------------------------
 

@@ -39,6 +39,7 @@ private:
   auto dividirCompra(const int idVendaProduto2, const double quant) -> void;
   auto exibirNota() -> void;
   auto limitarAlturaTabela() -> void;
+  auto on_pushButtonAjustarQuant_clicked() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto on_tableConsumo_doubleClicked(const QModelIndex &index) -> void;
   auto preencherRestante() -> void;

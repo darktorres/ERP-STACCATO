@@ -44,6 +44,7 @@ private:
   auto gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) -> void;
   auto getCaixasDefeito(const int row) -> double;
   auto on_pushButtonFoto_clicked() -> void;
+  auto on_pushButtonFoto_2_clicked() -> void;
   auto on_pushButtonQuebradoEntrega_clicked() -> void;
   auto on_pushButtonQuebradoReceb_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;

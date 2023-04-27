@@ -56,7 +56,7 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
     ui->labelEntregou->hide();
     ui->lineEditEntregou->hide();
 
-    ui->frameQuebrado->hide();
+    ui->groupBoxQuebrado->hide();
 
     adjustSize();
   }
@@ -75,6 +75,7 @@ void InputDialogConfirmacao::setConnections() {
   connect(ui->pushButtonQuebradoEntrega, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->pushButtonFoto, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFoto_clicked, connectionType);
+  connect(ui->pushButtonFoto_2, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFoto_2_clicked, connectionType);
 }
 
 QDate InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->date(); }
@@ -300,6 +301,8 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
+  if (not ui->lineEditFoto_2->styleSheet().contains("background-color: rgb(0, 255, 0);")) { throw RuntimeError("Envie a foto da quebra primeiro!"); }
+
   // -------------------------------------------------------------------------
 
   const int row = selection.first().row();
@@ -328,6 +331,9 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
   dividirEntrega(row, choice, caixasDefeito, obs, novoIdVendaProduto2);
 
   qApp->endTransaction();
+
+  ui->lineEditFoto_2->clear();
+  ui->lineEditFoto_2->setStyleSheet("");
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
@@ -614,6 +620,61 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   });
 }
 
+void InputDialogConfirmacao::on_pushButtonFoto_2_clicked() {
+  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
+
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
+
+  if (filePath.isEmpty()) { return; }
+
+  File file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
+
+  auto *manager = new QNetworkAccessManager(this);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
+  });
+
+  const QString ip = qApp->getWebDavIp();
+  const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
+  const QString id = modelVeiculo.data(0, "id").toString();
+
+  QFileInfo info(file);
+
+  const QString extension = info.suffix();
+
+  const QString url = "https://" + ip + "/webdav/FOTOS QUEBRA/" + idVenda + " - " + id + "." + extension;
+
+  const auto fileContent = file.readAll();
+
+  manager->put(QNetworkRequest(QUrl(url)), fileContent);
+
+  ui->lineEditFoto_2->setText("Enviando...");
+
+  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
+    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+
+    if (redirect.isValid()) {
+      manager->put(QNetworkRequest(redirect), fileContent);
+      return;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      ui->lineEditFoto_2->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+      throw RuntimeException("Erro enviando foto: " + reply->errorString());
+    }
+
+    ui->lineEditFoto_2->setText(reply->url().toString());
+    ui->lineEditFoto_2->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
+  });
+}
+
 double InputDialogConfirmacao::getCaixasDefeito(const int row) {
   QString produto;
   double caixas = 0;
@@ -725,6 +786,7 @@ void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
     modelVeiculo.setData(rowQuebrado, col, value);
   }
 
+  modelVeiculo.setData(rowQuebrado, "fotoEntrega", ui->lineEditFoto_2->text());
   modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2);
   modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito);
   modelVeiculo.setData(rowQuebrado, "kg", caixasDefeito * kgcx);

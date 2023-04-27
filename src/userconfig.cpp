@@ -3,9 +3,11 @@
 
 #include "application.h"
 #include "cadastrousuario.h"
+#include "file.h"
 #include "sendmail.h"
 #include "user.h"
 
+#include <QAuthenticator>
 #include <QDebug>
 #include <QFileDialog>
 #include <QSqlError>
@@ -68,7 +70,7 @@ void UserConfig::getSettings() {
   if (not ui->groupBoxEmail->isHidden()) {
     SqlQuery query;
 
-    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
+    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
       throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
     }
 
@@ -78,6 +80,7 @@ void UserConfig::getSettings() {
       ui->lineEditEmail->setText(query.value("email").toString());
       ui->lineEditEmailSenha->setText(query.value("senhaEmail").toString());
       ui->lineEditEmailCopia->setText(query.value("copiaParaEmail").toString());
+      ui->lineEditAssinaturaEmail->setText(query.value("assinaturaEmail").toString());
     }
   }
 
@@ -113,6 +116,7 @@ void UserConfig::setConnections() {
   connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked, connectionType);
   connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &UserConfig::on_pushButtonSalvar_clicked, connectionType);
+  connect(ui->pushButtonSelecionarAssinatura, &QPushButton::clicked, this, &UserConfig::on_pushButtonSelecionarAssinatura_clicked, connectionType);
   connect(ui->pushButtonVendasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonVendasFolder_clicked, connectionType);
 }
 
@@ -216,15 +220,17 @@ void UserConfig::preencherComboBoxMonitorar() {
 
 void UserConfig::salvarDadosEmail() {
   SqlQuery queryUsuario;
-  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail) "
-                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail) AS new "
-                       "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail");
+  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail) "
+                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail, :assinaturaEmail) AS new "
+                       "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, "
+                       "senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail, assinaturaEmail = new.assinaturaEmail");
   queryUsuario.bindValue(":idUsuario", User::idUsuario);
   queryUsuario.bindValue(":servidorEmail", ui->lineEditServidorSMTP->text());
   queryUsuario.bindValue(":portaEmail", ui->lineEditPortaSMTP->text());
   queryUsuario.bindValue(":email", ui->lineEditEmail->text());
   queryUsuario.bindValue(":senhaEmail", ui->lineEditEmailSenha->text());
   queryUsuario.bindValue(":copiaParaEmail", ui->lineEditEmailCopia->text());
+  queryUsuario.bindValue(":assinaturaEmail", ui->lineEditAssinaturaEmail->text());
 
   if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
 }
@@ -258,4 +264,57 @@ void UserConfig::salvarDadosMonitorNFe() {
   queryLoja.bindValue(":monitorarPorta2", ui->lineEditMonitorarPorta2->text());
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro salvando dados do monitor de NF-e: " + queryLoja.lastError().text()); }
+}
+
+void UserConfig::on_pushButtonSelecionarAssinatura_clicked() {
+  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
+
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
+
+  if (filePath.isEmpty()) { return; }
+
+  File file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
+
+  auto *manager = new QNetworkAccessManager(this);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
+  });
+
+  const QString ip = qApp->getWebDavIp();
+
+  QFileInfo info(file);
+
+  const QString extension = info.suffix();
+
+  const QString url = "https://" + ip + "/webdav/ASSINATURA EMAIL/" + User::usuario + "." + extension;
+
+  const auto fileContent = file.readAll();
+
+  manager->put(QNetworkRequest(QUrl(url)), fileContent);
+
+  ui->lineEditAssinaturaEmail->setText("Enviando...");
+
+  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
+    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+
+    if (redirect.isValid()) {
+      manager->put(QNetworkRequest(redirect), fileContent);
+      return;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+      throw RuntimeException("Erro enviando foto: " + reply->errorString());
+    }
+
+    ui->lineEditAssinaturaEmail->setText(reply->url().toString());
+    ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
+  });
 }

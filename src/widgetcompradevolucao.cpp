@@ -26,10 +26,12 @@ void WidgetCompraDevolucao::setConnections() {
   connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked, connectionType);
   connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked, connectionType);
   connect(ui->table, &TableView::doubleClicked, this, &WidgetCompraDevolucao::on_table_doubleClicked, connectionType);
+  connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraDevolucao::montaFiltro, connectionType);
 }
 
 void WidgetCompraDevolucao::updateTables() {
   if (not isSet) {
+    ui->lineEditBusca->setDelayed();
     setupTables();
     montaFiltro();
     setConnections();
@@ -210,12 +212,29 @@ void WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked() { montaFiltro
 void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked() { montaFiltro(); }
 
 void WidgetCompraDevolucao::montaFiltro() {
+  QStringList filtros;
+
+  //-------------------------------------
+
   const bool isPendente = ui->radioButtonFiltroPendente->isChecked();
 
   ui->pushButtonDevolucaoFornecedor->setEnabled(isPendente);
   ui->pushButtonRetornarEstoque->setEnabled(isPendente);
 
-  modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
+  filtros << (isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'");
+
+  //-------------------------------------
+
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
+
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
+  filtros << "quant < 0";
+
+  modelVendaProduto.setFilter(filtros.join(" AND "));
 }
 
 void WidgetCompraDevolucao::on_table_selectionChanged() {

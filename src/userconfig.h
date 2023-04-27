@@ -26,6 +26,7 @@ private:
   auto on_pushButtonEntregasXmlFolder_clicked() -> void;
   auto on_pushButtonOrcamentosFolder_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
+  auto on_pushButtonSelecionarAssinatura_clicked() -> void;
   auto on_pushButtonVendasFolder_clicked() -> void;
   auto preencherComboBoxMonitorar() -> void;
   auto salvarDadosEmail() -> void;

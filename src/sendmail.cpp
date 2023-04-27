@@ -2,9 +2,11 @@
 #include "ui_sendmail.h"
 
 #include "application.h"
+#include "file.h"
 #include "smtp.h"
 #include "user.h"
 
+#include <QAuthenticator>
 #include <QFileDialog>
 #include <QSqlError>
 
@@ -53,8 +55,54 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +
         R"(;</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;">Segue pedido, aguardo espelho como confirmação e previsão de disponibilidade/ coleta do mesmo.</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: Calibri, sans-serif; font-size: 11pt; font-weight: 400; font-style: normal;">Grato!</p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: Calibri, sans-serif; font-size: 11pt; font-weight: 400; font-style: normal;">   Att.</p></body></html>)");
 
-    ui->textEdit->document()->addResource(QTextDocument::ImageResource, QUrl("cid:assinatura.png@gmail.com"), QImage("://assinatura conrado.png"));
-    ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
+    SqlQuery query2;
+    query2.prepare("SELECT assinaturaEmail FROM usuario_has_config WHERE idUsuario = :idUsuario");
+    query2.bindValue(":idUsuario", User::idUsuario);
+
+    if (not query2.exec()) { throw RuntimeException("Erro buscando assinatura: " + query2.lastError().text()); }
+
+    if (query2.first()) {
+      const QString url = query2.value("assinaturaEmail").toString();
+
+      if (not url.isEmpty()) {
+        auto *manager = new QNetworkAccessManager(this);
+        manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+          Q_UNUSED(reply)
+
+          authenticator->setUser(User::usuario);
+          authenticator->setPassword(User::senha);
+        });
+
+        auto *reply = manager->get(QNetworkRequest(QUrl(url)));
+
+        connect(reply, &QNetworkReply::finished, this, [=, this] {
+          if (reply->error() != QNetworkReply::NoError) {
+            if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
+
+            throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+          }
+
+          const auto replyMsg = reply->readAll();
+
+          if (replyMsg.contains("could not be found on this server")) { throw RuntimeException("Arquivo não encontrado no servidor!"); }
+
+          const QString assinaturaFilepath = QDir::currentPath() + "/assinaturas/" + User::usuario + ".png";
+
+          File file(assinaturaFilepath);
+
+          if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+          file.write(replyMsg);
+
+          file.close();
+
+          ui->textEdit->document()->addResource(QTextDocument::ImageResource, QUrl("cid:assinatura.png@gmail.com"), QImage(assinaturaFilepath));
+          ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
+        });
+      }
+    }
   }
 
   if (tipo != Tipo::Vazio) {

@@ -33,6 +33,7 @@ private:
   // methods
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged() -> void;
+  auto on_pushButtonAlteraCodForn_clicked() -> void;
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_tablePedidos_selectionChanged() -> void;

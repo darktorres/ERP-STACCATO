@@ -8,6 +8,7 @@
 #include "noeditdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
+#include "sqlquery.h"
 
 #include <QSqlError>
 
@@ -19,6 +20,7 @@ void WidgetCompraHistorico::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetCompraHistorico::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonAlteraCodForn, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonAlteraCodForn_clicked, connectionType);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetCompraHistorico::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->tablePedidos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraHistorico::on_tablePedidos_selectionChanged, connectionType);
@@ -127,6 +129,7 @@ void WidgetCompraHistorico::setTreeView() {
   modelTree.setHeaderData("un", "Un.");
   modelTree.setHeaderData("caixas", "Cx.");
   modelTree.setHeaderData("prcUnitario", "R$ Unit.");
+  modelTree.setHeaderData("desconto", "Desc. %");
   modelTree.setHeaderData("preco", "R$");
   modelTree.setHeaderData("formComercial", "Form. Com.");
   modelTree.setHeaderData("obs", "Obs.");
@@ -237,6 +240,36 @@ void WidgetCompraHistorico::on_treeView_doubleClicked(const QModelIndex &index) 
   const QString header = modelTree.headerData(index.column(), Qt::Horizontal).toString();
 
   if (header == "Venda") { return qApp->abrirVenda(modelTree.data(modelTree.index(index.row(), modelTree.fieldIndex("idVenda")))); }
+}
+
+void WidgetCompraHistorico::on_pushButtonAlteraCodForn_clicked() {
+  const auto selection = ui->treeView->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+
+  QStringList ids;
+
+  for (const auto &index : selection) {
+    if (not index.parent().isValid()) { throw RuntimeError("Deve selecionar apenas sublinhas!", this); }
+
+    const auto index2 = modelTree.proxyModel->mapToSource(index);
+    const auto row = modelTree.mappedRow(index2);
+
+    ids << modelProdutos2.data(row, "idPedido2").toString();
+  }
+
+  const QString text = QInputDialog::getText(this, "Cód Forn.", "Digite o novo código forn.:");
+
+  if (text.isEmpty()) { return; }
+
+  SqlQuery query;
+
+  if (not query.exec("UPDATE pedido_fornecedor_has_produto2 SET codFornecedor = '" + text + "' WHERE idPedido2 IN (" + ids.join(", ") + ")")) {
+    throw RuntimeException("Erro atualizando cód.: " + query.lastError().text());
+  }
+
+  modelProdutos2.select();
+  qApp->enqueueInformation("Cód. forn. salvo com sucesso!");
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

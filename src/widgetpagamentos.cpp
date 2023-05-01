@@ -473,6 +473,37 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const Pagamento::
   dateEditPgt(pgt);
   lineEditPgt(pgt);
 
+  //---------------------------------------------------
+
+  //  auto *pushBtn = new QPushButton(pgt);
+  //  pushBtn->setText("del");
+
+  //  connect(pushBtn, &QPushButton::clicked, this, [=] {
+  //    pagamentos.removeAll(pgt);
+
+  //    if (pgtFrete == pgt) { pgtFrete = nullptr; }
+
+  //    if (pgtSt == pgt) { pgtSt = nullptr; }
+
+  //    auto *scrollLayout = qobject_cast<QVBoxLayout *>(ui->scrollArea->widget()->layout());
+  //    scrollLayout->removeWidget(pgt);
+
+  //    pgt->deleteLater();
+
+  //    for (int i = 0; i < scrollLayout->count();) {
+  //      auto *widget = dynamic_cast<Pagamento *>(scrollLayout->itemAt(i)->widget());
+
+  //      if (widget->tipoPgt != Pagamento::TipoPgt::Normal) { continue; }
+
+  //      widget->label->setText("Pgt. " + QString::number(i + 1));
+  //      ++i;
+  //    }
+  //  });
+
+  //  pgt->layout()->addWidget(pushBtn);
+
+  //---------------------------------------------------
+
   if (tipoPgt == Pagamento::TipoPgt::Normal) { pagamentos << pgt; }
   if (tipoPgt == Pagamento::TipoPgt::Frete) { pgtFrete = pgt; }
   if (tipoPgt == Pagamento::TipoPgt::ST) { pgtSt = pgt; }

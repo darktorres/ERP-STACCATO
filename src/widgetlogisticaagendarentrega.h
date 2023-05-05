@@ -52,6 +52,7 @@ private:
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_pushButtonGerarNFeFutura_clicked() -> void;
   auto on_pushButtonImportarNFe_clicked() -> void;
+  auto on_pushButtonMapa_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;

@@ -28,6 +28,7 @@ private:
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
+  auto geocodificarEndereco() -> void;
   auto novoEndereco() -> void;
   auto on_checkBoxDataNasc_stateChanged(const int state) -> void; // TODO: rename functions/widgets to aniversario
   auto on_checkBoxInscEstIsento_toggled(const bool checked) -> void;

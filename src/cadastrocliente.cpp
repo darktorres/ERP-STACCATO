@@ -98,6 +98,8 @@ void CadastroCliente::setupTables() {
   ui->tableEndereco->hideColumn("codUF");
   ui->tableEndereco->hideColumn("qualpJson");
   ui->tableEndereco->hideColumn("qualpData");
+  ui->tableEndereco->hideColumn("lat");
+  ui->tableEndereco->hideColumn("lng");
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
@@ -367,11 +369,56 @@ void CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
   setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()));
   setDataEnd("desativado", false);
 
+  geocodificarEndereco();
+
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
   if (tipo == Tipo::Atualizar) { save(true); }
+}
+
+void CadastroCliente::geocodificarEndereco() {
+  auto *manager = new QNetworkAccessManager(this);
+
+  QString logradouro = ui->lineEditLogradouro->text();
+  QString numero = ui->lineEditNumero->text();
+  if (numero == "0") { numero = ""; }
+  QString bairro = ui->lineEditBairro->text();
+  QString cidade = ui->lineEditCidade->text();
+  QString uf = ui->lineEditUF->text();
+  QString cep = ui->lineEditCEP->text();
+
+  QString endereco = logradouro + ", " + numero + " - " + bairro + ", " + cidade + " - " + uf + ", " + cep + ", Brasil";
+  QString url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + endereco + "&key=" + qApp->googleMapsApi();
+
+  auto *reply = manager->get(QNetworkRequest(QUrl(url)));
+
+  connect(reply, &QNetworkReply::finished, this, [=] {
+    if (reply->error() != QNetworkReply::NoError) {
+      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
+
+      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+    }
+
+    const auto replyMsg = reply->readAll();
+
+    if (replyMsg.contains("\"status\" : \"ZERO_RESULTS\"")) { return; }
+
+    if (not replyMsg.contains("\"status\" : \"OK\"")) { throw RuntimeException("not ok\n" + replyMsg); }
+
+    QJsonDocument json = QJsonDocument::fromJson(replyMsg);
+
+    QString lat = json.object().value("results").toArray()[0].toObject().value("geometry").toObject().value("location").toObject().value("lat").toVariant().toString();
+    QString lng = json.object().value("results").toArray()[0].toObject().value("geometry").toObject().value("location").toObject().value("lng").toVariant().toString();
+
+    setDataEnd("lat", lat);
+    setDataEnd("lng", lng);
+  });
+
+  while (not reply->isFinished()) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+
+  reply->deleteLater();
 }
 
 void CadastroCliente::cadastrar() {

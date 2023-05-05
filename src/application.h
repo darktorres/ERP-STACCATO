@@ -52,6 +52,7 @@ public:
   auto getSilent() const -> bool;
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
+  auto googleMapsApi() -> QString;
   auto lightTheme() -> void;
   auto notify(QObject *receiver, QEvent *event) -> bool final;
   auto removerDiacriticos(const QString &s, const bool removerSimbolos = false) -> QString;

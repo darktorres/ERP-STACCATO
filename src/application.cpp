@@ -91,6 +91,18 @@ void Application::readSettingsFile() {
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
+QString Application::googleMapsApi() {
+  File file("google_api.txt");
+
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo chave da API: " + file.errorString()); }
+
+  QString fileContent = file.readAll();
+
+  if (fileContent.isEmpty()) { throw RuntimeException("google_api.txt vazio!"); }
+
+  return fileContent;
+}
+
 void Application::userLogin(const QString &user) {
   db.close();
 

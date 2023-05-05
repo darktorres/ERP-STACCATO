@@ -30,7 +30,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>162</width>
+        <width>136</width>
         <height>609</height>
        </rect>
       </property>
@@ -483,6 +483,13 @@
            <widget class="QPushButton" name="pushButtonReagendarPedido">
             <property name="text">
              <string>Reagendar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonMapa">
+            <property name="text">
+             <string>Mapa</string>
             </property>
            </widget>
           </item>

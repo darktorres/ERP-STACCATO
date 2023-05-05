@@ -8,6 +8,7 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "log.h"
 #include "sql.h"
 #include "user.h"
 #include "xml.h"
@@ -41,6 +42,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 
   ui->tableVendas->hideColumn("data");
+  ui->tableVendas->hideColumn("mapa");
 
   // -----------------------------------------------------------------
 
@@ -202,6 +204,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked, connectionType);
   connect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked, connectionType);
+  connect(ui->pushButtonMapa, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked, connectionType);
   connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked, connectionType);
   connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -244,6 +247,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked);
   disconnect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked);
+  disconnect(ui->pushButtonMapa, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked);
   disconnect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
   disconnect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
   disconnect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
@@ -1089,6 +1093,47 @@ void WidgetLogisticaAgendarEntrega::ajustarGroupBoxStatus() {
   for (auto *checkBox : filtrosStatus) { checkBox->setEnabled(true); }
 
   setConnections();
+}
+
+void WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked() {
+  QString pedidos = User::usuario + "|";
+
+  for (int row = 0; row < modelVendas.rowCount(); ++row) {
+    QString pedido = modelVendas.data(row, "mapa").toString();
+    if (pedido.isEmpty()) { continue; }
+    pedidos += "&pedido=" + pedido;
+
+    QDate prazo = modelVendas.data(row, "novoPrazoEntrega").toDate();
+    const int dias = static_cast<int>(qApp->serverDate().daysTo(prazo));
+
+    if (dias < 3) {
+      pedidos += ";atrasado";
+    } else if (dias < 5) {
+      pedidos += ";quase-atrasado";
+    } else {
+      pedidos += ";normal";
+    }
+  }
+
+  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+  QUrl url("https://" + qApp->getWebDavIp() + "/maps/map_data.php");
+  QNetworkRequest request(url);
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+
+  auto *reply = manager->post(request, pedidos.toUtf8());
+
+  connect(reply, &QNetworkReply::finished, this, [=]() {
+    QByteArray response = reply->readAll();
+    reply->deleteLater();
+
+    if (response == "Data written to file") {
+      QDesktopServices::openUrl(QUrl("https://" + qApp->getWebDavIp() + "/maps/markers.html?user=" + User::usuario));
+    } else {
+      Log::createLog("Exceção", response);
+      throw RuntimeException("Não foi possível executar a operação!");
+    }
+  });
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

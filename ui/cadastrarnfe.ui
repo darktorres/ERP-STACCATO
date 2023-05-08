@@ -803,7 +803,7 @@
             <item row="0" column="6">
              <widget class="QPushButton" name="pushButtonConsultarCadastro">
               <property name="text">
-               <string>Consultar cadastro</string>
+               <string>Consultar Insc. Est.</string>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -1093,8 +1093,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1004</width>
-                <height>307</height>
+                <width>1010</width>
+                <height>298</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_81">
@@ -1603,8 +1603,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>120</width>
-                <height>80</height>
+                <width>98</width>
+                <height>78</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_83">
@@ -1747,8 +1747,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>202</width>
-                <height>145</height>
+                <width>162</width>
+                <height>141</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_84">
@@ -2061,8 +2061,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>233</width>
-                <height>145</height>
+                <width>187</width>
+                <height>141</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_85">
@@ -2374,8 +2374,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>506</width>
-                <height>274</height>
+                <width>399</width>
+                <height>266</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_5">

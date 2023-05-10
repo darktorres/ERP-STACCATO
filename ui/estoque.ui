@@ -181,7 +181,7 @@ color: rgb(0, 0, 0);</string>
      <item>
       <widget class="QPushButton" name="pushButtonAjustarQuant">
        <property name="text">
-        <string>Ajustar quant.</string>
+        <string>Ajustar caixas</string>
        </property>
       </widget>
      </item>

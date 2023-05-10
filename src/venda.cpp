@@ -1155,6 +1155,17 @@ void Venda::on_pushButtonCancelamento_clicked() {
       // domingo aceita segunda 2
       if (diaSemana == 7 and dia < 2) { allowed = true; }
 
+      // ----------------------------------------------------
+
+      SqlQuery queryData;
+      QString dataStr = dataAtual.toString("yyyy-MM-dd");
+
+      if (not queryData.exec("SELECT * FROM feriados_bancarios WHERE data = '" + dataStr + "'")) { throw RuntimeException("Erro verificando data: " + queryData.lastError().text()); }
+
+      if (queryData.size() > 0) { allowed = true; }
+
+      // ----------------------------------------------------
+
       if (not allowed) { throw RuntimeError("Não está no primeiro dia útil do mês seguinte!", this); }
     }
   }

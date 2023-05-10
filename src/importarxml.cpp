@@ -757,7 +757,11 @@ bool ImportarXML::lerXML() {
 
   File file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) {
+    QString errorStr = file.errorString();
+    if (errorStr == "unexpected end of file") { errorStr = "arquivo corrompido"; }
+    throw RuntimeException("Erro lendo arquivo: " + errorStr);
+  }
 
   auto fileContent = file.readAll();
 

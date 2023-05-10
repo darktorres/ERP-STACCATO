@@ -420,9 +420,9 @@ void Estoque::on_pushButtonAjustarQuant_clicked() {
   const double quantCx = modelEstoque.data(0, "quantCaixa").toDouble();
 
   bool ok = false;
-  const double ajuste = QInputDialog::getDouble(this, "Ajuste quant.", "Ajustar quantidade: ", 0, ui->doubleSpinBoxQuantRestante->value() * -1, INT_MAX, 4, &ok);
+  const double ajusteCx = QInputDialog::getDouble(this, "Ajuste", "Ajustar caixas: ", 0, ui->doubleSpinBoxCaixasRestante->value() * -1, INT_MAX, 4, &ok);
 
-  if (not ok or qFuzzyIsNull(ajuste)) { return; }
+  if (not ok or qFuzzyIsNull(ajusteCx)) { return; }
 
   QString observacao = QInputDialog::getText(this, "Observação", "Digite a observação: ", QLineEdit::Normal, QString(), &ok);
 
@@ -434,8 +434,8 @@ void Estoque::on_pushButtonAjustarQuant_clicked() {
 
   SqlQuery queryConsumo;
 
-  QString quant = QString::number(ajuste);
-  QString caixas = QString::number(ajuste / quantCx);
+  QString quant = QString::number(ajusteCx * quantCx);
+  QString caixas = QString::number(ajusteCx);
 
   if (not queryConsumo.exec("INSERT INTO estoque_has_consumo (idEstoque, status, descricao, quant, caixas) VALUES (" + idEstoque + ", 'AJUSTE', '" + observacao.toUpper() + "', " + quant + ", " +
                             caixas + ")")) {

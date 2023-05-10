@@ -45,7 +45,7 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          " LEFT JOIN "
          "     `produto` `p` ON `vp2`.`idProduto` = `p`.`idProduto` "
          " WHERE "
-         "     (`vp2`.`idVenda` NOT LIKE '%D') "
+         "     (`vp2`.`idVenda` NOT LIKE '%D' AND `vp2`.`quant` != 0) "
          "     AND (`v`.`status` NOT IN ('ENTREGUE' , 'CANCELADO', 'DEVOLVIDO')) "
          "     AND (`v`.`representacao` = FALSE) "
          "     AND (`v`.`devolucao` = FALSE) " +

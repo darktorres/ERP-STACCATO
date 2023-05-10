@@ -406,6 +406,8 @@ void WidgetLogisticaAgendarEntrega::filtroProdutos() {
 
   if (not filtroCheck.isEmpty()) { filtros << "vp2.status IN (" + filtroCheck.join(", ") + ")"; }
 
+  filtros << "vp2.quant != 0";
+
   modelProdutos.setQuery(Sql::view_agendar_entrega(selectedIdVenda, filtros.join(" AND ")));
 
   modelProdutos.select();

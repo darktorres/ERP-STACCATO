@@ -14,12 +14,12 @@ public:
   Q_ENUM(Tipo)
 
   explicit SendMail(const Tipo tipo, const QString &arquivo = {}, const QString &fornecedor = {}, QWidget *parent = nullptr);
-  explicit SendMail(const Tipo tipo, QWidget *parent = nullptr);
   ~SendMail() final;
 
 private:
   // attributes
   QProgressDialog *progress = nullptr;
+  QString assinatura;
   QString const fornecedor;
   QStringList files;
   Tipo tipo;

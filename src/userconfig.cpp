@@ -198,7 +198,7 @@ void UserConfig::on_pushButtonEmailTeste_clicked() {
 
   salvarDadosEmail();
 
-  auto *mail = new SendMail(SendMail::Tipo::Teste, this);
+  auto *mail = new SendMail(SendMail::Tipo::Teste, "", "", this);
   mail->setAttribute(Qt::WA_DeleteOnClose);
 
   mail->show();

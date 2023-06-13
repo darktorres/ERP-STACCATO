@@ -20,6 +20,28 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
   ui->lineEditAnexo->setText(arquivo);
 
+  if (tipo != Tipo::Vazio) {
+    SqlQuery query;
+
+    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
+      throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
+    }
+
+    if (query.first()) {
+      ui->lineEditServidor->setText(query.value("servidorEmail").toString());
+      ui->lineEditPorta->setText(query.value("portaEmail").toString());
+      ui->lineEditEmail->setText(query.value("email").toString());
+      ui->lineEditPasswd->setText(query.value("senhaEmail").toString());
+      ui->lineEditCopia->setText(query.value("copiaParaEmail").toString());
+    }
+  }
+
+  if (tipo == Tipo::Teste) {
+    ui->comboBoxDest->setCurrentText(ui->lineEditEmail->text());
+    ui->lineEditTitulo->setText("Teste");
+    ui->textEdit->setText("Mensagem de teste");
+  }
+
   if (tipo == Tipo::GerarCompra) {
     const QFileInfo info(arquivo);
 
@@ -54,70 +76,56 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
         R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"><html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;"><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;">)" +
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +
         R"(;</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;">Segue pedido, aguardo espelho como confirmação e previsão de disponibilidade/ coleta do mesmo.</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: Calibri, sans-serif; font-size: 11pt; font-weight: 400; font-style: normal;">Grato!</p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: Calibri, sans-serif; font-size: 11pt; font-weight: 400; font-style: normal;">   Att.</p></body></html>)");
-
-    SqlQuery query2;
-    query2.prepare("SELECT assinaturaEmail FROM usuario_has_config WHERE idUsuario = :idUsuario");
-    query2.bindValue(":idUsuario", User::idUsuario);
-
-    if (not query2.exec()) { throw RuntimeException("Erro buscando assinatura: " + query2.lastError().text()); }
-
-    if (query2.first()) {
-      const QString url = query2.value("assinaturaEmail").toString();
-
-      if (not url.isEmpty()) {
-        auto *manager = new QNetworkAccessManager(this);
-        manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
-        connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
-          Q_UNUSED(reply)
-
-          authenticator->setUser(User::usuario);
-          authenticator->setPassword(User::senha);
-        });
-
-        auto *reply = manager->get(QNetworkRequest(QUrl(url)));
-
-        connect(reply, &QNetworkReply::finished, this, [=, this] {
-          if (reply->error() != QNetworkReply::NoError) {
-            if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
-
-            throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
-          }
-
-          const auto replyMsg = reply->readAll();
-
-          if (replyMsg.contains("could not be found on this server")) { throw RuntimeException("Arquivo não encontrado no servidor!"); }
-
-          const QString assinaturaFilepath = QDir::currentPath() + "/assinaturas/" + User::usuario + ".png";
-
-          File file(assinaturaFilepath);
-
-          if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
-
-          file.write(replyMsg);
-
-          file.close();
-
-          ui->textEdit->document()->addResource(QTextDocument::ImageResource, QUrl("cid:assinatura.png@gmail.com"), QImage(assinaturaFilepath));
-          ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
-        });
-      }
-    }
   }
 
-  if (tipo != Tipo::Vazio) {
-    SqlQuery query;
+  SqlQuery query2;
+  query2.prepare("SELECT assinaturaEmail FROM usuario_has_config WHERE idUsuario = :idUsuario");
+  query2.bindValue(":idUsuario", User::idUsuario);
 
-    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
-      throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
-    }
+  if (not query2.exec()) { throw RuntimeException("Erro buscando assinatura: " + query2.lastError().text()); }
 
-    if (query.first()) {
-      ui->lineEditServidor->setText(query.value("servidorEmail").toString());
-      ui->lineEditPorta->setText(query.value("portaEmail").toString());
-      ui->lineEditEmail->setText(query.value("email").toString());
-      ui->lineEditPasswd->setText(query.value("senhaEmail").toString());
-      ui->lineEditCopia->setText(query.value("copiaParaEmail").toString());
+  if (query2.first()) {
+    const QString url = query2.value("assinaturaEmail").toString();
+
+    if (not url.isEmpty()) {
+      auto *manager = new QNetworkAccessManager(this);
+      manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+      connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+        Q_UNUSED(reply)
+
+        authenticator->setUser(User::usuario);
+        authenticator->setPassword(User::senha);
+      });
+
+      auto *reply = manager->get(QNetworkRequest(QUrl(url)));
+
+      connect(reply, &QNetworkReply::finished, this, [=, this] {
+        if (reply->error() != QNetworkReply::NoError) {
+          if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Arquivo não encontrado no servidor!"); }
+
+          throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+        }
+
+        const auto replyMsg = reply->readAll();
+
+        if (replyMsg.contains("could not be found on this server")) { throw RuntimeException("Arquivo não encontrado no servidor!"); }
+
+        const QString assinaturaFilepath = QDir::currentPath() + "/assinaturas/" + User::usuario + ".png";
+
+        File file(assinaturaFilepath);
+
+        if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+
+        file.write(replyMsg);
+
+        file.close();
+
+        assinatura = assinaturaFilepath;
+        qDebug() << "A: " << assinatura;
+        ui->textEdit->document()->addResource(QTextDocument::ImageResource, QUrl("cid:assinatura.png@gmail.com"), QImage(assinaturaFilepath));
+        ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
+      });
     }
   }
 
@@ -128,24 +136,14 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   setConnections();
 }
 
+SendMail::~SendMail() { delete ui; }
+
 void SendMail::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &SendMail::on_pushButtonBuscar_clicked, connectionType);
   connect(ui->pushButtonEnviar, &QPushButton::clicked, this, &SendMail::on_pushButtonEnviar_clicked, connectionType);
 }
-
-SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {
-  if (tipo == Tipo::Teste) {
-    ui->comboBoxDest->setCurrentText(ui->lineEditEmail->text());
-    ui->lineEditTitulo->setText("Teste");
-    ui->textEdit->setText("Mensagem de teste");
-
-    on_pushButtonEnviar_clicked();
-  }
-}
-
-SendMail::~SendMail() { delete ui; }
 
 void SendMail::on_pushButtonBuscar_clicked() {
   files.clear();
@@ -170,8 +168,7 @@ void SendMail::on_pushButtonEnviar_clicked() {
   Smtp *smtp = new Smtp(ui->lineEditEmail->text(), ui->lineEditPasswd->text(), ui->lineEditServidor->text(), ui->lineEditPorta->text().toUShort());
   connect(smtp, &Smtp::status, this, &SendMail::mailSent);
 
-  smtp->sendMail(ui->lineEditEmail->text(), ui->comboBoxDest->currentText(), ui->lineEditCopia->text(), ui->lineEditTitulo->text(), ui->textEdit->toHtml(), files,
-                 tipo == Tipo::GerarCompra ? "://assinatura conrado.png" : "");
+  smtp->sendMail(ui->lineEditEmail->text(), ui->comboBoxDest->currentText(), ui->lineEditCopia->text(), ui->lineEditTitulo->text(), ui->textEdit->toHtml(), files, assinatura);
 }
 
 void SendMail::mailSent(const QString &status) {

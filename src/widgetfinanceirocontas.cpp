@@ -115,14 +115,15 @@ void WidgetFinanceiroContas::resetTables() {
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
+  const QString header = model.headerData(index.column(), Qt::Horizontal).toString();
+
   if (tipo == Tipo::Receber) {
     auto *contas = new Contas(Contas::Tipo::Receber, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
-    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString());
+    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString(), (header == "ContraParte"));
   }
 
   if (tipo == Tipo::Pagar) {
-    const QString header = model.headerData(index.column(), Qt::Horizontal).toString();
     const QString ordemCompra = model.data(index.row(), "ordemCompra").toString();
 
     if (header == "O.C." and ordemCompra.isEmpty()) { throw RuntimeError("Sem O.C.!"); }
@@ -130,8 +131,9 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
     auto *contas = new Contas(Contas::Tipo::Pagar, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (header == "O.C.") { contas->viewContaPagarOrdemCompra(ordemCompra); }
-    if (header != "O.C.") { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString()); }
+    if (header == "ContraParte") { contas->viewContaPagarPgt(model.data(index.row(), "idPagamento").toString()); }
+    else if (header == "O.C.") { contas->viewContaPagarOrdemCompra(ordemCompra); }
+    else { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString()); }
   }
 }
 

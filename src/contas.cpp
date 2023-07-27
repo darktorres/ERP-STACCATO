@@ -360,6 +360,18 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
+void Contas::viewContaPagarPgt(const QString &idPagamento) {
+  modelPendentes.setFilter("idPagamento = '" + idPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+
+  modelProcessados.setFilter("idPagamento = '" + idPagamento + "' AND status IN ('PAGO')");
+
+  // -------------------------------------------------------------------------
+
+  modelPendentes.select();
+
+  modelProcessados.select();
+}
+
 void Contas::viewContaPagarData(const QString &dataPagamento) {
   setWindowTitle(windowTitle() + " - Data: " + QDate::fromString(dataPagamento, "yyyy-MM-dd").toString("dd-MM-yyyy"));
 
@@ -404,35 +416,50 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
   modelProcessados.select();
 }
 
-void Contas::viewContaReceber(const QString &idPagamento, const QString &contraparte) {
-  SqlQuery query;
-  query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
-  query.bindValue(":idPagamento", idPagamento);
+void Contas::viewContaReceber(const QString &idPagamento, const QString &contraparte, const bool singleLine) {
+  if (singleLine) {
 
-  if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
+    modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND idPagamento = " + idPagamento);
 
-  if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: '" + idPagamento + "'"); }
+    // -------------------------------------------------------------------------
 
-  const QString idVenda = query.value("idVenda").toString().left(11);
+    modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND idPagamento = " + idPagamento);
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
+    modelPendentes.select();
 
-  // -------------------------------------------------------------------------
+    modelProcessados.select();
+  } else {
+    SqlQuery query;
+    query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
+    query.bindValue(":idPagamento", idPagamento);
 
-  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+    if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
-  // -------------------------------------------------------------------------
+    if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: '" + idPagamento + "'"); }
 
-  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+      const QString idVenda = query.value("idVenda").toString().left(11);
 
-  // -------------------------------------------------------------------------
+      // -------------------------------------------------------------------------
 
-  modelPendentes.select();
+      setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
 
-  modelProcessados.select();
-}
+      // -------------------------------------------------------------------------
+
+      modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+
+      // -------------------------------------------------------------------------
+
+      modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+
+      // -------------------------------------------------------------------------
+
+      modelPendentes.select();
+
+      modelProcessados.select();
+    }
+  }
 
 void Contas::on_pushButtonCriarLancamento_clicked() {
   unsetConnections();

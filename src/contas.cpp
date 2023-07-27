@@ -143,6 +143,7 @@ void Contas::preencher(const QModelIndex &index) {
         modelPendentes.setData(row, "tipoReal", modelPendentes.data(row, "tipo"));
         modelPendentes.setData(row, "parcelaReal", modelPendentes.data(row, "parcela"));
         modelPendentes.setData(row, "centroCusto", modelPendentes.data(row, "idLoja"));
+        modelPendentes.setData(row, "dataRealizado", qApp->ajustarDiaUtil(modelPendentes.data(row, "dataRealizado").toDate()));
 
         // -------------------------------------------------------------------------
 

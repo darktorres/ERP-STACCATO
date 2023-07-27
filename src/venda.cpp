@@ -675,10 +675,10 @@ void Venda::criarComissaoProfissional() {
       query1.bindValue(":idVenda", ui->lineEditVenda->text());
       query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
       query1.bindValue(":idLoja", idLoja);
-      query1.bindValue(":idConta", 8); // caixa matriz
+      query1.bindValue(":idConta", 33);
       query1.bindValue(":centroCusto", idLoja);
       query1.bindValue(":valor", valor);
-      query1.bindValue(":tipo", "1. Dinheiro");
+      query1.bindValue(":tipo", "1. TRANSF. ITAÚ");
       // 01-15 paga dia 30, 16-30 paga prox dia 15
       QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
       QDate quinzena2 = date.addMonths(1);

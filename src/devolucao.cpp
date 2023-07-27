@@ -518,10 +518,10 @@ void Devolucao::criarComissaoProfissional(const int currentRow) {
     query1.bindValue(":idVenda", idDevolucao);
     query1.bindValue(":contraParte", profissional);
     query1.bindValue(":idLoja", modelProdutos2.data(currentRow, "idLoja"));
-    query1.bindValue(":idConta", 8); // caixa matriz
+    query1.bindValue(":idConta", 33);
     query1.bindValue(":centroCusto", modelProdutos2.data(currentRow, "idLoja"));
     query1.bindValue(":valor", valor);
-    query1.bindValue(":tipo", "1. Dinheiro");
+    query1.bindValue(":tipo", "1. TRANSF. ITAÚ");
     // 01-15 paga dia 30, 16-30 paga prox dia 15
     QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
     QDate quinzena2 = date.addMonths(1);

@@ -21,7 +21,8 @@ public:
 
   auto viewContaPagarData(const QString &dataPagamento) -> void;
   auto viewContaPagarOrdemCompra(const QString &ordemCompra) -> void;
-  auto viewContaReceber(const QString &idPagamento, const QString &contraparte) -> void;
+  auto viewContaPagarPgt(const QString &idPagamento) -> void;
+  auto viewContaReceber(const QString &idPagamento, const QString &contraparte, const bool singleLine) -> void;
 
 private:
   // attributes

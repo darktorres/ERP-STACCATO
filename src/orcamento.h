@@ -19,6 +19,7 @@ public:
 
 private:
   // attributes
+  bool replicando = false;
   bool canChangeFrete = false;
   bool currentItemIsEstoque = false;
   bool isReadOnly = false;

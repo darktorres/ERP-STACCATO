@@ -1199,8 +1199,8 @@ bool Orcamento::verificaServicosEspeciais() {
 
 void Orcamento::calcularFrete(const bool updateSpinBox) {
   if (ui->checkBoxFreteManual->isChecked()) { return; }
-
   if (verificaServicosEspeciais()) { return; }
+  if (replicando) { return; }
 
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);
@@ -1389,6 +1389,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   replica->ui->lineEditReplicaDe->setText(data("idOrcamento").toString());
   replica->ui->plainTextEditObs->setPlainText(data("observacao").toString());
 
+  replica->replicando = true;
+
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (skipRows.contains(row)) { continue; }
 
@@ -1398,6 +1400,9 @@ void Orcamento::on_pushButtonReplicar_clicked() {
     replica->ui->lineEditObs->setText(modelItem.data(row, "obs").toString());
     replica->adicionarItem();
   }
+
+  replica->replicando = false;
+  replica->calcPrecoGlobalTotal();
 
   replica->show();
 }

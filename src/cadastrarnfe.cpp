@@ -144,13 +144,13 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
-  ui->tableItens->setItemDelegateForColumn("fornecedor", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("produto", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("caixas", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("quant", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("un", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("quantCaixa", new NoEditDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("codComercial", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("fornecedor", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("produto", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("caixas", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("quant", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("un", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("quantCaixa", new NoEditDelegate(this));
+//  ui->tableItens->setItemDelegateForColumn("codComercial", new NoEditDelegate(this));
 
   ui->tableItens->hideColumn("idRelacionado");
   ui->tableItens->hideColumn("peso");

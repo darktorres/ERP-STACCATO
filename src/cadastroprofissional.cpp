@@ -167,15 +167,25 @@ bool CadastroProfissional::viewRegister() {
 
   //---------------------------------------------------
 
-  const double tetoComissao = User::fromLoja("tetoProfissionalRT").toDouble();
-  const double comissao = data("comissao").toDouble();
+  SqlQuery queryRT;
 
-  if (comissao > tetoComissao) {
-    ui->doubleSpinBoxComissao->setMaximum(comissao);
-    ui->doubleSpinBoxComissao->setValue(comissao);
+  if (not queryRT.exec("SELECT tetoProfissionalRT FROM loja WHERE idLoja = " + data("idLoja").toString())) {
+    throw RuntimeException("Erro buscando teto da RT: " + queryRT.lastError().text());
   }
 
-  if (not User::isAdmin() and comissao <= tetoComissao) { ui->doubleSpinBoxComissao->setMaximum(tetoComissao); }
+  if (queryRT.first()) {
+    const double tetoComissao = queryRT.value("tetoProfissionalRT").toDouble();
+    const double comissao = data("comissao").toDouble();
+
+    if (comissao > tetoComissao) {
+      ui->doubleSpinBoxComissao->setMaximum(comissao);
+      ui->doubleSpinBoxComissao->setValue(comissao);
+    }
+
+    if (not User::isAdmin() and comissao <= tetoComissao) {
+      ui->doubleSpinBoxComissao->setMaximum(tetoComissao);
+    }
+  }
 
   //---------------------------------------------------
 

@@ -89,8 +89,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>135</width>
-        <height>456</height>
+        <width>117</width>
+        <height>457</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_7">
@@ -430,7 +430,11 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QComboBox" name="comboBoxFornecedores"/>
+              <widget class="QComboBox" name="comboBoxFornecedores">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

@@ -42,7 +42,7 @@
         <bool>true</bool>
        </property>
        <property name="placeholderText">
-        <string>Código/Vendedor/Cliente/Profissional/OC Rep</string>
+        <string>Código/Vendedor/Cliente/Profissional</string>
        </property>
       </widget>
      </item>
@@ -65,8 +65,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>179</width>
-          <height>764</height>
+          <width>148</width>
+          <height>765</height>
          </rect>
         </property>
         <property name="autoFillBackground">
@@ -627,7 +627,11 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="QComboBox" name="comboBoxFornecedores"/>
+                <widget class="QComboBox" name="comboBoxFornecedores">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>

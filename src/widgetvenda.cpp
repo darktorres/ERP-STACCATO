@@ -26,7 +26,6 @@ void WidgetVenda::setupTables() {
   modelVenda.setHeaderData("status", "Status");
   modelVenda.setHeaderData("diasRestantes", "Dias restantes");
   modelVenda.setHeaderData("idVenda", "Código");
-  modelVenda.setHeaderData("ordemRepresentacao", "O.C. Rep.");
   modelVenda.setHeaderData("vendedor", "Vendedor");
   modelVenda.setHeaderData("consultor", "Consultor");
   modelVenda.setHeaderData("cliente", "Cliente");
@@ -43,7 +42,9 @@ void WidgetVenda::setupTables() {
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->hideColumn("idUsuarioConsultor");
-  ui->table->hideColumn("fornecedores");
+  ui->table->hideColumn("data2");
+  ui->table->hideColumn("data3");
+  ui->table->hideColumn("idFollowup");
 
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
@@ -81,12 +82,12 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroMes = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroMes = (ui->checkBoxMes->isChecked()) ? "data2 = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
   if (not filtroMes.isEmpty()) { filtros << filtroMes; }
 
   //-------------------------------------
 
-  const QString filtroDia = (ui->checkBoxDia->isChecked()) ? "DATE_FORMAT(data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  const QString filtroDia = (ui->checkBoxDia->isChecked()) ? "data3 = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
   if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
@@ -94,12 +95,6 @@ void WidgetVenda::montaFiltro() {
   const QString idVendedor = ui->comboBoxVendedores->currentData().toString();
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
-
-  //-------------------------------------
-
-  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
-  const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
-  if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 
@@ -135,8 +130,7 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca +
-                              "%' OR `ordemRepresentacao` LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 

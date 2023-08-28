@@ -82,8 +82,9 @@ void WidgetOrcamento::setupTables() {
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->hideColumn("idUsuarioConsultor");
+  ui->table->hideColumn("data2");
+  ui->table->hideColumn("idFollowup");
   ui->table->hideColumn("semaforo");
-  ui->table->hideColumn("fornecedores");
 
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
@@ -293,7 +294,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroData = (ui->checkBoxMes->isChecked()) ? "DATE_FORMAT(data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroData = (ui->checkBoxMes->isChecked()) ? "data2 = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
 
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
@@ -303,13 +304,6 @@ void WidgetOrcamento::montaFiltro() {
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
 
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
-
-  //-------------------------------------
-
-  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
-  const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
-
-  if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 

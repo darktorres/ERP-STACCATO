@@ -120,7 +120,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Receber) {
     auto *contas = new Contas(Contas::Tipo::Receber, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
-    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString(), (header == "ContraParte"));
+    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString(), (header == "Id"));
   }
 
   if (tipo == Tipo::Pagar) {
@@ -131,7 +131,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
     auto *contas = new Contas(Contas::Tipo::Pagar, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (header == "ContraParte") { contas->viewContaPagarPgt(model.data(index.row(), "idPagamento").toString()); }
+    if (header == "Id") { contas->viewContaPagarPgt(model.data(index.row(), "idPagamento").toString()); }
     else if (header == "O.C.") { contas->viewContaPagarOrdemCompra(ordemCompra); }
     else { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString()); }
   }
@@ -271,6 +271,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     model.setHeaderData("codFornecedor", "Cód. Forn.");
   }
 
+  model.setHeaderData("idPagamento", "Id");
   model.setHeaderData("contraParte", "ContraParte");
   model.setHeaderData("dataEmissao", "Emissão");
   model.setHeaderData("dataPagamento", "Vencimento");
@@ -294,7 +295,6 @@ void WidgetFinanceiroContas::montaFiltro() {
     ui->table->hideColumn("grupo");
   }
 
-  ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
 }
 

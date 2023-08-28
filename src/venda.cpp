@@ -475,6 +475,8 @@ void Venda::savingProcedures() {
   generateId();
 
   setData("data", ui->dateTimeEdit->isReadOnly() ? qApp->serverDateTime() : ui->dateTimeEdit->dateTime());
+  setData("data2", data("data").toDate().toString("yyyy-MM"));
+  setData("data3", data("data").toDate().toString("yyyy-MM-dd"));
   setData("dataOrc", ui->dateTimeEditOrc->dateTime());
   setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value());
   setData("descontoReais", ui->doubleSpinBoxDescontoGlobalReais->value());

@@ -679,6 +679,7 @@ void Orcamento::savingProcedures() {
   buscarConsultor();
 
   setData("data", ui->dataEmissao->isReadOnly() ? qApp->serverDateTime() : ui->dataEmissao->dateTime());
+  setData("data2", data("data").toDate().toString("yyyy-MM"));
   setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value());
   setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.);
   setData("frete", ui->doubleSpinBoxFrete->value());

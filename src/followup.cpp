@@ -44,6 +44,8 @@ void FollowUp::on_pushButtonCancelar_clicked() { close(); }
 void FollowUp::on_pushButtonSalvar_clicked() {
   verifyFields();
 
+  qApp->startTransaction("FollowUp::on_pushButtonSalvar_clicked");
+
   SqlQuery query;
 
   if (tipo == Tipo::Orcamento) {
@@ -98,6 +100,26 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   }
 
   if (not query.exec()) { throw RuntimeException("Erro salvando followup: " + query.lastError().text(), this); }
+
+  const auto lastId = query.lastInsertId();
+
+  if (tipo == Tipo::Orcamento) {
+    query.prepare("UPDATE orcamento SET idFollowup = :lastInsertId WHERE idOrcamento = :idOrcamento");
+    query.bindValue(":lastInsertId", lastId);
+    query.bindValue(":idOrcamento", id);
+
+    if (not query.exec()) { throw RuntimeException("Erro salvando idFollowup: " + query.lastError().text(), this); }
+  }
+
+  if (tipo == Tipo::Venda) {
+    query.prepare("UPDATE venda SET idFollowup = :lastInsertId WHERE idVenda = :idVenda");
+    query.bindValue(":lastInsertId", lastId);
+    query.bindValue(":idVenda", id);
+
+    if (not query.exec()) { throw RuntimeException("Erro salvando idFollowup: " + query.lastError().text(), this); }
+  }
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();

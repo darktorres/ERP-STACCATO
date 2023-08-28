@@ -435,9 +435,16 @@ void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
 void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) {
   const QString idVenda = modelVendaProduto.data(0, "idVenda").toString();
-  const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
+  const double quant = caixasDefeito * quantCaixa;
 
-  const double credito = caixasDefeito * quantCaixa * descUnitario;
+  SqlQuery queryTotal;
+
+  if (not queryTotal.exec("SELECT (total / quant) AS prcUnitario FROM venda_has_produto2 WHERE idVendaProduto2 = " + modelVendaProduto.data(0, "idVendaProduto2").toString()) or not queryTotal.first()) {
+    throw RuntimeException("Erro buscando prcUnitario: " + queryTotal.lastError().text());
+  }
+
+  const double prcUnitario = queryTotal.value("prcUnitario").toDouble();
+  const double credito = quant * prcUnitario;
 
   qApp->enqueueInformation("Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito), this);
 

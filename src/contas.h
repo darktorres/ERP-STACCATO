@@ -19,10 +19,13 @@ public:
   explicit Contas(const Tipo tipo, QWidget *parent);
   ~Contas() final;
 
+  auto viewContaPagarContraparte(const QString &contraparte) -> void;
   auto viewContaPagarData(const QString &dataPagamento) -> void;
   auto viewContaPagarOrdemCompra(const QString &ordemCompra) -> void;
   auto viewContaPagarPgt(const QString &idPagamento) -> void;
-  auto viewContaReceber(const QString &idPagamento, const QString &contraparte, const bool singleLine) -> void;
+  auto viewContaReceber(const QString &idPagamento, const QString &contraparte) -> void;
+  auto viewContaReceberContraparte(const QString &contraparte) -> void;
+  auto viewContaReceberPgt(const QString &idPagamento) -> void;
 
 private:
   // attributes

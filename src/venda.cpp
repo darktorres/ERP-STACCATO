@@ -267,7 +267,7 @@ void Venda::setupTables() {
 
   modelFluxoCaixa2.setTable("conta_a_receber_has_pagamento");
 
-  modelFluxoCaixa2.setHeaderData("contraParte", "ContraParte");
+  modelFluxoCaixa2.setHeaderData("contraParte", "Contraparte");
   modelFluxoCaixa2.setHeaderData("tipo", "Tipo");
   modelFluxoCaixa2.setHeaderData("parcela", "Parcela");
   modelFluxoCaixa2.setHeaderData("valor", "R$");

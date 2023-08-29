@@ -36,7 +36,7 @@ void InserirLancamento::setupTables() {
 
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
   modelContaPagamento.setHeaderData("idLoja", "Centro Custo");
-  modelContaPagamento.setHeaderData("contraParte", "ContraParte");
+  modelContaPagamento.setHeaderData("contraParte", "Contraparte");
   modelContaPagamento.setHeaderData("idNFe", "NF-e cadastrada");
   modelContaPagamento.setHeaderData("nfe", "NF-e");
   modelContaPagamento.setHeaderData("valor", "R$");
@@ -132,7 +132,7 @@ void InserirLancamento::verifyFields() {
 
     if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { throw RuntimeError("Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Contraparte' na linha: " + QString::number(row + 1), this); }
 
     if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { throw RuntimeError("Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
 

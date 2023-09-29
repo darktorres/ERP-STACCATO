@@ -35,6 +35,45 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item row="0" column="0">
+       <widget class="QFrame" name="frameEdicao">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QCheckBox" name="checkBoxCriarPallet">
+           <property name="text">
+            <string>Criar pallets</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxMoverPallet">
+           <property name="text">
+            <string>Mover pallets</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item row="0" column="1">
        <widget class="QFrame" name="framePalletSelecionado">
         <property name="enabled">
@@ -73,50 +112,37 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QFrame" name="frameEdicao">
+      <item row="0" column="3">
+       <widget class="QPushButton" name="pushButtonSalvarPallets">
+        <property name="text">
+         <string>Salvar alterações</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QFrame" name="frame">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QCheckBox" name="checkBoxCriarPallet">
-           <property name="text">
-            <string>Criar pallets</string>
+          <widget class="QLineEdit" name="lineEditMapa">
+           <property name="placeholderText">
+            <string>Alterar imagem do mapa</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxMoverPallet">
+          <widget class="QPushButton" name="pushButtonSelecionarMapa">
            <property name="text">
-            <string>Mover pallets</string>
+            <string>Selecionar...</string>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pushButtonSalvarPallets">
-        <property name="text">
-         <string>Salvar alterações</string>
-        </property>
        </widget>
       </item>
      </layout>

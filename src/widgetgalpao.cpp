@@ -13,6 +13,7 @@
 #include "sqlquery.h"
 #include "user.h"
 
+#include <QAuthenticator>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -47,6 +48,7 @@ void WidgetGalpao::setConnections() {
   connect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked, connectionType);
   connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked, connectionType);
   connect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked, connectionType);
+  connect(ui->pushButtonSelecionarMapa, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSelecionarMapa_clicked, connectionType);
   connect(ui->tablePallet, &QTableView::doubleClicked, this, &WidgetGalpao::on_tablePallet_doubleClicked, connectionType);
   connect(ui->tableTranspAgend, &QTableView::doubleClicked, this, &WidgetGalpao::on_tableTranspAgend_doubleClicked, connectionType);
 }
@@ -69,6 +71,7 @@ void WidgetGalpao::unsetConnections() {
   disconnect(ui->pushButtonMover, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonMover_clicked);
   disconnect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonRemoverPallet_clicked);
   disconnect(ui->pushButtonSalvarPallets, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSalvarPallets_clicked);
+  disconnect(ui->pushButtonSelecionarMapa, &QPushButton::clicked, this, &WidgetGalpao::on_pushButtonSelecionarMapa_clicked);
   disconnect(ui->tablePallet, &QTableView::doubleClicked, this, &WidgetGalpao::on_tablePallet_doubleClicked);
   disconnect(ui->tableTranspAgend, &QTableView::doubleClicked, this, &WidgetGalpao::on_tableTranspAgend_doubleClicked);
 }
@@ -87,9 +90,6 @@ void WidgetGalpao::updateTables() {
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(Qt::white);
 
-    auto *pixmapBackground = new QGraphicsPixmapItem(QPixmap("://novo_galpao2.png"));
-    scene->addItem(pixmapBackground);
-
     ui->graphicsGalpao->setScene(scene);
 
     connect(ui->graphicsGalpao, &ViewGalpao::selectBloco, this, &WidgetGalpao::selectBloco);
@@ -98,7 +98,38 @@ void WidgetGalpao::updateTables() {
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
-    ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
+    //----------------------------------
+
+    const QString ip = qApp->getWebDavIp();
+    const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa.png";
+
+    auto *manager = new QNetworkAccessManager(this);
+    manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+      Q_UNUSED(reply)
+
+      authenticator->setUser(User::usuario);
+      authenticator->setPassword(User::senha);
+    });
+
+    auto *reply = manager->get(QNetworkRequest(QUrl(url)));
+
+    connect(reply, &QNetworkReply::finished, this, [=, this] {
+      if (reply->error() != QNetworkReply::NoError) { return; }
+
+      QByteArray imageData = reply->readAll();
+
+      QPixmap pixmap;
+      pixmap.loadFromData(imageData);
+
+      if (!pixmap.isNull()) {
+        auto *pixmapBackground = new QGraphicsPixmapItem(pixmap);
+        pixmapBackground->setZValue(-1);
+        scene->addItem(pixmapBackground);
+        ui->graphicsGalpao->setSceneRect(pixmapBackground->boundingRect());
+      }
+    });
 
     setupTables();
 
@@ -707,6 +738,63 @@ void WidgetGalpao::on_pushButtonImprimir_clicked() {
 #else
   qApp->enqueueWarning("LimeReport desativado!");
 #endif
+}
+
+void WidgetGalpao::on_pushButtonSelecionarMapa_clicked()
+{
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
+
+  if (filePath.isEmpty()) { return; }
+
+  File file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
+
+  auto *manager = new QNetworkAccessManager(this);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
+    Q_UNUSED(reply)
+
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
+  });
+
+  const QString ip = qApp->getWebDavIp();
+
+  QFileInfo info(file);
+
+  const QString extension = info.suffix();
+
+//  const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa." + extension;
+  const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa.png";
+
+  const auto fileContent = file.readAll();
+
+  manager->put(QNetworkRequest(QUrl(url)), fileContent);
+
+  ui->lineEditMapa->setText("Enviando...");
+
+  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
+    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+
+    if (redirect.isValid()) {
+      manager->put(QNetworkRequest(redirect), fileContent);
+      return;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      ui->lineEditMapa->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+      throw RuntimeException("Erro enviando foto: " + reply->errorString());
+    }
+
+    ui->lineEditMapa->setText(reply->url().toString());
+    ui->lineEditMapa->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
+
+    ui->checkBoxEdicao->setChecked(false);
+    isSet = false;
+    updateTables();
+  });
 }
 
 // TODO: zoom por touch (e zoom por slider?)

@@ -1102,8 +1102,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked() {
 
   for (int row = 0; row < modelVendas.rowCount(); ++row) {
     QString pedido = modelVendas.data(row, "mapa").toString();
+    QString peso = QLocale(QLocale::Portuguese).toString(modelVendas.data(row, "kg").toInt());
     if (pedido.isEmpty()) { continue; }
-    pedidos += "&pedido=" + pedido;
+    pedidos += "&pedido=" + pedido + ";" + peso;
 
     QDate prazo = modelVendas.data(row, "novoPrazoEntrega").toDate();
     const int dias = static_cast<int>(qApp->serverDate().daysTo(prazo));
@@ -1130,7 +1131,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked() {
     reply->deleteLater();
 
     if (response == "Data written to file") {
-      QDesktopServices::openUrl(QUrl("https://" + qApp->getWebDavIp() + "/maps/markers.html?user=" + User::usuario));
+      QDesktopServices::openUrl(QUrl("https://" + qApp->getWebDavIp() +
+                                     "/maps/markers.html?user=" + User::usuario + "&timestamp=" + QDateTime::currentDateTime().toString("yyyyMMddHHmmss")));
     } else {
       Log::createLog("Exceção", response);
       throw RuntimeException("Não foi possível executar a operação!");

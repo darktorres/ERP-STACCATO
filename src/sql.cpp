@@ -20,7 +20,7 @@ void Sql::updateVendaStatus(const QString &idVendas) {
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {
   return " SELECT "
-         "     SUM(IF(vp2.status NOT IN ('ENTREGUE' , 'CANCELADO', 'DEVOLVIDO'), p.kgcx * vp2.caixas, 0)) AS kg,"
+         "     SUM(IF(vp2.status NOT IN ('ENTREGUE' , 'CANCELADO', 'DEVOLVIDO'), CAST(p.kgcx * vp2.caixas AS signed), 0)) AS kg,"
          "     `che`.`cep` AS `CEP`,"
          "     `che`.`bairro` AS `Bairro`,"
          "     `che`.`logradouro` AS `Logradouro`,"
@@ -35,7 +35,7 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          "     SUM(`vp2`.`status` = 'ESTOQUE') AS `Estoque`,"
          "     SUM(`vp2`.`status` IN ('ENTREGUE' , 'EM ENTREGA', 'ENTREGA AGEND.')) AS `Agend/Entregue`,"
          "     SUM(`vp2`.`status` NOT IN ('ESTOQUE' , 'ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.', 'DEVOLVIDO', 'QUEBRADO')) AS `Outros`,"
-         "     CONCAT(lat, ';', lng, ';', REPLACE(v.idVenda,'&','%26'), ';', REPLACE(che.logradouro, ' ', '%20'), ',%20', che.numero, '%20-%20', REPLACE(che.bairro, ' ', '%20'), ',%20', REPLACE(che.cidade, ' ', '%20')) AS mapa"
+         "     CONCAT(lat, ';', lng, ';', REPLACE(v.idVenda,'&','&amp'), ';', REPLACE(che.logradouro, ' ', '%20'), ',%20', REPLACE(che.numero, ' ', '%20'), '%20-%20', REPLACE(che.bairro, ' ', '%20'), ',%20', REPLACE(che.cidade, ' ', '%20')) AS mapa"
          " FROM "
          "     `venda_has_produto2` `vp2` "
          " LEFT JOIN "

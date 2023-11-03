@@ -24,7 +24,7 @@ WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : 
 WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 
 void WidgetLogisticaAgendarEntrega::setupTables() {
-  modelVendas.setQuery(Sql::view_entrega_pendente());
+  modelVendas.setQuery(Sql::view_entrega_pendente() + "LIMIT 0");
 
   modelVendas.select();
 
@@ -297,6 +297,8 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 
     setConnections();
     isSet = true;
+
+    return;
   }
 
   // -------------------------------------------------------------------------
@@ -352,10 +354,7 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-
-  const QString filtroBusca = textoBusca.isEmpty() ? ""
-                                                   : " AND (vp2.idVenda LIKE '%" + textoBusca + "%' OR che.bairro LIKE '%" + textoBusca + "%' OR che.logradouro LIKE '%" + textoBusca +
-                                                         "%' OR che.cidade LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = textoBusca.isEmpty() ? "" : montarLike(textoBusca);
 
   //-------------------------------------
 
@@ -384,12 +383,31 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   //-------------------------------------
 
   modelVendas.setQuery(Sql::view_entrega_pendente(filtroBusca, filtroCheck, filtroStatus, filtroAtelier, filtroServicos));
-
   modelVendas.select();
 
   //-------------------------------------
 
   filtroProdutos();
+}
+
+QString WidgetLogisticaAgendarEntrega::montarLike(QString textoBusca){
+  QStringList columns = {"vp2.idVenda", "che.bairro", "che.logradouro", "che.cidade"};
+  QStringList words = textoBusca.split(" ", Qt::SkipEmptyParts);
+  QString query;
+
+  // Iterate through columns and words to build the query
+  foreach (const QString &column, columns) {
+    foreach (const QString &word, words) {
+      query += QString("%1 LIKE '%%2%'").arg(column).arg(word);
+
+      // Add 'OR' if it's not the last condition
+      if (column != columns.last() or word != words.last()) {
+        query += " OR ";
+      }
+    }
+  }
+
+  return " AND (" + query + ")";
 }
 
 void WidgetLogisticaAgendarEntrega::filtroProdutos() {

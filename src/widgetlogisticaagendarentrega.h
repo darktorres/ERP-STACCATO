@@ -43,6 +43,7 @@ private:
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto filtroProdutos() -> void;
   auto montaFiltro() -> void;
+  auto montarLike(QString textoBusca) -> QString;
   auto on_dateTimeEdit_dateChanged(const QDate date) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_itemBoxVeiculo_textChanged() -> void;

@@ -199,6 +199,10 @@ void InserirLancamento::preencher(const QModelIndex &index) {
   try {
     const int row = index.row();
 
+    if (index.column() == ui->table->columnIndex("idLoja")) {
+      modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
+    }
+
     if (index.column() == ui->table->columnIndex("dataRealizado")) {
       const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
       const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
@@ -219,7 +223,6 @@ void InserirLancamento::preencher(const QModelIndex &index) {
       modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"));
       modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"));
       modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
-      modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
       modelContaPagamento.setData(row, "dataRealizado", qApp->ajustarDiaUtil(modelContaPagamento.data(row, "dataRealizado").toDate()));
     }
   } catch (std::exception &) {

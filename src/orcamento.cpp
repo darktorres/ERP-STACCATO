@@ -253,7 +253,6 @@ bool Orcamento::viewRegister() {
       ui->itemBoxProfissional->setReadOnlyItemBox(true);
       ui->itemBoxVendedor->setReadOnlyItemBox(true);
 
-      ui->dataEmissao->setReadOnly(true);
       ui->doubleSpinBoxDesconto->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);

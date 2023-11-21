@@ -999,6 +999,8 @@ void Venda::cadastrar() {
     criarConsumos();
 
     Sql::updateVendaStatus(ui->lineEditVenda->text());
+    Sql::updateFornecedoresVenda(ui->lineEditVenda->text());
+    Sql::updateOrdemRepresentacaoVenda(ui->lineEditVenda->text());
 
     qApp->endTransaction();
 

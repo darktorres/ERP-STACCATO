@@ -14,6 +14,7 @@
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "user.h"
 #include "venda.h"
 
@@ -1424,6 +1425,8 @@ void Orcamento::cadastrar() {
     if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     modelItem.submitAll();
+
+    Sql::updateFornecedoresOrcamento(primaryId);
 
     qApp->endTransaction();
 

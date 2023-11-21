@@ -85,6 +85,7 @@ void WidgetOrcamento::setupTables() {
   ui->table->hideColumn("data2");
   ui->table->hideColumn("idFollowup");
   ui->table->hideColumn("semaforo");
+  ui->table->hideColumn("fornecedores");
 
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
@@ -304,6 +305,12 @@ void WidgetOrcamento::montaFiltro() {
   const QString filtroVendedor = (ui->comboBoxVendedores->currentText() == "Vendedores") ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
 
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
+
+  //-------------------------------------
+
+  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
+  const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
+  if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 

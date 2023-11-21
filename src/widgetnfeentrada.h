@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QStack>
@@ -25,6 +26,7 @@ private:
   bool isSet = false;
   QStack<int> blockingSignals;
   SqlTableModel model;
+  SqlQueryModel modelResumo;
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto ajustarGroupBoxStatus() -> void;

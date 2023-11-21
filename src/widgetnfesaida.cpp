@@ -78,6 +78,22 @@ void WidgetNfeSaida::updateTables() {
   }
 
   model.select();
+
+  // ---------------------------------------------------
+
+  modelResumo.select();
+
+  const int fWidth = ui->tableResumo->frameWidth() * 2;
+
+  const int vWidth = ui->tableResumo->verticalHeader()->width();
+  const int hWidth = ui->tableResumo->horizontalHeader()->length();
+
+  ui->tableResumo->setFixedWidth(vWidth + hWidth + fWidth);
+
+  const int hHeight = ui->tableResumo->horizontalHeader()->height();
+  const int vHeight = ui->tableResumo->verticalHeader()->length();
+
+  ui->tableResumo->setFixedHeight(hHeight + vHeight + fWidth);
 }
 
 void WidgetNfeSaida::resetTables() {
@@ -102,6 +118,15 @@ void WidgetNfeSaida::setupTables() {
   ui->table->setItemDelegate(new DoubleDelegate(this));
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+
+  // ----------------------------------------------------
+
+  modelResumo.setQuery("SELECT status AS Status, COUNT(*) AS `` FROM nfe n WHERE tipo = 'SAÍDA' GROUP BY status");
+
+  ui->tableResumo->setModel(&modelResumo);
+
+  ui->tableResumo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  ui->tableResumo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {

@@ -16,6 +16,29 @@ void Sql::updateVendaStatus(const QString &idVendas) {
   }
 }
 
+void Sql::updateFornecedoresOrcamento(const QString idOrcamento) {
+  SqlQuery query;
+
+  if (not query.exec("CALL update_fornecedores_orcamento('" + idOrcamento + "')")) { throw RuntimeException("Erro atualizando fornecedores: " + query.lastError().text()); }
+}
+
+void Sql::updateFornecedoresVenda(const QString idVenda) {
+  SqlQuery query;
+
+  if (not query.exec("CALL update_fornecedores_venda('" + idVenda + "')")) { throw RuntimeException("Erro atualizando fornecedores: " + query.lastError().text()); }
+}
+
+void Sql::updateOrdemRepresentacaoVenda(const QStringList idVendas) { updateOrdemRepresentacaoVenda(idVendas.join(", ")); }
+
+void Sql::updateOrdemRepresentacaoVenda(const QString idVendas) {
+  QStringList list = idVendas.split(", ", Qt::SkipEmptyParts);
+  list.removeDuplicates();
+
+  for (auto const &idVenda : list) {
+    if (SqlQuery query; not query.exec("CALL update_ordemRepresentacao_venda('" + idVenda + "')")) { throw RuntimeException("Erro atualizando ordemRepresentacao: " + query.lastError().text()); }
+  }
+}
+
 // clang-format off
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {

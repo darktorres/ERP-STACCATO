@@ -8,6 +8,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "sql.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -301,13 +302,24 @@ void InputDialogProduto::cadastrar() {
     }
   }
 
+  QStringList idVendas;
+
   if (tipo == Tipo::Faturamento) {
     for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
       if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") { modelPedidoFornecedor.setData(row, "status", "ENTREGUE"); }
     }
+
+
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+      idVendas << modelPedidoFornecedor.data(row, "idVenda").toString();
+    }
   }
 
   modelPedidoFornecedor.submitAll();
+
+  if (tipo == Tipo::Faturamento) {
+    Sql::updateOrdemRepresentacaoVenda(idVendas);
+  }
 
   qApp->endTransaction();
 }

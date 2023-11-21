@@ -26,6 +26,7 @@ void WidgetVenda::setupTables() {
   modelVenda.setHeaderData("status", "Status");
   modelVenda.setHeaderData("diasRestantes", "Dias restantes");
   modelVenda.setHeaderData("idVenda", "Código");
+  modelVenda.setHeaderData("ordemRepresentacao", "O.C. Rep.");
   modelVenda.setHeaderData("vendedor", "Vendedor");
   modelVenda.setHeaderData("consultor", "Consultor");
   modelVenda.setHeaderData("cliente", "Cliente");
@@ -45,6 +46,7 @@ void WidgetVenda::setupTables() {
   ui->table->hideColumn("data2");
   ui->table->hideColumn("data3");
   ui->table->hideColumn("idFollowup");
+  ui->table->hideColumn("fornecedores");
 
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
@@ -98,6 +100,12 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
+  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
+  const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
+  if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
+
+  //-------------------------------------
+
   const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
@@ -130,8 +138,8 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca + "%')";
-
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca +
+                              "%' OR `ordemRepresentacao` LIKE '%" + textoBusca + "%')";
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
   //-------------------------------------

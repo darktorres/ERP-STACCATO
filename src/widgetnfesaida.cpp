@@ -390,23 +390,28 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbr;
 
-  const auto [xml, resposta] = acbr.consultarNFe(idNFe);
+  try {
+    const auto [xml, resposta] = acbr.consultarNFe(idNFe);
 
-  qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe");
+    qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe");
 
-  atualizarNFe(resposta, idNFe, xml);
+    atualizarNFe(resposta, idNFe, xml);
 
-  qApp->endTransaction();
+    qApp->endTransaction();
+
+    const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+
+    if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo':\n" + resposta); }
+
+    const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
+
+    qApp->enqueueInformation(xMotivo, this);
+  } catch (std::exception &) {
+    updateTables();
+    throw;
+  }
 
   updateTables();
-
-  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
-
-  if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo':\n" + resposta); }
-
-  const QString xMotivo = resposta.mid(xMotivoIndex + 8).split("\r\n").first();
-
-  qApp->enqueueInformation(xMotivo, this);
 }
 
 void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {

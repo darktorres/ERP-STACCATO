@@ -323,6 +323,9 @@
                  </item>
                  <item>
                   <widget class="QLineEdit" name="lineEditEstoque_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -343,6 +346,9 @@ color: rgb(255, 255, 255);</string>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="lineEditEstoque_3">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -363,6 +369,9 @@ color: rgb(0, 0, 0);</string>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="lineEditPromocao_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>0</horstretch>

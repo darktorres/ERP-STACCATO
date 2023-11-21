@@ -353,6 +353,10 @@ SearchDialog *SearchDialog::nfe(const bool todasNFes, QWidget *parent) {
 
   auto *sdNFe = new SearchDialog("Buscar NF-e", todasNFes ? "view_nfe_todas" : "view_nfe_inutilizada", "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
 
+  if (not todasNFes) {
+    sdNFe->setWindowTitle("Buscar NF-es destinadas ao CNPJ do CD");
+  }
+
   sdNFe->ui->table->setAutoResize(false);
 
   sdNFe->hideColumns({"idNFe", "infCpl", "xml"});

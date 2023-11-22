@@ -15,23 +15,26 @@
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
-  ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
+  setWindowFlags(Qt::Window);
 
-  if (not User::isAdministrativo()) { hideWidgets(); }
+  ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
   if (User::isAdministrativo()) { preencherComboBoxMonitorar(); }
 
+  if (not User::isAdministrativo()) {
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEmail), false);
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabNFe), false);
+  }
+
   getSettings();
-
   setConnections();
-
   adjustSize();
 }
 
 UserConfig::~UserConfig() { delete ui; }
 
 void UserConfig::getSettings() {
-  if (not ui->groupBoxAcbr->isHidden()) {
+  if (User::isAdministrativo()) {
     SqlQuery query;
 
     if (not query.exec("SELECT servidorACBr, portaACBr, lojaACBr, emailContabilidade, emailLogistica FROM config")) {
@@ -45,10 +48,6 @@ void UserConfig::getSettings() {
       ui->lineEditEmailContabilidade->setText(query.value("emailContabilidade").toString());
       ui->lineEditEmailLogistica->setText(query.value("emailLogistica").toString());
     }
-  }
-
-  if (not ui->groupBoxDownloadNFe->isHidden()) {
-    SqlQuery query;
 
     if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {
       throw RuntimeException("Erro buscando dados do monitor de NF-e: " + query.lastError().text());
@@ -65,10 +64,6 @@ void UserConfig::getSettings() {
       ui->lineEditMonitorarServidor2->setText(query.value("monitorarServidor2").toString());
       ui->lineEditMonitorarPorta2->setText(query.value("monitorarPorta2").toString());
     }
-  }
-
-  if (not ui->groupBoxEmail->isHidden()) {
-    SqlQuery query;
 
     if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
       throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
@@ -89,21 +84,6 @@ void UserConfig::getSettings() {
   ui->lineEditComprasFolder->setText(User::getSetting("User/ComprasFolder").toString());
   ui->lineEditEntregasXmlFolder->setText(User::getSetting("User/EntregasXmlFolder").toString());
   ui->lineEditEntregasPdfFolder->setText(User::getSetting("User/EntregasPdfFolder").toString());
-}
-
-void UserConfig::hideWidgets() {
-  ui->groupBoxAcbr->hide();
-  ui->groupBoxDownloadNFe->hide();
-  ui->groupBoxEmail->hide();
-  ui->labelCompras->hide();
-  ui->labelEntregas->hide();
-  ui->labelEntregas_2->hide();
-  ui->lineEditComprasFolder->hide();
-  ui->lineEditEntregasPdfFolder->hide();
-  ui->lineEditEntregasXmlFolder->hide();
-  ui->pushButtonComprasFolder->hide();
-  ui->pushButtonEntregasPdfFolder->hide();
-  ui->pushButtonEntregasXmlFolder->hide();
 }
 
 void UserConfig::setConnections() {
@@ -129,15 +109,14 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
-  if (not ui->groupBoxAcbr->isHidden()) { salvarDadosEmissorNFe(); }
+  if (User::isAdministrativo()) {
+    salvarDadosEmissorNFe();
 
-  if (not ui->groupBoxDownloadNFe->isHidden()) {
     User::setSetting("User/monitorarNFe", ui->groupBoxDownloadNFe->isChecked());
-
     salvarDadosMonitorNFe();
-  }
 
-  if (not ui->groupBoxEmail->isHidden()) { salvarDadosEmail(); }
+    salvarDadosEmail();
+  }
 
   // TODO: caso as pastas estejam vazias usar /arquivos como padrao
   User::setSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());

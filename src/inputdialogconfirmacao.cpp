@@ -416,7 +416,8 @@ void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   // -------------------------------------------------------------------------
 
-  (choice == QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
+  (choice == QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2)
+                               : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
 
   modelVendaProduto.submitAll();
 

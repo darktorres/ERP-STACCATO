@@ -5,7 +5,6 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
-#include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"

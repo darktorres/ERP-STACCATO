@@ -5,6 +5,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -12,7 +13,12 @@
 #include <QMessageBox>
 #include <QSqlError>
 
-WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) { ui->setupUi(this); }
+WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
+  ui->setupUi(this);
+
+  ui->splitter->setStretchFactor(0, 1);
+  ui->splitter->setStretchFactor(1, 4);
+}
 
 WidgetGare::~WidgetGare() { delete ui; }
 
@@ -51,6 +57,8 @@ void WidgetGare::updateTables() {
   }
 
   model.select();
+  modelVencidos.select();
+  modelVencer.select();
 }
 
 void WidgetGare::habilitarBotoes() {
@@ -122,6 +130,26 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 }
 
 void WidgetGare::setupTables() {
+  modelVencidos.setQuery(Sql::view_gare_vencidos());
+
+  modelVencidos.sort("`Data`");
+
+  ui->tableVencidos->setModel(&modelVencidos);
+
+  ui->tableVencidos->setItemDelegate(new ReaisDelegate(this));
+
+  // -------------------------------------------------------------------------
+
+  modelVencer.setQuery(Sql::view_gare_vencer());
+
+  modelVencer.sort("`Data`");
+
+  ui->tableVencer->setModel(&modelVencer);
+
+  ui->tableVencer->setItemDelegate(new ReaisDelegate(this));
+
+  // -------------------------------------------------------------------------
+
   model.setTable("view_gares");
 
   model.setHeaderData("valor", "R$");

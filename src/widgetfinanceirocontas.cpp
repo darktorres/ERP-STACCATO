@@ -27,7 +27,7 @@ void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Receber) { modelVencidos.setQuery(Sql::view_a_receber_vencidos()); }
   if (tipo == Tipo::Pagar) { modelVencidos.setQuery(Sql::view_a_pagar_vencidos()); }
 
-  modelVencidos.sort("`Data Pagamento`");
+  modelVencidos.sort("`Data`");
 
   ui->tableVencidos->setModel(&modelVencidos);
 
@@ -38,7 +38,7 @@ void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Receber) { modelVencer.setQuery(Sql::view_a_receber_vencer()); }
   if (tipo == Tipo::Pagar) { modelVencer.setQuery(Sql::view_a_pagar_vencer()); }
 
-  modelVencer.sort("`Data Pagamento`");
+  modelVencer.sort("`Data`");
 
   ui->tableVencer->setModel(&modelVencer);
 
@@ -355,8 +355,8 @@ void WidgetFinanceiroContas::on_groupBoxRealizado_toggled(const bool enabled) {
 void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  ui->dateEditVencimentoDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
-  ui->dateEditVencimentoAte->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoDe->setDate(modelVencidos.record(index.row()).value("Data").toDate());
+  ui->dateEditVencimentoAte->setDate(modelVencidos.record(index.row()).value("Data").toDate());
 
   ui->groupBoxVencimento->setChecked(true);
 
@@ -366,8 +366,8 @@ void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &i
 void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  ui->dateEditVencimentoDe->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
-  ui->dateEditVencimentoAte->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
+  ui->dateEditVencimentoDe->setDate(modelVencer.record(index.row()).value("Data").toDate());
+  ui->dateEditVencimentoAte->setDate(modelVencer.record(index.row()).value("Data").toDate());
 
   ui->groupBoxVencimento->setChecked(true);
 

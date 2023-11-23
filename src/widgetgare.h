@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cnab.h"
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QTimer>
@@ -24,6 +25,8 @@ private:
   // attributes
   bool isSet = false;
   SqlTableModel model;
+  SqlQueryModel modelVencidos;
+  SqlQueryModel modelVencer;
   Ui::WidgetGare *ui;
   // methods
   auto habilitarBotoes() -> void;

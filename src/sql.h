@@ -23,6 +23,8 @@ public:
   static auto view_a_pagar_vencidos() -> QString;
   static auto view_a_receber_vencer() -> QString;
   static auto view_a_receber_vencidos() -> QString;
+  static auto view_gare_vencer() -> QString;
+  static auto view_gare_vencidos() -> QString;
   static auto view_agendar_entrega(const QString &idVenda = {}, const QString &status = {}) -> QString;
   static auto view_entrega_pendente(const QString &filtroBusca = {}, const QString &filtroCheck = {}, const QString &filtroStatus = {}, const QString &filtroAtelier = {},
                                     const QString &filtroServico = {}) -> QString;

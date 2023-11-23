@@ -105,6 +105,8 @@ void WidgetFinanceiroContas::updateTables() {
   model.select();
   modelVencidos.select();
   modelVencer.select();
+
+  somarSelecao();
 }
 
 void WidgetFinanceiroContas::resetTables() {
@@ -280,6 +282,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("dataPagamento", "Vencimento");
   model.setHeaderData("dataRealizado", "Realizado");
   model.setHeaderData("valor", "R$");
+  model.setHeaderData("valorReal", "R$ Real");
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("parcela", "Parcela");
   model.setHeaderData("observacao", "Obs.");
@@ -290,6 +293,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->setStoredSelection(true);
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
 
   if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
 
@@ -666,13 +670,22 @@ void WidgetFinanceiroContas::somarSelecao() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   double soma = 0.;
+  double somaReal = 0.;
 
   for (auto index : selection) {
     soma += model.data(index.row(), "valor").toDouble();
+    somaReal += model.data(index.row(), "valorReal").toDouble();
   }
 
-  ui->doubleSpinBoxSomaSelecao->setValue(soma);
-  ui->doubleSpinBoxSomaSelecao->setSuffix(" - " + QString::number(selection.size()) + " linha(s)");
+  QString somaStr = QLocale(QLocale::Portuguese).toString(soma, 'f', 2);
+  QString somaRealStr = QLocale(QLocale::Portuguese).toString(somaReal, 'f', 2);
+  QString linhas = QLocale(QLocale::Portuguese).toString(selection.size());
+  ui->lineEditSomaSelecao->setText(QString("R$ %1 - R$ %2 Real - %3 linha(s)").arg(somaStr, somaRealStr, linhas));
+
+  QString text = ui->lineEditSomaSelecao->text();
+  int pixels = ui->lineEditSomaSelecao->fontMetrics().horizontalAdvance(text);
+
+  ui->lineEditSomaSelecao->setFixedWidth(pixels + 10);
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

@@ -544,21 +544,15 @@
            <number>2</number>
           </property>
           <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBoxSomaSelecao">
+           <widget class="QLineEdit" name="lineEditSomaSelecao">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
-            <property name="showGroupSeparator" stdset="0">
-             <bool>true</bool>
-            </property>
-            <property name="prefix">
-             <string>R$ </string>
-            </property>
-            <property name="maximum">
-             <double>9999999.990000000223517</double>
             </property>
            </widget>
           </item>
@@ -689,6 +683,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
@@ -703,11 +702,6 @@
    <class>LineEdit</class>
    <extends>QLineEdit</extends>
    <header>src/lineedit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

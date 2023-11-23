@@ -82,13 +82,15 @@ void Contas::validarData(const QModelIndex &index) {
     if (oldDate.isNull()) { return; }
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(30) or newDate < oldDate.addDays(-30))) {
-      modelPendentes.setData(row, "dataPagamento", oldDate);
-      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
+      // modelPendentes.setData(row, "dataPagamento", oldDate);
+      // throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
+      qApp->enqueueWarning("Alteração de data maior que 30 dias!");
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(30) or newDate < oldDate.addDays(-30))) {
-      modelPendentes.setData(row, "dataPagamento", oldDate);
-      throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
+      // modelPendentes.setData(row, "dataPagamento", oldDate);
+      // throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
+      qApp->enqueueWarning("Alteração de data maior que 30 dias!");
     }
   }
 }

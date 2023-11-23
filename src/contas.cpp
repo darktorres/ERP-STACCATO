@@ -66,8 +66,6 @@ void Contas::unsetConnections() {
 }
 
 void Contas::validarData(const QModelIndex &index) {
-  Q_UNUSED(index)
-
   if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
     const int row = index.row();
     const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
@@ -83,12 +81,12 @@ void Contas::validarData(const QModelIndex &index) {
 
     if (oldDate.isNull()) { return; }
 
-    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
+    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(30) or newDate < oldDate.addDays(-30))) {
       modelPendentes.setData(row, "dataPagamento", oldDate);
       throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
     }
 
-    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
+    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(30) or newDate < oldDate.addDays(-30))) {
       modelPendentes.setData(row, "dataPagamento", oldDate);
       throw RuntimeError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
     }
@@ -96,7 +94,7 @@ void Contas::validarData(const QModelIndex &index) {
 }
 
 void Contas::preencher(const QModelIndex &index) {
-  //  validarData(index);
+  validarData(index);
 
   unsetConnections();
 

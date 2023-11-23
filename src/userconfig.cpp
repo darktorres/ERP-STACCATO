@@ -65,7 +65,7 @@ void UserConfig::getSettings() {
       ui->lineEditMonitorarPorta2->setText(query.value("monitorarPorta2").toString());
     }
 
-    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
+    if (not query.exec("SELECT servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail, mensagemEmail FROM usuario_has_config WHERE idUsuario = " + User::idUsuario)) {
       throw RuntimeException("Erro buscando dados do email: " + query.lastError().text());
     }
 
@@ -76,6 +76,7 @@ void UserConfig::getSettings() {
       ui->lineEditEmailSenha->setText(query.value("senhaEmail").toString());
       ui->lineEditEmailCopia->setText(query.value("copiaParaEmail").toString());
       ui->lineEditAssinaturaEmail->setText(query.value("assinaturaEmail").toString());
+      ui->textBrowserMensagemEmail->setHtml(query.value("mensagemEmail").toString());
     }
   }
 
@@ -199,10 +200,10 @@ void UserConfig::preencherComboBoxMonitorar() {
 
 void UserConfig::salvarDadosEmail() {
   SqlQuery queryUsuario;
-  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail) "
-                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail, :assinaturaEmail) AS new "
+  queryUsuario.prepare("INSERT INTO usuario_has_config (idUsuario, servidorEmail, portaEmail, email, senhaEmail, copiaParaEmail, assinaturaEmail, mensagemEmail) "
+                       "VALUES (:idUsuario, :servidorEmail, :portaEmail, :email, :senhaEmail, :copiaParaEmail, :assinaturaEmail, :mensagemEmail) AS new "
                        "ON DUPLICATE KEY UPDATE servidorEmail = new.servidorEmail, portaEmail = new.portaEmail, email = new.email, "
-                       "senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail, assinaturaEmail = new.assinaturaEmail");
+                       "senhaEmail = new.senhaEmail, copiaParaEmail = new.copiaParaEmail, assinaturaEmail = new.assinaturaEmail, mensagemEmail = new.mensagemEmail");
   queryUsuario.bindValue(":idUsuario", User::idUsuario);
   queryUsuario.bindValue(":servidorEmail", ui->lineEditServidorSMTP->text());
   queryUsuario.bindValue(":portaEmail", ui->lineEditPortaSMTP->text());
@@ -210,6 +211,7 @@ void UserConfig::salvarDadosEmail() {
   queryUsuario.bindValue(":senhaEmail", ui->lineEditEmailSenha->text());
   queryUsuario.bindValue(":copiaParaEmail", ui->lineEditEmailCopia->text());
   queryUsuario.bindValue(":assinaturaEmail", ui->lineEditAssinaturaEmail->text());
+  queryUsuario.bindValue(":mensagemEmail", ui->textBrowserMensagemEmail->toHtml());
 
   if (not queryUsuario.exec()) { throw RuntimeException("Erro salvando dados do e-mail: " + queryUsuario.lastError().text()); }
 }

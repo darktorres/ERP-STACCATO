@@ -248,7 +248,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     //-------------------------------------
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
+    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR pf2.ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
     if (not text.isEmpty()) { filtros << busca; }
 
     //-------------------------------------

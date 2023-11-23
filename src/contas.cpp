@@ -74,7 +74,9 @@ void Contas::validarData(const QModelIndex &index) {
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando dataPagamento: " + query.lastError().text(), this); }
+
+    if (not query.first()) { return; }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();

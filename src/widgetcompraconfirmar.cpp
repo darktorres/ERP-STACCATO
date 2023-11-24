@@ -81,6 +81,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+  if (selection.size() > 1) { throw RuntimeError("Deve selecionar apenas uma linha!", this); }
 
   const int row = selection.first().row();
 

@@ -74,14 +74,14 @@ void User::autorizacao(const QString &user, const QString &password) {
   if (not query2.exec("UPDATE usuario SET senhaUsoUnico = NULL, valorMinimoFrete = NULL WHERE user = '" + user + "'")) { throw RuntimeException("Erro ao apagar senha de uso único: " + query2.lastError().text()); }
 }
 
-QVariant User::fromLoja(const QString &parameter, const QString &user) {
+QVariant User::fromLoja(const QString &parameter, const QString &idUsuario_) {
   SqlQuery queryLoja;
-  queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
-  queryLoja.bindValue(":nome", user);
+  queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.idUsuario = :idUsuario");
+  queryLoja.bindValue(":idUsuario", idUsuario_);
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro na query loja: " + queryLoja.lastError().text()); }
 
-  if (not queryLoja.first()) { throw RuntimeException("Dados da loja/usuário não encontrados para o usuário: '" + user + "'"); }
+  if (not queryLoja.first()) { throw RuntimeException("Dados da loja/usuário não encontrados para o usuário: '" + idUsuario_ + "'"); }
 
   return queryLoja.value(0);
 }

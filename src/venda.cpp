@@ -1229,7 +1229,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 void Venda::generateId() {
-  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
+  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->getId().toString()).toString();
 
   if (siglaLoja.isEmpty()) { throw RuntimeException("Erro buscando sigla da loja!"); }
 

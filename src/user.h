@@ -10,7 +10,7 @@ public:
   User() = delete;
 
   static auto autorizacao(const QString &user, const QString &password) -> void;
-  static auto fromLoja(const QString &parameter, const QString &user = nome) -> QVariant;
+  static auto fromLoja(const QString &parameter, const QString &idUsuario_ = idUsuario) -> QVariant;
   static auto getSetting(const QString &key) -> QVariant;
   static auto isAdmin() -> bool;              // administrador,  diretor
   static auto isAdministrativo() -> bool;     // administrador, administrativo, diretor

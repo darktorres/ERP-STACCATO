@@ -321,7 +321,7 @@ bool Orcamento::viewRegister() {
     }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
-      const QString idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toString();
+      const QString idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->getId().toString()).toString();
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
@@ -521,7 +521,7 @@ void Orcamento::removeItem() {
 }
 
 void Orcamento::generateId() {
-  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
+  const QString siglaLoja = User::fromLoja("sigla", ui->itemBoxVendedor->getId().toString()).toString();
 
   if (siglaLoja.isEmpty()) { throw RuntimeException("Erro buscando sigla da loja!"); }
 
@@ -665,7 +665,7 @@ void Orcamento::savingProcedures() {
   if (tipo == Tipo::Cadastrar) {
     generateId();
 
-    const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
+    const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->getId().toString()).toInt();
     setData("idLoja", idLoja);
 
     setData("idOrcamento", ui->lineEditOrcamento->text());
@@ -1557,7 +1557,7 @@ void Orcamento::on_itemBoxVendedor_textChanged() {
 }
 
 void Orcamento::buscarParametrosFrete() {
-  const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
+  const int idLoja = User::fromLoja("usuario.idLoja", ui->itemBoxVendedor->getId().toString()).toInt();
 
   if (idLoja == 0) { throw RuntimeException("Erro buscando idLoja!"); }
 

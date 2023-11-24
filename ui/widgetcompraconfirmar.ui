@@ -44,7 +44,6 @@
          <property name="font">
           <font>
            <pointsize>14</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -128,7 +127,7 @@
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
+          <enum>QAbstractItemView::MultiSelection</enum>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>

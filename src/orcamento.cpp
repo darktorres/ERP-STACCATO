@@ -234,7 +234,7 @@ bool Orcamento::viewRegister() {
       ui->plainTextEditBaixa->show();
     }
 
-    const bool expirado = (ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate());
+    const bool expirado = (qApp->serverDate() > ui->dataEmissao->date().addDays(data("validade").toInt()));
 
     if (expirado or status != "ATIVO") {
       isReadOnly = true;
@@ -938,11 +938,11 @@ void Orcamento::on_pushButtonAtualizarItem_clicked() { atualizarItem(); }
 void Orcamento::on_pushButtonGerarVenda_clicked() {
   save(true);
 
-  const QDateTime time = ui->dataEmissao->dateTime();
+  const QDate date = ui->dataEmissao->date();
 
-  if (not time.isValid()) { return; }
+  if (not date.isValid()) { return; }
 
-  if (time.addDays(data("validade").toInt()).date() < qApp->serverDate()) { throw RuntimeError("Orçamento vencido!"); }
+  if (qApp->serverDate() > date.addDays(data("validade").toInt())) { throw RuntimeError("Orçamento vencido!"); }
 
   if (ui->itemBoxEndereco->text().isEmpty()) { throw RuntimeError("Deve selecionar endereço!"); }
 

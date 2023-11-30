@@ -175,7 +175,7 @@ void CadastroProduto::savingProcedures() {
   const bool representacao = query.value("representacao").toBool();
 
   setData("representacao", representacao);
-  setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate());
+  setData("descontinuado", qApp->serverDate() > ui->dateEditValidade->date());
 }
 
 void CadastroProduto::on_pushButtonCadastrar_clicked() { save(); }

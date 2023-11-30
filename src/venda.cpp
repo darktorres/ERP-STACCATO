@@ -1700,7 +1700,7 @@ void Venda::processarPagamento(Pagamento *pgt) {
   if (tipoPgt == "CONTA CLIENTE") {
     const int row = modelFluxoCaixa.insertRowAtEnd();
 
-    const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
+    const QDate dataEmissao = (correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate());
 
     modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
     modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao);

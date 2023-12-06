@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1502</width>
-    <height>456</height>
+    <width>1426</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -525,7 +525,34 @@
          </widget>
         </widget>
        </item>
-       <item row="1" column="1" colspan="2">
+       <item row="2" column="2">
+        <widget class="LineEdit" name="lineEditBusca">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="labelContasReceberBuscar">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Buscar:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="lineEditSomaSelecao">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="3">
         <widget class="QFrame" name="frame_3">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">
@@ -543,19 +570,6 @@
           <property name="bottomMargin">
            <number>2</number>
           </property>
-          <item>
-           <widget class="QLineEdit" name="lineEditSomaSelecao">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QPushButton" name="pushButtonAbrirDANFE">
             <property name="enabled">
@@ -636,7 +650,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1" colspan="2">
+       <item row="0" column="1" colspan="3">
         <widget class="TableView" name="table">
          <property name="mouseTracking">
           <bool>true</bool>
@@ -652,26 +666,6 @@
          </property>
          <property name="sortingEnabled">
           <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="LineEdit" name="lineEditBusca">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="labelContasReceberBuscar">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Buscar:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>

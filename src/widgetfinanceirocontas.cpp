@@ -682,10 +682,10 @@ void WidgetFinanceiroContas::somarSelecao() {
   QString linhas = QLocale(QLocale::Portuguese).toString(selection.size());
   ui->lineEditSomaSelecao->setText(QString("R$ %1 - R$ %2 Real - %3 linha(s)").arg(somaStr, somaRealStr, linhas));
 
-  QString text = ui->lineEditSomaSelecao->text();
-  int pixels = ui->lineEditSomaSelecao->fontMetrics().horizontalAdvance(text);
+  // QString text = ui->lineEditSomaSelecao->text();
+  // int pixels = ui->lineEditSomaSelecao->fontMetrics().horizontalAdvance(text);
 
-  ui->lineEditSomaSelecao->setFixedWidth(pixels + 10);
+  // ui->lineEditSomaSelecao->setFixedWidth(pixels + 10);
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

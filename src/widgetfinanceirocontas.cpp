@@ -441,7 +441,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   msgBox.button(QMessageBox::No)->setText("Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    qApp->startTransaction("");
+    qApp->startTransaction("WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked");
 
     SqlQuery query;
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");

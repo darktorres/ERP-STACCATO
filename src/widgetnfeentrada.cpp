@@ -178,7 +178,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //------------------------------------- filtro data
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`Importado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
   //------------------------------------- filtro status

@@ -37,9 +37,11 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->checkBoxInutilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->checkBoxUtilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->dateEditDe, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::on_dateEditDe_dateChanged, connectionType);
   connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro, connectionType);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxMes_toggled, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxStatus_toggled, connectionType);
   connect(ui->groupBoxUtilizada, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxUtilizada_toggled, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
@@ -59,9 +61,11 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->checkBoxInutilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->checkBoxUtilizada, &QCheckBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
-  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->dateEditDe, &QDateEdit::dateChanged, this, &WidgetNfeEntrada::on_dateEditDe_dateChanged);
   disconnect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxMes_toggled);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxStatus_toggled);
   disconnect(ui->groupBoxUtilizada, &QGroupBox::toggled, this, &WidgetNfeEntrada::on_groupBoxUtilizada_toggled);
   disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &WidgetNfeEntrada::montaFiltro);
@@ -76,7 +80,8 @@ void WidgetNfeEntrada::unsetConnections() {
 void WidgetNfeEntrada::updateTables() {
   if (not isSet) {
     ui->lineEditBusca->setDelayed();
-    ui->dateEdit->setDate(qApp->serverDate());
+    ui->dateEditAte->setDate(qApp->serverDate());
+    ui->dateEditDe->setDate(qApp->serverDate());
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
     setupTables();
     montaFiltro();
@@ -162,8 +167,8 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeEntrada::montaFiltro() {
-  ajustarGroupBoxStatus();
-  ajustarGroupBoxUtilizada();
+  // ajustarGroupBoxStatus();
+  // ajustarGroupBoxUtilizada();
 
   //-------------------------------------
 
@@ -178,7 +183,8 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //------------------------------------- filtro data
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
+                                                          : "";
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
   //------------------------------------- filtro status
@@ -526,6 +532,14 @@ void WidgetNfeEntrada::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::NFe, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetNfeEntrada::on_dateEditDe_dateChanged(const QDate date) { ui->dateEditAte->setDate(date); }
+
+void WidgetNfeEntrada::on_groupBoxMes_toggled(const bool enabled) {
+  const auto children = ui->groupBoxMes->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
+
+  for (const auto &child : children) { child->setEnabled(enabled); }
 }
 
 // TODO: colocar opção de buscar por uma palavra-chave para buscar NF-es de um produto especifico, por ex: notebook

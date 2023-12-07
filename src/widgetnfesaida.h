@@ -34,6 +34,8 @@ private:
   auto cancelarNFe(const QString &chaveAcesso, const int row) -> void;
   auto gravarArquivo(const QString &resposta, const QString &chaveAcesso) -> void;
   auto montaFiltro() -> void;
+  auto on_dateEditDe_dateChanged(const QDate date) -> void;
+  auto on_groupBoxMes_toggled(const bool enabled) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCancelarNFe_clicked() -> void;
   auto on_pushButtonConsultarNFe_clicked() -> void;

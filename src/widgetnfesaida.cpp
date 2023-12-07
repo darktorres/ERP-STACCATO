@@ -36,8 +36,10 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
+  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
+  connect(ui->dateEditDe, &QDateEdit::dateChanged, this, &WidgetNfeSaida::on_dateEditDe_dateChanged, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro, connectionType);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxMes_toggled, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled, connectionType);
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeSaida::montaFiltro, connectionType);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked, connectionType);
@@ -55,8 +57,10 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxDenegada, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
-  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->dateEditDe, &QDateEdit::dateChanged, this, &WidgetNfeSaida::on_dateEditDe_dateChanged);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxMes_toggled);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled);
   disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeSaida::montaFiltro);
   disconnect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
@@ -70,7 +74,8 @@ void WidgetNfeSaida::unsetConnections() {
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
     ui->lineEditBusca->setDelayed();
-    ui->dateEdit->setDate(qApp->serverDate());
+    ui->dateEditAte->setDate(qApp->serverDate());
+    ui->dateEditDe->setDate(qApp->serverDate());
     setupTables();
     montaFiltro();
     setConnections();
@@ -148,7 +153,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeSaida::montaFiltro() {
-  ajustarGroupBoxStatus();
+  // ajustarGroupBoxStatus();
 
   //-------------------------------------
 
@@ -163,7 +168,8 @@ void WidgetNfeSaida::montaFiltro() {
 
   //------------------------------------- filtro data
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
+                                                          : "";
   if (not filtroData.isEmpty()) { filtros << filtroData; }
 
   //------------------------------------- filtro status
@@ -292,7 +298,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   view.setTable("view_relatorio_nfe");
 
   // TODO: trocar 'Criado em' por 'DataEmissao'
-  view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADA')");
+  view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "' AND (status = 'AUTORIZADA')");
 
   view.select();
 
@@ -303,12 +309,13 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   // TODO: trocar 'Criado em' por 'DataEmissao'
   SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
-                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADA')");
-  query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
+                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m-%d') BETWEEN :dataDe AND :dataAte AND (status = 'AUTORIZADA')");
+  query.bindValue(":dataDe", ui->dateEditDe->date().toString("yyyy-MM-dd"));
+  query.bindValue(":dataAte", ui->dateEditAte->date().toString("yyyy-MM-dd"));
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 
-  if (not query.first()) { throw RuntimeException("Não foram encontrado dados para a data: '" + ui->dateEdit->date().toString("yyyy-MM") + "'"); }
+  if (not query.first()) { throw RuntimeException("Não foram encontrado dados para a data: '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "/" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"); }
 
   dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
@@ -527,6 +534,14 @@ void WidgetNfeSaida::on_pushButtonFollowup_clicked() {
   auto *followup = new FollowUp(idVenda, FollowUp::Tipo::NFe, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
+}
+
+void WidgetNfeSaida::on_dateEditDe_dateChanged(const QDate date) { ui->dateEditAte->setDate(date); }
+
+void WidgetNfeSaida::on_groupBoxMes_toggled(const bool enabled) {
+  const auto children = ui->groupBoxMes->findChildren<QDateEdit *>(QRegularExpression("dateEdit"));
+
+  for (const auto &child : children) { child->setEnabled(enabled); }
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)

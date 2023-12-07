@@ -46,23 +46,8 @@
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>3</number>
-        </property>
-        <property name="leftMargin">
-         <number>3</number>
-        </property>
-        <property name="topMargin">
-         <number>3</number>
-        </property>
-        <property name="rightMargin">
-         <number>3</number>
-        </property>
-        <property name="bottomMargin">
-         <number>3</number>
-        </property>
-        <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
          <widget class="QGroupBox" name="groupBoxStatus">
           <property name="title">
            <string>Status</string>
@@ -128,7 +113,7 @@
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="1" column="0">
          <widget class="QGroupBox" name="groupBoxUtilizada">
           <property name="title">
            <string/>
@@ -181,13 +166,13 @@
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="2" column="0">
          <widget class="QGroupBox" name="groupBoxMes">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="title">
-           <string>Mês</string>
+           <string>Data</string>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -195,7 +180,7 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout_5">
+          <layout class="QGridLayout" name="gridLayout_8">
            <property name="leftMargin">
             <number>2</number>
            </property>
@@ -208,26 +193,56 @@
            <property name="bottomMargin">
             <number>2</number>
            </property>
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QDateEdit" name="dateEdit">
-             <property name="currentSection">
-              <enum>QDateTimeEdit::MonthSection</enum>
-             </property>
-             <property name="displayFormat">
-              <string>MM/yy</string>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="dateEditAte">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
              <property name="calendarPopup">
               <bool>true</bool>
              </property>
             </widget>
            </item>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEditDe">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>De</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Até</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="3" column="0">
          <widget class="QGroupBox" name="groupBoxLojas">
           <property name="enabled">
            <bool>true</bool>
@@ -267,7 +282,7 @@
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="4" column="0">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -379,6 +394,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>TableView</class>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
@@ -388,19 +408,12 @@
    <extends>QLineEdit</extends>
    <header>src/lineedit.h</header>
   </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxAutorizado</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxCancelado</tabstop>
-  <tabstop>groupBoxMes</tabstop>
-  <tabstop>dateEdit</tabstop>
   <tabstop>groupBoxLojas</tabstop>
   <tabstop>itemBoxLoja</tabstop>
   <tabstop>table</tabstop>

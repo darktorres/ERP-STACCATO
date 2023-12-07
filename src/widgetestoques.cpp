@@ -159,11 +159,11 @@ void WidgetEstoques::gerarExcel(const QString &arquivoModelo, const QString &fil
   const int columnCount = (User::isAdministrativo()) ? modelContabil.columnCount() : modelContabil.fieldIndex("codComercial") + 1;
 
   // write header
-  for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString::number(cell) + QString::number(1), modelContabil.headerData(column, Qt::Horizontal).toString()); }
+  for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString(cell) + QString::number(1), modelContabil.headerData(column, Qt::Horizontal).toString()); }
 
   // write data
   for (int row = 0, rowCount = modelContabil.rowCount(); row < rowCount; ++row) {
-    for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString::number(cell) + QString::number(row + 2), modelContabil.data(row, column)); }
+    for (int cell = 'A', column = 0; column < columnCount; ++cell, ++column) { xlsx.write(QString(cell) + QString::number(row + 2), modelContabil.data(row, column)); }
   }
 
   if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!"); }

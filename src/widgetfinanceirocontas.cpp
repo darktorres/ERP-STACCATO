@@ -10,6 +10,7 @@
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
+#include "user.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -423,6 +424,8 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
+  if (selection.size() != 1) { throw RuntimeError("Deve selecionar apenas uma linha!", this); }
+
   SqlQuery queryPagamento;
   queryPagamento.prepare("SELECT grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
 
@@ -434,6 +437,13 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: '" + model.data(index.row(), "idPagamento").toString() + "'"); }
 
     if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
+
+    // ---------------------------------------------------------------
+
+    const QDate realizado = model.data(index.row(), "dataRealizado").toDate();
+    const bool mais30dias = realizado < qApp->serverDate().addDays(-30);
+
+    if (not User::isAdmin() and mais30dias) { throw RuntimeError("O pagamento foi realizado a mais de 30 dias!", this); }
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);

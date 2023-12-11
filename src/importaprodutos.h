@@ -87,7 +87,6 @@ private:
   auto cadastraFornecedores(QXlsx::Document &xlsx) -> void;
   auto camposForaDoPadrao() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
-  auto importar() -> void;
   auto insereEmErro() -> void;
   auto insereEmOk() -> void;
   auto leituraProduto(QXlsx::Document &xlsx, const int row) -> void;
@@ -97,6 +96,7 @@ private:
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto pintarCamposForaDoPadrao(const int row) -> void;
+  auto processarArquivo() -> void;
   auto readFile() -> bool;
   auto readValidade() -> bool;
   auto salvar() -> void;

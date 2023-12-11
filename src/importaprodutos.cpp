@@ -45,7 +45,7 @@ void ImportaProdutos::importarTabela() {
 
     qApp->startTransaction("ImportaProdutos::importaTabela");
 
-    importar();
+    processarArquivo();
   } catch (std::exception &) {
     close();
     throw;
@@ -78,7 +78,7 @@ void ImportaProdutos::atualizaProduto() {
   marcaProdutoNaoDescontinuado(row);
 }
 
-void ImportaProdutos::importar() {
+void ImportaProdutos::processarArquivo() {
   QXlsx::Document xlsx(file, this);
 
   xlsx.selectSheet("BASE");

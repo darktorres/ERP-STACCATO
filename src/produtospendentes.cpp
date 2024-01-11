@@ -190,6 +190,7 @@ void ProdutosPendentes::setupTables() {
   ui->tableCompra->hideColumn("idPedido2");
   ui->tableCompra->hideColumn("idPedidoFK");
   ui->tableCompra->hideColumn("idRelacionado");
+  ui->tableCompra->hideColumn("idFollowup");
   ui->tableCompra->hideColumn("selecionado");
   ui->tableCompra->hideColumn("aliquotaSt");
   ui->tableCompra->hideColumn("st");

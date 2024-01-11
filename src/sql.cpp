@@ -111,7 +111,9 @@ QString Sql::view_agendar_entrega(const QString &idVenda, const QString &status)
          "     `vp2`.`quantCaixa` AS `quantCaixa`,"
          "     `vp2`.`codComercial` AS `codComercial`,"
          "     `vp2`.`formComercial` AS `formComercial`,"
-         "     GROUP_CONCAT(`ehc`.`idConsumo` SEPARATOR ',') AS `idConsumo` "
+         "     GROUP_CONCAT(`ehc`.`idConsumo` SEPARATOR ',') AS `idConsumo`, "
+         "     pff.dataFollowup, "
+         "     pff.observacao "
          " FROM "
          "     `venda_has_produto2` `vp2` "
          " LEFT JOIN "
@@ -121,8 +123,14 @@ QString Sql::view_agendar_entrega(const QString &idVenda, const QString &status)
          " LEFT JOIN "
          "     `nfe` `n` ON `vp2`.`idNFeSaida` = `n`.`idNFe` "
          " LEFT JOIN "
-         "     `nfe` `n2` ON `vp2`.`idNFeFutura` = `n2`.`idNFe` " +
-         filtro +
+         "     `nfe` `n2` ON `vp2`.`idNFeFutura` = `n2`.`idNFe` "
+         " LEFT JOIN "
+         "     pedido_fornecedor_has_produto2 pf2 ON vp2.idVendaProduto2 = pf2.idVendaProduto2 "
+         " LEFT JOIN "
+         "     pedido_fornecedor_has_produto pf1 ON pf2.idPedidoFK = pf1.idPedido1 "
+         " LEFT JOIN "
+         "     pedido_fornecedor_has_followup pff ON pf1.idFollowup = pff.idFollowup "
+         + filtro +
          " GROUP BY"
          "     `vp2`.`idVendaProduto2`";
 }

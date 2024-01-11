@@ -67,6 +67,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("quantCaixa", "Quant./Cx.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
+  modelProdutos.setHeaderData("dataFollowup", "Data Followup");
+  modelProdutos.setHeaderData("observacao", "Observação");
 
   ui->tableProdutos->setModel(&modelProdutos);
 

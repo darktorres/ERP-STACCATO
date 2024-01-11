@@ -60,6 +60,7 @@ void CancelaProduto::setupTables() {
 
   ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("idRelacionado");
+  ui->table->hideColumn("idFollowup");
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("codFornecedor");
   ui->table->hideColumn("idVendaProduto1");

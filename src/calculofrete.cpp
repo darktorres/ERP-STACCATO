@@ -30,7 +30,7 @@ CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::Calcul
   // -------------------------------------------------------------------------
 
   SqlQuery queryLoja;
-  queryLoja.prepare("SELECT logradouro, numero, complemento, cidade, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryLoja.prepare("SELECT logradouro, numero, complemento, cidade, uf FROM loja_has_endereco WHERE idLoja = :idLoja AND desativado = FALSE");
   queryLoja.bindValue(":idLoja", 6);
 
   if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeException("Erro buscando endereço do galpão: " + queryLoja.lastError().text(), this); }
@@ -300,7 +300,9 @@ void CalculoFrete::qualp() {
     const double distancia = rawObj.value("distance").toDouble();
     const double combustivel = rawObj.value("total_consumption").toDouble();
     const double pedagio = rawObj.value("total_tolls").toDouble();
-    const double totalViagem = rawObj.value("total_trip").toDouble();
+    // NOTE: por algum motivo desconhecido o qualp está retornando NULL nesse campo, só o formatado está saindo certo
+    // const double totalViagem = rawObj.value("total_trip").toDouble();
+    const double totalViagem = combustivel + pedagio;
 
     const QString distanciaFmt = fmtObj.value("distance").toString();
     const QString multiplicadorDistancia = (cargas == 1) ? "" : " -> " + QLocale(QLocale::Portuguese).toString(cargas * distancia, 'f', 2) + " KM";
@@ -309,7 +311,7 @@ void CalculoFrete::qualp() {
     const QString multiplicadorCombustivel = (cargas == 1) ? "" : " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * combustivel, 'f', 2);
 
     const QString pedagioFmt = fmtObj.value("total_tolls").toString();
-    const QString totalViagemFmt = fmtObj.value("total_trip").toString();
+    // const QString totalViagemFmt = fmtObj.value("total_trip").toString();
 
     const QString cargasStr = (cargas == 1) ? "" : QString::number(cargas) + "x ";
     const QString multiplicadorCarga = (cargas == 1) ? "" : " -> R$ " + QLocale(QLocale::Portuguese).toString(cargas * pedagio, 'f', 2);

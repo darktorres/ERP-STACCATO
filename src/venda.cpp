@@ -670,6 +670,13 @@ void Venda::criarComissaoProfissional() {
     const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
 
     if (not qFuzzyIsNull(valor)) {
+      SqlQuery query0;
+
+      if (not query0.exec("SELECT pagamento, idConta FROM forma_pagamento WHERE idPagamento = (SELECT contaComissaoProfissional FROM config WHERE idConfig = 1)")
+          or not query0.first()) {
+        throw RuntimeException("erro: " + query0.lastError().text());
+      }
+
       SqlQuery query1;
       query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, idConta, centroCusto, valor, tipo, dataPagamento, grupo) "
                      "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :idConta, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
@@ -677,10 +684,10 @@ void Venda::criarComissaoProfissional() {
       query1.bindValue(":idVenda", ui->lineEditVenda->text());
       query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
       query1.bindValue(":idLoja", idLoja);
-      query1.bindValue(":idConta", 33);
+      query1.bindValue(":idConta", query0.value("idConta").toInt());
       query1.bindValue(":centroCusto", idLoja);
       query1.bindValue(":valor", valor);
-      query1.bindValue(":tipo", "1. TRANSF. ITAÚ");
+      query1.bindValue(":tipo", "1. " + query0.value("pagamento").toString());
       // 01-15 paga dia 30, 16-30 paga prox dia 15
       QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
       QDate quinzena2 = date.addMonths(1);
@@ -1839,15 +1846,23 @@ void Venda::processarPagamento(Pagamento *pgt) {
 
       const int rowComissao = modelFluxoCaixa2.insertRowAtEnd();
 
+      SqlQuery query0;
+
+      if (not query0.exec("SELECT pagamento, idConta FROM forma_pagamento WHERE idPagamento = (SELECT contaComissaoLoja FROM config WHERE idConfig = 1)")
+          or not query0.first()) {
+        throw RuntimeException("erro: " + query0.lastError().text());
+      }
+
       modelFluxoCaixa2.setData(rowComissao, "contraParte", modelItem.data(0, "fornecedor"));
       modelFluxoCaixa2.setData(rowComissao, "dataEmissao", dataEmissao);
       modelFluxoCaixa2.setData(rowComissao, "idVenda", ui->lineEditVenda->text());
       modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja);
       modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1));
       modelFluxoCaixa2.setData(rowComissao, "valor", valorComissao);
-      modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pgt->posicao) + ". Comissão");
+      modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pgt->posicao) + ". " + query0.value("pagamento").toString());
       modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1);
       modelFluxoCaixa2.setData(rowComissao, "comissao", true);
+      modelFluxoCaixa2.setData(rowComissao, "idConta", query0.value("idConta").toInt());
       modelFluxoCaixa2.setData(rowComissao, "centroCusto", idLoja);
       modelFluxoCaixa2.setData(rowComissao, "grupo", "Comissão Representação");
     }

@@ -28,6 +28,9 @@ private:
   auto adicionarPagamento() -> void;
   auto atualizarPagamento() -> void;
   auto limparSelecao() -> void;
+  auto on_comboBoxLoja_currentIndexChanged(const int index) -> void;
+  auto on_comboBoxProfissional_currentIndexChanged(const int index) -> void;
+  auto on_comboBoxVendedor_currentIndexChanged(const int index) -> void;
   auto on_itemBoxLoja_idChanged(const QVariant &id) -> void;
   auto on_pushButtonAdicionaAssociacao_clicked() -> void;
   auto on_pushButtonAdicionarPagamento_clicked() -> void;

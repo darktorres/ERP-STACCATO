@@ -24,6 +24,36 @@ CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new 
   ui->pushButtonAtualizarPagamento->hide();
 
   setConnections();
+
+  ui->itemBoxContaLoja->setSearchDialog(SearchDialog::conta(this));
+  ui->itemBoxContaProfissional->setSearchDialog(SearchDialog::conta(this));
+  ui->itemBoxContaVendedor->setSearchDialog(SearchDialog::conta(this));
+
+  ui->itemBoxContaLoja->setReadOnlyItemBox(true);
+  ui->itemBoxContaProfissional->setReadOnlyItemBox(true);
+  ui->itemBoxContaVendedor->setReadOnlyItemBox(true);
+
+  ui->comboBoxLoja->addItem("");
+  ui->comboBoxProfissional->addItem("");
+  ui->comboBoxVendedor->addItem("");
+
+  for (int row = 0; row < modelPagamentos.rowCount(); ++row) {
+    ui->comboBoxLoja->addItem(modelPagamentos.data(row, "pagamento").toString(), modelPagamentos.data(row, "idPagamento").toInt());
+    ui->comboBoxProfissional->addItem(modelPagamentos.data(row, "pagamento").toString(), modelPagamentos.data(row, "idPagamento").toInt());
+    ui->comboBoxVendedor->addItem(modelPagamentos.data(row, "pagamento").toString(), modelPagamentos.data(row, "idPagamento").toInt());
+  }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT contaComissaoLoja, contaComissaoProfissional, contaComissaoVendedor FROM config WHERE idConfig = 1")) {
+    throw RuntimeException("Erro buscando contas padrão: " + query.lastError().text());
+  }
+
+  if (query.first()) {
+    ui->comboBoxLoja->setCurrentIndex(ui->comboBoxLoja->findData(query.value("contaComissaoLoja").toInt()));
+    ui->comboBoxProfissional->setCurrentIndex(ui->comboBoxProfissional->findData(query.value("contaComissaoProfissional").toInt()));
+    ui->comboBoxVendedor->setCurrentIndex(ui->comboBoxVendedor->findData(query.value("contaComissaoVendedor").toInt()));
+  }
 }
 
 CadastroPagamento::~CadastroPagamento() {
@@ -35,6 +65,9 @@ CadastroPagamento::~CadastroPagamento() {
 void CadastroPagamento::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->comboBoxLoja, qOverload<int>(&QComboBox::currentIndexChanged), this, &CadastroPagamento::on_comboBoxLoja_currentIndexChanged, connectionType);
+  connect(ui->comboBoxProfissional, qOverload<int>(&QComboBox::currentIndexChanged), this, &CadastroPagamento::on_comboBoxProfissional_currentIndexChanged, connectionType);
+  connect(ui->comboBoxVendedor, qOverload<int>(&QComboBox::currentIndexChanged), this, &CadastroPagamento::on_comboBoxVendedor_currentIndexChanged, connectionType);
   connect(ui->itemBoxLoja, &ItemBox::idChanged, this, &CadastroPagamento::on_itemBoxLoja_idChanged, connectionType);
   connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked, connectionType);
   connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroPagamento::on_pushButtonAdicionarPagamento_clicked, connectionType);
@@ -368,5 +401,59 @@ void CadastroPagamento::on_itemBoxLoja_idChanged(const QVariant &id) {
 }
 
 void CadastroPagamento::on_pushButtonLimparSelecao_clicked() { limparSelecao(); }
+
+void CadastroPagamento::on_comboBoxLoja_currentIndexChanged(const int index)
+{
+  Q_UNUSED(index)
+
+  const int idPagamento = ui->comboBoxLoja->currentData().toInt();
+  const auto match = modelPagamentos.match("idPagamento", idPagamento, 1, Qt::MatchExactly);
+
+  if (not match.isEmpty()) {
+    ui->itemBoxContaLoja->setId(modelPagamentos.data(match.first().row(), "idConta").toInt());
+
+    SqlQuery query;
+
+    if (not query.exec("UPDATE config SET contaComissaoLoja = " + QString::number(idPagamento) + " WHERE idConfig = 1")) {
+      throw RuntimeException("Erro atualizando conta: " + query.lastError().text());
+    }
+  }
+}
+
+void CadastroPagamento::on_comboBoxProfissional_currentIndexChanged(const int index)
+{
+  Q_UNUSED(index)
+
+  const int idPagamento = ui->comboBoxProfissional->currentData().toInt();
+  const auto match = modelPagamentos.match("idPagamento", idPagamento, 1, Qt::MatchExactly);
+
+  if (not match.isEmpty()) {
+    ui->itemBoxContaProfissional->setId(modelPagamentos.data(match.first().row(), "idConta").toInt());
+
+    SqlQuery query;
+
+    if (not query.exec("UPDATE config SET contaComissaoProfissional = " + QString::number(idPagamento) + " WHERE idConfig = 1")) {
+      throw RuntimeException("Erro atualizando conta: " + query.lastError().text());
+    }
+  }
+}
+
+void CadastroPagamento::on_comboBoxVendedor_currentIndexChanged(const int index)
+{
+  Q_UNUSED(index)
+
+  const int idPagamento = ui->comboBoxVendedor->currentData().toInt();
+  const auto match = modelPagamentos.match("idPagamento", idPagamento, 1, Qt::MatchExactly);
+
+  if (not match.isEmpty()) {
+    ui->itemBoxContaVendedor->setId(modelPagamentos.data(match.first().row(), "idConta").toInt());
+
+    SqlQuery query;
+
+    if (not query.exec("UPDATE config SET contaComissaoVendedor = " + QString::number(idPagamento) + " WHERE idConfig = 1")) {
+      throw RuntimeException("Erro atualizando conta: " + query.lastError().text());
+    }
+  }
+}
 
 // TODO: colocar caixa de confirmacao antes de remover qualquer coisa

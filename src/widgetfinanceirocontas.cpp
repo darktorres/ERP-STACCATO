@@ -18,7 +18,10 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) { ui->setupUi(this); }
+WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) {
+  ui->setupUi(this);
+  ui->pushButtonImportarFolhaPag->hide();
+}
 
 WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 

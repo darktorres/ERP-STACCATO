@@ -160,7 +160,7 @@ void MainWindow::resetTables() {
   if (currentTab == "Financeiro") { ui->widgetFinanceiro->resetTables(); }
   if (currentTab == "Relatórios") { ui->widgetRelatorio->resetTables(); }
   if (currentTab == "Gráfico") { ui->widgetGraficos->resetTables(); }
-  //    if (currentTab == "RH") { ui->widgetRh->resetTables(); }
+  if (currentTab == "RH") { ui->widgetRh->resetTables(); }
   if (currentTab == "Consistência") { ui->widgetConsistencia->resetTables(); }
 
   updateTables();
@@ -186,7 +186,7 @@ void MainWindow::updateTables() {
     if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
     if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
     if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
-    //    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
+    if (currentTab == "RH") { ui->widgetRh->updateTables(); }
     if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
   } catch (std::exception &) {
     qApp->setUpdating(false);

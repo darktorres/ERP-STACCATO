@@ -356,8 +356,6 @@ void WidgetPagamentos::setFrete(const double newFrete) {
 }
 
 void WidgetPagamentos::setST(const double newSt) {
-  qDebug() << "";
-
   st = newSt;
 
   if (qFuzzyIsNull(st)) {

@@ -4,6 +4,7 @@
 #include "QtCUrl.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -238,11 +239,21 @@ void CalculoFrete::qualp() {
     QString urlString = queryLoja.value("apiQualp").toString();
 
     const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
-    if (origemSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de origem!"); }
+
+    if (origemSplit.size() != 5) {
+      Log::createLog("Exceção", "Endereço origem: " + ui->lineEditOrigem->text());
+      throw RuntimeException("Erro na formatação do endereço de origem!");
+    }
+
     const QString origem = origemSplit.at(0) + ", " + origemSplit.at(1) + ", " + origemSplit.at(3) + " / " + origemSplit.at(4);
 
     const QStringList destinoSplit = ui->itemBoxDestino->text().split(" - ");
-    if (destinoSplit.size() != 5) { throw RuntimeException("Erro na formatação do endereço de destino!"); }
+
+    if (destinoSplit.size() != 5) {
+      Log::createLog("Exceção", "Endereço destino: " + ui->itemBoxDestino->text());
+      throw RuntimeException("Erro na formatação do endereço de destino!");
+    }
+
     const QString destino = destinoSplit.at(0) + ", " + destinoSplit.at(1) + ", " + destinoSplit.at(3) + " / " + destinoSplit.at(4);
 
     urlString.replace("_origem_", origem);

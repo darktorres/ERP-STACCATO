@@ -281,7 +281,7 @@ void Excel::setQuerys() {
 
   //------------------------------------------------------------------------
 
-  queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja AND desativado = FALSE");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLojaEnd.exec()) { throw RuntimeException("Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }

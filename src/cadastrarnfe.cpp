@@ -1757,7 +1757,7 @@ void CadastrarNFe::preencherEmitente() {
   // endereço do emitente
 
   SqlQuery queryEndereco;
-  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja AND desativado = FALSE");
   queryEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryEndereco.exec()) { throw RuntimeException("Erro lendo endereço do emitente: " + queryEndereco.lastError().text(), this); }
@@ -1799,7 +1799,7 @@ void CadastrarNFe::preencherDestinatario() {
   //    ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
 
   //    SqlQuery queryDestinatarioEndereco;
-  //    queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  //    queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja AND desativado = FALSE");
   //    queryDestinatarioEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   //    if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {

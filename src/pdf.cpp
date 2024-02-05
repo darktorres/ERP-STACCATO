@@ -227,7 +227,7 @@ void PDF::setQuerys() {
 
   //------------------------------------------------------------------------
 
-  queryLojaEnd.prepare("SELECT logradouro, numero, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
+  queryLojaEnd.prepare("SELECT logradouro, numero, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja AND desativado = FALSE");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLojaEnd.exec()) { throw RuntimeException("Erro buscando loja endereço: " + queryLojaEnd.lastError().text()); }

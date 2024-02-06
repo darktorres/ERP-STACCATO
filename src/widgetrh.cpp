@@ -44,6 +44,12 @@ void WidgetRh::setConnections() {
   connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetRh::on_groupBoxData_toggled, connectionType);
   connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetRh::on_pushButtonImportarFolhaPag_clicked, connectionType);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetRh::on_pushButtonRemessaItau_clicked, connectionType);
+  connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
+  connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
+  connect(ui->radioButtonConferido, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
+  connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
+  connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
+  connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
   // NOTE: QSqlTableModel::OnFieldChange sets the flags to not editable during dataChanged so the function below wont work unless flags() is overriden
   // connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &WidgetRh::preencher, connectionType);
 }
@@ -363,6 +369,20 @@ void WidgetRh::on_groupBoxData_toggled(const bool enabled) {
 
 void WidgetRh::montaFiltro() {
   QStringList filtros;
+  QString status;
+
+  const auto children = ui->groupBoxStatus->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
+
+  for (const auto &child : children) {
+    if (child->isChecked()) {
+      if (child->text() == "Todos") { break; }
+
+      status = child->text();
+      break;
+    }
+  }
+
+  if (not status.isEmpty()) { filtros << "status = '" + status + "'"; }
 
   //-------------------------------------
 

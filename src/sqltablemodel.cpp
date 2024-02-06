@@ -62,8 +62,10 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
   if (adjustValue and adjustedValue.userType() == QMetaType::QString) { adjustedValue.setValue(adjustedValue.toString().toUpper().trimmed()); }
 
   if (proxyModel) {
-    proxyModel->setData(proxyModel->index(row, column), adjustedValue);
-    return;
+    if (not proxyModel->setData(proxyModel->index(row, column), adjustedValue)) {
+      throw RuntimeException("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
+    }
+
   }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {

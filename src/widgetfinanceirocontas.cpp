@@ -153,7 +153,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     QStringList filtros;
     QString status;
 
-    const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
+    const auto children = ui->groupBoxStatus->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
 
     for (const auto &child : children) {
       if (child->isChecked()) {

@@ -163,7 +163,7 @@
                <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
               </item>
               <item>
-               <widget class="QGroupBox" name="groupBox_2">
+               <widget class="QGroupBox" name="groupBoxStatus">
                 <property name="title">
                  <string>Status</string>
                 </property>

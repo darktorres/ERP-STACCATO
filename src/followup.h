@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QDialog>
@@ -22,6 +23,7 @@ public:
 private:
   // attributes
   QString const id;
+  SqlQueryModel modelMisto;
   SqlTableModel modelFollowup;
   SqlTableModel modelOrcamento;
   Tipo const tipo;

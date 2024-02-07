@@ -249,6 +249,7 @@ void CalculoFrete::qualp() {
 
     const QStringList destinoSplit = ui->itemBoxDestino->text().split(" - ");
 
+    // NOTE: os campos podem ter hifen fazendo com que o split tenha tamanho maior que o devido
     if (destinoSplit.size() != 5) {
       Log::createLog("Exceção", "Endereço destino: " + ui->itemBoxDestino->text());
       throw RuntimeException("Erro na formatação do endereço de destino!");

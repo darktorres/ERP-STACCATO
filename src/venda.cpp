@@ -1343,7 +1343,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) { credito += modelFluxoCaixa.data(row, "valor").toDouble(); }
   }
 
-  ui->widgetPgts->setCredito(credito * -1);
+  ui->widgetPgts->setCredito(credito);
 
   // -------------------------------------------------------------------------
 

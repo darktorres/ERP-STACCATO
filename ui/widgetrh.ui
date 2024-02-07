@@ -173,7 +173,11 @@
       </widget>
      </item>
      <item>
-      <widget class="TableView" name="table"/>
+      <widget class="TableView" name="table">
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

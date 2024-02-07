@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "followupproxymodel.h"
+#include "sql.h"
 #include "user.h"
 
 #include <QDebug>
@@ -135,7 +136,7 @@ void FollowUp::verifyFields() {
 
 void FollowUp::setupTables() {
   if (tipo == Tipo::Orcamento) { modelFollowup.setTable("view_followup_orcamento"); }
-  if (tipo == Tipo::Venda) { modelFollowup.setTable("view_followup_venda"); }
+  if (tipo == Tipo::Venda) { modelMisto.setQuery(Sql::view_followup_venda_misto(id.left(11))); }
   if (tipo == Tipo::Compra) { modelFollowup.setTable("view_followup_pedido_fornecedor"); }
   if (tipo == Tipo::Estoque) { modelFollowup.setTable("view_followup_estoque"); }
   if (tipo == Tipo::NFe) { modelFollowup.setTable("view_followup_nfe"); }
@@ -145,28 +146,32 @@ void FollowUp::setupTables() {
     modelFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
   }
 
-  if (tipo == Tipo::Venda) { modelFollowup.setHeaderData("idVenda", "Venda"); }
   if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "O.C."); }
   if (tipo == Tipo::Estoque) { modelFollowup.setHeaderData("idEstoque", "Estoque"); }
   if (tipo == Tipo::NFe) { modelFollowup.setHeaderData("idNFe", "NF-e"); }
 
-  modelFollowup.setHeaderData("nome", "Usuário");
-  modelFollowup.setHeaderData("observacao", "Observação");
-  modelFollowup.setHeaderData("dataFollowup", "Data");
+  if (tipo != Tipo::Venda) {
+    modelFollowup.setHeaderData("nome", "Usuário");
+    modelFollowup.setHeaderData("observacao", "Observação");
+    modelFollowup.setHeaderData("dataFollowup", "Data");
+  }
 
   if (tipo == Tipo::Orcamento) { modelFollowup.setFilter("idOrcamento LIKE '" + id.left(12) + "%'"); }
-  if (tipo == Tipo::Venda) { modelFollowup.setFilter("idVenda LIKE '" + id.left(11) + "%'"); }
   if (tipo == Tipo::Compra) { modelFollowup.setFilter("ordemCompra = " + id); }
   if (tipo == Tipo::Estoque) { modelFollowup.setFilter("idEstoque = " + id); }
   if (tipo == Tipo::NFe) { modelFollowup.setFilter("idNFe = " + id); }
 
-  modelFollowup.setSort("dataFollowup");
+  if (tipo != Tipo::Venda) {
+    modelFollowup.setSort("dataFollowup");
+    modelFollowup.select();
+    modelFollowup.proxyModel = new FollowUpProxyModel(&modelFollowup, this);
+    ui->table->setModel(&modelFollowup);
+  }
 
-  modelFollowup.select();
-
-  modelFollowup.proxyModel = new FollowUpProxyModel(&modelFollowup, this);
-
-  ui->table->setModel(&modelFollowup);
+  if (tipo == Tipo::Venda) {
+    modelMisto.select();
+    ui->table->setModel(&modelMisto);
+  }
 
   if (tipo == Tipo::Orcamento) {
     modelOrcamento.setTable("orcamento");

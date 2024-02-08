@@ -66,6 +66,8 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
       throw RuntimeException("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
     }
 
+    return;
+
   }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {

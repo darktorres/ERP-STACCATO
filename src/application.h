@@ -15,13 +15,13 @@
 class RuntimeException : public std::runtime_error {
 public:
   explicit RuntimeException(const QString &message, QWidget *parent = nullptr);
-  Q_DISABLE_COPY(RuntimeException)
+  // Q_DISABLE_COPY(RuntimeException)
 };
 
 class RuntimeError : public std::runtime_error {
 public:
   explicit RuntimeError(const QString &message, QWidget *parent = nullptr);
-  Q_DISABLE_COPY(RuntimeError)
+  // Q_DISABLE_COPY(RuntimeError)
 };
 
 class Application final : public QApplication {

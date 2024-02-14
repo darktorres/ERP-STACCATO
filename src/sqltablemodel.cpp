@@ -67,7 +67,6 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
     }
 
     return;
-
   }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {

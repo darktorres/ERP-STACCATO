@@ -205,7 +205,7 @@ void Devolucao::setupTables() {
 
   //--------------------------------------------------------------
 
-  modelPagamentos.setTable("conta_a_receber_has_pagamento");
+  modelPagamentos.setTable("conta_a_receber_has_pagamento"); // renomear para modelPagReceb?
 
   modelPagamentos.setHeaderData("tipo", "Tipo");
   modelPagamentos.setHeaderData("parcela", "Parcela");

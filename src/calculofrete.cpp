@@ -219,15 +219,41 @@ void CalculoFrete::qualp() {
 
   // ------------------------------
 
-  SqlQuery queryEndereco;
+  SqlQuery queryQualp;
 
-  if (not queryEndereco.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
-    throw RuntimeException("Erro buscando dados do endereço: " + queryEndereco.lastError().text());
+  if (not queryQualp.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
+    throw RuntimeException("Erro buscando dados do endereço: " + queryQualp.lastError().text());
   }
 
-  if (queryEndereco.first() and !queryEndereco.value("qualpJson").toString().isEmpty()) {
-    result = queryEndereco.value("qualpJson").toString();
-  } else {
+  if (queryQualp.first() and not queryQualp.value("qualpJson").toString().isEmpty()) {
+    result = queryQualp.value("qualpJson").toString();
+  } else {    
+    const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
+
+    // NOTE: os campos podem ter hifen fazendo com que o split tenha tamanho maior que o devido
+    if (origemSplit.size() != 5) {
+      Log::createLog("Exceção", "Endereço origem: " + ui->lineEditOrigem->text());
+      throw RuntimeException("Erro na formatação do endereço de origem!");
+    }
+
+    const QString origem = origemSplit.at(0) + ", " + origemSplit.at(1) + ", " + origemSplit.at(3) + " / " + origemSplit.at(4);
+
+    // ------------------------------------------------------------------------------
+
+    SqlQuery queryDestino;
+
+    if (not queryDestino.exec("SELECT logradouro, numero, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString())) {
+      throw RuntimeException("Erro buscando dados do endereço: " + queryDestino.lastError().text());
+    }
+
+    if (not queryDestino.first()) {
+      throw RuntimeException("Erro buscando dados do endereço com id: " + ui->itemBoxDestino->getId().toString());
+    }
+
+    const QString destino = queryDestino.value("logradouro").toString() + ", " + queryDestino.value("numero").toString() + ", " + queryDestino.value("cidade").toString() + " / " + queryDestino.value("uf").toString();
+
+    // ------------------------------------------------------------------------------
+
     SqlQuery queryLoja;
 
     if (not queryLoja.exec("SELECT apiQualp, CabecalhosQualp, precoCombustivel, eixosCaminhaoGrande, consumoCaminhaoGrande FROM loja WHERE nomeFantasia = 'CENTRO DE DISTRIBUIÇÃO'") or not queryLoja.first()) {
@@ -238,24 +264,7 @@ void CalculoFrete::qualp() {
 
     QString urlString = queryLoja.value("apiQualp").toString();
 
-    const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
-
-    if (origemSplit.size() != 5) {
-      Log::createLog("Exceção", "Endereço origem: " + ui->lineEditOrigem->text());
-      throw RuntimeException("Erro na formatação do endereço de origem!");
-    }
-
-    const QString origem = origemSplit.at(0) + ", " + origemSplit.at(1) + ", " + origemSplit.at(3) + " / " + origemSplit.at(4);
-
-    const QStringList destinoSplit = ui->itemBoxDestino->text().split(" - ");
-
-    // NOTE: os campos podem ter hifen fazendo com que o split tenha tamanho maior que o devido
-    if (destinoSplit.size() != 5) {
-      Log::createLog("Exceção", "Endereço destino: " + ui->itemBoxDestino->text());
-      throw RuntimeException("Erro na formatação do endereço de destino!");
-    }
-
-    const QString destino = destinoSplit.at(0) + ", " + destinoSplit.at(1) + ", " + destinoSplit.at(3) + " / " + destinoSplit.at(4);
+    // ------------------------------------------------------------------------------
 
     urlString.replace("_origem_", origem);
     urlString.replace("_destino_", destino);

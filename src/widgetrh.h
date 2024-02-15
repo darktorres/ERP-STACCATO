@@ -31,6 +31,7 @@ private:
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
   auto on_groupBoxData_toggled(const bool enabled) -> void;
+  auto on_pushButtonDarBaixa_clicked() -> void;
   auto on_pushButtonImportarFolhaPag_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;
   auto preencher(const QModelIndex &index) -> void;

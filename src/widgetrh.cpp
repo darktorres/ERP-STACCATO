@@ -42,6 +42,7 @@ void WidgetRh::setConnections() {
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetRh::montaFiltro, connectionType);
   connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetRh::montaFiltro, connectionType);
   connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetRh::on_groupBoxData_toggled, connectionType);
+  connect(ui->pushButtonDarBaixa, &QPushButton::clicked, this, &WidgetRh::on_pushButtonDarBaixa_clicked, connectionType);
   connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetRh::on_pushButtonImportarFolhaPag_clicked, connectionType);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetRh::on_pushButtonRemessaItau_clicked, connectionType);
   connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetRh::montaFiltro, connectionType);
@@ -60,6 +61,7 @@ void WidgetRh::unsetConnections() {
   disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetRh::montaFiltro);
   disconnect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetRh::montaFiltro);
   disconnect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetRh::on_groupBoxData_toggled);
+  disconnect(ui->pushButtonDarBaixa, &QPushButton::clicked, this, &WidgetRh::on_pushButtonDarBaixa_clicked);
   disconnect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetRh::on_pushButtonImportarFolhaPag_clicked);
   disconnect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetRh::on_pushButtonRemessaItau_clicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &WidgetRh::preencher);
@@ -445,3 +447,26 @@ void WidgetRh::preencher(const QModelIndex &index) {
 
   setConnections();
 }
+
+void WidgetRh::on_pushButtonDarBaixa_clicked()
+{
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  qApp->startTransaction("WidgetRh::on_pushButtonDarBaixa_clicked");
+
+  for (const auto index : selection) {
+    const int row = index.row();
+
+    modelFolhaPag.setData(row, "status", "PAGO");
+    modelFolhaPag.setData(row, "valorReal", modelFolhaPag.data(row, "valor"));
+    modelFolhaPag.setData(row, "tipoReal", modelFolhaPag.data(row, "tipo"));
+    modelFolhaPag.setData(row, "parcelaReal", modelFolhaPag.data(row, "parcela"));
+    modelFolhaPag.setData(row, "centroCusto", modelFolhaPag.data(row, "idLoja"));
+    modelFolhaPag.setData(row, "dataRealizado", qApp->ajustarDiaUtil(modelFolhaPag.data(row, "dataRealizado").toDate()));
+  }
+
+  qApp->endTransaction();
+}
+

@@ -17,6 +17,7 @@ void TabCompras::resetTables() {
   ui->widgetFaturar->resetTables();
   ui->widgetOC->resetTables();
   ui->widgetHistorico->resetTables();
+  ui->widgetFinanceiro->resetTables();
 }
 
 void TabCompras::updateTables() {
@@ -30,6 +31,7 @@ void TabCompras::updateTables() {
   if (currentTab == "Faturamento") { ui->widgetFaturar->updateTables(); }
   if (currentTab == "Consumos") { ui->widgetOC->updateTables(); }
   if (currentTab == "Histórico") { ui->widgetHistorico->updateTables(); }
+  if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
 }
 
 void TabCompras::on_tabWidget_currentChanged() { updateTables(); }
@@ -37,7 +39,6 @@ void TabCompras::on_tabWidget_currentChanged() { updateTables(); }
 void TabCompras::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(
-      ui->widgetGerar, &WidgetCompraGerar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); }, connectionType);
+  connect(ui->widgetGerar, &WidgetCompraGerar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); }, connectionType);
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabCompras::on_tabWidget_currentChanged, connectionType);
 }

@@ -1695,8 +1695,6 @@ void Venda::connectLineEditsToDirty() {
 void Venda::processarPagamento(Pagamento *pgt) {
   if (pgt->comboTipoPgt->currentText() == "ESCOLHA UMA OPÇÃO!") { return; }
 
-  // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
-
   //-----------------------------------------------------------------
 
   const QString tipoPgt = pgt->comboTipoPgt->currentText();
@@ -1714,10 +1712,13 @@ void Venda::processarPagamento(Pagamento *pgt) {
     modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
     modelFluxoCaixa.setData(row, "idLoja", idLoja);
     modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao);
-    modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value() * -1);
+    modelFluxoCaixa.setData(row, "dataRealizado", dataEmissao);
+    modelFluxoCaixa.setData(row, "valor", pgt->valorPgt->value());
+    modelFluxoCaixa.setData(row, "valorReal", pgt->valorPgt->value());
     modelFluxoCaixa.setData(row, "tipo", QString::number(pgt->posicao) + ". " + tipoPgt);
     modelFluxoCaixa.setData(row, "parcela", 1);
     modelFluxoCaixa.setData(row, "observacao", pgt->observacao->text());
+    modelFluxoCaixa.setData(row, "status", "RECEBIDO");
     modelFluxoCaixa.setData(row, "representacao", false);
     const int creditoClientes = 11;
     modelFluxoCaixa.setData(row, "idConta", creditoClientes);

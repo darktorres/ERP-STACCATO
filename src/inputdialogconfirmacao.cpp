@@ -303,6 +303,8 @@ void InputDialogConfirmacao::on_pushButtonQuebradoEntrega_clicked() {
 
   if (not ui->lineEditFoto_2->styleSheet().contains("background-color: rgb(0, 255, 0);")) { throw RuntimeError("Envie a foto da quebra primeiro!"); }
 
+  // TODO: não deixar marcar quebrado em linhas com status 'quebrado'
+
   // -------------------------------------------------------------------------
 
   const int row = selection.first().row();
@@ -447,7 +449,7 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   const double prcUnitario = queryTotal.value("prcUnitario").toDouble();
   const double credito = quant * prcUnitario;
 
-  qApp->enqueueInformation("Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito), this);
+  qApp->enqueueInformation("Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito, 'f', 2), this);
 
   SqlTableModel modelCliente;
   modelCliente.setTable("cliente");
@@ -470,6 +472,33 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   modelCliente.setData(0, "credito", credito + creditoAntigo);
 
   modelCliente.submitAll();
+
+  //--------------------------------------------------------------
+
+  SqlTableModel modelPagamentos;
+  modelPagamentos.setTable("conta_a_receber_has_pagamento");
+
+  const int newRow = modelPagamentos.insertRowAtEnd();
+
+  modelPagamentos.setData(newRow, "contraParte", modelCliente.data(0, "nome_razao"));
+  modelPagamentos.setData(newRow, "dataEmissao", qApp->serverDate());
+  modelPagamentos.setData(newRow, "idVenda", idVenda);
+  modelPagamentos.setData(newRow, "idLoja", modelVendaProduto.data(0, "idLoja"));
+  modelPagamentos.setData(newRow, "valor", credito * -1);
+  modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
+  modelPagamentos.setData(newRow, "parcela", 1);
+  // TODO: adicionar observacao dizendo qual porcentagem e de qual produto
+  modelPagamentos.setData(newRow, "observacao", "");
+  modelPagamentos.setData(newRow, "status", "RECEBIDO");
+  modelPagamentos.setData(newRow, "dataPagamento", qApp->serverDate());
+  modelPagamentos.setData(newRow, "dataRealizado", qApp->serverDate());
+  modelPagamentos.setData(newRow, "valorReal", credito * -1);
+  modelPagamentos.setData(newRow, "centroCusto", modelVendaProduto.data(0, "idLoja"));
+
+  const int contaCreditos = 11;
+  modelPagamentos.setData(newRow, "idConta", contaCreditos);
+
+  modelPagamentos.submitAll();
 }
 
 void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString &obs, const int novoIdVendaProduto2) {

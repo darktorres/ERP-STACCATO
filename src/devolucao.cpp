@@ -545,17 +545,17 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "contraParte", modelCliente.data(0, "nome_razao"));
   modelPagamentos.setData(newRow, "dataEmissao", qApp->serverDate());
   modelPagamentos.setData(newRow, "idVenda", idDevolucao);
-  // TODO: porque usa o idLoja do usuario?
-  modelPagamentos.setData(newRow, "idLoja", User::idLoja);
-  modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value());
+  modelPagamentos.setData(newRow, "idLoja", modelVenda.data(0, "idLoja"));
+  modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value() * -1);
   modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
   modelPagamentos.setData(newRow, "parcela", 1);
+  // TODO: adicionar observacao dizendo qual porcentagem e de qual produto
   modelPagamentos.setData(newRow, "observacao", "");
   modelPagamentos.setData(newRow, "status", "RECEBIDO");
   modelPagamentos.setData(newRow, "dataPagamento", qApp->serverDate());
   modelPagamentos.setData(newRow, "dataRealizado", qApp->serverDate());
-  modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value());
-  // TODO: adicionar observacao dizendo qual porcentagem e de qual produto
+  modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value() * -1);
+  modelPagamentos.setData(newRow, "centroCusto", modelVenda.data(0, "idLoja"));
 
   const int contaCreditos = 11;
   modelPagamentos.setData(newRow, "idConta", contaCreditos);
@@ -598,6 +598,8 @@ void Devolucao::limparCampos() {
   ui->doubleSpinBoxPorcentagem->setValue(0);
   ui->doubleSpinBoxPrecoUn->setValue(0);
   ui->doubleSpinBoxQuant->setValue(0);
+
+  ui->lineEditObservacao->clear();
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {

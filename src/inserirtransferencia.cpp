@@ -93,8 +93,6 @@ void InserirTransferencia::cadastrar() {
   modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
   if (ui->frameCliente->isVisible()) {
-    modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value() * -1);
-    modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value() * -1);
     modelPara.setData(rowDe, "observacao", ui->itemBoxCliente->text() + " - " + ui->lineEditObservacao->text());
   }
 
@@ -102,18 +100,10 @@ void InserirTransferencia::cadastrar() {
 
   modelPara.submitAll();
 
-  if (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES") {
-    SqlQuery query;
-
-    if (not query.exec("UPDATE cliente SET credito = credito - " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
-      throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text());
-    }
-  }
-
   if (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES") {
     SqlQuery query;
 
-    if (not query.exec("UPDATE cliente SET credito = credito + " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
+    if (not query.exec("UPDATE cliente SET credito = credito - " + QString::number(ui->doubleSpinBoxValor->value()) + " WHERE idCliente = " + ui->itemBoxCliente->getId().toString())) {
       throw RuntimeException("Erro atualizando crédito do cliente: " + query.lastError().text());
     }
   }
@@ -146,11 +136,13 @@ void InserirTransferencia::setupTables() {
 void InserirTransferencia::itemBoxTextChanged() {
   ui->itemBoxCliente->clear();
 
-  const bool mostrarCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES" or ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
+  const bool mostrarCliente = (ui->itemBoxPara->text() == "CRÉDITO DE CLIENTES");
 
   ui->frameCliente->setVisible(mostrarCliente);
 
   ui->doubleSpinBoxValor->setMaximum(999999.990000);
+
+  ui->pushButtonSalvar->setDisabled(ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES");
 }
 
 void InserirTransferencia::on_itemBoxCliente_textChanged(const QString &text) {
@@ -174,11 +166,10 @@ void InserirTransferencia::buscarCreditoCliente() {
 
   if (not query.first()) { throw RuntimeException("Dados do cliente não encontrados!"); }
 
-  const bool deCliente = (ui->itemBoxDe->text() == "CRÉDITO DE CLIENTES");
   const double credito = query.value("credito").toDouble();
 
-  ui->doubleSpinBoxValor->setMaximum(deCliente ? credito : 999999.990000);
+  ui->doubleSpinBoxValor->setMaximum(credito);
   ui->doubleSpinBoxValor->setValue(query.value("credito").toDouble());
 
-  if (deCliente and qFuzzyIsNull(credito)) { throw RuntimeError("Cliente selecionado não possui crédito!"); }
+  if (qFuzzyIsNull(credito)) { throw RuntimeError("Cliente selecionado não possui crédito!"); }
 }

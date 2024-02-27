@@ -1111,7 +1111,7 @@ void Venda::cancelamento() {
     const QString tipo = modelFluxoCaixa.data(row, "tipo").toString();
 
     if ((status == "PENDENTE" or status == "RECEBIDO") and tipo.contains("CONTA CLIENTE")) {
-      const double credito = modelFluxoCaixa.data(row, "valor").toDouble() * -1;
+      const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 
       SqlQuery query6;
       query6.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");

@@ -12,6 +12,7 @@
 #include "sqlquery.h"
 #include "xlsxdocument.h"
 #include "xml.h"
+#include "xml_viewer.h"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -164,6 +165,8 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   if (not query.first()) { throw RuntimeException("Não encontrado XML da NF-e com id: '" + model.data(index.row(), "idNFe").toString() + "'", this); }
 
   ACBrLib::gerarDanfe(query.value("xml").toString(), true);
+  // auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
+  // viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void WidgetNfeEntrada::montaFiltro() {

@@ -109,6 +109,10 @@ void Orcamento::on_tableProdutos_selectionChanged() {
   unsetConnections();
 
   try {
+    // NOTE: mapper sets values but fields still have maximum from previous line
+    ui->doubleSpinBoxCaixas->setMaximum(9'999'999.000000);
+    ui->doubleSpinBoxQuant->setMaximum(9'999'999.000000);
+
     mapperItem.setCurrentModelIndex(index);
     setarParametrosProduto();
   } catch (std::exception &) {

@@ -348,14 +348,15 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   return sdLoja;
 }
 
-SearchDialog *SearchDialog::nfe(const bool todasNFes, QWidget *parent) {
+SearchDialog *SearchDialog::nfe(const bool todasNFes, const bool somenteCD, QWidget *parent) {
   const QList<FullTextIndex> fullTextIndex = {{"numeroNFe", "Número NF-e"}};
+  const QString table = (todasNFes ? "view_nfe_todas" : (somenteCD ? "view_nfe_inutilizada" : "view_nfe_inutilizada2"));
 
-  auto *sdNFe = new SearchDialog("Buscar NF-e", todasNFes ? "view_nfe_todas" : "view_nfe_inutilizada", "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
+  auto *sdNFe = new SearchDialog("Buscar NF-e", table, "idNFe", {"numeroNFe"}, fullTextIndex, "", "", true, parent);
 
-  if (not todasNFes) {
-    sdNFe->setWindowTitle("Buscar NF-es destinadas ao CNPJ do CD");
-  }
+  if (todasNFes) { sdNFe->setWindowTitle("Buscar NF-es"); }
+  if (not todasNFes and somenteCD) { sdNFe->setWindowTitle("Buscar NF-es inutilizadas destinadas ao CNPJ do CD"); }
+  if (not todasNFes and not somenteCD) { sdNFe->setWindowTitle("Buscar NF-es inutilizadas"); }
 
   sdNFe->ui->table->setAutoResize(false);
 

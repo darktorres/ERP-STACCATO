@@ -26,7 +26,7 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate dataFaturamen
 
   setConnections();
 
-  ui->itemBoxNFe->setSearchDialog(SearchDialog::nfe(false, this));
+  ui->itemBoxNFe->setSearchDialog(SearchDialog::nfe(false, true, this));
   ui->tableCompra->setCopyHeaders(false);
 }
 

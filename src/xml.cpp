@@ -76,6 +76,10 @@ void XML::lerValores(const QStandardItem *item) {
       if (parentText == "dest" and text.contains("CNPJ - ")) { cnpjDest = text.remove("CNPJ - "); }
       if (parentText == "transporta" and text.contains("xNome - ")) { xNomeTransp = text.remove("xNome - "); }
 
+      if (parentText == "dup" and text.contains("nDup")) { duplicata.nDup = text.remove("nDup - "); }
+      if (parentText == "dup" and text.contains("dVenc")) { duplicata.dVenc = text.remove("dVenc - "); }
+      if (parentText == "dup" and text.contains("vDup")) { duplicata.vDup = text.remove("vDup - ").toDouble(); duplicatas << duplicata; duplicata = {}; }
+
       if (parentText == "prod") { lerDadosProduto(child); }
       if (parentText == "ICMS" and text.left(4) == "ICMS") { produto.tipoICMS = text; }
       if (parentText == produto.tipoICMS) { lerICMSProduto(child); }

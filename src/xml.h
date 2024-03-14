@@ -65,6 +65,12 @@ private:
     double valorGare = 0;
   };
 
+  struct Duplicata {
+    QString nDup;
+    QString dVenc;
+    double vDup = 0;
+  };
+
 public:
   enum class Tipo { Entrada, Saida, Nulo };
 
@@ -76,6 +82,7 @@ public:
   auto verificaNCMs() -> void;
 
   QVector<Produto> produtos;
+  QVector<Duplicata> duplicatas;
 
   QString const fileContent;
   QStandardItemModel model;
@@ -102,6 +109,7 @@ private:
   // attributes
   QDomDocument document;
   Produto produto;
+  Duplicata duplicata;
   Tipo const tipo;
   QWidget *parent = nullptr;
   // methods

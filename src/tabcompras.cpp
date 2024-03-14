@@ -32,6 +32,7 @@ void TabCompras::updateTables() {
   if (currentTab == "Consumos") { ui->widgetOC->updateTables(); }
   if (currentTab == "Histórico") { ui->widgetHistorico->updateTables(); }
   if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentTab == "Avulso") { ui->widgetCompraAvulsa->updateTables(); }
 }
 
 void TabCompras::on_tabWidget_currentChanged() { updateTables(); }

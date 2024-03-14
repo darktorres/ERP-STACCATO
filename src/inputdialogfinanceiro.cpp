@@ -268,6 +268,7 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->hideColumn("centroCusto");
   ui->tableFluxoCaixa->hideColumn("grupo");
   ui->tableFluxoCaixa->hideColumn("subGrupo");
+  ui->tableFluxoCaixa->hideColumn("compraAvulsa");
   ui->tableFluxoCaixa->hideColumn("desativado");
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));

@@ -224,8 +224,48 @@
        <string>Financeiro</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_10">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item row="0" column="0">
         <widget class="WidgetFinanceiroCompra" name="widgetFinanceiro" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabCompraAvulsa">
+      <attribute name="title">
+       <string>Avulso</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_11">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="WidgetCompraAvulsa" name="widgetCompraAvulsa" native="true"/>
        </item>
       </layout>
      </widget>
@@ -286,6 +326,12 @@
    <class>WidgetFinanceiroCompra</class>
    <extends>QWidget</extends>
    <header>src/widgetfinanceirocompra.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetCompraAvulsa</class>
+   <extends>QWidget</extends>
+   <header>src/widgetcompraavulsa.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

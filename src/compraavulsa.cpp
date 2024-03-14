@@ -5,7 +5,6 @@
 #include "comboboxdelegate.h"
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
-#include "lineeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
@@ -34,16 +33,14 @@ void CompraAvulsa::setupTables() {
   modelCompra.setHeaderData("un", "Un.");
   modelCompra.setHeaderData("prcUnitario", "R$ Unit.");
   modelCompra.setHeaderData("preco", "R$");
-  modelCompra.setHeaderData("dataRealCompra", "Data");
+
+  modelCompra.proxyModel = new SortFilterProxyModel(&modelCompra, this);
 
   ui->tableCompra->setModel(&modelCompra);
 
-  ui->tableCompra->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("dataRealCompra", new DateFormatDelegate(this));
-
-  // ui->tableCompra->setPersistentColumns({"status"});
 
   ui->tableCompra->hideColumn("idPedido1");
   ui->tableCompra->hideColumn("status");
@@ -70,6 +67,7 @@ void CompraAvulsa::setupTables() {
   ui->tableCompra->hideColumn("formComercial");
   ui->tableCompra->hideColumn("codBarras");
   ui->tableCompra->hideColumn("dataPrevCompra");
+  ui->tableCompra->hideColumn("dataRealCompra");
   ui->tableCompra->hideColumn("dataPrevConf");
   ui->tableCompra->hideColumn("dataRealConf");
   ui->tableCompra->hideColumn("dataPrevFat");
@@ -96,7 +94,6 @@ void CompraAvulsa::setupTables() {
   modelPagar.setHeaderData("parcela", "Parcela");
   modelPagar.setHeaderData("dataPagamento", "Vencimento");
   modelPagar.setHeaderData("observacao", "Obs.");
-  modelPagar.setHeaderData("status", "Status");
   modelPagar.setHeaderData("centroCusto", "Centro Custo");
   modelPagar.setHeaderData("grupo", "Grupo");
   modelPagar.setHeaderData("subGrupo", "SubGrupo");
@@ -107,26 +104,22 @@ void CompraAvulsa::setupTables() {
 
   ui->tablePagar->setModel(&modelPagar);
 
-  ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("dataEmissao", new DateFormatDelegate(this));
-  ui->tablePagar->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-  ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tablePagar->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPagar.fieldIndex("dataPagamento"), modelPagar.fieldIndex("tipo"), false, this));
-
-  ui->tablePagar->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this));
-
   ui->tablePagar->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
+  ui->tablePagar->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->tablePagar->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePagar->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
-  ui->tablePagar->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
+  ui->tablePagar->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
 
-  ui->tablePagar->setPersistentColumns({"status", "idNFe"});
+  ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "grupo"});
 
   ui->tablePagar->hideColumn("idPagamento");
   ui->tablePagar->hideColumn("idCompra");
   ui->tablePagar->hideColumn("idVenda");
   ui->tablePagar->hideColumn("idLoja");
   ui->tablePagar->hideColumn("idCnab");
+  ui->tablePagar->hideColumn("status");
   ui->tablePagar->hideColumn("dataRealizado");
   ui->tablePagar->hideColumn("valorReal");
   ui->tablePagar->hideColumn("tipoReal");
@@ -191,13 +184,19 @@ void CompraAvulsa::on_tablePagar_dataChanged(const QModelIndex &index) {
 }
 
 void CompraAvulsa::on_pushButtonAdicionarProduto_clicked() {
-  modelCompra.insertRowAtEnd();
+  const int row = modelCompra.insertRowAtEnd();
+
+  modelCompra.setData(row, "status", "PEND. APROV.");
 
   ui->tableCompra->redoView();
 }
 
 void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
-  modelPagar.insertRowAtEnd();
+  const int row = modelPagar.insertRowAtEnd();
+
+  modelPagar.setData(row, "dataEmissao", qApp->serverDate());
+  modelPagar.setData(row, "status", "PEND. APROV.");
+  modelPagar.setData(row, "compraAvulsa", true);
 
   ui->tablePagar->redoView();
 }
@@ -225,6 +224,8 @@ void CompraAvulsa::on_pushButtonSalvar_clicked() {
 
   qApp->startTransaction("CompraAvulsa::on_pushButtonSalvar");
 
+  // -------------------------------------------------------------------------
+
   QStringList idNFes;
 
   for (int row = 0; row < modelPagar.rowCount(); ++row) {
@@ -237,8 +238,28 @@ void CompraAvulsa::on_pushButtonSalvar_clicked() {
 
   if (not query.exec("UPDATE nfe SET utilizada = TRUE WHERE idNFe IN (" + idNFes.join(", ") + ")")) { throw RuntimeException("Erro marcando NFes como utilizadas: " + query.lastError().text()); }
 
+  // -------------------------------------------------------------------------
+
+  if (not query.exec("SELECT MAX(idCompra) AS idCompra FROM compra_avulsa")) { throw RuntimeException("Erro gerando O.C.: " + query.lastError().text()); }
+
+  int last = 0;
+
+  if (query.first()) { last = query.value("idCompra").toString().remove("C.A.").toInt(); }
+
+  QString idCompra = "C.A." + QString::number(last + 1).rightJustified(5, '0');
+
+  for (int row = 0; row < modelCompra.rowCount(); ++row) {
+    modelCompra.setData(row, "idCompra", idCompra);
+  }
+
+  for (int row = 0; row < modelPagar.rowCount(); ++row) {
+    modelPagar.setData(row, "idCompra", idCompra);
+  }
+
   modelCompra.submitAll();
   modelPagar.submitAll();
+
+  // -------------------------------------------------------------------------
 
   qApp->endTransaction();
 
@@ -247,10 +268,32 @@ void CompraAvulsa::on_pushButtonSalvar_clicked() {
 }
 
 void CompraAvulsa::verifyFields() {
+  double totalCompra = 0;
+
+  for (auto row = 0; row < modelCompra.rowCount(); ++row) {
+    if (modelCompra.data(row, "fornecedor").isNull()) { throw RuntimeError("'Fornecedor' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "descricao").isNull()) { throw RuntimeError("'Produto' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "quant").isNull()) { throw RuntimeError("'Quant.' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "un").isNull()) { throw RuntimeError("'Un.' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "prcUnitario").isNull()) { throw RuntimeError("'R$ Unit.' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "preco").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!"); }
+
+    totalCompra += modelCompra.data(row, "preco").toDouble();
+  }
+
+  double totalPagar = 0;
+
   for (auto row = 0; row < modelPagar.rowCount(); ++row) {
-    if (modelPagar.data(row, "idLoja").isNull()) { throw RuntimeError("'Centro Custo' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelPagar.data(row, "contraParte").isNull()) { throw RuntimeError("'Contraparte' não preenchido na linha " + QString::number(row + 1) + "!"); }
     if (modelPagar.data(row, "valor").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!"); }
     if (modelPagar.data(row, "tipo").isNull()) { throw RuntimeError("'Tipo' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelPagar.data(row, "centroCusto").isNull()) { throw RuntimeError("'Centro Custo' não preenchido na linha " + QString::number(row + 1) + "!"); }
+
+    totalPagar += modelPagar.data(row, "valor").toDouble();
+  }
+
+  if (not qFuzzyCompare(totalCompra, totalPagar)) {
+    throw RuntimeError("Total dos produtos diferente do total dos pagamentos!");
   }
 }
 
@@ -310,9 +353,7 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
     modelPagar.setData(row, "centroCusto", query.value("idLoja"));
     // modelPagar.setData(row, "grupo", duplicata.dVenc); // ???
     // modelPagar.setData(row, "subgrupo", duplicata.dVenc); // ???
-    modelPagar.setData(row, "compraAvulsa", true);
   }
 }
 
-// TODO: fazer mensagem de erro para 'No Fields to update'
 // TODO: colocar um autopreenchimento no prcUnitario/preco

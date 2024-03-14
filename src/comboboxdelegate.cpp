@@ -19,6 +19,21 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   QStringList list;
 
+  if (tipo == Tipo::CompraAvulsa) {
+    list << "PEND. APROV."
+         << "CONFERIDO"
+         << "COMPRADO"
+         << "FINALIZADO";
+  }
+
+  if (tipo == Tipo::PagarAvulso) {
+    list << "PEND. APROV."
+         << "CONFERIDO"
+         << "AGENDADO"
+         << "PAGO"
+         << "CANCELADO";
+  }
+
   if (tipo == Tipo::Receber) {
     list << "PENDENTE"
          << "CONFERIDO"

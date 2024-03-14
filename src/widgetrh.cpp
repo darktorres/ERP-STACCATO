@@ -114,7 +114,7 @@ void WidgetRh::setupTables() {
   ui->table->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
   ui->table->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->table->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
-  ui->table->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
+  ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
 
   // NOTE: to avoid this making a query to the database for each row needs to change SearchDialog::nfe to not select() on the ctor
   // select() only if the initial value is not empty or zero, set by the model in setEditorData()

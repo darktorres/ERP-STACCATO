@@ -28,6 +28,7 @@ private:
   auto montaFiltro() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonCancelar_clicked() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

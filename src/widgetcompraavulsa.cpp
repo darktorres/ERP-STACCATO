@@ -1,13 +1,14 @@
 #include "widgetcompraavulsa.h"
 #include "ui_widgetcompraavulsa.h"
 
+#include "application.h"
 #include "comboboxdelegate.h"
 #include "compraavulsa.h"
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
-#include "lineeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "user.h"
 
 WidgetCompraAvulsa::WidgetCompraAvulsa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraAvulsa) { ui->setupUi(this); }
 
@@ -21,6 +22,7 @@ void WidgetCompraAvulsa::setupTables() {
   modelCompra.setFilter("");
 
   modelCompra.setHeaderData("status", "Status");
+  modelCompra.setHeaderData("idCompra", "O.C.");
   modelCompra.setHeaderData("fornecedor", "Fornecedor");
   modelCompra.setHeaderData("descricao", "Produto");
   modelCompra.setHeaderData("obs", "Obs.");
@@ -33,11 +35,14 @@ void WidgetCompraAvulsa::setupTables() {
 
   ui->tableCompra->setModel(&modelCompra);
 
-  ui->tableCompra->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this));
+  if (User::isAdmin()) {
+    ui->tableCompra->setEditTriggers(QTableView::DoubleClicked | QTableView::EditKeyPressed | QTableView::AnyKeyPressed);
+    ui->tableCompra->setPersistentColumns({"status"});
+  }
+
+  ui->tableCompra->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::CompraAvulsa, this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-
-  ui->tableCompra->setPersistentColumns({"status"});
 
   ui->tableCompra->hideColumn("idPedido1");
   ui->tableCompra->hideColumn("idRelacionado");
@@ -52,7 +57,6 @@ void WidgetCompraAvulsa::setupTables() {
   ui->tableCompra->hideColumn("idVenda");
   ui->tableCompra->hideColumn("idVendaProduto1");
   ui->tableCompra->hideColumn("idVendaProduto2");
-  ui->tableCompra->hideColumn("idCompra");
   ui->tableCompra->hideColumn("idProduto");
   ui->tableCompra->hideColumn("colecao");
   ui->tableCompra->hideColumn("quantUpd");
@@ -85,6 +89,7 @@ void WidgetCompraAvulsa::setupTables() {
   modelPagar.setFilter("compraAvulsa = TRUE");
 
   modelPagar.setHeaderData("dataEmissao", "Data Emissão");
+  modelPagar.setHeaderData("idCompra", "O.C.");
   modelPagar.setHeaderData("contraParte", "Contraparte");
   modelPagar.setHeaderData("idNFe", "NF-e cadastrada");
   modelPagar.setHeaderData("nfe", "NF-e");
@@ -111,17 +116,19 @@ void WidgetCompraAvulsa::setupTables() {
   ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPagar.fieldIndex("dataPagamento"), modelPagar.fieldIndex("tipo"), false, this));
 
-  ui->tablePagar->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this));
+  ui->tablePagar->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::PagarAvulso, this));
 
   ui->tablePagar->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
   ui->tablePagar->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePagar->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
-  ui->tablePagar->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
+  ui->tablePagar->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
 
-  ui->tablePagar->setPersistentColumns({"status", "idNFe"});
+  if (User::isAdmin()) {
+    ui->tablePagar->setEditTriggers(QTableView::DoubleClicked | QTableView::EditKeyPressed | QTableView::AnyKeyPressed);
+    ui->tablePagar->setPersistentColumns({"status", "idNFe"});
+  }
 
   ui->tablePagar->hideColumn("idPagamento");
-  ui->tablePagar->hideColumn("idCompra");
   ui->tablePagar->hideColumn("idVenda");
   ui->tablePagar->hideColumn("idLoja");
   ui->tablePagar->hideColumn("idCnab");
@@ -146,6 +153,7 @@ void WidgetCompraAvulsa::setConnections() {
   connect(ui->checkBoxFiltroPendente, &QCheckBox::toggled, this, &WidgetCompraAvulsa::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraAvulsa::on_groupBoxStatus_toggled, connectionType);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &WidgetCompraAvulsa::on_pushButtonCadastrar_clicked, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetCompraAvulsa::on_pushButtonCancelar_clicked, connectionType);
 }
 
 void WidgetCompraAvulsa::on_groupBoxStatus_toggled(const bool enabled) {
@@ -206,6 +214,35 @@ void WidgetCompraAvulsa::on_pushButtonCadastrar_clicked() {
   compraAvulsa->setAttribute(Qt::WA_DeleteOnClose);
 
   compraAvulsa->show();
+}
+
+void WidgetCompraAvulsa::on_pushButtonCancelar_clicked() {
+  // TODO: não deixar cancelar compras finalizadas e talvez outros status?
+
+  const auto selection = ui->tableCompra->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.button(QMessageBox::Yes)->setText("Cancelar");
+  msgBox.button(QMessageBox::No)->setText("Voltar");
+
+  if (msgBox.exec() == QMessageBox::No) { return; }
+
+  const QString idCompra = modelCompra.data(selection.first().row(), "idCompra").toString();
+
+  qApp->startTransaction("WidgetCompraAvulsa::on_pushButtonCancelar");
+
+  SqlQuery query;
+
+  if (not query.exec("UPDATE compra_avulsa SET status = 'CANCELADO' WHERE idCompra = '" + idCompra + "'")) { throw RuntimeException("Erro cancelando produtos: " + query.lastError().text()); }
+
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idCompra = '" + idCompra + "' AND compraAvulsa = TRUE")) { throw RuntimeException("Erro cancelando pagamentos: " + query.lastError().text()); }
+
+  qApp->endTransaction();
+
+  updateTables();
+  qApp->enqueueInformation("Cancelado com sucesso!", this);
 }
 
 // TODO: colocar um autopreenchimento no prcUnitario/preco

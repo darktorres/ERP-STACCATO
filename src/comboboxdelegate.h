@@ -6,7 +6,7 @@ class ComboBoxDelegate final : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  enum class Tipo { Receber, Pagar, Conta, Pagamento, Grupo, ST };
+  enum class Tipo { CompraAvulsa, PagarAvulso, Receber, Pagar, Conta, Pagamento, Grupo, ST };
   Q_ENUM(Tipo)
 
   explicit ComboBoxDelegate(const Tipo tipo, QObject *parent);

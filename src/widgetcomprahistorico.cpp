@@ -106,6 +106,7 @@ void WidgetCompraHistorico::setupTables() {
   ui->tableFinanceiro->hideColumn("centroCusto");
   ui->tableFinanceiro->hideColumn("grupo");
   ui->tableFinanceiro->hideColumn("subGrupo");
+  ui->tableFinanceiro->hideColumn("compraAvulsa");
   ui->tableFinanceiro->hideColumn("desativado");
 
   ui->tableFinanceiro->setItemDelegate(new NoEditDelegate(this));
@@ -150,6 +151,7 @@ void WidgetCompraHistorico::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
+  ui->treeView->hideColumn("idFollowup");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("aliquotaSt");

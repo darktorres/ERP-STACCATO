@@ -80,7 +80,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Comprar avulso</string>
+        <string>Comprar para estoque</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="4">

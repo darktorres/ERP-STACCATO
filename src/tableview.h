@@ -14,6 +14,7 @@ public:
   auto columnIndex(const QString &column) const -> int;
   auto columnIndex(const QString &column, const bool silent) const -> int;
   auto hideColumn(const QString &column) -> void;
+  auto redoView() -> void;
   auto resort() -> void;
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
@@ -40,7 +41,6 @@ private:
   QVector<int> selectedRows;
   // methods
   auto openPersistentEditor(const int row, const QString &column) -> void;
-  auto redoView() -> void;
   auto resizeColumnsToContents() -> void;
   auto restoreSelection() -> void;
   auto setConnections() -> void;

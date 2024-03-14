@@ -171,6 +171,7 @@ SOURCES += \
     src/cnab.cpp \
     src/collapsiblewidget.cpp \
     src/comboboxdelegate.cpp \
+    src/compraavulsa.cpp \
     src/comprovantes.cpp \
     src/contas.cpp \
     src/dateformatdelegate.cpp \
@@ -245,6 +246,7 @@ SOURCES += \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
     src/viewgalpao.cpp \
+    src/widgetcompraavulsa.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
@@ -312,6 +314,7 @@ HEADERS  += \
     src/cnab.h \
     src/collapsiblewidget.h \
     src/comboboxdelegate.h \
+    src/compraavulsa.h \
     src/comprovantes.h \
     src/contas.h \
     src/dateformatdelegate.h \
@@ -385,6 +388,7 @@ HEADERS  += \
     src/venda.h \
     src/vendaproxymodel.h \
     src/viewgalpao.h \
+    src/widgetcompraavulsa.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \
@@ -442,6 +446,7 @@ FORMS += \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
     ui/collapsiblewidget.ui \
+    ui/compraavulsa.ui \
     ui/comprovantes.ui \
     ui/contas.ui \
     ui/devolucao.ui \
@@ -472,6 +477,7 @@ FORMS += \
     ui/userconfig.ui \
     ui/validadedialog.ui \
     ui/venda.ui \
+    ui/widgetcompraavulsa.ui \
     ui/widgetcompraconfirmar.ui \
     ui/widgetcompraconsumos.ui \
     ui/widgetcompradevolucao.ui \

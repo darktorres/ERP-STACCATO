@@ -216,7 +216,7 @@ void WidgetCompraHistorico::on_pushButtonDanfe_clicked() {
   const auto selection = ui->tableNFe->selectionModel()->selectedRows();
   const auto rowCount = ui->tableNFe->rowCount();
 
-  if (selection.isEmpty() and rowCount != 1) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty() and rowCount != 1) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const int row = (selection.isEmpty()) ? 0 : selection.first().row();
   const int idNFe = modelNFe.data(row, "idNFe").toInt();
@@ -227,7 +227,7 @@ void WidgetCompraHistorico::on_pushButtonDanfe_clicked() {
 void WidgetCompraHistorico::on_pushButtonFollowup_clicked() {
   const auto selection = ui->tablePedidos->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const QString ordemCompra = modelCompras.data(selection.first().row(), "OC").toString();
 
@@ -247,7 +247,7 @@ void WidgetCompraHistorico::on_treeView_doubleClicked(const QModelIndex &index) 
 void WidgetCompraHistorico::on_pushButtonAlteraCodForn_clicked() {
   const auto selection = ui->treeView->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QStringList ids;
 

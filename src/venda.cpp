@@ -1598,7 +1598,7 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
 void Venda::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->treeView->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const int row = selection.first().row();
 

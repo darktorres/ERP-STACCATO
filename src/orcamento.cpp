@@ -1679,7 +1679,7 @@ void Orcamento::verificaDisponibilidadeEstoque() {
 void Orcamento::on_pushButtonModelo3d_clicked() {
   const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const int row = selection.first().row();
 

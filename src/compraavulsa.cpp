@@ -205,7 +205,7 @@ void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
 void CompraAvulsa::on_pushButtonRemoverLinhasProdutos_clicked() {
   const auto selection = ui->tableCompra->selectionModel()->selectedIndexes();
 
-  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   modelCompra.removeSelection(selection);
 }
@@ -213,7 +213,7 @@ void CompraAvulsa::on_pushButtonRemoverLinhasProdutos_clicked() {
 void CompraAvulsa::on_pushButtonRemoverLinhasPagamento_clicked() {
   const auto selection = ui->tablePagar->selectionModel()->selectedIndexes();
 
-  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   modelPagar.removeSelection(selection);
 }

@@ -663,7 +663,7 @@ void WidgetFinanceiroContas::on_pushButtonAbrirDANFE_clicked()
 {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QStringList idNFe;
 

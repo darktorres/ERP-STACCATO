@@ -278,7 +278,7 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
 void WidgetLogisticaColeta::on_pushButtonFollowup_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const QString idEstoque = modelColeta.data(selection.first().row(), "idEstoque").toString();
 

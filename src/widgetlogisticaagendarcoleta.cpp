@@ -512,7 +512,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
 void WidgetLogisticaAgendarColeta::on_pushButtonFollowup_clicked() {
   const auto selection = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const QString idEstoque = modelEstoque.data(selection.first().row(), "idEstoque").toString();
 

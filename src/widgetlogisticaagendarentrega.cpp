@@ -1030,7 +1030,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (const auto &index : selection) {
     if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { throw RuntimeError("Pelo menos uma linha selecionada já possui NF-e!", this); }

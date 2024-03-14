@@ -258,7 +258,7 @@ void WidgetGare::on_tableSelection_changed() {
 void WidgetGare::on_pushButtonCancelar_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   // -------------------------------------------------------------------------
 

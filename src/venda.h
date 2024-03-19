@@ -50,6 +50,7 @@ private:
   auto copiaProdutosOrcamento() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;
+  auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto financeiroSalvar() -> void;
   auto generateId() -> void;
   auto montarFluxoCaixa() -> void;

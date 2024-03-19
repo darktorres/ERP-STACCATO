@@ -29,6 +29,14 @@
 Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento", parent), ui(new Ui::Orcamento) {
   ui->setupUi(this);
 
+  for (auto spinbox : findChildren<QSpinBox *>()) {
+    spinbox->installEventFilter(this);
+  }
+
+  for (auto doubleSpinbox : findChildren<QDoubleSpinBox *>()) {
+    doubleSpinbox->installEventFilter(this);
+  }
+
   connectLineEditsToDirty();
   setItemBoxes();
   setupTables();
@@ -1830,6 +1838,15 @@ void Orcamento::buscarIdVenda() {
     ui->pushButtonAbrirVenda->show();
     ui->lineEditVenda->show();
   }
+}
+
+bool Orcamento::eventFilter(QObject *obj, QEvent *event) {
+  if (event->type() == QEvent::Wheel and (obj->inherits("QSpinBox") or obj->inherits("QDoubleSpinBox"))) {
+    event->ignore();
+    return true;
+  }
+
+  return QObject::eventFilter(obj, event);
 }
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)

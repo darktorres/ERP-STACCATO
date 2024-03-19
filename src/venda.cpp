@@ -36,6 +36,14 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
+  for (auto spinbox : findChildren<QSpinBox *>()) {
+    spinbox->installEventFilter(this);
+  }
+
+  for (auto doubleSpinbox : findChildren<QDoubleSpinBox *>()) {
+    doubleSpinbox->installEventFilter(this);
+  }
+
   connectLineEditsToDirty();
   setItemBoxes();
   setupTables();
@@ -1892,6 +1900,15 @@ void Venda::trocarEnderecoEntrega() {
   qApp->endTransaction();
 
   successMessage();
+}
+
+bool Venda::eventFilter(QObject *obj, QEvent *event) {
+  if (event->type() == QEvent::Wheel and (obj->inherits("QSpinBox") or obj->inherits("QDoubleSpinBox"))) {
+    event->ignore();
+    return true;
+  }
+
+  return QObject::eventFilter(obj, event);
 }
 
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao

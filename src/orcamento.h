@@ -50,6 +50,7 @@ private:
   auto connectLineEditsToDirty() -> void final;
   auto corrigirValores() -> void;
   auto dataItem(const QString &key) const -> QVariant;
+  auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto generateId() -> void;
   auto montarLog() -> QString;
   auto newRegister() -> bool final;

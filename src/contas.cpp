@@ -233,7 +233,6 @@ void Contas::setupTables() {
 
   ui->tablePendentes->setModel(&modelPendentes);
 
-  ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
   //  ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));

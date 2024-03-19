@@ -163,14 +163,12 @@ QString Sql::view_a_receber_vencidos() {
            "     SUM(SUM(`cr`.`valor`)) OVER (ORDER BY dataPagamento, representacao, status) AS `Acumulado` "
            " FROM "
            "     `conta_a_receber_has_pagamento` `cr` "
-           " WHERE "
-           "     `cr`.`status` NOT IN ('CANCELADO', 'SUBSTITUIDO')"
            " GROUP BY "
            "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
            " HAVING "
            "     `cr`.`dataPagamento` < CURDATE() "
            "     AND `cr`.`representacao` = 0 "
-           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO')"; // TODO: precisa colocar status aqui??
+           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO')";
 }
 
 QString Sql::view_a_receber_vencer() {
@@ -203,8 +201,6 @@ QString Sql::view_a_receber_vencer() {
            "     SUM(SUM(`cr`.`valor`)) OVER (ORDER BY `cr`.dataPagamento, `cr`.representacao, `cr`.status) AS `Acumulado` "
            " FROM "
            "     `conta_a_receber_has_pagamento` `cr` "
-           " WHERE "
-           "     `cr`.`status` NOT IN ('CANCELADO', 'SUBSTITUIDO')"
            " GROUP BY "
            "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
            " HAVING "

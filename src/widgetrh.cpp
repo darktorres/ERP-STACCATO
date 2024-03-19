@@ -131,8 +131,6 @@ void WidgetRh::setupTables() {
 }
 
 void WidgetRh::on_pushButtonImportarFolhaPag_clicked() {
-  // TODO: cadastrar as linhas do Excel na tabela folha_pagamento e na tabela de contas_a_pagar lançar o total de cada loja
-
   const QString file = QFileDialog::getOpenFileName(this, "Importar arquivo do Excel", "", "Excel (*.xlsx)");
 
   if (file.isEmpty()) { return; }

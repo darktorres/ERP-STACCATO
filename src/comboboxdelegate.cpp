@@ -23,7 +23,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     list << "PEND. APROV."
          << "CONFERIDO"
          << "COMPRADO"
-         << "FINALIZADO";
+         << "CANCELADO";
   }
 
   if (tipo == Tipo::PagarAvulso) {
@@ -88,6 +88,13 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   editor->addItems(list);
+
+  connect(editor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, editor](int index){
+    Q_UNUSED(index)
+    Q_EMIT const_cast<ComboBoxDelegate*>(this)->commitData(editor);
+    Q_EMIT const_cast<ComboBoxDelegate*>(this)->closeEditor(editor);
+
+  });
 
   return editor;
 }

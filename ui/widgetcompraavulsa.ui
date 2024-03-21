@@ -26,7 +26,7 @@
       <enum>QAbstractItemView::MultiSelection</enum>
      </property>
      <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectItems</enum>
+      <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <property name="sortingEnabled">
       <bool>true</bool>
@@ -34,25 +34,6 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="TableView" name="tablePagar">
-     <property name="mouseTracking">
-      <bool>true</bool>
-     </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::MultiSelection</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectItems</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="pushButtonCadastrar">
@@ -70,25 +51,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="pushButtonCancelar">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Cancelar</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item row="0" column="0" rowspan="3">
+   <item row="0" column="0" rowspan="2">
     <widget class="QFrame" name="frame_6">
      <property name="enabled">
       <bool>true</bool>
@@ -126,7 +91,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBoxStatus">
+       <widget class="QGroupBox" name="groupBoxProdutos">
         <property name="title">
          <string>Status</string>
         </property>
@@ -136,7 +101,7 @@
         <property name="checked">
          <bool>true</bool>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -150,7 +115,7 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="QCheckBox" name="checkBoxFiltroPendente">
+          <widget class="QCheckBox" name="checkBoxProdutoPendente">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -169,7 +134,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxFiltroConferido">
+          <widget class="QCheckBox" name="checkBoxProdutoConferido">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -188,7 +153,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxFiltroAgendado">
+          <widget class="QCheckBox" name="checkBoxProdutoComprado">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -199,7 +164,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Agendado</string>
+            <string>Comprado</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -207,26 +172,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxFiltroPago">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Pago</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxFiltroCancelado">
+          <widget class="QCheckBox" name="checkBoxProdutoCancelado">
            <property name="enabled">
             <bool>true</bool>
            </property>

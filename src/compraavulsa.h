@@ -13,7 +13,9 @@ class CompraAvulsa : public QDialog {
 
 public:
   explicit CompraAvulsa(QWidget *parent = nullptr);
-  ~CompraAvulsa();  
+  ~CompraAvulsa();
+
+  auto viewRegisterById(const QVariant &id) -> void;
 
 private:
   // attributes
@@ -22,14 +24,14 @@ private:
   SqlTableModel modelPagar;
   Ui::CompraAvulsa *ui;
   // methods
+  auto alterarPagamentos(const QModelIndex &index) -> void;
   auto on_itemBoxNFe_textChanged(const QString &text) -> void;
   auto on_pushButtonAdicionarPagamento_clicked() -> void;
   auto on_pushButtonAdicionarProduto_clicked() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
-  auto on_pushButtonRemoverLinhasPagamento_clicked() -> void;
-  auto on_pushButtonRemoverLinhasProdutos_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_tablePagar_dataChanged(const QModelIndex &index) -> void;
+  auto preencher(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

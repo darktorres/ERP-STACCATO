@@ -126,6 +126,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Receber) {
     auto *contas = new Contas(Contas::Tipo::Receber, this);
     contas->setAttribute(Qt::WA_DeleteOnClose);
+
     if (header == "Id") { contas->viewContaReceberPgt(model.data(index.row(), "idPagamento").toString()); }
     else if (header == "Contraparte") { contas->viewContaReceberContraparte(model.data(index.row(), "contraParte").toString()); }
     else { contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "contraParte").toString()); }
@@ -252,7 +253,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     //-------------------------------------
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR pf2.ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
+    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR pf2.ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%' OR cr.observacao LIKE '%" + text + "%')";
     if (not text.isEmpty()) { filtros << busca; }
 
     //-------------------------------------
@@ -344,7 +345,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo novoTipo) {
     ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
     ui->radioButtonAgendado->hide();
-    ui->lineEditBusca->setPlaceholderText("Venda/O.C. Rep./Contraparte");
+    ui->lineEditBusca->setPlaceholderText("Venda/O.C. Rep./Contraparte/Obs.");
   }
 }
 

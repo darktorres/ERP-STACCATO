@@ -5,9 +5,11 @@
 #include "comboboxdelegate.h"
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
+#include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
+#include "user.h"
 #include "xml.h"
 
 CompraAvulsa::CompraAvulsa(QWidget *parent) : QDialog(parent), ui(new Ui::CompraAvulsa) {
@@ -25,6 +27,7 @@ CompraAvulsa::~CompraAvulsa() { delete ui; }
 void CompraAvulsa::setupTables() {
   modelCompra.setTable("compra_avulsa");
 
+  modelCompra.setHeaderData("status", "Status");
   modelCompra.setHeaderData("fornecedor", "Fornecedor");
   modelCompra.setHeaderData("descricao", "Produto");
   modelCompra.setHeaderData("obs", "Obs.");
@@ -42,8 +45,14 @@ void CompraAvulsa::setupTables() {
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("dataRealCompra", new DateFormatDelegate(this));
 
+  if (User::isAdmin()) {
+    ui->tableCompra->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::CompraAvulsa, this));
+    ui->tableCompra->setPersistentColumns({"status"});
+  } else {
+    ui->tableCompra->setItemDelegateForColumn("status", new NoEditDelegate(this));
+  }
+
   ui->tableCompra->hideColumn("idPedido1");
-  ui->tableCompra->hideColumn("status");
   ui->tableCompra->hideColumn("idRelacionado");
   ui->tableCompra->hideColumn("idFollowup");
   ui->tableCompra->hideColumn("selecionado");
@@ -94,6 +103,12 @@ void CompraAvulsa::setupTables() {
   modelPagar.setHeaderData("parcela", "Parcela");
   modelPagar.setHeaderData("dataPagamento", "Vencimento");
   modelPagar.setHeaderData("observacao", "Obs.");
+  modelPagar.setHeaderData("status", "Status");
+  modelPagar.setHeaderData("dataRealizado", "Data Realizado");
+  modelPagar.setHeaderData("valorReal", "R$ Real");
+  modelPagar.setHeaderData("tipoReal", "Tipo Real");
+  modelPagar.setHeaderData("parcelaReal", "Parcela Real");
+  modelPagar.setHeaderData("idConta", "Conta");
   modelPagar.setHeaderData("centroCusto", "Centro Custo");
   modelPagar.setHeaderData("grupo", "Grupo");
   modelPagar.setHeaderData("subGrupo", "SubGrupo");
@@ -107,24 +122,27 @@ void CompraAvulsa::setupTables() {
   ui->tablePagar->setItemDelegateForColumn("dataEmissao", new DateFormatDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
   ui->tablePagar->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->tablePagar->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePagar->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->tablePagar->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
+  ui->tablePagar->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPagar.fieldIndex("dataPagamento"), modelPagar.fieldIndex("tipo"), false, this));
 
   ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "grupo"});
+
+  if (User::isAdmin()) {
+    ui->tablePagar->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::PagarAvulso, this));
+    ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "grupo", "status"});
+  } else {
+    ui->tablePagar->setItemDelegateForColumn("status", new NoEditDelegate(this));
+  }
 
   ui->tablePagar->hideColumn("idPagamento");
   ui->tablePagar->hideColumn("idCompra");
   ui->tablePagar->hideColumn("idVenda");
   ui->tablePagar->hideColumn("idLoja");
   ui->tablePagar->hideColumn("idCnab");
-  ui->tablePagar->hideColumn("status");
-  ui->tablePagar->hideColumn("dataRealizado");
-  ui->tablePagar->hideColumn("valorReal");
-  ui->tablePagar->hideColumn("tipoReal");
-  ui->tablePagar->hideColumn("parcelaReal");
-  ui->tablePagar->hideColumn("idConta");
   ui->tablePagar->hideColumn("tipoDet");
   ui->tablePagar->hideColumn("compraAvulsa");
   ui->tablePagar->hideColumn("desativado");
@@ -139,26 +157,24 @@ void CompraAvulsa::setConnections() {
 
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->itemBoxNFe, &ItemBox::textChanged, this, &CompraAvulsa::on_itemBoxNFe_textChanged, connectionType);
   connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonAdicionarPagamento_clicked, connectionType);
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonCancelar_clicked, connectionType);
-  connect(ui->pushButtonRemoverLinhasPagamento, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonRemoverLinhasPagamento_clicked, connectionType);
-  connect(ui->pushButtonRemoverLinhasProdutos, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonRemoverLinhasProdutos_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonSalvar_clicked, connectionType);
-  connect(ui->itemBoxNFe, &ItemBox::textChanged, this, &CompraAvulsa::on_itemBoxNFe_textChanged, connectionType);
+  connect(ui->tableCompra->model(), &QAbstractItemModel::dataChanged, this, &CompraAvulsa::alterarPagamentos, connectionType);
   connect(ui->tablePagar->model(), &QAbstractItemModel::dataChanged, this, &CompraAvulsa::on_tablePagar_dataChanged, connectionType);
 }
 
 void CompraAvulsa::unsetConnections() {
   blockingSignals.push(0);
 
+  disconnect(ui->itemBoxNFe, &ItemBox::textChanged, this, &CompraAvulsa::on_itemBoxNFe_textChanged);
   disconnect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonAdicionarPagamento_clicked);
   disconnect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonAdicionarProduto_clicked);
   disconnect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonCancelar_clicked);
-  disconnect(ui->pushButtonRemoverLinhasPagamento, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonRemoverLinhasPagamento_clicked);
-  disconnect(ui->pushButtonRemoverLinhasProdutos, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonRemoverLinhasProdutos_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CompraAvulsa::on_pushButtonSalvar_clicked);
-  disconnect(ui->itemBoxNFe, &ItemBox::textChanged, this, &CompraAvulsa::on_itemBoxNFe_textChanged);
+  disconnect(ui->tableCompra->model(), &QAbstractItemModel::dataChanged, this, &CompraAvulsa::alterarPagamentos);
   disconnect(ui->tablePagar->model(), &QAbstractItemModel::dataChanged, this, &CompraAvulsa::on_tablePagar_dataChanged);
 }
 
@@ -168,6 +184,30 @@ void CompraAvulsa::on_tablePagar_dataChanged(const QModelIndex &index) {
   try {
     [&] {
       const int row = index.row();
+
+      if (index.column() == ui->tablePagar->columnIndex("dataRealizado")) {
+        const int idContaExistente = modelPagar.data(row, "idConta").toInt();
+        const QString tipoPagamento = modelPagar.data(row, "tipo").toString();
+
+        SqlQuery queryConta;
+
+        if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+          throw RuntimeException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        }
+
+        if (queryConta.first()) {
+          const int idConta = queryConta.value("idConta").toInt();
+
+          if (idContaExistente == 0 and idConta != 0) { modelPagar.setData(row, "idConta", idConta); }
+        }
+
+        modelPagar.setData(row, "status", "PAGO");
+        modelPagar.setData(row, "valorReal", modelPagar.data(row, "valor"));
+        modelPagar.setData(row, "tipoReal", modelPagar.data(row, "tipo"));
+        modelPagar.setData(row, "parcelaReal", modelPagar.data(row, "parcela"));
+        modelPagar.setData(row, "centroCusto", modelPagar.data(row, "idLoja"));
+        modelPagar.setData(row, "dataRealizado", qApp->ajustarDiaUtil(modelPagar.data(row, "dataRealizado").toDate()));
+      }
 
       if (index.column() == ui->tablePagar->columnIndex("centroCusto")) {
         if (index.data().toInt() == 0) { return; }
@@ -199,22 +239,6 @@ void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
   modelPagar.setData(row, "compraAvulsa", true);
 
   ui->tablePagar->redoView();
-}
-
-void CompraAvulsa::on_pushButtonRemoverLinhasProdutos_clicked() {
-  const auto selection = ui->tableCompra->selectionModel()->selectedIndexes();
-
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
-
-  modelCompra.removeSelection(selection);
-}
-
-void CompraAvulsa::on_pushButtonRemoverLinhasPagamento_clicked() {
-  const auto selection = ui->tablePagar->selectionModel()->selectedIndexes();
-
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
-
-  modelPagar.removeSelection(selection);
 }
 
 void CompraAvulsa::on_pushButtonSalvar_clicked() {
@@ -324,6 +348,7 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
   for (auto produto : xml.produtos) {
     const int row = modelCompra.insertRowAtEnd();
 
+    modelCompra.setData(row, "status", "PEND. APROV.");
     modelCompra.setData(row, "fornecedor", xml.xNome);
     modelCompra.setData(row, "descricao", produto.descricao);
     modelCompra.setData(row, "obs", "NFe: " + xml.chaveAcesso);
@@ -340,6 +365,7 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
   for (auto duplicata : xml.duplicatas) {
     const int row = modelPagar.insertRowAtEnd();
 
+    modelPagar.setData(row, "status", "PEND. APROV.");
     modelPagar.setData(row, "dataEmissao", xml.dataHoraEmissao);
     modelPagar.setData(row, "idLoja", query.value("idLoja"));
     modelPagar.setData(row, "contraParte", xml.xNome);
@@ -351,9 +377,57 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
     modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
     modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup);
     modelPagar.setData(row, "centroCusto", query.value("idLoja"));
-    // modelPagar.setData(row, "grupo", duplicata.dVenc); // ???
-    // modelPagar.setData(row, "subgrupo", duplicata.dVenc); // ???
+    // modelPagar.setData(row, "grupo", "???");
+    // modelPagar.setData(row, "subgrupo", "???");
   }
+}
+
+void CompraAvulsa::viewRegisterById(const QVariant &id) {
+  modelCompra.setFilter("idCompra = '" + id.toString() + "'");
+  modelCompra.select();
+
+  modelPagar.setFilter("idCompra = '" + id.toString() + "'");
+  modelPagar.select();
+
+  if (not User::isAdmin()) {
+    ui->tableCompra->closePersistentEditors();
+    ui->tablePagar->closePersistentEditors();
+
+    ui->tableCompra->setPersistentColumns({});
+    ui->tablePagar->setPersistentColumns({});
+
+    ui->tableCompra->setEditTriggers(QTableView::NoEditTriggers);
+    ui->tablePagar->setEditTriggers(QTableView::NoEditTriggers);
+
+    ui->pushButtonAdicionarProduto->hide();
+    ui->pushButtonAdicionarPagamento->hide();
+  }
+}
+
+void CompraAvulsa::alterarPagamentos(const QModelIndex &index) {
+  unsetConnections();
+
+  try {
+    [&] {
+      const int row = index.row();
+
+      if (index.column() == ui->tableCompra->columnIndex("status")) {
+        const QString status = modelCompra.data(row, "status").toString();
+
+        if (status == "PEND. APROV." or status == "CONFERIDO" or status == "CANCELADO") {
+          for (int row = 0; row < modelPagar.rowCount(); ++row) {
+            // TODO: verificar quais status podem ser alterados, por exemplo, se o pagamento já estiver como pago não deve ser alterado para cancelado
+            modelPagar.setData(row, "status", status);
+          }
+        }
+      }
+    }();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
 }
 
 // TODO: colocar um autopreenchimento no prcUnitario/preco

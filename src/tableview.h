@@ -10,6 +10,7 @@ public:
   explicit TableView(QWidget *parent);
   ~TableView() final = default;
 
+  auto closePersistentEditors() -> void;
   auto columnCount() const -> int;
   auto columnIndex(const QString &column) const -> int;
   auto columnIndex(const QString &column, const bool silent) const -> int;

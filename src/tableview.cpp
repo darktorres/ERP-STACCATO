@@ -153,6 +153,12 @@ void TableView::redoView() {
   }
 }
 
+void TableView::closePersistentEditors() {
+  for (int row = 0; row <= rowCount(); ++row) {
+    for (const auto &column : qAsConst(persistentColumns)) { closePersistentEditor(QTableView::model()->index(row, columnIndex(column))); }
+  }
+}
+
 void TableView::setModel(QAbstractItemModel *model) {
   if (auto *queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
     QTableView::setModel(queryModel->proxyModel);

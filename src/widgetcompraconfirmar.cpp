@@ -85,6 +85,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   const int row = selection.first().row();
 
+  // TODO: alterar para idCompra porque OC pode repetir o que ocasionaria em um pedido já feito voltar status
   const QString ordemCompra = modelCompras.data(row, "OC").toString();
   const QString idVenda = modelCompras.data(row, "Venda").toString();
 

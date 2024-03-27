@@ -346,7 +346,6 @@ void InputDialogProduto::cadastrar() {
       if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") { modelPedidoFornecedor.setData(row, "status", "ENTREGUE"); }
     }
 
-
     for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
       idVendas << modelPedidoFornecedor.data(row, "idVenda").toString();
     }

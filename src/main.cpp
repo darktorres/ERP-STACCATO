@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
 #else
     window->show();
 #endif
-  } catch (std::exception &) {
-    app.rollbackTransaction();
+  } catch (std::exception &e) {
+    app.rollbackTransaction(e.what());
     exit(1);
   }
 

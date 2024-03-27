@@ -61,7 +61,7 @@ public:
   auto reservarIdPagamento() -> int;
   auto reservarIdPedido2() -> int;
   auto reservarIdVendaProduto2() -> int;
-  auto rollbackTransaction() -> void;
+  auto rollbackTransaction(const QString &message) -> void;
   auto roundDouble(const double value) -> double;
   auto roundDouble(const double value, const int decimais) -> double;
   auto sanitizeSQL(const QString &string) -> QString;

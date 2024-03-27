@@ -246,8 +246,8 @@ void CadastroFornecedor::cadastrar() {
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
-  } catch (std::exception &) {
-    qApp->rollbackTransaction();
+  } catch (std::exception &e) {
+    qApp->rollbackTransaction(e.what());
     model.select();
     modelEnd.select();
 

@@ -256,8 +256,8 @@ void CadastroUsuario::cadastrar() {
     qApp->endTransaction();
 
     if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
-  } catch (std::exception &) {
-    qApp->rollbackTransaction();
+  } catch (std::exception &e) {
+    qApp->rollbackTransaction(e.what());
     model.select();
     modelPermissoes.select();
 

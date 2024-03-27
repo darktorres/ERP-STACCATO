@@ -288,11 +288,13 @@ void Application::endTransaction() {
   showMessages();
 }
 
-void Application::rollbackTransaction() {
+void Application::rollbackTransaction(const QString &message) {
   if (inTransaction) {
-    qDebug() << "rollbackTransaction";
+    qDebug() << "rollbackTransaction: " << message;
     SqlQuery query;
     query.exec("ROLLBACK");
+
+    if (not message.isEmpty()) { Log::createLog("exceção", message); }
 
     inTransaction = false;
   }
@@ -560,7 +562,7 @@ bool Application::notify(QObject *receiver, QEvent *event) {
     done = QApplication::notify(receiver, event);
   } catch (const std::exception &e) {
     qDebug() << "catch all: " << e.what();
-    rollbackTransaction();
+    rollbackTransaction(e.what());
   }
 
   return done;

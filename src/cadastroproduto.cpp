@@ -210,8 +210,8 @@ void CadastroProduto::cadastrar() {
     if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     qApp->endTransaction();
-  } catch (std::exception &) {
-    qApp->rollbackTransaction();
+  } catch (std::exception &e) {
+    qApp->rollbackTransaction(e.what());
     model.select();
 
     throw;

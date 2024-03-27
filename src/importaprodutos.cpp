@@ -1012,7 +1012,7 @@ void ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
 }
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {
-  if (qApp->getInTransaction()) { qApp->rollbackTransaction(); }
+  if (qApp->getInTransaction()) { qApp->rollbackTransaction(""); }
 
   QDialog::closeEvent(event);
 }

@@ -1028,8 +1028,8 @@ void Venda::cadastrar() {
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE AND desativado = FALSE");
-  } catch (std::exception &) {
-    qApp->rollbackTransaction();
+  } catch (std::exception &e) {
+    qApp->rollbackTransaction(e.what());
     model.select();
     modelItem.select();
 

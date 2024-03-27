@@ -1447,8 +1447,8 @@ void Orcamento::cadastrar() {
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
-  } catch (std::exception &) {
-    qApp->rollbackTransaction();
+  } catch (std::exception &e) {
+    qApp->rollbackTransaction(e.what());
     model.select();
     modelItem.select();
 

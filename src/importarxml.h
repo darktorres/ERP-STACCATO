@@ -1,6 +1,5 @@
 #pragma once
 
-#include "estoqueproxymodel.h"
 #include "sqltablemodel.h"
 #include "xml.h"
 
@@ -49,12 +48,14 @@ private:
   QMap<QString, double> mapNFes;
   QStack<int> blockingSignals;
   QStringList const idsCompra;
+  QStringList ordemCompra;
   SqlTableModel modelCompra;
   SqlTableModel modelConsumo;
   SqlTableModel modelEstoque;
   SqlTableModel modelEstoque_compra;
   SqlTableModel modelNFe;
-  SqlTableModel modelPagamento;
+  SqlTableModel modelPagar;
+  SqlTableModel modelPagar_conta;
   SqlTableModel modelVenda;
   Ui::ImportarXML *ui;
   // methods

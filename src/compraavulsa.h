@@ -15,12 +15,13 @@ public:
   explicit CompraAvulsa(QWidget *parent = nullptr);
   ~CompraAvulsa();
 
-  auto viewRegisterById(const QVariant &id) -> void;
+  auto viewRegisterById(const QString &idCompra) -> void;
 
 private:
   // attributes
   QStack<int> blockingSignals;
   SqlTableModel modelCompra;
+  SqlTableModel modelContaIdCompra;
   SqlTableModel modelPagar;
   Ui::CompraAvulsa *ui;
   // methods

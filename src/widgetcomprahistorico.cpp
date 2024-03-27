@@ -5,6 +5,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "followup.h"
+#include "itemboxdelegate.h"
 #include "noeditdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
@@ -75,10 +76,11 @@ void WidgetCompraHistorico::setupTables() {
 
   //------------------------------------------------------
 
-  modelFinanceiro.setTable("conta_a_pagar_has_pagamento");
+  modelFinanceiro.setTable("view_conta_pagar_idcompra");
 
   modelFinanceiro.setSort("dataPagamento");
 
+  modelFinanceiro.setHeaderData("idNFe", "NF-e");
   modelFinanceiro.setHeaderData("tipo", "Tipo");
   modelFinanceiro.setHeaderData("parcela", "Parcela");
   modelFinanceiro.setHeaderData("valor", "R$");
@@ -94,7 +96,6 @@ void WidgetCompraHistorico::setupTables() {
   ui->tableFinanceiro->hideColumn("idVenda");
   ui->tableFinanceiro->hideColumn("idLoja");
   ui->tableFinanceiro->hideColumn("contraParte");
-  ui->tableFinanceiro->hideColumn("idNFe");
   ui->tableFinanceiro->hideColumn("idCnab");
   ui->tableFinanceiro->hideColumn("nfe");
   ui->tableFinanceiro->hideColumn("dataRealizado");
@@ -110,6 +111,10 @@ void WidgetCompraHistorico::setupTables() {
   ui->tableFinanceiro->hideColumn("desativado");
 
   ui->tableFinanceiro->setItemDelegate(new NoEditDelegate(this));
+  ui->tableFinanceiro->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, true, this));
+  ui->tableFinanceiro->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
+
+  ui->tableFinanceiro->setPersistentColumns({"idNFe"});
 }
 
 void WidgetCompraHistorico::setTreeView() {

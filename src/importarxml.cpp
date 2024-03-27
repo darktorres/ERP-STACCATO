@@ -2,9 +2,12 @@
 #include "ui_importarxml.h"
 
 #include "application.h"
+#include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
+#include "estoqueproxymodel.h"
 #include "file.h"
+#include "itemboxdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -21,6 +24,16 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate dataFaturamen
     : QDialog(parent), dataFaturamento(dataFaturamento), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
   setWindowFlags(Qt::Window);
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT DISTINCT ordemCompra FROM pedido_fornecedor_has_produto WHERE idCompra IN (" + idsCompra.join(", ") + ")") or not query.first()) { throw RuntimeException("Erro buscando ordemCompra: " + query.lastError().text()); }
+
+  do {
+    ordemCompra << query.value("ordemCompra").toString();
+  } while (query.next());
+
+  setWindowTitle("O.C. " + ordemCompra.join(", "));
 
   setupTables();
 
@@ -176,6 +189,56 @@ void ImportarXML::setupTables() {
 
   // -------------------------------------------------------------------------
 
+  modelPagar.setTable("conta_a_pagar_has_pagamento");
+
+  modelPagar.setHeaderData("dataEmissao", "Data Emissão");
+  modelPagar.setHeaderData("contraParte", "Contraparte");
+  modelPagar.setHeaderData("nfe", "NF-e");
+  modelPagar.setHeaderData("valor", "R$");
+  modelPagar.setHeaderData("tipo", "Tipo");
+  modelPagar.setHeaderData("parcela", "Parcela");
+  modelPagar.setHeaderData("dataPagamento", "Vencimento");
+  modelPagar.setHeaderData("observacao", "Obs.");
+  modelPagar.setHeaderData("status", "Status");
+  modelPagar.setHeaderData("centroCusto", "Centro Custo");
+
+  modelPagar.setSort("dataPagamento");
+
+  modelPagar.proxyModel = new SortFilterProxyModel(&modelPagar, this);
+
+  ui->tablePagar->setModel(&modelPagar);
+
+  ui->tablePagar->setItemDelegateForColumn("dataEmissao", new DateFormatDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
+  ui->tablePagar->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
+  ui->tablePagar->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPagar.fieldIndex("dataPagamento"), modelPagar.fieldIndex("tipo"), false, this));
+
+  ui->tablePagar->hideColumn("idPagamento");
+  ui->tablePagar->hideColumn("idVenda");
+  ui->tablePagar->hideColumn("idLoja");
+  ui->tablePagar->hideColumn("idCnab");
+  ui->tablePagar->hideColumn("idNFe");
+  ui->tablePagar->hideColumn("dataRealizado");
+  ui->tablePagar->hideColumn("valorReal");
+  ui->tablePagar->hideColumn("tipoReal");
+  ui->tablePagar->hideColumn("parcelaReal");
+  ui->tablePagar->hideColumn("idConta");
+  ui->tablePagar->hideColumn("tipoDet");
+  ui->tablePagar->hideColumn("grupo");
+  ui->tablePagar->hideColumn("subGrupo");
+  ui->tablePagar->hideColumn("compraAvulsa");
+  ui->tablePagar->hideColumn("desativado");
+  ui->tablePagar->hideColumn("created");
+  ui->tablePagar->hideColumn("lastUpdated");
+
+  // -------------------------------------------------------------------------
+
+  modelPagar_conta.setTable("conta_a_pagar_has_idcompra");
+
+  // -------------------------------------------------------------------------
+
   modelConsumo.setTable("estoque_has_consumo");
 
   modelConsumo.setHeaderData("status", "Status");
@@ -321,10 +384,6 @@ void ImportarXML::setupTables() {
   modelVenda.setFilter("idVendaProduto2 IN (" + idVendas.join(", ") + ") AND status = 'EM FATURAMENTO'");
 
   modelVenda.select();
-
-  // -------------------------------------------------------------------------
-
-  modelPagamento.setTable("conta_a_pagar_has_pagamento");
 }
 
 void ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) {
@@ -429,7 +488,8 @@ void ImportarXML::importar() {
 
   modelEstoque_compra.submitAll();
 
-  modelPagamento.submitAll();
+  modelPagar.submitAll();
+  modelPagar_conta.submitAll();
 }
 
 void ImportarXML::salvarDadosCompra() {
@@ -709,7 +769,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
 void ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
-  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE idNFe = " + ui->itemBoxNFe->getId().toString())) {
+  if (not query.exec("SELECT n.idNFe, n.xml, n.status, n.utilizada, l.idLoja FROM nfe n LEFT JOIN loja l ON n.cnpjDest = REGEXP_REPLACE(l.cnpj, '[^0-9]', '') WHERE n.idNFe = " + ui->itemBoxNFe->getId().toString())) {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
@@ -903,6 +963,45 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "vCOFINS", produto.vCOFINS);
     modelEstoque.setData(newRow, "status", "EM COLETA");
     modelEstoque.setData(newRow, "valorGare", produto.valorGare);
+  }
+
+  // ----------------------------------------------------------------
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT idLoja FROM loja l WHERE REGEXP_REPLACE(cnpj, '[^0-9]', '') = '" + xml.cnpjDest + "'")) {
+    throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
+  }
+
+  if (not query.first()) { throw RuntimeException("idLoja não encontrado para CNPJ: '" + xml.cnpjDest + "'"); }
+
+  int parcela = 1;
+
+  for (auto duplicata : xml.duplicatas) {
+    const int row = modelPagar.insertRowAtEnd();
+
+    modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
+    modelPagar.setData(row, "status", "PENDENTE");
+    modelPagar.setData(row, "dataEmissao", xml.dataHoraEmissao);
+    modelPagar.setData(row, "idLoja", query.value("idLoja"));
+    modelPagar.setData(row, "contraParte", xml.xNome);
+    modelPagar.setData(row, "idNFe", xml.idNFe);
+    modelPagar.setData(row, "nfe", xml.chaveAcesso);
+    modelPagar.setData(row, "valor", duplicata.vDup);
+    modelPagar.setData(row, "tipo", "BOLETO");
+    modelPagar.setData(row, "parcela", parcela++);
+    modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
+    modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup + " - O.C.: " + ordemCompra.join(", "));
+    modelPagar.setData(row, "centroCusto", query.value("idLoja"));
+    // modelPagar.setData(row, "grupo", "???");
+    // modelPagar.setData(row, "subgrupo", "???");
+
+    for (const auto &idCompra : idsCompra) {
+      const int row2 = modelPagar_conta.insertRowAtEnd();
+
+      modelPagar_conta.setData(row2, "idPagamento", modelPagar.data(row, "idPagamento"));
+      modelPagar_conta.setData(row2, "idCompra", idCompra);
+    }
   }
 }
 
@@ -1215,15 +1314,15 @@ double ImportarXML::calculaGare(XML &xml) {
 
     produto.valorGare = icmsST;
 
-    qDebug() << "baseCalculo: " << baseCalculo;
-    qDebug() << "mvaAjustado: " << mva;
-    qDebug() << "icmsIntra: " << icmsIntra;
-    qDebug() << "icmsProprio: " << icmsProprio;
-    qDebug() << "baseST: " << baseST;
-    qDebug() << "icmsST: " << icmsST;
+    // qDebug() << "baseCalculo: " << baseCalculo;
+    // qDebug() << "mvaAjustado: " << mva;
+    // qDebug() << "icmsIntra: " << icmsIntra;
+    // qDebug() << "icmsProprio: " << icmsProprio;
+    // qDebug() << "baseST: " << baseST;
+    // qDebug() << "icmsST: " << icmsST;
   }
 
-  qDebug() << "gare: " << total;
+  // qDebug() << "gare: " << total;
 
   return total;
 }
@@ -1248,22 +1347,22 @@ void ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
 
   if (query.first()) { return; }
 
-  const int row = modelPagamento.insertRowAtEnd();
+  const int row = modelPagar.insertRowAtEnd();
 
   const int lojaGeral = 1;
 
-  modelPagamento.setData(row, "dataEmissao", qApp->serverDate());
-  modelPagamento.setData(row, "dataPagamento", qApp->serverDate().addDays(15));
-  modelPagamento.setData(row, "idLoja", lojaGeral);
-  modelPagamento.setData(row, "contraParte", "GARE");
-  modelPagamento.setData(row, "idNFe", xml.idNFe);
-  modelPagamento.setData(row, "nfe", xml.nNF);
-  modelPagamento.setData(row, "valor", valor);
-  modelPagamento.setData(row, "tipo", "Boleto");
-  modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF);
-  modelPagamento.setData(row, "status", qFuzzyIsNull(valor) ? "PAGO GARE" : "PENDENTE GARE");
-  modelPagamento.setData(row, "centroCusto", lojaGeral);
-  modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS");
+  modelPagar.setData(row, "dataEmissao", qApp->serverDate());
+  modelPagar.setData(row, "dataPagamento", qApp->serverDate().addDays(15));
+  modelPagar.setData(row, "idLoja", lojaGeral);
+  modelPagar.setData(row, "contraParte", "GARE");
+  modelPagar.setData(row, "idNFe", xml.idNFe);
+  modelPagar.setData(row, "nfe", xml.chaveAcesso);
+  modelPagar.setData(row, "valor", valor);
+  modelPagar.setData(row, "tipo", "Boleto");
+  modelPagar.setData(row, "observacao", "GARE ICMS ST " + xml.nNF);
+  modelPagar.setData(row, "status", qFuzzyIsNull(valor) ? "PAGO GARE" : "PENDENTE GARE");
+  modelPagar.setData(row, "centroCusto", lojaGeral);
+  modelPagar.setData(row, "grupo", "Impostos - ICMS;ST;ISS");
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque

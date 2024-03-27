@@ -258,7 +258,6 @@ void Contas::setupTables() {
   }
 
   if (tipo == Tipo::Pagar) {
-    ui->tablePendentes->hideColumn("idCompra");
     ui->tablePendentes->hideColumn("idCnab");
     ui->tablePendentes->hideColumn("compraAvulsa");
   }
@@ -315,7 +314,6 @@ void Contas::setupTables() {
   }
 
   if (tipo == Tipo::Pagar) {
-    ui->tableProcessados->hideColumn("idCompra");
     ui->tableProcessados->hideColumn("idCnab");
     ui->tableProcessados->hideColumn("compraAvulsa");
   }
@@ -425,9 +423,9 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+  modelPendentes.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("idCompra IN (" + idCompra + ") AND status IN ('PAGO')");
+  modelProcessados.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 

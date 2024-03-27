@@ -5,7 +5,7 @@
 #include "cancelaproduto.h"
 #include "financeiroproxymodel.h"
 #include "followup.h"
-#include "inputdialogfinanceiro.h"
+#include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -88,8 +88,8 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QString ordemCompra = modelCompras.data(row, "OC").toString();
   const QString idVenda = modelCompras.data(row, "Venda").toString();
 
-  InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
-  inputDlg.setFilter(ordemCompra);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::ConfirmarCompra, this);
+  inputDlg.setFilter({ordemCompra});
 
   if (inputDlg.exec() != QDialog::Accepted) { return; }
 

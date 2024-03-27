@@ -141,7 +141,7 @@ void WidgetCompraAvulsa::on_tableCompra_doubleClicked(const QModelIndex &index) 
 
   auto *compraAvulsa = new CompraAvulsa(this);
   compraAvulsa->setAttribute(Qt::WA_DeleteOnClose);
-  compraAvulsa->viewRegisterById(modelCompra.data(index.row(), "idCompra"));
+  compraAvulsa->viewRegisterById(modelCompra.data(index.row(), "idCompra").toString());
 
   compraAvulsa->show();
 }

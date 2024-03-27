@@ -40,19 +40,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) :
 
   ui->treeView->hide();
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    ui->frameData->show();
-    ui->frameDataPreco->show();
-    ui->groupBoxFrete->show();
-
-    ui->labelEvento->setText("Data confirmação:");
-    ui->labelProximoEvento->setText("Data prevista faturamento:");
-
-    ui->widgetPgts->show();
-
-    ui->tableFluxoCaixa->setSelectionMode(QTableView::NoSelection);
-  }
-
   if (tipo == Tipo::Financeiro) {
     ui->frameDataPreco->show();
     ui->groupBoxFinanceiro->show();
@@ -189,12 +176,6 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor2);
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    ui->table->hideColumn("status");
-    ui->table->hideColumn("ordemRepresentacao");
-    ui->table->hideColumn("codFornecedor");
-  }
-
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("idRelacionado");
@@ -250,9 +231,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
-  ui->tableFluxoCaixa->hideColumn("idPagamento");
   ui->tableFluxoCaixa->hideColumn("dataEmissao");
-  ui->tableFluxoCaixa->hideColumn("idCompra");
   ui->tableFluxoCaixa->hideColumn("idVenda");
   ui->tableFluxoCaixa->hideColumn("idLoja");
   ui->tableFluxoCaixa->hideColumn("contraParte");
@@ -276,6 +255,10 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("dataPagamento", new EditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
+
+  //--------------------------------------------------
+
+  modelContaIdCompra.setTable("conta_a_pagar_has_idcompra");
 }
 
 void InputDialogFinanceiro::montarFluxoCaixa() {
@@ -289,6 +272,7 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
       if (not ui->widgetPgts->isVisible()) { return; }
 
       modelFluxoCaixa.revertAll();
+      modelContaIdCompra.revertAll();
 
       if (tipo == Tipo::Financeiro) {
         const auto selection = ui->tableFluxoCaixa->selectionModel()->selectedRows();
@@ -315,21 +299,18 @@ void InputDialogFinanceiro::calcularTotal() {
 
   try {
     auto *table = [&] {
-      if (tipo == Tipo::ConfirmarCompra) { return ui->table; }
       if (tipo == Tipo::Financeiro) { return ui->tableFluxoCaixa; }
 
       throw RuntimeException("Tipo Nulo!");
     }();
 
     auto *model = [&] {
-      if (tipo == Tipo::ConfirmarCompra) { return &modelPedidoFornecedor2; }
       if (tipo == Tipo::Financeiro) { return &modelFluxoCaixa; }
 
       throw RuntimeException("Tipo Nulo!");
     }();
 
     const QString coluna = [&] {
-      if (tipo == Tipo::ConfirmarCompra) { return "preco"; }
       if (tipo == Tipo::Financeiro) { return "valor"; }
 
       throw RuntimeException("Tipo Nulo!");
@@ -502,9 +483,9 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
   if (ordemCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
 
-  QString filtro = "ordemCompra IN (" + ordemCompra + ")";
+  setWindowTitle("O.C.: " + ordemCompra);
 
-  if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
+  QString filtro = "ordemCompra IN (" + ordemCompra + ")";
 
   modelPedidoFornecedor.setFilter(filtro);
 
@@ -516,7 +497,9 @@ void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
 
   //  setTreeView();
 
-  if (tipo == Tipo::Financeiro) { modelFluxoCaixa.setFilter("idCompra IN (SELECT idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra + ") AND desativado = FALSE"); }
+  if (tipo == Tipo::Financeiro) {
+    modelFluxoCaixa.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra IN (SELECT DISTINCT idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra + ")) AND desativado = FALSE");
+  }
 
   modelFluxoCaixa.select();
 
@@ -541,17 +524,10 @@ void InputDialogFinanceiro::setFilter(const QString &ordemCompra) {
     ui->framePagamentos->hide();
     ui->lineEditCodFornecedor->hide();
 
-    if (tipo == Tipo::ConfirmarCompra) { ui->frameAdicionais->hide(); }
     if (tipo == Tipo::Financeiro) { ui->pushButtonSalvar->hide(); }
   }
 
   ui->widgetPgts->setRepresentacao(representacao);
-
-  setWindowTitle("O.C.: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
-
-  // -------------------------------------------------------------------------
-
-  if (tipo == Tipo::ConfirmarCompra) { ui->checkBoxMarcarTodos->setChecked(true); }
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
@@ -585,30 +561,7 @@ void InputDialogFinanceiro::verifyFields() {
 
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (tipo == Tipo::ConfirmarCompra and selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
-
   if (not representacao) {
-    if (tipo == Tipo::ConfirmarCompra) {
-      for (const auto &index : selection) {
-        if (modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
-      }
-
-      if (ui->widgetPgts->pagamentos.isEmpty()) {
-        QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Sem pagamentos cadastrados, deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
-        msgBox.button(QMessageBox::Yes)->setText("Continuar");
-        msgBox.button(QMessageBox::No)->setText("Voltar");
-
-        if (msgBox.exec() == QMessageBox::No) { throw std::exception(); }
-      } else {
-        const double total = ui->doubleSpinBoxTotal->value();
-        const double pagamentos = ui->widgetPgts->getTotalPag();
-
-        if (not qFuzzyCompare(total, pagamentos)) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
-
-        ui->widgetPgts->verifyFields();
-      }
-    }
-
     if (tipo == Tipo::Financeiro) {
       if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { throw RuntimeError("Soma dos pagamentos difere do total! Favor verificar!"); }
 
@@ -620,10 +573,6 @@ void InputDialogFinanceiro::verifyFields() {
 void InputDialogFinanceiro::cadastrar() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "selecionado", true); }
-  }
-
   if (tipo == Tipo::Financeiro) {
     for (const auto &index : selection) { modelPedidoFornecedor2.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText()); }
   }
@@ -633,6 +582,8 @@ void InputDialogFinanceiro::cadastrar() {
   modelPedidoFornecedor2.submitAll();
 
   modelFluxoCaixa.submitAll();
+
+  modelContaIdCompra.submitAll();
 }
 
 void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate date) {
@@ -655,7 +606,22 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   ui->pushButtonCorrigirFluxo->setDisabled(true);
   ui->tableFluxoCaixa->setDisabled(true);
 
-  for (const auto &index : selection) { modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO"); }
+  QStringList idPagamentos;
+
+  for (const auto &index : selection) {
+    modelFluxoCaixa.setData(index.row(), "status", "SUBSTITUIDO");
+    idPagamentos << modelFluxoCaixa.data(index.row(), "idPagamento").toString();
+  }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT DISTINCT idCompra FROM conta_a_pagar_has_idcompra WHERE idPagamento IN (" + idPagamentos.join(", ") + ")") or not query.first()) { throw RuntimeException("Erro buscando idCompras: " + query.lastError().text()); }
+
+  idCompras.clear();
+
+  do {
+    idCompras << query.value("idCompra").toString();
+  } while (query.next());
 
   ui->frameAdicionais->show();
   ui->widgetPgts->show();
@@ -763,11 +729,11 @@ void InputDialogFinanceiro::setCodFornecedor() {
 }
 
 void InputDialogFinanceiro::on_table_selectionChanged() {
-  if (tipo == Tipo::ConfirmarCompra) {
-    setCodFornecedor();
-    calcularTotal();
-    setMaximumST();
-  }
+  // if (tipo == Tipo::ConfirmarCompra) {
+  //   setCodFornecedor();
+  //   calcularTotal();
+  //   setMaximumST();
+  // }
 }
 
 void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
@@ -802,9 +768,17 @@ void InputDialogFinanceiro::processarPagamento(Pagamento *pgt) {
   for (int parcela = 0; parcela < parcelas; ++parcela) {
     const int row = modelFluxoCaixa.insertRowAtEnd();
 
+    modelFluxoCaixa.setData(row, "idPagamento", qApp->reservarIdPagamento());
     modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"));
     modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date());
-    modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"));
+
+    for (const auto &idCompra : idCompras) {
+      const int row2 = modelContaIdCompra.insertRowAtEnd();
+
+      modelContaIdCompra.setData(row2, "idPagamento", modelFluxoCaixa.data(row, "idPagamento"));
+      modelContaIdCompra.setData(row2, "idCompra", idCompra);
+    }
+
     // TODO: esse idLoja provavelmente está errado
     modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
 

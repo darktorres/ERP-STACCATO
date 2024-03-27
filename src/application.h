@@ -58,6 +58,7 @@ public:
   auto removerDiacriticos(const QString &s, const bool removerSimbolos = false) -> QString;
   auto reservarIdEstoque() -> int;
   auto reservarIdNFe() -> int;
+  auto reservarIdPagamento() -> int;
   auto reservarIdPedido2() -> int;
   auto reservarIdVendaProduto2() -> int;
   auto rollbackTransaction() -> void;

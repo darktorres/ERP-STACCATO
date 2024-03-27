@@ -981,7 +981,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     const int row = modelPagar.insertRowAtEnd();
 
     modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
-    modelPagar.setData(row, "status", "PENDENTE");
+    modelPagar.setData(row, "status", "CONFERIDO");
     modelPagar.setData(row, "dataEmissao", xml.dataHoraEmissao);
     modelPagar.setData(row, "idLoja", query.value("idLoja"));
     modelPagar.setData(row, "contraParte", xml.xNome);

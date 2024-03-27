@@ -139,7 +139,6 @@ void CompraAvulsa::setupTables() {
   }
 
   ui->tablePagar->hideColumn("idPagamento");
-  ui->tablePagar->hideColumn("idCompra");
   ui->tablePagar->hideColumn("idVenda");
   ui->tablePagar->hideColumn("idLoja");
   ui->tablePagar->hideColumn("idCnab");
@@ -148,6 +147,10 @@ void CompraAvulsa::setupTables() {
   ui->tablePagar->hideColumn("desativado");
   ui->tablePagar->hideColumn("created");
   ui->tablePagar->hideColumn("lastUpdated");
+
+  // -------------------------------------------------------------------------
+
+  modelContaIdCompra.setTable("conta_a_pagar_has_idcompra");
 }
 
 void CompraAvulsa::setConnections() {
@@ -382,12 +385,14 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
   }
 }
 
-void CompraAvulsa::viewRegisterById(const QVariant &id) {
-  modelCompra.setFilter("idCompra = '" + id.toString() + "'");
+void CompraAvulsa::viewRegisterById(const QString &idCompra) {
+  modelCompra.setFilter("idCompra = '" + idCompra + "'");
   modelCompra.select();
 
-  modelPagar.setFilter("idCompra = '" + id.toString() + "'");
+  modelPagar.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND desativado = FALSE");
   modelPagar.select();
+
+  modelContaIdCompra.setFilter("idCompra = '" + idCompra + "'");
 
   if (not User::isAdmin()) {
     ui->tableCompra->closePersistentEditors();

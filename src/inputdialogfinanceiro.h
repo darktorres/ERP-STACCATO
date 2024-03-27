@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sqltablemodel.h"
-#include "sqltreemodel.h"
 #include "widgetpagamentos.h"
 
 #include <QDialog>
@@ -15,7 +14,7 @@ class InputDialogFinanceiro final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { ConfirmarCompra, Financeiro, Historico };
+  enum class Tipo { Financeiro, Historico };
   Q_ENUM(Tipo)
 
   explicit InputDialogFinanceiro(const Tipo tipo, QWidget *parent);
@@ -30,6 +29,8 @@ private:
   bool representacao = false;
   double selectedTotal = 0;
   QStack<int> blockingSignals;
+  QStringList idCompras;
+  SqlTableModel modelContaIdCompra;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelPedidoFornecedor2;
   SqlTableModel modelPedidoFornecedor;

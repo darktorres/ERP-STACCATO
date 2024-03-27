@@ -38,6 +38,19 @@ InputDialogProduto::InputDialogProduto(const Tipo tipo, QWidget *parent) : QDial
     connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
+  if (tipo == Tipo::ConfirmarCompra) {
+    ui->labelEvento->setText("Data confirmação:");
+    ui->labelProximoEvento->setText("Data prevista faturamento:");
+
+    ui->comboBoxST->hide();
+    ui->labelAliquota->hide();
+    ui->doubleSpinBoxAliquota->hide();
+    ui->labelST->hide();
+    ui->doubleSpinBoxST->hide();
+    ui->labelDescontoGlobal->hide();
+    ui->doubleSpinBoxDescontoGlobal->hide();
+  }
+
   if (tipo == Tipo::Faturamento) {
     ui->labelProximoEvento->hide();
     ui->dateEditProximo->hide();
@@ -94,11 +107,12 @@ void InputDialogProduto::unsetConnections() {
 
 void InputDialogProduto::setupTables() {
   if (tipo == Tipo::GerarCompra) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto"); }
-  if (tipo == Tipo::Faturamento) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2"); }
+  if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Faturamento) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2"); }
 
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
   modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+  modelPedidoFornecedor.setHeaderData("codFornecedor", "Cód. Forn.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
@@ -118,7 +132,9 @@ void InputDialogProduto::setupTables() {
 
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
 
-  if (tipo == Tipo::Faturamento) {
+  if (tipo == Tipo::ConfirmarCompra) { ui->table->hideColumn("ordemRepresentacao"); }
+
+  if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Faturamento) {
     ui->table->hideColumn("idPedido2");
     ui->table->hideColumn("idPedidoFK");
   }
@@ -129,7 +145,6 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
-  ui->table->hideColumn("codFornecedor");
   ui->table->hideColumn("idVendaProduto1");
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
@@ -166,7 +181,11 @@ void InputDialogProduto::setupTables() {
     ui->table->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
   }
 
-  if (tipo == Tipo::Faturamento) {
+  if (tipo == Tipo::ConfirmarCompra) {
+    ui->table->setItemDelegateForColumn("codFornecedor", new EditDelegate(this));
+  }
+
+  if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Faturamento) {
     ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
     ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this));
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(2, true, this));
@@ -180,6 +199,7 @@ void InputDialogProduto::setFilter(const QStringList &ids) {
   QString filter;
 
   if (tipo == Tipo::GerarCompra) { filter = "`idPedido1` IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
+  if (tipo == Tipo::ConfirmarCompra) { filter += " ordemCompra IN (" + ids.join(", ") + ") AND status = 'EM COMPRA'"; }
   if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
   if (filter.isEmpty()) { throw RuntimeException("Filtro vazio!"); }
@@ -267,6 +287,16 @@ void InputDialogProduto::calcularTotal() {
 }
 
 void InputDialogProduto::on_pushButtonSalvar_clicked() {
+  if (tipo == Tipo::ConfirmarCompra) {
+    const auto selection = ui->table->selectionModel()->selectedRows();
+
+    if (tipo == Tipo::ConfirmarCompra and selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!"); }
+
+    for (const auto &index : selection) {
+      if (modelPedidoFornecedor.data(index.row(), "codFornecedor").toString().isEmpty()) { throw RuntimeError("Não preencheu código do fornecedor!"); }
+    }
+  }
+
   if (ui->lineEditCodRep->isVisible() and ui->lineEditCodRep->text().isEmpty()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Não preencheu 'Cód. Rep.'. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
     msgBox.button(QMessageBox::Yes)->setText("Salvar");
@@ -301,6 +331,12 @@ void InputDialogProduto::cadastrar() {
 
       if (not queryUpdate.exec()) { throw RuntimeException("Erro copiando dados para tabela 2: " + queryUpdate.lastError().text()); }
     }
+  }
+
+  if (tipo == Tipo::ConfirmarCompra) {
+    const auto selection = ui->table->selectionModel()->selectedRows();
+
+    for (const auto &index : selection) { modelPedidoFornecedor.setData(index.row(), "selecionado", true); }
   }
 
   QStringList idVendas;

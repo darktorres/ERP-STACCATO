@@ -507,6 +507,24 @@ int Application::reservarIdNFe() {
   return id;
 }
 
+int Application::reservarIdPagamento() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = '" + db.databaseName() + "' AND table_name = 'conta_a_pagar_has_pagamento'")) {
+    throw RuntimeException("Erro reservando idPagamento: " + query.lastError().text());
+  }
+
+  if (not query.first()) { throw RuntimeException("Erro reservando idPagamento!"); }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE conta_a_pagar_has_pagamento auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservando idPagamento: " + query.lastError().text()); }
+
+  return id;
+}
+
 int Application::reservarIdPedido2() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 

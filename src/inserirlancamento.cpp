@@ -77,7 +77,6 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("idPagamento");
 
   if (tipo == Tipo::Pagar) {
-    ui->table->hideColumn("idCompra");
     ui->table->hideColumn("idCnab");
     ui->table->hideColumn("compraAvulsa");
   }

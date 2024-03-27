@@ -122,6 +122,7 @@ void CompraAvulsa::setupTables() {
   ui->tablePagar->setItemDelegateForColumn("dataEmissao", new DateFormatDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("idNFe", new ItemBoxDelegate(ItemBoxDelegate::Tipo::NFe, false, this));
   ui->tablePagar->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePagar->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePagar->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->tablePagar->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
@@ -129,11 +130,11 @@ void CompraAvulsa::setupTables() {
   ui->tablePagar->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->tablePagar->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPagar.fieldIndex("dataPagamento"), modelPagar.fieldIndex("tipo"), false, this));
 
-  ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "grupo"});
+  ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "centroCusto", "grupo"});
 
   if (User::isAdmin()) {
     ui->tablePagar->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::PagarAvulso, this));
-    ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "grupo", "status"});
+    ui->tablePagar->setPersistentColumns({"idNFe", "tipo", "centroCusto", "grupo", "status"});
   } else {
     ui->tablePagar->setItemDelegateForColumn("status", new NoEditDelegate(this));
   }
@@ -237,6 +238,7 @@ void CompraAvulsa::on_pushButtonAdicionarProduto_clicked() {
 void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
   const int row = modelPagar.insertRowAtEnd();
 
+  modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
   modelPagar.setData(row, "dataEmissao", qApp->serverDate());
   modelPagar.setData(row, "status", "PEND. APROV.");
   modelPagar.setData(row, "compraAvulsa", true);
@@ -245,9 +247,7 @@ void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
 }
 
 void CompraAvulsa::on_pushButtonSalvar_clicked() {
-  try {
-    verifyFields();
-  } catch (std::exception &) { throw; }
+  verifyFields();
 
   qApp->startTransaction("CompraAvulsa::on_pushButtonSalvar");
 
@@ -280,11 +280,15 @@ void CompraAvulsa::on_pushButtonSalvar_clicked() {
   }
 
   for (int row = 0; row < modelPagar.rowCount(); ++row) {
-    modelPagar.setData(row, "idCompra", idCompra);
+    const int row2 = modelContaIdCompra.insertRowAtEnd();
+
+    modelContaIdCompra.setData(row2, "idPagamento", modelPagar.data(row, "idPagamento"));
+    modelContaIdCompra.setData(row2, "idCompra", idCompra);
   }
 
   modelCompra.submitAll();
   modelPagar.submitAll();
+  modelContaIdCompra.submitAll();
 
   // -------------------------------------------------------------------------
 
@@ -298,12 +302,12 @@ void CompraAvulsa::verifyFields() {
   double totalCompra = 0;
 
   for (auto row = 0; row < modelCompra.rowCount(); ++row) {
-    if (modelCompra.data(row, "fornecedor").isNull()) { throw RuntimeError("'Fornecedor' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelCompra.data(row, "descricao").isNull()) { throw RuntimeError("'Produto' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelCompra.data(row, "quant").isNull()) { throw RuntimeError("'Quant.' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelCompra.data(row, "un").isNull()) { throw RuntimeError("'Un.' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelCompra.data(row, "prcUnitario").isNull()) { throw RuntimeError("'R$ Unit.' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelCompra.data(row, "preco").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelCompra.data(row, "fornecedor").isNull()) { throw RuntimeError("'Fornecedor' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelCompra.data(row, "descricao").isNull()) { throw RuntimeError("'Produto' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelCompra.data(row, "quant").isNull()) { throw RuntimeError("'Quant.' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelCompra.data(row, "un").isNull()) { throw RuntimeError("'Un.' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelCompra.data(row, "prcUnitario").isNull()) { throw RuntimeError("'R$ Unit.' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelCompra.data(row, "preco").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!", this); }
 
     totalCompra += modelCompra.data(row, "preco").toDouble();
   }
@@ -311,16 +315,16 @@ void CompraAvulsa::verifyFields() {
   double totalPagar = 0;
 
   for (auto row = 0; row < modelPagar.rowCount(); ++row) {
-    if (modelPagar.data(row, "contraParte").isNull()) { throw RuntimeError("'Contraparte' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelPagar.data(row, "valor").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelPagar.data(row, "tipo").isNull()) { throw RuntimeError("'Tipo' não preenchido na linha " + QString::number(row + 1) + "!"); }
-    if (modelPagar.data(row, "centroCusto").isNull()) { throw RuntimeError("'Centro Custo' não preenchido na linha " + QString::number(row + 1) + "!"); }
+    if (modelPagar.data(row, "contraParte").isNull()) { throw RuntimeError("'Contraparte' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelPagar.data(row, "valor").isNull()) { throw RuntimeError("'R$' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelPagar.data(row, "tipo").isNull()) { throw RuntimeError("'Tipo' não preenchido na linha " + QString::number(row + 1) + "!", this); }
+    if (modelPagar.data(row, "centroCusto").isNull()) { throw RuntimeError("'Centro Custo' não preenchido na linha " + QString::number(row + 1) + "!", this); }
 
     totalPagar += modelPagar.data(row, "valor").toDouble();
   }
 
   if (not qFuzzyCompare(totalCompra, totalPagar)) {
-    throw RuntimeError("Total dos produtos diferente do total dos pagamentos!");
+    throw RuntimeError("Total dos produtos diferente do total dos pagamentos!", this);
   }
 }
 
@@ -337,7 +341,7 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
     throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
   }
 
-  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + ui->itemBoxNFe->getId().toString() + "'"); }
+  if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + ui->itemBoxNFe->getId().toString() + "'", this); }
 
   if (query.value("status").toString() != "AUTORIZADA") { throw RuntimeError("NF-e não está autorizada!", this); }
 
@@ -391,8 +395,6 @@ void CompraAvulsa::viewRegisterById(const QString &idCompra) {
 
   modelPagar.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND desativado = FALSE");
   modelPagar.select();
-
-  modelContaIdCompra.setFilter("idCompra = '" + idCompra + "'");
 
   if (not User::isAdmin()) {
     ui->tableCompra->closePersistentEditors();

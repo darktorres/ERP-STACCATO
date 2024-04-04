@@ -238,10 +238,10 @@ void CompraAvulsa::on_pushButtonAdicionarProduto_clicked() {
 void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
   const int row = modelPagar.insertRowAtEnd();
 
-  modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
   modelPagar.setData(row, "dataEmissao", qApp->serverDate());
   modelPagar.setData(row, "status", "PEND. APROV.");
   modelPagar.setData(row, "compraAvulsa", true);
+  modelPagar.setData(row, "grupo", "PRODUTOS - VENDA");
 
   ui->tablePagar->redoView();
 }
@@ -249,9 +249,40 @@ void CompraAvulsa::on_pushButtonAdicionarPagamento_clicked() {
 void CompraAvulsa::on_pushButtonSalvar_clicked() {
   verifyFields();
 
-  qApp->startTransaction("CompraAvulsa::on_pushButtonSalvar");
+  // -------------------------------------------------------------------------
+
+  SqlQuery query;
+
+  if (currentIdCompra.isEmpty()) {
+    if (not query.exec("SELECT MAX(idCompra) AS idCompra FROM compra_avulsa")) { throw RuntimeException("Erro gerando O.C.: " + query.lastError().text()); }
+
+    int last = 0;
+
+    if (query.first()) { last = query.value("idCompra").toString().remove("C.A.").toInt(); }
+
+    currentIdCompra = "C.A." + QString::number(last + 1).rightJustified(5, '0');
+  }
+
+  for (int row = 0; row < modelCompra.rowCount(); ++row) {
+    if (modelCompra.data(row, "idCompra").isNull()) {
+      modelCompra.setData(row, "idCompra", currentIdCompra);
+    }
+  }
+
+  for (int row = 0; row < modelPagar.rowCount(); ++row) {
+    if (modelPagar.data(row, "idPagamento").isNull()) {
+      modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
+
+      const int row2 = modelContaIdCompra.insertRowAtEnd();
+
+      modelContaIdCompra.setData(row2, "idPagamento", modelPagar.data(row, "idPagamento"));
+      modelContaIdCompra.setData(row2, "idCompra", currentIdCompra);
+    }
+  }
 
   // -------------------------------------------------------------------------
+
+  qApp->startTransaction("CompraAvulsa::on_pushButtonSalvar");
 
   QStringList idNFes;
 
@@ -261,30 +292,9 @@ void CompraAvulsa::on_pushButtonSalvar_clicked() {
 
   idNFes.removeDuplicates();
 
-  SqlQuery query;
-
-  if (not query.exec("UPDATE nfe SET utilizada = TRUE WHERE idNFe IN (" + idNFes.join(", ") + ")")) { throw RuntimeException("Erro marcando NFes como utilizadas: " + query.lastError().text()); }
+  if (not query.exec("UPDATE nfe SET utilizada = TRUE WHERE idNFe IN (" + idNFes.join(", ") + ") AND utilizada = FALSE")) { throw RuntimeException("Erro marcando NFes como utilizadas: " + query.lastError().text()); }
 
   // -------------------------------------------------------------------------
-
-  if (not query.exec("SELECT MAX(idCompra) AS idCompra FROM compra_avulsa")) { throw RuntimeException("Erro gerando O.C.: " + query.lastError().text()); }
-
-  int last = 0;
-
-  if (query.first()) { last = query.value("idCompra").toString().remove("C.A.").toInt(); }
-
-  QString idCompra = "C.A." + QString::number(last + 1).rightJustified(5, '0');
-
-  for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    modelCompra.setData(row, "idCompra", idCompra);
-  }
-
-  for (int row = 0; row < modelPagar.rowCount(); ++row) {
-    const int row2 = modelContaIdCompra.insertRowAtEnd();
-
-    modelContaIdCompra.setData(row2, "idPagamento", modelPagar.data(row, "idPagamento"));
-    modelContaIdCompra.setData(row2, "idCompra", idCompra);
-  }
 
   modelCompra.submitAll();
   modelPagar.submitAll();
@@ -384,12 +394,13 @@ void CompraAvulsa::on_itemBoxNFe_textChanged(const QString &text) {
     modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
     modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup);
     modelPagar.setData(row, "centroCusto", query.value("idLoja"));
-    // modelPagar.setData(row, "grupo", "???");
-    // modelPagar.setData(row, "subgrupo", "???");
+    modelPagar.setData(row, "grupo", "PRODUTOS - VENDA");
   }
 }
 
 void CompraAvulsa::viewRegisterById(const QString &idCompra) {
+  currentIdCompra = idCompra;
+
   modelCompra.setFilter("idCompra = '" + idCompra + "'");
   modelCompra.select();
 

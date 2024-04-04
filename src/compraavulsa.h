@@ -19,6 +19,7 @@ public:
 
 private:
   // attributes
+  QString currentIdCompra;
   QStack<int> blockingSignals;
   SqlTableModel modelCompra;
   SqlTableModel modelContaIdCompra;

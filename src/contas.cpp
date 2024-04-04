@@ -413,7 +413,7 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + ordemCompra)) {
+  if (not query.exec("SELECT GROUP_CONCAT(DISTINCT idCompra) AS idCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra IN ('" + ordemCompra + "')")) {
     throw RuntimeException("Erro buscando O.C.: " + query.lastError().text());
   }
 
@@ -423,9 +423,9 @@ void Contas::viewContaPagarOrdemCompra(const QString &ordemCompra) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+  modelPendentes.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra IN ('" + idCompra + "')) AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
 
-  modelProcessados.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra = '" + idCompra + "') AND status IN ('PAGO')");
+  modelProcessados.setFilter("idPagamento IN (SELECT idPagamento FROM conta_a_pagar_has_idcompra WHERE idCompra IN ('" + idCompra + "')) AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 

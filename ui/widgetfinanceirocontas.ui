@@ -100,7 +100,7 @@
             <x>0</x>
             <y>0</y>
             <width>135</width>
-            <height>596</height>
+            <height>568</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
@@ -159,9 +159,6 @@
               <property name="bottomMargin">
                <number>2</number>
               </property>
-              <item>
-               <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
-              </item>
               <item>
                <widget class="QGroupBox" name="groupBoxStatus">
                 <property name="title">

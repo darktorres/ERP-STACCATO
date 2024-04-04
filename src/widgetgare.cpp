@@ -118,7 +118,7 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
   SqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEditBaixa->date().toString("yyyy-MM-dd") +
-                     "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
+                     "' WHERE idNFe IN (" + ids.join(", ") + ") AND grupo = 'IMPOSTOS - ICMS;ST;ISS'")) {
     throw RuntimeException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
   }
 

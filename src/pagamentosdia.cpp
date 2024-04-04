@@ -27,10 +27,6 @@ void PagamentosDia::setupTables() {
 
   ui->tableView->setModel(&modelFluxoCaixa);
 
-  // TODO: 5usar outra coluna no lugar de idCompra?
-  // TODO: 5renomear/esconder colunas de data
-  // TODO: 5colocar delegates
-
   ui->tableView->hideColumn("idConta");
   ui->tableView->hideColumn("dataRealizado");
 

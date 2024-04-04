@@ -993,8 +993,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
     modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup + " - O.C.: " + ordemCompra.join(", "));
     modelPagar.setData(row, "centroCusto", query.value("idLoja"));
-    // modelPagar.setData(row, "grupo", "???");
-    // modelPagar.setData(row, "subgrupo", "???");
+    modelPagar.setData(row, "grupo", "PRODUTOS - VENDA");
 
     for (const auto &idCompra : idsCompra) {
       const int row2 = modelPagar_conta.insertRowAtEnd();

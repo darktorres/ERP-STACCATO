@@ -90,7 +90,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
     const QString status = modelProduto.data(row, "status").toString();
 
-    if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { throw RuntimeError("Produto ainda não foi comprado!", this); }
+    if (status == "PENDENTE" or status == "REPO. ENTREGA") { throw RuntimeError("Produto ainda não foi comprado!", this); }
 
     if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
 

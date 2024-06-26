@@ -967,14 +967,6 @@ void ImportarXML::percorrerXml(XML &xml) {
 
   // ----------------------------------------------------------------
 
-  SqlQuery query;
-
-  if (not query.exec("SELECT idLoja FROM loja l WHERE REGEXP_REPLACE(cnpj, '[^0-9]', '') = '" + xml.cnpjDest + "'")) {
-    throw RuntimeException("Erro buscando XML: " + query.lastError().text(), this);
-  }
-
-  if (not query.first()) { throw RuntimeException("idLoja não encontrado para CNPJ: '" + xml.cnpjDest + "'"); }
-
   int parcela = 1;
 
   for (auto duplicata : xml.duplicatas) {
@@ -983,7 +975,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelPagar.setData(row, "idPagamento", qApp->reservarIdPagamento());
     modelPagar.setData(row, "status", "CONFERIDO");
     modelPagar.setData(row, "dataEmissao", xml.dataHoraEmissao);
-    modelPagar.setData(row, "idLoja", query.value("idLoja"));
+    modelPagar.setData(row, "idLoja", "1");
     modelPagar.setData(row, "contraParte", xml.xNome);
     modelPagar.setData(row, "idNFe", xml.idNFe);
     modelPagar.setData(row, "nfe", xml.chaveAcesso);
@@ -992,7 +984,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelPagar.setData(row, "parcela", parcela++);
     modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
     modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup + " - O.C.: " + ordemCompra.join(", "));
-    modelPagar.setData(row, "centroCusto", query.value("idLoja"));
+    modelPagar.setData(row, "centroCusto", "1");
     modelPagar.setData(row, "grupo", "PRODUTOS - VENDA");
 
     for (const auto &idCompra : idsCompra) {

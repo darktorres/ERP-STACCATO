@@ -88,6 +88,8 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("DSR", new ReaisDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("Total", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("porcentagem", new PorcentagemDelegate(false, this));
 
   ui->tableRelatorio->hideColumn("Mês");

@@ -1068,11 +1068,11 @@ void Orcamento::setarParametrosProduto() {
   // -------------------------------------------------------------------------
 
   ui->doubleSpinBoxEstoque->setValue(query.value("estoqueRestante").toDouble());
-  // ui->doubleSpinBoxPrecoUn->setValue(query.value("precoVenda").toDouble());
-  // ui->lineEditCodComercial->setText(query.value("codComercial").toString());
-  // ui->lineEditFormComercial->setText(query.value("formComercial").toString());
-  // ui->lineEditFornecedor->setText(query.value("fornecedor").toString());
-  // ui->lineEditUn->setText(query.value("un").toString().toUpper());
+  ui->doubleSpinBoxPrecoUn->setValue(query.value("precoVenda").toDouble());
+  ui->lineEditCodComercial->setText(query.value("codComercial").toString());
+  ui->lineEditFormComercial->setText(query.value("formComercial").toString());
+  ui->lineEditFornecedor->setText(query.value("fornecedor").toString());
+  ui->lineEditUn->setText(query.value("un").toString().toUpper());
 
   // -------------------------------------------------------------------------
 

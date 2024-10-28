@@ -91,7 +91,7 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
-  auto usarXMLInutilizado() -> void;
+  auto usarXMLInutilizado() -> bool;
   auto verificaExiste(const XML &xml) -> bool;
   auto verifyFields() -> void;
 };

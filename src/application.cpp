@@ -294,7 +294,7 @@ void Application::rollbackTransaction(const QString &message) {
     SqlQuery query;
     query.exec("ROLLBACK");
 
-    if (not message.isEmpty()) { Log::createLog("exceção", message); }
+    if (not message.isEmpty()) { Log::createLog("Exceção", message); }
 
     inTransaction = false;
   }

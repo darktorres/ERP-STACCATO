@@ -580,15 +580,21 @@ void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
   unsetConnections();
 
   try {
-    usarXMLInutilizado();
-    parear();
+    [&] {
+      if (not usarXMLInutilizado()) {
+        ui->itemBoxNFe->clear();
+        return;
+      }
 
-    const auto match = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+      parear();
 
-    if (match.isEmpty()) {
-      ui->pushButtonProcurar->setDisabled(true);
-      ui->itemBoxNFe->setReadOnly(true);
-    }
+      const auto match = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+
+      if (match.isEmpty()) {
+        ui->pushButtonProcurar->setDisabled(true);
+        ui->itemBoxNFe->setReadOnly(true);
+      }
+    }();
   } catch (std::exception &) {
     ui->pushButtonImportar->setDisabled(true);
     setConnections();
@@ -766,7 +772,7 @@ void ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   modelNFe.setData(row, "utilizada", 1);
 }
 
-void ImportarXML::usarXMLInutilizado() {
+bool ImportarXML::usarXMLInutilizado() {
   SqlQuery query;
 
   if (not query.exec("SELECT n.idNFe, n.xml, n.status, n.utilizada, l.idLoja FROM nfe n LEFT JOIN loja l ON n.cnpjDest = REGEXP_REPLACE(l.cnpj, '[^0-9]', '') WHERE n.idNFe = " + ui->itemBoxNFe->getId().toString())) {
@@ -775,7 +781,10 @@ void ImportarXML::usarXMLInutilizado() {
 
   if (not query.first()) { throw RuntimeException("XML não encontrado para NF-e com id: '" + ui->itemBoxNFe->getId().toString() + "'"); }
 
-  if (query.value("status").toString() != "AUTORIZADA") { throw RuntimeError("NF-e não está autorizada!", this); }
+  if (query.value("status").toString() != "AUTORIZADA") {
+    QMessageBox::critical(this, "Erro!", "NF-e não está autorizada!");
+    return false;
+  }
 
   const auto fileContent = query.value("xml").toString();
 
@@ -784,7 +793,18 @@ void ImportarXML::usarXMLInutilizado() {
   XML xml(fileContent, XML::Tipo::Entrada, this);
 
   // verifica se já cadastrado dentre as notas utilizadas nessa importacao
-  if (mapNFes.contains(xml.chaveAcesso)) { throw RuntimeError("NF-e já cadastrada!", this); }
+  if (mapNFes.contains(xml.chaveAcesso)) {
+    QMessageBox::critical(this, "Erro!", "NF-e já cadastrada!");
+    return false;
+  }
+
+  if (xml.cnpjDest != "09375013000543") {
+    QMessageBox msgBox(QMessageBox::Warning, "Aviso!", "Destinatário da NF-e não é C.D.! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Cancelar");
+
+    if (msgBox.exec() == QMessageBox::No) { return false; }
+  }
 
   xml.verificaNCMs();
 
@@ -805,6 +825,8 @@ void ImportarXML::usarXMLInutilizado() {
   percorrerXml(xml);
 
   mapNFes.insert(xml.chaveAcesso, gare);
+
+  return true;
 }
 
 bool ImportarXML::lerXML() {
@@ -821,7 +843,8 @@ bool ImportarXML::lerXML() {
   if (not file.open(QFile::ReadOnly)) {
     QString errorStr = file.errorString();
     if (errorStr == "unexpected end of file") { errorStr = "arquivo corrompido"; }
-    throw RuntimeException("Erro lendo arquivo: " + errorStr);
+    QMessageBox::critical(this, "Erro!", "Erro lendo arquivo: " + errorStr);
+    return false;
   }
 
   auto fileContent = file.readAll();
@@ -837,6 +860,14 @@ bool ImportarXML::lerXML() {
   xml.validar();
 
   if (verificaExiste(xml)) { return false; }
+
+  if (xml.cnpjDest != "09375013000543") {
+    QMessageBox msgBox(QMessageBox::Warning, "Aviso!", "Destinatário da NF-e não é C.D.! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.button(QMessageBox::Yes)->setText("Continuar");
+    msgBox.button(QMessageBox::No)->setText("Cancelar");
+
+    if (msgBox.exec() == QMessageBox::No) { return false; }
+  }
 
   xml.verificaNCMs();
 
@@ -872,7 +903,7 @@ void ImportarXML::perguntarLocal(XML &xml) {
 
   while (query.next()) { lojas << query.value("descricao").toString(); }
 
-  QInputDialog input;
+  QInputDialog input(this);
   input.setInputMode(QInputDialog::TextInput);
   input.setCancelButtonText("Cancelar");
   input.setWindowTitle("Local");
@@ -982,7 +1013,7 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelPagar.setData(row, "valor", duplicata.vDup);
     modelPagar.setData(row, "tipo", "BOLETO");
     modelPagar.setData(row, "parcela", parcela++);
-    modelPagar.setData(row, "dataPagamento", duplicata.dVenc);
+    modelPagar.setData(row, "dataPagamento", QDate::fromString(duplicata.dVenc, "yyyy-MM-dd"));
     modelPagar.setData(row, "observacao", "Duplicata: " + duplicata.nDup + " - O.C.: " + ordemCompra.join(", "));
     modelPagar.setData(row, "centroCusto", "1");
     modelPagar.setData(row, "grupo", "PRODUTOS - VENDA");

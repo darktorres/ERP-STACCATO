@@ -379,9 +379,12 @@ void Contas::viewContaPagarContraparte(const QString &contraparte) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("contraparte = '" + contraparte + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+  QString escapedContraparte = contraparte;
+  escapedContraparte.replace("'", "''");
 
-  modelProcessados.setFilter("contraparte = '" + contraparte + "' AND status IN ('PAGO')");
+  modelPendentes.setFilter("contraparte = '" + escapedContraparte + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+
+  modelProcessados.setFilter("contraparte = '" + escapedContraparte + "' AND status IN ('PAGO')");
 
   // -------------------------------------------------------------------------
 
@@ -469,9 +472,12 @@ void Contas::viewContaReceberContraparte(const QString &contraparte) {
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
+  QString escapedContraparte = contraparte;
+  escapedContraparte.replace("'", "''");
 
-  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND contraParte = '" + escapedContraparte + "'");
+
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND contraParte = '" + escapedContraparte + "'");
 
   // -------------------------------------------------------------------------
 

@@ -383,7 +383,7 @@ void Contas::viewContaPagarContraparte(const QString &contraparte) {
 
   modelProcessados.setFilter("contraparte = '" + contraparte + "' AND status IN ('PAGO')");
 
-         // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   modelPendentes.select();
 
@@ -443,55 +443,55 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
 
   if (not query.first()) { throw RuntimeException("Não encontrado Venda do pagamento com id: '" + idPagamento + "'"); }
 
-    const QString idVenda = query.value("idVenda").toString().left(11);
+  const QString idVenda = query.value("idVenda").toString().left(11);
 
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
+  setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
 
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND " + (idVenda.isEmpty() ? "idPagamento = " + idPagamento : "idVenda LIKE '" + idVenda + "%'"));
 
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelPendentes.select();
+  modelPendentes.select();
 
-    modelProcessados.select();
-  }
+  modelProcessados.select();
+}
 
 void Contas::viewContaReceberContraparte(const QString &contraparte) {
-    setWindowTitle(windowTitle() + " - Contraparte: " + contraparte);
+  setWindowTitle(windowTitle() + " - Contraparte: " + contraparte);
 
-           // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
 
-    modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND contraParte = '" + contraparte + "'");
 
-           // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelPendentes.select();
+  modelPendentes.select();
 
-    modelProcessados.select();
-  }
+  modelProcessados.select();
+}
 
 void Contas::viewContaReceberPgt(const QString &idPagamento) {
-    modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND idPagamento = " + idPagamento);
+  modelPendentes.setFilter("status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND representacao = FALSE AND idPagamento = " + idPagamento);
 
-           // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND idPagamento = " + idPagamento);
+  modelProcessados.setFilter("status IN ('RECEBIDO') AND representacao = FALSE AND idPagamento = " + idPagamento);
 
-           // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-    modelPendentes.select();
+  modelPendentes.select();
 
-    modelProcessados.select();
+  modelProcessados.select();
 }
 
 void Contas::on_pushButtonCriarLancamento_clicked() {

@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.pro": "qmake",
+    "*.pri": "qmake",
+    "*.ui": "xml",
+    "*.qrc": "xml"
+  },
+  "markdown.mermaid.enabledThemes": [
+    "default",
+    "forest",
+    "dark",
+    "neutral"
+  ],
+  "markdown.preview.breaks": true,
+  "markdown.preview.linkify": true
+}

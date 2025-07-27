@@ -641,7 +641,7 @@ double ImportarXML::buscarCaixas(const int rowEstoque) {
 
   if (not query.first()) { throw RuntimeException("Dados não encontrados para produto com id: '" + modelEstoque.data(rowEstoque, "idProduto").toString() + "'"); }
 
-  const double quantCaixa = query.value("quantCaixa").toDouble();
+  const double quantCaixa = query.value("quantCaixa").toDouble(); // FIX: quantCaixa can be 0
   const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
   const double caixas = quant / quantCaixa;
 

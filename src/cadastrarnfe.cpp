@@ -359,6 +359,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   if (resposta.contains("Rejeição: IE do destinatário não informada", Qt::CaseInsensitive)) {
     qApp->enqueueError("Rejeição: IE do destinatário não informada\nFazendo consulta do CNPJ...");
     on_pushButtonConsultarCadastro_clicked();
+    return; // Não continuar processando a resposta de rejeição original após consulta
   }
 
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {
@@ -1685,7 +1686,9 @@ void CadastrarNFe::on_checkBoxFrete_toggled(const bool checked) {
 }
 
 void CadastrarNFe::enviarNFe(ACBr &acbr, const QString &filePath, const int idNFe) {
-  const QString resposta = acbr.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)", "Enviando NF-e..."); // lote, assina, imprime, sincrono
+  // Nova regra SEFAZ: "Resposta Síncrona para Lote com somente 1 (uma) NF-e"
+  // Sistema sempre envia 1 NFe por vez, então sempre modo síncrono
+  const QString resposta = acbr.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, \"\", 1)", "Enviando NF-e..."); // arquivo, lote, assina, imprime, impressora, sincrono
   qDebug() << "enviarNFe: " << resposta;
 
   processarResposta(resposta, filePath, idNFe, acbr);

@@ -25,6 +25,50 @@ make  # or nmake on Windows with MSVC
 - **Icon**: Staccato.ico
 - **Dependencies**: OpenSSL, cURL, ACBr libraries
 
+## MSVC Build Tools Configuration
+
+### MSVC Build Tools Path
+**Base Path**: `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`
+
+**Key Directories**:
+- **MSVC Version**: `14.44.35207`
+- **Compiler Path**: `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\`
+- **Tools Available**: `cl.exe`, `link.exe`, `nmake.exe`
+- **Environment Setup**: `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat`
+
+### Qt Installation Paths
+- **Qt 5.15.2**: `C:\Qt\5.15.2\msvc2019_64\`
+- **qmake**: `C:\Qt\5.15.2\msvc2019_64\bin\qmake.exe`
+
+### Build Environment Setup
+To compile with MSVC, first run the Visual Studio Developer Command Prompt:
+```batch
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+```
+
+Or use the PowerShell version:
+```powershell
+& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\Launch-VsDevShell.ps1"
+```
+
+### Test Suite Compilation
+```batch
+# Setup MSVC environment first
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+
+# Navigate to tests directory
+cd tests
+
+# Generate Makefile with correct Qt
+"C:\Qt\5.15.2\msvc2019_64\bin\qmake.exe" tests.pro
+
+# Compile tests
+nmake
+
+# Run tests
+debug\tests.exe
+```
+
 ## Architecture Overview
 
 ### Core Application Structure
@@ -68,6 +112,7 @@ make  # or nmake on Windows with MSVC
 - **3rdparty/**: External libraries and dependencies
 - **modelos/**: Report templates (.lrxml, .xlsx)
 - **db/**: Database schema and migration files
+- **tests/**: Comprehensive test suite with unit and integration tests
 
 ### Key Design Patterns
 - **Model-View Architecture**: Extensive use of Qt's model/view framework
@@ -95,3 +140,25 @@ This is an ERP system specifically designed for Brazilian businesses, with featu
 - Extensive use of auto keyword for type deduction
 - Modern C++ features where supported by Qt 5.15+
 - Consistent indentation and formatting
+
+### Testing Framework
+- **Test Directory**: `tests/`
+- **Unit Tests**: Status management, validators, SQL operations
+- **Integration Tests**: Purchase workflow, sales workflow, inventory management
+- **Test Infrastructure**: Qt Test framework with mock objects and helpers
+- **Coverage**: 97 test methods covering critical functionality
+
+### Process Improvements
+- **Status Management**: Enum-based status transitions to replace hard-coded strings
+- **Input Validation**: Brazilian compliance validation (CPF/CNPJ/phone)
+- **Database Safety**: Parameterized queries and transaction management
+- **Workflow Simplification**: Reduced status states and cleaner business logic
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+      
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.

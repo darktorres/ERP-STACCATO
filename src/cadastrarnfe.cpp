@@ -367,8 +367,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     removerNota(idNFe);
 
-    // TODO: replace QStringList::filter with qApp.findTag due to filter using 'contains', it may find the string in the middle of the text instead of only in the beggining
-    const QString rejeicao = resposta.split("\r\n", Qt::SkipEmptyParts).filter("xMotivo=Rejeição").first().remove("xMotivo=");
+    const QString rejeicao = qApp->findTag(resposta, "XMotivo=");
 
     manterAberto = true;
     throw RuntimeException(rejeicao, this);

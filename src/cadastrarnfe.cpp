@@ -1985,6 +1985,9 @@ void CadastrarNFe::preencherImpostos() {
   }
 
   if (tipo == Tipo::Saida) {
+    // Disable model signals during bulk updates to avoid expensive VIEW recalculations
+    const bool wasBlocked = modelProduto.signalsBlocked();
+    modelProduto.blockSignals(true);
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       for (int col = 0; col < modelProduto.columnCount(); ++col) {
         if (modelProduto.data(row, col).isNull()) {
@@ -2009,6 +2012,9 @@ void CadastrarNFe::preencherImpostos() {
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
       modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
+    
+    // Re-enable signals and trigger single refresh
+    modelProduto.blockSignals(wasBlocked);
   }
 
   if (tipo == Tipo::Futura) {

@@ -412,6 +412,8 @@ bool Application::getSilent() const { return silent; }
 
 void Application::setSilent(const bool value) { silent = value; }
 
+bool Application::isSilent() const { return silent; }
+
 bool Application::getInTransaction() const { return inTransaction; }
 
 QDateTime Application::serverDateTime() {

@@ -11,8 +11,6 @@ namespace Ui {
 class WidgetNFeDistribuicao;
 }
 
-using namespace std::chrono_literals;
-
 class WidgetNFeDistribuicao final : public QWidget {
   Q_OBJECT
 
@@ -25,7 +23,6 @@ public:
 
 private:
   // attributes
-  auto inline static tempoTimer = 15min;
   bool isSet = false;
   int maximoNSU = 0;
   int ultimoNSU = 0;
@@ -47,9 +44,11 @@ private:
   auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
-  auto enviarComando(ACBr &acbr) -> void;
+  auto enviarComando(ACBr &acbr) -> bool;
   auto enviarEvento(ACBr &acbr, const QString &operacao, const QVector<int> &selection) -> bool;
-  auto houveConsultaEmOutroPc() -> bool;
+  auto podeConsultarAgora() -> bool;
+  auto calcularMinutosProximaConsulta() -> int;
+  auto calcularMinutosProximaConsultaGeral() -> int;
   auto montaFiltro() -> void;
   auto naoRealizar(ACBr &acbr, const bool silent) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

@@ -12,12 +12,15 @@
 #include <QSqlError>
 #include <QTimer>
 
+using namespace std::chrono_literals;
+
 WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNFeDistribuicao) {
   ui->setupUi(this);
 
   connect(&timer, &QTimer::timeout, this, &WidgetNFeDistribuicao::downloadAutomatico);
   timer.setTimerType(Qt::VeryCoarseTimer);
-  timer.start(tempoTimer);
+  // Inicializar com 0 minutos - será recalculado dinamicamente
+  timer.start(0min);
 }
 
 WidgetNFeDistribuicao::~WidgetNFeDistribuicao() { delete ui; }
@@ -30,19 +33,42 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   // TODO: is this still needed?
   updateTables();
 
-  qDebug() << "download Automatico";
-  qApp->setSilent(true);
-
   try {
-    consultarSefaz();
+    // Verificar se há alguma consulta disponível agora
+    QSqlQuery queryDisponivel;
+    if (not queryDisponivel.exec("SELECT COUNT(*) as consultas FROM loja l "
+                                "JOIN config c ON (l.cnpj LIKE CONCAT(c.monitorarCNPJ1, '%') OR l.cnpj LIKE CONCAT(c.monitorarCNPJ2, '%')) "
+                                "WHERE l.desativado = FALSE "
+                                "AND (c.monitorarCNPJ1 IS NOT NULL OR c.monitorarCNPJ2 IS NOT NULL) "
+                                "AND (l.proximaConsultaPermitida IS NULL OR l.proximaConsultaPermitida <= NOW())")) {
+      throw RuntimeException("Erro verificando consultas disponíveis: " + queryDisponivel.lastError().text(), this);
+    }
+
+    queryDisponivel.first();
+    int consultasDisponiveis = queryDisponivel.value("consultas").toInt();
+
+    if (consultasDisponiveis > 0) {
+      qDebug() << "download Automatico - executando consultas (" << consultasDisponiveis << " disponíveis)";
+      qApp->setSilent(true);
+      consultarSefaz();
+      qApp->setSilent(false);
+
+      // Recalcular próximo timer baseado no resultado
+      int proximosMinutos = calcularMinutosProximaConsultaGeral();
+      qDebug() << "Próximas consultas disponíveis em" << proximosMinutos << "minutos";
+      timer.start(std::chrono::minutes(proximosMinutos));
+    } else {
+      // Nenhuma consulta disponível, calcular quando será a próxima
+      int proximosMinutos = calcularMinutosProximaConsultaGeral();
+      qDebug() << "download Automatico - nenhuma consulta disponível, reagendando para" << proximosMinutos << "minutos";
+      timer.start(std::chrono::minutes(proximosMinutos));
+    }
   } catch (std::exception &) {
     qApp->setSilent(false);
-    timer.start(tempoTimer);
+    // Em caso de erro, tentar novamente em 5 minutos
+    timer.start(std::chrono::minutes(5));
     throw;
   }
-
-  qApp->setSilent(false);
-  timer.start(tempoTimer);
 }
 
 void WidgetNFeDistribuicao::resetTables() {
@@ -59,7 +85,10 @@ void WidgetNFeDistribuicao::updateTables() {
     isSet = true;
   }
 
-  model.select();
+  // Só atualizar a tabela se não estiver em modo silent (download automático)
+  if (!qApp->isSilent()) {
+    model.select();
+  }
 }
 
 void WidgetNFeDistribuicao::buscarNSU() {
@@ -159,6 +188,9 @@ void WidgetNFeDistribuicao::setupTables() {
   ui->table->hideColumn("naoRealizar");
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
+  
+  // Desabilitar autoResize para melhor performance
+  ui->table->setAutoResize(false);
 }
 
 void WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked() {
@@ -167,30 +199,56 @@ void WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked() {
   try {
     consultarSefaz();
     qApp->enqueueInformation("Operação realizada com sucesso!", this);
+
+    // Recalcular próximo timer baseado no resultado das consultas
+    int proximosMinutos = calcularMinutosProximaConsultaGeral();
+    qDebug() << "Consulta manual concluída - próximas consultas em" << proximosMinutos << "minutos";
+    timer.start(std::chrono::minutes(proximosMinutos));
   } catch (std::exception &) {
-    timer.start(tempoTimer);
+    // Em caso de erro, tentar novamente em 5 minutos
+    timer.start(std::chrono::minutes(5));
     throw;
   }
-
-  timer.start(tempoTimer);
 }
 
-void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
+bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
 
   // TODO: parametrizar o código do estado em vez de usar 35
   const QString resposta = acbr.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")", "Consultando NF-es do CNPJ " + cnpjDest + "...");
-
+  qDebug() << "resposta: " << resposta;
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
   if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) {
-    tempoTimer = 1h;
-    return;
-  }
-  if (resposta.contains("ERRO: Rejeicao: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital")) { throw RuntimeError("Certificado plugado é de outro CNPJ!"); }
-  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
+    qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest << "- definindo próxima consulta para 1h";
 
-  tempoTimer = (resposta.contains("XMotivo=Nenhum documento localizado", Qt::CaseInsensitive)) ? 1h : 15min;
+    // Definir próxima consulta permitida para 1h no futuro
+    SqlQuery queryUpdate;
+    if (not queryUpdate.exec("UPDATE loja SET proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+      throw RuntimeException("Erro atualizando próxima consulta: " + queryUpdate.lastError().text());
+    }
+
+    qDebug() << "Próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
+    return false; // Para este CNPJ, mas continua outros
+  }
+
+  if (resposta.contains("ERRO: Rejeicao: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital")) { throw RuntimeError("Certificado plugado é de outro CNPJ!"); }
+
+  // Detectar dessincronização de NSU com SEFAZ
+  if (resposta.contains("Deve ser utilizado o ultNSU nas solicitacoes subsequentes", Qt::CaseInsensitive)) {
+    qDebug() << "DESSINCRONIZAÇÃO DE NSU DETECTADA para CNPJ" << cnpjDest << "- resetando NSUs e definindo próxima consulta para 1h";
+
+    // Resetar NSUs no banco e definir próxima consulta para 1h no futuro
+    SqlQuery queryReset;
+    if (not queryReset.exec("UPDATE loja SET ultimoNSU = 0, maximoNSU = 0, proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+      throw RuntimeException("Erro resetando NSUs e definindo próxima consulta: " + queryReset.lastError().text());
+    }
+
+    qDebug() << "NSUs resetados e próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
+    return false; // Para este CNPJ, mas continua outros
+  }
+
+  if (resposta.contains("ERRO: ", Qt::CaseInsensitive)) { throw RuntimeException(resposta, this); }
 
   //----------------------------------------------------------
 
@@ -200,7 +258,28 @@ void WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
 
   qApp->endTransaction();
 
-  model.select();
+  // Só atualizar a tabela se não estiver em modo silent (download automático)
+  if (!qApp->isSilent()) {
+    model.select();
+  }
+
+  // Atualizar próxima consulta permitida baseado no resultado
+  SqlQuery queryProximaConsulta;
+  QString intervalo;
+
+  if (resposta.contains("Nenhum documento localizado", Qt::CaseInsensitive)) {
+    intervalo = "DATE_ADD(NOW(), INTERVAL 1 HOUR)";
+    qDebug() << "Nenhum documento localizado para CNPJ" << cnpjDest << "- próxima consulta em 1h";
+  } else {
+    intervalo = "DATE_ADD(NOW(), INTERVAL 15 MINUTE)";
+    qDebug() << "Documentos encontrados para CNPJ" << cnpjDest << "- próxima consulta em 15min";
+  }
+
+  if (not queryProximaConsulta.exec("UPDATE loja SET proximaConsultaPermitida = " + intervalo + ", ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+    throw RuntimeException("Erro definindo próxima consulta: " + queryProximaConsulta.lastError().text());
+  }
+
+  return true; // Sucesso
 }
 
 void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) {
@@ -246,15 +325,21 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
     ultimoNSU = queryCnpj.value("ultimoNSU").toInt();
     maximoNSU = queryCnpj.value("maximoNSU").toInt();
 
-    if (houveConsultaEmOutroPc()) { continue; }
+    if (!podeConsultarAgora()) { continue; }
 
-    enviarComando(acbr);
+    if (!enviarComando(acbr)) {
+      qDebug() << "Erro na consulta do CNPJ" << cnpjDest << "- pulando para próximo";
+      continue;
+    }
 
     //----------------------------------------------------------
 
     while (ultimoNSU < maximoNSU) {
       qDebug() << "pesquisar novamente";
-      enviarComando(acbr);
+      if (!enviarComando(acbr)) {
+        qDebug() << "Erro na consulta adicional do CNPJ" << cnpjDest << "- interrompendo loop";
+        break;
+      }
     }
 
     qDebug() << "darCiencia";
@@ -271,8 +356,8 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
     qDebug() << "maintenance";
     SqlQuery queryMaintenance;
 
-    if (not queryMaintenance.exec("UPDATE loja SET lastDistribuicao = NOW() WHERE idLoja = " + idLoja)) {
-      throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this);
+    if (not queryMaintenance.exec("UPDATE loja SET ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+      throw RuntimeException("Erro guardando ultimaConsultaNSU:" + queryMaintenance.lastError().text(), this);
     }
   }
 
@@ -615,7 +700,10 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
     continue;
   }
 
-  model.select();
+  // Só atualizar a tabela se não estiver em modo silent (download automático)
+  if (!qApp->isSilent()) {
+    model.select();
+  }
 
   qApp->endTransaction();
 
@@ -740,11 +828,25 @@ void WidgetNFeDistribuicao::processarEventoNFe(const QString &evento) {
   const QString chaveAcesso = qApp->findTag(evento, "chDFe=");
   const QString numeroNFe = chaveAcesso.mid(25, 9);
   const QString cnpjOrig = qApp->findTag(evento, "CNPJCPF=");
-  const QDateTime dataHoraEmissao = QDateTime::fromString(qApp->findTag(evento, "dhRecbto="), "dd/MM/yyyy hh:mm:ss");
+  const QString xml = qApp->findTag(evento, "XML=");
+
+  // Extrair dhEmi diretamente do XML (sempre completo e confiável)
+  QRegularExpression regex("<dhEmi>(.*?)</dhEmi>");
+  QRegularExpressionMatch match = regex.match(xml);
+
+  QDateTime dataHoraEmissao;
+  if (match.hasMatch()) {
+    const QString dhEmiISO = match.captured(1);
+    qDebug() << "PROCESSAMENTO NFE - dhEmi do XML:" << dhEmiISO;
+
+    // Converter formato ISO para QDateTime
+    dataHoraEmissao = QDateTime::fromString(dhEmiISO, Qt::ISODate);
+  }
+
+  qDebug() << "PROCESSAMENTO NFE - dataHoraEmissao final:" << dataHoraEmissao << "valido:" << dataHoraEmissao.isValid();
   const QString nomeEmitente = qApp->findTag(evento, "xNome=");
   const QString valor = qApp->findTag(evento, "vNF=").replace(',', '.');
   const QString nsu = qApp->findTag(evento, "NSU=");
-  const QString xml = qApp->findTag(evento, "XML=");
   const QString schemaEvento = qApp->findTag(evento, "schema=");
 
   //----------------------------------------------------------
@@ -868,18 +970,54 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
   }
 }
 
-bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
+bool WidgetNFeDistribuicao::podeConsultarAgora() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT lastDistribuicao IS NULL, timestampdiff(SECOND, lastDistribuicao, NOW()) / 60 AS tempo FROM loja WHERE idLoja = " + idLoja)) {
-    throw RuntimeException("Erro buscando última consulta: " + query.lastError().text(), this);
+  if (not query.exec("SELECT proximaConsultaPermitida IS NULL, "
+                     "timestampdiff(SECOND, proximaConsultaPermitida, NOW()) AS segundosRestantes "
+                     "FROM loja WHERE idLoja = " + idLoja)) {
+    throw RuntimeException("Erro buscando próxima consulta permitida: " + query.lastError().text(), this);
   }
 
-  if (not query.first()) { throw RuntimeException("Última consulta não encontrada!", this); }
+  if (not query.first()) { throw RuntimeException("Dados da loja não encontrados!", this); }
 
-  if (query.value("lastDistribuicao IS NULL").toBool()) { return false; }
+  // Se o campo é NULL, permite consultar (primeira vez)
+  if (query.value("proximaConsultaPermitida IS NULL").toBool()) { return true; }
 
-  return query.value("tempo").toInt() < 60;
+  // Se segundosRestantes >= 0, significa que chegou o horário permitido
+  return query.value("segundosRestantes").toInt() >= 0;
+}
+
+int WidgetNFeDistribuicao::calcularMinutosProximaConsulta() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT GREATEST(0, CEIL(timestampdiff(SECOND, NOW(), proximaConsultaPermitida) / 60.0)) AS minutosRestantes "
+                     "FROM loja WHERE idLoja = " + idLoja)) {
+    throw RuntimeException("Erro calculando próxima consulta: " + query.lastError().text(), this);
+  }
+
+  if (not query.first()) { return 15; } // Default
+
+  return qMax(1, query.value("minutosRestantes").toInt()); // Mínimo 1 minuto
+}
+
+int WidgetNFeDistribuicao::calcularMinutosProximaConsultaGeral() {
+  QSqlQuery query;
+
+  // Buscar o menor tempo até a próxima consulta de todas as lojas ativas dos CNPJs monitorados
+  if (not query.exec("SELECT "
+                     "MIN(GREATEST(0, CEIL(timestampdiff(SECOND, NOW(), proximaConsultaPermitida) / 60.0))) AS menorTempoRestante "
+                     "FROM loja l "
+                     "JOIN config c ON (l.cnpj LIKE CONCAT(c.monitorarCNPJ1, '%') OR l.cnpj LIKE CONCAT(c.monitorarCNPJ2, '%')) "
+                     "WHERE l.desativado = FALSE AND (c.monitorarCNPJ1 IS NOT NULL OR c.monitorarCNPJ2 IS NOT NULL)")) {
+    throw RuntimeException("Erro calculando próxima consulta geral: " + query.lastError().text(), this);
+  }
+
+  if (not query.first() || query.value("menorTempoRestante").isNull()) {
+    return 15; // Default se não há dados
+  }
+
+  return qMax(1, query.value("menorTempoRestante").toInt()); // Mínimo 1 minuto
 }
 
 void WidgetNFeDistribuicao::ajustarGroupBoxStatus() {
@@ -916,7 +1054,7 @@ void WidgetNFeDistribuicao::consultarSefaz() {
   const QString porta2 = query.value("monitorarPorta2").toString();
 
   if (not cnpj1.isEmpty()) { buscarNFes(cnpj1, servidor1, porta1); }
-  if (not cnpj2.isEmpty()) { buscarNFes(cnpj2, servidor2, porta2); }
+  if (not cnpj2.isEmpty() and cnpj2 != cnpj1) { buscarNFes(cnpj2, servidor2, porta2); }
 }
 
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

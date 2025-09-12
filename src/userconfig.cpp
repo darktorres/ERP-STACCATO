@@ -190,7 +190,7 @@ void UserConfig::preencherComboBoxMonitorar() {
 
   SqlQuery query;
 
-  if (not query.exec("SELECT DISTINCT(LEFT(cnpj, 10)) AS raiz, razaoSocial FROM loja WHERE cnpj IS NOT NULL")) { throw RuntimeException("Erro buscando empresas: " + query.lastError().text()); }
+  if (not query.exec("SELECT DISTINCT(LEFT(cnpj, 10)) AS raiz, razaoSocial FROM loja WHERE cnpj IS NOT NULL AND cnpj != ''")) { throw RuntimeException("Erro buscando empresas: " + query.lastError().text()); }
 
   while (query.next()) {
     ui->comboBoxMonitorar1->addItem(query.value("razaoSocial").toString(), query.value("raiz"));

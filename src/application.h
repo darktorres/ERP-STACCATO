@@ -68,6 +68,7 @@ public:
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
   auto setSilent(const bool value) -> void;
+  auto isSilent() const -> bool;
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;

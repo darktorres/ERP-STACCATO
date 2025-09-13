@@ -442,4 +442,3 @@ void InputDialogProduto::on_doubleSpinBoxDescontoGlobal_valueChanged(const doubl
     modelPedidoFornecedor.setData(row, "desconto", value);
   }
 }
-

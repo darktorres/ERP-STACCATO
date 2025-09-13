@@ -467,4 +467,3 @@ void WidgetRh::on_pushButtonDarBaixa_clicked()
 
   qApp->endTransaction();
 }
-

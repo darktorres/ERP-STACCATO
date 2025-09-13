@@ -227,7 +227,7 @@ void CalculoFrete::qualp() {
 
   if (queryQualp.first() and not queryQualp.value("qualpJson").toString().isEmpty()) {
     result = queryQualp.value("qualpJson").toString();
-  } else {    
+  } else {
     const QStringList origemSplit = ui->lineEditOrigem->text().split(" - ");
 
     // NOTE: os campos podem ter hifen fazendo com que o split tenha tamanho maior que o devido

@@ -86,9 +86,9 @@ void WidgetNFeDistribuicao::updateTables() {
   }
 
   // Só atualizar a tabela se não estiver em modo silent (download automático)
-  if (!qApp->isSilent()) {
+  // if (!qApp->isSilent()) {
     model.select();
-  }
+  // }
 }
 
 void WidgetNFeDistribuicao::buscarNSU() {
@@ -259,9 +259,9 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qApp->endTransaction();
 
   // Só atualizar a tabela se não estiver em modo silent (download automático)
-  if (!qApp->isSilent()) {
+  // if (!qApp->isSilent()) {
     model.select();
-  }
+  // }
 
   // Atualizar próxima consulta permitida baseado no resultado
   SqlQuery queryProximaConsulta;
@@ -701,9 +701,9 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
   }
 
   // Só atualizar a tabela se não estiver em modo silent (download automático)
-  if (!qApp->isSilent()) {
+  // if (!qApp->isSilent()) {
     model.select();
-  }
+  // }
 
   qApp->endTransaction();
 

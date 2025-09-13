@@ -359,7 +359,7 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   if (resposta.contains("Rejeição: IE do destinatário não informada", Qt::CaseInsensitive)) {
     qApp->enqueueError("Rejeição: IE do destinatário não informada\nFazendo consulta do CNPJ...");
     on_pushButtonConsultarCadastro_clicked();  // Will throw if consultation fails
-    
+
     // If we get here, consultation succeeded
     manterAberto = true;
     throw RuntimeException("Inscrição Estadual atualizada com sucesso!\nClique em 'Enviar NF-e' novamente para reenviar.", this);
@@ -429,8 +429,8 @@ void CadastrarNFe::atualizarNFe(const int idNFe) {
   const int indexBegin = xml.indexOf(tagBegin);
   const int indexEnd = xml.indexOf(tagEnd);
 
-  if (indexBegin == -1 or indexEnd == -1) { 
-    throw RuntimeException("Erro: NFe não foi processada com sucesso. XML não contém informações de aprovação."); 
+  if (indexBegin == -1 or indexEnd == -1) {
+    throw RuntimeException("Erro: NFe não foi processada com sucesso. XML não contém informações de aprovação.");
   }
 
   const QString dataHoraEmissao = xml.mid(indexBegin + tagBegin.length(), indexEnd - indexBegin - tagBegin.length());
@@ -2012,7 +2012,7 @@ void CadastrarNFe::preencherImpostos() {
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
       modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
-    
+
     // Re-enable signals and trigger single refresh
     modelProduto.blockSignals(wasBlocked);
   }

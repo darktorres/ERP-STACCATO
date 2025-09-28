@@ -1,0 +1,87 @@
+{
+  "name": "Staccato ERP Qt C++ Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-vscode.vscode-json",
+        "DavidAnson.vscode-markdownlint",
+        "ms-python.python",
+        "ms-vscode.hexeditor",
+        "augustocdias.tasks-shell-input",
+        "sanaajani.taskrunnercode",
+        "aaron-bond.better-comments",
+        "streetsidesoftware.code-spell-checker",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        "C_Cpp.default.cppStandard": "c++17",
+        "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+        "C_Cpp.default.compilerPath": "/usr/bin/g++",
+        "C_Cpp.default.includePath": [
+          "/workspace/src",
+          "/opt/Qt/5.15.2/gcc_64/include",
+          "/opt/Qt/5.15.2/gcc_64/include/QtCore",
+          "/opt/Qt/5.15.2/gcc_64/include/QtGui",
+          "/opt/Qt/5.15.2/gcc_64/include/QtWidgets",
+          "/opt/Qt/5.15.2/gcc_64/include/QtSql",
+          "/opt/Qt/5.15.2/gcc_64/include/QtNetwork",
+          "/opt/Qt/5.15.2/gcc_64/include/QtXml",
+          "/opt/Qt/5.15.2/gcc_64/include/QtCharts"
+        ],
+        "C_Cpp.default.defines": [
+          "QT_CORE_LIB",
+          "QT_GUI_LIB",
+          "QT_WIDGETS_LIB",
+          "QT_SQL_LIB",
+          "QT_NETWORK_LIB",
+          "QT_XML_LIB",
+          "QT_CHARTS_LIB"
+        ],
+        "files.associations": {
+          "*.pro": "qmake",
+          "*.pri": "qmake",
+          "*.ui": "xml"
+        },
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "cmake.sourceDirectory": "${workspaceFolder}",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "vscode",
+      "userUid": "1000",
+      "userGid": "1000"
+    }
+  },
+
+
+  "postCreateCommand": [
+    "bash",
+    "-c",
+    "echo 'Setting up development environment...' && sudo chown -R vscode:vscode /workspace && cd /workspace && echo 'Development environment ready!'"
+  ],
+
+  "remoteUser": "vscode",
+
+  "mounts": [
+    "source=qt-cache,target=/home/vscode/.cache/qmake,type=volume",
+    "source=ccache-cache,target=/home/vscode/.ccache,type=volume"
+  ]
+}

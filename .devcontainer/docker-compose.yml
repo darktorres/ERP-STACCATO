@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+      - /workspaces/erp-staccato:/workspace:cached
+    command: sleep infinity
+    environment:
+      - DISPLAY=${DISPLAY:-:99}
+
+volumes:
+  qt-cache:
+    driver: local
+  ccache-cache:
+    driver: local

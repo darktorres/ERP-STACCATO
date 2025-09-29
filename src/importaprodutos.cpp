@@ -55,7 +55,7 @@ void ImportaProdutos::importarTabela() {
 void ImportaProdutos::verificaSeRepresentacao() {
   SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
+  queryFornecedor.bindValue(":razaoSocial", m_fornecedor.left(100));
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
 
@@ -371,18 +371,18 @@ void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   QStringList ids;
 
   for (auto const &fornecedor : qAsConst(fornecedores)) {
-    m_fornecedor = fornecedor;
+    m_fornecedor = fornecedor.left(100);
 
     const int idFornecedor = buscarCadastrarFornecedor();
 
     ids << QString::number(idFornecedor);
 
-    m_fornecedores.insert(fornecedor, idFornecedor);
+    m_fornecedores.insert(fornecedor.left(100), idFornecedor);
 
     SqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
     queryFornecedor.bindValue(":validade", (validade == -1) ? QVariant() : qApp->serverDate().addDays(validade));
-    queryFornecedor.bindValue(":razaoSocial", fornecedor);
+    queryFornecedor.bindValue(":razaoSocial", fornecedor.left(100));
 
     if (not queryFornecedor.exec()) { throw RuntimeException("Erro salvando validade: " + queryFornecedor.lastError().text()); }
   }
@@ -465,22 +465,22 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   sticms = qApp->roundDouble(sticms.toDouble());
 
   produto.idFornecedor = m_fornecedores.value(fornecedor.toString().trimmed());
-  produto.fornecedor = fornecedor.toString().toUpper().trimmed();
-  produto.descricao = descricao.toString().remove("*").remove("()").replace('_', ' ').toUpper().trimmed();
-  produto.un = un.toString().remove("*").toUpper().trimmed();
-  produto.colecao = colecao.toString().remove("*").toUpper().trimmed();
+  produto.fornecedor = fornecedor.toString().toUpper().trimmed().left(100);
+  produto.descricao = descricao.toString().remove("*").remove("()").replace('_', ' ').toUpper().trimmed().left(250);
+  produto.un = un.toString().remove("*").toUpper().trimmed().left(45);
+  produto.colecao = colecao.toString().remove("*").toUpper().trimmed().left(200);
   produto.m2cx = m2cx.toDouble();
   produto.pccx = pccx.toDouble();
   produto.kgcx = kgcx.toDouble();
-  produto.formComercial = formComercial.toString().remove("*").toUpper().trimmed();
-  produto.codComercial = codComercial.toString().remove("*").remove(".").remove(",").toUpper().trimmed();
-  produto.codBarras = codBarras.toString().remove("*").remove(".").remove(",").toUpper().trimmed();
-  produto.ncm = ncm.toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper().trimmed();
+  produto.formComercial = formComercial.toString().remove("*").toUpper().trimmed().left(100);
+  produto.codComercial = codComercial.toString().remove("*").remove(".").remove(",").toUpper().trimmed().left(100);
+  produto.codBarras = codBarras.toString().remove("*").remove(".").remove(",").toUpper().trimmed().left(100);
+  produto.ncm = ncm.toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper().trimmed().left(10);
   produto.qtdPallet = qtdPallet.toDouble();
   produto.custo = custo.toDouble();
   produto.precoVenda = precoVenda.toDouble();
-  produto.ui = ui2.toString().remove("*").toUpper().trimmed();
-  produto.un2 = un2.toString().remove("*").toUpper().trimmed();
+  produto.ui = ui2.toString().remove("*").toUpper().trimmed().left(45);
+  produto.un2 = un2.toString().remove("*").toUpper().trimmed().left(45);
   produto.minimo = minimo.toDouble();
   produto.mva = mva.toDouble();
   produto.st = st.toDouble();
@@ -923,13 +923,13 @@ void ImportaProdutos::insereEmOk() {
 int ImportaProdutos::buscarCadastrarFornecedor() {
   SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
+  queryFornecedor.bindValue(":razaoSocial", m_fornecedor.left(100));
 
   if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando fornecedor: " + queryFornecedor.lastError().text()); }
 
   if (not queryFornecedor.first()) {
     queryFornecedor.prepare("INSERT INTO fornecedor (razaoSocial) VALUES (:razaoSocial)");
-    queryFornecedor.bindValue(":razaoSocial", m_fornecedor);
+    queryFornecedor.bindValue(":razaoSocial", m_fornecedor.left(100));
 
     if (not queryFornecedor.exec()) { throw RuntimeException("Erro cadastrando fornecedor: " + queryFornecedor.lastError().text()); }
 

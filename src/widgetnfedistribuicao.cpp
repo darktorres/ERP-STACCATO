@@ -19,6 +19,16 @@ WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent),
 
   connect(&timer, &QTimer::timeout, this, &WidgetNFeDistribuicao::downloadAutomatico);
   timer.setTimerType(Qt::VeryCoarseTimer);
+
+  // Connect to application's connection status to detect DB reconnection
+  connect(qApp, &Application::setConnectionStatus, this, [this](bool connected) {
+    if (connected) {
+      resetTables();
+      timer.stop();
+      timer.start(10s);
+    }
+  });
+
   // Inicializar com 0 minutos - será recalculado dinamicamente
   timer.start(0min);
 }
@@ -66,7 +76,7 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   } catch (std::exception &) {
     qApp->setSilent(false);
     // Em caso de erro, tentar novamente em 5 minutos
-    timer.start(std::chrono::minutes(5));
+    timer.start(5min);
     throw;
   }
 }
@@ -206,7 +216,7 @@ void WidgetNFeDistribuicao::on_pushButtonBaixarNFe_clicked() {
     timer.start(std::chrono::minutes(proximosMinutos));
   } catch (std::exception &) {
     // Em caso de erro, tentar novamente em 5 minutos
-    timer.start(std::chrono::minutes(5));
+    timer.start(5min);
     throw;
   }
 }
@@ -215,7 +225,8 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
 
   // TODO: parametrizar o código do estado em vez de usar 35
-  const QString resposta = acbr.enviarComando(R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")", "Consultando NF-es do CNPJ " + cnpjDest + "...");
+  const QString comando = R"(NFe.DistribuicaoDFePorUltNSU("35", ")" + cnpjDest + R"(", )" + QString::number(ultimoNSU) + ")";
+  const QString resposta = acbr.enviarComando(comando, "Consultando NF-es do CNPJ " + cnpjDest + "...");
   qDebug() << "resposta: " << resposta;
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
@@ -310,7 +321,6 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
   SqlQuery queryCnpj;
 
   if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj LIKE '" + cnpjRaiz + "%' AND desativado = FALSE")) {
-    //  if (not queryCnpj.exec("SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja WHERE cnpj = '09.375.013/0005-43' AND desativado = FALSE")) {
     throw RuntimeException("Erro buscando filiais: " + queryCnpj.lastError().text());
   }
 

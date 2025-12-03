@@ -36,14 +36,18 @@ WidgetNFeDistribuicao::WidgetNFeDistribuicao(QWidget *parent) : QWidget(parent),
 WidgetNFeDistribuicao::~WidgetNFeDistribuicao() { delete ui; }
 
 void WidgetNFeDistribuicao::downloadAutomatico() {
-  if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
+  if (not User::getSetting("User/monitorarNFe").toBool()) {
+    // Mesmo quando desabilitado, manter timer rodando para verificar novamente depois
+    timer.start(1min);
+    return;
+  }
 
   timer.stop();
 
-  // TODO: is this still needed?
-  updateTables();
-
   try {
+    // TODO: is this still needed?
+    updateTables();
+
     // Verificar se há alguma consulta disponível agora
     QSqlQuery queryDisponivel;
     if (not queryDisponivel.exec("SELECT COUNT(*) as consultas FROM loja l "
@@ -76,7 +80,7 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
   } catch (std::exception &) {
     qApp->setSilent(false);
     // Em caso de erro, tentar novamente em 5 minutos
-    timer.start(5min);
+    timer.start(1min);
     throw;
   }
 }

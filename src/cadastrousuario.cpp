@@ -108,6 +108,8 @@ void CadastroUsuario::verifyFields() {
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) { throw RuntimeError("As senhas não batem!"); }
 
   if (ui->comboBoxTipo->currentText().isEmpty()) { throw RuntimeError("Não escolheu o tipo de usuário!"); }
+
+  if (ui->comboBoxTipo->currentText() == "ASSISTENTE ADMINISTRATIVO" and ui->comboBoxLoja->currentText() == "") { throw RuntimeError("Assistente Administrativo deve ter uma loja associada!"); }
 }
 
 void CadastroUsuario::clearFields() { RegisterDialog::clearFields(); }

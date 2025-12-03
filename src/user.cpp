@@ -17,6 +17,8 @@ bool User::isGerente() { return (User::tipo == "GERENTE DEPARTAMENTO" or User::t
 
 bool User::isOperacional() { return (User::tipo == "OPERACIONAL"); }
 
+bool User::isAssistenteAdministrativo() { return (User::tipo == "ASSISTENTE ADMINISTRATIVO"); }
+
 bool User::isVendedor() { return (User::tipo == "VENDEDOR"); }
 
 bool User::isVendedorOrEspecial() { return (User::tipo == "VENDEDOR" or User::tipo == "VENDEDOR ESPECIAL"); }

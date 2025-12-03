@@ -2,6 +2,7 @@
 #include "ui_cadastroncm.h"
 
 #include "application.h"
+#include "checkboxdelegate.h"
 #include "porcentagemdelegate.h"
 
 #include <QDebug>
@@ -39,6 +40,7 @@ void CadastroNCM::setupTables() {
   model.setHeaderData("mva4", "MVA 4%");
   model.setHeaderData("mva12", "MVA 12%");
   model.setHeaderData("aliq", "Alíq. ICMS");
+  model.setHeaderData("st", "ST");
 
   model.setFilter("");
 
@@ -51,6 +53,8 @@ void CadastroNCM::setupTables() {
   ui->table->setItemDelegateForColumn("mva4", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("mva12", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("aliq", new PorcentagemDelegate(false, this));
+  ui->table->setItemDelegateForColumn("st", new CheckBoxDelegate(false, this));
+  ui->table->setPersistentColumns({"st"});
 }
 
 void CadastroNCM::verificaNCM(const QModelIndex &index) {
@@ -100,6 +104,7 @@ void CadastroNCM::on_pushButtonAdicionar_clicked() {
   model.setData(row, "mva4", 0.);
   model.setData(row, "mva12", 0.);
   model.setData(row, "aliq", 0.);
+  model.setData(row, "st", 1); // default: sujeito a ST
 
   ui->table->selectRow(row);
 }

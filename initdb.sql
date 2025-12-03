@@ -1626,6 +1626,7 @@ CREATE TABLE IF NOT EXISTS `staccato`.`ncm` (
   `mva4` DECIMAL(15,2) NOT NULL,
   `mva12` DECIMAL(15,2) NOT NULL,
   `aliq` DECIMAL(15,2) NOT NULL,
+  `st` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica se o NCM está sujeito a ST (Substituição Tributária)',
   `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastUpdated` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`idncm`),

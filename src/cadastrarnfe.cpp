@@ -1218,61 +1218,139 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
   modelProduto.setData(row, "cstICMS", cstICMS);
 
   // -------------------------------------------------------------------------
+  // Tributação Normal
 
   if (text == "00 - Tributada integralmente") {
     ui->frameICMSNormal->show();
     ui->frameST->hide();
+    ui->labelPorcMargemIcmsSt->hide();
+    ui->doubleSpinBoxICMSpmvast->hide();
   }
 
-  // TODO: preencher os casos abaixo
-  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
+  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->show();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "20 - Com redução de base de cálculo") {}
+  if (text == "20 - Com redução de base de cálculo") {
+    ui->frameICMSNormal->show();
+    ui->frameST->hide();
+    ui->labelPorcMargemIcmsSt->hide();
+    ui->doubleSpinBoxICMSpmvast->hide();
+  }
 
-  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {}
+  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "40 - Isenta") {}
+  if (text == "40 - Isenta") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "41 - Não tributada") {}
+  if (text == "41 - Não tributada") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "50 - Suspensão") {}
+  if (text == "50 - Suspensão") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "51 - Diferimento") {}
+  if (text == "51 - Diferimento") {
+    ui->frameICMSNormal->show();
+    ui->frameST->hide();
+  }
 
   if (text == "60 - ICMS cobrado anteriormente por substituição tributária") {
     ui->frameICMSNormal->hide();
     ui->frameST->show();
-
     ui->labelPorcMargemIcmsSt->hide();
     ui->doubleSpinBoxICMSpmvast->hide();
-    // TODO: icms retido anteriormente, é outro campo?
   }
 
-  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {}
+  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->show();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "90 - Outras") {}
+  if (text == "90 - Outras") {
+    ui->frameICMSNormal->show();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  // simples nacional
+  // -------------------------------------------------------------------------
+  // Simples Nacional
 
-  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {}
+  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {
+    ui->frameICMSNormal->show();
+    ui->frameST->hide();
+  }
 
-  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {}
+  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {}
+  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->show();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {}
+  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 
-  if (text == "400 - Não tributada pelo Simples Nacional") {}
+  if (text == "300 - Imune") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "300 - Imune") {}
+  if (text == "400 - Não tributada pelo Simples Nacional") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->hide();
+  }
 
-  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {}
+  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {
+    ui->frameICMSNormal->hide();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->hide();
+    ui->doubleSpinBoxICMSpmvast->hide();
+  }
 
-  if (text == "900 - Outros") {}
+  if (text == "900 - Outros") {
+    ui->frameICMSNormal->show();
+    ui->frameST->show();
+    ui->labelPorcMargemIcmsSt->show();
+    ui->doubleSpinBoxICMSpmvast->show();
+  }
 }
 
 void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {
@@ -1959,16 +2037,37 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
+      // Buscar se o NCM está sujeito a ST
+      const QString ncmProduto = modelProduto.data(row, "ncm").toString();
+      bool produtoST = true; // default: assume ST
+
+      if (not ncmProduto.isEmpty()) {
+        SqlQuery queryNcm;
+        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.bindValue(":ncm", ncmProduto);
+
+        if (queryNcm.exec() and queryNcm.first()) {
+          produtoST = queryNcm.value("st").toBool();
+        }
+      }
+
       // para CFOP de saída 5101/6101 usar CFOP 1201/2201
       // para CFOP de saída 5102/6102 usar CFOP 1202/2202
       // para CFOP de saída 5401/6401 usar CFOP 1410/2410
       // para CFOP de saída 5403/6403 usar CFOP 1411/2411
       // para CFOP de saída 5405/6404 usar CFOP 1411/2411
 
-      modelProduto.setData(row, "cfop", mesmaUf ? "1411" : "2411");
-
-      modelProduto.setData(row, "tipoICMS", "ICMS60");
-      modelProduto.setData(row, "cstICMS", "60");
+      if (produtoST) {
+        // Produto com ST: CFOP 1411/2411 e CST 60
+        modelProduto.setData(row, "cfop", mesmaUf ? "1411" : "2411");
+        modelProduto.setData(row, "tipoICMS", "ICMS60");
+        modelProduto.setData(row, "cstICMS", "60");
+      } else {
+        // Produto sem ST: CFOP 1202/2202 e CST 00
+        modelProduto.setData(row, "cfop", mesmaUf ? "1202" : "2202");
+        modelProduto.setData(row, "tipoICMS", "ICMS00");
+        modelProduto.setData(row, "cstICMS", "00");
+      }
 
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
@@ -1995,10 +2094,31 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
-      modelProduto.setData(row, "cfop", mesmaUf ? "5403" : "6403");
+      // Buscar se o NCM está sujeito a ST
+      const QString ncmProduto = modelProduto.data(row, "ncm").toString();
+      bool produtoST = true; // default: assume ST
 
-      modelProduto.setData(row, "tipoICMS", "ICMS60");
-      modelProduto.setData(row, "cstICMS", "60");
+      if (not ncmProduto.isEmpty()) {
+        SqlQuery queryNcm;
+        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.bindValue(":ncm", ncmProduto);
+
+        if (queryNcm.exec() and queryNcm.first()) {
+          produtoST = queryNcm.value("st").toBool();
+        }
+      }
+
+      if (produtoST) {
+        // Produto com ST: CFOP 5403/6403 e CST 60
+        modelProduto.setData(row, "cfop", mesmaUf ? "5403" : "6403");
+        modelProduto.setData(row, "tipoICMS", "ICMS60");
+        modelProduto.setData(row, "cstICMS", "60");
+      } else {
+        // Produto sem ST: CFOP 5102/6102 e CST 00 (tributado integralmente)
+        modelProduto.setData(row, "cfop", mesmaUf ? "5102" : "6102");
+        modelProduto.setData(row, "tipoICMS", "ICMS00");
+        modelProduto.setData(row, "cstICMS", "00");
+      }
 
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
@@ -2038,10 +2158,30 @@ void CadastrarNFe::preencherImpostos() {
         modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
+      // Buscar se o NCM está sujeito a ST
+      const QString ncmProduto = modelProduto.data(row, "ncm").toString();
+      bool produtoST = true; // default: assume ST
+
+      if (not ncmProduto.isEmpty()) {
+        SqlQuery queryNcm;
+        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.bindValue(":ncm", ncmProduto);
+
+        if (queryNcm.exec() and queryNcm.first()) {
+          produtoST = queryNcm.value("st").toBool();
+        }
+      }
+
+      // CFOP 5922/6922 é para entrega futura, não depende de ST
       modelProduto.setData(row, "cfop", mesmaUf ? "5922" : "6922");
 
-      modelProduto.setData(row, "tipoICMS", "ICMS60");
-      modelProduto.setData(row, "cstICMS", "60");
+      if (produtoST) {
+        modelProduto.setData(row, "tipoICMS", "ICMS60");
+        modelProduto.setData(row, "cstICMS", "60");
+      } else {
+        modelProduto.setData(row, "tipoICMS", "ICMS00");
+        modelProduto.setData(row, "cstICMS", "00");
+      }
 
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();

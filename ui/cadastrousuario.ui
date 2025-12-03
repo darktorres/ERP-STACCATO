@@ -217,6 +217,11 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item>
           <property name="text">
+           <string>ASSISTENTE ADMINISTRATIVO</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>DIRETOR</string>
           </property>
          </item>

@@ -17,6 +17,7 @@ public:
   static auto isEspecial() -> bool;           // vendedor especial
   static auto isGerente() -> bool;            // gerente loja
   static auto isOperacional() -> bool;        // operacional
+  static auto isAssistenteAdministrativo() -> bool; // assistente administrativo
   static auto isVendedor() -> bool;           // vendedor
   static auto isVendedorOrEspecial() -> bool; // vendedor, vendedor especial
   static auto login(const QString &user, const QString &password) -> void;

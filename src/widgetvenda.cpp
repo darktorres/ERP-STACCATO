@@ -187,7 +187,7 @@ void WidgetVenda::setWidgets() {
       ui->dateEditMes->setEnabled(true);
     }
 
-    if (User::isGerente()) { ui->frameLojas->hide(); }
+    if (User::isGerente() or User::isAssistenteAdministrativo()) { ui->frameLojas->hide(); }
 
     if (User::isVendedorOrEspecial()) { ui->frameVendedores->hide(); }
 

@@ -37,7 +37,7 @@ public:
   auto abrirVenda(const QVariant &idVenda) -> void;
   auto ajustarDiaUtil(const QDate date) -> QDate;
   auto darkTheme() -> void;
-  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> void;
+  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword, const bool staging = false) -> void;
   auto dbReconnect(const bool isSilent = false) -> void;
   auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
@@ -99,7 +99,7 @@ private:
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
   // methods
-  auto genericLogin(const QString &hostname) -> void;
+  auto genericLogin(const QString &hostname, const bool staging) -> void;
   auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> void;

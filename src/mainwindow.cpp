@@ -22,6 +22,7 @@
 #include "user.h"
 #include "userconfig.h"
 
+#include <QLabel>
 #include <QSqlError>
 
 using namespace std::chrono_literals;
@@ -42,6 +43,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   const QString hostnameText = qApp->getMapLojas().key(hostname);
 
   setWindowTitle(windowTitle() + " - " + User::nome + " - " + User::tipo + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
+
+  if (User::getSetting("Login/staging").toBool()) {
+    setWindowTitle("[TESTE] " + windowTitle());
+
+    auto *stagingBanner = new QLabel("AMBIENTE DE TESTE", this);
+    stagingBanner->setAlignment(Qt::AlignCenter);
+    stagingBanner->setStyleSheet("background-color: #cc0000; color: white; font-weight: bold; padding: 5px;");
+    ui->gridLayout->addWidget(stagingBanner, 0, 0);
+    ui->gridLayout->addWidget(ui->tabWidget, 1, 0);
+  }
 
   if (not User::isAdmin()) { ui->actionCadastrarUsuario->setVisible(false); }
 

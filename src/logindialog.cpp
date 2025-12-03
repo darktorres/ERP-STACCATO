@@ -27,12 +27,25 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   if (not User::getSetting("Login/hostname").toString().isEmpty()) { ui->lineEditHostname->setText(User::getSetting("Login/hostname").toString()); }
 
-  if (not User::getSetting("Login/loja").toString().isEmpty()) { ui->comboBoxLoja->setCurrentText(User::getSetting("Login/loja").toString()); }
+  if (not User::getSetting("Login/loja").toString().isEmpty()) {
+    QString loja = User::getSetting("Login/loja").toString();
+
+    // migrate old loja names
+    if (loja == "Teste") { loja = "Desenvolvimento"; }
+    if (loja == "Acesso Externo - Locaweb") { loja = "Locaweb"; }
+
+    if (loja != User::getSetting("Login/loja").toString()) { User::setSetting("Login/loja", loja); }
+
+    ui->comboBoxLoja->setCurrentText(loja);
+  }
 
   ui->checkBoxSalvarSenha->hide();
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
   ui->comboBoxLoja->hide();
+  ui->checkBoxStaging->hide();
+
+  ui->checkBoxStaging->setChecked(User::getSetting("Login/staging").toBool());
 
   if (tipo == Tipo::Login) {
     const bool salvarSenha = User::getSetting("User/savePasswd").toBool();
@@ -85,6 +98,7 @@ void LoginDialog::on_pushButtonConfig_clicked() {
   ui->labelHostname->setVisible(not ui->labelHostname->isVisible());
   ui->lineEditHostname->setVisible(not ui->lineEditHostname->isVisible());
   ui->comboBoxLoja->setVisible(not ui->comboBoxLoja->isVisible());
+  ui->checkBoxStaging->setVisible(not ui->checkBoxStaging->isVisible());
   adjustSize();
 }
 
@@ -95,8 +109,9 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     User::setSetting("Login/hostname", ui->lineEditHostname->text());
     User::setSetting("User/lastuser", ui->lineEditUser->text());
     User::setSetting("User/passwd", ui->lineEditPass->text());
+    User::setSetting("Login/staging", ui->checkBoxStaging->isChecked());
 
-    qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text());
+    qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text(), ui->checkBoxStaging->isChecked());
 
     //-----------------------------------------------------
 

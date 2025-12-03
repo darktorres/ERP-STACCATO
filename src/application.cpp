@@ -114,7 +114,7 @@ void Application::userLogin(const QString &user) {
   if (not db.open()) { loginError(); }
 }
 
-void Application::genericLogin(const QString &hostname) {
+void Application::genericLogin(const QString &hostname, const bool staging) {
   File file("mysql.txt");
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo mysql.txt: " + file.errorString()); }
@@ -130,7 +130,7 @@ void Application::genericLogin(const QString &hostname) {
   db.setHostName(hostname);
   db.setUserName("loginUser");
   db.setPassword(systemPassword);
-  db.setDatabaseName("staccato");
+  db.setDatabaseName(staging ? "staccato_staging" : "staccato");
   //  db.setDatabaseName("empty"); // for testing
   db.setPort(3306);
 
@@ -174,8 +174,8 @@ void Application::dbReconnect(const bool isSilent) {
   }
 }
 
-void Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
-  genericLogin(hostname);
+void Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword, const bool staging) {
+  genericLogin(hostname, staging);
 
   User::login(user, userPassword);
 

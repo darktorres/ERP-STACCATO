@@ -3,6 +3,7 @@
 #include "acbr.h"
 #include "sqltablemodel.h"
 
+#include <QMutex>
 #include <QStack>
 #include <QTimer>
 #include <QWidget>
@@ -26,6 +27,7 @@ private:
   bool isSet = false;
   int maximoNSU = 0;
   int ultimoNSU = 0;
+  QMutex mutexConsulta; // Mutex to prevent concurrent consultarSefaz() calls
   QStack<int> blockingSignals;
   QString cnpjDest;
   QString idLoja;
@@ -35,6 +37,7 @@ private:
   // methods
   auto agendarOperacao() -> void;
   auto ajustarGroupBoxStatus() -> void;
+  auto atualizarNSUDoBanco() -> void;
   auto buscarNFes(const QString &cnpjRaiz, const QString &servidor, const QString &porta) -> void;
   auto buscarNSU() -> void;
   auto confirmar(ACBr &acbr, const bool silent) -> void;

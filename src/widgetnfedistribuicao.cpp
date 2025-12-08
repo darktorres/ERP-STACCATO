@@ -9,6 +9,7 @@
 #include "user.h"
 
 #include <QInputDialog>
+#include <QMutexLocker>
 #include <QSqlError>
 #include <QTimer>
 
@@ -272,14 +273,7 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
 
   processarResposta(resposta, idLoja);
 
-  qApp->endTransaction();
-
-  // Só atualizar a tabela se não estiver em modo silent (download automático)
-  // if (!qApp->isSilent()) {
-    model.select();
-  // }
-
-  // Atualizar próxima consulta permitida baseado no resultado
+  // Atualizar próxima consulta permitida baseado no resultado (inside transaction)
   SqlQuery queryProximaConsulta;
   QString intervalo;
 
@@ -294,6 +288,13 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   if (not queryProximaConsulta.exec("UPDATE loja SET proximaConsultaPermitida = " + intervalo + ", ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
     throw RuntimeException("Erro definindo próxima consulta: " + queryProximaConsulta.lastError().text());
   }
+
+  qApp->endTransaction();
+
+  // Só atualizar a tabela se não estiver em modo silent (download automático)
+  // if (!qApp->isSilent()) {
+    model.select();
+  // }
 
   return true; // Sucesso
 }
@@ -350,7 +351,9 @@ void WidgetNFeDistribuicao::buscarNFes(const QString &cnpjRaiz, const QString &s
     //----------------------------------------------------------
 
     while (ultimoNSU < maximoNSU) {
-      qDebug() << "pesquisar novamente";
+      atualizarNSUDoBanco(); // Re-read fresh NSU values from DB
+      qDebug() << "pesquisar novamente - ultimoNSU:" << ultimoNSU << "maximoNSU:" << maximoNSU;
+      if (ultimoNSU >= maximoNSU) { break; } // Check again after refresh
       if (!enviarComando(acbr)) {
         qDebug() << "Erro na consulta adicional do CNPJ" << cnpjDest << "- interrompendo loop";
         break;
@@ -985,6 +988,19 @@ void WidgetNFeDistribuicao::processarEventoInformacao(const QString &evento) {
   }
 }
 
+void WidgetNFeDistribuicao::atualizarNSUDoBanco() {
+  SqlQuery query;
+
+  if (not query.exec("SELECT ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja)) {
+    throw RuntimeException("Erro buscando NSU do banco: " + query.lastError().text());
+  }
+
+  if (not query.first()) { throw RuntimeException("Loja não encontrada: " + idLoja); }
+
+  ultimoNSU = query.value("ultimoNSU").toInt();
+  maximoNSU = query.value("maximoNSU").toInt();
+}
+
 bool WidgetNFeDistribuicao::podeConsultarAgora() {
   QSqlQuery query;
 
@@ -1053,6 +1069,8 @@ void WidgetNFeDistribuicao::ajustarGroupBoxStatus() {
 }
 
 void WidgetNFeDistribuicao::consultarSefaz() {
+  QMutexLocker locker(&mutexConsulta); // Prevent concurrent calls
+
   SqlQuery query;
 
   if (not query.exec("SELECT monitorarCNPJ1, monitorarServidor1, monitorarPorta1, monitorarCNPJ2, monitorarServidor2, monitorarPorta2 FROM config")) {

@@ -234,22 +234,9 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   qDebug() << "resposta: " << resposta;
   // TODO: se essas mensagens são silenciosas como o usuario vai arrumar quando der erro?
 
-  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) {
-    qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest << "- definindo próxima consulta para 1h";
-
-    // Definir próxima consulta permitida para 1h no futuro
-    SqlQuery queryUpdate;
-    if (not queryUpdate.exec("UPDATE loja SET proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
-      throw RuntimeException("Erro atualizando próxima consulta: " + queryUpdate.lastError().text());
-    }
-
-    qDebug() << "Próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
-    return false; // Para este CNPJ, mas continua outros
-  }
-
   if (resposta.contains("ERRO: Rejeicao: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital")) { throw RuntimeError("Certificado plugado é de outro CNPJ!"); }
 
-  // Detectar dessincronização de NSU com SEFAZ
+  // Detectar dessincronização de NSU com SEFAZ (pode vir junto com "Consumo Indevido")
   if (resposta.contains("Deve ser utilizado o ultNSU nas solicitacoes subsequentes", Qt::CaseInsensitive)) {
     qDebug() << "DESSINCRONIZAÇÃO DE NSU DETECTADA para CNPJ" << cnpjDest << "- resetando NSUs e definindo próxima consulta para 1h";
 
@@ -260,6 +247,20 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
     }
 
     qDebug() << "NSUs resetados e próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
+    return false; // Para este CNPJ, mas continua outros
+  }
+
+  // Consumo Indevido genérico (sem dessincronização de NSU)
+  if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) {
+    qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest << "- definindo próxima consulta para 1h";
+
+    // Definir próxima consulta permitida para 1h no futuro
+    SqlQuery queryUpdate;
+    if (not queryUpdate.exec("UPDATE loja SET proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+      throw RuntimeException("Erro atualizando próxima consulta: " + queryUpdate.lastError().text());
+    }
+
+    qDebug() << "Próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
     return false; // Para este CNPJ, mas continua outros
   }
 

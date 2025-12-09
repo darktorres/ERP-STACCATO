@@ -239,29 +239,29 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
 
   // Detectar dessincronização de NSU com SEFAZ (pode vir junto com "Consumo Indevido")
   if (resposta.contains("Deve ser utilizado o ultNSU nas solicitacoes subsequentes", Qt::CaseInsensitive)) {
-    qDebug() << "DESSINCRONIZAÇÃO DE NSU DETECTADA para CNPJ" << cnpjDest << "- resetando NSUs e definindo próxima consulta para 1h";
+    qDebug() << "DESSINCRONIZAÇÃO DE NSU DETECTADA para CNPJ" << cnpjDest << "- resetando NSUs e definindo próxima consulta para 65min";
 
-    // Resetar NSUs no banco e definir próxima consulta para 1h no futuro
+    // Resetar NSUs no banco e definir próxima consulta para 65min no futuro
     SqlQuery queryReset;
-    if (not queryReset.exec("UPDATE loja SET ultimoNSU = 0, maximoNSU = 0, proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+    if (not queryReset.exec("UPDATE loja SET ultimoNSU = 0, maximoNSU = 0, proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 65 MINUTE), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
       throw RuntimeException("Erro resetando NSUs e definindo próxima consulta: " + queryReset.lastError().text());
     }
 
-    qDebug() << "NSUs resetados e próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
+    qDebug() << "NSUs resetados e próxima consulta permitida em 65min para loja" << idLoja << "- pulando para próximo CNPJ";
     return false; // Para este CNPJ, mas continua outros
   }
 
   // Consumo Indevido genérico (sem dessincronização de NSU)
   if (resposta.contains("Consumo Indevido", Qt::CaseInsensitive)) {
-    qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest << "- definindo próxima consulta para 1h";
+    qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest << "- definindo próxima consulta para 65min";
 
-    // Definir próxima consulta permitida para 1h no futuro
+    // Definir próxima consulta permitida para 65min no futuro
     SqlQuery queryUpdate;
-    if (not queryUpdate.exec("UPDATE loja SET proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 1 HOUR), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
+    if (not queryUpdate.exec("UPDATE loja SET proximaConsultaPermitida = DATE_ADD(NOW(), INTERVAL 65 MINUTE), ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {
       throw RuntimeException("Erro atualizando próxima consulta: " + queryUpdate.lastError().text());
     }
 
-    qDebug() << "Próxima consulta permitida em 1h para loja" << idLoja << "- pulando para próximo CNPJ";
+    qDebug() << "Próxima consulta permitida em 65min para loja" << idLoja << "- pulando para próximo CNPJ";
     return false; // Para este CNPJ, mas continua outros
   }
 
@@ -278,11 +278,11 @@ bool WidgetNFeDistribuicao::enviarComando(ACBr &acbr) {
   QString intervalo;
 
   if (resposta.contains("Nenhum documento localizado", Qt::CaseInsensitive)) {
-    intervalo = "DATE_ADD(NOW(), INTERVAL 1 HOUR)";
-    qDebug() << "Nenhum documento localizado para CNPJ" << cnpjDest << "- próxima consulta em 1h";
+    intervalo = "DATE_ADD(NOW(), INTERVAL 65 MINUTE)";
+    qDebug() << "Nenhum documento localizado para CNPJ" << cnpjDest << "- próxima consulta em 65min";
   } else {
-    intervalo = "DATE_ADD(NOW(), INTERVAL 15 MINUTE)";
-    qDebug() << "Documentos encontrados para CNPJ" << cnpjDest << "- próxima consulta em 15min";
+    intervalo = "DATE_ADD(NOW(), INTERVAL 20 MINUTE)";
+    qDebug() << "Documentos encontrados para CNPJ" << cnpjDest << "- próxima consulta em 20min";
   }
 
   if (not queryProximaConsulta.exec("UPDATE loja SET proximaConsultaPermitida = " + intervalo + ", ultimaConsultaNSU = NOW() WHERE idLoja = " + idLoja)) {

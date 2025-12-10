@@ -70,7 +70,7 @@ void Application::enqueueWarning(const QString &warning, QWidget *parent) {
   showMessages();
 }
 
-QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Locaweb"); }
+QString Application::getWebDavIp() const { return mapLojas.value("Locaweb"); }
 
 void Application::readSettingsFile() {
   File file("lojas.txt");

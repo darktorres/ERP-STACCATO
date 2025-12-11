@@ -805,9 +805,17 @@ void Orcamento::calcPrecoGlobalTotal() {
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
 
-    const double itemBruto = modelItem.data(row, "quant").toDouble() * modelItem.data(row, "prcUnitario").toDouble();
+    const double quant = modelItem.data(row, "quant").toDouble();
+    const double prcUnitario = modelItem.data(row, "prcUnitario").toDouble();
     const double descItem = modelItem.data(row, "desconto").toDouble() / 100.;
+    
+    const double itemBruto = quant * prcUnitario;
     const double stItem = itemBruto * (1. - descItem);
+    
+    // Atualiza os campos individuais dos itens para manter consistência
+    modelItem.setData(row, "parcial", itemBruto);
+    modelItem.setData(row, "parcialDesc", stItem);
+    
     subTotalBruto += itemBruto;
     subTotalItens += stItem;
   }
@@ -821,12 +829,22 @@ void Orcamento::calcPrecoGlobalTotal() {
 
   const double frete = ui->doubleSpinBoxFrete->value();
   const double descGlobal = ui->doubleSpinBoxDescontoGlobal->value();
+  const double descGlobalFrac = descGlobal / 100.;
 
   ui->doubleSpinBoxDescontoGlobalReais->setMaximum(subTotalItens);
-  ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalItens * descGlobal / 100);
+  ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalItens * descGlobalFrac);
 
   ui->doubleSpinBoxTotal->setMaximum(subTotalItens + frete);
-  ui->doubleSpinBoxTotal->setValue(subTotalItens * (1 - (descGlobal / 100)) + frete);
+  ui->doubleSpinBoxTotal->setValue(subTotalItens * (1 - descGlobalFrac) + frete);
+
+  // Atualiza o campo 'total' de cada item aplicando o desconto global
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+    
+    const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+    const double descGlobal = modelItem.data(row, "descGlobal").toDouble() / 100.;
+    modelItem.setData(row, "total", parcialDesc * (1 - descGlobal));
+  }
 }
 
 void Orcamento::on_pushButtonGerarPdf_clicked() {

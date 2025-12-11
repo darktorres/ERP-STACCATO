@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useAuthStore } from '../stores/auth.js';
 import { trpc } from '../lib/trpc.js';
 import { OrcamentoFilters } from '@erp-staccato/shared';
@@ -41,6 +41,25 @@ export default function OrcamentoListPage() {
 
   const [filters, setFilters] = useState<OrcamentoFilters>(defaultFilters);
   const [selectedOrcamento, setSelectedOrcamento] = useState<any | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setFilters((prevFilters) => ({ ...prevFilters, search: searchText || undefined }));
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchText]);
 
   // Queries
   const { data: orcamentos, isLoading } = trpc.orcamento.list.useQuery(filters);
@@ -54,68 +73,202 @@ export default function OrcamentoListPage() {
   const { data: fornecedores } = trpc.orcamento.fornecedores.useQuery();
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-slate-50">Orçamentos</h1>
-          <div className="flex gap-3">
-            <button
-              disabled={!selectedOrcamento}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => {
-                if (!selectedOrcamento) {
-                  alert('Selecione um orçamento para abrir o followup');
-                  return;
-                }
-                console.log('Open followup for:', selectedOrcamento.idOrcamento);
-                // TODO: Open FollowUp dialog
-              }}
-            >
-              Followup
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                // Navigate to new orcamento page
-                console.log('Navigate to new orcamento');
-              }}
-            >
-              + Criar Orçamento
-            </button>
-          </div>
+    <div className="flex h-[calc(100vh-120px)] bg-slate-950">
+      {/* Left Sidebar */}
+      <div className="w-48 bg-slate-900 border-r border-slate-700 p-4 overflow-y-auto flex flex-col">
+        {/* Buttons */}
+        <div className="space-y-2 mb-6">
+          <button
+            className="w-full px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+            onClick={() => {
+              console.log('Navigate to new orcamento');
+            }}
+          >
+            Criar orçamento
+          </button>
+          <button
+            disabled={!selectedOrcamento}
+            className="w-full px-4 py-2 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => {
+              if (!selectedOrcamento) {
+                alert('Selecione um orçamento para abrir o followup');
+                return;
+              }
+              console.log('Open followup for:', selectedOrcamento.idOrcamento);
+              // TODO: Open FollowUp dialog
+            }}
+          >
+            Followup
+          </button>
         </div>
 
-        {/* Filters */}
-        <OrcamentoFilterPanel
-          filters={filters}
-          onFiltersChange={setFilters}
-          lojas={(lojas || []).map((loja) => ({
-            idLoja: loja.idLoja,
-            descricao: loja.descricao ?? undefined,
-            nomeFantasia: loja.nomeFantasia,
-          }))}
-          vendedores={vendedores || []}
-          fornecedores={fornecedores || []}
-          userType={user?.tipo}
-        />
+        {/* Filters Section */}
+        <div className="space-y-4 flex-1">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase">Filtros</h3>
+
+          {/* Todos/Próprios Radio */}
+          {(user?.tipo === 'VENDEDOR' || user?.tipo === 'VENDEDOR ESPECIAL') && (
+            <div className="space-y-2">
+              <label className="flex items-center text-sm text-slate-300">
+                <input
+                  type="radio"
+                  checked={!filters.apenasPropriosOrcamentos}
+                  onChange={() => setFilters({ ...filters, apenasPropriosOrcamentos: false })}
+                  className="h-4 w-4 text-blue-600 border-slate-600 bg-slate-700"
+                />
+                <span className="ml-2">Todos</span>
+              </label>
+              <label className="flex items-center text-sm text-slate-300">
+                <input
+                  type="radio"
+                  checked={filters.apenasPropriosOrcamentos}
+                  onChange={() => setFilters({ ...filters, apenasPropriosOrcamentos: true })}
+                  className="h-4 w-4 text-blue-600 border-slate-600 bg-slate-700"
+                />
+                <span className="ml-2">Próprios</span>
+              </label>
+            </div>
+          )}
+
+          {/* Status Checkboxes */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Status</h4>
+            <div className="space-y-1">
+              {['Ativo', 'Expirado', 'Cancelado', 'Fechado', 'Perdido', 'Replicado'].map((status) => (
+                <label key={status} className="flex items-center text-sm text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={(filters.statuses || []).includes(status.toUpperCase() as any)}
+                    onChange={(e) => {
+                      const statuses = filters.statuses || [];
+                      const newStatuses = e.target.checked
+                        ? [...statuses, status.toUpperCase() as any]
+                        : statuses.filter((s) => s !== status.toUpperCase());
+                      setFilters({ ...filters, statuses: newStatuses });
+                    }}
+                    className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700"
+                  />
+                  <span className="ml-2">{status}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Month Filter */}
+          {user?.tipo !== 'GERENTE LOJA' && user?.tipo !== 'GERENTE DEPARTAMENTO' && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Mês</h4>
+              <input
+                type="month"
+                value={filters.mesAno || ''}
+                onChange={(e) => setFilters({ ...filters, mesAno: e.target.value || undefined })}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+              />
+            </div>
+          )}
+
+          {/* Lojas Dropdown */}
+          {user?.tipo !== 'GERENTE LOJA' && user?.tipo !== 'GERENTE DEPARTAMENTO' && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Lojas</h4>
+              <select
+                value={filters.idLoja || ''}
+                onChange={(e) => setFilters({ ...filters, idLoja: e.target.value ? Number(e.target.value) : undefined })}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+              >
+                <option value="">Todas</option>
+                {(lojas || []).map((loja) => (
+                  <option key={loja.idLoja} value={loja.idLoja}>
+                    {loja.descricao || loja.nomeFantasia}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Vendedores Dropdown */}
+          {user?.tipo !== 'VENDEDOR' && user?.tipo !== 'VENDEDOR ESPECIAL' && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Vendedores</h4>
+              <select
+                value={filters.idVendedor || ''}
+                onChange={(e) => setFilters({ ...filters, idVendedor: e.target.value ? Number(e.target.value) : undefined })}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+              >
+                <option value="">Todos</option>
+                {(vendedores || []).map((vendedor) => (
+                  <option key={vendedor.idUsuario} value={vendedor.idUsuario}>
+                    {vendedor.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Fornecedores Dropdown */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Fornecedores</h4>
+            <select
+              value={filters.fornecedor || ''}
+              onChange={(e) => setFilters({ ...filters, fornecedor: e.target.value || undefined })}
+              className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+            >
+              <option value="">Todos</option>
+              {(fornecedores || []).map((fornecedor) => (
+                <option key={fornecedor.razaoSocial} value={fornecedor.razaoSocial}>
+                  {fornecedor.razaoSocial}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Followup Dropdown */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Followup</h4>
+            <select
+              value={filters.semaforo?.toString() || ''}
+              onChange={(e) => setFilters({ ...filters, semaforo: e.target.value ? Number(e.target.value) : undefined })}
+              className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+            >
+              <option value="">Todos</option>
+              <option value="1">QUENTE</option>
+              <option value="2">MORNO</option>
+              <option value="3">FRIO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Search Bar */}
+        <div className="bg-slate-900 border-b border-slate-700 p-4">
+          <input
+            type="text"
+            placeholder="Buscar: Código/Vendedor/Cliente/Profissional"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 placeholder-slate-500"
+          />
+        </div>
 
         {/* Table */}
-        {isLoading ? (
-          <div className="text-center py-8">
-            <p className="text-slate-400">Carregando orçamentos...</p>
-          </div>
-        ) : (
-          <OrcamentoTable
-            orcamentos={(Array.isArray(orcamentos) ? orcamentos : []) || []}
-            selectedOrcamento={selectedOrcamento}
-            onRowClick={(orcamento) => {
-              setSelectedOrcamento(orcamento);
-              console.log('Click row:', orcamento.idOrcamento);
-              // Navigate to orcamento detail page
-            }}
-          />
-        )}
+        <div className="flex-1 overflow-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-slate-400">Carregando orçamentos...</p>
+            </div>
+          ) : (
+            <OrcamentoTable
+              orcamentos={(Array.isArray(orcamentos) ? orcamentos : []) || []}
+              selectedOrcamento={selectedOrcamento}
+              onRowClick={(orcamento) => {
+                setSelectedOrcamento(orcamento);
+                console.log('Click row:', orcamento.idOrcamento);
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -50,11 +50,11 @@ export function OrcamentoFilterPanel({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-slate-800 rounded-lg shadow-md p-6 mb-6 border border-slate-700">
       <div className="space-y-6">
         {/* Status Checkboxes */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Status</h3>
+          <h3 className="text-sm font-semibold text-slate-50 mb-3">Status</h3>
           <div className="grid grid-cols-3 gap-4">
             {Object.entries(OrcamentoStatusEnum).map(([key, value]) => (
               <label key={key} className="flex items-center">
@@ -63,9 +63,9 @@ export function OrcamentoFilterPanel({
                   checked={(filters.statuses || []).includes(value as any)}
                   onChange={(e) => handleStatusChange(e.target.value)}
                   value={value}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700"
                 />
-                <span className="ml-2 text-sm text-gray-700">{value}</span>
+                <span className="ml-2 text-sm text-slate-300">{value}</span>
               </label>
             ))}
           </div>
@@ -76,13 +76,13 @@ export function OrcamentoFilterPanel({
           {/* Loja - Hidden for gerentes */}
           {userType !== 'GERENTE LOJA' && userType !== 'GERENTE DEPARTAMENTO' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Loja
               </label>
               <select
                 value={filters.idLoja || ''}
                 onChange={(e) => handleLojaChange(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
               >
                 <option value="">Todas as lojas</option>
                 {lojas.map((loja) => (
@@ -97,7 +97,7 @@ export function OrcamentoFilterPanel({
           {/* Vendedor - Hidden for vendedores */}
           {userType !== 'VENDEDOR' && userType !== 'VENDEDOR ESPECIAL' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Vendedor
               </label>
               <select
@@ -105,7 +105,7 @@ export function OrcamentoFilterPanel({
                 onChange={(e) =>
                   handleVendedorChange(e.target.value ? Number(e.target.value) : undefined)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
               >
                 <option value="">Todos os vendedores</option>
                 {vendedores.map((vendedor) => (
@@ -119,13 +119,13 @@ export function OrcamentoFilterPanel({
 
           {/* Fornecedor */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Fornecedor
             </label>
             <select
               value={filters.fornecedor || ''}
               onChange={(e) => handleFornecedorChange(e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
             >
               <option value="">Todos os fornecedores</option>
               {fornecedores.map((fornecedor) => (
@@ -141,7 +141,7 @@ export function OrcamentoFilterPanel({
         <div className="grid grid-cols-2 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Buscar (Código, Cliente, Profissional)
             </label>
             <input
@@ -149,21 +149,21 @@ export function OrcamentoFilterPanel({
               placeholder="Digite para buscar..."
               value={filters.search || ''}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400 placeholder-slate-500"
             />
           </div>
 
           {/* Month */}
           {userType !== 'GERENTE LOJA' && userType !== 'GERENTE DEPARTAMENTO' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Mês/Ano
               </label>
               <input
                 type="month"
                 value={filters.mesAno || ''}
                 onChange={(e) => handleMesAnoChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
               />
             </div>
           )}
@@ -172,25 +172,25 @@ export function OrcamentoFilterPanel({
         {/* Radio buttons - Todos vs Próprios */}
         {(userType === 'VENDEDOR' || userType === 'VENDEDOR ESPECIAL') && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Filtro de Orçamentos</h3>
+            <h3 className="text-sm font-semibold text-slate-50 mb-3">Filtro de Orçamentos</h3>
             <div className="space-y-2">
               <label className="flex items-center">
                 <input
                   type="radio"
                   checked={!filters.apenasPropriosOrcamentos}
                   onChange={(e) => handlePropriosChange(!e.target.checked)}
-                  className="h-4 w-4 text-blue-600 border-gray-300"
+                  className="h-4 w-4 text-blue-600 border-slate-600 bg-slate-700"
                 />
-                <span className="ml-2 text-sm text-gray-700">Todos os orçamentos</span>
+                <span className="ml-2 text-sm text-slate-300">Todos os orçamentos</span>
               </label>
               <label className="flex items-center">
                 <input
                   type="radio"
                   checked={filters.apenasPropriosOrcamentos}
                   onChange={(e) => handlePropriosChange(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 border-gray-300"
+                  className="h-4 w-4 text-blue-600 border-slate-600 bg-slate-700"
                 />
-                <span className="ml-2 text-sm text-gray-700">Apenas meus orçamentos</span>
+                <span className="ml-2 text-sm text-slate-300">Apenas meus orçamentos</span>
               </label>
             </div>
           </div>

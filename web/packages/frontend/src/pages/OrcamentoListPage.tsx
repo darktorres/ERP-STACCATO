@@ -42,6 +42,8 @@ export default function OrcamentoListPage() {
   const [filters, setFilters] = useState<OrcamentoFilters>(defaultFilters);
   const [selectedOrcamento, setSelectedOrcamento] = useState<any | null>(null);
   const [searchText, setSearchText] = useState('');
+  const [statusEnabled, setStatusEnabled] = useState((defaultFilters.statuses || []).length > 0);
+  const [mesEnabled, setMesEnabled] = useState(!!defaultFilters.mesAno);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounce search
@@ -132,7 +134,20 @@ export default function OrcamentoListPage() {
 
           {/* Status Checkboxes */}
           <div>
-            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Status</h4>
+            <label className="flex items-center text-xs font-semibold text-slate-400 uppercase mb-2">
+              <input
+                type="checkbox"
+                checked={statusEnabled}
+                onChange={(e) => {
+                  setStatusEnabled(e.target.checked);
+                  if (!e.target.checked) {
+                    setFilters({ ...filters, statuses: [] });
+                  }
+                }}
+                className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700 mr-2"
+              />
+              Status
+            </label>
             <div className="space-y-1">
               {['Ativo', 'Expirado', 'Cancelado', 'Fechado', 'Perdido', 'Replicado'].map((status) => (
                 <label key={status} className="flex items-center text-sm text-slate-300">
@@ -146,9 +161,10 @@ export default function OrcamentoListPage() {
                         : statuses.filter((s) => s !== status.toUpperCase());
                       setFilters({ ...filters, statuses: newStatuses });
                     }}
-                    className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700"
+                    disabled={!statusEnabled}
+                    className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  <span className="ml-2">{status}</span>
+                  <span className={`ml-2 ${statusEnabled ? 'text-slate-300' : 'text-slate-500'}`}>{status}</span>
                 </label>
               ))}
             </div>
@@ -157,12 +173,31 @@ export default function OrcamentoListPage() {
           {/* Month Filter */}
           {user?.tipo !== 'GERENTE LOJA' && user?.tipo !== 'GERENTE DEPARTAMENTO' && (
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Mês</h4>
+              <label className="flex items-center text-xs font-semibold text-slate-400 uppercase mb-2">
+                <input
+                  type="checkbox"
+                  checked={mesEnabled}
+                  onChange={(e) => {
+                    setMesEnabled(e.target.checked);
+                    if (!e.target.checked) {
+                      setFilters({ ...filters, mesAno: undefined });
+                    }
+                  }}
+                  className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700 mr-2"
+                />
+                Mês
+              </label>
               <input
                 type="month"
                 value={filters.mesAno || ''}
-                onChange={(e) => setFilters({ ...filters, mesAno: e.target.value || undefined })}
-                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+                onChange={(e) => {
+                  setFilters({ ...filters, mesAno: e.target.value || undefined });
+                  if (e.target.value) {
+                    setMesEnabled(true);
+                  }
+                }}
+                disabled={!mesEnabled}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           )}
@@ -241,17 +276,6 @@ export default function OrcamentoListPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Search Bar */}
-        <div className="bg-slate-900 border-b border-slate-700 p-4">
-          <input
-            type="text"
-            placeholder="Buscar: Código/Vendedor/Cliente/Profissional"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 placeholder-slate-500"
-          />
-        </div>
-
         {/* Table */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (
@@ -268,6 +292,17 @@ export default function OrcamentoListPage() {
               }}
             />
           )}
+        </div>
+
+        {/* Search Bar */}
+        <div className="bg-slate-900 border-t border-slate-700 p-4">
+          <input
+            type="text"
+            placeholder="Buscar: Código/Vendedor/Cliente/Profissional"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 placeholder-slate-500"
+          />
         </div>
       </div>
     </div>

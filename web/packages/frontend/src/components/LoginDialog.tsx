@@ -43,7 +43,18 @@ export default function LoginDialog() {
       }
     },
     onError: (err) => {
-      setError(err.message);
+      // Check if error has detailed validation errors from the server
+      const errorData = (err as any).data?.data;
+      if (errorData?.fieldErrors) {
+        // Display field-specific errors in the general error box
+        const fieldErrorsText = Object.entries(errorData.fieldErrors as Record<string, string[]>)
+          .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
+          .join('\n');
+        setError(`Erros de validação:\n${fieldErrorsText}`);
+      } else {
+        // Fall back to generic error message
+        setError(err.message);
+      }
     },
   });
 

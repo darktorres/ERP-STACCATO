@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
-import { TrpcService } from './trpc.service.js';
+import { z, ZodError } from 'zod';
+import { TrpcService, zodErrorToDetails } from './trpc.service.js';
 import { AuthService } from '../modules/auth/auth.service.js';
 import { OrcamentoService } from '../modules/orcamento/orcamento.service.js';
 import { loginSchema, authorizationSchema, orcamentoFiltersSchema } from '@erp-staccato/shared';
@@ -27,22 +27,66 @@ export class TrpcRouter implements OnModuleInit {
          * Login procedure
          * Matches C++ LoginDialog::on_pushButtonLogin_clicked behavior
          */
-        login: this.trpc.procedure.input(loginSchema).mutation(async ({ input }) => {
-          try {
-            return await this.authService.login(input);
-          } catch (error) {
-            if (error instanceof Error) {
+        login: this.trpc.procedure
+          .input(loginSchema)
+          .use(async (opts) => {
+            // Middleware to catch and properly format input validation errors
+            try {
+              return await opts.next();
+            } catch (error) {
+              // tRPC throws errors with stringified Zod issues in the message
+              // e.g., "[{code: "invalid_type", path: ["password"], ...}]"
+              if (error instanceof TRPCError && error.message.startsWith('[')) {
+                try {
+                  const zodIssues = JSON.parse(error.message);
+                  if (Array.isArray(zodIssues) && zodIssues[0]?.code) {
+                    const fieldErrors: Record<string, string[]> = {};
+                    for (const issue of zodIssues) {
+                      const path = issue.path?.join('.') || 'unknown';
+                      if (!fieldErrors[path]) {
+                        fieldErrors[path] = [];
+                      }
+                      fieldErrors[path].push(issue.message);
+                    }
+                    throw new TRPCError({
+                      code: 'BAD_REQUEST',
+                      message: 'Validation error',
+                      cause: { code: 'BAD_REQUEST', fieldErrors },
+                    });
+                  }
+                } catch (parseError) {
+                  // If not a Zod error, re-throw original
+                  throw error;
+                }
+              }
+              throw error;
+            }
+          })
+          .mutation(async ({ input }) => {
+            try {
+              return await this.authService.login(input);
+            } catch (error) {
+              if (error instanceof ZodError) {
+                // Validation error - include field-level details
+                const details = zodErrorToDetails(error);
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: details.message,
+                  cause: details,
+                });
+              }
+              if (error instanceof Error) {
+                throw new TRPCError({
+                  code: 'UNAUTHORIZED',
+                  message: error.message,
+                });
+              }
               throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: error.message,
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Erro no login',
               });
             }
-            throw new TRPCError({
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'Erro no login',
-            });
-          }
-        }),
+          }),
 
         /**
          * Authorization procedure (one-time password)

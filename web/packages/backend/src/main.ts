@@ -112,6 +112,7 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Internal Server Error';
           const stringCode = error instanceof Error && 'code' in error ? (error as any).code : 'INTERNAL_SERVER_ERROR';
+          const errorCause = error instanceof Error && 'cause' in error ? (error as any).cause : null;
 
           // Map tRPC error codes to JSON-RPC 2.0 numeric codes
           const TRPC_ERROR_CODES_BY_KEY: Record<string, number> = {
@@ -133,12 +134,44 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
           // Return error response in tRPC format per JSON-RPC 2.0 spec
           // error.code MUST be a number, with string code in error.data.code
+          const errorData: any = {
+            code: stringCode,
+          };
+
+          // Include validation error details if available
+          if (errorCause && typeof errorCause === 'object') {
+            if ('fieldErrors' in errorCause) {
+              errorData.fieldErrors = (errorCause as any).fieldErrors;
+            }
+            if ('context' in errorCause) {
+              errorData.context = (errorCause as any).context;
+            }
+          }
+
+          // Also try to extract fieldErrors from the message if it's a Zod validation error (stringified JSON)
+          if (stringCode === 'BAD_REQUEST' && message.startsWith('[')) {
+            try {
+              const zodIssues = JSON.parse(message);
+              if (Array.isArray(zodIssues) && zodIssues[0]?.code && !errorData.fieldErrors) {
+                const fieldErrors: Record<string, string[]> = {};
+                for (const issue of zodIssues) {
+                  const path = issue.path?.join('.') || 'unknown';
+                  if (!fieldErrors[path]) {
+                    fieldErrors[path] = [];
+                  }
+                  fieldErrors[path].push(issue.message);
+                }
+                errorData.fieldErrors = fieldErrors;
+              }
+            } catch (e) {
+              // Not a Zod error, ignore
+            }
+          }
+
           const errorShape = {
             code: numericCode,
             message,
-            data: {
-              code: stringCode,
-            },
+            data: errorData,
           };
 
           responses.push({

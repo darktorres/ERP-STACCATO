@@ -72,6 +72,17 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
       if (method === 'POST' && request.body) {
         requestData = request.body;
+      } else if (method === 'GET' && url.searchParams.has('input')) {
+        // For GET requests, parse the input from query parameters
+        const inputParam = url.searchParams.get('input');
+        if (inputParam) {
+          try {
+            requestData = JSON.parse(inputParam);
+            console.log('[tRPC] Parsed GET input from query params:', inputParam.substring(0, 100));
+          } catch (e) {
+            console.error('[tRPC] Failed to parse input query parameter:', inputParam);
+          }
+        }
       }
       console.log('[tRPC] Request data:', JSON.stringify(requestData).substring(0, 200));
 

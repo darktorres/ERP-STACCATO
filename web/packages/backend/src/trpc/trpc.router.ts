@@ -128,6 +128,9 @@ export class TrpcRouter implements OnModuleInit {
           .input(orcamentoFiltersSchema)
           .query(async ({ input, ctx }) => {
             try {
+              console.log('[tRPC.orcamento.list] Raw input received:', input);
+              console.log('[tRPC.orcamento.list] Input type:', typeof input);
+              console.log('[tRPC.orcamento.list] Input keys:', Object.keys(input));
               return await this.orcamentoService.list(
                 input,
                 ctx.user.idUsuario,

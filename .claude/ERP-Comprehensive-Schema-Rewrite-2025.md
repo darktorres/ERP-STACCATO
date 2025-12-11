@@ -1,5 +1,240 @@
 # ERP Staccato - Redesenho Completo do Schema de Banco de Dados 2025
 
+## 📋 Document Index
+
+### **1. [Resumo Executivo](#resumo-executivo)** (Line 234)
+
+#### **1.1 Objetivos do Redesenho** (Lines 7-15)
+- Eliminação de débito técnico
+- Padronização de nomenclatura em português brasileiro
+- Normalização adequada e modelagem de domínio
+- Performance e manutenibilidade
+
+#### **1.2 Problemas Identificados no Schema Atual** (Lines 16-73)
+- **🚨 Anti-Padrões Críticos Identificados** (Lines 18-33)
+  - Duplicação de tabelas: `venda_has_produto` → `venda_has_produto2`
+  - Same pattern in orçamentos and pedidos fornecedor
+  - Nomenclatura inconsistente, redundância de dados
+
+- **📊 Análise do Impacto dos Anti-Padrões** (Lines 34-54)
+  - Examples across all 3 domains: sales, quotes, purchases
+  - Massive data duplication in multiple business areas
+
+- **🎯 Raiz do Problema: Tree Table UI** (Lines 55-73)
+  - Root cause: Qt Tree Table widget requirements
+  - Data duplication forced by UI constraints
+
+#### **1.3 🛠️ Solução: Tree UI com Dados Normalizados** (Lines 74-301)
+- **Abordagem 1: Views Especializadas para Tree UI** (Lines 76-137)
+  - SQL views to create tree structure from normalized data
+- **Abordagem 2: JSON Tree Structure (Moderna)** (Lines 138-184)
+  - Modern JSON-based approach for tree structures
+- **Abordagem 3: Recursive CTE (Para UIs Complexas)** (Lines 185-235)
+  - Complex tree hierarchies using Common Table Expressions
+- **Abordagem 4: Interface Moderna com Componentes Tree** (Lines 236-301)
+  - Modern UI components with proper data separation
+
+#### **1.4 🎯 Vantagens da Solução Correta** (Lines 302-321)
+- Dados normalizados + UI flexível
+- Manutenção simplificada
+- Flexibilidade de interface
+
+### **2. [Arquitetura do Novo Schema](#arquitetura-do-novo-schema)** (Line 553)
+
+#### **2.1 Princípios de Design** (Lines 324-331)
+- Domain-Driven Design (DDD)
+- Nomenclatura brasileira
+- Normalização rigorosa, auditoria completa, performance first
+
+#### **2.2 Diagrama de Relacionamento de Entidades (ERD)** (Lines 332-603)
+- Comprehensive Mermaid ERD diagram
+- All business domains and their relationships
+
+#### **2.3 Diagrama de Domínios e Relacionamentos** (Lines 604-726)
+- Domain-specific relationship mapping
+
+#### **2.4 Características do Novo Schema** (Lines 735-765)
+- Benefits and integration points
+- Identified business domains
+
+### **3. [Schema Detalhado por Domínio](#schema-detalhado-por-domínio)** (Line 997)
+
+#### **3.1 Domínio: Empresas e Configuração** (Lines 768-842)
+- **Tabela: `empresas`** (Lines 770-820): Main company entity
+- **Tabela: `configuracoes_sistema`** (Lines 821-842): System configurations
+
+#### **3.2 Domínio: Localização** (Lines 843-905)
+- **Tabela: `estados`** (Lines 845-857): Brazilian states
+- **Tabela: `cidades`** (Lines 858-879): Cities
+- **Tabela: `enderecos`** (Lines 880-905): Addresses
+
+#### **3.3 Domínio: Pessoas e Entidades** (Lines 906-1037)
+- **Tabela: `tipos_pessoa`** (Lines 908-932): Person types (customer, supplier, etc.)
+- **Tabela: `pessoas`** (Lines 933-991): Main people entity
+- **Tabela: `pessoa_tipos`** (Lines 992-1013): Person type relationships
+- **Tabela: `pessoas_enderecos`** (Lines 1014-1037): Person-address relationships
+
+#### **3.4 Domínio: Produtos e Estoque** (Lines 1038-1200)
+- **Tabela: `categorias_produto`** (Lines 1040-1075): Product categories
+- **Tabela: `produtos`** (Lines 1076-1137): Main products entity
+- **Tabela: `estoques`** (Lines 1138-1170): Warehouses/storage locations
+- **Tabela: `saldos_estoque`** (Lines 1171-1200): Inventory balances
+
+#### **3.5 Domínio: Vendas** (Lines 1201-1292)
+- **Tabela: `vendas`** (Lines 1203-1249): Main sales entity
+- **Tabela: `itens_venda`** (Lines 1250-1292): Sales line items
+
+#### **3.6 Domínio: Orçamentos** (Lines 1293-1432)
+- **Tabela: `orcamentos`** (Lines 1295-1346): Quotations
+- **Tabela: `itens_orcamento`** (Lines 1347-1392): Quote line items
+- **Tabela: `origens_atendimento_orcamento`** (Lines 1393-1432): Quote fulfillment sources
+
+#### **3.7 Domínio: Sistema de Usuários** (Lines 1433-1473)
+- **Tabela: `usuarios`** (Lines 1435-1473): User management
+
+#### **3.8 Domínio: Financeiro** (Lines 1820-1977)
+- **Tabela: `planos_conta`** (Lines 1822-1855): Chart of accounts
+- **Tabela: `contas_receber`** (Lines 1856-1901): Accounts receivable
+- **Tabela: `contas_pagar`** (Lines 1902-1947): Accounts payable
+- **Tabela: `formas_pagamento`** (Lines 1948-1977): Payment methods
+
+#### **3.9 Domínio: Compras** (Lines 1978-2065)
+- **Tabela: `compras`** (Lines 1980-2025): Purchase orders
+- **Tabela: `itens_compra`** (Lines 2026-2065): Purchase line items
+
+#### **3.10 Domínio: Fiscal e Compliance** (Lines 2066-2210)
+- **Tabela: `cfops`** (Lines 2068-2090): Brazilian fiscal operation codes
+- **Tabela: `notas_fiscais`** (Lines 2091-2155): Electronic invoices
+- **Tabela: `itens_nota_fiscal`** (Lines 2156-2210): Invoice line items
+
+#### **3.11 Domínio: Logística e Transporte** (Lines 2211-2339)
+- **Tabela: `transportadoras`** (Lines 2213-2243): Shipping companies
+- **Tabela: `veiculos`** (Lines 2244-2276): Vehicles
+- **Tabela: `entregas`** (Lines 2277-2315): Deliveries
+- **Tabela: `entregas_vendas`** (Lines 2316-2339): Sale-delivery relationships
+
+#### **3.12 Domínio: Auditoria e Rastreamento Temporal** (Lines 2340-2824)
+- **Abordagem Híbrida: Temporal + Event Sourcing** (Lines 2342-2349)
+- **Tabela: `logs_sistema`** (Lines 2350-2384): System audit logs
+- **Sistema de Tabelas Temporais** (Lines 2385-2494)
+  - **Exemplo: `vendas_historico`** (Lines 2389-2438)
+  - **Exemplo: `produtos_historico`** (Lines 2439-2494)
+- **Sistema de Event Sourcing** (Lines 2495-2540)
+  - **Tabela: `eventos_negocio`** (Lines 2499-2540)
+- **Triggers Automáticos para Auditoria** (Lines 2541-2649)
+- **Funções para Consultas Temporais** (Lines 2650-2716)
+- **Views para Consultas Comuns** (Lines 2717-2754)
+- **Consultas de Exemplo** (Lines 2755-2796)
+- **Tabela: `historico_precos`** (Lines 2797-2824)
+
+### **4. [Estratégia de Migração](#estratégia-de-migração)** (Line 1705)
+
+#### **4.1 Fase 1: Preparação** (Lines 1476-1489) - **4-6 semanas**
+- **Análise Detalhada** (Lines 1478-1483)
+- **Criação do Novo Schema** (Lines 1484-1489)
+
+#### **4.2 Fase 2: Migração de Dados** (Lines 1490-1686) - **8-12 semanas**
+- **Dados Mestres** (Lines 1492-1511)
+- **Migração dos Anti-Padrões (Crítico)** (Lines 1512-1649)
+  - **Problema 1: Vendas Split** (Lines 1514-1558)
+  - **Problema 2: Orçamentos Split** (Lines 1559-1614)
+  - **Problema 3: Pedidos Fornecedor Split** (Lines 1615-1649)
+- **Validação da Migração** (Lines 1650-1680)
+- **Scripts de Migração Adicionais** (Lines 1681-1686)
+
+#### **4.3 Fase 3: Atualização da Aplicação** (Lines 1687-1699) - **12-16 semanas**
+- **Camada de Dados** (Lines 1689-1694)
+- **Camada de Negócios** (Lines 1695-1699)
+
+#### **4.4 Fase 4: Testes e Validação** (Lines 1700-1713) - **4-6 semanas**
+- **Testes de Integridade** (Lines 1702-1707)
+- **Testes de Aplicação** (Lines 1708-1713)
+
+#### **4.5 Fase 5: Deployment e Monitoria** (Lines 1714-1721) - **2-3 semanas**
+- **Deployment Gradual** (Lines 1716-1721)
+
+### **5. [Eliminação Completa dos Anti-Padrões](#eliminação-completa-dos-anti-padrões)** (Line 1953)
+- **🎯 Antes vs. Depois: Resolução dos 3 Anti-Padrões** (Lines 1724-1761)
+- **📊 Resultado: Padrão Consistente** (Lines 1762-1771)
+
+### **6. [Benefícios Esperados](#benefícios-esperados)** (Line 2003)
+- **Índices Compostos Estratégicos** (Lines 2827-2842)
+- **Triggers de Auditoria Automática** (Lines 2843-2874)
+- **Views Materializadas para Relatórios** (Lines 2875-2904)
+
+### **7. [Timeline e Recursos](#timeline-e-recursos)** (Line 2025)
+
+#### **7.1 PostgreSQL ⭐ RECOMENDADO** (Lines 2913-2979)
+- **Recursos Nativos** (Lines 2915-2921)
+- **Implementação de Tabelas Temporais** (Lines 2922-2964)
+- **Vantagens e Desvantagens** (Lines 2965-2979)
+
+#### **7.2 SQL Server ⭐⭐ MELHOR PARA TEMPORAL** (Lines 2980-3032)
+- **Recursos Nativos** (Lines 2982-2987)
+- **Implementação** (Lines 2988-3018)
+- **Vantagens e Desvantagens** (Lines 3019-3032)
+
+#### **7.3 Oracle Database ⭐ ENTERPRISE** (Lines 3033-3088)
+- **Recursos Nativos** (Lines 3035-3039)
+- **Implementação** (Lines 3040-3075)
+- **Vantagens e Desvantagens** (Lines 3076-3088)
+
+#### **7.4 MariaDB ⭐ ALTERNATIVA MYSQL** (Lines 3089-3139)
+- **Recursos Nativos** (Lines 3091-3094)
+- **Implementação** (Lines 3095-3126)
+- **Vantagens e Desvantagens** (Lines 3127-3139)
+
+#### **7.5 Outras Opções** (Lines 3140-3180)
+- **CockroachDB 🌐 DISTRIBUÍDO** (Lines 3142-3152)
+- **ClickHouse 📊 ANALYTICS** (Lines 3153-3169)
+- **TimescaleDB 📈 TIME-SERIES** (Lines 3170-3180)
+
+### **8. [Riscos e Mitigações](#riscos-e-mitigações)** (Line 2039)
+- **🥇 PostgreSQL - Melhor Custo-Benefício** (Lines 3183-3189)
+- **🥈 SQL Server - Se Budget Permite** (Lines 3190-3195)
+- **🥉 MariaDB - Alternativa MySQL** (Lines 3196-3202)
+
+### **9. [Análise de DBMS para Recursos Temporais/Auditoria](#análise-de-dbms-para-recursos-temporaisauditoria)** (Line 3142)
+
+#### **9.1 🚀 Recursos Únicos que MySQL Não Oferece** (Lines 3205-3626)
+- **Tipos de Dados Avançados** (Lines 3207-3291)
+  - **JSONB para Dados Flexíveis** (Lines 3209-3249)
+  - **Arrays para Listas** (Lines 3250-3267)
+  - **Ranges para Períodos** (Lines 3268-3291)
+- **Full-Text Search Nativo** (Lines 3292-3333)
+- **Extensões Poderosas** (Lines 3334-3400)
+  - **pg_stat_statements** (Lines 3336-3352)
+  - **PostGIS para Geolocalização** (Lines 3353-3382)
+  - **pg_cron** (Lines 3383-3400)
+- **Row-Level Security (RLS)** (Lines 3401-3431)
+- **Particionamento Avançado** (Lines 3432-3473)
+- **LISTEN/NOTIFY para Real-Time** (Lines 3474-3512)
+- **Foreign Data Wrappers (FDW)** (Lines 3513-3539)
+- **Materialized Views com Refresh Automático** (Lines 3540-3567)
+- **Stored Procedures Avançados** (Lines 3568-3626)
+
+#### **9.2 🎯 Benefícios Práticos para o ERP** (Lines 3627-3654)
+- **Performance 📈** (Lines 3629-3633)
+- **Funcionalidade ⚙️** (Lines 3634-3639)
+- **Segurança 🔒** (Lines 3640-3644)
+- **Integração 🔗** (Lines 3645-3649)
+- **Escalabilidade 📊** (Lines 3650-3654)
+
+#### **9.3 💰 ROI da Migração** (Lines 3655-3666)
+- Cost savings analysis: +$115K/ano + 200h dev
+- Eliminates need for ElasticSearch, MongoDB, Google Maps API
+
+### **10. [Conclusão](#conclusão)** (Line 3136)
+
+### **11. [Recomendação Final](#recomendação-final)** (Line 3412)
+
+### **12. [PostgreSQL: Recursos Avançados para ERP](#postgresql-recursos-avançados-para-erp)** (Line 3434)
+- PostgreSQL as ideal choice for ERP Staccato
+- All necessary features with strong community and future growth
+- Immediate Phase 1 approval recommendation
+
+---
+
 ## Resumo Executivo
 
 Este documento propõe um redesenho completo e abrangente do schema de banco de dados do ERP Staccato, passando das atuais 209 tabelas para uma estrutura moderna, normalizada e bem organizada usando convenções de nomenclatura em português brasileiro.

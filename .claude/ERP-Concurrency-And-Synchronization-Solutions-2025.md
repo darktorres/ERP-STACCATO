@@ -1,5 +1,74 @@
 # ERP Staccato - Soluções para Concorrência e Sincronização 2025
 
+## 📑 Índice Detalhado
+
+### **🎯 Visão Geral**
+- [Resumo Executivo](#resumo-executivo) (Line 72) - Problemas críticos e objetivos de solução
+
+### **🚨 Análise de Problemas**
+1. **[Problema 1: Controle de Concorrência](#1-problema-1-controle-de-concorrência)** (Line 91)
+   - [1.1 Cenário Problemático Atual](#11-cenário-problemático-atual) (L24) - Casos de atualizações perdidas
+   - [1.2 Impacto do Problema](#12-impacto-do-problema) (L42) - Consequências para o negócio
+   - [1.3 Onde Acontece No Sistema Atual](#13-onde-acontece-no-sistema-atual) (L50) - Pontos críticos identificados
+
+### **✅ Solução para Concorrência**
+2. **[Solução 1: Optimistic Locking](#2-solução-1-optimistic-locking)** (Line 134)
+   - [2.1 Conceito](#21-conceito) (L67) - Fundamentos do bloqueio otimista
+   - [2.2 Implementação com Versionamento](#22-implementação-com-versionamento) (L71)
+     - [2.2.1 Adicionar Colunas de Controle](#221-adicionar-colunas-de-controle) (L73) - Schema com versioning
+     - [2.2.2 Query Segura com Verificação de Versão](#222-query-segura-com-verificação-de-versão) (L107) - SQL protegido
+     - [2.2.3 Tratamento de Conflitos](#223-tratamento-de-conflitos) (L122) - Resolução de conflitos
+   - [2.3 Exemplo de Uso](#23-exemplo-de-uso) (L177) - Caso prático implementado
+
+### **🔄 Análise de Sincronização**
+3. **[Problema 2: Sincronização de Dados](#3-problema-2-sincronização-de-dados)** (Line 278)
+   - [3.1 Cenários Problemáticos](#31-cenários-problemáticos) (L211)
+     - [3.1.1 Status Dessincronizado](#311-status-dessincronizado) (L213) - Estados inconsistentes
+     - [3.1.2 Referências Órfãs](#312-referências-órfãs) (L226) - Relacionamentos quebrados
+   - [3.2 Casos Reais no ERP](#32-casos-reais-no-erp) (L241)
+     - [3.2.1 Fluxo de Vendas → Compras](#321-fluxo-de-vendas--compras) (L243) - Cascata de problemas
+     - [3.2.2 Fluxo NFe ↔ Vendas/Compras](#322-fluxo-nfe--vendascompras) (L254) - Inconsistências fiscais
+
+### **⚡ Solução para Sincronização**
+4. **[Solução 2: Event-Driven Synchronization](#4-solução-2-event-driven-synchronization)** (Line 337)
+   - [4.1 Conceito](#41-conceito) (L270) - Arquitetura orientada a eventos
+   - [4.2 Implementação com Triggers e Funções](#42-implementação-com-triggers-e-funções) (L274)
+     - [4.2.1 Sistema de Eventos](#421-sistema-de-eventos) (L276) - Infraestrutura de eventos
+     - [4.2.2 Triggers para Capturar Mudanças](#422-triggers-para-capturar-mudanças) (L296) - Detectores automáticos
+     - [4.2.3 Processadores de Eventos](#423-processadores-de-eventos) (L358) - Handlers especializados
+     - [4.2.4 Processador Principal de Eventos](#424-processador-principal-de-eventos) (L436) - Coordenador central
+
+### **🏗️ Implementação Técnica**
+5. **[Implementação no Novo Schema](#5-implementação-no-novo-schema)** (Line 555)
+   - [5.1 Tabelas Base com Controle de Concorrência](#51-tabelas-base-com-controle-de-concorrência) (L488) - Schema aprimorado
+   - [5.2 Constraints para Integridade Referencial](#52-constraints-para-integridade-referencial) (L531) - Validações automáticas
+   - [5.3 Foreign Keys com Cascade Apropriado](#53-foreign-keys-com-cascade-apropriado) (L573) - Relacionamentos seguros
+
+### **💻 Código de Implementação**
+6. **[Código C++ de Exemplo](#6-código-c-de-exemplo)** (Line 666)
+   - [6.1 Classe Base com Optimistic Locking](#61-classe-base-com-optimistic-locking) (L599) - Framework base
+   - [6.2 Implementação para Venda](#62-implementação-para-venda) (L713) - Exemplo específico
+   - [6.3 Sistema de Eventos em C++](#63-sistema-de-eventos-em-c) (L805) - Event system
+
+### **🧪 Validação e Testes**
+7. **[Testes e Validação](#7-testes-e-validação)** (Line 983)
+   - [7.1 Testes de Concorrência](#71-testes-de-concorrência) (L916) - Cenários de teste paralelo
+   - [7.2 Testes de Sincronização](#72-testes-de-sincronização) (L966) - Validação de eventos
+
+### **📊 Resultados e Implementação**
+8. **[Conclusão e Benefícios](#8-conclusão-e-benefícios)** (Line 1096)
+   - [8.1 Problemas Resolvidos](#81-problemas-resolvidos) (L1029)
+     - [✅ Controle de Concorrência](#-controle-de-concorrência) (L1031) - Benefícios do locking
+     - [✅ Sincronização de Dados](#-sincronização-de-dados) (L1037) - Benefícios dos eventos
+   - [8.2 Métricas de Melhoria](#82-métricas-de-melhoria) (L1043) - Números de performance
+   - [8.3 Implementação Recomendada](#83-implementação-recomendada) (L1054)
+     - [Fase 1: Fundação](#fase-1-fundação) (L1056) - Base do sistema
+     - [Fase 2: Triggers e Sincronização](#fase-2-triggers-e-sincronização) (L1061) - Eventos automáticos
+     - [Fase 3: Interface de Usuário](#fase-3-interface-de-usuário) (L1066) - UI adaptada
+     - [Fase 4: Monitoramento e Otimização](#fase-4-monitoramento-e-otimização) (L1071) - Refinamentos
+
+---
+
 ## Resumo Executivo
 
 Este documento aborda duas questões críticas identificadas no ERP Staccato que devem ser resolvidas no novo schema:

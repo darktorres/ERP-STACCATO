@@ -1,5 +1,65 @@
 # ERP Staccato - Sistema Completo de Validação de Dados 2025
 
+## 📑 Índice Detalhado
+
+### **🎯 Visão Geral**
+- [Resumo Executivo](#resumo-executivo) (Line 63) - Princípios fundamentais de validação
+- [Filosofia de Validação](#filosofia-de-validação) (L7) - Abordagem "zero tolerância"
+
+### **💰 Validações Financeiras**
+1. **[Validação Financeira](#1-validação-financeira)** (Line 92)
+   - [1.1 Consistência de Totais de Vendas](#11-consistência-de-totais-de-vendas) (L34) - Verificação de somas e cálculos
+   - [1.2 Consistência de Itens de Venda](#12-consistência-de-itens-de-venda) (L76) - Validação item por item
+   - [1.3 Validação de Pagamentos](#13-validação-de-pagamentos) (L125) - Controle de forma de pagamento
+   - [1.4 Validação de Origens de Atendimento](#14-validação-de-origens-de-atendimento) (L175) - Verificação de canais
+
+### **📋 Regras de Negócio**
+2. **[Validação de Regras de Negócio](#2-validação-de-regras-de-negócio)** (Line 287)
+   - [2.1 Validação de Datas](#21-validação-de-datas) (L229) - Consistência temporal
+   - [2.2 Validação de Status e Transições](#22-validação-de-status-e-transições) (L268) - Máquina de estados
+   - [2.3 Validação de Campos Obrigatórios por Status](#23-validação-de-campos-obrigatórios-por-status) (L342) - Campos condicionais
+
+### **🇧🇷 Conformidade Brasileira**
+3. **[Validação de Conformidade Brasileira](#3-validação-de-conformidade-brasileira)** (Line 451)
+   - [3.1 Validação de CPF e CNPJ](#31-validação-de-cpf-e-cnpj) (L393) - Documentos brasileiros
+   - [3.2 Validação de CEP](#32-validação-de-cep) (L538) - Códigos postais
+   - [3.3 Validação de Telefone](#33-validação-de-telefone) (L597) - Números brasileiros
+
+### **📦 Controle de Estoque**
+4. **[Validação de Estoque e Inventário](#4-validação-de-estoque-e-inventário)** (Line 716)
+   - [4.1 Validação de Saldos de Estoque](#41-validação-de-saldos-de-estoque) (L658) - Controle de disponibilidade
+   - [4.2 Validação de Movimentos de Estoque](#42-validação-de-movimentos-de-estoque) (L713) - Histórico de movimentação
+   - [4.3 Atualização Automática de Saldos](#43-atualização-automática-de-saldos) (L774) - Sincronização automática
+
+### **🔗 Integridade de Dados**
+5. **[Validação de Integridade Referencial](#5-validação-de-integridade-referencial)** (Line 884)
+   - [5.1 Validação de Referências Ativas](#51-validação-de-referências-ativas) (L826) - Verificação de FK válidas
+   - [5.2 Prevenção de Exclusão com Dependências](#52-prevenção-de-exclusão-com-dependências) (L890) - Proteção contra órfãos
+
+### **🔄 Estados e Transições**
+6. **[Validação de Estados e Transições](#6-validação-de-estados-e-transições)** (Line 995)
+   - [6.1 Sistema de Validação de Estado Global](#61-sistema-de-validação-de-estado-global) (L937) - Workflow completo
+
+### **⚙️ Sistema Personalizável**
+7. **[Sistema de Validação Personalizada](#7-sistema-de-validação-personalizada)** (Line 1063)
+   - [7.1 Framework de Validações Customizáveis](#71-framework-de-validações-customizáveis) (L1005) - Engine configurável
+   - [7.2 Exemplos de Regras Dinâmicas](#72-exemplos-de-regras-dinâmicas) (L1093) - Casos específicos
+
+### **🧪 Testes e Monitoramento**
+8. **[Testes de Validação](#8-testes-de-validação)** (Line 1177)
+   - [8.1 Suite de Testes Automatizada](#81-suite-de-testes-automatizada) (L1119) - Bateria de testes
+   - [8.2 Monitoramento de Performance das Validações](#82-monitoramento-de-performance-das-validações) (L1219) - Métricas de velocidade
+
+### **📊 Resultados e Implementação**
+9. **[Relatório de Implementação](#9-relatório-de-implementação)** (Line 1322)
+   - [9.1 Checklist de Validações Implementadas](#91-checklist-de-validações-implementadas) (L1264) - Status de cobertura
+   - [9.2 Métricas de Proteção de Dados](#92-métricas-de-proteção-de-dados) (L1299) - Indicadores de qualidade
+   - [9.3 Benefícios Comprovados](#93-benefícios-comprovados) (L1309)
+     - [✅ Antes vs Depois](#-antes-vs-depois) (L1311) - Comparativo de melhorias
+     - [✅ Impacto no Negócio](#-impacto-no-negócio) (L1323) - ROI das validações
+
+---
+
 ## Resumo Executivo
 
 Este documento define um sistema abrangente de validação de dados no banco de dados para garantir que **nenhum dado inconsistente ou incorreto seja jamais salvo**. O princípio fundamental é: **detectar e bloquear dados ruins ANTES do commit, não depois**.

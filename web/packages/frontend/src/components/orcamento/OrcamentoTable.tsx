@@ -1,3 +1,6 @@
+import { useRef, useCallback, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+
 interface OrcamentoTableProps {
   orcamentos: any[];
   onRowClick: (orcamento: any) => void;
@@ -48,19 +51,96 @@ function getRowBackgroundColor(orcamento: any): string {
   return 'hover:bg-slate-700';
 }
 
-export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: OrcamentoTableProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+// Memoize the currency formatter
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
 
-  const formatDate = (date: any) => {
+const dateFormatter = new Intl.DateTimeFormat('pt-BR');
+
+function OrcamentoRow({ orcamento, isSelected, onRowClick }: any) {
+  const formatDate = useCallback((date: any) => {
     if (!date) return '-';
     const d = new Date(date);
     return d.toLocaleDateString('pt-BR');
-  };
+  }, []);
+
+  const bgColor = isSelected ? 'bg-blue-800 ring-2 ring-blue-500' : getRowBackgroundColor(orcamento);
+
+  return (
+    <tr
+      onClick={() => onRowClick(orcamento)}
+      className={`cursor-pointer transition-colors ${bgColor}`}
+    >
+      <td className="px-6 py-3 whitespace-nowrap">
+        <span
+          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+            statusBadgeColors[orcamento.status] || 'bg-slate-700 text-slate-300'
+          }`}
+        >
+          {orcamento.status}
+        </span>
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {orcamento.diasRestantes || '-'}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
+        {orcamento.idOrcamento}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {orcamento.vendedor || '-'}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {orcamento.consultor || '-'}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {orcamento.cliente || '-'}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {orcamento.profissional || '-'}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-xs text-slate-400">
+        <div>
+          {orcamento.tel && <div>{orcamento.tel}</div>}
+          {orcamento.telCel && <div>{orcamento.telCel}</div>}
+          {orcamento.telProf && <div>{orcamento.telProf}</div>}
+        </div>
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {formatDate(orcamento.data)}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-slate-300 text-right">
+        {currencyFormatter.format(Number(orcamento.total) || 0)}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {formatDate(orcamento.dataFollowup)}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+        {formatDate(orcamento.dataProxFollowup)}
+      </td>
+      <td className="px-6 py-3 text-sm text-slate-400 max-w-xs truncate">
+        {orcamento.observacao || '-'}
+      </td>
+    </tr>
+  );
+}
+
+export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: OrcamentoTableProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: orcamentos.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: useCallback(() => 48, []), // ~48px per row (py-3 padding)
+    overscan: 10, // Render 10 extra rows above/below viewport for smoother scrolling
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
+  const paddingBottom = totalSize - (virtualRows[virtualRows.length - 1]?.end || 0);
 
   if (orcamentos.length === 0) {
     return (
@@ -71,10 +151,10 @@ export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: Or
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg shadow-md overflow-hidden border border-slate-700">
-      <div className="overflow-x-auto">
+    <div className="bg-slate-800 rounded-lg shadow-md overflow-hidden border border-slate-700 flex flex-col h-full">
+      <div ref={parentRef} className="overflow-auto flex-1">
         <table className="w-full">
-          <thead className="bg-slate-900 border-b border-slate-700">
+          <thead className="bg-slate-900 border-b border-slate-700 sticky top-0 z-10">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Status
@@ -118,69 +198,33 @@ export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: Or
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700">
-            {orcamentos.map((orcamento, idx) => {
-              const isSelected = selectedOrcamento?.idOrcamento === orcamento.idOrcamento;
-              const bgColor = isSelected ? 'bg-blue-800 ring-2 ring-blue-500' : getRowBackgroundColor(orcamento);
-              return (
-              <tr
-                key={idx}
-                onClick={() => onRowClick(orcamento)}
-                className={`cursor-pointer transition-colors ${bgColor}`}
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      statusBadgeColors[orcamento.status] || 'bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {orcamento.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {orcamento.diasRestantes || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
-                  {orcamento.idOrcamento}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {orcamento.vendedor || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {orcamento.consultor || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {orcamento.cliente || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {orcamento.profissional || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
-                  <div>
-                    {orcamento.tel && <div>{orcamento.tel}</div>}
-                    {orcamento.telCel && <div>{orcamento.telCel}</div>}
-                    {orcamento.telProf && <div>{orcamento.telProf}</div>}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {formatDate(orcamento.data)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300 text-right">
-                  {formatCurrency(orcamento.total)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {formatDate(orcamento.dataFollowup)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {formatDate(orcamento.dataProxFollowup)}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate">
-                  {orcamento.observacao || '-'}
-                </td>
+            {paddingTop > 0 && (
+              <tr>
+                <td colSpan={13} style={{ height: `${paddingTop}px` }} />
               </tr>
-            );
-            })}
+            )}
+            {virtualRows.map((virtualRow) => (
+              <OrcamentoRow
+                key={orcamentos[virtualRow.index].idOrcamento}
+                orcamento={orcamentos[virtualRow.index]}
+                isSelected={selectedOrcamento?.idOrcamento === orcamentos[virtualRow.index].idOrcamento}
+                onRowClick={onRowClick}
+              />
+            ))}
+            {paddingBottom > 0 && (
+              <tr>
+                <td colSpan={13} style={{ height: `${paddingBottom}px` }} />
+              </tr>
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* Info Footer */}
+      <div className="bg-slate-900 border-t border-slate-700 px-6 py-2">
+        <div className="text-xs text-slate-400">
+          Total: {orcamentos.length} orçamentos | Mostrando {virtualRows.length} visíveis
+        </div>
       </div>
     </div>
   );

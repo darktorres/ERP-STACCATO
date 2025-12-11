@@ -277,22 +277,23 @@ export default function OrcamentoListPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Table */}
-        <div className="flex-1 overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-slate-400">Carregando orçamentos...</p>
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-slate-400 mb-4">Carregando orçamentos...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
-          ) : (
-            <OrcamentoTable
-              orcamentos={(Array.isArray(orcamentos) ? orcamentos : []) || []}
-              selectedOrcamento={selectedOrcamento}
-              onRowClick={(orcamento) => {
-                setSelectedOrcamento(orcamento);
-                console.log('Click row:', orcamento.idOrcamento);
-              }}
-            />
-          )}
-        </div>
+          </div>
+        ) : (
+          <OrcamentoTable
+            orcamentos={(Array.isArray(orcamentos) ? orcamentos : []) || []}
+            selectedOrcamento={selectedOrcamento}
+            onRowClick={(orcamento) => {
+              setSelectedOrcamento(orcamento);
+              console.log('Click row:', orcamento.idOrcamento);
+            }}
+          />
+        )}
 
         {/* Search Bar */}
         <div className="bg-slate-900 border-t border-slate-700 p-4">

@@ -11,9 +11,24 @@ import { TrpcRouter } from './trpc/trpc.router.js';
 export async function registerTrpcRoutes(app: NestFastifyApplication) {
   const fastify = app.getHttpAdapter().getInstance();
 
+  // Extract JWT service once on startup
+  let jwtService: JwtService | null = null;
+  try {
+    jwtService = app.get(JwtService);
+  } catch (error) {
+    console.warn('JwtService not available in tRPC handler');
+  }
+
   // Handle tRPC requests directly
   const trpcHandler = async (request: any, reply: any) => {
     try {
+      console.log('[tRPC] Incoming request:', {
+        method: request.method,
+        url: request.url,
+        hasAuth: !!request.headers.authorization,
+        hasBody: !!request.body,
+      });
+
       // Get the tRPC router instance
       const trpcRouter = app.get(TrpcRouter);
       const router = trpcRouter.appRouter;
@@ -25,6 +40,7 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
       // Extract the procedure path from /trpc/path/to/procedure
       const procedurePath = pathname.replace(/^\/trpc\/?/, '').split('?')[0];
+      console.log('[tRPC] Procedure path:', procedurePath);
 
       // Parse query parameters
       const isBatch = url.searchParams.has('batch');
@@ -33,22 +49,31 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
       if (method === 'POST' && request.body) {
         requestData = request.body;
       }
+      console.log('[tRPC] Request data:', JSON.stringify(requestData).substring(0, 200));
 
       // Extract JWT from Authorization header
       let user: any = null;
       const authHeader = request.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
+      console.log('[tRPC] Auth header present:', !!authHeader);
+      console.log('[tRPC] JwtService available:', !!jwtService);
+
+      if (authHeader && authHeader.startsWith('Bearer ') && jwtService) {
         const token = authHeader.substring(7);
+        console.log('[tRPC] Attempting JWT verification...');
         try {
-          const jwtService = app.get(JwtService);
           const payload = jwtService.verify(token);
           user = payload;
+          console.log('[tRPC] JWT verified successfully, user:', {
+            idUsuario: user?.idUsuario,
+            tipo: user?.tipo,
+          });
         } catch (error) {
           // Invalid token - JWT verification failed
-          // Log the error for debugging but don't crash
-          console.error('JWT verification failed:', error instanceof Error ? error.message : error);
+          console.error('[tRPC] JWT verification failed:', error instanceof Error ? error.message : error);
           // user stays null, protected procedures will fail with UNAUTHORIZED
         }
+      } else {
+        console.log('[tRPC] Skipping JWT verification - no auth header or no JwtService');
       }
 
       // Handle both batch and non-batch requests
@@ -87,6 +112,8 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
       for (const req of requests) {
         try {
+          console.log('[tRPC] Processing request:', { procedurePath, hasInput: !!req.input });
+
           // Call the procedure directly from the router
           const caller = router.createCaller({
             user: user,
@@ -98,8 +125,10 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
           for (const part of parts) {
             if (!part) continue;
+            console.log('[tRPC] Resolving procedure part:', part);
             procedure = procedure[part];
             if (!procedure) {
+              console.error('[tRPC] Procedure not found:', procedurePath);
               responses.push({
                 error: {
                   code: 'NOT_FOUND',
@@ -112,6 +141,7 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
           // Determine if it's a query or mutation and call the procedure
           let result: any;
+          console.log('[tRPC] Calling procedure with method:', method);
           if (method === 'GET') {
             result = await procedure(req.input);
           } else if (method === 'POST') {
@@ -126,8 +156,14 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
             continue;
           }
 
+          console.log('[tRPC] Procedure result received, array length:', Array.isArray(result) ? result.length : 'not array');
           responses.push({ result: { data: result } });
         } catch (error) {
+          console.error('[tRPC] Procedure execution error:', {
+            message: error instanceof Error ? error.message : String(error),
+            code: error instanceof Error && 'code' in error ? (error as any).code : 'INTERNAL_SERVER_ERROR',
+            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('\n') : undefined,
+          });
           const message = error instanceof Error ? error.message : 'Internal Server Error';
           const stringCode = error instanceof Error && 'code' in error ? (error as any).code : 'INTERNAL_SERVER_ERROR';
           const errorCause = error instanceof Error && 'cause' in error ? (error as any).cause : null;
@@ -211,7 +247,11 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
       reply.code(200).send(responseToSend);
     } catch (error) {
-      console.error('tRPC handler error:', error);
+      console.error('[tRPC] Unhandled handler error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        type: error?.constructor?.name,
+      });
       const message = error instanceof Error ? error.message : 'Internal Server Error';
       reply.status(500).send(
         JSON.stringify({

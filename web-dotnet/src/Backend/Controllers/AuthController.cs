@@ -19,31 +19,23 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Login with username and password
+    /// Login with email and password
     /// </summary>
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
     {
-        _logger.LogInformation($"[Auth] Login attempt for user: {request.User}");
+        _logger.LogInformation($"[Auth] Login attempt for email: {request.Email}");
 
         var response = await _authService.LoginAsync(request);
 
-        if (!response.Success)
+        if (!response.Sucesso)
         {
-            _logger.LogWarning($"[Auth] Login failed for user: {request.User}");
-            return Unauthorized(new ApiResponse<LoginResponse>
-            {
-                Success = false,
-                Message = response.Message
-            });
+            _logger.LogWarning($"[Auth] Login failed for email: {request.Email}");
+            return Unauthorized(ApiResponse<LoginResponse>.Error(response.Mensagem ?? "Login failed"));
         }
 
-        _logger.LogInformation($"[Auth] Login successful for user: {request.User}");
-        return Ok(new ApiResponse<LoginResponse>
-        {
-            Success = true,
-            Data = response
-        });
+        _logger.LogInformation($"[Auth] Login successful for email: {request.Email}");
+        return Ok(ApiResponse<LoginResponse>.Ok(response));
     }
 
     /// <summary>
@@ -56,28 +48,16 @@ public class AuthController : ControllerBase
 
         if (!int.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new ApiResponse<SessionUser>
-            {
-                Success = false,
-                Message = "Invalid token"
-            });
+            return Unauthorized(ApiResponse<SessionUser>.Error("Invalid token"));
         }
 
         var user = await _authService.GetCurrentUserAsync(userId);
 
         if (user == null)
         {
-            return NotFound(new ApiResponse<SessionUser>
-            {
-                Success = false,
-                Message = "User not found"
-            });
+            return NotFound(ApiResponse<SessionUser>.Error("User not found"));
         }
 
-        return Ok(new ApiResponse<SessionUser>
-        {
-            Success = true,
-            Data = user
-        });
+        return Ok(ApiResponse<SessionUser>.Ok(user));
     }
 }

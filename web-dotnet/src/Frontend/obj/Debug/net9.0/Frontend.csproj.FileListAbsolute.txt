@@ -1,0 +1,8 @@
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.csproj.AssemblyReference.cache
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.AssemblyInfoInputs.cache
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.AssemblyInfo.cs
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.csproj.CoreCompileInputs.cache
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\ERP.Staccato.Frontend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net9.0\Frontend.sourcelink.json

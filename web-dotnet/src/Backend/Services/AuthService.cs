@@ -23,43 +23,43 @@ public class AuthService
     }
 
     /// <summary>
-    /// Login user with username and password
+    /// Login user with email and password
     /// </summary>
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         try
         {
             // Validate input
-            if (string.IsNullOrWhiteSpace(request.User) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Senha))
             {
                 return new LoginResponse
                 {
-                    Success = false,
-                    Message = "Usuário e senha são obrigatórios"
+                    Sucesso = false,
+                    Mensagem = "Email e senha são obrigatórios"
                 };
             }
 
-            // Find user in database
+            // Find user in database (match by email or user field)
             var usuario = await _context.Set<Usuario>()
-                .FirstOrDefaultAsync(u => u.User == request.User && !u.Desativado);
+                .FirstOrDefaultAsync(u => (u.Email == request.Email || u.User == request.Email) && !u.Desativado);
 
             if (usuario == null)
             {
                 return new LoginResponse
                 {
-                    Success = false,
-                    Message = "Usuário ou senha inválidos"
+                    Sucesso = false,
+                    Mensagem = "Email ou senha inválidos"
                 };
             }
 
             // Verify password (in production, use bcrypt or similar)
             // For POC, simple comparison
-            if (!VerifyPassword(request.Password, usuario.Password))
+            if (!VerifyPassword(request.Senha, usuario.Password))
             {
                 return new LoginResponse
                 {
-                    Success = false,
-                    Message = "Usuário ou senha inválidos"
+                    Sucesso = false,
+                    Mensagem = "Email ou senha inválidos"
                 };
             }
 
@@ -69,9 +69,9 @@ public class AuthService
             // Return success response
             return new LoginResponse
             {
-                Success = true,
+                Sucesso = true,
                 Token = token,
-                User = new SessionUser
+                Usuario = new SessionUser
                 {
                     IdUsuario = usuario.IdUsuario,
                     User = usuario.User,
@@ -86,8 +86,8 @@ public class AuthService
         {
             return new LoginResponse
             {
-                Success = false,
-                Message = $"Erro no login: {ex.Message}"
+                Sucesso = false,
+                Mensagem = $"Erro no login: {ex.Message}"
             };
         }
     }

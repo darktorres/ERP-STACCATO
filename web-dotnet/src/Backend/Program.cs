@@ -6,7 +6,7 @@ using ERP.Staccato.Backend.Data;
 using ERP.Staccato.Backend.Services;
 using FluentValidation;
 
-var builder = WebApplicationBuilder.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

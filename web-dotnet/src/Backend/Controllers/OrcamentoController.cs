@@ -40,20 +40,12 @@ public class OrcamentoController : ControllerBase
 
             _logger.LogInformation($"[Orcamento.List] Returned {orcamentos.Count} budgets");
 
-            return Ok(new ApiResponse<List<OrcamentoListItem>>
-            {
-                Success = true,
-                Data = orcamentos
-            });
+            return Ok(ApiResponse<List<OrcamentoListItem>>.Ok(orcamentos));
         }
         catch (Exception ex)
         {
             _logger.LogError($"[Orcamento.List] Error: {ex.Message}");
-            return StatusCode(500, new ApiResponse<List<OrcamentoListItem>>
-            {
-                Success = false,
-                Message = $"Error listing orcamentos: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<List<OrcamentoListItem>>.Error($"Error listing orcamentos: {ex.Message}"));
         }
     }
 
@@ -66,21 +58,12 @@ public class OrcamentoController : ControllerBase
         try
         {
             var lojas = await _orcamentoService.GetLojasForFilterAsync();
-
-            return Ok(new ApiResponse<List<LojaDto>>
-            {
-                Success = true,
-                Data = lojas
-            });
+            return Ok(ApiResponse<List<LojaDto>>.Ok(lojas));
         }
         catch (Exception ex)
         {
             _logger.LogError($"[Orcamento.GetLojas] Error: {ex.Message}");
-            return StatusCode(500, new ApiResponse<List<LojaDto>>
-            {
-                Success = false,
-                Message = "Error loading lojas"
-            });
+            return StatusCode(500, ApiResponse<List<LojaDto>>.Error("Error loading lojas"));
         }
     }
 
@@ -93,21 +76,12 @@ public class OrcamentoController : ControllerBase
         try
         {
             var vendedores = await _orcamentoService.GetVendedoresForFilterAsync(idLoja);
-
-            return Ok(new ApiResponse<List<VendedorDto>>
-            {
-                Success = true,
-                Data = vendedores
-            });
+            return Ok(ApiResponse<List<VendedorDto>>.Ok(vendedores));
         }
         catch (Exception ex)
         {
             _logger.LogError($"[Orcamento.GetVendedores] Error: {ex.Message}");
-            return StatusCode(500, new ApiResponse<List<VendedorDto>>
-            {
-                Success = false,
-                Message = "Error loading vendedores"
-            });
+            return StatusCode(500, ApiResponse<List<VendedorDto>>.Error("Error loading vendedores"));
         }
     }
 
@@ -120,21 +94,12 @@ public class OrcamentoController : ControllerBase
         try
         {
             var fornecedores = await _orcamentoService.GetFornecedoresForFilterAsync();
-
-            return Ok(new ApiResponse<List<FornecedorDto>>
-            {
-                Success = true,
-                Data = fornecedores
-            });
+            return Ok(ApiResponse<List<FornecedorDto>>.Ok(fornecedores));
         }
         catch (Exception ex)
         {
             _logger.LogError($"[Orcamento.GetFornecedores] Error: {ex.Message}");
-            return StatusCode(500, new ApiResponse<List<FornecedorDto>>
-            {
-                Success = false,
-                Message = "Error loading fornecedores"
-            });
+            return StatusCode(500, ApiResponse<List<FornecedorDto>>.Error("Error loading fornecedores"));
         }
     }
 }

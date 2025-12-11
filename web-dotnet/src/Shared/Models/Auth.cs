@@ -5,9 +5,8 @@ namespace ERP.Staccato.Shared.Models;
 /// </summary>
 public class LoginRequest
 {
-    public string User { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public bool Staging { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Senha { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -15,10 +14,10 @@ public class LoginRequest
 /// </summary>
 public class LoginResponse
 {
-    public bool Success { get; set; }
-    public string? Message { get; set; }
+    public bool Sucesso { get; set; }
+    public string? Mensagem { get; set; }
     public string? Token { get; set; }
-    public SessionUser? User { get; set; }
+    public SessionUser? Usuario { get; set; }
 }
 
 /// <summary>
@@ -26,13 +25,13 @@ public class LoginResponse
 /// </summary>
 public class ApiResponse<T>
 {
-    public bool Success { get; set; }
-    public T? Data { get; set; }
-    public string? Message { get; set; }
-    public Dictionary<string, List<string>>? Errors { get; set; }
+    public bool Sucesso { get; set; }
+    public T? Dados { get; set; }
+    public string? Mensagem { get; set; }
+    public Dictionary<string, List<string>>? Erros { get; set; }
 
-    public static ApiResponse<T> Ok(T data) => new() { Success = true, Data = data };
-    public static ApiResponse<T> Error(string message) => new() { Success = false, Message = message };
+    public static ApiResponse<T> Ok(T data) => new() { Sucesso = true, Dados = data };
+    public static ApiResponse<T> Error(string message) => new() { Sucesso = false, Mensagem = message };
     public static ApiResponse<T> ValidationError(Dictionary<string, List<string>> errors) =>
-        new() { Success = false, Errors = errors, Message = "Validation error" };
+        new() { Sucesso = false, Erros = errors, Mensagem = "Validation error" };
 }

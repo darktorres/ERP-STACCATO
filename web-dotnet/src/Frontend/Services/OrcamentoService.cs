@@ -33,7 +33,7 @@ public class OrcamentoService
             }
 
             var result = await response.Content.ReadAsAsync<ApiResponse<List<OrcamentoListItem>>>();
-            return result?.Data ?? new();
+            return result?.Dados ?? new();
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class OrcamentoService
                 return new();
 
             var result = await response.Content.ReadAsAsync<ApiResponse<List<LojaDto>>>();
-            return result?.Data ?? new();
+            return result?.Dados ?? new();
         }
         catch (Exception ex)
         {
@@ -81,7 +81,7 @@ public class OrcamentoService
                 return new();
 
             var result = await response.Content.ReadAsAsync<ApiResponse<List<VendedorDto>>>();
-            return result?.Data ?? new();
+            return result?.Dados ?? new();
         }
         catch (Exception ex)
         {
@@ -103,7 +103,7 @@ public class OrcamentoService
                 return new();
 
             var result = await response.Content.ReadAsAsync<ApiResponse<List<FornecedorDto>>>();
-            return result?.Data ?? new();
+            return result?.Dados ?? new();
         }
         catch (Exception ex)
         {

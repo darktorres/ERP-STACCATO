@@ -1,0 +1,120 @@
+@page "/login"
+@using ERP.Staccato.Shared.Models
+@using ERP.Staccato.Frontend.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<Login> Logger
+
+<PageTitle>Login - ERP Staccato</PageTitle>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>ERP Staccato</h1>
+            <p>Gerenciamento de Orçamentos</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ErrorMessage
+            </div>
+        }
+
+        <form @onsubmit="HandleLoginAsync">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="text"
+                    id="email"
+                    class="form-control"
+                    @bind="Email"
+                    placeholder="seu.email@example.com"
+                    disabled="@IsLoading"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input
+                    type="password"
+                    id="password"
+                    class="form-control"
+                    @bind="Password"
+                    placeholder="••••••••"
+                    disabled="@IsLoading"
+                    required
+                />
+            </div>
+
+            <button type="submit" class="btn-login" disabled="@IsLoading">
+                @if (IsLoading)
+                {
+                    <span>Autenticando...</span>
+                }
+                else
+                {
+                    <span>Entrar</span>
+                }
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p class="text-muted">Versão 0.10.136</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Email = "";
+    private string Password = "";
+    private string ErrorMessage = "";
+    private bool IsLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If already logged in, redirect to orcamentos
+        var authState = await AuthService.GetAuthStateAsync();
+        if (authState?.User?.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo("/orcamentos", replace: true);
+        }
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        try
+        {
+            ErrorMessage = "";
+            IsLoading = true;
+
+            var request = new LoginRequest
+            {
+                Email = Email,
+                Senha = Password
+            };
+
+            var response = await AuthService.LoginAsync(request);
+
+            if (response?.Sucesso == true && !string.IsNullOrEmpty(response.Dados?.Token))
+            {
+                Logger.LogInformation("Login successful for user: {Email}", Email);
+                Navigation.NavigateTo("/orcamentos", replace: true);
+            }
+            else
+            {
+                ErrorMessage = response?.Mensagem ?? "Falha ao autenticar. Tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Login error");
+            ErrorMessage = $"Erro ao fazer login: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

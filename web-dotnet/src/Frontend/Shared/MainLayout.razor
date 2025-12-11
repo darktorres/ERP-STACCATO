@@ -1,0 +1,37 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using ERP.Staccato.Frontend.Services
+@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <div class="main-layout">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <span class="logo">ERP Staccato</span>
+                </div>
+                <div class="navbar-menu">
+                    <NavLink href="/orcamentos" class="nav-link" Match="NavLinkMatch.All">
+                        Orçamentos
+                    </NavLink>
+                    <button class="btn-logout" @onclick="LogoutAsync">Logout (@context.User.Identity?.Name)</button>
+                </div>
+            </nav>
+            <div class="content-wrapper">
+                @Body
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @Body
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

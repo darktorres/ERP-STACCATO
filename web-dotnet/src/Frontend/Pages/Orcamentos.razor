@@ -1,0 +1,335 @@
+@page "/orcamentos"
+@using ERP.Staccato.Shared.Models
+@using ERP.Staccato.Frontend.Services
+@using System.Globalization
+@inject OrcamentoService OrcamentoService
+@inject AuthService AuthService
+@inject ILogger<Orcamentos> Logger
+
+<PageTitle>Orçamentos - ERP Staccato</PageTitle>
+
+<div class="orcamentos-container">
+    <div class="orcamentos-header">
+        <h1>Orçamentos</h1>
+        <div class="header-buttons">
+            <button class="btn-primary" @onclick="CreateOrcamento">
+                <span>➕ Criar Orçamento</span>
+            </button>
+            <button class="btn-secondary" disabled="@(SelectedOrcamento == null)" @onclick="OpenFollowup">
+                <span>💬 Followup</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="orcamentos-content">
+        {/* Filters */
+        <div class="filters-panel">
+            <h3>Filtros</h3>
+
+            {/* Status Filter */
+            <div class="filter-group">
+                <label class="filter-label">
+                    <input type="checkbox" @bind="StatusEnabled" />
+                    <span>Status</span>
+                </label>
+                @foreach (var status in StatusOptions)
+                {
+                    <label class="filter-checkbox">
+                        <input
+                            type="checkbox"
+                            @bind="SelectedStatuses"
+                            value="@status"
+                            disabled="@(!StatusEnabled)"
+                        />
+                        <span>@status</span>
+                    </label>
+                }
+            </div>
+
+            {/* Month Filter */
+            @if (User?.Tipo != "GERENTE LOJA" && User?.Tipo != "GERENTE DEPARTAMENTO")
+            {
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <input type="checkbox" @bind="MesEnabled" />
+                        <span>Mês</span>
+                    </label>
+                    <input
+                        type="month"
+                        class="filter-input"
+                        @bind="MesValue"
+                        disabled="@(!MesEnabled)"
+                    />
+                </div>
+            }
+
+            {/* Store Filter */
+            @if (User?.Tipo != "GERENTE LOJA" && User?.Tipo != "GERENTE DEPARTAMENTO")
+            {
+                <div class="filter-group">
+                    <label class="filter-label">Lojas</label>
+                    <select class="filter-select" @bind="SelectedLoja">
+                        <option value="">Todas</option>
+                        @foreach (var loja in Lojas)
+                        {
+                            <option value="@loja.IdLoja">@(loja.Descricao ?? loja.NomeFantasia)</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            {/* Vendor Filter */
+            @if (User?.Tipo != "VENDEDOR" && User?.Tipo != "VENDEDOR ESPECIAL")
+            {
+                <div class="filter-group">
+                    <label class="filter-label">Vendedores</label>
+                    <select class="filter-select" @bind="SelectedVendedor">
+                        <option value="">Todos</option>
+                        @foreach (var vendedor in Vendedores)
+                        {
+                            <option value="@vendedor.IdUsuario">@vendedor.Nome</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            {/* Supplier Filter */
+            <div class="filter-group">
+                <label class="filter-label">Fornecedores</label>
+                <select class="filter-select" @bind="SelectedFornecedor">
+                    <option value="">Todos</option>
+                    @foreach (var fornecedor in Fornecedores)
+                    {
+                        <option value="@fornecedor.RazaoSocial">@fornecedor.RazaoSocial</option>
+                    }
+                </select>
+            </div>
+
+            {/* Search Filter */
+            <div class="filter-group">
+                <label class="filter-label">Buscar</label>
+                <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="ID, Cliente, Vendedor..."
+                    @bind="SearchText"
+                    @bind:event="oninput"
+                />
+            </div>
+
+            {/* My Budgets Filter (for vendors) */
+            @if (User?.Tipo == "VENDEDOR" || User?.Tipo == "VENDEDOR ESPECIAL")
+            {
+                <div class="filter-group">
+                    <label class="filter-radio">
+                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => ApenasPropriosOrcamentos = e.Value?.ToString() == "true")" checked="@(!ApenasPropriosOrcamentos)" value="false" />
+                        <span>Todos</span>
+                    </label>
+                    <label class="filter-radio">
+                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => ApenasPropriosOrcamentos = e.Value?.ToString() == "true")" checked="@ApenasPropriosOrcamentos" value="true" />
+                        <span>Próprios</span>
+                    </label>
+                </div>
+            }
+        </div>
+
+        {/* Table */
+        <div class="table-panel">
+            @if (IsLoading)
+            {
+                <div class="loading-state">
+                    <p>Carregando orçamentos...</p>
+                </div>
+            }
+            else if (OrcamentosList == null || OrcamentosList.Count == 0)
+            {
+                <div class="empty-state">
+                    <p>Nenhum orçamento encontrado</p>
+                </div>
+            }
+            else
+            {
+                <table class="orcamentos-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Dias</th>
+                            <th>ID</th>
+                            <th>Vendedor</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var orc in OrcamentosList)
+                        {
+                            <tr
+                                class="@("orcamento-row " + GetStatusClass(orc.Status))"
+                                @onclick="@(() => SelectOrcamento(orc))"
+                                style="cursor: pointer; @(SelectedOrcamento?.IdOrcamento == orc.IdOrcamento ? "background-color: rgba(59, 130, 246, 0.1);" : "")"
+                            >
+                                <td>
+                                    <span class="@("status-badge status-" + orc.Status.ToLower())">
+                                        @orc.Status
+                                    </span>
+                                </td>
+                                <td>@(GetDiasRestantes(orc))</td>
+                                <td><strong>@orc.IdOrcamento</strong></td>
+                                <td>@orc.Vendedor</td>
+                                <td>@orc.Cliente</td>
+                                <td class="text-right">@orc.Total.ToString("C", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                                <td>@orc.Data.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private SessionUser? User;
+    private List<OrcamentoListItem> OrcamentosList = new();
+    private List<LojaDto> Lojas = new();
+    private List<VendedorDto> Vendedores = new();
+    private List<FornecedorDto> Fornecedores = new();
+
+    private bool IsLoading = true;
+    private OrcamentoListItem? SelectedOrcamento;
+
+    // Filter state
+    private bool StatusEnabled = true;
+    private HashSet<string> SelectedStatuses = new() { "ATIVO", "EXPIRADO" };
+    private bool MesEnabled = false;
+    private string MesValue = "";
+    private string SelectedLoja = "";
+    private string SelectedVendedor = "";
+    private string SelectedFornecedor = "";
+    private string SearchText = "";
+    private bool ApenasPropriosOrcamentos = false;
+
+    private readonly string[] StatusOptions = { "ATIVO", "EXPIRADO", "CANCELADO", "FECHADO", "PERDIDO", "REPLICADO" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get current user
+            User = await AuthService.GetCurrentUserAsync();
+
+            // Set defaults based on user type
+            if (User?.Tipo == "ADMINISTRATIVO" || User?.Tipo == "ADMINISTRADOR")
+            {
+                // Auto-enable month filter for admin
+                var today = DateTime.Now;
+                MesValue = today.ToString("yyyy-MM");
+                MesEnabled = true;
+            }
+
+            if (User?.Tipo == "VENDEDOR" || User?.Tipo == "VENDEDOR ESPECIAL")
+            {
+                ApenasPropriosOrcamentos = true;
+            }
+
+            // Load dropdown data
+            var lojasTask = OrcamentoService.GetLojasAsync();
+            var vendedoresTask = OrcamentoService.GetVendedoresAsync();
+            var fornecedoresTask = OrcamentoService.GetFornecedoresAsync();
+
+            await Task.WhenAll(lojasTask, vendedoresTask, fornecedoresTask);
+
+            Lojas = await lojasTask;
+            Vendedores = await vendedoresTask;
+            Fornecedores = await fornecedoresTask;
+
+            // Load initial orcamentos
+            await LoadOrcamentos();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing page");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadOrcamentos()
+    {
+        try
+        {
+            IsLoading = true;
+
+            var filters = new OrcamentoFilters
+            {
+                Statuses = StatusEnabled ? SelectedStatuses.ToList() : null,
+                MesAno = MesEnabled && !string.IsNullOrEmpty(MesValue) ? MesValue : null,
+                IdLoja = string.IsNullOrEmpty(SelectedLoja) ? null : int.Parse(SelectedLoja),
+                IdVendedor = string.IsNullOrEmpty(SelectedVendedor) ? null : int.Parse(SelectedVendedor),
+                Fornecedor = string.IsNullOrEmpty(SelectedFornecedor) ? null : SelectedFornecedor,
+                Search = string.IsNullOrEmpty(SearchText) ? null : SearchText,
+                ApenasPropriosOrcamentos = ApenasPropriosOrcamentos
+            };
+
+            OrcamentosList = await OrcamentoService.ListAsync(filters);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading orcamentos");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ApplyFilters()
+    {
+        await LoadOrcamentos();
+    }
+
+    private void SelectOrcamento(OrcamentoListItem orc)
+    {
+        SelectedOrcamento = orc;
+    }
+
+    private void CreateOrcamento()
+    {
+        Logger.LogInformation("Create orcamento clicked");
+        // TODO: Navigate to create orcamento page
+    }
+
+    private void OpenFollowup()
+    {
+        if (SelectedOrcamento == null)
+        {
+            Logger.LogWarning("No orcamento selected");
+            return;
+        }
+
+        Logger.LogInformation($"Open followup for: {SelectedOrcamento.IdOrcamento}");
+        // TODO: Open followup dialog
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "ativo" => "status-ativo",
+            "expirado" => "status-expirado",
+            "cancelado" => "status-cancelado",
+            "fechado" => "status-fechado",
+            "perdido" => "status-perdido",
+            "replicado" => "status-replicado",
+            _ => ""
+        };
+    }
+
+    private string GetDiasRestantes(OrcamentoListItem orc)
+    {
+        return orc.DiasRestantes?.ToString() ?? "-";
+    }
+}

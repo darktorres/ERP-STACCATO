@@ -36,6 +36,13 @@ export const loginResponseSchema = z.object({
       user: z.string(),
       tipo: z.string(),
       nome: z.string(),
+      loja: z
+        .object({
+          idLoja: z.number(),
+          descricao: z.string(),
+          nomeFantasia: z.string(),
+        })
+        .optional(),
     })
     .optional(),
   error: z.string().optional(),

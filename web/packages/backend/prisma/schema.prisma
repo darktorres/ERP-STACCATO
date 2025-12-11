@@ -1,0 +1,97 @@
+// Prisma schema for ERP Staccato
+// This maps to the existing MySQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Maps to: staccato.loja
+model Loja {
+  idLoja              Int       @id @default(autoincrement()) @db.UnsignedInt
+  descricao           String?   @db.VarChar(45)
+  nomeFantasia        String    @db.VarChar(45)
+  razaoSocial         String    @db.VarChar(60)
+  tel                 String    @db.VarChar(18)
+  tel2                String?   @db.VarChar(18)
+  inscEstadual        String?   @unique @db.VarChar(20)
+  sigla               String?   @db.VarChar(4)
+  cnpj                String?   @unique @db.VarChar(18)
+  codUF               Int       @default(0)
+  porcentagemFrete    Decimal   @default(4.0000) @db.Decimal(15, 4)
+  valorMinimoFrete    Decimal   @default(80.0000) @db.Decimal(15, 4)
+  desativado          Boolean   @default(false)
+  created             DateTime  @default(now())
+  lastUpdated         DateTime? @updatedAt
+
+  usuarios Usuario[]
+
+  @@map("loja")
+}
+
+// Maps to: staccato.usuario
+model Usuario {
+  idUsuario       Int       @id @default(autoincrement()) @db.UnsignedInt
+  idLoja          Int       @db.UnsignedInt
+  user            String    @unique @db.VarChar(20)
+  passwd          String    @db.VarChar(42) // Old password field (deprecated)
+  password        String?   @db.VarChar(45) // New password field using SHA_PASSWORD
+  tipo            String    @db.VarChar(45)
+  nome            String    @db.VarChar(45)
+  email           String?   @db.VarChar(150)
+  telefone        String?   @db.VarChar(45)
+  especialidade   Int?
+  regime          String    @default("") @db.VarChar(45)
+  banco           String?   @db.VarChar(45)
+  agencia         String?   @db.VarChar(45)
+  cc              String?   @db.VarChar(45)
+  poupanca        Boolean?
+  nomeBanco       String?   @db.VarChar(45)
+  cpfBanco        String?   @db.VarChar(45)
+  cnpjBanco       String?   @db.VarChar(45)
+  senhaUsoUnico   String?   @db.VarChar(4) // One-time password for authorization
+  valorMinimoFrete Decimal? @db.Decimal(15, 4)
+  desativado      Boolean   @default(false)
+  created         DateTime  @default(now())
+  lastUpdated     DateTime? @updatedAt
+
+  loja       Loja        @relation(fields: [idLoja], references: [idLoja])
+  permissoes UsuarioHasPermissao?
+
+  @@index([idLoja], map: "fk_Usuario_Loja1_idx")
+  @@map("usuario")
+}
+
+// Maps to: staccato.usuario_has_permissao
+model UsuarioHasPermissao {
+  idUsuario Int @id @db.UnsignedInt
+
+  // Permission flags - add as needed from the actual table
+  // These are examples, adjust based on actual columns
+  usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
+
+  @@map("usuario_has_permissao")
+}
+
+// Maps to: staccato.maintenance
+model Maintenance {
+  id               Int       @id
+  lastInvalidated  DateTime? @db.Date
+  ultimaConsultaNSU DateTime?
+  emManutencao     Boolean?
+  created          DateTime  @default(now())
+  lastUpdated      DateTime? @updatedAt
+
+  @@map("maintenance")
+}
+
+// Maps to: staccato.versao_erp
+model VersaoErp {
+  id          Int     @id @default(autoincrement())
+  versaoAtual String? @db.VarChar(45)
+
+  @@map("versao_erp")
+}

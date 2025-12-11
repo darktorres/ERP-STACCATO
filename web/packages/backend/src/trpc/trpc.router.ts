@@ -133,6 +133,7 @@ export class TrpcRouter implements OnModuleInit {
                 ctx.user.idUsuario,
                 ctx.user.tipo,
                 ctx.user.idLoja,
+                ctx.user.nome,
               );
             } catch (error) {
               if (error instanceof Error) {

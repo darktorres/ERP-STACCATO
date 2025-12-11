@@ -63,8 +63,32 @@ export default function OrcamentoListPage() {
     };
   }, [searchText]);
 
-  // Queries
-  const { data: orcamentos, isLoading } = trpc.orcamento.list.useQuery(filters);
+  // Log when filters change
+  useEffect(() => {
+    console.log('[OrcamentoListPage] Filters changed:', {
+      ...filters,
+      mesAno: filters.mesAno ? `"${filters.mesAno}"` : undefined,
+      mesEnabledState: mesEnabled,
+    });
+  }, [filters, mesEnabled]);
+
+  // Queries with logging
+  const { data: orcamentos, isLoading, isFetching } = trpc.orcamento.list.useQuery(filters, {
+    onSuccess: (data) => {
+      console.log(`[OrcamentoListPage] orcamento.list returned ${data?.length || 0} rows`);
+    },
+  });
+
+  useEffect(() => {
+    if (isLoading) {
+      console.log('[OrcamentoListPage] orcamento.list → loading');
+    } else if (isFetching) {
+      console.log('[OrcamentoListPage] orcamento.list → refetching');
+    } else if (orcamentos) {
+      console.log('[OrcamentoListPage] orcamento.list → loaded with', orcamentos.length, 'rows');
+    }
+  }, [isLoading, isFetching, orcamentos]);
+
   const { data: lojas } = trpc.orcamento.lojas.useQuery(undefined, {
     enabled: user?.tipo !== 'GERENTE LOJA',
   });

@@ -24,6 +24,35 @@ export const trpcClient = trpc.createClient({
             }
           : {};
       },
+      async fetch(url, options) {
+        const requestTime = performance.now();
+        const body = options?.body;
+        let procedureName = 'unknown';
+
+        // Try to extract procedure name from body
+        if (body instanceof FormData) {
+          // Handle FormData if needed
+        } else if (typeof body === 'string') {
+          try {
+            const parsed = JSON.parse(body);
+            if (Array.isArray(parsed)) {
+              procedureName = parsed[0]?.meta?.path?.join('.') || 'batch';
+            }
+          } catch (e) {
+            // Ignore parsing errors
+          }
+        }
+
+        console.log(`[tRPC] → ${procedureName} (request sent)`);
+
+        const response = await fetch(url, options);
+        const responseTime = performance.now();
+        const duration = responseTime - requestTime;
+
+        console.log(`[tRPC] ← ${procedureName} (received in ${duration.toFixed(2)}ms)`);
+
+        return response;
+      },
     }),
   ],
 });

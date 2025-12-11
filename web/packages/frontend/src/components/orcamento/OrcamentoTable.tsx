@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface OrcamentoTableProps {
@@ -7,197 +7,174 @@ interface OrcamentoTableProps {
   selectedOrcamento?: any | null;
 }
 
-const statusBadgeColors: Record<string, string> = {
-  ATIVO: 'bg-green-900 text-green-300',
-  EXPIRADO: 'bg-yellow-900 text-yellow-300',
-  FECHADO: 'bg-blue-900 text-blue-300',
-  PERDIDO: 'bg-red-900 text-red-300',
-  CANCELADO: 'bg-slate-700 text-slate-300',
-  REPLICADO: 'bg-purple-900 text-purple-300',
+const statusBadgeColors: Record<string, { bg: string; text: string }> = {
+  ATIVO: { bg: '#1a3a2a', text: '#86efac' },
+  EXPIRADO: { bg: '#3a2a1a', text: '#fcd34d' },
+  FECHADO: { bg: '#1a2a3a', text: '#86c5fa' },
+  PERDIDO: { bg: '#3a1a1a', text: '#f87171' },
+  CANCELADO: { bg: '#2a2a3a', text: '#cbd5e1' },
+  REPLICADO: { bg: '#2a1a3a', text: '#d8b4fe' },
 };
 
-// Semaforo (followup) color mapping
 const semaforoColors: Record<number, string> = {
-  1: 'bg-red-900 text-red-300',      // QUENTE (Hot) - Red
-  2: 'bg-amber-900 text-amber-300',  // MORNO (Warm) - Orange
-  3: 'bg-blue-900 text-blue-300',    // FRIO (Cold) - Blue
+  1: '#1a1a2a', // QUENTE
+  2: '#2a1a0a', // MORNO
+  3: '#0a1a2a', // FRIO
 };
 
 function getRowBackgroundColor(orcamento: any): string {
-  // FECHADO takes priority - special styling
-  if (orcamento.status === 'FECHADO') {
-    return 'bg-blue-950';
-  }
+  if (orcamento.status === 'FECHADO') return '#001a33';
+  if (orcamento.status === 'CANCELADO' || orcamento.status === 'PERDIDO') return '#1a1a00';
+  if (orcamento.semaforo && semaforoColors[orcamento.semaforo]) return semaforoColors[orcamento.semaforo];
 
-  // CANCELADO and PERDIDO - yellow tint
-  if (orcamento.status === 'CANCELADO' || orcamento.status === 'PERDIDO') {
-    return 'bg-yellow-950';
-  }
-
-  // Color by semaforo (followup temperature) if available
-  if (orcamento.semaforo && semaforoColors[orcamento.semaforo]) {
-    return semaforoColors[orcamento.semaforo];
-  }
-
-  // Color by days remaining
   const dias = parseInt(String(orcamento.diasRestantes), 10);
   if (!isNaN(dias)) {
-    if (dias < 3) return 'bg-red-950';      // < 3 days - Red
-    if (dias < 5) return 'bg-yellow-950';   // 3-5 days - Yellow
-    if (dias >= 5) return 'bg-green-950';   // >= 5 days - Green
+    if (dias < 3) return '#1a0000';
+    if (dias < 5) return '#1a1a00';
+    if (dias >= 5) return '#001a00';
   }
-
-  // Default
-  return 'hover:bg-slate-700';
+  return 'transparent';
 }
 
-// Memoize the currency formatter
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
 });
 
-const dateFormatter = new Intl.DateTimeFormat('pt-BR');
+function formatDate(date: any): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  return d.toLocaleDateString('pt-BR');
+}
 
-function OrcamentoRow({ orcamento, isSelected, onRowClick }: any) {
-  const formatDate = useCallback((date: any) => {
-    if (!date) return '-';
-    const d = new Date(date);
-    return d.toLocaleDateString('pt-BR');
-  }, []);
-
-  const bgColor = isSelected ? 'bg-blue-800 ring-2 ring-blue-500' : getRowBackgroundColor(orcamento);
+// Ultra-lightweight row component with inline styles
+const OrcamentoRow = ({ orcamento, isSelected, onRowClick }: any) => {
+  const bgColor = isSelected ? '#1e3a8a' : getRowBackgroundColor(orcamento);
+  const statusColor = statusBadgeColors[orcamento.status] || { bg: '#2a2a3a', text: '#cbd5e1' };
 
   return (
     <tr
       onClick={() => onRowClick(orcamento)}
-      className={`cursor-pointer transition-colors ${bgColor}`}
+      style={{
+        backgroundColor: bgColor,
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+      }}
     >
-      <td className="px-6 py-3 whitespace-nowrap">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap' }}>
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-            statusBadgeColors[orcamento.status] || 'bg-slate-700 text-slate-300'
-          }`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '4px 12px',
+            borderRadius: '9999px',
+            fontSize: '12px',
+            fontWeight: '500',
+            backgroundColor: statusColor.bg,
+            color: statusColor.text,
+          }}
         >
           {orcamento.status}
         </span>
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {orcamento.diasRestantes || '-'}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', fontWeight: '500', color: '#60a5fa' }}>
         {orcamento.idOrcamento}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {orcamento.vendedor || '-'}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {orcamento.consultor || '-'}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {orcamento.cliente || '-'}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {orcamento.profissional || '-'}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-xs text-slate-400">
-        <div>
-          {orcamento.tel && <div>{orcamento.tel}</div>}
-          {orcamento.telCel && <div>{orcamento.telCel}</div>}
-          {orcamento.telProf && <div>{orcamento.telProf}</div>}
-        </div>
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '12px', color: '#94a3b8' }}>
+        {orcamento.tel && <div>{orcamento.tel}</div>}
+        {orcamento.telCel && <div>{orcamento.telCel}</div>}
+        {orcamento.telProf && <div>{orcamento.telProf}</div>}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {formatDate(orcamento.data)}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-slate-300 text-right">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', fontWeight: '500', color: '#cbd5e1', textAlign: 'right' }}>
         {currencyFormatter.format(Number(orcamento.total) || 0)}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {formatDate(orcamento.dataFollowup)}
       </td>
-      <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-400">
+      <td style={{ padding: '12px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#94a3b8' }}>
         {formatDate(orcamento.dataProxFollowup)}
       </td>
-      <td className="px-6 py-3 text-sm text-slate-400 max-w-xs truncate">
+      <td style={{ padding: '12px 24px', fontSize: '14px', color: '#94a3b8', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {orcamento.observacao || '-'}
       </td>
     </tr>
   );
-}
+};
 
 export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: OrcamentoTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const renderStartRef = useRef(performance.now());
 
   const rowVirtualizer = useVirtualizer({
     count: orcamentos.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: useCallback(() => 48, []), // ~48px per row (py-3 padding)
-    overscan: 10, // Render 10 extra rows above/below viewport for smoother scrolling
+    estimateSize: useCallback(() => 48, []),
+    overscan: 10,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
 
-  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
+  // Log render timing
+  useEffect(() => {
+    if (virtualRows.length > 0) {
+      const elapsed = performance.now() - renderStartRef.current;
+      console.log(`[OrcamentoTable] Rendered in ${elapsed.toFixed(2)}ms, showing ${virtualRows.length} rows of ${orcamentos.length}`);
+      renderStartRef.current = 0; // Only log once per data change
+    }
+  }, [virtualRows.length, orcamentos.length]);
+
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0]?.start || 0 : 0;
   const paddingBottom = totalSize - (virtualRows[virtualRows.length - 1]?.end || 0);
 
   if (orcamentos.length === 0) {
     return (
-      <div className="bg-slate-800 rounded-lg shadow-md p-8 text-center border border-slate-700">
-        <p className="text-slate-400">Nenhum orçamento encontrado</p>
+      <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', padding: '32px', textAlign: 'center', border: '1px solid #334155' }}>
+        <p style={{ color: '#64748b' }}>Nenhum orçamento encontrado</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg shadow-md overflow-hidden border border-slate-700 flex flex-col h-full">
-      <div ref={parentRef} className="overflow-auto flex-1">
-        <table className="w-full">
-          <thead className="bg-slate-900 border-b border-slate-700 sticky top-0 z-10">
+    <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div ref={parentRef} style={{ overflowY: 'auto', flex: 1 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead style={{ backgroundColor: '#0f172a', borderBottom: '1px solid #334155', position: 'sticky', top: 0, zIndex: 10 }}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Dias
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Código
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Vendedor
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Consultor
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Cliente
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Profissional
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Telefones
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Data
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Últ. Followup
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Próx. Followup
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Observação
-              </th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dias</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Código</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vendedor</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Consultor</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cliente</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Profissional</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Telefones</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Data</th>
+              <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Últ. Followup</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Próx. Followup</th>
+              <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Observação</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700">
+          <tbody style={{ borderTop: '1px solid #334155' }}>
             {paddingTop > 0 && (
               <tr>
                 <td colSpan={13} style={{ height: `${paddingTop}px` }} />
@@ -205,7 +182,7 @@ export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: Or
             )}
             {virtualRows.map((virtualRow) => (
               <OrcamentoRow
-                key={orcamentos[virtualRow.index].idOrcamento}
+                key={`${orcamentos[virtualRow.index].idOrcamento}-${virtualRow.index}`}
                 orcamento={orcamentos[virtualRow.index]}
                 isSelected={selectedOrcamento?.idOrcamento === orcamentos[virtualRow.index].idOrcamento}
                 onRowClick={onRowClick}
@@ -220,9 +197,8 @@ export function OrcamentoTable({ orcamentos, onRowClick, selectedOrcamento }: Or
         </table>
       </div>
 
-      {/* Info Footer */}
-      <div className="bg-slate-900 border-t border-slate-700 px-6 py-2">
-        <div className="text-xs text-slate-400">
+      <div style={{ backgroundColor: '#0f172a', borderTop: '1px solid #334155', padding: '8px 24px' }}>
+        <div style={{ fontSize: '12px', color: '#64748b' }}>
           Total: {orcamentos.length} orçamentos | Mostrando {virtualRows.length} visíveis
         </div>
       </div>

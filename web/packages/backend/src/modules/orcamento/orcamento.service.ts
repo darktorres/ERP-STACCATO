@@ -6,103 +6,131 @@ import { OrcamentoFilters } from '@erp-staccato/shared';
 export class OrcamentoService {
   constructor(private prisma: PrismaService) {}
 
-  async list(filters: OrcamentoFilters, userId: number, userType: string, userLojaId: number) {
+  async list(filters: OrcamentoFilters, userId: number, userType: string, userLojaId: number, userName: string) {
+    const startTime = Date.now();
+    const times: Record<string, number> = {};
+
     try {
-      // Build WHERE clause based on filters
+      times.start = Date.now();
+
+      // Build WHERE clause based on filters (matching C++ widgetorcamento.cpp montaFiltro logic)
       const whereConditions: string[] = [];
       const params: any[] = [];
 
-      // Role-based filtering for vendedor
-      if (userType === 'VENDEDOR' || userType === 'VENDEDOR ESPECIAL') {
-        if (filters.apenasPropriosOrcamentos) {
-          whereConditions.push('(o.idUsuario = ? OR o.idUsuarioConsultor = ?)');
-          params.push(userId, userId);
-        }
-      }
-
       // Store filter (gerentes see only their store, admin sees all)
+      // C++ line 292: idLoja = <value>
       if (userType === 'GERENTE LOJA' || userType === 'GERENTE DEPARTAMENTO') {
-        whereConditions.push('o.idLoja = ?');
+        whereConditions.push('idLoja = ?');
         params.push(userLojaId);
       } else if (filters.idLoja) {
-        whereConditions.push('o.idLoja = ?');
+        whereConditions.push('idLoja = ?');
         params.push(filters.idLoja);
       }
 
-      // Status filter
-      if (filters.statuses && filters.statuses.length > 0) {
-        const placeholders = filters.statuses.map(() => '?').join(',');
-        whereConditions.push(`o.status IN (${placeholders})`);
-        params.push(...filters.statuses);
-      }
-
       // Month filter (YYYY-MM format)
+      // C++ line 298: data2 = 'yyyy-MM' (when checkbox is checked)
       if (filters.mesAno) {
-        whereConditions.push('o.data2 = ?');
+        whereConditions.push('data2 = ?');
         params.push(filters.mesAno);
       }
 
-      // Vendor filter
+      // Vendor filter (by ID)
+      // C++ line 305: (idUsuario = <id> OR idUsuarioConsultor = <id>)
       if (filters.idVendedor) {
-        whereConditions.push('(o.idUsuario = ? OR o.idUsuarioConsultor = ?)');
+        whereConditions.push('(idUsuario = ? OR idUsuarioConsultor = ?)');
         params.push(filters.idVendedor, filters.idVendedor);
       }
 
-      // Supplier filter
+      // Supplier filter (comma-separated list)
+      // C++ line 312: (fornecedores LIKE '%<value>%')
       if (filters.fornecedor) {
-        whereConditions.push('FIND_IN_SET(?, o.fornecedores)');
-        params.push(filters.fornecedor);
+        whereConditions.push('fornecedores LIKE ?');
+        params.push(`%${filters.fornecedor}%`);
       }
 
-      // Search filter (idOrcamento, cliente, profissional, vendedor)
+      // Status filter (checkbox list)
+      // C++ lines 323-331: status IN ('STATUS1', 'STATUS2', ...)
+      if (filters.statuses && filters.statuses.length > 0) {
+        const placeholders = filters.statuses.map(() => '?').join(',');
+        whereConditions.push(`status IN (${placeholders})`);
+        params.push(...filters.statuses);
+      }
+
+      // Followup semaforo filter (dropdown index)
+      // C++ line 335: (semaforo = <index>) where index is 1=QUENTE, 2=MORNO, 3=FRIO
+      if (filters.semaforo) {
+        whereConditions.push('semaforo = ?');
+        params.push(filters.semaforo);
+      }
+
+      // Radio button filter: "Próprios" (show only user's budgets by name)
+      // C++ line 317: (vendedor = '<user_name>' OR consultor = '<user_name>')
+      // Only applies to VENDEDOR/VENDEDOR ESPECIAL when they select "Próprios"
+      if ((userType === 'VENDEDOR' || userType === 'VENDEDOR ESPECIAL') && filters.apenasPropriosOrcamentos) {
+        whereConditions.push('(vendedor = ? OR consultor = ?)');
+        params.push(userName, userName);
+      }
+
+      // Search filter (across multiple fields)
+      // C++ line 342: (idOrcamento LIKE '%<text>%' OR vendedor LIKE '%<text>%' OR cliente LIKE '%<text>%' OR profissional LIKE '%<text>%')
       if (filters.search) {
         const searchTerm = `%${filters.search}%`;
-        whereConditions.push('(o.idOrcamento LIKE ? OR c.nome_razao LIKE ? OR p.nome_razao LIKE ? OR u.nome LIKE ?)');
+        whereConditions.push('(idOrcamento LIKE ? OR vendedor LIKE ? OR cliente LIKE ? OR profissional LIKE ?)');
         params.push(searchTerm, searchTerm, searchTerm, searchTerm);
       }
 
       const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+      times.queryBuilt = Date.now();
 
-      // Use raw query to access view_orcamento which has computed fields
-      const orcamentos = await this.prisma.$queryRawUnsafe(
-        `
+      // Debug logging
+      console.log('[Orcamento.list] Filter inputs:', {
+        filters,
+        userType,
+        userId,
+        userLojaId,
+        userName,
+      });
+      console.log('[Orcamento.list] Built WHERE clause:', {
+        whereConditions,
+        params,
+        whereClause,
+      });
+
+      // Query the view_orcamento directly (same as C++ widget does)
+      // The view already has all the joins and computed fields optimized
+      const fullQuery = `
         SELECT
-          o.idOrcamento,
-          o.idLoja,
-          o.idUsuario,
-          o.idUsuarioConsultor,
-          o.status,
-          CASE
-            WHEN o.status = 'FECHADO' THEN ''
-            WHEN o.status = 'PERDIDO' THEN ''
-            WHEN o.status = 'CANCELADO' THEN ''
-            WHEN DATEDIFF(DATE_ADD(o.data, INTERVAL o.validade DAY), CURDATE()) < 0 THEN 'EXPIRADO'
-            ELSE DATEDIFF(DATE_ADD(o.data, INTERVAL o.validade DAY), CURDATE())
-          END as diasRestantes,
-          u.nome as vendedor,
-          uc.nome as consultor,
-          c.nome_razao as cliente,
-          p.nome_razao as profissional,
-          c.tel,
-          c.telCel,
-          p.tel as telProf,
-          o.data,
-          o.data2,
-          o.total,
-          o.created,
-          o.lastUpdated,
-          o.observacao,
-          o.fornecedores
-        FROM orcamento o
-        LEFT JOIN usuario u ON o.idUsuario = u.idUsuario
-        LEFT JOIN usuario uc ON o.idUsuarioConsultor = uc.idUsuario
-        LEFT JOIN cliente c ON o.idCliente = c.idCliente
-        LEFT JOIN profissional p ON o.idProfissional = p.idProfissional
+          idOrcamento,
+          idLoja,
+          idUsuario,
+          idUsuarioConsultor,
+          status,
+          diasRestantes,
+          vendedor,
+          consultor,
+          cliente,
+          profissional,
+          tel,
+          telCel,
+          telProf,
+          data,
+          data2,
+          total,
+          idFollowup,
+          dataFollowup,
+          dataProxFollowup,
+          observacao,
+          semaforo,
+          fornecedores
+        FROM view_orcamento
         ${whereClause}
-        ORDER BY o.data DESC
-        `,
-        ...params
-      );
+        ORDER BY data DESC
+      `;
+
+      console.log('[Orcamento.list] Full query:', { fullQuery, params });
+
+      const orcamentos = await this.prisma.$queryRawUnsafe(fullQuery, ...params);
+      times.queryExecuted = Date.now();
 
       // Convert BigInt values to numbers (needed for JSON serialization)
       const orcamentosArray = Array.isArray(orcamentos) ? orcamentos : [];
@@ -116,6 +144,15 @@ export class OrcamentoService {
           }
         }
         return normalized;
+      });
+      times.normalized = Date.now();
+
+      console.log('[Orcamento.list] Performance metrics:', {
+        totalMs: times.normalized - times.start,
+        queryBuildMs: times.queryBuilt - times.start,
+        queryExecuteMs: times.queryExecuted - times.queryBuilt,
+        normalizationMs: times.normalized - times.queryExecuted,
+        rowCount: normalized.length,
       });
 
       return normalized;

@@ -28,6 +28,7 @@ model Loja {
   lastUpdated         DateTime? @updatedAt
 
   usuarios Usuario[]
+  orcamentos Orcamento[]
 
   @@map("loja")
 }
@@ -60,6 +61,8 @@ model Usuario {
 
   loja       Loja        @relation(fields: [idLoja], references: [idLoja])
   permissoes UsuarioHasPermissao?
+  orcamentosVendedor Orcamento[] @relation("VendedorOrcamentos")
+  orcamentosConsultor Orcamento[] @relation("ConsultorOrcamentos")
 
   @@index([idLoja], map: "fk_Usuario_Loja1_idx")
   @@map("usuario")
@@ -95,3 +98,122 @@ model VersaoErp {
 
   @@map("versao_erp")
 }
+
+// Maps to: staccato.cliente
+model Cliente {
+  idCliente           Int       @id @default(autoincrement()) @db.UnsignedInt
+  nome_razao          String    @db.VarChar(200)
+  nomeFantasia        String?   @db.VarChar(100)
+  cpfCnpj             String?   @db.VarChar(18)
+  inscEstadual        String?   @db.VarChar(20)
+  tel                 String?   @db.VarChar(18)
+  telCel              String?   @db.VarChar(18)
+  email               String?   @db.VarChar(100)
+  desativado          Boolean   @default(false)
+  created             DateTime  @default(now())
+  lastUpdated         DateTime? @updatedAt
+
+  orcamentos Orcamento[]
+
+  @@map("cliente")
+}
+
+// Maps to: staccato.profissional
+model Profissional {
+  idProfissional      Int       @id @default(autoincrement()) @db.UnsignedInt
+  nome_razao          String    @db.VarChar(200)
+  nomeFantasia        String?   @db.VarChar(100)
+  cpfCnpj             String?   @db.VarChar(18)
+  tel                 String?   @db.VarChar(18)
+  telCel              String?   @db.VarChar(18)
+  telCom              String?   @db.VarChar(18)
+  email               String?   @db.VarChar(100)
+  desativado          Boolean   @default(false)
+  created             DateTime  @default(now())
+  lastUpdated         DateTime? @updatedAt
+
+  orcamentos Orcamento[]
+
+  @@map("profissional")
+}
+
+// Maps to: staccato.orcamento
+model Orcamento {
+  idOrcamento             String    @id @db.VarChar(20)
+  idLoja                  Int       @db.UnsignedInt
+  idUsuario               Int       @db.UnsignedInt
+  idUsuarioConsultor      Int?      @db.UnsignedInt
+  idCliente               Int       @db.UnsignedInt
+  idEnderecoEntrega       Int       @db.UnsignedInt
+  idProfissional          Int?      @db.UnsignedInt
+  data                    DateTime  @db.DateTime
+  data2                   String    @db.VarChar(7)  // YYYY-MM format
+  validade                Int       @default(7)
+  status                  String    @db.VarChar(20)
+  subTotalBru             Decimal   @db.Decimal(10, 2)
+  subTotalLiq             Decimal   @db.Decimal(10, 2)
+  frete                   Decimal   @db.Decimal(10, 2)
+  freteManual             Boolean   @default(false)
+  descontoPorc            Decimal   @db.Decimal(10, 2)
+  descontoReais           Decimal   @db.Decimal(10, 2)
+  total                   Decimal   @db.Decimal(10, 2)
+  prazoEntrega            Int
+  observacao              String?   @db.Text
+  replicadoDe             String?   @db.VarChar(20)
+  replicadoEm             String?   @db.VarChar(20)
+  motivoCancelamento      String?   @db.VarChar(100)
+  observacaoCancelamento  String?   @db.Text
+  representacao           Boolean   @default(false)
+  fornecedores            String?   @db.VarChar(500)
+  idFollowup              Int?      @db.UnsignedInt
+  created                 DateTime  @default(now())
+  lastUpdated             DateTime? @updatedAt
+
+  loja                    Loja            @relation(fields: [idLoja], references: [idLoja])
+  vendedor                Usuario         @relation("VendedorOrcamentos", fields: [idUsuario], references: [idUsuario])
+  consultor               Usuario?        @relation("ConsultorOrcamentos", fields: [idUsuarioConsultor], references: [idUsuario])
+  cliente                 Cliente         @relation(fields: [idCliente], references: [idCliente])
+  profissional            Profissional?   @relation(fields: [idProfissional], references: [idProfissional])
+  produtos                OrcamentoProduto[]
+
+  @@index([idLoja], map: "fk_Orcamento_Loja_idx")
+  @@index([idUsuario], map: "fk_Orcamento_Usuario_idx")
+  @@index([idCliente], map: "fk_Orcamento_Cliente_idx")
+  @@index([idProfissional], map: "fk_Orcamento_Profissional_idx")
+  @@index([status], map: "idx_Orcamento_Status")
+  @@index([data2], map: "idx_Orcamento_Data2")
+  @@map("orcamento")
+}
+
+// Maps to: staccato.orcamento_has_produto
+model OrcamentoProduto {
+  idOrcamentoProduto  Int       @id @default(autoincrement()) @db.UnsignedInt
+  idOrcamento         String    @db.VarChar(20)
+  idLoja              Int       @db.UnsignedInt
+  idProduto           Int       @db.UnsignedInt
+  produto             String    @db.VarChar(200)
+  fornecedor          String    @db.VarChar(100)
+  codComercial        String    @db.VarChar(50)
+  formComercial       String    @db.VarChar(50)
+  quant               Decimal   @db.Decimal(10, 4)
+  caixas              Decimal   @db.Decimal(10, 4)
+  quantCaixa          Decimal   @db.Decimal(10, 4)
+  prcUnitario         Decimal   @db.Decimal(10, 2)
+  desconto            Decimal   @db.Decimal(10, 2)
+  parcial             Decimal   @db.Decimal(10, 2)
+  parcialDesc         Decimal   @db.Decimal(10, 2)
+  kg                  Decimal   @db.Decimal(10, 4)
+  un                  String    @db.VarChar(10)
+  obs                 String?   @db.Text
+  estoque             Boolean   @default(false)
+  promocao            Boolean   @default(false)
+  created             DateTime  @default(now())
+  lastUpdated         DateTime? @updatedAt
+
+  orcamento           Orcamento @relation(fields: [idOrcamento], references: [idOrcamento])
+
+  @@index([idOrcamento], map: "fk_OrcamentoProduto_Orcamento_idx")
+  @@index([idLoja], map: "idx_OrcamentoProduto_Loja")
+  @@map("orcamento_has_produto")
+}
+

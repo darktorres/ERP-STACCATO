@@ -8,7 +8,6 @@ export const loginSchema = z.object({
     .max(20, 'Usuário deve ter no máximo 20 caracteres')
     .transform((val) => val.toLowerCase()),
   password: z.string().min(1, 'Senha é obrigatória'),
-  hostname: z.string().optional(),
   staging: z.boolean(),
 });
 

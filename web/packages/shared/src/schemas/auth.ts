@@ -25,6 +25,18 @@ export const authorizationSchema = z.object({
 
 export type AuthorizationInput = z.infer<typeof authorizationSchema>;
 
+// Detailed error response with field-specific validation errors
+export const errorDetailsSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  // Field-specific validation errors: { fieldName: ["error1", "error2"] }
+  fieldErrors: z.record(z.array(z.string())).optional(),
+  // Additional context (path, timestamp, etc.)
+  context: z.record(z.unknown()).optional(),
+});
+
+export type ErrorDetails = z.infer<typeof errorDetailsSchema>;
+
 // Login response
 export const loginResponseSchema = z.object({
   success: z.boolean(),

@@ -1,46 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { AppModule } from '../../app.module.js';
-import { registerTrpcRoutes } from '../../main.js';
+import { describe, it, expect } from 'vitest';
 
 /**
  * Integration tests for Authentication (Login)
- * Tests the full tRPC login endpoint without mocks
+ * Tests the full tRPC login endpoint against running backend server
+ * Assumes backend is running on http://localhost:3001
  */
 describe('Auth Integration Tests', () => {
-  let app: NestFastifyApplication;
-  const testPort = 3007; // Use a unique test port
-  const baseUrl = `http://localhost:${testPort}`;
-
-  beforeAll(async () => {
-    // Create NestJS app for testing
-    app = await NestFactory.create<NestFastifyApplication>(
-      AppModule,
-      new FastifyAdapter(),
-    );
-
-    app.enableCors({
-      origin: ['*'],
-      credentials: true,
-    });
-
-    // Register tRPC routes
-    await registerTrpcRoutes(app);
-
-    // Listen on a test port that doesn't conflict with dev server
-    await app.listen(testPort, '127.0.0.1');
-    console.log(`Test server running on ${baseUrl}`);
-
-    // Give server time to start
-    await new Promise(resolve => setTimeout(resolve, 500));
-  });
-
-  afterAll(async () => {
-    if (app) {
-      await app.close();
-    }
-  });
+  const baseUrl = 'http://localhost:3001';
 
   describe('POST /trpc/auth.login', () => {
     it('should return success with valid torres credentials', async () => {
@@ -115,7 +81,8 @@ describe('Auth Integration Tests', () => {
       const result = data[0];
       expect(result).toHaveProperty('error');
       expect(result.error).toHaveProperty('code');
-      expect(result.error.code).toBe('UNAUTHORIZED');
+      expect(result.error.code).toBe(-32001); // UNAUTHORIZED numeric code
+      expect(result.error.data.code).toBe('UNAUTHORIZED'); // String code in data
       expect(result.error.message).toContain('Login inválido');
     });
 
@@ -139,8 +106,11 @@ describe('Auth Integration Tests', () => {
       const data = await response.json();
 
       const result = data[0];
+      console.log('Validation error response:', JSON.stringify(result, null, 2));
       expect(result).toHaveProperty('error');
-      expect(result.error.code).toBe('BAD_REQUEST');
+      expect(result.error.code).toBe(-32600); // BAD_REQUEST numeric code
+      expect(result.error.data.code).toBe('BAD_REQUEST'); // String code in data
+      expect(result.error.data).toHaveProperty('fieldErrors');
     });
 
     it('should handle batch multiple requests', async () => {
@@ -179,7 +149,9 @@ describe('Auth Integration Tests', () => {
 
       // Second request should fail
       expect(data[1]).toHaveProperty('error');
-      expect(data[1].error.code).toBe('UNAUTHORIZED');
+      expect(data[1].error.code).toBe(-32001); // UNAUTHORIZED numeric code
+      expect(data[1].error.data.code).toBe('UNAUTHORIZED'); // String code in data
+      expect(data[1].error.message).toContain('Login inválido');
     });
   });
 });

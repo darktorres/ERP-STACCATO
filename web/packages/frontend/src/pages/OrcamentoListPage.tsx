@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '../stores/auth.js';
 import { trpc } from '../lib/trpc.js';
 import { OrcamentoFilters } from '@erp-staccato/shared';
@@ -7,10 +7,39 @@ import { OrcamentoTable } from '../components/orcamento/OrcamentoTable.js';
 
 export default function OrcamentoListPage() {
   const user = useAuthStore((state) => state.user);
-  const [filters, setFilters] = useState<OrcamentoFilters>({
-    apenasPropriosOrcamentos: user?.tipo === 'VENDEDOR' || user?.tipo === 'VENDEDOR ESPECIAL',
-    statuses: ['ATIVO', 'EXPIRADO'],
-  });
+
+  // Initialize filters with role-based defaults
+  const defaultFilters = useMemo(() => {
+    const isAdmin = user?.tipo === 'ADMINISTRADOR' || user?.tipo === 'ADMINISTRATIVO';
+    const isGerente = user?.tipo === 'GERENTE LOJA' || user?.tipo === 'GERENTE DEPARTAMENTO';
+    const isVendedor = user?.tipo === 'VENDEDOR' || user?.tipo === 'VENDEDOR ESPECIAL';
+
+    const filters: OrcamentoFilters = {
+      statuses: ['ATIVO', 'EXPIRADO'],
+    };
+
+    // For ADMINISTRATIVO users, auto-enable month filter with current month
+    if (isAdmin) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      filters.mesAno = `${year}-${month}`;
+    }
+
+    // For GERENTE users, show only their store (filter will be applied in backend)
+    if (isGerente && user?.idLoja) {
+      filters.idLoja = user.idLoja;
+    }
+
+    // For VENDEDOR users, default to showing only their budgets
+    if (isVendedor) {
+      filters.apenasPropriosOrcamentos = true;
+    }
+
+    return filters;
+  }, [user]);
+
+  const [filters, setFilters] = useState<OrcamentoFilters>(defaultFilters);
   const [selectedOrcamento, setSelectedOrcamento] = useState<any | null>(null);
 
   // Queries

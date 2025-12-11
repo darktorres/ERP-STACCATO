@@ -1,4 +1,5 @@
 import { OrcamentoFilters, OrcamentoStatusEnum } from '@erp-staccato/shared';
+import { useState, useRef, useEffect } from 'react';
 
 interface OrcamentoFilterPanelProps {
   filters: OrcamentoFilters;
@@ -9,6 +10,13 @@ interface OrcamentoFilterPanelProps {
   userType?: string;
 }
 
+const SEMAFORO_OPTIONS = [
+  { value: undefined, label: 'Followup' },
+  { value: 1, label: 'QUENTE' },
+  { value: 2, label: 'MORNO' },
+  { value: 3, label: 'FRIO' },
+];
+
 export function OrcamentoFilterPanel({
   filters,
   onFiltersChange,
@@ -17,6 +25,35 @@ export function OrcamentoFilterPanel({
   fornecedores,
   userType,
 }: OrcamentoFilterPanelProps) {
+  const [statusEnabled, setStatusEnabled] = useState((filters.statuses || []).length > 0);
+  const [searchText, setSearchText] = useState(filters.search || '');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      onFiltersChange({ ...filters, search: searchText || undefined });
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchText]);
+
+  const handleStatusToggle = (enabled: boolean) => {
+    setStatusEnabled(enabled);
+    if (!enabled) {
+      // When status filter is disabled, clear all status filters
+      onFiltersChange({ ...filters, statuses: [] });
+    }
+  };
+
   const handleStatusChange = (status: string) => {
     const statuses = filters.statuses || [];
     const newStatuses = statuses.includes(status as any)
@@ -38,7 +75,7 @@ export function OrcamentoFilterPanel({
   };
 
   const handleSearchChange = (search: string) => {
-    onFiltersChange({ ...filters, search: search || undefined });
+    setSearchText(search);
   };
 
   const handleMesAnoChange = (mesAno: string) => {
@@ -49,13 +86,25 @@ export function OrcamentoFilterPanel({
     onFiltersChange({ ...filters, apenasPropriosOrcamentos: checked });
   };
 
+  const handleSemaforoChange = (semaforo: number | undefined) => {
+    onFiltersChange({ ...filters, semaforo });
+  };
+
   return (
     <div className="bg-slate-800 rounded-lg shadow-md p-6 mb-6 border border-slate-700">
       <div className="space-y-6">
-        {/* Status Checkboxes */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-50 mb-3">Status</h3>
-          <div className="grid grid-cols-3 gap-4">
+        {/* Status GroupBox */}
+        <fieldset className="border border-slate-600 rounded-lg p-4">
+          <legend className="px-2 text-sm font-semibold text-slate-50 flex items-center">
+            <input
+              type="checkbox"
+              checked={statusEnabled}
+              onChange={(e) => handleStatusToggle(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700 mr-2"
+            />
+            Status
+          </legend>
+          <div className="grid grid-cols-3 gap-4 mt-2">
             {Object.entries(OrcamentoStatusEnum).map(([key, value]) => (
               <label key={key} className="flex items-center">
                 <input
@@ -63,13 +112,14 @@ export function OrcamentoFilterPanel({
                   checked={(filters.statuses || []).includes(value as any)}
                   onChange={(e) => handleStatusChange(e.target.value)}
                   value={value}
-                  className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700"
+                  disabled={!statusEnabled}
+                  className="h-4 w-4 text-blue-600 border-slate-600 rounded bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <span className="ml-2 text-sm text-slate-300">{value}</span>
+                <span className={`ml-2 text-sm ${statusEnabled ? 'text-slate-300' : 'text-slate-500'}`}>{value}</span>
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {/* Loja, Vendedor, Fornecedor Row */}
         <div className="grid grid-cols-3 gap-4">
@@ -135,6 +185,24 @@ export function OrcamentoFilterPanel({
               ))}
             </select>
           </div>
+
+          {/* Followup Semaforo */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Seguimento
+            </label>
+            <select
+              value={filters.semaforo?.toString() || ''}
+              onChange={(e) => handleSemaforoChange(e.target.value ? Number(e.target.value) : undefined)}
+              className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
+            >
+              {SEMAFORO_OPTIONS.map((option) => (
+                <option key={option.value ?? 'none'} value={option.value?.toString() || ''}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Search and Month Row */}
@@ -147,7 +215,7 @@ export function OrcamentoFilterPanel({
             <input
               type="text"
               placeholder="Digite para buscar..."
-              value={filters.search || ''}
+              value={searchText}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400 placeholder-slate-500"
             />

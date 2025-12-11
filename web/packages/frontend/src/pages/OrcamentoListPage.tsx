@@ -89,14 +89,16 @@ export default function OrcamentoListPage() {
     }
   }, [isLoading, isFetching, orcamentos]);
 
-  const { data: lojas } = trpc.orcamento.lojas.useQuery(undefined, {
-    enabled: user?.tipo !== 'GERENTE LOJA',
+  const { data: lojas, isLoading: lojasLoading } = trpc.orcamento.lojas.useQuery(undefined, {
+    enabled: !!user && user.tipo !== 'GERENTE LOJA' && user.tipo !== 'GERENTE DEPARTAMENTO',
   });
-  const { data: vendedores } = trpc.orcamento.vendedores.useQuery(
+  const { data: vendedores, isLoading: vendedoresLoading } = trpc.orcamento.vendedores.useQuery(
     { idLoja: filters.idLoja },
-    { enabled: true }
+    { enabled: !!user && user.tipo !== 'VENDEDOR' && user.tipo !== 'VENDEDOR ESPECIAL' }
   );
-  const { data: fornecedores } = trpc.orcamento.fornecedores.useQuery();
+  const { data: fornecedores, isLoading: fornecedoresLoading } = trpc.orcamento.fornecedores.useQuery(undefined, {
+    enabled: !!user,
+  });
 
   return (
     <div className="flex h-[calc(100vh-120px)] bg-slate-950">
@@ -229,13 +231,16 @@ export default function OrcamentoListPage() {
           {/* Lojas Dropdown */}
           {user?.tipo !== 'GERENTE LOJA' && user?.tipo !== 'GERENTE DEPARTAMENTO' && (
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Lojas</h4>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">
+                Lojas {lojasLoading && <span className="text-xs text-slate-500 font-normal ml-1">(carregando...)</span>}
+              </h4>
               <select
                 value={filters.idLoja || ''}
                 onChange={(e) => setFilters({ ...filters, idLoja: e.target.value ? Number(e.target.value) : undefined })}
-                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+                disabled={lojasLoading}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Todas</option>
+                <option value="">{lojasLoading ? 'Carregando...' : 'Todas'}</option>
                 {(lojas || []).map((loja) => (
                   <option key={loja.idLoja} value={loja.idLoja}>
                     {loja.descricao || loja.nomeFantasia}
@@ -248,13 +253,16 @@ export default function OrcamentoListPage() {
           {/* Vendedores Dropdown */}
           {user?.tipo !== 'VENDEDOR' && user?.tipo !== 'VENDEDOR ESPECIAL' && (
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Vendedores</h4>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">
+                Vendedores {vendedoresLoading && <span className="text-xs text-slate-500 font-normal ml-1">(carregando...)</span>}
+              </h4>
               <select
                 value={filters.idVendedor || ''}
                 onChange={(e) => setFilters({ ...filters, idVendedor: e.target.value ? Number(e.target.value) : undefined })}
-                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+                disabled={vendedoresLoading}
+                className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Todos</option>
+                <option value="">{vendedoresLoading ? 'Carregando...' : 'Todos'}</option>
                 {(vendedores || []).map((vendedor) => (
                   <option key={vendedor.idUsuario} value={vendedor.idUsuario}>
                     {vendedor.nome}
@@ -266,13 +274,16 @@ export default function OrcamentoListPage() {
 
           {/* Fornecedores Dropdown */}
           <div>
-            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">Fornecedores</h4>
+            <h4 className="text-xs font-semibold text-slate-400 uppercase mb-2">
+              Fornecedores {fornecedoresLoading && <span className="text-xs text-slate-500 font-normal ml-1">(carregando...)</span>}
+            </h4>
             <select
               value={filters.fornecedor || ''}
               onChange={(e) => setFilters({ ...filters, fornecedor: e.target.value || undefined })}
-              className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400"
+              disabled={fornecedoresLoading}
+              className="w-full px-2 py-1 border border-slate-600 rounded-md bg-slate-700 text-slate-50 text-sm focus:outline-none focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="">Todos</option>
+              <option value="">{fornecedoresLoading ? 'Carregando...' : 'Todos'}</option>
               {(fornecedores || []).map((fornecedor) => (
                 <option key={fornecedor.razaoSocial} value={fornecedor.razaoSocial}>
                   {fornecedor.razaoSocial}

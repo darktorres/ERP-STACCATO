@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
-body {
+* {
+  @apply dark;
+}
+
+html, body, #root {
+  @apply bg-slate-950 text-slate-50;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

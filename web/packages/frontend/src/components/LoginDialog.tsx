@@ -68,14 +68,14 @@ export default function LoginDialog() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">ERP Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="bg-slate-800 p-8 rounded-lg shadow-md w-full max-w-md border border-slate-700">
+        <h1 className="text-2xl font-bold text-center mb-6 text-slate-50">ERP Login</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Usuario */}
           <div>
-            <label htmlFor="user" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="user" className="block text-sm font-medium text-slate-300">
               Usuário:
             </label>
             <input
@@ -83,16 +83,16 @@ export default function LoginDialog() {
               type="text"
               autoComplete="username"
               {...register('user')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
             />
             {errors.user && (
-              <p className="mt-1 text-sm text-red-600">{errors.user.message}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.user.message}</p>
             )}
           </div>
 
           {/* Senha */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-300">
               Senha:
             </label>
             <input
@@ -100,10 +100,10 @@ export default function LoginDialog() {
               type="password"
               autoComplete="current-password"
               {...register('password')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-slate-50 shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
             )}
           </div>
 
@@ -116,9 +116,9 @@ export default function LoginDialog() {
                 type="checkbox"
                 checked={rememberPassword}
                 onChange={(e) => setRememberPassword(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-400 border-slate-600 rounded bg-slate-700"
               />
-              <label htmlFor="rememberPassword" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="rememberPassword" className="ml-2 block text-sm text-slate-300">
                 Salvar senha
               </label>
             </div>
@@ -129,9 +129,9 @@ export default function LoginDialog() {
                 id="staging"
                 type="checkbox"
                 {...register('staging')}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-400 border-slate-600 rounded bg-slate-700"
               />
-              <label htmlFor="staging" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="staging" className="ml-2 block text-sm text-slate-300">
                 Ambiente de teste
               </label>
             </div>
@@ -148,8 +148,8 @@ export default function LoginDialog() {
 
           {/* Error message */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="p-3 bg-red-950 border border-red-700 rounded-md">
+              <p className="text-sm text-red-300 whitespace-pre-wrap">{error}</p>
             </div>
           )}
         </form>

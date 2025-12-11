@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { JwtService } from '@nestjs/jwt';
 import { AppModule } from './app.module.js';
 import { TrpcRouter } from './trpc/trpc.router.js';
 
@@ -31,6 +32,23 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
 
       if (method === 'POST' && request.body) {
         requestData = request.body;
+      }
+
+      // Extract JWT from Authorization header
+      let user: any = null;
+      const authHeader = request.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        try {
+          const jwtService = app.get(JwtService);
+          const payload = jwtService.verify(token);
+          user = payload;
+        } catch (error) {
+          // Invalid token - JWT verification failed
+          // Log the error for debugging but don't crash
+          console.error('JWT verification failed:', error instanceof Error ? error.message : error);
+          // user stays null, protected procedures will fail with UNAUTHORIZED
+        }
       }
 
       // Handle both batch and non-batch requests
@@ -71,7 +89,7 @@ export async function registerTrpcRoutes(app: NestFastifyApplication) {
         try {
           // Call the procedure directly from the router
           const caller = router.createCaller({
-            user: (request as any).user || null,
+            user: user,
           });
 
           // Parse the procedure path and call it

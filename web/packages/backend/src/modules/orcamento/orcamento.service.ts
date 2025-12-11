@@ -104,7 +104,21 @@ export class OrcamentoService {
         ...params
       );
 
-      return orcamentos || [];
+      // Convert BigInt values to numbers (needed for JSON serialization)
+      const orcamentosArray = Array.isArray(orcamentos) ? orcamentos : [];
+      const normalized = orcamentosArray.map((item: any) => {
+        const normalized: any = {};
+        for (const [key, value] of Object.entries(item)) {
+          if (typeof value === 'bigint') {
+            normalized[key] = Number(value);
+          } else {
+            normalized[key] = value;
+          }
+        }
+        return normalized;
+      });
+
+      return normalized;
     } catch (error) {
       console.error('Error listing orcamentos:', error);
       throw error;

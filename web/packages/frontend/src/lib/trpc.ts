@@ -15,7 +15,7 @@ const getAuthToken = () => {
 export const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: '/trpc',
+      url: 'http://localhost:3001/trpc',
       headers() {
         const token = getAuthToken();
         return token

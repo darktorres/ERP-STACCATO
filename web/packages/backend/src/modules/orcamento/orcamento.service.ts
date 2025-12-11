@@ -132,6 +132,14 @@ export class OrcamentoService {
       const orcamentos = await this.prisma.$queryRawUnsafe(fullQuery, ...params);
       times.queryExecuted = Date.now();
 
+      // Debug: sample data2 values if month filter was applied
+      if (filters.mesAno) {
+        const sample = await this.prisma.$queryRawUnsafe(
+          'SELECT DISTINCT data2 FROM orcamento WHERE data2 IS NOT NULL ORDER BY data2 DESC LIMIT 5'
+        );
+        console.log('[Orcamento.list] Sample data2 values in DB:', sample);
+      }
+
       // Convert BigInt values to numbers (needed for JSON serialization)
       const orcamentosArray = Array.isArray(orcamentos) ? orcamentos : [];
       const normalized = orcamentosArray.map((item: any) => {

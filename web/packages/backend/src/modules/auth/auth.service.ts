@@ -51,6 +51,10 @@ export class AuthService {
 
     const usuario = usuarios[0];
 
+    // Ensure both IDs are regular numbers, not BigInt
+    const idUsuarioAsNumber = typeof usuario.idUsuario === 'bigint' ? Number(usuario.idUsuario) : usuario.idUsuario;
+    const idLojaAsNumber = typeof usuario.idLoja === 'bigint' ? Number(usuario.idLoja) : usuario.idLoja;
+
     // Block OPERACIONAL users (matching C++ behavior)
     if (usuario.tipo === 'OPERACIONAL') {
       throw new UnauthorizedException('Operacional bloqueado!');
@@ -58,7 +62,7 @@ export class AuthService {
 
     // Get loja info
     const loja = await this.prisma.loja.findUnique({
-      where: { idLoja: usuario.idLoja },
+      where: { idLoja: idLojaAsNumber },
       select: {
         idLoja: true,
         descricao: true,
@@ -68,8 +72,8 @@ export class AuthService {
 
     // Create session payload
     const sessionUser: SessionUser = {
-      idUsuario: usuario.idUsuario,
-      idLoja: usuario.idLoja,
+      idUsuario: idUsuarioAsNumber,
+      idLoja: idLojaAsNumber,
       user: user,
       tipo: usuario.tipo as UserType,
       nome: usuario.nome,

@@ -11,6 +11,7 @@ export default function OrcamentoListPage() {
     apenasPropriosOrcamentos: user?.tipo === 'VENDEDOR' || user?.tipo === 'VENDEDOR ESPECIAL',
     statuses: ['ATIVO', 'EXPIRADO'],
   });
+  const [selectedOrcamento, setSelectedOrcamento] = useState<any | null>(null);
 
   // Queries
   const { data: orcamentos, isLoading } = trpc.orcamento.list.useQuery(filters);
@@ -29,15 +30,31 @@ export default function OrcamentoListPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-slate-50">Orçamentos</h1>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            onClick={() => {
-              // Navigate to new orcamento page
-              console.log('Navigate to new orcamento');
-            }}
-          >
-            + Criar Orçamento
-          </button>
+          <div className="flex gap-3">
+            <button
+              disabled={!selectedOrcamento}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => {
+                if (!selectedOrcamento) {
+                  alert('Selecione um orçamento para abrir o followup');
+                  return;
+                }
+                console.log('Open followup for:', selectedOrcamento.idOrcamento);
+                // TODO: Open FollowUp dialog
+              }}
+            >
+              Followup
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => {
+                // Navigate to new orcamento page
+                console.log('Navigate to new orcamento');
+              }}
+            >
+              + Criar Orçamento
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -62,7 +79,9 @@ export default function OrcamentoListPage() {
         ) : (
           <OrcamentoTable
             orcamentos={(Array.isArray(orcamentos) ? orcamentos : []) || []}
+            selectedOrcamento={selectedOrcamento}
             onRowClick={(orcamento) => {
+              setSelectedOrcamento(orcamento);
               console.log('Click row:', orcamento.idOrcamento);
               // Navigate to orcamento detail page
             }}

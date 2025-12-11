@@ -87,9 +87,11 @@ describe('Orcamento Integration Tests', () => {
             expect(Array.isArray(result.result.data)).toBe(true);
           } else if (result.error) {
             console.log('Got tRPC error:', result.error.message);
+            console.log('Full error:', JSON.stringify(result.error, null, 2));
           }
         } else {
           console.log('Got HTTP error response');
+          console.log('Full response data:', JSON.stringify(orcamentosData, null, 2));
         }
       } catch (error) {
         console.error('Fetch error:', error);

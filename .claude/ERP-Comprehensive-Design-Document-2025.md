@@ -1,5 +1,152 @@
 # Staccato ERP - Comprehensive Redesign Document 2025
 
+## 📋 Document Index
+
+### **1. [Executive Summary](#executive-summary)** (Line 150)
+- Comprehensive analysis of current system and redesign proposal
+- Current system: Qt C++ desktop application, 290+ source files, ~100,000+ lines
+- Database: MySQL with 209 tables and 136 views
+- Key problems: Database complexity, monolithic architecture, tight coupling
+
+### **2. [Current System Analysis](#current-system-analysis)** (Line 168)
+
+#### **2.1 Database Architecture Issues** (Lines 23-64)
+- **Over-Complex Database Design** (Lines 25-41)
+  - 209 Tables with unclear relationships
+  - 136 Views with embedded business logic
+  - Circular dependencies and performance issues
+  - Evidence from initdb.sql
+- **Database Normalization Problems** (Lines 42-64)
+  - Mixed concerns in single tables
+  - Redundant data and inconsistent naming
+  - Missing constraints example: `loja` table analysis
+
+#### **2.2 Application Architecture Issues** (Lines 65-114)
+- **Monolithic God Class** (Lines 67-100)
+  - Application class violating Single Responsibility Principle
+  - Database management + transaction management + business operations
+  - UI management and utility functions in single class
+- **Scattered Business Logic** (Lines 101-107)
+  - Business logic distributed across database views and application code
+- **Tight UI-Business Coupling** (Lines 108-114)
+  - Qt widgets directly coupled to database operations
+
+#### **2.3 Code Organization Issues** (Lines 115-133)
+- **Evidence from TODOs in main.cpp** (Lines 117-133)
+  - Unresolved technical debt indicators
+  - Inconsistent initialization patterns
+
+#### **2.4 Organic Growth Problems** (Lines 134-148)
+- **Inconsistent Patterns** (Lines 136-141)
+  - Multiple approaches to similar problems
+- **Module Boundaries** (Lines 142-148)
+  - Unclear separation of concerns
+
+#### **2.5 Performance and Scalability Issues** (Lines 149-160)
+- **Database Performance Problems** (Lines 151-155)
+  - Complex view queries causing slow performance
+- **Application Performance Issues** (Lines 156-160)
+  - Desktop-only limitation
+
+#### **2.6 Maintenance and Development Issues** (Lines 161-172)
+- **Testing Challenges** (Lines 163-167)
+  - Tight coupling makes unit testing difficult
+- **Development Velocity Issues** (Lines 168-172)
+  - Time-consuming changes and high bug risk
+
+### **3. [Proposed Modern Architecture](#proposed-modern-architecture)** (Line 320)
+
+#### **3.1 Clean Architecture Design** (Lines 175-213)
+- **Hexagonal Architecture (Ports and Adapters)** (Lines 177-213)
+  - Domain layer isolation
+  - Infrastructure abstraction
+  - Mermaid diagram of clean architecture
+
+#### **3.2 Domain-Driven Design (DDD) Approach** (Lines 214-316)
+- **Identified Bounded Contexts** (Lines 216-316)
+  - **Sales Context**: Customer management, order processing, quotations
+  - **Inventory Context**: Product catalog, stock management, warehouse operations
+  - **Purchasing Context**: Supplier management, purchase orders, receiving
+  - **Financial Context**: Accounts receivable/payable, invoicing, payments
+  - **Brazilian Compliance Context**: NFe, tax calculations, regulatory reporting
+  - **Logistics Context**: Shipping, delivery, route optimization
+  - **Reporting Context**: Business intelligence, analytics, report generation
+
+#### **3.3 Redesigned Database Schema** (Lines 317-642)
+- **Core Entities with Proper Separation** (Lines 319-642)
+  - Complete normalized schema design
+  - Proper foreign key relationships
+  - Audit fields and temporal tracking
+  - Brazilian compliance integration
+
+#### **3.4 Modern Application Architecture** (Lines 643-860)
+- **Microservices Architecture** (Lines 645-699)
+  - Service decomposition strategy
+  - Inter-service communication patterns
+  - Database-per-service principle
+- **Domain Events and CQRS** (Lines 700-860)
+  - Event-driven architecture
+  - Command Query Responsibility Segregation
+  - Event sourcing for audit trails
+
+#### **3.5 API Design** (Lines 861-1024)
+- **REST API Design** (Lines 863-1024)
+  - Resource-based endpoints
+  - Consistent error handling
+  - Authentication and authorization
+  - API versioning strategy
+  - Comprehensive endpoint examples
+
+#### **3.6 Frontend Architecture** (Lines 1025-1250)
+- **Modern React Application Structure** (Lines 1027-1250)
+  - Component architecture
+  - State management with Redux Toolkit
+  - Routing and navigation
+  - UI component library integration
+  - Performance optimization strategies
+
+#### **3.7 Testing Strategy** (Lines 1251-1529)
+- **Comprehensive Testing Approach** (Lines 1253-1529)
+  - Unit testing frameworks
+  - Integration testing strategies
+  - End-to-end testing
+  - Performance testing
+  - Test automation pipeline
+
+#### **3.8 Migration Strategy** (Lines 1530-1677)
+- **Phased Migration Approach** (Lines 1532-1677)
+  - **Phase 1: Foundation** (1-3 months): Database redesign, basic API
+  - **Phase 2: Core Services** (4-6 months): Essential business logic migration
+  - **Phase 3: Frontend Development** (7-9 months): React interface implementation
+  - **Phase 4: Advanced Features** (10-12 months): Reports, analytics, optimization
+
+### **4. Implementation Timeline and Resource Requirements** (Lines 1678-1717)
+- **Timeline: 12-Month Migration** (Lines 1680-1697)
+  - Month-by-month breakdown
+  - Deliverables and milestones
+- **Resource Requirements** (Lines 1698-1717)
+  - Development team: 11 specialists
+  - Infrastructure requirements
+  - Total estimated cost: $800K-1.2M
+
+### **5. Benefits and Expected Outcomes** (Lines 1718-1740)
+- **Technical Benefits** (Lines 1720-1726)
+  - Improved maintainability, performance, scalability
+  - Enhanced testability and developer experience
+- **Business Benefits** (Lines 1727-1733)
+  - Reduced development costs, improved UX
+  - Better business insights and compliance
+- **Risk Mitigation** (Lines 1734-1740)
+  - Gradual migration, parallel running
+  - Comprehensive testing and rollback procedures
+
+### **6. Conclusion** (Lines 1741-1753)
+- Summary of architectural redesign benefits
+- Investment justification: $800K-1.2M for 10+ year future-proof system
+- Transformation from organic growth to well-architected solution
+
+---
+
 ## Executive Summary
 
 This document provides a comprehensive analysis of the current Staccato ERP system and proposes a complete architectural redesign to address organic growth issues, improve maintainability, and modernize the technology stack. The current system, while functional, suffers from significant architectural debt that hinders scalability, maintainability, and development velocity.

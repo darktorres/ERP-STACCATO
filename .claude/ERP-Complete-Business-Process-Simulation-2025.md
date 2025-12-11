@@ -1,5 +1,85 @@
 # ERP Staccato - Simulação Completa de Processos de Negócio 2025
 
+## 📑 Índice Detalhado
+
+### **📋 Visão Geral**
+- [Resumo Executivo](#resumo-executivo) (Line 83) - Objetivos e escopo da simulação
+- [Objetivos da Simulação](#objetivos-da-simulação) (L7) - Metas e propósitos do documento
+
+### **🆕 Novo Schema - Processos Limpos**
+1. **[Configuração Inicial](#1-configuração-inicial)** (Line 128)
+   - [1.1 Cadastro da Empresa Principal](#11-cadastro-da-empresa-principal) (L50) - Setup básico da empresa
+   - [1.2 Configuração de Endereços da Empresa](#12-configuração-de-endereços-da-empresa) (L74) - Gestão de endereços múltiplos
+   - [1.3 Configuração de Usuários e Permissões](#13-configuração-de-usuários-e-permissões) (L104) - Sistema de acesso e segurança
+
+2. **[Cadastro de Entidades](#2-cadastro-de-entidades)** (Line 220)
+   - [2.1 Cadastro de Fornecedores](#21-cadastro-de-fornecedores) (L142) - Gestão completa de fornecedores
+   - [2.2 Cadastro de Clientes](#22-cadastro-de-clientes) (L213) - Sistema de CRM e clientes
+   - [2.3 Cadastro de Produtos](#23-cadastro-de-produtos) (L266) - Catálogo e especificações
+   - [2.4 Configuração de Estoque Inicial](#24-configuração-de-estoque-inicial) (L318) - Inventário e controle
+
+3. **[Fluxo de Vendas](#3-fluxo-de-vendas)** (Line 443)
+   - [3.1 Criação de Orçamento](#31-criação-de-orçamento) (L365) - Processo de cotação
+   - [3.2 Conversão de Orçamento em Venda](#32-conversão-de-orçamento-em-venda) (L429) - Fechamento de negócios
+   - [3.3 Gestão de Origens de Atendimento (Novo Schema)](#33-gestão-de-origens-de-atendimento-novo-schema) (L491) - Rastreamento de canais
+
+4. **[Fluxo de Compras](#4-fluxo-de-compras)** (Line 625)
+   - [4.1 Geração Automática de Compras Necessárias](#41-geração-automática-de-compras-necessárias) (L547) - Automação de reposição
+   - [4.2 Confirmação e Aprovação da Compra](#42-confirmação-e-aprovação-da-compra) (L615) - Workflow de aprovação
+
+5. **[Logística e Entregas](#5-logística-e-entregas)** (Line 715)
+   - [5.1 Agendamento de Coleta do Fornecedor](#51-agendamento-de-coleta-do-fornecedor) (L637) - Coordenação de recebimento
+   - [5.2 Recebimento de Produtos](#52-recebimento-de-produtos) (L659) - Processo de entrada
+   - [5.3 Agendamento de Entrega ao Cliente](#53-agendamento-de-entrega-ao-cliente) (L731) - Planejamento de distribuição
+   - [5.4 Realização da Entrega](#54-realização-da-entrega) (L778) - Execução e confirmação
+
+6. **[NFe e Compliance](#6-nfe-e-compliance)** (Line 915)
+   - [6.1 Geração de NFe de Entrada (Compra)](#61-geração-de-nfe-de-entrada-compra) (L837) - Documentação fiscal de entrada
+   - [6.2 Geração de NFe de Saída (Venda)](#62-geração-de-nfe-de-saída-venda) (L907) - Documentação fiscal de saída
+
+7. **[Gestão Financeira](#7-gestão-financeira)** (Line 1059)
+   - [7.1 Contas a Pagar (Fornecedor)](#71-contas-a-pagar-fornecedor) (L981) - Gestão de passivos
+   - [7.2 Contas a Receber (Cliente)](#72-contas-a-receber-cliente) (L1034) - Gestão de recebíveis
+   - [7.3 Lançamentos Contábeis](#73-lançamentos-contábeis) (L1087) - Controle contábil
+
+8. **[Relatórios e Analytics](#8-relatórios-e-analytics)** (Line 1195)
+   - [8.1 Relatório de Vendas Realizadas](#81-relatório-de-vendas-realizadas) (L1117) - Performance comercial
+   - [8.2 Relatório de Rentabilidade por Produto](#82-relatório-de-rentabilidade-por-produto) (L1143) - Análise de margem
+   - [8.3 Fluxo de Caixa Projetado](#83-fluxo-de-caixa-projetado) (L1172) - Projeções financeiras
+
+### **⚠️ Schema Atual - Anti-Padrões e Problemas**
+9. **[Workflow com Schema Atual - Anti-Padrões](#9-workflow-com-schema-atual---anti-padrões)** (Line 1300)
+   - [Resumo dos Problemas do Schema Atual](#resumo-dos-problemas-do-schema-atual) (L1222) - Visão geral dos issues
+   - [🚨 Problemas Identificados no Schema Atual](#-problemas-identificados-no-schema-atual) (L1226) - Lista de problemas críticos
+   - [9.1 Fluxo de Vendas - Schema Atual](#91-fluxo-de-vendas---schema-atual) (L1237)
+     - [9.1.1 Criação de Venda (Schema Problemático)](#911-criação-de-venda-schema-problemático) (L1239) - Complexidade desnecessária
+     - [9.1.2 Split de Atendimento - O Anti-Padrão](#912-split-de-atendimento---o-anti-padrão) (L1285) - Duplicação de dados
+     - [9.1.3 Problemas Evidentes](#913-problemas-evidentes) (L1387) - Consequências práticas
+   - [9.2 Fluxo de Compras - Schema Atual](#92-fluxo-de-compras---schema-atual) (L1424) - Problemas em compras
+   - [9.3 Orçamentos - Schema Atual](#93-orçamentos---schema-atual) (L1485) - Complexidade em orçamentos
+   - [9.4 Tree Table UI - A Raiz do Problema](#94-tree-table-ui---a-raiz-do-problema) (L1548)
+     - [9.4.1 Por que a Duplicação Existe](#941-por-que-a-duplicação-existe) (L1550) - Origem dos problemas
+     - [9.4.2 Consulta Tree Table Atual](#942-consulta-tree-table-atual) (L1566) - Queries complexas
+   - [9.5 Problemas de Manutenção](#95-problemas-de-manutenção) (L1613)
+     - [9.5.1 Atualizações Complexas](#951-atualizações-complexas) (L1615) - Dificuldades de atualização
+     - [9.5.2 Validações Necessárias](#952-validações-necessárias) (L1648) - Controles obrigatórios
+   - [9.6 Performance Degradada](#96-performance-degradada) (L1683) - Impacto na performance
+   - [9.7 Manutenção do Código C++](#97-manutenção-do-código-c) (L1710) - Complexidade no código
+   - [9.8 Comparação Direta - Mesma Funcionalidade](#98-comparação-direta---mesma-funcionalidade) (L1763) - Lado a lado
+
+### **📊 Análise e Conclusões**
+10. **[Vantagens do Novo Schema](#10-vantagens-do-novo-schema)** (Line 1856)
+    - [10.1 Eliminação dos Anti-Padrões](#101-eliminação-dos-anti-padrões) (L1778) - Correção dos problemas
+    - [10.2 Auditoria Temporal Completa](#102-auditoria-temporal-completa) (L1808) - Rastreabilidade total
+    - [10.3 Performance Otimizada](#103-performance-otimizada) (L1848) - Melhorias de velocidade
+
+11. **[Conclusão da Simulação](#11-conclusão-da-simulação)** (Line 1958)
+    - [11.1 Resumo dos Processos Executados](#111-resumo-dos-processos-executados) (L1880) - Síntese dos resultados
+    - [11.2 Benefícios Comprovados](#112-benefícios-comprovados) (L1919) - Vantagens demonstradas
+    - [11.3 Métricas Finais](#113-métricas-finais) (L1928) - Números e comparativos
+
+---
+
 ## Resumo Executivo
 
 Este documento simula o fluxo completo de processos de negócio do ERP Staccato comparando o **novo schema limpo e normalizado** com o **schema atual problemático**. A simulação abrange desde o cadastro inicial da empresa até o ciclo completo de vendas, compras, logística, NFe e faturamento, demonstrando como o mesmo processo de negócio é executado em ambas as abordagens.

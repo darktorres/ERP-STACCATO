@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ERP.Staccato.Frontend",
   "resources": {
-    "hash": "sha256-UnvdwehUX67sfKnwzgoE3LWwBsJFogGVM+Re1x9i6c0=",
+    "hash": "sha256-dtTpBonIl5S12Z1xJSFpxGoMFm/ozqOAIkQAmfUpmJ4=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-vtotCeXt2UD6oc459laJT32vBgigZ+eLoUmdeFkvYDk="
     },
@@ -216,12 +216,12 @@
       "mscorlib.wasm": "sha256-K9gNrsN9UmPqLs6J/FrkiKpmkVGnHjjqUsc7YGvesCY=",
       "netstandard.wasm": "sha256-4emjlXLM9qW3t2tlII20SDylBgG4ueI0wy9nh5FMd8g=",
       "System.Private.CoreLib.wasm": "sha256-2DN4v7I/tabltDEPdIO8sDBB0tY8zOm+0CvHbMssXW4=",
-      "ERP.Staccato.Shared.wasm": "sha256-KmXm8jMS9wCjfBgaS9ZqgvbieVhz6363UaxexDI8ZuU=",
-      "ERP.Staccato.Frontend.wasm": "sha256-IyRamSYR5NnwEGOK956cGzmznDp3oOqM+A+hmNA9Oc0="
+      "ERP.Staccato.Shared.wasm": "sha256-HzWm9/O46jEXmU9Fa54oMsx8erFA8I1e8Io4IXvh0I4=",
+      "ERP.Staccato.Frontend.wasm": "sha256-eoSfqiewRhy+nVh4CWyv4czctojSEF3t4EigEiFHqrA="
     },
     "pdb": {
-      "ERP.Staccato.Shared.pdb": "sha256-4DA9GU0lD1lE2wTpBw9miVA0VgkRPuCulAW4/gXX0OE=",
-      "ERP.Staccato.Frontend.pdb": "sha256-eyyhpKmFlHXAzv8ZPAJxGjoLJkzXi5ZpgTNMdVY4QNk="
+      "ERP.Staccato.Shared.pdb": "sha256-TZKsv74IKrEPLkTWcSSo4GAj6cXFC2Qe3Jo6SAG5cRM=",
+      "ERP.Staccato.Frontend.pdb": "sha256-G1zq1+YExINpqzP+AOXa1HsefAPhDyuNj9MhEib/yfE="
     }
   },
   "cacheBootResources": true,

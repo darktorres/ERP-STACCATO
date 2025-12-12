@@ -1063,11 +1063,6 @@ C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\ob
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\s8a0xkut21-{0}-tptq2av103-tptq2av103.gz
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\kiwg5p7bbc-{0}-lfu7j35m59-lfu7j35m59.gz
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\1dbfe4eczd-{0}-oyz0vx2fzb-oyz0vx2fzb.gz
-C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\006hwu9ezj-{0}-qz99s1wbw7-qz99s1wbw7.gz
-C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\ioitmxk248-{0}-w8ejicqj4q-w8ejicqj4q.gz
-C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\jpshpn11z2-{0}-x7s8zi9a5x-x7s8zi9a5x.gz
-C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\tarqs9ia4w-{0}-1xaxe83srl-1xaxe83srl.gz
-C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\ioivxtghf2-{0}-buixswfytu-buixswfytu.gz
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\staticwebassets.development.json
@@ -1078,3 +1073,8 @@ C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\ob
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\refint\ERP.Staccato.Frontend.dll
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\ERP.Staccato.Frontend.pdb
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\ref\ERP.Staccato.Frontend.dll
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\006hwu9ezj-{0}-3vk27ugz2r-3vk27ugz2r.gz
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\ioitmxk248-{0}-1b8ha5hvth-1b8ha5hvth.gz
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\jpshpn11z2-{0}-a39e2ly2rf-a39e2ly2rf.gz
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\tarqs9ia4w-{0}-75qfqko6tt-75qfqko6tt.gz
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Frontend\obj\Debug\net8.0\compressed\ioivxtghf2-{0}-bw5uvu3g8j-bw5uvu3g8j.gz

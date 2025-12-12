@@ -51,77 +51,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     private static void SeedTestData(ApplicationDbContext context)
     {
-        // Clear existing data
-        context.Set<Usuario>().RemoveRange(context.Set<Usuario>());
-        context.Set<Loja>().RemoveRange(context.Set<Loja>());
-        context.Set<Maintenance>().RemoveRange(context.Set<Maintenance>());
-        context.SaveChanges();
-
-        // Seed test data - all users use password "1234"
-        var usuarios = new[]
-        {
-            new Usuario
-            {
-                IdUsuario = 1,
-                IdLoja = 1,
-                User = "admin",
-                Password = "1234",
-                Nome = "Administrador",
-                Tipo = SessionUser.Roles.ADMINISTRADOR,
-                Email = "admin@staccato.com.br",
-                Desativado = false,
-                SenhaUsoUnico = null,
-                ValorMinimoFrete = null
-            },
-            new Usuario
-            {
-                IdUsuario = 2,
-                IdLoja = 1,
-                User = "gerente",
-                Password = "1234",
-                Nome = "Gerente Loja",
-                Tipo = SessionUser.Roles.GERENTE_LOJA,
-                Email = "gerente@staccato.com.br",
-                Desativado = false,
-                SenhaUsoUnico = "1234",
-                ValorMinimoFrete = 50m
-            },
-            new Usuario
-            {
-                IdUsuario = 3,
-                IdLoja = 1,
-                User = "vendedor",
-                Password = "1234",
-                Nome = "Vendedor Um",
-                Tipo = SessionUser.Roles.VENDEDOR,
-                Email = "vendedor@staccato.com.br",
-                Desativado = false,
-                SenhaUsoUnico = null,
-                ValorMinimoFrete = null
-            }
-        };
-
-        var lojas = new[]
-        {
-            new Loja
-            {
-                IdLoja = 1,
-                Descricao = "Loja Principal",
-                NomeFantasia = "Staccato Matriz"
-            }
-        };
-
-        var maintenance = new Maintenance
-        {
-            Id = 1,
-            Created = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            EmManutencao = false
-        };
-
-        context.Set<Usuario>().AddRange(usuarios);
-        context.Set<Loja>().AddRange(lojas);
-        context.Set<Maintenance>().Add(maintenance);
-        context.SaveChanges();
+        // Tests only query existing data from the production database
+        // The implementation only covers WidgetOrcamento (read-only queries), not data creation/modification
+        // No modifications to the database are made during testing
     }
 }

@@ -30,12 +30,12 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(e => e.IdUsuario);
             entity.ToTable("usuario");
 
-            entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
+            entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
             entity.Property(e => e.User).HasColumnName("user");
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.Nome).HasColumnName("nome");
             entity.Property(e => e.Tipo).HasColumnName("tipo");
-            entity.Property(e => e.IdLoja).HasColumnName("id_loja");
+            entity.Property(e => e.IdLoja).HasColumnName("idLoja");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.SenhaUsoUnico).HasColumnName("senhaUsoUnico");
             entity.Property(e => e.ValorMinimoFrete).HasColumnName("valorMinimoFrete");
@@ -48,9 +48,9 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(e => e.IdLoja);
             entity.ToTable("loja");
 
-            entity.Property(e => e.IdLoja).HasColumnName("id_loja");
+            entity.Property(e => e.IdLoja).HasColumnName("idLoja");
             entity.Property(e => e.Descricao).HasColumnName("descricao");
-            entity.Property(e => e.NomeFantasia).HasColumnName("nome_fantasia");
+            entity.Property(e => e.NomeFantasia).HasColumnName("nomeFantasia");
             entity.Property(e => e.Desativado).HasColumnName("desativado");
         });
 

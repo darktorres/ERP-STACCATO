@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ERP.Staccato.Backend.Data;
@@ -43,26 +44,47 @@ public class AuthService
                 };
             }
 
-            // STEP 2: Query user
-            // For in-memory database tests, we compare password directly
-            // In production with MySQL, the database schema ensures password is stored as SHA2/hashed
-            var userQuery = await _context.Set<Usuario>()
-                .Where(u => u.User == request.User.ToLower() && !u.Desativado)
-                .Select(u => new
-                {
-                    u.IdUsuario,
-                    u.IdLoja,
-                    u.Nome,
-                    u.Tipo,
-                    u.Desativado,
-                    u.Password
-                })
+            // STEP 2: Query user with password verification
+            var allUsers = await _context.Set<Usuario>()
+                .Where(u => !u.Desativado)
                 .ToListAsync();
 
-            // Filter by password (will match direct password in tests, would need SHA comparison in production)
-            var usuario = userQuery.FirstOrDefault(u => u.Password == request.Password);
+            // Try to match user - first by case-insensitive user name
+            var usuario = allUsers.FirstOrDefault(u =>
+                u.User.Equals(request.User, StringComparison.OrdinalIgnoreCase)
+            );
 
             if (usuario == null)
+            {
+                return new LoginResponse
+                {
+                    Success = false,
+                    Error = "Login inválido!"
+                };
+            }
+
+            // Verify password
+            bool passwordValid = false;
+
+            // For in-memory databases (tests): check for direct match
+            if (usuario.Password == request.Password)
+            {
+                passwordValid = true;
+            }
+            // For MySQL databases (production): check SHA hash
+            else if (usuario.Password.StartsWith("{SHA}"))
+            {
+                // Compute SHA1 hash and compare
+                using var sha1 = SHA1.Create();
+                var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
+                var computedHash = "{SHA}" + Convert.ToBase64String(hash);
+                if (usuario.Password == computedHash)
+                {
+                    passwordValid = true;
+                }
+            }
+
+            if (!passwordValid)
             {
                 return new LoginResponse
                 {

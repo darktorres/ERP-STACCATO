@@ -1,6 +1,7 @@
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\bin\Debug\net9.0\ERP.Staccato.Shared.deps.json
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\bin\Debug\net9.0\ERP.Staccato.Shared.dll
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\bin\Debug\net9.0\ERP.Staccato.Shared.pdb
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\obj\Debug\net9.0\Shared.csproj.AssemblyReference.cache
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\obj\Debug\net9.0\Shared.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\obj\Debug\net9.0\Shared.AssemblyInfoInputs.cache
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Shared\obj\Debug\net9.0\Shared.AssemblyInfo.cs

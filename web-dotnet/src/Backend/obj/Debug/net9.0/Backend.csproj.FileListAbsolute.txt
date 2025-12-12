@@ -134,3 +134,4 @@ C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Backend\obj
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Backend\obj\Debug\net9.0\ERP.Staccato.Backend.pdb
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Backend\obj\Debug\net9.0\Backend.genruntimeconfig.cache
 C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Backend\obj\Debug\net9.0\ref\ERP.Staccato.Backend.dll
+C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-dotnet\src\Backend\bin\Debug\net9.0\FluentValidation.AspNetCore.dll

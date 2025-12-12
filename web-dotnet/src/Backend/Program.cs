@@ -76,18 +76,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// OpenAPI
-builder.Services.AddOpenApi();
+// Swagger/OpenAPI
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "ERP Staccato API");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ERP Staccato API");
     });
 }
 
@@ -101,6 +101,8 @@ app.MapControllers();
 // Health check
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
     .WithName("Health")
-    .WithOpenApi();
+    .Produces(StatusCodes.Status200OK);
 
 app.Run();
+
+public partial class Program { }

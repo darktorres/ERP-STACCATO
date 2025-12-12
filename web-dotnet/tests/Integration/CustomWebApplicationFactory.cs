@@ -28,10 +28,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Add in-memory database for testing
+            // Add real MySQL database for testing
+            var connectionString = "Server=localhost;Database=staccato;User=root;Password=1234;";
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseInMemoryDatabase("IntegrationTestDb-" + Guid.NewGuid());
+                options.UseMySql(
+                    connectionString,
+                    ServerVersion.AutoDetect(connectionString)
+                );
             });
 
             // Build service provider and seed test data
@@ -53,7 +57,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         context.Set<Maintenance>().RemoveRange(context.Set<Maintenance>());
         context.SaveChanges();
 
-        // Seed test data
+        // Seed test data - all users use password "1234"
         var usuarios = new[]
         {
             new Usuario
@@ -61,7 +65,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 IdUsuario = 1,
                 IdLoja = 1,
                 User = "admin",
-                Password = "8C6976E5B5410415BDE908BD4DEE15DFB167A9C873FC4BB8A81F6F2AB448A918",
+                Password = "1234",
                 Nome = "Administrador",
                 Tipo = SessionUser.Roles.ADMINISTRADOR,
                 Email = "admin@staccato.com.br",
@@ -74,7 +78,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 IdUsuario = 2,
                 IdLoja = 1,
                 User = "gerente",
-                Password = "3E8F0FBD3B4FC84E6F59CB0ACAD5B2E5D6D8F0B8D7A3C5F8E1E8B3C3D3F0A0B",
+                Password = "1234",
                 Nome = "Gerente Loja",
                 Tipo = SessionUser.Roles.GERENTE_LOJA,
                 Email = "gerente@staccato.com.br",
@@ -87,7 +91,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 IdUsuario = 3,
                 IdLoja = 1,
                 User = "vendedor",
-                Password = "9D8F0FBD3B4FC84E6F59CB0ACAD5B2E5D6D8F0B8D7A3C5F8E1E8B3C3D3F0A0B",
+                Password = "1234",
                 Nome = "Vendedor Um",
                 Tipo = SessionUser.Roles.VENDEDOR,
                 Email = "vendedor@staccato.com.br",

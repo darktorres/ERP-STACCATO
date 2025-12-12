@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ERP.Staccato.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bccccb1a20f218fe6e553f2c2bff10251929346c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10962a704cb7b0b3841ff6b8df9fd16a07257275")]
 [assembly: System.Reflection.AssemblyProductAttribute("ERP.Staccato.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ERP.Staccato.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

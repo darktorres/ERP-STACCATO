@@ -23,7 +23,7 @@ public static class TestDbContextFactory
 
     private static void SeedTestData(ApplicationDbContext context)
     {
-        // Create test users
+        // Create test users - all use password "1234"
         var usuarios = new[]
         {
             new Usuario
@@ -31,7 +31,7 @@ public static class TestDbContextFactory
                 IdUsuario = 1,
                 IdLoja = 1,
                 User = "admin",
-                Password = "8C6976E5B5410415BDE908BD4DEE15DFB167A9C873FC4BB8A81F6F2AB448A918", // SHA_PASSWORD("admin")
+                Password = "1234",
                 Nome = "Administrador",
                 Tipo = SessionUser.Roles.ADMINISTRADOR,
                 Email = "admin@staccato.com.br",
@@ -44,7 +44,7 @@ public static class TestDbContextFactory
                 IdUsuario = 2,
                 IdLoja = 1,
                 User = "gerente",
-                Password = "3E8F0FBD3B4FC84E6F59CB0ACAD5B2E5D6D8F0B8D7A3C5F8E1E8B3C3D3F0A0B", // SHA_PASSWORD("gerente")
+                Password = "1234",
                 Nome = "Gerente Loja",
                 Tipo = SessionUser.Roles.GERENTE_LOJA,
                 Email = "gerente@staccato.com.br",
@@ -57,7 +57,7 @@ public static class TestDbContextFactory
                 IdUsuario = 3,
                 IdLoja = 1,
                 User = "vendedor",
-                Password = "9D8F0FBD3B4FC84E6F59CB0ACAD5B2E5D6D8F0B8D7A3C5F8E1E8B3C3D3F0A0B", // SHA_PASSWORD("vendedor")
+                Password = "1234",
                 Nome = "Vendedor Um",
                 Tipo = SessionUser.Roles.VENDEDOR,
                 Email = "vendedor@staccato.com.br",
@@ -70,7 +70,7 @@ public static class TestDbContextFactory
                 IdUsuario = 4,
                 IdLoja = 2,
                 User = "operacional",
-                Password = "1F8F0FBD3B4FC84E6F59CB0ACAD5B2E5D6D8F0B8D7A3C5F8E1E8B3C3D3F0A0B", // SHA_PASSWORD("operacional")
+                Password = "1234",
                 Nome = "Operacional",
                 Tipo = SessionUser.Roles.OPERACIONAL,
                 Email = "operacional@staccato.com.br",

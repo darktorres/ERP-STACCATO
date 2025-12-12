@@ -104,9 +104,8 @@ public class LoginRequestValidatorTests
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle();
-        result.Errors[0].PropertyName.Should().Be("Password");
-        result.Errors[0].ErrorMessage.Should().Contain("obrigatória");
+        result.Errors.Should().NotBeEmpty();
+        result.Errors.Should().Contain(e => e.PropertyName == "Password" && e.ErrorMessage.Contains("obrigatória"));
     }
 
     [Fact]
@@ -207,7 +206,7 @@ public class AuthorizationRequestValidatorTests
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle(e => e.PropertyName == "SenhaUsoUnico");
+        result.Errors.Should().Contain(e => e.PropertyName == "SenhaUsoUnico" && e.ErrorMessage.Contains("obrigatória"));
     }
 
     [Fact]

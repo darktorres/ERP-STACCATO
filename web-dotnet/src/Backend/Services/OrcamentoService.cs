@@ -19,6 +19,7 @@ public class OrcamentoService
     /// <summary>
     /// List orcamentos with filtering
     /// Mirrors C++ WidgetOrcamento::montaFiltro() logic
+    /// Implemented using LINQ for compatibility with both SQL Server and in-memory testing
     /// </summary>
     public async Task<List<OrcamentoListItem>> ListAsync(
         OrcamentoFilters filters,
@@ -29,133 +30,82 @@ public class OrcamentoService
     {
         try
         {
-            // Build raw SQL query similar to TypeScript implementation
-            var query = @"
-SELECT
-    idOrcamento,
-    idLoja,
-    idUsuario,
-    idUsuarioConsultor,
-    status,
-    diasRestantes,
-    vendedor,
-    consultor,
-    cliente,
-    profissional,
-    tel,
-    telCel,
-    telProf,
-    data,
-    data2,
-    total,
-    idFollowup,
-    dataFollowup,
-    dataProxFollowup,
-    observacao,
-    semaforo,
-    fornecedores
-FROM view_orcamento
-WHERE 1=1";
-
-            var parameters = new List<object>();
-            var paramIndex = 0;
+            var query = _context.Set<OrcamentoView>().AsQueryable();
 
             // Role-based filtering
             if (userType == "GERENTE LOJA" || userType == "GERENTE DEPARTAMENTO")
             {
-                query += $" AND idLoja = @p{paramIndex}";
-                parameters.Add(userLojaId);
-                paramIndex++;
+                query = query.Where(o => o.IdLoja == userLojaId);
             }
             else if (filters.IdLoja.HasValue)
             {
-                query += $" AND idLoja = @p{paramIndex}";
-                parameters.Add(filters.IdLoja);
-                paramIndex++;
+                query = query.Where(o => o.IdLoja == filters.IdLoja);
             }
 
             // Month filter
             if (!string.IsNullOrEmpty(filters.MesAno))
             {
-                query += $" AND data2 = @p{paramIndex}";
-                parameters.Add(filters.MesAno);
-                paramIndex++;
+                query = query.Where(o => o.Data2 == filters.MesAno);
             }
 
             // Vendor filter
             if (filters.IdVendedor.HasValue)
             {
-                query += $" AND (idUsuario = @p{paramIndex} OR idUsuarioConsultor = @p{paramIndex + 1})";
-                parameters.Add(filters.IdVendedor);
-                parameters.Add(filters.IdVendedor);
-                paramIndex += 2;
+                query = query.Where(o =>
+                    o.IdUsuario == filters.IdVendedor ||
+                    o.IdUsuarioConsultor == filters.IdVendedor);
             }
 
             // Supplier filter
             if (!string.IsNullOrEmpty(filters.Fornecedor))
             {
-                query += $" AND fornecedores LIKE @p{paramIndex}";
-                parameters.Add($"%{filters.Fornecedor}%");
-                paramIndex++;
+                query = query.Where(o =>
+                    o.Fornecedores != null &&
+                    o.Fornecedores.Contains(filters.Fornecedor));
             }
 
             // Status filter
             if (filters.Statuses.Any())
             {
-                var statusPlaceholders = string.Join(",", filters.Statuses
-                    .Select((_, i) => $"@p{paramIndex + i}"));
-                query += $" AND status IN ({statusPlaceholders})";
-                parameters.AddRange(filters.Statuses);
-                paramIndex += filters.Statuses.Count;
+                query = query.Where(o => filters.Statuses.Contains(o.Status));
             }
 
             // Semaforo filter
             if (filters.Semaforo.HasValue)
             {
-                query += $" AND semaforo = @p{paramIndex}";
-                parameters.Add(filters.Semaforo);
-                paramIndex++;
+                query = query.Where(o => o.Semaforo == filters.Semaforo);
             }
 
             // "Próprios" filter (only for vendedores)
             if ((userType == "VENDEDOR" || userType == "VENDEDOR ESPECIAL")
                 && filters.ApenasPropriosOrcamentos)
             {
-                query += $" AND (vendedor = @p{paramIndex} OR consultor = @p{paramIndex + 1})";
-                parameters.Add(userName);
-                parameters.Add(userName);
-                paramIndex += 2;
+                query = query.Where(o =>
+                    o.Vendedor == userName ||
+                    o.Consultor == userName);
             }
 
             // Search filter
             if (!string.IsNullOrEmpty(filters.Search))
             {
-                var searchTerm = $"%{filters.Search}%";
-                query += $" AND (idOrcamento LIKE @p{paramIndex} OR vendedor LIKE @p{paramIndex + 1} " +
-                         $"OR cliente LIKE @p{paramIndex + 2} OR profissional LIKE @p{paramIndex + 3})";
-                parameters.Add(searchTerm);
-                parameters.Add(searchTerm);
-                parameters.Add(searchTerm);
-                parameters.Add(searchTerm);
-                paramIndex += 4;
+                var searchTerm = filters.Search;
+                query = query.Where(o =>
+                    o.IdOrcamento.ToString().Contains(searchTerm) ||
+                    (o.Vendedor != null && o.Vendedor.Contains(searchTerm)) ||
+                    (o.Cliente != null && o.Cliente.Contains(searchTerm)) ||
+                    (o.Profissional != null && o.Profissional.Contains(searchTerm))
+                );
             }
 
             // Order by
-            query += " ORDER BY data DESC";
+            query = query.OrderByDescending(o => o.Data);
 
-            Console.WriteLine($"[Orcamento.ListAsync] Query: {query}");
             Console.WriteLine($"[Orcamento.ListAsync] Filters: {System.Text.Json.JsonSerializer.Serialize(filters)}");
 
             // Execute query and map results
-            var result = new List<OrcamentoListItem>();
+            var orcamentos = await query.ToListAsync();
 
-            // Using FromSqlRaw with proper parameterization
-            var orcamentos = await _context.Set<OrcamentoView>()
-                .FromSqlRaw(query, parameters.ToArray())
-                .ToListAsync();
-
-            // Map to DTO
-            result = orcamentos.Select(o => new OrcamentoListItem
+            var result = orcamentos.Select(o => new OrcamentoListItem
             {
                 IdOrcamento = o.IdOrcamento,
                 IdLoja = o.IdLoja,
@@ -198,7 +148,7 @@ WHERE 1=1";
     {
         return await _context.Set<Loja>()
             .Where(l => !l.Desativado)
-            .OrderBy(l => l.Descricao)
+            .OrderBy(l => l.IdLoja)
             .Select(l => new LojaDto
             {
                 IdLoja = l.IdLoja,
@@ -234,21 +184,24 @@ WHERE 1=1";
     /// </summary>
     public async Task<List<FornecedorDto>> GetFornecedoresForFilterAsync()
     {
-        var result = await _context.Database.SqlQueryRaw<dynamic>(
-            @"SELECT DISTINCT fornecedores FROM orcamento
-              WHERE fornecedores IS NOT NULL AND fornecedores != ''"
-        ).ToListAsync();
+        // Get all orcamentos with fornecedores data
+        var orcamentos = await _context.Set<OrcamentoView>()
+            .Where(o => o.Fornecedores != null && o.Fornecedores != "")
+            .Select(o => o.Fornecedores)
+            .ToListAsync();
 
         var fornecedoresSet = new HashSet<string>();
 
-        foreach (var row in result)
+        foreach (var fornecedoresStr in orcamentos)
         {
-            if (row?.fornecedores != null)
+            if (!string.IsNullOrEmpty(fornecedoresStr))
             {
-                var fornecedores = row.fornecedores.ToString()?.Split(',') ?? Array.Empty<string>();
+                var fornecedores = fornecedoresStr.Split(',');
                 foreach (var f in fornecedores)
                 {
-                    fornecedoresSet.Add(f.Trim());
+                    var trimmed = f.Trim();
+                    if (!string.IsNullOrEmpty(trimmed))
+                        fornecedoresSet.Add(trimmed);
                 }
             }
         }
@@ -258,33 +211,4 @@ WHERE 1=1";
             .Select(x => new FornecedorDto { RazaoSocial = x })
             .ToList();
     }
-}
-
-/// <summary>
-/// OrcamentoView entity for FromSqlRaw queries
-/// </summary>
-public class OrcamentoView
-{
-    public string IdOrcamento { get; set; } = string.Empty;
-    public int IdLoja { get; set; }
-    public int IdUsuario { get; set; }
-    public int? IdUsuarioConsultor { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public int? DiasRestantes { get; set; }
-    public string Vendedor { get; set; } = string.Empty;
-    public string? Consultor { get; set; }
-    public string Cliente { get; set; } = string.Empty;
-    public string? Profissional { get; set; }
-    public string? Tel { get; set; }
-    public string? TelCel { get; set; }
-    public string? TelProf { get; set; }
-    public DateTime Data { get; set; }
-    public string Data2 { get; set; } = string.Empty;
-    public decimal Total { get; set; }
-    public int? IdFollowup { get; set; }
-    public DateTime? DataFollowup { get; set; }
-    public DateTime? DataProxFollowup { get; set; }
-    public string? Observacao { get; set; }
-    public int? Semaforo { get; set; }
-    public string? Fornecedores { get; set; }
 }

@@ -24,7 +24,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var request = new LoginRequest
         {
             User = "admin",
-            Password = "admin",
+            Password = "1234",
             Staging = false
         };
 
@@ -93,7 +93,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var request = new LoginRequest
         {
             User = "",
-            Password = "admin"
+            Password = "1234"
         };
 
         // Act
@@ -127,7 +127,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var request = new LoginRequest
         {
             User = "admin",
-            Password = "admin",
+            Password = "1234",
             Staging = false
         };
 
@@ -150,7 +150,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var request = new LoginRequest
         {
             User = "admin",
-            Password = "admin"
+            Password = "1234"
         };
 
         // Act
@@ -254,7 +254,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var loginRequest = new LoginRequest
         {
             User = "gerente",
-            Password = "gerente",
+            Password = "1234",
             Staging = false
         };
 
@@ -292,7 +292,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var adminLogin = new LoginRequest
         {
             User = "admin",
-            Password = "admin"
+            Password = "1234"
         };
 
         var adminResponse = await _httpClient.PostAsJsonAsync("/api/auth/login", adminLogin);
@@ -302,7 +302,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
         var gerenteLogin = new LoginRequest
         {
             User = "gerente",
-            Password = "gerente"
+            Password = "1234"
         };
 
         var gerenteResponse = await _httpClient.PostAsJsonAsync("/api/auth/login", gerenteLogin);

@@ -100,7 +100,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/lojas-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/lojas");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<LojaDto>>>();
 
         // Assert
@@ -112,7 +112,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
     public async Task GetLojas_WithoutAuth_Returns401()
     {
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/lojas-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/lojas");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -131,7 +131,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/vendedores-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/vendedores");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<VendedorDto>>>();
 
         // Assert
@@ -143,7 +143,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
     public async Task GetVendedores_WithoutAuth_Returns401()
     {
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/vendedores-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/vendedores");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -162,7 +162,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/fornecedores-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/fornecedores");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<FornecedorDto>>>();
 
         // Assert
@@ -174,7 +174,7 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
     public async Task GetFornecedores_WithoutAuth_Returns401()
     {
         // Act
-        var response = await _httpClient.GetAsync("/api/orcamento/fornecedores-filter");
+        var response = await _httpClient.GetAsync("/api/orcamento/fornecedores");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -232,15 +232,15 @@ public class OrcamentoControllerIntegrationTests : IClassFixture<CustomWebApplic
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Step 2: Get stores dropdown
-        var lojasResponse = await _httpClient.GetAsync("/api/orcamento/lojas-filter");
+        var lojasResponse = await _httpClient.GetAsync("/api/orcamento/lojas");
         lojasResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 3: Get vendors dropdown
-        var vendedoresResponse = await _httpClient.GetAsync("/api/orcamento/vendedores-filter");
+        var vendedoresResponse = await _httpClient.GetAsync("/api/orcamento/vendedores");
         vendedoresResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 4: Get suppliers dropdown
-        var fornecedoresResponse = await _httpClient.GetAsync("/api/orcamento/fornecedores-filter");
+        var fornecedoresResponse = await _httpClient.GetAsync("/api/orcamento/fornecedores");
         fornecedoresResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 5: List budgets with filters

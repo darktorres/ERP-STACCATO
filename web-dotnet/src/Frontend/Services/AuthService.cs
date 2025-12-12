@@ -43,7 +43,7 @@ public class AuthService
                 _logger.LogWarning($"Login failed with status {response.StatusCode}");
                 try
                 {
-                    var error = await response.Content.ReadAsAsync<LoginResponse>();
+                    var error = await response.Content.ReadFromJsonAsync<LoginResponse>();
                     return error ?? new LoginResponse { Success = false, Error = "Login failed" };
                 }
                 catch
@@ -52,7 +52,7 @@ public class AuthService
                 }
             }
 
-            var result = await response.Content.ReadAsAsync<LoginResponse>();
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
             if (result == null)
             {
                 return new LoginResponse { Success = false, Error = "Invalid response" };
@@ -92,7 +92,7 @@ public class AuthService
 
             var response = await _httpClient.PostAsJsonAsync("/api/auth/authorize", request);
 
-            var result = await response.Content.ReadAsAsync<AuthorizationResponse>();
+            var result = await response.Content.ReadFromJsonAsync<AuthorizationResponse>();
             return result ?? new AuthorizationResponse { Success = false, Message = "Invalid response" };
         }
         catch (Exception ex)
@@ -118,7 +118,7 @@ public class AuthService
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<SessionUser>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SessionUser>>();
             return result?.Dados;
         }
         catch (Exception ex)

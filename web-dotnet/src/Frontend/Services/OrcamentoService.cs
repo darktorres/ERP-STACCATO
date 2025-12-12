@@ -32,7 +32,7 @@ public class OrcamentoService
                 return new();
             }
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<List<OrcamentoListItem>>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<OrcamentoListItem>>>();
             return result?.Dados ?? new();
         }
         catch (Exception ex)
@@ -54,7 +54,7 @@ public class OrcamentoService
             if (!response.IsSuccessStatusCode)
                 return new();
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<List<LojaDto>>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<LojaDto>>>();
             return result?.Dados ?? new();
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public class OrcamentoService
             if (!response.IsSuccessStatusCode)
                 return new();
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<List<VendedorDto>>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<VendedorDto>>>();
             return result?.Dados ?? new();
         }
         catch (Exception ex)
@@ -102,7 +102,7 @@ public class OrcamentoService
             if (!response.IsSuccessStatusCode)
                 return new();
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<List<FornecedorDto>>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<FornecedorDto>>>();
             return result?.Dados ?? new();
         }
         catch (Exception ex)

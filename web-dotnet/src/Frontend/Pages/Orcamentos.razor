@@ -29,7 +29,7 @@
             {/* Status Filter */
             <div class="filter-group">
                 <label class="filter-label">
-                    <input type="checkbox" @bind="StatusEnabled" @onchange="ApplyFiltersAsync" />
+                    <input type="checkbox" @bind="StatusEnabled" />
                     <span>Status</span>
                 </label>
                 @foreach (var status in StatusOptions)
@@ -37,10 +37,10 @@
                     <label class="filter-checkbox">
                         <input
                             type="checkbox"
-                            @bind="SelectedStatuses"
                             value="@status"
-                            @onchange="ApplyFiltersAsync"
+                            @onchange="@((ChangeEventArgs e) => OnStatusChanged(status, (bool)e.Value!))"
                             disabled="@(!StatusEnabled)"
+                            checked="@SelectedStatuses.Contains(status)"
                         />
                         <span>@status</span>
                     </label>
@@ -52,14 +52,14 @@
             {
                 <div class="filter-group">
                     <label class="filter-label">
-                        <input type="checkbox" @bind="MesEnabled" @onchange="ApplyFiltersAsync" />
+                        <input type="checkbox" @bind="MesEnabled" />
                         <span>Mês</span>
                     </label>
                     <input
                         type="month"
                         class="filter-input"
-                        @bind="MesValue"
-                        @onchange="ApplyFiltersAsync"
+                        value="@MesValue"
+                        @onchange="@((ChangeEventArgs e) => MesValue = e.Value?.ToString() ?? string.Empty)"
                         disabled="@(!MesEnabled)"
                     />
                 </div>
@@ -70,7 +70,7 @@
             {
                 <div class="filter-group">
                     <label class="filter-label">Lojas</label>
-                    <select class="filter-select" @bind="SelectedLoja" @onchange="ApplyFiltersAsync">
+                    <select class="filter-select" value="@SelectedLoja" @onchange="@((ChangeEventArgs e) => SelectedLoja = e.Value?.ToString() ?? string.Empty)">
                         <option value="">Todas</option>
                         @foreach (var loja in Lojas)
                         {
@@ -85,7 +85,7 @@
             {
                 <div class="filter-group">
                     <label class="filter-label">Vendedores</label>
-                    <select class="filter-select" @bind="SelectedVendedor" @onchange="ApplyFiltersAsync">
+                    <select class="filter-select" value="@SelectedVendedor" @onchange="@((ChangeEventArgs e) => SelectedVendedor = e.Value?.ToString() ?? string.Empty)">
                         <option value="">Todos</option>
                         @foreach (var vendedor in Vendedores)
                         {
@@ -98,7 +98,7 @@
             {/* Supplier Filter */
             <div class="filter-group">
                 <label class="filter-label">Fornecedores</label>
-                <select class="filter-select" @bind="SelectedFornecedor" @onchange="ApplyFiltersAsync">
+                <select class="filter-select" value="@SelectedFornecedor" @onchange="@((ChangeEventArgs e) => SelectedFornecedor = e.Value?.ToString() ?? string.Empty)">
                     <option value="">Todos</option>
                     @foreach (var fornecedor in Fornecedores)
                     {
@@ -304,6 +304,15 @@
     private async Task ApplyFiltersAsync()
     {
         await LoadOrcamentos();
+    }
+
+    private async Task OnStatusChanged(string status, bool isChecked)
+    {
+        if (isChecked)
+            SelectedStatuses.Add(status);
+        else
+            SelectedStatuses.Remove(status);
+        await ApplyFiltersAsync();
     }
 
     private async Task OnSearchKeyUpAsync(KeyboardEventArgs e)

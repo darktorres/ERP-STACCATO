@@ -35,6 +35,8 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Tipo).HasColumnName("tipo");
             entity.Property(e => e.IdLoja).HasColumnName("id_loja");
             entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.SenhaUsoUnico).HasColumnName("senhaUsoUnico");
+            entity.Property(e => e.ValorMinimoFrete).HasColumnName("valorMinimoFrete");
             entity.Property(e => e.Desativado).HasColumnName("desativado");
         });
 
@@ -48,6 +50,20 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Descricao).HasColumnName("descricao");
             entity.Property(e => e.NomeFantasia).HasColumnName("nome_fantasia");
             entity.Property(e => e.Desativado).HasColumnName("desativado");
+        });
+
+        // Configure Maintenance table
+        modelBuilder.Entity<Maintenance>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("maintenance");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.LastInvalidated).HasColumnName("lastInvalidated");
+            entity.Property(e => e.UltimaConsultaNSU).HasColumnName("ultimaConsultaNSU");
+            entity.Property(e => e.EmManutencao).HasColumnName("emManutencao");
+            entity.Property(e => e.Created).HasColumnName("created");
+            entity.Property(e => e.LastUpdated).HasColumnName("lastUpdated");
         });
     }
 }
@@ -64,6 +80,8 @@ public class Usuario
     public string Tipo { get; set; } = string.Empty;
     public int IdLoja { get; set; }
     public string? Email { get; set; }
+    public string? SenhaUsoUnico { get; set; }
+    public decimal? ValorMinimoFrete { get; set; }
     public bool Desativado { get; set; }
 }
 
@@ -76,4 +94,17 @@ public class Loja
     public string? Descricao { get; set; }
     public string? NomeFantasia { get; set; }
     public bool Desativado { get; set; }
+}
+
+/// <summary>
+/// Maintenance entity - system maintenance flag
+/// </summary>
+public class Maintenance
+{
+    public int Id { get; set; }
+    public DateTime? LastInvalidated { get; set; }
+    public DateTime? UltimaConsultaNSU { get; set; }
+    public bool EmManutencao { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime LastUpdated { get; set; }
 }

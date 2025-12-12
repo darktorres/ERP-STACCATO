@@ -23,12 +23,19 @@ public class AuthService
     }
 
     /// <summary>
-    /// Login user with email and password
+    /// Login user with user and password
     /// </summary>
-    public async Task<ApiResponse<LoginResponse>?> LoginAsync(LoginRequest request)
+    public async Task<LoginResponse?> LoginAsync(string user, string password)
     {
         try
         {
+            var request = new LoginRequest
+            {
+                User = user,
+                Password = password,
+                Staging = false
+            };
+
             var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
 
             if (!response.IsSuccessStatusCode)
@@ -36,24 +43,24 @@ public class AuthService
                 _logger.LogWarning($"Login failed with status {response.StatusCode}");
                 try
                 {
-                    var error = await response.Content.ReadAsAsync<ApiResponse<LoginResponse>>();
-                    return error;
+                    var error = await response.Content.ReadAsAsync<LoginResponse>();
+                    return error ?? new LoginResponse { Success = false, Error = "Login failed" };
                 }
                 catch
                 {
-                    return new ApiResponse<LoginResponse> { Sucesso = false, Mensagem = "Login failed" };
+                    return new LoginResponse { Success = false, Error = "Login failed" };
                 }
             }
 
-            var result = await response.Content.ReadAsAsync<ApiResponse<LoginResponse>>();
+            var result = await response.Content.ReadAsAsync<LoginResponse>();
             if (result == null)
             {
-                return new ApiResponse<LoginResponse> { Sucesso = false, Mensagem = "Invalid response" };
+                return new LoginResponse { Success = false, Error = "Invalid response" };
             }
 
-            if (result?.Sucesso == true && !string.IsNullOrEmpty(result.Dados?.Token))
+            if (result?.Success == true && !string.IsNullOrEmpty(result.Token))
             {
-                await _customAuthProvider.MarkUserAsAuthenticatedAsync(result.Dados.Token);
+                await _customAuthProvider.MarkUserAsAuthenticatedAsync(result.Token);
                 _logger.LogInformation("Login successful");
             }
 
@@ -62,10 +69,39 @@ public class AuthService
         catch (Exception ex)
         {
             _logger.LogError($"Login error: {ex.Message}");
-            return new ApiResponse<LoginResponse>
+            return new LoginResponse
             {
-                Sucesso = false,
-                Mensagem = $"Erro ao fazer login: {ex.Message}"
+                Success = false,
+                Error = $"Erro ao fazer login: {ex.Message}"
+            };
+        }
+    }
+
+    /// <summary>
+    /// Authorization with one-time password
+    /// </summary>
+    public async Task<AuthorizationResponse?> AuthorizeAsync(string user, string senhaUsoUnico)
+    {
+        try
+        {
+            var request = new AuthorizationRequest
+            {
+                User = user,
+                SenhaUsoUnico = senhaUsoUnico
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/authorize", request);
+
+            var result = await response.Content.ReadAsAsync<AuthorizationResponse>();
+            return result ?? new AuthorizationResponse { Success = false, Message = "Invalid response" };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Authorization error: {ex.Message}");
+            return new AuthorizationResponse
+            {
+                Success = false,
+                Message = $"Erro na autorização: {ex.Message}"
             };
         }
     }

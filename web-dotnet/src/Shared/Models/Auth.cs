@@ -1,23 +1,62 @@
 namespace ERP.Staccato.Shared.Models;
 
 /// <summary>
-/// Login request
+/// Login request - matches TypeScript LoginInput
 /// </summary>
 public class LoginRequest
 {
-    public string Email { get; set; } = string.Empty;
-    public string Senha { get; set; } = string.Empty;
+    public string User { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public bool Staging { get; set; } = false;
 }
 
 /// <summary>
-/// Login response
+/// Authorization request - one-time password validation
+/// Matches TypeScript AuthorizationInput
+/// </summary>
+public class AuthorizationRequest
+{
+    public string User { get; set; } = string.Empty;
+    public string SenhaUsoUnico { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Authorization response
+/// </summary>
+public class AuthorizationResponse
+{
+    public bool Success { get; set; }
+    public decimal? ValorMinimoFrete { get; set; }
+    public string? Message { get; set; }
+}
+
+/// <summary>
+/// Store information for login response
+/// </summary>
+public class LojaInfo
+{
+    public int IdLoja { get; set; }
+    public string Descricao { get; set; } = string.Empty;
+    public string NomeFantasia { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Session user with loja information
+/// </summary>
+public class SessionUserWithLoja : SessionUser
+{
+    public LojaInfo? Loja { get; set; }
+}
+
+/// <summary>
+/// Login response - matches TypeScript LoginResponse
 /// </summary>
 public class LoginResponse
 {
-    public bool Sucesso { get; set; }
-    public string? Mensagem { get; set; }
+    public bool Success { get; set; }
     public string? Token { get; set; }
-    public SessionUser? Usuario { get; set; }
+    public SessionUserWithLoja? User { get; set; }
+    public string? Error { get; set; }
 }
 
 /// <summary>

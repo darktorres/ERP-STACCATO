@@ -23,13 +23,13 @@
 
         <form @onsubmit="HandleLoginAsync">
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="user">Usuário</label>
                 <input
                     type="text"
-                    id="email"
+                    id="user"
                     class="form-control"
-                    @bind="Email"
-                    placeholder="seu.email@example.com"
+                    @bind="User"
+                    placeholder="seu_usuario"
                     disabled="@IsLoading"
                     required
                 />
@@ -67,7 +67,7 @@
 </div>
 
 @code {
-    private string Email = "";
+    private string User = "";
     private string Password = "";
     private string ErrorMessage = "";
     private bool IsLoading = false;
@@ -89,22 +89,16 @@
             ErrorMessage = "";
             IsLoading = true;
 
-            var request = new LoginRequest
-            {
-                Email = Email,
-                Senha = Password
-            };
+            var response = await AuthService.LoginAsync(User, Password);
 
-            var response = await AuthService.LoginAsync(request);
-
-            if (response?.Sucesso == true && !string.IsNullOrEmpty(response.Dados?.Token))
+            if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
             {
-                Logger.LogInformation("Login successful for user: {Email}", Email);
+                Logger.LogInformation("Login successful for user: {User}", User);
                 Navigation.NavigateTo("/orcamentos", replace: true);
             }
             else
             {
-                ErrorMessage = response?.Mensagem ?? "Falha ao autenticar. Tente novamente.";
+                ErrorMessage = response?.Error ?? "Falha ao autenticar. Tente novamente.";
             }
         }
         catch (Exception ex)

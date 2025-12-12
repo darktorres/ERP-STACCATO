@@ -19,23 +19,44 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Login with email and password
+    /// Login with user and password
     /// </summary>
     [HttpPost("login")]
-    public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
-        _logger.LogInformation($"[Auth] Login attempt for email: {request.Email}");
+        _logger.LogInformation($"[Auth] Login attempt for user: {request.User}");
 
         var response = await _authService.LoginAsync(request);
 
-        if (!response.Sucesso)
+        if (!response.Success)
         {
-            _logger.LogWarning($"[Auth] Login failed for email: {request.Email}");
-            return Unauthorized(ApiResponse<LoginResponse>.Error(response.Mensagem ?? "Login failed"));
+            _logger.LogWarning($"[Auth] Login failed for user: {request.User} - {response.Error}");
+            return Unauthorized(response);
         }
 
-        _logger.LogInformation($"[Auth] Login successful for email: {request.Email}");
-        return Ok(ApiResponse<LoginResponse>.Ok(response));
+        _logger.LogInformation($"[Auth] Login successful for user: {request.User}");
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Authorization with one-time password
+    /// Matches TypeScript tRPC router authorize procedure
+    /// </summary>
+    [HttpPost("authorize")]
+    public async Task<ActionResult<AuthorizationResponse>> Authorize([FromBody] AuthorizationRequest request)
+    {
+        _logger.LogInformation($"[Auth] Authorization attempt for user: {request.User}");
+
+        var response = await _authService.AuthorizeAsync(request);
+
+        if (!response.Success)
+        {
+            _logger.LogWarning($"[Auth] Authorization failed for user: {request.User}");
+            return Unauthorized(response);
+        }
+
+        _logger.LogInformation($"[Auth] Authorization successful for user: {request.User}");
+        return Ok(response);
     }
 
     /// <summary>

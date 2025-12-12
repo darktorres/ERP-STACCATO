@@ -23,62 +23,106 @@ public class AuthService
     }
 
     /// <summary>
-    /// Login user with email and password
+    /// Login user with user and password
+    /// Matches TypeScript auth.service.ts login() method (lines 18-93)
     /// </summary>
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         try
         {
-            // Validate input
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Senha))
+            // STEP 1: Check maintenance mode
+            var maintenance = await _context.Set<Maintenance>()
+                .FirstOrDefaultAsync(m => m.Id == 1);
+
+            if (maintenance?.EmManutencao == true)
             {
                 return new LoginResponse
                 {
-                    Sucesso = false,
-                    Mensagem = "Email e senha são obrigatórios"
+                    Success = false,
+                    Error = "Sistema em manutenção!"
                 };
             }
 
-            // Find user in database (match by email or user field)
-            var usuario = await _context.Set<Usuario>()
-                .FirstOrDefaultAsync(u => (u.Email == request.Email || u.User == request.Email) && !u.Desativado);
+            // STEP 2: Query user with SHA_PASSWORD comparison
+            // Use raw SQL to match MySQL SHA_PASSWORD function
+            var sql = @"
+                SELECT idUsuario, idLoja, nome, tipo, desativado
+                FROM usuario
+                WHERE user = {0}
+                  AND password = SHA_PASSWORD({1})
+                  AND desativado = FALSE
+            ";
 
-            if (usuario == null)
+            var usuarios = await _context.Set<Usuario>()
+                .FromSqlRaw(sql, request.User.ToLower(), request.Password)
+                .Select(u => new
+                {
+                    u.IdUsuario,
+                    u.IdLoja,
+                    u.Nome,
+                    u.Tipo,
+                    u.Desativado
+                })
+                .ToListAsync();
+
+            if (usuarios.Count == 0)
             {
                 return new LoginResponse
                 {
-                    Sucesso = false,
-                    Mensagem = "Email ou senha inválidos"
+                    Success = false,
+                    Error = "Login inválido!"
                 };
             }
 
-            // Verify password (in production, use bcrypt or similar)
-            // For POC, simple comparison
-            if (!VerifyPassword(request.Senha, usuario.Password))
+            var usuario = usuarios[0];
+
+            // STEP 3: Block OPERACIONAL users
+            if (usuario.Tipo == SessionUser.Roles.OPERACIONAL)
             {
                 return new LoginResponse
                 {
-                    Sucesso = false,
-                    Mensagem = "Email ou senha inválidos"
+                    Success = false,
+                    Error = "Operacional bloqueado!"
                 };
             }
 
-            // Generate JWT token
-            var token = GenerateJwtToken(usuario);
+            // STEP 4: Get loja info
+            var loja = await _context.Set<Loja>()
+                .Where(l => l.IdLoja == usuario.IdLoja)
+                .Select(l => new LojaInfo
+                {
+                    IdLoja = l.IdLoja,
+                    Descricao = l.Descricao ?? string.Empty,
+                    NomeFantasia = l.NomeFantasia ?? string.Empty
+                })
+                .FirstOrDefaultAsync();
 
-            // Return success response
+            // STEP 5: Create session user
+            var sessionUser = new SessionUser
+            {
+                IdUsuario = usuario.IdUsuario,
+                IdLoja = usuario.IdLoja,
+                User = request.User.ToLower(),
+                Tipo = usuario.Tipo,
+                Nome = usuario.Nome
+            };
+
+            // STEP 6: Generate JWT token
+            var token = GenerateJwtToken(sessionUser);
+
+            // STEP 7: Return success with user + loja
             return new LoginResponse
             {
-                Sucesso = true,
+                Success = true,
                 Token = token,
-                Usuario = new SessionUser
+                User = new SessionUserWithLoja
                 {
-                    IdUsuario = usuario.IdUsuario,
-                    User = usuario.User,
-                    Nome = usuario.Nome,
-                    Tipo = usuario.Tipo,
-                    IdLoja = usuario.IdLoja,
-                    Email = usuario.Email
+                    IdUsuario = sessionUser.IdUsuario,
+                    IdLoja = sessionUser.IdLoja,
+                    User = sessionUser.User,
+                    Tipo = sessionUser.Tipo,
+                    Nome = sessionUser.Nome,
+                    Loja = loja
                 }
             };
         }
@@ -86,8 +130,70 @@ public class AuthService
         {
             return new LoginResponse
             {
-                Sucesso = false,
-                Mensagem = $"Erro no login: {ex.Message}"
+                Success = false,
+                Error = $"Erro no login: {ex.Message}"
+            };
+        }
+    }
+
+    /// <summary>
+    /// Authorization with one-time password
+    /// Matches TypeScript auth.service.ts authorize() method (lines 99-135)
+    /// </summary>
+    public async Task<AuthorizationResponse> AuthorizeAsync(AuthorizationRequest request)
+    {
+        try
+        {
+            // Query for authorization - managers/admins only
+            var sql = @"
+                SELECT idUsuario, valorMinimoFrete
+                FROM usuario
+                WHERE user = {0}
+                  AND senhaUsoUnico = {1}
+                  AND tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR',
+                              'GERENTE DEPARTAMENTO', 'GERENTE LOJA')
+            ";
+
+            var usuarios = await _context.Database
+                .SqlQueryRaw<dynamic>(sql, request.User, request.SenhaUsoUnico)
+                .ToListAsync();
+
+            if (usuarios.Count == 0)
+            {
+                return new AuthorizationResponse
+                {
+                    Success = false,
+                    Message = "Senha não confere!"
+                };
+            }
+
+            var usuario = usuarios[0];
+            var idUsuario = (int)usuario.idUsuario;
+            var valorMinimoFrete = usuario.valorMinimoFrete as decimal?;
+
+            // Clear one-time password after use
+            var userEntity = await _context.Set<Usuario>()
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+
+            if (userEntity != null)
+            {
+                userEntity.SenhaUsoUnico = null;
+                userEntity.ValorMinimoFrete = null;
+                await _context.SaveChangesAsync();
+            }
+
+            return new AuthorizationResponse
+            {
+                Success = true,
+                ValorMinimoFrete = valorMinimoFrete
+            };
+        }
+        catch (Exception ex)
+        {
+            return new AuthorizationResponse
+            {
+                Success = false,
+                Message = $"Erro na autorização: {ex.Message}"
             };
         }
     }
@@ -117,7 +223,7 @@ public class AuthService
     /// <summary>
     /// Generate JWT token
     /// </summary>
-    private string GenerateJwtToken(Usuario usuario)
+    private string GenerateJwtToken(SessionUser usuario)
     {
         var key = _configuration["Jwt:Key"]
             ?? throw new InvalidOperationException("JWT key not configured");
@@ -147,15 +253,5 @@ public class AuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    /// <summary>
-    /// Verify password (placeholder - use bcrypt in production)
-    /// </summary>
-    private bool VerifyPassword(string password, string hash)
-    {
-        // For POC: simple comparison
-        // In production: use BCrypt.Net-Next or similar
-        return password == hash;
     }
 }

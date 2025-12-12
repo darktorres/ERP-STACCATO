@@ -5,6 +5,8 @@ using System.Text;
 using ERP.Staccato.Backend.Data;
 using ERP.Staccato.Backend.Services;
 using FluentValidation;
+using FluentValidation.AspNetCore;
+using ERP.Staccato.Shared.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,8 +53,12 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<OrcamentoService>();
 
-// Validation
-builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
+// Validation - register validators from Shared assembly
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+
+// Enable automatic validation for all API endpoints
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 
 // Controllers
 builder.Services.AddControllers();

@@ -546,6 +546,41 @@ html, body {
     color: #d8b4fe;
 }
 
+/* Days Remaining Color Coding */
+.dias-green {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    font-weight: 600;
+}
+
+.dias-yellow {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    font-weight: 600;
+}
+
+.dias-red {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    font-weight: 600;
+}
+
+/* Semaforo (Traffic Light) Color Coding */
+.semaforo-quente {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.semaforo-morno {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.semaforo-frio {
+    background-color: rgba(6, 182, 212, 0.2);
+    color: #67e8f9;
+}
+
 .text-right {
     text-align: right;
 }

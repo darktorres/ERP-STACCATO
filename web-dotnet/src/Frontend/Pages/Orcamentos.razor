@@ -29,7 +29,7 @@
             {/* Status Filter */
             <div class="filter-group">
                 <label class="filter-label">
-                    <input type="checkbox" @bind="StatusEnabled" />
+                    <input type="checkbox" @bind="StatusEnabled" @onchange="ApplyFiltersAsync" />
                     <span>Status</span>
                 </label>
                 @foreach (var status in StatusOptions)
@@ -39,6 +39,7 @@
                             type="checkbox"
                             @bind="SelectedStatuses"
                             value="@status"
+                            @onchange="ApplyFiltersAsync"
                             disabled="@(!StatusEnabled)"
                         />
                         <span>@status</span>
@@ -46,29 +47,30 @@
                 }
             </div>
 
-            {/* Month Filter */
-            @if (User?.Tipo != "GERENTE LOJA" && User?.Tipo != "GERENTE DEPARTAMENTO")
+            {/* Month Filter - Hidden for managers */
+            @if (!RoleHelpers.IsGerente(User?.Tipo ?? ""))
             {
                 <div class="filter-group">
                     <label class="filter-label">
-                        <input type="checkbox" @bind="MesEnabled" />
+                        <input type="checkbox" @bind="MesEnabled" @onchange="ApplyFiltersAsync" />
                         <span>Mês</span>
                     </label>
                     <input
                         type="month"
                         class="filter-input"
                         @bind="MesValue"
+                        @onchange="ApplyFiltersAsync"
                         disabled="@(!MesEnabled)"
                     />
                 </div>
             }
 
-            {/* Store Filter */
-            @if (User?.Tipo != "GERENTE LOJA" && User?.Tipo != "GERENTE DEPARTAMENTO")
+            {/* Store Filter - Hidden for store managers */
+            @if (!RoleHelpers.IsGerente(User?.Tipo ?? ""))
             {
                 <div class="filter-group">
                     <label class="filter-label">Lojas</label>
-                    <select class="filter-select" @bind="SelectedLoja">
+                    <select class="filter-select" @bind="SelectedLoja" @onchange="ApplyFiltersAsync">
                         <option value="">Todas</option>
                         @foreach (var loja in Lojas)
                         {
@@ -78,12 +80,12 @@
                 </div>
             }
 
-            {/* Vendor Filter */
-            @if (User?.Tipo != "VENDEDOR" && User?.Tipo != "VENDEDOR ESPECIAL")
+            {/* Vendor Filter - Hidden for vendors */
+            @if (!RoleHelpers.IsVendedorOrEspecial(User?.Tipo ?? ""))
             {
                 <div class="filter-group">
                     <label class="filter-label">Vendedores</label>
-                    <select class="filter-select" @bind="SelectedVendedor">
+                    <select class="filter-select" @bind="SelectedVendedor" @onchange="ApplyFiltersAsync">
                         <option value="">Todos</option>
                         @foreach (var vendedor in Vendedores)
                         {
@@ -96,7 +98,7 @@
             {/* Supplier Filter */
             <div class="filter-group">
                 <label class="filter-label">Fornecedores</label>
-                <select class="filter-select" @bind="SelectedFornecedor">
+                <select class="filter-select" @bind="SelectedFornecedor" @onchange="ApplyFiltersAsync">
                     <option value="">Todos</option>
                     @foreach (var fornecedor in Fornecedores)
                     {
@@ -105,7 +107,7 @@
                 </select>
             </div>
 
-            {/* Search Filter */
+            {/* Search Filter - Real-time with debouncing */
             <div class="filter-group">
                 <label class="filter-label">Buscar</label>
                 <input
@@ -113,20 +115,20 @@
                     class="filter-input"
                     placeholder="ID, Cliente, Vendedor..."
                     @bind="SearchText"
-                    @bind:event="oninput"
+                    @onkeyup="OnSearchKeyUpAsync"
                 />
             </div>
 
-            {/* My Budgets Filter (for vendors) */
-            @if (User?.Tipo == "VENDEDOR" || User?.Tipo == "VENDEDOR ESPECIAL")
+            {/* My Budgets Filter - Only for vendors */
+            @if (RoleHelpers.IsVendedorOrEspecial(User?.Tipo ?? ""))
             {
                 <div class="filter-group">
                     <label class="filter-radio">
-                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => ApenasPropriosOrcamentos = e.Value?.ToString() == "true")" checked="@(!ApenasPropriosOrcamentos)" value="false" />
+                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => HandlePropriosOrcamentosChange(e.Value?.ToString() == "true"))" checked="@(!ApenasPropriosOrcamentos)" value="false" />
                         <span>Todos</span>
                     </label>
                     <label class="filter-radio">
-                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => ApenasPropriosOrcamentos = e.Value?.ToString() == "true")" checked="@ApenasPropriosOrcamentos" value="true" />
+                        <input type="radio" name="my-budgets" @onchange="@((ChangeEventArgs e) => HandlePropriosOrcamentosChange(e.Value?.ToString() == "true"))" checked="@ApenasPropriosOrcamentos" value="true" />
                         <span>Próprios</span>
                     </label>
                 </div>
@@ -158,6 +160,7 @@
                             <th>Vendedor</th>
                             <th>Cliente</th>
                             <th>Total</th>
+                            <th>Semáforo</th>
                             <th>Data</th>
                         </tr>
                     </thead>
@@ -174,11 +177,20 @@
                                         @orc.Status
                                     </span>
                                 </td>
-                                <td>@(GetDiasRestantes(orc))</td>
+                                <td>
+                                    <span class="@GetDiasRestantesClass(orc)">
+                                        @(GetDiasRestantes(orc))
+                                    </span>
+                                </td>
                                 <td><strong>@orc.IdOrcamento</strong></td>
                                 <td>@orc.Vendedor</td>
                                 <td>@orc.Cliente</td>
                                 <td class="text-right">@orc.Total.ToString("C", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                                <td>
+                                    <span class="@GetSemaforoClass(orc.Semaforo)">
+                                        @GetSemaforoLabel(orc.Semaforo)
+                                    </span>
+                                </td>
                                 <td>@orc.Data.ToString("dd/MM/yyyy")</td>
                             </tr>
                         }
@@ -212,6 +224,9 @@
 
     private readonly string[] StatusOptions = { "ATIVO", "EXPIRADO", "CANCELADO", "FECHADO", "PERDIDO", "REPLICADO" };
 
+    private CancellationTokenSource? _searchCancelToken;
+    private Task? _searchTask;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -220,15 +235,15 @@
             User = await AuthService.GetCurrentUserAsync();
 
             // Set defaults based on user type
-            if (User?.Tipo == "ADMINISTRATIVO" || User?.Tipo == "ADMINISTRADOR")
+            if (RoleHelpers.IsAdministrativo(User?.Tipo ?? ""))
             {
-                // Auto-enable month filter for admin
+                // Auto-enable month filter for admin/administrativo
                 var today = DateTime.Now;
                 MesValue = today.ToString("yyyy-MM");
                 MesEnabled = true;
             }
 
-            if (User?.Tipo == "VENDEDOR" || User?.Tipo == "VENDEDOR ESPECIAL")
+            if (RoleHelpers.IsVendedorOrEspecial(User?.Tipo ?? ""))
             {
                 ApenasPropriosOrcamentos = true;
             }
@@ -265,7 +280,7 @@
 
             var filters = new OrcamentoFilters
             {
-                Statuses = StatusEnabled ? SelectedStatuses.ToList() : null,
+                Statuses = StatusEnabled ? SelectedStatuses.ToList() : new(),
                 MesAno = MesEnabled && !string.IsNullOrEmpty(MesValue) ? MesValue : null,
                 IdLoja = string.IsNullOrEmpty(SelectedLoja) ? null : int.Parse(SelectedLoja),
                 IdVendedor = string.IsNullOrEmpty(SelectedVendedor) ? null : int.Parse(SelectedVendedor),
@@ -286,9 +301,35 @@
         }
     }
 
-    private async Task ApplyFilters()
+    private async Task ApplyFiltersAsync()
     {
         await LoadOrcamentos();
+    }
+
+    private async Task OnSearchKeyUpAsync(KeyboardEventArgs e)
+    {
+        // Cancel any pending search task
+        _searchCancelToken?.Cancel();
+        _searchCancelToken = new CancellationTokenSource();
+
+        try
+        {
+            // Debounce search: wait 300ms before making request
+            _searchTask = Task.Delay(300, _searchCancelToken.Token)
+                .ContinueWith(async _ => await LoadOrcamentos(), _searchCancelToken.Token);
+
+            await _searchTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // Search was cancelled, ignore
+        }
+    }
+
+    private void HandlePropriosOrcamentosChange(bool value)
+    {
+        ApenasPropriosOrcamentos = value;
+        _ = ApplyFiltersAsync();
     }
 
     private void SelectOrcamento(OrcamentoListItem orc)
@@ -331,5 +372,36 @@
     private string GetDiasRestantes(OrcamentoListItem orc)
     {
         return orc.DiasRestantes?.ToString() ?? "-";
+    }
+
+    private string GetDiasRestantesClass(OrcamentoListItem orc)
+    {
+        if (!int.TryParse(orc.DiasRestantes, out var dias))
+            return "";
+
+        return dias >= 5 ? "dias-green" :
+               dias >= 3 ? "dias-yellow" : "dias-red";
+    }
+
+    private string GetSemaforoClass(int? semaforo)
+    {
+        return semaforo switch
+        {
+            1 => "semaforo-quente",
+            2 => "semaforo-morno",
+            3 => "semaforo-frio",
+            _ => ""
+        };
+    }
+
+    private string GetSemaforoLabel(int? semaforo)
+    {
+        return semaforo switch
+        {
+            1 => "🔴 Quente",
+            2 => "🟠 Morno",
+            3 => "🔵 Frio",
+            _ => "-"
+        };
     }
 }

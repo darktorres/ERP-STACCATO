@@ -1,0 +1,194 @@
+
+Running 50 tests using 3 workers
+
+[1A[2K[1/50] [chromium] › tests\e2e\api.spec.js:4:3 › API Endpoints - Data Loading › should handle /orcamentos/lojas endpoint
+[1A[2K[2/50] [chromium] › tests\e2e\auth.spec.js:11:3 › Authentication - Login Page › should display login form with correct elements
+[1A[2K[3/50] [chromium] › tests\e2e\quotations.spec.js:12:3 › Quotations Page - Layout and Structure › should have proper page structure with sidebar and main content
+[1A[2K[4/50] [chromium] › tests\e2e\api.spec.js:19:3 › API Endpoints - Data Loading › should handle /orcamentos/vendedores endpoint
+[1A[2K[5/50] [chromium] › tests\e2e\api.spec.js:32:3 › API Endpoints - Data Loading › should handle /orcamentos/fornecedores endpoint
+[1A[2K[6/50] [chromium] › tests\e2e\auth.spec.js:33:3 › Authentication - Login Page › should show error for empty credentials
+[1A[2K[7/50] [chromium] › tests\e2e\api.spec.js:45:3 › API Endpoints - Data Loading › should handle /orcamentos/data endpoint with parameters
+[1A[2K[8/50] [chromium] › tests\e2e\api.spec.js:60:3 › API Response Format › /orcamentos/lojas should return proper JSON format
+[1A[2K[9/50] [chromium] › tests\e2e\auth.spec.js:42:3 › Authentication - Login Page › should show error for invalid credentials
+[1A[2K[10/50] [chromium] › tests\e2e\api.spec.js:80:3 › API Response Format › /orcamentos/vendedores should return proper JSON format
+[1A[2K[11/50] [chromium] › tests\e2e\api.spec.js:95:3 › API Response Format › /orcamentos/fornecedores should return proper JSON format
+[1A[2K[12/50] [chromium] › tests\e2e\api.spec.js:109:3 › API Response Format › /orcamentos/data should return quotations with proper structure
+[1A[2K[13/50] [chromium] › tests\e2e\api.spec.js:139:3 › Page Navigation › login page should be accessible
+[1A[2K[14/50] [chromium] › tests\e2e\auth.spec.js:63:3 › Authentication - Login Page › should remember username when checkbox is checked
+[1A[2K[15/50] [chromium] › tests\e2e\api.spec.js:144:3 › Page Navigation › orcamentos page should exist
+[1A[2K[16/50] [chromium] › tests\e2e\auth.spec.js:75:3 › Authentication - Login Page › should not show remember checkbox value if unchecked
+[1A[2K[17/50] [chromium] › tests\e2e\quotations.spec.js:23:3 › Quotations Page - Layout and Structure › should have navbar with user info and logout button
+[1A[2K[18/50] [chromium] › tests\e2e\api.spec.js:150:3 › Page Navigation › logout page should exist
+[1A[2K[19/50] [chromium] › tests\e2e\auth.spec.js:80:3 › Authentication - Login Page › should redirect to orcamentos on successful login
+[1A[2K[chromium] › tests\e2e\auth.spec.js:80:3 › Authentication - Login Page › should redirect to orcamentos on successful login
+TEST: Starting login test
+
+[1A[2KTEST: Current URL before login: http://localhost:8000/
+
+[1A[2KTEST: Filling username field
+
+[1A[2KTEST: Filling password field
+
+[1A[2KTEST: Clicking submit button
+
+[1A[2K[20/50] [chromium] › tests\e2e\quotations.spec.js:32:3 › Quotations Page - Layout and Structure › should display filter sidebar with all filter sections
+[1A[2K[21/50] [chromium] › tests\e2e\api.spec.js:157:3 › Form Handling › login form should have proper attributes
+[1A[2K[22/50] [chromium] › tests\e2e\api.spec.js:173:3 › Form Handling › filters form should have proper structure
+[1A[2KTEST: Waiting for redirect to /orcamentos
+
+[1A[2KTEST: Failed to redirect. Current URL: http://localhost:8000/
+
+[1A[2K  1) [chromium] › tests\e2e\auth.spec.js:80:3 › Authentication - Login Page › should redirect to orcamentos on successful login 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.title: Target page, context or browser has been closed
+
+      100 |     } catch (e) {
+      101 |       console.log('TEST: Failed to redirect. Current URL:', page.url());
+    > 102 |       console.log('TEST: Page title:', await page.title());
+          |                                                   ^
+      103 |       const errorMsg = await page.locator('.alert-danger').textContent().catch(() => 'No error message found');
+      104 |       console.log('TEST: Error message:', errorMsg);
+      105 |       const pageContent = await page.content();
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\auth.spec.js:102:51
+
+
+[1A[2K[23/50] [chromium] › tests\e2e\auth.spec.js:111:3 › Authentication - Login Page › should display loading state on form submission
+[1A[2K  2) [chromium] › tests\e2e\quotations.spec.js:32:3 › Quotations Page - Layout and Structure › should display filter sidebar with all filter sections 
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      2 |
+      3 | test.describe('Quotations Page - Layout and Structure', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     // Navigate to quotations page directly (tests page structure)
+      6 |     // In real scenario, would be behind login
+      7 |     await page.goto('/orcamentos', { waitUntil: 'networkidle' }).catch(() => {
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\quotations.spec.js:4:8
+
+
+[1A[2K  3) [chromium] › tests\e2e\api.spec.js:173:3 › Form Handling › filters form should have proper structure 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error Context: test-results\api-Form-Handling-filters-form-should-have-proper-structure-chromium\error-context.md
+
+
+[1A[2K[24/50] [chromium] › tests\e2e\quotations.spec.js:41:3 › Quotations Page - Layout and Structure › should have quotation table with proper columns
+[1A[2K[25/50] [chromium] › tests\e2e\auth.spec.js:128:3 › Authentication - Login Page › should have proper styling and layout
+[1A[2K[26/50] [chromium] › tests\e2e\api.spec.js:192:3 › Security Checks › should not expose sensitive information in page source
+[1A[2K[27/50] [chromium] › tests\e2e\auth.spec.js:141:3 › Authentication - Login Page › should show footer with version info
+[1A[2K[28/50] [chromium] › tests\e2e\auth.spec.js:157:3 › Authentication - Logout › should show logout button when navigating to orcamentos (if logged in)
+[1A[2K[29/50] [chromium] › tests\e2e\quotations.spec.js:55:3 › Quotations Page - Filters › should have all filter input elements
+[1A[2K[30/50] [chromium] › tests\e2e\api.spec.js:203:3 › Security Checks › should set proper security headers for login page
+[1A[2K[31/50] [chromium] › tests\e2e\api.spec.js:213:3 › Security Checks › should redirect login attempts to HTTPS check
+[1A[2K[32/50] [chromium] › tests\e2e\api.spec.js:221:3 › Database Connection Validation › application should be able to load page with valid database
+[1A[2K[33/50] [chromium] › tests\e2e\quotations.spec.js:80:3 › Quotations Page - Filters › should have status checkboxes for all statuses
+[1A[2K  4) [chromium] › tests\e2e\auth.spec.js:157:3 › Authentication - Logout › should show logout button when navigating to orcamentos (if logged in) 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+
+[1A[2K  5) [chromium] › tests\e2e\api.spec.js:221:3 › Database Connection Validation › application should be able to load page with valid database 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error Context: test-results\api-Database-Connection-Va-702c0-ad-page-with-valid-database-chromium\error-context.md
+
+
+[1A[2K[34/50] [chromium] › tests\e2e\auth.spec.js:171:3 › Authentication - Logout › logout should clear session and redirect to login
+[1A[2K  6) [chromium] › tests\e2e\quotations.spec.js:80:3 › Quotations Page - Filters › should have status checkboxes for all statuses 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+
+[1A[2K[35/50] [chromium] › tests\e2e\api.spec.js:232:3 › Database Connection Validation › orcamentos page should handle missing session gracefully
+[1A[2K[36/50] [chromium] › tests\e2e\quotations.spec.js:97:3 › Quotations Page - Filters › should have semaforo radio buttons
+[1A[2K  7) [chromium] › tests\e2e\auth.spec.js:171:3 › Authentication - Logout › logout should clear session and redirect to login 
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      148 |
+      149 | test.describe('Authentication - Logout', () => {
+    > 150 |   test.beforeEach(async ({ page, context }) => {
+          |        ^
+      151 |     // Clear any existing cookies/session
+      152 |     await context.clearCookies();
+      153 |     // Navigate to login page
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\auth.spec.js:150:8
+
+    Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+    Call log:
+    [2m  - navigating to "http://localhost:8000/", waiting until "load"[22m
+
+
+      152 |     await context.clearCookies();
+      153 |     // Navigate to login page
+    > 154 |     await page.goto('/');
+          |                ^
+      155 |   });
+      156 |
+      157 |   test('should show logout button when navigating to orcamentos (if logged in)', async ({ page }) => {
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\auth.spec.js:154:16
+
+
+[1A[2K  8) [chromium] › tests\e2e\api.spec.js:232:3 › Database Connection Validation › orcamentos page should handle missing session gracefully 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+    Call log:
+    [2m  - navigating to "http://localhost:8000/orcamentos", waiting until "load"[22m
+
+
+      235 |
+      236 |     // Navigate to orcamentos
+    > 237 |     const response = await page.goto('/orcamentos');
+          |                                 ^
+      238 |
+      239 |     // Should either redirect to login or show login page
+      240 |     expect([200, 302]).toContain(response.status());
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\api.spec.js:237:33
+
+
+[1A[2K  9) [chromium] › tests\e2e\quotations.spec.js:97:3 › Quotations Page - Filters › should have semaforo radio buttons 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+
+[1A[2K[37/50] [chromium] › tests\e2e\quotations.spec.js:107:3 › Quotations Page - Filters › should have filter and clear buttons
+[1A[2K[38/50] [chromium] › tests\e2e\quotations.spec.js:144:3 › Quotations Page - AJAX Functionality › filter button should trigger AJAX request
+[1A[2K[chromium] › tests\e2e\quotations.spec.js:144:3 › Quotations Page - AJAX Functionality › filter button should trigger AJAX request
+AJAX TEST: Clearing cookies and navigating to login page
+
+[1A[2KAJAX TEST: Login page loaded. Current URL: http://localhost:8000/
+
+[1A[2KAJAX TEST: Filling credentials (torres / 1234)
+
+[1A[2KAJAX TEST: Clicking submit button
+
+[1A[2KAJAX TEST: Waiting for redirect to /orcamentos
+
+[1A[2KAJAX TEST: Login failed. Current URL: http://localhost:8000/
+
+[1A[2KAJAX TEST: Error displayed: No error message
+
+[1A[2K  10) [chromium] › tests\e2e\quotations.spec.js:144:3 › Quotations Page - AJAX Functionality › filter button should trigger AJAX request 
+
+    Error: AJAX beforeEach login failed: page.waitForURL: net::ERR_ABORTED; maybe frame was detached?
+    =========================== logs ===========================
+    waiting for navigation to "/orcamentos" until "load"
+    ============================================================
+
+      138 |       const errorMsg = await page.locator('.alert-danger').textContent().catch(() => 'No error message');
+      139 |       console.log('AJAX TEST: Error displayed:', errorMsg);
+    > 140 |       throw new Error(`AJAX beforeEach login failed: ${e.message}`);
+          |             ^
+      141 |     }
+      142 |   });
+      143 |
+        at C:\Users\Torres\Dropbox\Projeto_Staccato\erp-staccato\web-symfony\tests\e2e\quotations.spec.js:140:13
+
+

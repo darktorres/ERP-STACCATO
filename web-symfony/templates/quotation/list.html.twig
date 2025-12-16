@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orcamentos - Staccato ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .page-container {
+            display: flex;
+            min-height: calc(100vh - 56px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-section h6 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .form-control, .form-select {
+            font-size: 13px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 38px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-check-input {
+            cursor: pointer;
+            border-color: #ddd;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .btn-filter {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            height: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-clear {
+            width: 100%;
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .table thead {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            color: #333;
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-ativo {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-expirado {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-cancelado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-fechado {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-perdido {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-replicado {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+
+        .semaforo-quente {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .semaforo-morno {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .semaforo-frio {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .user-info strong {
+            display: block;
+            color: #333;
+        }
+
+        .user-info small {
+            color: #666;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-border-sm {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .page-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="bi bi-briefcase"></i> Staccato ERP
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white" style="font-size: 13px;">
+                    {{ usuario.nome }} <small>({{ usuario.tipo }})</small>
+                </span>
+                <a href="{{ path('logout') }}" class="btn btn-sm btn-outline-light">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="page-container">
+        <!-- Sidebar Filters -->
+        <div class="sidebar">
+            <div class="user-info">
+                <strong>{{ usuario.nome }}</strong>
+                <small>Loja: {{ usuario.loja.descricao }}</small>
+            </div>
+
+            <form id="filterForm">
+                <!-- Store Filter -->
+                {% if usuario.isAdmin() or usuario.isAdministrativo() %}
+                <div class="filter-section">
+                    <h6>Filtrar por Loja</h6>
+                    <div class="filter-group">
+                        <select id="idLoja" name="idLoja" class="form-select">
+                            <option value="">Todas as lojas</option>
+                            {% for loja in lojas %}
+                                <option value="{{ loja.idLoja }}">{{ loja.descricao }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Month Filter -->
+                {% if usuario.isAdministrativo() %}
+                <div class="filter-section">
+                    <h6>Filtrar por Período</h6>
+                    <div class="filter-group">
+                        <input type="month" id="mesAno" name="mesAno" class="form-control">
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Seller Filter -->
+                <div class="filter-section">
+                    <h6>Filtrar por Vendedor</h6>
+                    <div class="filter-group">
+                        <select id="idVendedor" name="idVendedor" class="form-select">
+                            <option value="">Todos os vendedores</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Supplier Filter -->
+                <div class="filter-section">
+                    <h6>Filtrar por Fornecedor</h6>
+                    <div class="filter-group">
+                        <select id="fornecedor" name="fornecedor" class="form-select">
+                            <option value="">Todos os fornecedores</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="filter-section">
+                    <h6>Filtrar por Status</h6>
+                    <div class="filter-group">
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_ativo" name="statuses" value="ATIVO">
+                            <label class="form-check-label" for="status_ativo">Ativo</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_cancelado" name="statuses" value="CANCELADO">
+                            <label class="form-check-label" for="status_cancelado">Cancelado</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_expirado" name="statuses" value="EXPIRADO">
+                            <label class="form-check-label" for="status_expirado">Expirado</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_fechado" name="statuses" value="FECHADO">
+                            <label class="form-check-label" for="status_fechado">Fechado</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_perdido" name="statuses" value="PERDIDO">
+                            <label class="form-check-label" for="status_perdido">Perdido</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input status-check" type="checkbox" id="status_replicado" name="statuses" value="REPLICADO">
+                            <label class="form-check-label" for="status_replicado">Replicado</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semáforo Filter -->
+                <div class="filter-section">
+                    <h6>Semáforo</h6>
+                    <div class="filter-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="semaforo_quente" name="semaforo" value="1">
+                            <label class="form-check-label semaforo-quente" for="semaforo_quente">🔴 Quente</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="semaforo_morno" name="semaforo" value="2">
+                            <label class="form-check-label semaforo-morno" for="semaforo_morno">🟠 Morno</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="semaforo_frio" name="semaforo" value="3">
+                            <label class="form-check-label semaforo-frio" for="semaforo_frio">🔵 Frio</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="semaforo_todos" name="semaforo" value="" checked>
+                            <label class="form-check-label" for="semaforo_todos">Todos</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Own Quotes Filter (for sellers) -->
+                {% if usuario.isVendedorOrEspecial() %}
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="apenasPropriosOrcamentos" name="apenasPropriosOrcamentos">
+                            <label class="form-check-label" for="apenasPropriosOrcamentos">Apenas meus orcamentos</label>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Text Search -->
+                <div class="filter-section">
+                    <h6>Pesquisar</h6>
+                    <div class="filter-group">
+                        <input type="text" id="search" name="search" class="form-control" placeholder="ID, vendedor, cliente...">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <button type="button" id="btnFiltrar" class="btn-filter">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+                <button type="button" id="btnLimpar" class="btn-clear">
+                    <i class="bi bi-x-circle"></i> Limpar Filtros
+                </button>
+            </form>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="loading active" id="loadingSpinner">
+                <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                <span class="ms-2">Carregando dados...</span>
+            </div>
+
+            <div id="tableContainer" class="table-container" style="display: none;">
+                <table class="table table-hover" id="orcamentosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Vendedor</th>
+                            <th>Cliente</th>
+                            <th>Profissional</th>
+                            <th>Status</th>
+                            <th>Dias</th>
+                            <th>Data</th>
+                            <th>Total</th>
+                            <th>Semáforo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orcamentosBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="bi bi-inbox"></i>
+                <p><strong>Nenhum orcamento encontrado</strong></p>
+                <small>Tente ajustar os filtros acima</small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const filterForm = document.getElementById('filterForm');
+        const btnFiltrar = document.getElementById('btnFiltrar');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const tableContainer = document.getElementById('tableContainer');
+        const emptyState = document.getElementById('emptyState');
+        const orcamentosBody = document.getElementById('orcamentosBody');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const idLoja = document.getElementById('idLoja');
+        const idVendedor = document.getElementById('idVendedor');
+        const fornecedor = document.getElementById('fornecedor');
+
+        // Load initial data
+        loadData();
+
+        // Event listeners
+        btnFiltrar.addEventListener('click', loadData);
+        btnLimpar.addEventListener('click', clearFilters);
+        idLoja.addEventListener('change', loadVendedores);
+
+        async function loadData() {
+            loadingSpinner.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                const formData = new FormData(filterForm);
+                const params = new URLSearchParams();
+
+                for (const [key, value] of formData.entries()) {
+                    if (key === 'statuses' && value) {
+                        params.append(key + '[]', value);
+                    } else if (value) {
+                        params.set(key, value);
+                    }
+                }
+
+                const response = await fetch(`{{ path('orcamentos_data') }}?${params.toString()}`);
+                const result = await response.json();
+
+                loadingSpinner.style.display = 'none';
+
+                if (result.success && result.data.length > 0) {
+                    renderTable(result.data);
+                    tableContainer.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'block';
+                    orcamentosBody.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                loadingSpinner.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+        }
+
+        function renderTable(data) {
+            orcamentosBody.innerHTML = data.map(o => `
+                <tr>
+                    <td>${escapeHtml(o.idOrcamento)}</td>
+                    <td>${escapeHtml(o.vendedor || '-')}</td>
+                    <td>${escapeHtml(o.cliente || '-')}</td>
+                    <td>${escapeHtml(o.profissional || '-')}</td>
+                    <td>
+                        <span class="status-badge status-${o.status.toLowerCase()}">
+                            ${o.status}
+                        </span>
+                    </td>
+                    <td>
+                        <strong>${o.diasRestantes}</strong> dias
+                    </td>
+                    <td>${formatDate(o.data)}</td>
+                    <td><strong>R$ ${formatCurrency(o.total)}</strong></td>
+                    <td>
+                        <span class="semaforo-${getSemaforoLabel(o.semaforo).toLowerCase()}">
+                            ${getSemaforoLabel(o.semaforo)}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function clearFilters() {
+            filterForm.reset();
+            document.getElementById('semaforo_todos').checked = true;
+            loadData();
+        }
+
+        async function loadVendedores() {
+            try {
+                const idLoja = document.getElementById('idLoja').value;
+                const url = `{{ path('orcamentos_vendedores') }}` + (idLoja ? `?idLoja=${idLoja}` : '');
+                const response = await fetch(url);
+                const vendedores = await response.json();
+
+                idVendedor.innerHTML = '<option value="">Todos os vendedores</option>' +
+                    vendedores.map(v => `<option value="${v.idUsuario}">${escapeHtml(v.nome)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading vendedores:', error);
+            }
+        }
+
+        async function loadFornecedores() {
+            try {
+                const response = await fetch(`{{ path('orcamentos_fornecedores') }}`);
+                const fornecedores = await response.json();
+
+                fornecedor.innerHTML = '<option value="">Todos os fornecedores</option>' +
+                    fornecedores.map(f => `<option value="${escapeHtml(f.razaoSocial)}">${escapeHtml(f.razaoSocial)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading fornecedores:', error);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '0,00';
+            return parseFloat(value).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function getSemaforoLabel(semaforo) {
+            switch(parseInt(semaforo)) {
+                case 1: return '🔴 Quente';
+                case 2: return '🟠 Morno';
+                case 3: return '🔵 Frio';
+                default: return '-';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Load initial options
+        loadVendedores();
+        loadFornecedores();
+
+        // Auto-load data when filter values change
+        document.querySelectorAll('.status-check').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                // Debounce the search
+                clearTimeout(window.filterTimeout);
+                window.filterTimeout = setTimeout(loadData, 500);
+            });
+        });
+    </script>
+</body>
+</html>

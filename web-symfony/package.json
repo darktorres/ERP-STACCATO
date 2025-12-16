@@ -1,0 +1,22 @@
+{
+  "name": "web-symfony",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test tests/e2e/auth.spec.js",
+    "test:quotations": "playwright test tests/e2e/quotations.spec.js",
+    "test:api": "playwright test tests/e2e/api.spec.js",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

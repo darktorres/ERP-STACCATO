@@ -538,10 +538,10 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
   preencherDadosNFe();
   preencherEmitente();
   preencherDestinatario();
+  buscarAliquotas();  // Must be called before preencherImpostos() to populate queryPartilhaInter/queryPartilhaIntra
   preencherTotais();
   preencherImpostos();
   preencherTransporte();
-  buscarAliquotas();
   updateTotais();
   setConnections();
 

@@ -760,12 +760,12 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
       stream << "[ICMSUFDest" + numProd + "]\n";
-      stream << "vBCUFDest = " + modelProduto.data(row, "vBCPIS").toString() + "\n"; // TODO: should be valorProduto + frete + ipi + outros - desconto
+      stream << "vBCUFDest = " + modelProduto.data(row, "vBC").toString() + "\n";
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() + "\n";
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() + "\n";
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelProduto.data(row, "vBC").toDouble() * diferencaICMS;
 
       stream << "pICMSInterPart = 100\n";
       stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) + "\n";
@@ -797,7 +797,7 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
 
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
-      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelProduto.data(row, "vBC").toDouble() * diferencaICMS;
 
       totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
     }
@@ -958,9 +958,7 @@ void CadastrarNFe::on_tableItens_selectionChanged() {
 
     // -------------------------------------------------------------------------
 
-    // ICMS Inter
-
-    // TODO: arrumar esse codigo, nao é mais 80%
+    // ICMS Inter - Partilha de ICMS (100% para estado destino desde 2019)
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       ui->scrollAreaInterestadual->setEnabled(true);
 
@@ -968,14 +966,14 @@ void CadastrarNFe::on_tableItens_selectionChanged() {
       ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelProduto.data(row, "vBC").toDouble());
       ui->doubleSpinBoxAliquotaInternaDestinatario->setValue(queryPartilhaIntra.value("valor").toDouble());
       ui->doubleSpinBoxAliquotaInter->setValue(queryPartilhaInter.value("valor").toDouble());
-      ui->doubleSpinBoxPercentualPartilha->setValue(80);
+      ui->doubleSpinBoxPercentualPartilha->setValue(100); // 100% para estado destino desde 01/01/2019
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelProduto.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelProduto.data(row, "vBC").toDouble() * diferencaICMS;
 
-      ui->doubleSpinBoxPartilhaDestinatario->setValue(difal * 0.8);
-      ui->doubleSpinBoxPartilhaRemetente->setValue(difal * 0.2);
-      ui->doubleSpinBoxFcpDestino->setValue(modelProduto.data(row, "vBCPIS").toDouble() * 0.02);
+      ui->doubleSpinBoxPartilhaDestinatario->setValue(difal);  // 100% para destino
+      ui->doubleSpinBoxPartilhaRemetente->setValue(0);         // 0% para origem
+      ui->doubleSpinBoxFcpDestino->setValue(modelProduto.data(row, "vBC").toDouble() * 0.02);
     }
 
     // -------------------------------------------------------------------------
@@ -2094,17 +2092,19 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
-      // Buscar se o NCM está sujeito a ST
+      // Buscar se o NCM está sujeito a ST e obter a alíquota de ICMS
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
       bool produtoST = true; // default: assume ST
+      double aliqICMS = 0.0;
 
       if (not ncmProduto.isEmpty()) {
         SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.prepare("SELECT st, aliq FROM ncm WHERE ncm = :ncm");
         queryNcm.bindValue(":ncm", ncmProduto);
 
         if (queryNcm.exec() and queryNcm.first()) {
           produtoST = queryNcm.value("st").toBool();
+          aliqICMS = queryNcm.value("aliq").toDouble();
         }
       }
 
@@ -2122,6 +2122,11 @@ void CadastrarNFe::preencherImpostos() {
 
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      // ICMS
+      modelProduto.setData(row, "vBC", total + freteProduto);
+      modelProduto.setData(row, "pICMS", aliqICMS);
+      modelProduto.setData(row, "vICMS", (total + freteProduto) * aliqICMS / 100);
 
       modelProduto.setData(row, "cstPIS", "01");
       modelProduto.setData(row, "vBCPIS", total + freteProduto);
@@ -2158,21 +2163,23 @@ void CadastrarNFe::preencherImpostos() {
         modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
-      // Buscar se o NCM está sujeito a ST
+      // Buscar se o NCM está sujeito a ST e obter a alíquota de ICMS
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
       bool produtoST = true; // default: assume ST
+      double aliqICMS = 0.0;
 
       if (not ncmProduto.isEmpty()) {
         SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.prepare("SELECT st, aliq FROM ncm WHERE ncm = :ncm");
         queryNcm.bindValue(":ncm", ncmProduto);
 
         if (queryNcm.exec() and queryNcm.first()) {
           produtoST = queryNcm.value("st").toBool();
+          aliqICMS = queryNcm.value("aliq").toDouble();
         }
       }
 
-      // CFOP 5922/6922 é para entrega futura, não depende de ST
+      // CFOP 5922/6922 é para entrega futura
       modelProduto.setData(row, "cfop", mesmaUf ? "5922" : "6922");
 
       if (produtoST) {
@@ -2185,6 +2192,11 @@ void CadastrarNFe::preencherImpostos() {
 
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      // ICMS
+      modelProduto.setData(row, "vBC", total + freteProduto);
+      modelProduto.setData(row, "pICMS", aliqICMS);
+      modelProduto.setData(row, "vICMS", (total + freteProduto) * aliqICMS / 100);
 
       modelProduto.setData(row, "cstPIS", "01");
       modelProduto.setData(row, "vBCPIS", total + freteProduto);

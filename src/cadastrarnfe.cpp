@@ -2123,10 +2123,17 @@ void CadastrarNFe::preencherImpostos() {
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
+      // ICMS: usar taxa diferenciada para operações interestaduais
+      double icmsRate = aliqICMS;
+      if (not mesmaUf and not produtoST) {
+        // Operação interestadual sem ST: usar taxa de ICMS interestadual
+        icmsRate = queryPartilhaInter.value("valor").toDouble();
+      }
+
       // ICMS
       modelProduto.setData(row, "vBC", total + freteProduto);
-      modelProduto.setData(row, "pICMS", aliqICMS);
-      modelProduto.setData(row, "vICMS", (total + freteProduto) * aliqICMS / 100);
+      modelProduto.setData(row, "pICMS", icmsRate);
+      modelProduto.setData(row, "vICMS", (total + freteProduto) * icmsRate / 100);
 
       modelProduto.setData(row, "cstPIS", "01");
       modelProduto.setData(row, "vBCPIS", total + freteProduto);
@@ -2193,10 +2200,17 @@ void CadastrarNFe::preencherImpostos() {
       const double total = modelProduto.data(row, "total").toDouble();
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
+      // ICMS: usar taxa diferenciada para operações interestaduais
+      double icmsRate = aliqICMS;
+      if (not mesmaUf and not produtoST) {
+        // Operação interestadual sem ST: usar taxa de ICMS interestadual
+        icmsRate = queryPartilhaInter.value("valor").toDouble();
+      }
+
       // ICMS
       modelProduto.setData(row, "vBC", total + freteProduto);
-      modelProduto.setData(row, "pICMS", aliqICMS);
-      modelProduto.setData(row, "vICMS", (total + freteProduto) * aliqICMS / 100);
+      modelProduto.setData(row, "pICMS", icmsRate);
+      modelProduto.setData(row, "vICMS", (total + freteProduto) * icmsRate / 100);
 
       modelProduto.setData(row, "cstPIS", "01");
       modelProduto.setData(row, "vBCPIS", total + freteProduto);

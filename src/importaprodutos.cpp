@@ -745,7 +745,7 @@ void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
 
   // Fora do padrão
 
-  if (ncm == "0" or ncm.isEmpty()) { modelErro.setData(row, "ncmUpd", gray); }
+  if (ncm == "0" or ncm == "00000000" or ncm.isEmpty()) { modelErro.setData(row, "ncmUpd", gray); }
 
   if (codBarras == "0" or codBarras.isEmpty()) { modelErro.setData(row, "codBarrasUpd", gray); }
 

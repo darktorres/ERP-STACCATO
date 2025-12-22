@@ -139,7 +139,6 @@ void CadastroProduto::savingProcedures() {
   setData("descricao", ui->lineEditDescricao->text());
   setData("estoqueRestante", ui->doubleSpinBoxEstoque->value());
   setData("formComercial", ui->lineEditFormComer->text());
-  setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first());
   setData("icms", ui->lineEditICMS->text());
   setData("idFornecedor", ui->itemBoxFornecedor->getId());
   setData("ipi", ui->doubleSpinBoxIPI->value());
@@ -164,16 +163,20 @@ void CadastroProduto::savingProcedures() {
   setData("un", ui->comboBoxUn->currentText());
   setData("validade", ui->checkBoxValidade->isChecked() ? ui->dateEditValidade->date() : QVariant());
 
+  // Fetch supplier details from database to ensure data consistency
   SqlQuery query;
-  query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
+  query.prepare("SELECT razaoSocial, representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando dados do fornecedor: " + query.lastError().text()); }
 
   if (not query.first()) { throw RuntimeException("Não encontrou fornecedor de id: '" + ui->itemBoxFornecedor->getId().toString() + "'"); }
 
+  // Use the actual database razaoSocial instead of parsing display text
+  const QString fornecedorName = query.value("razaoSocial").toString();
   const bool representacao = query.value("representacao").toBool();
 
+  setData("Fornecedor", fornecedorName);
   setData("representacao", representacao);
   setData("descontinuado", qApp->serverDate() > ui->dateEditValidade->date());
 }

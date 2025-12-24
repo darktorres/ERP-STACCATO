@@ -51,6 +51,8 @@ void CadastroFuncionario::setupTables() {
   ui->table->hideColumn("email");
   ui->table->hideColumn("telefone");
   ui->table->hideColumn("especialidade");
+  ui->table->hideColumn("senhaUsoUnico");
+  ui->table->hideColumn("valorMinimoFrete");
   ui->table->hideColumn("desativado");
 
   ui->table->setItemDelegateForColumn("poupanca", new CheckBoxDelegate(false, this));

@@ -805,9 +805,21 @@ vPag=0.00
         }
     }
 
+    9 {
+        Write-Host "Test ConsultaCadastro - quoted with formatted vs clean CNPJ" -ForegroundColor Yellow
+
+        Write-Host "`n[Test 1] Quoted + Clean: NFE.ConsultaCadastro(`"SP`", `"53355004000159`")..." -ForegroundColor Cyan
+        $resp1 = Send-ACBrCommand "NFE.ConsultaCadastro(`"SP`", `"53355004000159`")"
+        Write-Host "Response:`n$resp1" -ForegroundColor White
+
+        Write-Host "`n[Test 2] Quoted + Formatted: NFE.ConsultaCadastro(`"SP`", `"53.355.004/0001-59`")..." -ForegroundColor Cyan
+        $resp2 = Send-ACBrCommand "NFE.ConsultaCadastro(`"SP`", `"53.355.004/0001-59`")"
+        Write-Host "Response:`n$resp2" -ForegroundColor White
+    }
+
     default {
         Write-Host "Unknown stage: $Stage" -ForegroundColor Red
-        Write-Host "Valid stages: 0-8" -ForegroundColor Yellow
+        Write-Host "Valid stages: 0-9" -ForegroundColor Yellow
     }
 }
 

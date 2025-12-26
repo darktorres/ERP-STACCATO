@@ -1737,7 +1737,7 @@
            <item row="0" column="0" colspan="2">
             <widget class="QScrollArea" name="scrollAreaPIS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="widgetResizable">
               <bool>true</bool>
@@ -2051,7 +2051,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
            <item row="0" column="0" colspan="2">
             <widget class="QScrollArea" name="scrollAreaCOFINS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="widgetResizable">
               <bool>true</bool>
@@ -2364,7 +2364,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
            <item row="0" column="0" colspan="2">
             <widget class="QScrollArea" name="scrollAreaIBS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="widgetResizable">
               <bool>true</bool>
@@ -2486,7 +2486,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
            <item row="0" column="0" colspan="2">
             <widget class="QScrollArea" name="scrollAreaCBS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="widgetResizable">
               <bool>true</bool>
@@ -2571,7 +2571,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
            <item row="0" column="0" colspan="2">
             <widget class="QScrollArea" name="scrollAreaIS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="widgetResizable">
               <bool>true</bool>

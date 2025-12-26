@@ -180,6 +180,7 @@ private:
   auto updateTotais() -> void;
   auto validarDados() -> void;
   auto validarRegras(ACBr &acbr, const QString &filePath) -> bool;
+  auto validarSchema(ACBr &acbr, const QString &filePath) -> void;
   auto writeComplemento(QTextStream &stream) const -> void;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;

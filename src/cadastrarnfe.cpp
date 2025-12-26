@@ -62,6 +62,36 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, co
   mapper.addMapping(ui->doubleSpinBoxCOFINSpcofins, modelProduto.fieldIndex("pCOFINS"));
   mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelProduto.fieldIndex("vCOFINS"));
 
+  // ================================================
+  // NOVOS CAMPOS: IBS/CBS/IS (REFORMA TRIBUTÁRIA)
+  // ================================================
+
+  // IBS
+  mapper.addMapping(ui->lineEditClassTribIBS, modelProduto.fieldIndex("cClassTribIBS"));
+  mapper.addMapping(ui->doubleSpinBoxIBSBC, modelProduto.fieldIndex("vBCIBS"));
+  mapper.addMapping(ui->doubleSpinBoxIBSUFAliq, modelProduto.fieldIndex("pIBSUF"));
+  mapper.addMapping(ui->doubleSpinBoxIBSUFValor, modelProduto.fieldIndex("vTribOpIBSUF"));
+  mapper.addMapping(ui->doubleSpinBoxIBSMunAliq, modelProduto.fieldIndex("pIBSMun"));
+  mapper.addMapping(ui->doubleSpinBoxIBSMunValor, modelProduto.fieldIndex("vTribOpIBSMun"));
+
+  // CBS
+  mapper.addMapping(ui->lineEditClassTribCBS, modelProduto.fieldIndex("cClassTribCBS"));
+  mapper.addMapping(ui->doubleSpinBoxCBSBC, modelProduto.fieldIndex("vBCCBS"));
+  mapper.addMapping(ui->doubleSpinBoxCBSAliq, modelProduto.fieldIndex("pCBS"));
+  mapper.addMapping(ui->doubleSpinBoxCBSValor, modelProduto.fieldIndex("vCBS"));
+
+  // IS
+  mapper.addMapping(ui->lineEditClassTribIS, modelProduto.fieldIndex("cClassTribIS"));
+  mapper.addMapping(ui->doubleSpinBoxISBC, modelProduto.fieldIndex("vBCIS"));
+  mapper.addMapping(ui->doubleSpinBoxISAliq, modelProduto.fieldIndex("pIS"));
+  mapper.addMapping(ui->doubleSpinBoxISValor, modelProduto.fieldIndex("vIS"));
+
+  // Totais
+  mapper.addMapping(ui->doubleSpinBoxValorIBSUF, modelProduto.fieldIndex("vTribOpIBSUF"));
+  mapper.addMapping(ui->doubleSpinBoxValorIBSMun, modelProduto.fieldIndex("vTribOpIBSMun"));
+  mapper.addMapping(ui->doubleSpinBoxValorCBS, modelProduto.fieldIndex("vCBS"));
+  mapper.addMapping(ui->doubleSpinBoxValorIS, modelProduto.fieldIndex("vIS"));
+
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
   ui->lineEditCodigo->setInputMask("99999999;_");
@@ -178,6 +208,15 @@ QString CadastrarNFe::montarXML() {
   writeComplemento(stream);
 
   stream << R"(",1))"; // return xml
+
+  // DEBUG: Write command to file for inspection
+  QFile debugFile(QCoreApplication::applicationDirPath() + "/nfe_acbr_command.txt");
+  if (debugFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QTextStream debugStream(&debugFile);
+    debugStream << nfe;
+    debugFile.close();
+    qDebug() << "NFe command written to:" << debugFile.fileName();
+  }
 
   return nfe;
 }
@@ -466,13 +505,28 @@ void CadastrarNFe::updateTotais() {
   double valorPIS = 0;
   double valorCOFINS = 0;
   double valorProdutos = 0;
+  // NOVOS TRIBUTOS - REFORMA TRIBUTÁRIA
+  double valorIBSUF = 0;
+  double valorIBSMun = 0;
+  double valorCBS = 0;
+  double valorIS = 0;
 
   for (int row = 0; row < modelProduto.rowCount(); ++row) {
-    baseICMS += modelProduto.data(row, "vBC").toDouble();
+    // CST 60 (ICMS ST) doesn't output vBC in XML, so exclude from total to match SEFAZ validation
+    const QString cstICMS = modelProduto.data(row, "cstICMS").toString();
+    if (cstICMS != "60") {
+      baseICMS += modelProduto.data(row, "vBC").toDouble();
+    }
     valorICMS += modelProduto.data(row, "vICMS").toDouble();
     valorPIS += QString::number(modelProduto.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
     valorCOFINS += QString::number(modelProduto.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
     valorProdutos += modelProduto.data(row, "total").toDouble();
+
+    // NOVOS TRIBUTOS
+    valorIBSUF += modelProduto.data(row, "vTribOpIBSUF").toDouble();
+    valorIBSMun += modelProduto.data(row, "vTribOpIBSMun").toDouble();
+    valorCBS += modelProduto.data(row, "vCBS").toDouble();
+    valorIS += modelProduto.data(row, "vIS").toDouble();
   }
 
   const double valorFrete = ui->doubleSpinBoxValorFrete->value();
@@ -484,6 +538,12 @@ void CadastrarNFe::updateTotais() {
   ui->doubleSpinBoxValorCOFINS->setValue(valorCOFINS);
   ui->doubleSpinBoxValorProdutos->setValue(valorProdutos);
   ui->doubleSpinBoxValorNota->setValue(valorNota);
+
+  // NOVOS TRIBUTOS
+  ui->doubleSpinBoxValorIBSUF->setValue(valorIBSUF);
+  ui->doubleSpinBoxValorIBSMun->setValue(valorIBSMun);
+  ui->doubleSpinBoxValorCBS->setValue(valorCBS);
+  ui->doubleSpinBoxValorIS->setValue(valorIS);
 
   updateComplemento();
 }
@@ -754,6 +814,58 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "Aliquota = " + modelProduto.data(row, "pCOFINS").toString() + "\n";
     stream << "Valor = " + QString::number(modelProduto.data(row, "vCOFINS").toDouble(), 'f', 2) + "\n";
 
+    // ================================================
+    // NOVOS TRIBUTOS - REFORMA TRIBUTÁRIA
+    // ================================================
+
+    // IBS/CBS - Reforma Tributária 2025 (NT 2025.002)
+    // Only output when rates > 0 (reform starts 2026, rates are 0 before that)
+    const QString cstIBS = modelProduto.data(row, "cstIBS").toString();
+    const double pIBSUF = modelProduto.data(row, "pIBSUF").toDouble();
+    const double pIBSMun = modelProduto.data(row, "pIBSMun").toDouble();
+    const double pCBS = modelProduto.data(row, "pCBS").toDouble();
+    const bool hasIBSCBS = (pIBSUF > 0 || pIBSMun > 0 || pCBS > 0);
+    if (!cstIBS.isEmpty() && cstIBS != "0" && hasIBSCBS) {
+      stream << "[IBSCBS" + numProd + "]\n";
+      stream << "CST=" + cstIBS + "\n";
+      stream << "cClassTrib=" + modelProduto.data(row, "cClassTribIBS").toString() + "\n";
+
+      // gIBSCBS - Base de cálculo e valor total IBS
+      const double vIBSUF = modelProduto.data(row, "vTribOpIBSUF").toDouble();
+      const double vIBSMun = modelProduto.data(row, "vTribOpIBSMun").toDouble();
+      const double vIBS = vIBSUF + vIBSMun;
+      stream << "[gIBSCBS" + numProd + "]\n";
+      stream << "vBC=" + QString::number(modelProduto.data(row, "vBCIBS").toDouble(), 'f', 2) + "\n";
+      stream << "vIBS=" + QString::number(vIBS, 'f', 2) + "\n";
+
+      // gIBSUF - IBS Estadual (always output, SEFAZ requires it)
+      stream << "[gIBSUF" + numProd + "]\n";
+      stream << "pIBSUF=" + QString::number(modelProduto.data(row, "pIBSUF").toDouble(), 'f', 2) + "\n";
+      stream << "vIBSUF=" + QString::number(vIBSUF, 'f', 2) + "\n";
+
+      // gIBSMun - IBS Municipal (always output, SEFAZ requires it)
+      stream << "[gIBSMun" + numProd + "]\n";
+      stream << "pIBSMun=" + QString::number(modelProduto.data(row, "pIBSMun").toDouble(), 'f', 2) + "\n";
+      stream << "vIBSMun=" + QString::number(vIBSMun, 'f', 2) + "\n";
+
+      // gCBS - Contribuição Federal (always output, SEFAZ requires it)
+      stream << "[gCBS" + numProd + "]\n";
+      stream << "pCBS=" + QString::number(modelProduto.data(row, "pCBS").toDouble(), 'f', 2) + "\n";
+      stream << "vCBS=" + QString::number(modelProduto.data(row, "vCBS").toDouble(), 'f', 2) + "\n";
+    }
+
+    // IS (Imposto Seletivo) - only for products subject to IS with rate > 0
+    const QString cstIS = modelProduto.data(row, "cstIS").toString();
+    const double pIS = modelProduto.data(row, "pIS").toDouble();
+    if (!cstIS.isEmpty() && cstIS != "0" && pIS > 0) {
+      stream << "[ISel" + numProd + "]\n";
+      stream << "CSTIS = " + cstIS + "\n";
+      stream << "cClassTribIS = " + modelProduto.data(row, "cClassTribIS").toString() + "\n";
+      stream << "vBCIS = " + QString::number(modelProduto.data(row, "vBCIS").toDouble(), 'f', 2) + "\n";
+      stream << "pIS = " + QString::number(pIS, 'f', 2) + "\n";
+      stream << "vIS = " + QString::number(modelProduto.data(row, "vIS").toDouble(), 'f', 2) + "\n";
+    }
+
     // PARTILHA ICMS
 
     const QString inscEst = ui->lineEditDestinatarioInscEst->text();
@@ -782,10 +894,39 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value(), 'f', 2) + "\n";
   stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) + "\n";
   stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) + "\n";
-  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) + "\n";
+
+  stream << "ValorProduto=" + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) + "\n";
   const double valorFrete = (ui->checkBoxFrete->isChecked()) ? ui->doubleSpinBoxValorFrete->value() : 0;
-  stream << "ValorFrete = " + QString::number(valorFrete, 'f', 2) + "\n";
-  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
+  stream << "ValorFrete=" + QString::number(valorFrete, 'f', 2) + "\n";
+  stream << "ValorNota=" + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
+
+  // IBSCBSTot - Totais IBS/CBS (Reforma Tributária 2025)
+  const double vIBSUFTot = ui->doubleSpinBoxValorIBSUF->value();
+  const double vIBSMunTot = ui->doubleSpinBoxValorIBSMun->value();
+  const double vIBSTot = vIBSUFTot + vIBSMunTot;
+  const double vCBSTot = ui->doubleSpinBoxValorCBS->value();
+
+  if (vIBSTot > 0 || vCBSTot > 0) {
+    // Calculate total BC for IBS/CBS (sum of all product BCs)
+    double vBCIBSCBSTot = 0;
+    for (int row = 0; row < modelProduto.rowCount(); ++row) {
+      const QString cstIBS = modelProduto.data(row, "cstIBS").toString();
+      if (!cstIBS.isEmpty() && cstIBS != "0") {
+        vBCIBSCBSTot += modelProduto.data(row, "vBCIBS").toDouble();
+      }
+    }
+
+    stream << "[IBSCBSTot]\n";
+    stream << "vBCIBSCBS=" + QString::number(vBCIBSCBSTot, 'f', 2) + "\n";
+    stream << "[gIBS]\n";
+    stream << "vIBS=" + QString::number(vIBSTot, 'f', 2) + "\n";
+    stream << "[gIBSUFTot]\n";
+    stream << "vIBSUF=" + QString::number(vIBSUFTot, 'f', 2) + "\n";
+    stream << "[gIBSMunTot]\n";
+    stream << "vIBSMun=" + QString::number(vIBSMunTot, 'f', 2) + "\n";
+    stream << "[gCBSTot]\n";
+    stream << "vCBS=" + QString::number(vCBSTot, 'f', 2) + "\n";
+  }
 
   // PARTILHA ICMS
 
@@ -1088,7 +1229,8 @@ void CadastrarNFe::calculaCofins() {
   unsetConnections();
 
   try {
-    ui->doubleSpinBoxCOFINSvbc->setValue(ui->doubleSpinBoxCOFINSvcofins->value() * 100 / ui->doubleSpinBoxCOFINSpcofins->value());
+    // Fix: Calculate value from base (vCOFINS = vBC * pCOFINS / 100), not base from value
+    ui->doubleSpinBoxCOFINSvcofins->setValue(ui->doubleSpinBoxCOFINSvbc->value() * ui->doubleSpinBoxCOFINSpcofins->value() / 100);
 
     const int row = selection.first().row();
 
@@ -1103,6 +1245,140 @@ void CadastrarNFe::calculaCofins() {
   }
 
   setConnections();
+}
+
+// ================================================
+// NOVOS MÉTODOS: IBS/CBS/IS (REFORMA TRIBUTÁRIA)
+// ================================================
+
+void CadastrarNFe::calculaIBS() {
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  unsetConnections();
+
+  try {
+    const int row = selection.first().row();
+
+    // IBS UF (Estadual)
+    double vBC = ui->doubleSpinBoxIBSBC->value();
+    double pIBSUF = ui->doubleSpinBoxIBSUFAliq->value();
+    double vIBSUF = (vBC * pIBSUF) / 100.0;
+    ui->doubleSpinBoxIBSUFValor->setValue(vIBSUF);
+
+    // IBS Município
+    double pIBSMun = ui->doubleSpinBoxIBSMunAliq->value();
+    double vIBSMun = (vBC * pIBSMun) / 100.0;
+    ui->doubleSpinBoxIBSMunValor->setValue(vIBSMun);
+
+    // Salvar no modelo
+    modelProduto.setData(row, "cClassTribIBS", ui->lineEditClassTribIBS->text());
+    modelProduto.setData(row, "vBCIBS", vBC);
+    modelProduto.setData(row, "pIBSUF", pIBSUF);
+    modelProduto.setData(row, "vTribOpIBSUF", vIBSUF);
+    modelProduto.setData(row, "pIBSMun", pIBSMun);
+    modelProduto.setData(row, "vTribOpIBSMun", vIBSMun);
+
+    updateTotais();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
+void CadastrarNFe::calculaCBS() {
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  unsetConnections();
+
+  try {
+    const int row = selection.first().row();
+
+    double vBC = ui->doubleSpinBoxCBSBC->value();
+    double pCBS = ui->doubleSpinBoxCBSAliq->value();
+    double vCBS = (vBC * pCBS) / 100.0;
+    ui->doubleSpinBoxCBSValor->setValue(vCBS);
+
+    // Salvar no modelo
+    modelProduto.setData(row, "cClassTribCBS", ui->lineEditClassTribCBS->text());
+    modelProduto.setData(row, "vBCCBS", vBC);
+    modelProduto.setData(row, "pCBS", pCBS);
+    modelProduto.setData(row, "vCBS", vCBS);
+    modelProduto.setData(row, "vTribOpCBS", vCBS);
+
+    updateTotais();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
+void CadastrarNFe::calculaIS() {
+  const auto selection = ui->tableItens->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  unsetConnections();
+
+  try {
+    const int row = selection.first().row();
+
+    double vBC = ui->doubleSpinBoxISBC->value();
+    double pIS = ui->doubleSpinBoxISAliq->value();
+    double vIS = (vBC * pIS) / 100.0;
+    ui->doubleSpinBoxISValor->setValue(vIS);
+
+    // Salvar no modelo
+    modelProduto.setData(row, "cClassTribIS", ui->lineEditClassTribIS->text());
+    modelProduto.setData(row, "vBCIS", vBC);
+    modelProduto.setData(row, "pIS", pIS);
+    modelProduto.setData(row, "vIS", vIS);
+    modelProduto.setData(row, "vTribOpIS", vIS);
+
+    updateTotais();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+}
+
+void CadastrarNFe::validarClassTrib(const QString &cClassTrib, const QString &tipo) {
+  // Valida se cClassTrib existe na tabela de classificação
+  // tipo = "IBS", "CBS", "IS"
+
+  if (cClassTrib.isEmpty()) { return; }  // Campo vazio é permitido
+
+  if (cClassTrib.length() != 6) {
+    throw RuntimeException("Classificação Tributária deve ter exatamente 6 dígitos!");
+  }
+
+  bool ok = false;
+  cClassTrib.toInt(&ok);
+  if (!ok) {
+    throw RuntimeException("Classificação Tributária deve conter apenas dígitos!");
+  }
+
+  SqlQuery query;
+  query.prepare("SELECT idClassTrib FROM imposto_classificacao WHERE codigo = :codigo AND tipo = :tipo");
+  query.bindValue(":codigo", cClassTrib);
+  query.bindValue(":tipo", tipo);
+
+  if (!query.exec()) {
+    throw RuntimeException("Erro validando classificação tributária: " + query.lastError().text());
+  }
+
+  if (!query.first()) {
+    throw RuntimeException("Classificação Tributária " + cClassTrib + " (" + tipo + ") não encontrada na base de dados!");
+  }
 }
 
 void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged() { calculaCofins(); }
@@ -1681,6 +1957,34 @@ void CadastrarNFe::setConnections() {
   connect(ui->doubleSpinBoxPISppis, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged, connectionType);
   connect(ui->doubleSpinBoxPISvbc, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged, connectionType);
   connect(ui->doubleSpinBoxPISvpis, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged, connectionType);
+
+  // Sinais para IBS/CBS/IS (REFORMA TRIBUTÁRIA)
+  connect(ui->doubleSpinBoxIBSBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS, connectionType);
+  connect(ui->doubleSpinBoxIBSUFAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS, connectionType);
+  connect(ui->doubleSpinBoxIBSMunAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS, connectionType);
+
+  connect(ui->doubleSpinBoxCBSBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaCBS, connectionType);
+  connect(ui->doubleSpinBoxCBSAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaCBS, connectionType);
+
+  connect(ui->doubleSpinBoxISBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIS, connectionType);
+  connect(ui->doubleSpinBoxISAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIS, connectionType);
+
+  // Validação de classificações tributárias
+  connect(ui->lineEditClassTribIBS, &QLineEdit::textChanged, this, [this]() {
+    try { validarClassTrib(ui->lineEditClassTribIBS->text(), "IBS"); }
+    catch (const std::exception &e) { qApp->enqueueError(e.what()); }
+  }, connectionType);
+
+  connect(ui->lineEditClassTribCBS, &QLineEdit::textChanged, this, [this]() {
+    try { validarClassTrib(ui->lineEditClassTribCBS->text(), "CBS"); }
+    catch (const std::exception &e) { qApp->enqueueError(e.what()); }
+  }, connectionType);
+
+  connect(ui->lineEditClassTribIS, &QLineEdit::textChanged, this, [this]() {
+    try { validarClassTrib(ui->lineEditClassTribIS->text(), "IS"); }
+    catch (const std::exception &e) { qApp->enqueueError(e.what()); }
+  }, connectionType);
+
   connect(ui->doubleSpinBoxValorFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged, connectionType);
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxCliente_textChanged, connectionType);
   connect(ui->itemBoxEnderecoEntrega, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged, connectionType);
@@ -1720,6 +2024,23 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->doubleSpinBoxPISppis, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged);
   disconnect(ui->doubleSpinBoxPISvbc, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged);
   disconnect(ui->doubleSpinBoxPISvpis, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged);
+
+  // Desconectar sinais para IBS/CBS/IS
+  disconnect(ui->doubleSpinBoxIBSBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS);
+  disconnect(ui->doubleSpinBoxIBSUFAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS);
+  disconnect(ui->doubleSpinBoxIBSMunAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIBS);
+
+  disconnect(ui->doubleSpinBoxCBSBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaCBS);
+  disconnect(ui->doubleSpinBoxCBSAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaCBS);
+
+  disconnect(ui->doubleSpinBoxISBC, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIS);
+  disconnect(ui->doubleSpinBoxISAliq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::calculaIS);
+
+  // Desconectar validações de classificações tributárias
+  disconnect(ui->lineEditClassTribIBS, &QLineEdit::textChanged, nullptr, nullptr);
+  disconnect(ui->lineEditClassTribCBS, &QLineEdit::textChanged, nullptr, nullptr);
+  disconnect(ui->lineEditClassTribIS, &QLineEdit::textChanged, nullptr, nullptr);
+
   disconnect(ui->doubleSpinBoxValorFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged);
   disconnect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxCliente_textChanged);
   disconnect(ui->itemBoxEnderecoEntrega, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged);
@@ -2035,17 +2356,29 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
-      // Buscar se o NCM está sujeito a ST
+      // Buscar se o NCM está sujeito a ST e IS (Imposto Seletivo), e classificações tributárias
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
       bool produtoST = true; // default: assume ST
+      bool produtoIS = false;
+      double aliqIS = 0.0;
+      QString cClassTribIBS = "000001"; // default: tributação integral
+      QString cClassTribCBS = "000001"; // default: tributação integral
+      QString cClassTribIS;
 
       if (not ncmProduto.isEmpty()) {
         SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st FROM ncm WHERE ncm = :ncm");
+        queryNcm.prepare("SELECT st, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
         queryNcm.bindValue(":ncm", ncmProduto);
 
         if (queryNcm.exec() and queryNcm.first()) {
           produtoST = queryNcm.value("st").toBool();
+          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
+          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
+          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
+          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
+          produtoIS = queryNcm.value("sujeitoIS").toBool();
+          aliqIS = queryNcm.value("pIS").toDouble();
+          cClassTribIS = queryNcm.value("cClassTribIS").toString();
         }
       }
 
@@ -2078,6 +2411,56 @@ void CadastrarNFe::preencherImpostos() {
       modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
       modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+
+      // =====================================================================
+      // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
+      // =====================================================================
+      // Check if product has valid new tax data (not just zeros from null conversion)
+      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
+      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
+      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
+      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+
+      if (!temIBS && !temCBS) {
+        // Product comes from old tax system NFe - convert to new taxes
+        // Use same calculation basis as old system (total + freight)
+        const double vBC = total + freteProduto;
+
+        // Get progressive rates based on emission date (Reforma Tributária LC 214/2025)
+        const auto aliq = AliquotasReformaTributaria::calcular(qApp->serverDate());
+
+        modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
+        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
+        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+
+        modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "pCBS", aliq.pCBS);
+        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+
+        // IS: Populate from NCM table if product is subject to Imposto Seletivo
+        if (produtoIS && aliqIS > 0) {
+          const double vIS = vBC * aliqIS / 100;
+
+          modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "pIS", aliqIS);
+          modelProduto.setData(row, "vIS", vIS);
+          modelProduto.setData(row, "vTribOpIS", vIS);
+        } else {
+          modelProduto.setData(row, "cstIS", "");
+          modelProduto.setData(row, "vBCIS", 0);
+          modelProduto.setData(row, "pIS", 0);
+          modelProduto.setData(row, "vIS", 0);
+        }
+      }
     }
   }
 
@@ -2092,19 +2475,31 @@ void CadastrarNFe::preencherImpostos() {
         }
       }
 
-      // Buscar se o NCM está sujeito a ST e obter a alíquota de ICMS
+      // Buscar se o NCM está sujeito a ST, IS e obter alíquotas e classificações
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
       bool produtoST = true; // default: assume ST
+      bool produtoIS = false;
       double aliqICMS = 0.0;
+      double aliqIS = 0.0;
+      QString cClassTribIBS = "000001"; // default: tributação integral
+      QString cClassTribCBS = "000001"; // default: tributação integral
+      QString cClassTribIS;
 
       if (not ncmProduto.isEmpty()) {
         SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st, aliq FROM ncm WHERE ncm = :ncm");
+        queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
         queryNcm.bindValue(":ncm", ncmProduto);
 
         if (queryNcm.exec() and queryNcm.first()) {
           produtoST = queryNcm.value("st").toBool();
           aliqICMS = queryNcm.value("aliq").toDouble();
+          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
+          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
+          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
+          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
+          produtoIS = queryNcm.value("sujeitoIS").toBool();
+          aliqIS = queryNcm.value("pIS").toDouble();
+          cClassTribIS = queryNcm.value("cClassTribIS").toString();
         }
       }
 
@@ -2143,6 +2538,55 @@ void CadastrarNFe::preencherImpostos() {
       modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
       modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+
+      // =====================================================================
+      // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
+      // =====================================================================
+      // Check if product has valid new tax data (not just zeros from null conversion)
+      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
+      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
+      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
+      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+
+      if (!temIBS && !temCBS) {
+        // Product comes from old tax system - convert to new taxes
+        const double vBC = total + freteProduto;
+
+        // Get progressive rates based on emission date (Reforma Tributária LC 214/2025)
+        const auto aliq = AliquotasReformaTributaria::calcular(qApp->serverDate());
+
+        modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
+        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
+        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+
+        modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "pCBS", aliq.pCBS);
+        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+
+        // IS: Populate from NCM table if product is subject to Imposto Seletivo
+        if (produtoIS && aliqIS > 0) {
+          const double vIS = vBC * aliqIS / 100;
+
+          modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "pIS", aliqIS);
+          modelProduto.setData(row, "vIS", vIS);
+          modelProduto.setData(row, "vTribOpIS", vIS);
+        } else {
+          modelProduto.setData(row, "cstIS", "");
+          modelProduto.setData(row, "vBCIS", 0);
+          modelProduto.setData(row, "pIS", 0);
+          modelProduto.setData(row, "vIS", 0);
+        }
+      }
     }
 
     // Re-enable signals and trigger single refresh
@@ -2170,19 +2614,31 @@ void CadastrarNFe::preencherImpostos() {
         modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
-      // Buscar se o NCM está sujeito a ST e obter a alíquota de ICMS
+      // Buscar se o NCM está sujeito a ST, IS e obter alíquotas e classificações
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
       bool produtoST = true; // default: assume ST
+      bool produtoIS = false;
       double aliqICMS = 0.0;
+      double aliqIS = 0.0;
+      QString cClassTribIBS = "000001"; // default: tributação integral
+      QString cClassTribCBS = "000001"; // default: tributação integral
+      QString cClassTribIS;
 
       if (not ncmProduto.isEmpty()) {
         SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st, aliq FROM ncm WHERE ncm = :ncm");
+        queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
         queryNcm.bindValue(":ncm", ncmProduto);
 
         if (queryNcm.exec() and queryNcm.first()) {
           produtoST = queryNcm.value("st").toBool();
           aliqICMS = queryNcm.value("aliq").toDouble();
+          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
+          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
+          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
+          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
+          produtoIS = queryNcm.value("sujeitoIS").toBool();
+          aliqIS = queryNcm.value("pIS").toDouble();
+          cClassTribIS = queryNcm.value("cClassTribIS").toString();
         }
       }
 
@@ -2220,6 +2676,55 @@ void CadastrarNFe::preencherImpostos() {
       modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
       modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+
+      // =====================================================================
+      // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
+      // =====================================================================
+      // Check if product has valid new tax data (not just zeros from null conversion)
+      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
+      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
+      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
+      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+
+      if (!temIBS && !temCBS) {
+        // Product comes from old tax system - convert to new taxes
+        const double vBC = total + freteProduto;
+
+        // Get progressive rates based on emission date (Reforma Tributária LC 214/2025)
+        const auto aliq = AliquotasReformaTributaria::calcular(qApp->serverDate());
+
+        modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
+        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
+        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+
+        modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
+        modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
+        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "pCBS", aliq.pCBS);
+        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+
+        // IS: Populate from NCM table if product is subject to Imposto Seletivo
+        if (produtoIS && aliqIS > 0) {
+          const double vIS = vBC * aliqIS / 100;
+
+          modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "pIS", aliqIS);
+          modelProduto.setData(row, "vIS", vIS);
+          modelProduto.setData(row, "vTribOpIS", vIS);
+        } else {
+          modelProduto.setData(row, "cstIS", "");
+          modelProduto.setData(row, "vBCIS", 0);
+          modelProduto.setData(row, "pIS", 0);
+          modelProduto.setData(row, "vIS", 0);
+        }
+      }
     }
 
     ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");

@@ -1627,10 +1627,19 @@ CREATE TABLE IF NOT EXISTS `staccato`.`ncm` (
   `mva12` DECIMAL(15,2) NOT NULL,
   `aliq` DECIMAL(15,2) NOT NULL,
   `st` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Indica se o NCM está sujeito a ST (Substituição Tributária)',
+  `cClassTribIBS` VARCHAR(6) NULL DEFAULT '000001' COMMENT 'Código Classificação Tributária IBS (6 dígitos)',
+  `cClassTribCBS` VARCHAR(6) NULL DEFAULT '000001' COMMENT 'Código Classificação Tributária CBS (6 dígitos)',
+  `sujeitoIS` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Indica se NCM está sujeito a Imposto Seletivo (Reforma Tributária 2025)',
+  `pIS` DECIMAL(7,4) NULL COMMENT 'Alíquota IS ad valorem',
+  `cClassTribIS` VARCHAR(6) NULL COMMENT 'Código Classificação Tributária IS (6 dígitos)',
   `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastUpdated` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`idncm`),
-  UNIQUE INDEX `ncm_UNIQUE` (`ncm` ASC) VISIBLE)
+  UNIQUE INDEX `ncm_UNIQUE` (`ncm` ASC) VISIBLE,
+  INDEX `idx_ncm_cClassTribIBS` (`cClassTribIBS` ASC) VISIBLE,
+  INDEX `idx_ncm_cClassTribCBS` (`cClassTribCBS` ASC) VISIBLE,
+  INDEX `idx_ncm_sujeitoIS` (`sujeitoIS` ASC) VISIBLE,
+  INDEX `idx_ncm_cClassTribIS` (`cClassTribIS` ASC) VISIBLE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci

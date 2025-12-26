@@ -41,6 +41,12 @@ void CadastroNCM::setupTables() {
   model.setHeaderData("mva12", "MVA 12%");
   model.setHeaderData("aliq", "Alíq. ICMS");
   model.setHeaderData("st", "ST");
+  // Reforma Tributária 2025 - IBS/CBS/IS
+  model.setHeaderData("cClassTribIBS", "Class. IBS");
+  model.setHeaderData("cClassTribCBS", "Class. CBS");
+  model.setHeaderData("sujeitoIS", "IS");
+  model.setHeaderData("pIS", "Alíq. IS");
+  model.setHeaderData("cClassTribIS", "Class. IS");
 
   model.setFilter("");
 
@@ -54,7 +60,10 @@ void CadastroNCM::setupTables() {
   ui->table->setItemDelegateForColumn("mva12", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("aliq", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new CheckBoxDelegate(false, this));
-  ui->table->setPersistentColumns({"st"});
+  // Reforma Tributária 2025 - Imposto Seletivo
+  ui->table->setItemDelegateForColumn("sujeitoIS", new CheckBoxDelegate(false, this));
+  ui->table->setItemDelegateForColumn("pIS", new PorcentagemDelegate(false, this));
+  ui->table->setPersistentColumns({"st", "sujeitoIS"});
 }
 
 void CadastroNCM::verificaNCM(const QModelIndex &index) {
@@ -105,6 +114,11 @@ void CadastroNCM::on_pushButtonAdicionar_clicked() {
   model.setData(row, "mva12", 0.);
   model.setData(row, "aliq", 0.);
   model.setData(row, "st", 1); // default: sujeito a ST
+  // Reforma Tributária 2025 - IBS/CBS/IS
+  model.setData(row, "cClassTribIBS", "000001"); // default: tributação integral
+  model.setData(row, "cClassTribCBS", "000001"); // default: tributação integral
+  model.setData(row, "sujeitoIS", 0); // default: não sujeito a IS
+  model.setData(row, "pIS", 0.);  // ad valorem rate
 
   ui->table->selectRow(row);
 }

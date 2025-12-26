@@ -457,8 +457,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   try {
     enviarEmail(acbr, filePath);
-  } catch (std::exception &e) {
-    qApp->enqueueError("Erro ao enviar email: " + QString(e.what()), this);
+  } catch (std::exception &) {
+    // RuntimeException already displays the error via enqueueException
   }
 
   ACBrLib::gerarDanfe(xml, true);
@@ -696,23 +696,23 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "CNPJ = " + clearStr(ui->lineEditEmitenteCNPJ->text()) + "\n";
   //  stream << "CNPJ = 99999090910270\n";
   stream << "IE = " + ui->lineEditEmitenteInscEstadual->text() + "\n";
-  stream << "Razao = " + ui->lineEditEmitenteNomeRazao->text().left(59) + "\n";
-  stream << "Fantasia = " + ui->lineEditEmitenteFantasia->text() + "\n";
+  stream << "Razao = " + ui->lineEditEmitenteNomeRazao->text().left(60) + "\n";
+  stream << "Fantasia = " + ui->lineEditEmitenteFantasia->text().left(60) + "\n";
   stream << "Fone = " + ui->lineEditEmitenteTel1->text() + "\n";
   stream << "CEP = " + clearStr(ui->lineEditEmitenteCEP->text()) + "\n";
-  stream << "Logradouro = " + ui->lineEditEmitenteLogradouro->text() + "\n";
-  stream << "Numero = " + ui->lineEditEmitenteNumero->text() + "\n";
-  stream << "Complemento = " + ui->lineEditEmitenteComplemento->text() + "\n";
-  stream << "Bairro = " + ui->lineEditEmitenteBairro->text() + "\n";
+  stream << "Logradouro = " + ui->lineEditEmitenteLogradouro->text().left(60) + "\n";
+  stream << "Numero = " + ui->lineEditEmitenteNumero->text().left(60) + "\n";
+  stream << "Complemento = " + ui->lineEditEmitenteComplemento->text().left(60) + "\n";
+  stream << "Bairro = " + ui->lineEditEmitenteBairro->text().left(60) + "\n";
   stream << "cMun = " + queryIBGEEmit.value("codigo").toString() + "\n";
-  stream << "Cidade = " + ui->lineEditEmitenteCidade->text() + "\n";
+  stream << "Cidade = " + ui->lineEditEmitenteCidade->text().left(60) + "\n";
   stream << "UF = " + ui->lineEditEmitenteUF->text() + "\n";
 }
 
 void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "[Destinatario]\n";
 
-  stream << "NomeRazao = " + ui->lineEditDestinatarioNomeRazao->text().left(59) + "\n";
+  stream << "NomeRazao = " + ui->lineEditDestinatarioNomeRazao->text().left(60) + "\n";
 
   if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 14) {
     stream << "CPF = " + clearStr(ui->lineEditDestinatarioCPFCNPJ->text()) + "\n";
@@ -730,20 +730,20 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   // TODO: se tel1 estiver vazio usar tel2
   stream << "Fone = " + ui->lineEditDestinatarioTel1->text() + "\n";
   stream << "CEP = " + clearStr(ui->lineEditDestinatarioCEP->text()) + "\n";
-  stream << "Logradouro = " + ui->lineEditDestinatarioLogradouro->text().left(59) + "\n";
-  stream << "Numero = " + ui->lineEditDestinatarioNumero->text() + "\n";
-  stream << "Complemento = " + ui->lineEditDestinatarioComplemento->text().left(59) + "\n";
+  stream << "Logradouro = " + ui->lineEditDestinatarioLogradouro->text().left(60) + "\n";
+  stream << "Numero = " + ui->lineEditDestinatarioNumero->text().left(60) + "\n";
+  stream << "Complemento = " + ui->lineEditDestinatarioComplemento->text().left(60) + "\n";
 
   const QString bairro = ui->lineEditDestinatarioBairro->text();
 
   if (bairro.isEmpty()) {
     stream << "Bairro = SEM BAIRRO\n";
   } else {
-    stream << "Bairro = " + bairro + "\n";
+    stream << "Bairro = " + bairro.left(60) + "\n";
   }
 
   stream << "cMun = " + queryIBGEDest.value("codigo").toString() + "\n";
-  stream << "Cidade = " + ui->lineEditDestinatarioCidade->text() + "\n";
+  stream << "Cidade = " + ui->lineEditDestinatarioCidade->text().left(60) + "\n";
   stream << "UF = " + ui->lineEditDestinatarioUF->text() + "\n";
 }
 
@@ -760,7 +760,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     if (not cest.isEmpty()) { stream << "CEST = " + cest + "\n"; }
 
     stream << "NCM = " + modelProduto.data(row, "ncm").toString() + "\n";
-    stream << "Codigo = " + modelProduto.data(row, "codComercial").toString() + "\n";
+    stream << "Codigo = " + modelProduto.data(row, "codComercial").toString().left(60) + "\n";
 
     const QString codBarras = modelProduto.data(row, "codBarras").toString();
     if (not codBarras.isEmpty()) { stream << "cEAN = " + codBarras + "\n"; }
@@ -771,7 +771,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     formato = (formato.isEmpty() ? "" : " - " + formato);
     const QString descricao = produto + formato;
     const QString caixas = modelProduto.data(row, "caixas").toString();
-    stream << "Descricao = " + descricao.left(100).remove(R"(")") + " (" + caixas + " Cx.)\n";
+    stream << "Descricao = " + descricao.left(120).remove(R"(")") + " (" + caixas + " Cx.)\n";
 
     stream << "Unidade = " + modelProduto.data(row, "un").toString().left(6) + "\n";
     stream << "Quantidade = " + modelProduto.data(row, "quant").toString() + "\n";
@@ -960,11 +960,11 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
 
   if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") or razaoSocial == "RETIRA" or razaoSocial == "CARRO EXTRA") { return; }
 
-  stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() + "\n";
+  stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text().left(60) + "\n";
   stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() + "\n";
   stream << "IE = " << ui->lineEditTransportadorInscEst->text() + "\n";
-  stream << "Endereco = " << ui->lineEditTransportadorEndereco->text() + "\n";
-  stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text() + "\n";
+  stream << "Endereco = " << ui->lineEditTransportadorEndereco->text().left(60) + "\n";
+  stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text().left(60) + "\n";
   stream << "UF = " << ui->lineEditTransportadorUf->text() + "\n";
   stream << "ValorServico = \n";
   stream << "ValorBase = \n";
@@ -1019,7 +1019,7 @@ void CadastrarNFe::writeComplemento(QTextStream &stream) const {
     informacoes.replace('\n', ';');
 
     stream << "[DadosAdicionais]\n";
-    stream << "infCpl = " + informacoes + "\n";
+    stream << "infCpl = " + informacoes.left(5000) + "\n";
   }
 }
 

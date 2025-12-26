@@ -440,23 +440,28 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString filePath = gerarNota(acbr);
 
+  validarSchema(acbr, filePath);
+
   // TODO: o ACBr mostra erros de validação devido a pequenas diferenças nos centavos porém a SEFAZ aceita a NF-e, reativar depois de arrumar os spinBoxs para considerar 4 decimais
   //  if (not validarRegras(acbr, filePath)) { return; }
 
   const int idNFe = preCadastrarNota();
 
-  // TODO: para simplificar essa lógica não seria apenas separar em dois trys? o primeiro impede a tela de fechar mas o segundo não
   try {
-    enviarNFe(acbr, filePath, idNFe); // dont close if rejection
-    enviarEmail(acbr, filePath);      // close if error
-
-    ACBrLib::gerarDanfe(xml, true); // close if error
+    enviarNFe(acbr, filePath, idNFe);
   } catch (std::exception &) {
     if (not manterAberto) { close(); }
-
     manterAberto = false;
     throw;
   }
+
+  try {
+    enviarEmail(acbr, filePath);
+  } catch (std::exception &e) {
+    qApp->enqueueError("Erro ao enviar email: " + QString(e.what()), this);
+  }
+
+  ACBrLib::gerarDanfe(xml, true);
 
   close();
 }
@@ -768,7 +773,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const QString caixas = modelProduto.data(row, "caixas").toString();
     stream << "Descricao = " + descricao.left(100).remove(R"(")") + " (" + caixas + " Cx.)\n";
 
-    stream << "Unidade = " + modelProduto.data(row, "un").toString() + "\n";
+    stream << "Unidade = " + modelProduto.data(row, "un").toString().left(6) + "\n";
     stream << "Quantidade = " + modelProduto.data(row, "quant").toString() + "\n";
     stream << "ValorUnitario = " + QString::number(modelProduto.data(row, "descUnitario").toDouble(), 'f', 10) + "\n";
 
@@ -2807,6 +2812,14 @@ bool CadastrarNFe::validarRegras(ACBr &acbr, const QString &filePath) {
   }
 
   return true;
+}
+
+void CadastrarNFe::validarSchema(ACBr &acbr, const QString &filePath) {
+  const QString resposta = acbr.enviarComando("NFE.ValidarNFe(" + filePath + ")", "Validando schema XML...");
+
+  if (not resposta.startsWith("OK", Qt::CaseInsensitive)) {
+    throw RuntimeException("Erro na validação do XML:\n" + resposta, this);
+  }
 }
 
 void CadastrarNFe::on_pushButtonPrevia_clicked() {

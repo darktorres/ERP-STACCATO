@@ -2356,6 +2356,298 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="tabIBS">
+          <attribute name="title">
+           <string>IBS</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_ibs">
+           <item row="0" column="0" colspan="2">
+            <widget class="QScrollArea" name="scrollAreaIBS">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_IBS">
+              <layout class="QGridLayout" name="gridLayout_ibs_content">
+               <item row="0" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Classificação:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEditClassTribIBS"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>vBC (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxIBSBC">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Alíquota UF (%):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxIBSUFAliq">
+                 <property name="suffix">
+                  <string> %</string>
+                 </property>
+                 <property name="maximum">
+                  <double>100.0</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Valor UF (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxIBSUFValor">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Alíquota Município (%):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxIBSMunAliq">
+                 <property name="suffix">
+                  <string> %</string>
+                 </property>
+                 <property name="maximum">
+                  <double>100.0</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Valor Município (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxIBSMunValor">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabCBS">
+          <attribute name="title">
+           <string>CBS</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_cbs">
+           <item row="0" column="0" colspan="2">
+            <widget class="QScrollArea" name="scrollAreaCBS">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_CBS">
+              <layout class="QGridLayout" name="gridLayout_cbs_content">
+               <item row="0" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Classificação:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEditClassTribCBS"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>vBC (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxCBSBC">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Alíquota (%):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxCBSAliq">
+                 <property name="suffix">
+                  <string> %</string>
+                 </property>
+                 <property name="maximum">
+                  <double>100.0</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Valor (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxCBSValor">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabIS">
+          <attribute name="title">
+           <string>IS</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_is">
+           <item row="0" column="0" colspan="2">
+            <widget class="QScrollArea" name="scrollAreaIS">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_IS">
+              <layout class="QGridLayout" name="gridLayout_is_content">
+               <item row="0" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Classificação:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEditClassTribIS"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>vBC (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxISBC">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Alíquota (%):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxISAliq">
+                 <property name="suffix">
+                  <string> %</string>
+                 </property>
+                 <property name="maximum">
+                  <double>100.0</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel">
+                 <property name="text">
+                  <string>Valor (R$):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxISValor">
+                 <property name="prefix">
+                  <string>R$ </string>
+                 </property>
+                 <property name="maximum">
+                  <double>99999999.989999994635582</double>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="tabInterestadual">
           <attribute name="title">
            <string>ICMS Interestadual</string>
@@ -3062,6 +3354,146 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </property>
              <property name="maximum">
               <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorIBSUF">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QLabel">
+             <property name="text">
+              <string>IBS UF:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5.5" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorIBSMun">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5.5" column="1">
+            <widget class="QLabel">
+             <property name="text">
+              <string>IBS Município:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5.6" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorCBS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5.6" column="1">
+            <widget class="QLabel">
+             <property name="text">
+              <string>CBS:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5.7" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorIS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5.7" column="1">
+            <widget class="QLabel">
+             <property name="text">
+              <string>IS:</string>
              </property>
             </widget>
            </item>

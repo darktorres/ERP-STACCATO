@@ -1863,28 +1863,40 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   ACBr acbr;
 
   const QString resposta =
-      acbr.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", "Consultando cadastro do destinatário...");
+      acbr.enviarComando("NFE.ConsultaCadastro(\"" + ui->lineEditDestinatarioUF->text() + "\", \"" + clearStr(ui->lineEditDestinatarioCPFCNPJ->text()) + "\")", "Consultando cadastro do destinatário...");
 
   if (resposta.contains("CStat=111", Qt::CaseInsensitive)) { // Consulta cadastro com uma ocorrência
-    QStringList respostaSplit = resposta.split("\r\n", Qt::SkipEmptyParts).filter("IE=", Qt::CaseInsensitive);
+    // Find IE in INFCAD section (the header IE= is empty)
+    const QStringList lines = resposta.split("\r\n", Qt::SkipEmptyParts);
+    QString inscricao;
 
-    if (respostaSplit.empty()) { throw RuntimeException("Não foi encontrado a inscrição estadual na consulta!"); }
-
-    // TODO: replace QStringList::filter with qApp.findTag due to filter using 'contains', it may find the string in the middle of the text instead of only in the beggining
-    const QString inscricao = respostaSplit.first().remove("IE=", Qt::CaseInsensitive);
-
-    if (not inscricao.isEmpty()) {
-      ui->lineEditDestinatarioInscEst->setText(inscricao);
-
-      SqlQuery query;
-      query.prepare("UPDATE cliente SET inscEstadual = :inscEstadual WHERE idCliente = :idCliente");
-      query.bindValue(":inscEstadual", inscricao);
-      query.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
-
-      if (not query.exec()) { throw RuntimeException("Erro atualizando Insc. Est.: " + query.lastError().text(), this); }
+    for (const QString &line : lines) {
+      if (line.startsWith("IE=", Qt::CaseInsensitive)) {
+        const QString value = line.mid(3); // Skip "IE="
+        if (not value.isEmpty()) {
+          inscricao = value;
+          break;
+        }
+      }
     }
 
-    return qApp->enqueueInformation("Consulta com sucesso, atualizando dados...", this);
+    qDebug() << "ConsultaCadastro IE from SEFAZ:" << inscricao;
+
+    if (inscricao.isEmpty()) { throw RuntimeException("Não foi encontrado a inscrição estadual na consulta!"); }
+
+    ui->lineEditDestinatarioInscEst->setText(inscricao);
+
+    const QVariant idCliente = modelVenda.data(0, "idCliente");
+    qDebug() << "ConsultaCadastro saving IE:" << inscricao << "for idCliente:" << idCliente;
+
+    SqlQuery query;
+    query.prepare("UPDATE cliente SET inscEstadual = :inscEstadual WHERE idCliente = :idCliente");
+    query.bindValue(":inscEstadual", inscricao);
+    query.bindValue(":idCliente", idCliente);
+
+    if (not query.exec()) { throw RuntimeException("Erro atualizando Insc. Est.: " + query.lastError().text(), this); }
+
+    return qApp->enqueueInformation("Consulta com sucesso! IE: " + inscricao, this);
   }
 
   if (resposta.contains("CStat=259", Qt::CaseInsensitive)) { // CNPJ da consulta não cadastrado como contribuinte na UF
@@ -1899,7 +1911,16 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
     return qApp->enqueueInformation("CNPJ da consulta não cadastrado como contribuinte na UF", this);
   }
 
-  // TODO: salvar resposta no Log e não mostrar para o usuario, pedir para ele entrar em contato com o suporte
+  if (resposta.contains("CStat=215", Qt::CaseInsensitive)) { // Falha no schema XML
+    throw RuntimeException("Falha na consulta: erro no schema XML. Verifique se o CNPJ está correto.", this);
+  }
+
+  // Extract XMotivo if available for better error message
+  const QString xMotivo = qApp->findTag(resposta, "XMotivo=");
+  if (not xMotivo.isEmpty()) {
+    throw RuntimeException("Erro na consulta: " + xMotivo, this);
+  }
+
   throw RuntimeException("Resposta não tratada:\n" + resposta, this);
 }
 

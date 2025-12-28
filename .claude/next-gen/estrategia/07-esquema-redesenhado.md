@@ -377,6 +377,15 @@ CREATE TYPE estoque_status AS ENUM (
     'CONSUMIDO',          -- Totalmente consumido
     'BLOQUEADO'           -- Bloqueado (avaria, etc)
 );
+
+-- Motivo de Consumo de Estoque
+CREATE TYPE consumo_motivo AS ENUM (
+    'VENDA',              -- Consumo normal para venda
+    'AJUSTE',             -- Ajuste de inventário
+    'QUEBRA',             -- Produto quebrado/danificado
+    'TRANSFERENCIA',      -- Transferência entre lojas
+    'AMOSTRA'             -- Amostra para cliente
+);
 ```
 
 ### 4.2 Tabelas de Dados Mestres
@@ -720,35 +729,48 @@ CREATE TABLE estoques (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Índice para FIFO
-CREATE INDEX idx_estoques_fifo
+-- Índice para busca de estoque disponível
+CREATE INDEX idx_estoques_disponivel
     ON estoques(produto_id, loja_id, data_entrada)
     WHERE quantidade_disponivel > 0;
 
--- Estoque Consumos (Consumo de Estoque - registros FIFO)
+-- Estoque Consumos (Vínculo 1:1 entre venda_item e estoque)
+-- Seleção MANUAL pelo usuário (não automática) devido a variação de lote
 CREATE TABLE estoque_consumos (
     id SERIAL PRIMARY KEY,
+
+    -- Vínculo 1:1 (cada venda_item liga a um estoque específico)
+    venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id),
     estoque_id INTEGER NOT NULL REFERENCES estoques(id),
 
-    -- O que consumiu
-    venda_item_id INTEGER REFERENCES venda_itens(id),
-
-    -- Quantidades
+    -- Quantidade e custo (snapshot no momento do pareamento)
     quantidade DECIMAL(15,4) NOT NULL,
     custo_unitario DECIMAL(15,4) NOT NULL,
-    custo_total DECIMAL(15,2) NOT NULL,
+    custo_total DECIMAL(15,2) GENERATED ALWAYS AS (quantidade * custo_unitario) STORED,
 
-    -- Tipo
-    motivo VARCHAR(50) NOT NULL,  -- VENDA, AJUSTE, QUEBRA, TRANSFERENCIA
+    -- Tipo de consumo
+    motivo consumo_motivo NOT NULL DEFAULT 'VENDA',
 
-    -- Reversão
+    -- Reversão/Estorno (mantém histórico)
     is_estornado BOOLEAN DEFAULT FALSE,
-    estornado_at TIMESTAMP,
+    estornado_em TIMESTAMP,
     estorno_motivo VARCHAR(200),
+    estornado_por INTEGER REFERENCES usuarios(id),
 
+    -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
     created_by INTEGER REFERENCES usuarios(id)
 );
+
+-- CONSTRAINT 1:1: Apenas um consumo ativo por venda_item
+CREATE UNIQUE INDEX idx_consumos_venda_item_ativo
+    ON estoque_consumos(venda_item_id)
+    WHERE NOT is_estornado;
+
+-- CONSTRAINT 1:1: Cada estoque só pode ser consumido uma vez (por completo)
+CREATE UNIQUE INDEX idx_consumos_estoque_ativo
+    ON estoque_consumos(estoque_id)
+    WHERE NOT is_estornado;
 ```
 
 ### 4.5 Tabelas de NFe
@@ -1013,7 +1035,7 @@ enum VendaItemStatus: string
 | Problema               | Atual                     | Novo Design                  |
 | ---------------------- | ------------------------- | ---------------------------- |
 | **Tabelas L1/L2**      | 2 tabelas + idRelacionado | 1 tabela + parent_id/root_id |
-| **FIFO**               | produto.idEstoque         | ORDER BY data_entrada        |
+| **Consumo estoque**    | FIFO automático (quebrado)| Seleção manual 1:1           |
 | **Refs de fornecedor** | VARCHAR em 9 tabelas      | fornecedor_id FK             |
 | **Status**             | Strings mágicas           | ENUMs PostgreSQL             |
 | **Tabela produto**     | 100+ colunas              | Dividida em 3 tabelas        |
@@ -1060,6 +1082,129 @@ SELECT e.* FROM estoques e
 JOIN fornecedores f ON e.fornecedor_id = f.id
 WHERE f.id = :fornecedor_id;
 ```
+
+### 6.3 Processo de Parear (Seleção Manual de Estoque)
+
+**Por que seleção manual?** Produtos como cerâmicas têm variação de lote (tom, calibre).
+O usuário deve escolher qual estoque usar para garantir consistência visual.
+
+#### Fluxo de Pareamento
+
+```mermaid
+flowchart LR
+    subgraph Antes["Antes do Parear"]
+        VI["venda_item<br/>status=PENDENTE<br/>quantidade=100"]
+        E1["estoque A<br/>lote=T01<br/>disp=60"]
+        E2["estoque B<br/>lote=T02<br/>disp=150"]
+    end
+
+    VI -->|"Usuário seleciona<br/>estoque B"| Parear
+
+    subgraph Depois["Depois do Parear"]
+        VI2["venda_item<br/>status=ESTOQUE"]
+        EC["estoque_consumo<br/>1:1 link"]
+        E2b["estoque B<br/>disp=50"]
+    end
+
+    Parear --> VI2
+    Parear --> EC
+    EC --> E2b
+```
+
+#### SQL do Pareamento
+
+```sql
+-- 1. Inserir o consumo (link 1:1)
+INSERT INTO estoque_consumos (
+    venda_item_id,
+    estoque_id,
+    quantidade,
+    custo_unitario,
+    motivo,
+    created_by
+) VALUES (
+    :venda_item_id,
+    :estoque_selecionado_id,
+    :quantidade,
+    (SELECT custo_unitario FROM estoques WHERE id = :estoque_selecionado_id),
+    'VENDA',
+    :user_id
+);
+
+-- 2. Atualizar quantidade disponível do estoque
+UPDATE estoques
+SET quantidade_disponivel = quantidade_disponivel - :quantidade
+WHERE id = :estoque_selecionado_id;
+
+-- 3. Atualizar status do item
+UPDATE venda_itens
+SET status = 'ESTOQUE'
+WHERE id = :venda_item_id;
+```
+
+#### SQL de Estorno (Reversão)
+
+```sql
+-- 1. Marcar consumo como estornado (mantém histórico)
+UPDATE estoque_consumos
+SET is_estornado = TRUE,
+    estornado_em = NOW(),
+    estorno_motivo = :motivo,
+    estornado_por = :user_id
+WHERE venda_item_id = :venda_item_id
+  AND NOT is_estornado
+RETURNING estoque_id, quantidade;
+
+-- 2. Restaurar quantidade no estoque
+UPDATE estoques
+SET quantidade_disponivel = quantidade_disponivel + :quantidade
+WHERE id = :estoque_id;
+
+-- 3. Atualizar status do item (volta para pendente ou devolvido)
+UPDATE venda_itens
+SET status = :novo_status  -- 'PENDENTE' ou 'DEVOLVIDO'
+WHERE id = :venda_item_id;
+```
+
+#### Query para Exibição no ERP
+
+```sql
+-- Listar itens de venda com info do estoque vinculado
+SELECT
+    vi.id,
+    vi.quantidade,
+    vi.valor_unitario,
+    vi.valor_total,
+    vi.status,
+    p.descricao as produto,
+    e.lote,
+    e.data_entrada,
+    ec.custo_unitario as custo_consumo,
+    ec.created_at as data_pareamento
+FROM venda_itens vi
+JOIN produtos p ON p.id = vi.produto_id
+LEFT JOIN estoque_consumos ec ON ec.venda_item_id = vi.id AND NOT ec.is_estornado
+LEFT JOIN estoques e ON e.id = ec.estoque_id
+WHERE vi.venda_id = :venda_id
+ORDER BY vi.id;
+```
+
+#### Constraint 1:1 Explicada
+
+```sql
+-- Cada venda_item só pode ter UM consumo ativo
+CREATE UNIQUE INDEX idx_consumos_venda_item_ativo
+    ON estoque_consumos(venda_item_id)
+    WHERE NOT is_estornado;
+
+-- Cada estoque só pode ser consumido por UM item
+CREATE UNIQUE INDEX idx_consumos_estoque_ativo
+    ON estoque_consumos(estoque_id)
+    WHERE NOT is_estornado;
+```
+
+**Efeito:** Se tentar parear um item já pareado, ou usar um estoque já consumido,
+o banco retorna erro de constraint violation.
 
 ---
 

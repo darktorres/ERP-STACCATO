@@ -26,7 +26,7 @@
 | 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | ✅ Feito |
 | 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | ✅ Feito |
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | ✅ Feito |
-| 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | Pendente |
+| 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | ✅ Feito |
 | 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | Pendente |
 | 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
 | 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | Pendente |
@@ -403,23 +403,21 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 17. Atalhos de Teclado
+## 17. Atalhos de Teclado ✅
 
-**Problema**: App C++ tem navegação por teclado extensiva que precisa ser preservada.
+**Arquivo**: [`tecnico/12-atalhos-teclado.md`](../tecnico/12-atalhos-teclado.md)
 
-**Arquivo sugerido**: `tecnico/12-atalhos-teclado.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Inventário de atalhos do C++ atual
-- Mapeamento para atalhos web (considerando conflitos com browser)
-- Navegação por Tab entre campos
-- Enter para confirmar/avançar
-- Esc para cancelar/fechar
-- Atalhos globais (Ctrl+N novo, Ctrl+S salvar, etc.)
-- Atalhos por módulo
-- Implementação Vue (VueUse `useMagicKeys` ou similar)
-- Acessibilidade (focus visible, skip links)
+- ✅ Mapeamento completo desktop → web
+- ✅ Resolução de conflitos com navegador
+- ✅ Atalhos globais (Ctrl+K, Ctrl+1-9, ?, etc.)
+- ✅ Atalhos por módulo (Orçamentos, Vendas, Estoque)
+- ✅ Atalhos em tabelas (Enter, Delete, setas)
+- ✅ Composable `useKeyboardShortcuts`
+- ✅ Command Palette (Ctrl+K)
+- ✅ Modal de ajuda (?)
+- ✅ Acessibilidade (focus, skip links, ARIA)
 
 ---
 
@@ -534,20 +532,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 14 | Treinamento - 8 perfis, 8 módulos, rollout gradual     |
 | 2025-12-28 | Item 15 | Design System - cores, tipografia, componentes Vue     |
 | 2025-12-28 | Item 16 | Concorrência - locks, queues, race conditions          |
+| 2025-12-28 | Item 17 | Atalhos - mapeamento, Command Palette, acessibilidade  |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 17 - Atalhos de teclado
-2. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-3. [ ] Item 8 - DevOps/Deployment
-4. [ ] Item 9 - Benchmarks de performance
-5. [ ] Item 10 - Substituição de relatórios
-6. [ ] Item 19 - Dicionário de dados
-7. [ ] Item 20 - Matriz de suporte browser/dispositivo
-8. [ ] Item 21 - Auditoria de dependências
+2. [ ] Item 8 - DevOps/Deployment
+3. [ ] Item 9 - Benchmarks de performance
+4. [ ] Item 10 - Substituição de relatórios
+5. [ ] Item 19 - Dicionário de dados
+6. [ ] Item 20 - Matriz de suporte browser/dispositivo
+7. [ ] Item 21 - Auditoria de dependências
 
 ---
 

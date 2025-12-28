@@ -14,7 +14,7 @@
 | 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | ✅ Feito |
 | 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | ✅ Feito |
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | ✅ Feito |
-| 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
+| 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | ✅ Feito |
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | Pendente |
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
@@ -193,20 +193,23 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 5. Estratégia de Testes
+## 5. Estratégia de Testes ✅
 
-**Problema**: Testes existem em `tests/` mas novo sistema precisa de estratégia.
+**Arquivo**: [`tecnico/07-testes.md`](../tecnico/07-testes.md)
 
-**Arquivo sugerido**: `tecnico/07-testes.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Testes unitários (Services)
-- Testes de integração
-- Testes E2E (Cypress/Playwright)
-- Factories e seeders
-- Cobertura mínima exigida
-- CI/CD integration
+- ✅ Pirâmide de testes (75% unit, 20% integration, 5% E2E)
+- ✅ Estrutura de diretórios (Unit, Feature, Integration, E2E)
+- ✅ Ferramentas (PHPUnit, Pest, Cypress, Mockery)
+- ✅ Testes unitários (Services, ValueObjects, Models, Rules)
+- ✅ Testes de Feature (API, Workflows)
+- ✅ Testes de integração (ACBr, CNAB)
+- ✅ Testes E2E com Cypress
+- ✅ Factories com states
+- ✅ Mocking de serviços externos
+- ✅ CI/CD com GitHub Actions
+- ✅ Métricas de cobertura por módulo
 
 ---
 
@@ -527,25 +530,25 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 13 | Integrações - 7 sistemas externos documentados         |
 | 2025-12-28 | Item 22 | Estratégia de validação - 5 camadas documentadas       |
 | 2025-12-28 | Item 4  | Design de API - REST + OpenAPI + webhooks              |
+| 2025-12-28 | Item 5  | Estratégia de testes - Unit/Feature/E2E + CI/CD        |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 5 - Estratégia de testes
-2. [ ] Item 7 - Tratamento de erros e monitoramento
-3. [ ] Item 14 - Plano de treinamento de usuários
-4. [ ] Item 15 - Design System/Guia de UI
-5. [ ] Item 16 - Estratégia de concorrência
-6. [ ] Item 17 - Atalhos de teclado
-7. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 7 - Tratamento de erros e monitoramento
+2. [ ] Item 14 - Plano de treinamento de usuários
+3. [ ] Item 15 - Design System/Guia de UI
+4. [ ] Item 16 - Estratégia de concorrência
+5. [ ] Item 17 - Atalhos de teclado
+6. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-8. [ ] Item 8 - DevOps/Deployment
-9. [ ] Item 9 - Benchmarks de performance
-10. [ ] Item 10 - Substituição de relatórios
-11. [ ] Item 19 - Dicionário de dados
-12. [ ] Item 20 - Matriz de suporte browser/dispositivo
-13. [ ] Item 21 - Auditoria de dependências
+7. [ ] Item 8 - DevOps/Deployment
+8. [ ] Item 9 - Benchmarks de performance
+9. [ ] Item 10 - Substituição de relatórios
+10. [ ] Item 19 - Dicionário de dados
+11. [ ] Item 20 - Matriz de suporte browser/dispositivo
+12. [ ] Item 21 - Auditoria de dependências
 
 ---
 

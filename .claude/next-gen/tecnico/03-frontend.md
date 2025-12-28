@@ -36,7 +36,6 @@ Renderização no servidor com atualizações reativas via AJAX. Componentes esc
 - Mais carga no servidor (toda interação acessa o servidor)
 - UX menos fluida comparada a SPA verdadeira
 - Interações complexas podem ser complicadas
-- Capacidade offline limitada
 
 ### Exemplo de Componente - Livewire
 
@@ -357,7 +356,6 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 | **Tabelas de Dados**           | Bom           | Excelente   | Excelente       |
 | **Formulários Complexos**      | Médio         | Excelente   | Excelente       |
 | **Atualizações em Tempo Real** | Bom (polling) | Médio       | Excelente (WS)  |
-| **Suporte Offline**            | Nenhum        | Limitado    | Possível        |
 | **Impressão/Relatórios**       | Fácil         | Médio       | Complexo        |
 | **Curva de Aprendizado**       | Baixa         | Média       | Alta            |
 | **Familiaridade da Equipe**    | Apenas PHP    | PHP + Vue   | PHP + React/Vue |

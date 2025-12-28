@@ -104,8 +104,7 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │
 └── meta/                             # Meta-documentação
     ├── backlog-documentacao.md       # Backlog de melhorias pendentes
-    ├── rastreador.md                 # Rastreador de progresso
-    └── reorganizacao-docs.md         # Tracking de reorganização
+    └── rastreador.md                 # Rastreador de progresso
 ```
 
 ---
@@ -284,7 +283,6 @@ Pontos problemáticos e oportunidades de melhoria:
 |-----|-----------|
 | [backlog-documentacao.md](./meta/backlog-documentacao.md) | Backlog de melhorias pendentes |
 | [rastreador.md](./meta/rastreador.md) | Rastreador de progresso |
-| [reorganizacao-docs.md](./meta/reorganizacao-docs.md) | Tracking de reorganização |
 
 ---
 

@@ -15,7 +15,7 @@
 | 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | ✅ Feito |
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
-| 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | Pendente |
+| 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | Pendente |
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
@@ -195,28 +195,22 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 6. Scripts de Migração de Dados
+## 6. Scripts de Migração de Dados ✅
 
-**Problema**: Plano de migração existe mas falta detalhamento de dados.
+**Arquivo**: [`estrategia/09-migracao-dados.md`](./09-migracao-dados.md)
 
-**Arquivo sugerido**: `estrategia/09-migracao-dados.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Mapeamento de tabelas (antigo → novo)
-- Regras de transformação (L1/L2 → tabela única, etc.)
-- Procedimentos de rollback
-- Queries de validação (contagens, integridade)
-- Ordem de migração (dependências entre tabelas)
-
-**Exemplo de conteúdo**:
-
-```text
-| Tabela Antiga | Tabela Nova | Transformações |
-|---------------|-------------|----------------|
-| venda_has_produto + venda_has_produto2 | venda_itens | Merge L1/L2 |
-| fornecedor (VARCHAR) | fornecedor_id (FK) | Lookup por nome |
-```
+- ✅ Mapeamento completo de 40+ tabelas (antigo → novo)
+- ✅ Script SQL de merge L1/L2 com hierarquia parent_id/root_id
+- ✅ Normalização de fornecedor VARCHAR → FK
+- ✅ Split de tabela `produto` (100 cols → 4 tabelas)
+- ✅ Migração de senhas SHA → bcrypt (lazy)
+- ✅ Migração de permissões → Spatie
+- ✅ Scripts de validação (contagens, integridade, somas)
+- ✅ Ordem de migração em 8 fases
+- ✅ Procedimento de rollback
+- ✅ Comando Artisan `migracao:executar`
 
 ---
 
@@ -295,13 +289,14 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 1 | Criadas specs de todos os 6 módulos faltantes           |
 | 2025-12-28 | Item 2 | Fechados todos os ADRs (003, 005, 006)                  |
 | 2025-12-28 | Item 3 | Arquitetura de segurança completa                       |
+| 2025-12-28 | Item 6 | Scripts de migração de dados                            |
 
 ### Próximos
 
-1. [ ] Item 6 - Scripts de migração de dados
-2. [ ] Item 4 - Design de API
-3. [ ] Item 5 - Estratégia de testes
-4. [ ] Item 7 - Tratamento de erros e monitoramento
+1. [ ] Item 4 - Design de API
+2. [ ] Item 5 - Estratégia de testes
+3. [ ] Item 7 - Tratamento de erros e monitoramento
+4. [ ] Item 8 - DevOps/Deployment
 
 ---
 

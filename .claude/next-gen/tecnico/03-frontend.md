@@ -1,40 +1,40 @@
-# Frontend Framework Evaluation
+# Avaliação de Framework Frontend
 
-> Status: **Open - Decision Needed**
-> Last updated: 2025-12-27
+> Status: **Em Aberto - Decisão Necessária**
+> Última atualização: 2025-12-27
 
 ---
 
-## Options Overview
+## Visão Geral das Opções
 
-| Option | Type | Learning Curve | Interactivity | Complexity |
+| Opção | Tipo | Curva de Aprendizado | Interatividade | Complexidade |
 |--------|------|----------------|---------------|------------|
-| **Livewire** | Server-rendered | Low | Medium | Low |
-| **Inertia + Vue** | SPA-like | Medium | High | Medium |
-| **Inertia + React** | SPA-like | Medium-High | High | Medium |
-| **Full SPA + API** | Decoupled | High | Maximum | High |
+| **Livewire** | Renderizado no servidor | Baixa | Média | Baixa |
+| **Inertia + Vue** | Estilo SPA | Média | Alta | Média |
+| **Inertia + React** | Estilo SPA | Média-Alta | Alta | Média |
+| **SPA Completo + API** | Desacoplado | Alta | Máxima | Alta |
 
 ---
 
-## Option 1: Livewire
+## Opção 1: Livewire
 
-### What is it?
-Server-side rendering with reactive updates via AJAX. Components written in PHP.
+### O que é?
+Renderização no servidor com atualizações reativas via AJAX. Componentes escritos em PHP.
 
-### Pros
-- Stays in PHP ecosystem (no JS framework to learn)
-- Simpler mental model
-- Less build tooling
-- Good for CRUD-heavy applications
-- Real-time features with Livewire 3
+### Prós
+- Permanece no ecossistema PHP (sem framework JS para aprender)
+- Modelo mental mais simples
+- Menos ferramentas de build
+- Bom para aplicações com muito CRUD
+- Recursos de tempo real com Livewire 3
 
-### Cons
-- More server load (every interaction hits server)
-- Less smooth UX compared to true SPA
-- Complex interactions can be tricky
-- Limited offline capability
+### Contras
+- Mais carga no servidor (toda interação acessa o servidor)
+- UX menos fluida comparada a SPA verdadeira
+- Interações complexas podem ser complicadas
+- Capacidade offline limitada
 
-### Example Component
+### Exemplo de Componente
 
 ```php
 <?php
@@ -135,26 +135,26 @@ class ListaCompras extends Component
 
 ---
 
-## Option 2: Inertia + Vue
+## Opção 2: Inertia + Vue
 
-### What is it?
-SPA-like experience without building an API. Server renders data, Vue handles UI.
+### O que é?
+Experiência estilo SPA sem construir uma API. Servidor renderiza dados, Vue cuida da UI.
 
-### Pros
-- SPA feel without API complexity
-- Great developer experience
-- Vue's reactivity for complex forms
-- Component reuse across pages
-- Good TypeScript support
-- Partial reloads for performance
+### Prós
+- Sensação de SPA sem complexidade de API
+- Ótima experiência de desenvolvimento
+- Reatividade do Vue para formulários complexos
+- Reutilização de componentes entre páginas
+- Bom suporte a TypeScript
+- Recarregamentos parciais para performance
 
-### Cons
-- Need to know Vue.js
-- Build step required (Vite)
-- Slightly more complex than Livewire
-- Initial bundle size larger
+### Contras
+- Precisa conhecer Vue.js
+- Etapa de build necessária (Vite)
+- Ligeiramente mais complexo que Livewire
+- Tamanho inicial do bundle maior
 
-### Example Component
+### Exemplo de Componente
 
 ```php
 <?php
@@ -284,121 +284,121 @@ const sortBy = (field: string) => {
 
 ---
 
-## Option 3: Inertia + React
+## Opção 3: Inertia + React
 
-Similar to Vue but using React ecosystem.
+Similar ao Vue mas usando o ecossistema React.
 
-### Pros
-- Larger ecosystem than Vue
-- Better TypeScript support
-- More job market demand
-- More component libraries (shadcn/ui, Radix)
+### Prós
+- Ecossistema maior que Vue
+- Melhor suporte a TypeScript
+- Maior demanda no mercado de trabalho
+- Mais bibliotecas de componentes (shadcn/ui, Radix)
 
-### Cons
-- More boilerplate than Vue
-- JSX learning curve
-- Hooks can be confusing initially
-
----
-
-## Option 4: Full SPA + API
-
-Completely separate frontend (React/Vue) with Laravel as API only.
-
-### Pros
-- Maximum flexibility
-- Can have mobile app use same API
-- Frontend can be hosted on CDN
-- Clear separation of concerns
-
-### Cons
-- Two codebases to maintain
-- API versioning complexity
-- Authentication more complex (tokens)
-- CORS, more infrastructure
+### Contras
+- Mais boilerplate que Vue
+- Curva de aprendizado do JSX
+- Hooks podem ser confusos inicialmente
 
 ---
 
-## Comparison for ERP Use Cases
+## Opção 4: SPA Completo + API
 
-| Use Case | Livewire | Inertia+Vue | Full SPA |
+Frontend completamente separado (React/Vue) com Laravel apenas como API.
+
+### Prós
+- Máxima flexibilidade
+- App mobile pode usar mesma API
+- Frontend pode ser hospedado em CDN
+- Clara separação de responsabilidades
+
+### Contras
+- Duas bases de código para manter
+- Complexidade de versionamento de API
+- Autenticação mais complexa (tokens)
+- CORS, mais infraestrutura
+
+---
+
+## Comparação para Casos de Uso de ERP
+
+| Caso de Uso | Livewire | Inertia+Vue | SPA Completo |
 |----------|----------|-------------|----------|
-| **Data Tables** | Good | Excellent | Excellent |
-| **Complex Forms** | Medium | Excellent | Excellent |
-| **Real-time Updates** | Good (polling) | Medium | Excellent (WS) |
-| **Offline Support** | None | Limited | Possible |
-| **Print/Reports** | Easy | Medium | Complex |
-| **Learning Curve** | Low | Medium | High |
-| **Team Familiarity** | PHP only | PHP + Vue | PHP + React/Vue |
+| **Tabelas de Dados** | Bom | Excelente | Excelente |
+| **Formulários Complexos** | Médio | Excelente | Excelente |
+| **Atualizações em Tempo Real** | Bom (polling) | Médio | Excelente (WS) |
+| **Suporte Offline** | Nenhum | Limitado | Possível |
+| **Impressão/Relatórios** | Fácil | Médio | Complexo |
+| **Curva de Aprendizado** | Baixa | Média | Alta |
+| **Familiaridade da Equipe** | Apenas PHP | PHP + Vue | PHP + React/Vue |
 
 ---
 
-## Current Desktop Features to Consider
+## Recursos Desktop Atuais a Considerar
 
-### 1. Heavy Data Tables
-- Qt TableView with delegates
-- Inline editing
-- Custom cell formatting (currency, dates)
-- Sorting, filtering
+### 1. Tabelas de Dados Pesadas
+- TableView do Qt com delegates
+- Edição inline
+- Formatação customizada de células (moeda, datas)
+- Ordenação, filtragem
 
-**Best fit**: Inertia + Vue with TanStack Table or AG Grid
+**Melhor opção**: Inertia + Vue com TanStack Table ou AG Grid
 
-### 2. Complex Multi-Step Forms
-- Product registration with tabs
-- Sale creation with line items
-- Dynamic field visibility
+### 2. Formulários Multi-Etapas Complexos
+- Cadastro de produto com abas
+- Criação de venda com itens de linha
+- Visibilidade dinâmica de campos
 
-**Best fit**: Inertia + Vue (better state management)
+**Melhor opção**: Inertia + Vue (melhor gerenciamento de estado)
 
-### 3. Real-Time Features
-- Stock level updates
-- Order status changes
-- NFe status polling
+### 3. Recursos em Tempo Real
+- Atualizações de nível de estoque
+- Mudanças de status de pedidos
+- Polling de status de NFe
 
-**Best fit**: Full SPA with WebSockets, or Livewire with polling
+**Melhor opção**: SPA completo com WebSockets, ou Livewire com polling
 
-### 4. Keyboard Navigation
-- Tab through fields
-- Enter to submit
-- Keyboard shortcuts
+### 4. Navegação por Teclado
+- Tab entre campos
+- Enter para enviar
+- Atalhos de teclado
 
-**Best fit**: Any option with proper focus management
+**Melhor opção**: Qualquer opção com gerenciamento de foco adequado
 
 ---
 
-## Recommendation
+## Recomendação
 
-**Inertia + Vue** appears to be the best balance:
+**Inertia + Vue** parece ser o melhor equilíbrio:
 
-1. **SPA-like experience** without API complexity
-2. **Vue's reactivity** handles complex forms well
-3. **Partial reloads** reduce data transfer
-4. **No API versioning** needed
-5. **TypeScript support** for type safety
-6. **Growing ecosystem** (PrimeVue, Headless UI)
+1. **Experiência estilo SPA** sem complexidade de API
+2. **Reatividade do Vue** lida bem com formulários complexos
+3. **Recarregamentos parciais** reduzem transferência de dados
+4. **Sem versionamento de API** necessário
+5. **Suporte a TypeScript** para segurança de tipos
+6. **Ecossistema crescente** (PrimeVue, Headless UI)
 
-### Suggested Stack
-- **Inertia.js** - Laravel integration
+### Stack Sugerida
+- **Inertia.js** - Integração com Laravel
 - **Vue 3** - Composition API
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first styling
-- **PrimeVue** - UI components (tables, forms, dialogs)
-- **VueUse** - Utility composables
+- **TypeScript** - Segurança de tipos
+- **Tailwind CSS** - Estilização utility-first
+- **PrimeVue** - Componentes de UI (tabelas, formulários, diálogos)
+- **VueUse** - Composables utilitários
 
 ---
 
-## Questions to Resolve
+## Questões a Resolver
 
-1. **Team Vue experience?** If none, Livewire might be faster to start
-2. **Mobile app planned?** If yes, consider API-first approach
-3. **Offline requirements?** Critical for field work?
-4. **Real-time needs?** Chat, live updates, notifications?
+1. **Experiência da equipe com Vue?** Se nenhuma, Livewire pode ser mais rápido para começar
+2. **App mobile planejado?** Se sim, considere abordagem API-first
+3. **Requisitos offline?** Crítico para trabalho em campo?
+4. **Necessidades de tempo real?** Chat, atualizações ao vivo, notificações?
 
 ---
 
-## Next Steps
+## Próximos Passos
 
-1. Build a prototype of one module (Cadastro Fornecedor) in each approach
-2. Compare development speed and code quality
-3. Get team feedback on developer experience
-4. Make final decision
+1. Construir um protótipo de um módulo (Cadastro Fornecedor) em cada abordagem
+2. Comparar velocidade de desenvolvimento e qualidade de código
+3. Obter feedback da equipe sobre experiência de desenvolvimento
+4. Tomar decisão final

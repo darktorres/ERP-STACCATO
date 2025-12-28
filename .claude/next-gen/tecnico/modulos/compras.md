@@ -1,53 +1,53 @@
-# Module: Compras (Purchases)
+# Módulo: Compras
 
-> Status: **Draft**
-> Priority: 2 (after Cadastros)
-> Complexity: Medium
+> Status: **Rascunho**
+> Prioridade: 2 (após Cadastros)
+> Complexidade: Média
 
 ---
 
-## Current Implementation (C++)
+## Implementação Atual (C++)
 
 ### Classes
-| Class | File | Purpose |
-|-------|------|---------|
-| `TabCompras` | `tabcompras.cpp` | Main tab container |
-| `WidgetCompraGerar` | `widgetcompragerar.cpp` | Generate purchase orders |
-| `WidgetCompraConfirmar` | `widgetcompraconfirmar.cpp` | Confirm orders |
-| `WidgetCompraFaturar` | `widgetcomprafaturar.cpp` | Invoice orders |
-| `WidgetCompraPendentes` | `widgetcomprapendentes.cpp` | Pending orders list |
-| `WidgetCompraResumo` | `widgetcompraresumo.cpp` | Order summary |
-| `WidgetCompraDevolucao` | `widgetcompradevolucao.cpp` | Returns |
-| `WidgetCompraHistorico` | `widgetcomprahistorico.cpp` | Order history |
-| `CompraAvulsa` | `compraavulsa.cpp` | Ad-hoc purchases |
+| Classe | Arquivo | Finalidade |
+|--------|---------|------------|
+| `TabCompras` | `tabcompras.cpp` | Container principal da aba |
+| `WidgetCompraGerar` | `widgetcompragerar.cpp` | Gerar pedidos de compra |
+| `WidgetCompraConfirmar` | `widgetcompraconfirmar.cpp` | Confirmar pedidos |
+| `WidgetCompraFaturar` | `widgetcomprafaturar.cpp` | Faturar pedidos |
+| `WidgetCompraPendentes` | `widgetcomprapendentes.cpp` | Lista de pedidos pendentes |
+| `WidgetCompraResumo` | `widgetcompraresumo.cpp` | Resumo do pedido |
+| `WidgetCompraDevolucao` | `widgetcompradevolucao.cpp` | Devoluções |
+| `WidgetCompraHistorico` | `widgetcomprahistorico.cpp` | Histórico de pedidos |
+| `CompraAvulsa` | `compraavulsa.cpp` | Compras avulsas |
 
-### Current Workflow
+### Fluxo Atual
 
 ```
-Venda Created
+Venda Criada
     ↓
-[GERAR] Generate Purchase Order
+[GERAR] Gerar Pedido de Compra
     ↓ status: PENDENTE
-[CONFIRMAR] Confirm with Supplier
+[CONFIRMAR] Confirmar com Fornecedor
     ↓ status: CONFIRMADO
-    ↓ → Creates Contas a Pagar
-[FATURAR] Receive Invoice (NFe)
+    ↓ → Cria Contas a Pagar
+[FATURAR] Receber Nota Fiscal (NFe)
     ↓ status: FATURADO
-[RECEBER] Receive Goods
+[RECEBER] Receber Mercadorias
     ↓ status: RECEBIDO
-    ↓ → Updates Estoque
+    ↓ → Atualiza Estoque
 ```
 
-### Database Tables (Current)
-- `pedido_fornecedor_has_produto` (Level 1)
-- `pedido_fornecedor_has_produto2` (Level 2)
-- `compra_avulsa` (Ad-hoc purchases)
+### Tabelas do Banco de Dados (Atual)
+- `pedido_fornecedor_has_produto` (Nível 1)
+- `pedido_fornecedor_has_produto2` (Nível 2)
+- `compra_avulsa` (Compras avulsas)
 - `conta_a_pagar_has_pagamento`
 - `conta_a_pagar_has_idcompra`
 
 ---
 
-## Laravel Implementation
+## Implementação Laravel
 
 ### Models
 
@@ -128,7 +128,7 @@ class CompraItem extends Model
 }
 ```
 
-### Status Enum
+### Enum de Status
 
 ```php
 // app/Enums/CompraStatus.php
@@ -186,12 +186,12 @@ class CompraService
     ) {}
 
     /**
-     * Generate purchase orders from a sale
+     * Gerar pedidos de compra a partir de uma venda
      */
     public function gerarDeVenda(Venda $venda): Collection
     {
         return DB::transaction(function () use ($venda) {
-            // Group sale items by supplier
+            // Agrupar itens da venda por fornecedor
             $itensPorFornecedor = $venda->itens
                 ->groupBy('fornecedor_id');
 
@@ -226,7 +226,7 @@ class CompraService
     }
 
     /**
-     * Confirm purchase order with supplier
+     * Confirmar pedido de compra com fornecedor
      */
     public function confirmar(Compra $compra): void
     {
@@ -238,7 +238,7 @@ class CompraService
                 'data_real_compra' => now(),
             ]);
 
-            // Generate accounts payable
+            // Gerar contas a pagar
             $this->contaPagarService->gerarDeCompra($compra);
 
             event(new CompraConfirmada($compra));
@@ -246,7 +246,7 @@ class CompraService
     }
 
     /**
-     * Receive invoice (NFe)
+     * Receber nota fiscal (NFe)
      */
     public function faturar(Compra $compra, Nfe $nfe): void
     {
@@ -263,14 +263,14 @@ class CompraService
     }
 
     /**
-     * Receive goods into inventory
+     * Receber mercadorias no estoque
      */
     public function receber(Compra $compra, array $recebimento): void
     {
         DB::transaction(function () use ($compra, $recebimento) {
             $this->validarTransicao($compra, CompraStatus::RECEBIDO);
 
-            // Create stock entries
+            // Criar entradas no estoque
             foreach ($compra->itens as $item) {
                 $this->estoqueService->darEntrada([
                     'loja_id' => $compra->loja_id,
@@ -344,7 +344,7 @@ class CompraController extends Controller
 }
 ```
 
-### Routes
+### Rotas
 
 ```php
 // routes/web.php
@@ -367,49 +367,49 @@ Route::middleware(['auth'])->group(function () {
 
 ---
 
-## UI Components Needed
+## Componentes de UI Necessários
 
-### List View
-- Filterable data table (status, supplier, date range)
-- Quick actions (confirm, view)
-- Status badges with colors
-- Pagination
+### Visualização em Lista
+- Tabela de dados filtrável (status, fornecedor, período)
+- Ações rápidas (confirmar, visualizar)
+- Badges de status com cores
+- Paginação
 
-### Detail View
-- Header with order info
-- Items table with edit capability
-- Status timeline
-- Action buttons based on current status
-- Related documents (NFe, Contas a Pagar)
+### Visualização de Detalhes
+- Cabeçalho com informações do pedido
+- Tabela de itens com capacidade de edição
+- Linha do tempo de status
+- Botões de ação baseados no status atual
+- Documentos relacionados (NFe, Contas a Pagar)
 
-### Form (Ad-hoc Purchase)
-- Supplier selection (searchable)
-- Product line items
-- Payment terms
-- Delivery info
-
----
-
-## Events
-
-| Event | Triggers |
-|-------|----------|
-| `CompraConfirmada` | Generate Contas a Pagar, Notify supplier |
-| `CompraFaturada` | Link NFe, Update financials |
-| `CompraRecebida` | Create Estoque entries, Update Venda items |
-| `CompraCancelada` | Reverse Contas a Pagar, Notify |
+### Formulário (Compra Avulsa)
+- Seleção de fornecedor (com busca)
+- Itens de produto
+- Condições de pagamento
+- Informações de entrega
 
 ---
 
-## Migration Considerations
+## Eventos
 
-### Data Migration
-1. Map `pedido_fornecedor_has_produto` → `compras`
-2. Map `pedido_fornecedor_has_produto2` → `compra_itens`
-3. Normalize supplier references (name → FK)
-4. Map date fields to new naming
+| Evento | Dispara |
+|--------|---------|
+| `CompraConfirmada` | Gerar Contas a Pagar, Notificar fornecedor |
+| `CompraFaturada` | Vincular NFe, Atualizar financeiro |
+| `CompraRecebida` | Criar entradas no Estoque, Atualizar itens da Venda |
+| `CompraCancelada` | Reverter Contas a Pagar, Notificar |
 
-### Breaking Changes
-- Two-level table structure simplified to one level
-- Status values may differ
-- Supplier reference is now FK only
+---
+
+## Considerações de Migração
+
+### Migração de Dados
+1. Mapear `pedido_fornecedor_has_produto` → `compras`
+2. Mapear `pedido_fornecedor_has_produto2` → `compra_itens`
+3. Normalizar referências de fornecedor (nome → FK)
+4. Mapear campos de data para nova nomenclatura
+
+### Mudanças Incompatíveis
+- Estrutura de tabela em dois níveis simplificada para um nível
+- Valores de status podem diferir
+- Referência ao fornecedor agora é apenas FK

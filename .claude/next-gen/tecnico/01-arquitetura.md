@@ -1,59 +1,59 @@
-# Laravel Architecture Design
+# Design de Arquitetura Laravel
 
-> Status: **Draft**
-> Last updated: 2025-12-27
+> Status: **Rascunho**
+> Última atualização: 2025-12-27
 
 ---
 
-## Current Problems in Legacy Code
+## Problemas Atuais no Código Legado
 
-### 1. SQL Injection Vulnerabilities (HIGH)
+### 1. Vulnerabilidades de SQL Injection (ALTA)
 
-**30+ files affected** with string concatenation in queries:
+**30+ arquivos afetados** com concatenação de strings em queries:
 
 ```cpp
-// VULNERABLE - Found in compraavulsa.cpp:350
+// VULNERÁVEL - Encontrado em compraavulsa.cpp:350
 query.exec("SELECT * FROM nfe WHERE idNFe = " + ui->itemBoxNFe->getId().toString())
 
-// VULNERABLE - Found in cadastrofornecedor.cpp
+// VULNERÁVEL - Encontrado em cadastrofornecedor.cpp
 query.exec("UPDATE produto SET fornecedor = '" + data("razaoSocial").toString() + "'")
 ```
 
-Some files use parameterized queries correctly (inconsistent):
+Alguns arquivos usam queries parametrizadas corretamente (inconsistente):
 ```cpp
-// SAFE - Found in cadastroproduto.cpp:88-90
+// SEGURO - Encontrado em cadastroproduto.cpp:88-90
 query.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor");
 query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
 ```
 
-### 2. Business Logic in Widgets (MEDIUM)
+### 2. Lógica de Negócio em Widgets (MÉDIA)
 
-Logic scattered across:
-- Widget classes (`WidgetCompra*`, `WidgetEstoque*`)
-- Dialog classes (`CadastroProduto`, `Venda`)
-- Static SQL utility class (`Sql::contasPagar()`, `Sql::updateVendaStatus()`)
-- Application class (`qApp->roundDouble()`, `qApp->sanitizeSQL()`)
+Lógica espalhada em:
+- Classes de Widget (`WidgetCompra*`, `WidgetEstoque*`)
+- Classes de Dialog (`CadastroProduto`, `Venda`)
+- Classe utilitária SQL estática (`Sql::contasPagar()`, `Sql::updateVendaStatus()`)
+- Classe Application (`qApp->roundDouble()`, `qApp->sanitizeSQL()`)
 
-**No clear service layer exists.**
+**Não existe uma camada de serviço clara.**
 
-### 3. Global State via `qApp` Macro (MEDIUM)
+### 3. Estado Global via Macro `qApp` (MÉDIA)
 
-Everything accessed globally:
-- Database connection
-- Configuration
-- Transaction state
-- User session
-- Error queues
+Tudo acessado globalmente:
+- Conexão com banco de dados
+- Configuração
+- Estado de transação
+- Sessão do usuário
+- Filas de erro
 
-Makes testing and isolation difficult.
+Dificulta testes e isolamento.
 
 ---
 
-## Proposed Laravel Directory Structure
+## Estrutura de Diretórios Laravel Proposta
 
 ```
 app/
-├── Models/                    # Eloquent models with relationships
+├── Models/                    # Modelos Eloquent com relacionamentos
 │   ├── Produto.php
 │   ├── Cliente.php
 │   ├── Fornecedor.php
@@ -63,7 +63,7 @@ app/
 │   ├── Nfe.php
 │   └── ...
 │
-├── Services/                  # Business logic layer (NEW!)
+├── Services/                  # Camada de lógica de negócio (NOVO!)
 │   ├── Compras/
 │   │   ├── CompraService.php
 │   │   ├── ConfirmacaoCompraService.php
@@ -86,48 +86,48 @@ app/
 │       └── EntregaService.php
 │
 ├── Http/
-│   ├── Controllers/           # Thin controllers, delegate to services
+│   ├── Controllers/           # Controllers enxutos, delegam para services
 │   │   ├── CompraController.php
 │   │   ├── VendaController.php
 │   │   └── ...
-│   ├── Requests/              # Form validation (replaces verifyFields)
+│   ├── Requests/              # Validação de formulário (substitui verifyFields)
 │   │   ├── StoreProdutoRequest.php
 │   │   ├── StoreClienteRequest.php
 │   │   └── ...
-│   └── Resources/             # API JSON responses (if needed)
+│   └── Resources/             # Respostas JSON da API (se necessário)
 │
-├── Events/                    # Domain events
+├── Events/                    # Eventos de domínio
 │   ├── CompraConfirmada.php
 │   ├── VendaFinalizada.php
 │   ├── EstoqueAtualizado.php
 │   └── NfeEmitida.php
 │
-├── Listeners/                 # Event handlers
+├── Listeners/                 # Manipuladores de eventos
 │   ├── GerarContasPagar.php
 │   ├── AtualizarEstoque.php
 │   └── EnviarNotificacao.php
 │
-├── Jobs/                      # Background tasks
+├── Jobs/                      # Tarefas em background
 │   ├── ProcessarNFeJob.php
 │   ├── GerarCnabJob.php
 │   └── ImportarTabelaIbptJob.php
 │
-├── DTOs/                      # Data transfer objects (optional)
+├── DTOs/                      # Objetos de transferência de dados (opcional)
 │   ├── CompraDTO.php
 │   └── ...
 │
-├── Enums/                     # PHP 8.1+ enums
+├── Enums/                     # Enums PHP 8.1+
 │   ├── VendaStatus.php
 │   ├── CompraStatus.php
 │   ├── NfeStatus.php
 │   └── ...
 │
-├── Exceptions/                # Custom exceptions
+├── Exceptions/                # Exceções customizadas
 │   ├── BusinessException.php
 │   ├── ValidationException.php
 │   └── NfeException.php
 │
-└── Rules/                     # Custom validation rules
+└── Rules/                     # Regras de validação customizadas
     ├── CnpjValido.php
     ├── CpfValido.php
     └── InscricaoEstadualValida.php
@@ -135,11 +135,11 @@ app/
 
 ---
 
-## Design Patterns to Apply
+## Padrões de Design a Aplicar
 
-### 1. Service Layer Pattern
+### 1. Padrão Service Layer
 
-Thin controllers delegate to services:
+Controllers enxutos delegam para services:
 
 ```php
 <?php
@@ -172,7 +172,7 @@ class CompraController extends Controller
 }
 ```
 
-Service contains business logic:
+Service contém lógica de negócio:
 
 ```php
 <?php
@@ -221,9 +221,9 @@ class CompraService
 }
 ```
 
-### 2. PHP 8.1+ Enums for Status
+### 2. Enums PHP 8.1+ para Status
 
-Replace magic strings with type-safe enums:
+Substituir strings mágicas por enums com type-safety:
 
 ```php
 <?php
@@ -280,7 +280,7 @@ enum VendaStatus: string
 }
 ```
 
-Usage in model:
+Uso no modelo:
 
 ```php
 <?php
@@ -297,9 +297,9 @@ class Venda extends Model
 }
 ```
 
-### 3. Event-Driven Workflows
+### 3. Fluxos de Trabalho Orientados a Eventos
 
-Decouple operations with events:
+Desacoplar operações com eventos:
 
 ```php
 <?php
@@ -345,9 +345,9 @@ class GerarContasPagarListener
 }
 ```
 
-### 4. Form Request Validation
+### 4. Validação com Form Request
 
-Replace `verifyFields()` with dedicated request classes:
+Substituir `verifyFields()` por classes de request dedicadas:
 
 ```php
 <?php
@@ -390,9 +390,9 @@ class StoreFornecedorRequest extends FormRequest
 
 ---
 
-## Module to Controller/Service Mapping
+## Mapeamento de Módulo para Controller/Service
 
-| C++ Class | Laravel Controller | Laravel Service |
+| Classe C++ | Controller Laravel | Service Laravel |
 |-----------|-------------------|-----------------|
 | `TabCompras` | `CompraController` | `CompraService` |
 | `WidgetCompraGerar` | `CompraController@create` | `CompraService@gerar()` |
@@ -406,45 +406,45 @@ class StoreFornecedorRequest extends FormRequest
 | `TabLogistica` | `EntregaController` | `LogisticaService` |
 | `TabGalpao` | `ArmazemController` | `ArmazemService` |
 | `CadastroProduto` | `ProdutoController` | `ProdutoService` |
-| `CadastroCliente` | `ClienteController` | - (simple CRUD) |
-| `CadastroFornecedor` | `FornecedorController` | - (simple CRUD) |
+| `CadastroCliente` | `ClienteController` | - (CRUD simples) |
+| `CadastroFornecedor` | `FornecedorController` | - (CRUD simples) |
 
 ---
 
-## Background Jobs
+## Jobs em Background
 
-| Current Implementation | Laravel Job |
+| Implementação Atual | Job Laravel |
 |-----------------------|-------------|
-| ACBr NFe signing | `ProcessarNFeJob` |
-| CNAB generation | `GerarCnabJob` |
-| IBPT table import | `ImportarIbptJob` |
-| Report generation | `GerarRelatorioJob` |
+| Assinatura NFe via ACBr | `ProcessarNFeJob` |
+| Geração de CNAB | `GerarCnabJob` |
+| Importação tabela IBPT | `ImportarIbptJob` |
+| Geração de relatórios | `GerarRelatorioJob` |
 
 ---
 
-## Scheduled Tasks
+## Tarefas Agendadas
 
 ```php
 // app/Console/Kernel.php
 protected function schedule(Schedule $schedule)
 {
-    // Check for NFe status updates
+    // Verificar atualizações de status de NFe
     $schedule->job(new ConsultarStatusNFeJob)->everyFiveMinutes();
 
-    // Daily inventory reconciliation
+    // Reconciliação diária de estoque
     $schedule->job(new ReconciliarEstoqueJob)->dailyAt('06:00');
 
-    // Banking holidays sync
+    // Sincronização de feriados bancários
     $schedule->job(new SincronizarFeriadosJob)->weekly();
 
-    // Clean up old sessions/logs
+    // Limpar sessões/logs antigos
     $schedule->command('sanctum:prune-expired --hours=24')->daily();
 }
 ```
 
 ---
 
-## Testing Strategy
+## Estratégia de Testes
 
 ```
 tests/

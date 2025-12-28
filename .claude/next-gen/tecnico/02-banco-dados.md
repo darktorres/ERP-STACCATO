@@ -1,32 +1,32 @@
-# Database Schema Redesign
+# Redesign do Schema de Banco de Dados
 
-> Status: **Draft**
-> Last updated: 2025-12-27
-> Target: PostgreSQL 16
+> Status: **Rascunho**
+> Última atualização: 2025-12-27
+> Alvo: PostgreSQL 16
 
 ---
 
-## Why PostgreSQL
+## Por que PostgreSQL
 
-| Feature | Benefit for This Project |
+| Recurso | Benefício para Este Projeto |
 |---------|-------------------------|
-| **Native JSONB** | Flexible tax data, product attributes, audit logs |
-| **Native ENUM** | Type-safe status fields |
-| **CHECK constraints** | Business rule enforcement at DB level |
-| **Full-text search** | Built-in `tsvector` for product search |
-| **Better concurrency** | MVCC handles concurrent users well |
-| **Schemas** | Multi-tenancy option (schema per loja) |
-| **Partitioning** | Table partitioning for large transaction tables |
+| **JSONB Nativo** | Dados de impostos flexíveis, atributos de produto, logs de auditoria |
+| **ENUM Nativo** | Campos de status com type-safety |
+| **Restrições CHECK** | Aplicação de regras de negócio no nível do BD |
+| **Busca full-text** | tsvector integrado para busca de produtos |
+| **Melhor concorrência** | MVCC lida bem com usuários simultâneos |
+| **Schemas** | Opção de multi-tenancy (schema por loja) |
+| **Particionamento** | Particionamento de tabelas para tabelas de transação grandes |
 
 ---
 
-## Current Schema Problems
+## Problemas Atuais do Schema
 
-### 1. Denormalized Supplier Names
+### 1. Nomes de Fornecedor Desnormalizados
 
-Supplier names stored as VARCHAR in multiple tables instead of FK:
+Nomes de fornecedores armazenados como VARCHAR em múltiplas tabelas em vez de FK:
 
-| Table | Column |
+| Tabela | Coluna |
 |-------|--------|
 | `venda_has_produto2` | `fornecedor` |
 | `estoque` | `fornecedor` |
@@ -34,25 +34,25 @@ Supplier names stored as VARCHAR in multiple tables instead of FK:
 | `compra_avulsa` | `fornecedor` |
 | `pedido_fornecedor_has_produto2` | `fornecedor` |
 
-**Impact**: If supplier name changes, requires updating 5+ tables.
+**Impacto**: Se o nome do fornecedor mudar, requer atualização de 5+ tabelas.
 
-**Fix**: Replace with `fornecedor_id` FK.
+**Correção**: Substituir por FK `fornecedor_id`.
 
 ---
 
-### 2. Mega-Table: `produto`
+### 2. Mega-Tabela: `produto`
 
-The `produto` table has **100+ columns** including:
-- Core product data
-- Multiple `*Upd` tracking flags for each field
-- Calculated fields (`estoqueRestante`)
-- Historical values (`oldPrecoVenda`)
-- Multiple boolean flags scattered throughout
+A tabela `produto` tem **100+ colunas** incluindo:
+- Dados principais do produto
+- Múltiplas flags de rastreamento `*Upd` para cada campo
+- Campos calculados (`estoqueRestante`)
+- Valores históricos (`oldPrecoVenda`)
+- Múltiplas flags booleanas espalhadas
 
-**Fix**: Split into normalized tables:
+**Correção**: Dividir em tabelas normalizadas:
 
 ```sql
--- Core product data only
+-- Apenas dados principais do produto
 CREATE TABLE produtos (
     id SERIAL PRIMARY KEY,
     fornecedor_id INTEGER REFERENCES fornecedores(id),
@@ -65,7 +65,7 @@ CREATE TABLE produtos (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Versioned pricing (history preserved)
+-- Precificação versionada (histórico preservado)
 CREATE TABLE produto_precos (
     id SERIAL PRIMARY KEY,
     produto_id INTEGER REFERENCES produtos(id) ON DELETE CASCADE,
@@ -76,21 +76,21 @@ CREATE TABLE produto_precos (
     vigencia_fim DATE,
     created_at TIMESTAMP DEFAULT NOW(),
 
-    -- Only one active price per product at a time
+    -- Apenas um preço ativo por produto de cada vez
     CONSTRAINT one_active_price EXCLUDE USING gist (
         produto_id WITH =,
         daterange(vigencia_inicio, vigencia_fim, '[]') WITH &&
     ) WHERE (vigencia_fim IS NOT NULL)
 );
 
--- Flexible attributes (dimensions, colors, specs)
+-- Atributos flexíveis (dimensões, cores, especificações)
 CREATE TABLE produto_atributos (
     produto_id INTEGER PRIMARY KEY REFERENCES produtos(id) ON DELETE CASCADE,
     atributos JSONB DEFAULT '{}'::jsonb,
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Get current price view
+-- View para obter preço atual
 CREATE VIEW produto_preco_atual AS
 SELECT DISTINCT ON (produto_id) *
 FROM produto_precos
@@ -101,15 +101,15 @@ ORDER BY produto_id, vigencia_inicio DESC;
 
 ---
 
-### 3. Two-Level Detail Tables
+### 3. Tabelas de Detalhe em Dois Níveis
 
-Current pattern uses two levels:
-- `venda_has_produto` (Level 1 - aggregated)
-- `venda_has_produto2` (Level 2 - detailed)
+Padrão atual usa dois níveis:
+- `venda_has_produto` (Nível 1 - agregado)
+- `venda_has_produto2` (Nível 2 - detalhado)
 
-**Problem**: Complexity, sync issues.
+**Problema**: Complexidade, problemas de sincronização.
 
-**Fix**: Single `venda_itens` table with proper relationships:
+**Correção**: Tabela única `venda_itens` com relacionamentos adequados:
 
 ```sql
 CREATE TABLE venda_itens (
@@ -120,11 +120,11 @@ CREATE TABLE venda_itens (
     quantidade DECIMAL(15,4) NOT NULL,
     preco_unitario DECIMAL(15,2) NOT NULL,
     desconto DECIMAL(7,4) DEFAULT 0,
-    -- Denormalized for performance (captured at time of sale)
+    -- Desnormalizado para performance (capturado no momento da venda)
     descricao_produto VARCHAR(500),
     unidade VARCHAR(10),
-    -- Tracking
-    estoque_id INTEGER REFERENCES estoques(id), -- which stock was consumed
+    -- Rastreamento
+    estoque_id INTEGER REFERENCES estoques(id), -- qual estoque foi consumido
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -134,11 +134,11 @@ CREATE INDEX idx_venda_itens_produto ON venda_itens(produto_id);
 
 ---
 
-### 4. Tax Fields Explosion
+### 4. Explosão de Campos de Impostos
 
-Current: 35 inline fields for IBS/CBS/IS in `estoque` and `estoque_has_consumo`.
+Atual: 35 campos inline para IBS/CBS/IS em `estoque` e `estoque_has_consumo`.
 
-**Fix**: Separate table with JSONB:
+**Correção**: Tabela separada com JSONB:
 
 ```sql
 CREATE TYPE tributo_tipo AS ENUM ('ICMS', 'IPI', 'PIS', 'COFINS', 'IBS', 'CBS', 'IS');
@@ -154,7 +154,7 @@ CREATE TABLE item_tributos (
     UNIQUE(item_type, item_id, tributo)
 );
 
--- Example JSONB structure for ICMS:
+-- Exemplo de estrutura JSONB para ICMS:
 -- {
 --   "cst": "00",
 --   "orig": "0",
@@ -163,7 +163,7 @@ CREATE TABLE item_tributos (
 --   "vICMS": 180.00
 -- }
 
--- Example for IBS (Reforma Tributária):
+-- Exemplo para IBS (Reforma Tributária):
 -- {
 --   "cst": "01",
 --   "cClassTrib": "123456",
@@ -178,11 +178,11 @@ CREATE INDEX idx_item_tributos_item ON item_tributos(item_type, item_id);
 
 ---
 
-### 5. Status as VARCHAR
+### 5. Status como VARCHAR
 
-Current: Magic strings like `"PENDENTE"`, `"PEND. APROV."`, `"EM ENTREGA"`.
+Atual: Strings mágicas como `"PENDENTE"`, `"PEND. APROV."`, `"EM ENTREGA"`.
 
-**Fix**: PostgreSQL ENUMs:
+**Correção**: ENUMs do PostgreSQL:
 
 ```sql
 CREATE TYPE venda_status AS ENUM (
@@ -211,7 +211,7 @@ CREATE TYPE nfe_status AS ENUM (
     'INUTILIZADA'
 );
 
--- Usage in table
+-- Uso na tabela
 CREATE TABLE vendas (
     id SERIAL PRIMARY KEY,
     status venda_status NOT NULL DEFAULT 'ORCAMENTO',
@@ -221,11 +221,11 @@ CREATE TABLE vendas (
 
 ---
 
-### 6. No Audit Trail
+### 6. Sem Trilha de Auditoria
 
-Current: Some `*Upd` flags but no real audit trail.
+Atual: Algumas flags `*Upd` mas sem trilha de auditoria real.
 
-**Fix**: Audit log table with triggers:
+**Correção**: Tabela de log de auditoria com triggers:
 
 ```sql
 CREATE TABLE audit_log (
@@ -235,7 +235,7 @@ CREATE TABLE audit_log (
     action VARCHAR(20) NOT NULL, -- INSERT, UPDATE, DELETE
     old_values JSONB,
     new_values JSONB,
-    changed_fields TEXT[], -- list of changed column names
+    changed_fields TEXT[], -- lista de nomes de colunas alteradas
     user_id INTEGER REFERENCES usuarios(id),
     ip_address INET,
     user_agent TEXT,
@@ -245,7 +245,7 @@ CREATE TABLE audit_log (
 CREATE INDEX idx_audit_log_table_record ON audit_log(table_name, record_id);
 CREATE INDEX idx_audit_log_created ON audit_log(created_at);
 
--- Generic audit trigger function
+-- Função genérica de trigger de auditoria
 CREATE OR REPLACE FUNCTION audit_trigger_func()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -265,7 +265,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply to important tables
+-- Aplicar às tabelas importantes
 CREATE TRIGGER audit_vendas
     AFTER INSERT OR UPDATE OR DELETE ON vendas
     FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
@@ -277,12 +277,12 @@ CREATE TRIGGER audit_compras
 
 ---
 
-## Proposed Core Schema
+## Schema Principal Proposto
 
-### Master Tables
+### Tabelas Mestras
 
 ```sql
--- Lojas (stores/branches)
+-- Lojas (filiais)
 CREATE TABLE lojas (
     id SERIAL PRIMARY KEY,
     cnpj VARCHAR(14) UNIQUE NOT NULL,
@@ -336,7 +336,7 @@ CREATE TABLE clientes (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Enderecos (polymorphic)
+-- Enderecos (polimórfico)
 CREATE TABLE enderecos (
     id SERIAL PRIMARY KEY,
     enderecavel_type VARCHAR(50) NOT NULL, -- 'cliente', 'fornecedor', 'loja'
@@ -357,7 +357,7 @@ CREATE TABLE enderecos (
 CREATE INDEX idx_enderecos_enderecavel ON enderecos(enderecavel_type, enderecavel_id);
 ```
 
-### Transaction Tables
+### Tabelas de Transação
 
 ```sql
 -- Vendas
@@ -368,13 +368,13 @@ CREATE TABLE vendas (
     vendedor_id INTEGER REFERENCES usuarios(id),
     status venda_status NOT NULL DEFAULT 'ORCAMENTO',
 
-    -- Totals (denormalized for performance)
+    -- Totais (desnormalizados para performance)
     subtotal DECIMAL(15,2) DEFAULT 0,
     desconto DECIMAL(15,2) DEFAULT 0,
     frete DECIMAL(15,2) DEFAULT 0,
     total DECIMAL(15,2) DEFAULT 0,
 
-    -- Dates
+    -- Datas
     data_orcamento TIMESTAMP,
     data_venda TIMESTAMP,
     data_previsao_entrega DATE,
@@ -394,15 +394,15 @@ CREATE TABLE compras (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER REFERENCES lojas(id) NOT NULL,
     fornecedor_id INTEGER REFERENCES fornecedores(id) NOT NULL,
-    venda_id INTEGER REFERENCES vendas(id), -- if linked to a sale
+    venda_id INTEGER REFERENCES vendas(id), -- se vinculada a uma venda
     status compra_status NOT NULL DEFAULT 'PENDENTE',
 
-    -- Totals
+    -- Totais
     subtotal DECIMAL(15,2) DEFAULT 0,
     frete DECIMAL(15,2) DEFAULT 0,
     total DECIMAL(15,2) DEFAULT 0,
 
-    -- Planned vs Actual dates
+    -- Datas previstas vs reais
     data_prev_compra DATE,
     data_real_compra DATE,
     data_prev_entrega DATE,
@@ -418,10 +418,10 @@ CREATE INDEX idx_compras_loja_status ON compras(loja_id, status);
 CREATE INDEX idx_compras_fornecedor ON compras(fornecedor_id);
 ```
 
-### Inventory Tables
+### Tabelas de Estoque
 
 ```sql
--- Estoque (stock receipts/entries)
+-- Estoque (recebimentos/entradas de estoque)
 CREATE TABLE estoques (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER REFERENCES lojas(id) NOT NULL,
@@ -430,13 +430,13 @@ CREATE TABLE estoques (
     fornecedor_id INTEGER REFERENCES fornecedores(id),
 
     quantidade DECIMAL(15,4) NOT NULL,
-    quantidade_disponivel DECIMAL(15,4) NOT NULL, -- current available
+    quantidade_disponivel DECIMAL(15,4) NOT NULL, -- disponível atual
     custo_unitario DECIMAL(15,2),
 
-    -- Location
-    bloco_id INTEGER REFERENCES blocos(id), -- warehouse location
+    -- Localização
+    bloco_id INTEGER REFERENCES blocos(id), -- localização no armazém
 
-    -- Dates
+    -- Datas
     data_entrada TIMESTAMP DEFAULT NOW(),
     validade DATE,
 
@@ -449,7 +449,7 @@ CREATE INDEX idx_estoques_produto ON estoques(produto_id);
 CREATE INDEX idx_estoques_disponivel ON estoques(produto_id, quantidade_disponivel)
     WHERE quantidade_disponivel > 0;
 
--- Estoque consumos (stock consumption tracking)
+-- Consumos de estoque (rastreamento de consumo)
 CREATE TABLE estoque_consumos (
     id SERIAL PRIMARY KEY,
     estoque_id INTEGER REFERENCES estoques(id) NOT NULL,
@@ -464,34 +464,34 @@ CREATE INDEX idx_estoque_consumos_estoque ON estoque_consumos(estoque_id);
 
 ---
 
-## Migration Strategy
+## Estratégia de Migração
 
-### Phase 1: New Tables
-Create new normalized tables alongside existing ones.
+### Fase 1: Novas Tabelas
+Criar novas tabelas normalizadas junto às existentes.
 
-### Phase 2: Dual-Write
-Write to both old and new tables during transition.
+### Fase 2: Escrita Dupla
+Escrever em ambas tabelas antigas e novas durante a transição.
 
-### Phase 3: Backfill
-Migrate historical data from old to new tables.
+### Fase 3: Backfill
+Migrar dados históricos das tabelas antigas para as novas.
 
-### Phase 4: Switch Reads
-Point application reads to new tables.
+### Fase 4: Mudar Leituras
+Apontar leituras da aplicação para as novas tabelas.
 
-### Phase 5: Cleanup
-Remove old tables after validation.
+### Fase 5: Limpeza
+Remover tabelas antigas após validação.
 
 ---
 
-## Full-Text Search
+## Busca Full-Text
 
 ```sql
--- Add search vector to produtos
+-- Adicionar coluna de vetor de busca aos produtos
 ALTER TABLE produtos ADD COLUMN search_vector tsvector;
 
 CREATE INDEX idx_produtos_search ON produtos USING GIN(search_vector);
 
--- Update trigger
+-- Trigger de atualização
 CREATE OR REPLACE FUNCTION produtos_search_update() RETURNS trigger AS $$
 BEGIN
     NEW.search_vector :=
@@ -505,7 +505,7 @@ CREATE TRIGGER produtos_search_trigger
     BEFORE INSERT OR UPDATE ON produtos
     FOR EACH ROW EXECUTE FUNCTION produtos_search_update();
 
--- Search query
+-- Query de busca
 SELECT * FROM produtos
 WHERE search_vector @@ plainto_tsquery('portuguese', 'mesa escritorio')
 ORDER BY ts_rank(search_vector, plainto_tsquery('portuguese', 'mesa escritorio')) DESC;

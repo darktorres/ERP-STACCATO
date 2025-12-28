@@ -1,151 +1,151 @@
-# Supplier Reference Normalization
+# Normalização de Referências de Fornecedor
 
-> Status: **Analysis**
-> Last updated: 2025-12-27
-> Focus: Replace denormalized supplier names with proper FK references
-
----
-
-## Table of Contents
-
-1. [Current Problem](#1-current-problem)
-2. [Affected Tables](#2-affected-tables)
-3. [Impact Analysis](#3-impact-analysis)
-4. [Proposed Solution](#4-proposed-solution)
-5. [Migration Strategy](#5-migration-strategy)
-6. [Code Changes](#6-code-changes)
+> Status: **Análise**
+> Última atualização: 2025-12-27
+> Foco: Substituir nomes de fornecedor desnormalizados por referências FK adequadas
 
 ---
 
-## 1. Current Problem
+## Sumário
 
-### 1.1 What's Wrong
+1. [Problema Atual](#1-problema-atual)
+2. [Tabelas Afetadas](#2-tabelas-afetadas)
+3. [Análise de Impacto](#3-análise-de-impacto)
+4. [Solução Proposta](#4-solução-proposta)
+5. [Estratégia de Migração](#5-estratégia-de-migração)
+6. [Mudanças de Código](#6-mudanças-de-código)
 
-Supplier name is stored as **VARCHAR** in multiple tables instead of **FK to fornecedor**:
+---
+
+## 1. Problema Atual
+
+### 1.1 O Que Está Errado
+
+Nome do fornecedor é armazenado como **VARCHAR** em múltiplas tabelas ao invés de **FK para fornecedor**:
 
 ```sql
--- Current: Name duplicated everywhere
+-- Atual: Nome duplicado em todo lugar
 venda_has_produto2 (fornecedor VARCHAR)     -- "ACME Corp"
 estoque (fornecedor VARCHAR)                 -- "ACME Corp"
 estoque_has_consumo (fornecedor VARCHAR)     -- "ACME Corp"
 pedido_fornecedor_has_produto2 (fornecedor VARCHAR) -- "ACME Corp"
 produto (fornecedor VARCHAR)                 -- "ACME Corp"
 
--- Should be: FK reference
+-- Deveria ser: Referência FK
 venda_has_produto2 (fornecedor_id INT FK)   -- 123
 estoque (fornecedor_id INT FK)              -- 123
 ```
 
-### 1.2 Why It's a Problem
+### 1.2 Por Que é um Problema
 
-| Issue | Impact |
-|-------|--------|
-| **Data inconsistency** | Typos, variations ("ACME Corp" vs "Acme Corp") |
-| **Rename nightmare** | If supplier renames, must update 5+ tables |
-| **No referential integrity** | Can have orphan references |
-| **Query inefficiency** | String comparison slower than INT |
-| **Storage waste** | VARCHAR repeated vs single INT FK |
-| **No cascade** | Delete supplier leaves orphan records |
+| Problema | Impacto |
+|----------|---------|
+| **Inconsistência de dados** | Erros de digitação, variações ("ACME Corp" vs "Acme Corp") |
+| **Pesadelo de renomeação** | Se fornecedor muda de nome, precisa atualizar 5+ tabelas |
+| **Sem integridade referencial** | Pode ter referências órfãs |
+| **Ineficiência de query** | Comparação de string mais lenta que INT |
+| **Desperdício de armazenamento** | VARCHAR repetido vs único INT FK |
+| **Sem cascade** | Deletar fornecedor deixa registros órfãos |
 
-### 1.3 Real Example from Code
+### 1.3 Exemplo Real do Código
 
 ```cpp
-// inputdialogproduto.cpp:215 - Searching by name (fragile!)
+// inputdialogproduto.cpp:215 - Buscando por nome (frágil!)
 query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
-// If name has typo or variation, this fails silently
+// Se nome tem erro de digitação ou variação, isso falha silenciosamente
 ```
 
 ---
 
-## 2. Affected Tables
+## 2. Tabelas Afetadas
 
-### 2.1 Tables with Denormalized Supplier
+### 2.1 Tabelas com Fornecedor Desnormalizado
 
-| Table | Column | Usage Count in Code |
-|-------|--------|---------------------|
-| `produto` | `fornecedor` | ~15 files |
-| `venda_has_produto` | `fornecedor` | ~10 files |
-| `venda_has_produto2` | `fornecedor` | ~20 files |
-| `pedido_fornecedor_has_produto` | `fornecedor` | ~8 files |
-| `pedido_fornecedor_has_produto2` | `fornecedor` | ~12 files |
-| `estoque` | `fornecedor` | ~8 files |
-| `estoque_has_consumo` | `fornecedor` | ~5 files |
-| `compra_avulsa` | `fornecedor` | ~3 files |
-| `orcamento_has_produto` | `fornecedor` | ~5 files |
+| Tabela | Coluna | Contagem de Uso no Código |
+|--------|--------|---------------------------|
+| `produto` | `fornecedor` | ~15 arquivos |
+| `venda_has_produto` | `fornecedor` | ~10 arquivos |
+| `venda_has_produto2` | `fornecedor` | ~20 arquivos |
+| `pedido_fornecedor_has_produto` | `fornecedor` | ~8 arquivos |
+| `pedido_fornecedor_has_produto2` | `fornecedor` | ~12 arquivos |
+| `estoque` | `fornecedor` | ~8 arquivos |
+| `estoque_has_consumo` | `fornecedor` | ~5 arquivos |
+| `compra_avulsa` | `fornecedor` | ~3 arquivos |
+| `orcamento_has_produto` | `fornecedor` | ~5 arquivos |
 
-**Total**: ~9 tables, ~85+ code references
+**Total**: ~9 tabelas, ~85+ referências de código
 
-### 2.2 Tables That Already Have FK
+### 2.2 Tabelas Que Já Tem FK
 
 ```sql
--- These are correct
+-- Estas estão corretas
 produto.idFornecedor → fornecedor.idFornecedor
 pedido_fornecedor.idFornecedor → fornecedor.idFornecedor
 ```
 
-**Problem**: Both `idFornecedor` (FK) AND `fornecedor` (VARCHAR) exist!
+**Problema**: Tanto `idFornecedor` (FK) QUANTO `fornecedor` (VARCHAR) existem!
 
 ---
 
-## 3. Impact Analysis
+## 3. Análise de Impacto
 
-### 3.1 Current Data Issues
+### 3.1 Problemas de Dados Atuais
 
 ```sql
--- Find inconsistencies
+-- Encontrar inconsistências
 SELECT DISTINCT p.fornecedor, f.razaoSocial
 FROM produto p
 LEFT JOIN fornecedor f ON p.idFornecedor = f.idFornecedor
 WHERE p.fornecedor != f.razaoSocial
   AND p.fornecedor IS NOT NULL;
 
--- Common issues found:
--- "TRAMONTINA " vs "TRAMONTINA" (trailing space)
--- "Tok&Stok" vs "TOK&STOK" (case difference)
--- Old name vs new name after rename
+-- Problemas comuns encontrados:
+-- "TRAMONTINA " vs "TRAMONTINA" (espaço no final)
+-- "Tok&Stok" vs "TOK&STOK" (diferença de caixa)
+-- Nome antigo vs nome novo após renomeação
 ```
 
-### 3.2 Code Patterns to Fix
+### 3.2 Padrões de Código a Corrigir
 
-**Pattern 1: Setting supplier name manually**
+**Padrão 1: Definindo nome do fornecedor manualmente**
 ```cpp
-// Current: Copy name string
+// Atual: Copia string do nome
 modelEstoque.setData(newRow, "fornecedor", xml.xNome);
 
-// Should be: Use FK
+// Deveria ser: Usar FK
 modelEstoque.setData(newRow, "fornecedor_id", fornecedorId);
 ```
 
-**Pattern 2: Comparing by name**
+**Padrão 2: Comparando por nome**
 ```cpp
-// Current: String comparison
+// Atual: Comparação de string
 if (modelItem.data(0, "fornecedor").toString() == "ATELIER STACCATO") { ... }
 
-// Should be: Compare FK or use constant
+// Deveria ser: Comparar FK ou usar constante
 if (modelItem.data(0, "fornecedor_id").toInt() == ATELIER_STACCATO_ID) { ... }
 ```
 
-**Pattern 3: Grouping by supplier**
+**Padrão 3: Agrupando por fornecedor**
 ```cpp
-// Current: Group by name (slow, error-prone)
+// Atual: Agrupar por nome (lento, propenso a erros)
 for (row : rows) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
 
-// Should be: Group by FK
+// Deveria ser: Agrupar por FK
 for (row : rows) { fornecedorIds << modelItem.data(row, "fornecedor_id").toInt(); }
 ```
 
 ---
 
-## 4. Proposed Solution
+## 4. Solução Proposta
 
-### 4.1 New Schema
+### 4.1 Novo Schema
 
 ```sql
--- Keep fornecedor table as-is (already normalized)
+-- Manter tabela fornecedor como está (já normalizada)
 -- fornecedor (idFornecedor PK, razaoSocial, cnpj, ...)
 
--- Add FK columns to affected tables
+-- Adicionar colunas FK nas tabelas afetadas
 ALTER TABLE venda_has_produto2
     ADD COLUMN fornecedor_id INTEGER REFERENCES fornecedores(id);
 
@@ -155,17 +155,17 @@ ALTER TABLE estoque
 ALTER TABLE estoque_has_consumo
     ADD COLUMN fornecedor_id INTEGER REFERENCES fornecedores(id);
 
--- etc for other tables
+-- etc para outras tabelas
 
--- Create indexes
+-- Criar índices
 CREATE INDEX idx_vhp2_fornecedor ON venda_has_produto2(fornecedor_id);
 CREATE INDEX idx_estoque_fornecedor ON estoque(fornecedor_id);
 ```
 
-### 4.2 PostgreSQL Schema (New System)
+### 4.2 Schema PostgreSQL (Sistema Novo)
 
 ```sql
--- Suppliers table
+-- Tabela de fornecedores
 CREATE TABLE fornecedores (
     id SERIAL PRIMARY KEY,
     razao_social VARCHAR(200) NOT NULL,
@@ -173,16 +173,16 @@ CREATE TABLE fornecedores (
     cnpj VARCHAR(18) UNIQUE,
     inscricao_estadual VARCHAR(20),
 
-    -- Contact
+    -- Contato
     email VARCHAR(200),
     telefone VARCHAR(20),
 
-    -- Banking
+    -- Dados bancários
     banco VARCHAR(100),
     agencia VARCHAR(20),
     conta VARCHAR(20),
 
-    -- Business rules
+    -- Regras de negócio
     comissao_percentual DECIMAL(5,2) DEFAULT 0,
     frete_pago_loja BOOLEAN DEFAULT FALSE,
     representacao BOOLEAN DEFAULT FALSE,
@@ -190,29 +190,29 @@ CREATE TABLE fornecedores (
     -- Status
     ativo BOOLEAN DEFAULT TRUE,
 
-    -- Audit
+    -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- All related tables use FK
+-- Todas as tabelas relacionadas usam FK
 CREATE TABLE venda_itens (
     -- ...
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
-    -- Remove: fornecedor VARCHAR
+    -- Removido: fornecedor VARCHAR
 );
 
 CREATE TABLE estoques (
     -- ...
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
-    -- Remove: fornecedor VARCHAR
+    -- Removido: fornecedor VARCHAR
 );
 ```
 
-### 4.3 View for Backwards Compatibility
+### 4.3 View para Compatibilidade com Versões Anteriores
 
 ```sql
--- During transition, create view that includes supplier name
+-- Durante transição, criar view que inclui nome do fornecedor
 CREATE VIEW venda_itens_com_fornecedor AS
 SELECT
     vi.*,
@@ -224,19 +224,19 @@ JOIN fornecedores f ON vi.fornecedor_id = f.id;
 
 ---
 
-## 5. Migration Strategy
+## 5. Estratégia de Migração
 
-### Phase 1: Add FK Columns (Non-Breaking)
+### Fase 1: Adicionar Colunas FK (Sem Quebra)
 
 ```sql
--- Add nullable FK columns
+-- Adicionar colunas FK nullables
 ALTER TABLE venda_has_produto2
     ADD COLUMN fornecedor_id INTEGER;
 
 ALTER TABLE estoque
     ADD COLUMN fornecedor_id INTEGER;
 
--- Populate from existing names
+-- Popular a partir dos nomes existentes
 UPDATE venda_has_produto2 vp
 SET fornecedor_id = f.idFornecedor
 FROM fornecedor f
@@ -247,17 +247,17 @@ SET fornecedor_id = f.idFornecedor
 FROM fornecedor f
 WHERE UPPER(TRIM(e.fornecedor)) = UPPER(TRIM(f.razaoSocial));
 
--- Check for unmatched records
+-- Verificar registros não correspondidos
 SELECT DISTINCT fornecedor
 FROM venda_has_produto2
 WHERE fornecedor_id IS NULL
   AND fornecedor IS NOT NULL;
 ```
 
-### Phase 2: Handle Unmatched Names
+### Fase 2: Tratar Nomes Não Correspondidos
 
 ```sql
--- Option A: Create missing suppliers
+-- Opção A: Criar fornecedores faltantes
 INSERT INTO fornecedor (razaoSocial)
 SELECT DISTINCT vp.fornecedor
 FROM venda_has_produto2 vp
@@ -268,42 +268,42 @@ WHERE vp.fornecedor_id IS NULL
       WHERE UPPER(TRIM(f.razaoSocial)) = UPPER(TRIM(vp.fornecedor))
   );
 
--- Option B: Manual review of variations
--- Export list for manual matching
+-- Opção B: Revisão manual de variações
+-- Exportar lista para correspondência manual
 COPY (
     SELECT DISTINCT fornecedor, COUNT(*) as count
     FROM venda_has_produto2
     WHERE fornecedor_id IS NULL
     GROUP BY fornecedor
     ORDER BY count DESC
-) TO '/tmp/unmatched_suppliers.csv' CSV HEADER;
+) TO '/tmp/fornecedores_nao_correspondidos.csv' CSV HEADER;
 ```
 
-### Phase 3: Add Constraints
+### Fase 3: Adicionar Constraints
 
 ```sql
--- After all data migrated
+-- Após todos os dados migrados
 ALTER TABLE venda_has_produto2
     ALTER COLUMN fornecedor_id SET NOT NULL,
     ADD CONSTRAINT fk_vhp2_fornecedor
         FOREIGN KEY (fornecedor_id)
         REFERENCES fornecedor(idFornecedor);
 
--- Create index
+-- Criar índice
 CREATE INDEX idx_vhp2_fornecedor ON venda_has_produto2(fornecedor_id);
 ```
 
-### Phase 4: Dual-Write in Application
+### Fase 4: Escrita Dupla na Aplicação
 
 ```php
-// During transition: write to both columns
+// Durante transição: escrever em ambas colunas
 class VendaItemService
 {
     public function create(array $data): VendaItem
     {
         return VendaItem::create([
             'fornecedor_id' => $data['fornecedor_id'],
-            // Keep writing to old column for backwards compatibility
+            // Manter escrita na coluna antiga para compatibilidade
             'fornecedor' => Fornecedor::find($data['fornecedor_id'])->razao_social,
             // ...
         ]);
@@ -311,10 +311,10 @@ class VendaItemService
 }
 ```
 
-### Phase 5: Drop Old Columns
+### Fase 5: Remover Colunas Antigas
 
 ```sql
--- After all code migrated
+-- Após todo código migrado
 ALTER TABLE venda_has_produto2 DROP COLUMN fornecedor;
 ALTER TABLE estoque DROP COLUMN fornecedor;
 -- etc.
@@ -322,9 +322,9 @@ ALTER TABLE estoque DROP COLUMN fornecedor;
 
 ---
 
-## 6. Code Changes
+## 6. Mudanças de Código
 
-### 6.1 Laravel Models
+### 6.1 Modelos Laravel
 
 ```php
 <?php
@@ -336,7 +336,7 @@ class VendaItem extends Model
     protected $fillable = [
         'venda_id',
         'produto_id',
-        'fornecedor_id',  // FK instead of name
+        'fornecedor_id',  // FK ao invés de nome
         'quantidade',
         // ...
     ];
@@ -346,7 +346,7 @@ class VendaItem extends Model
         return $this->belongsTo(Fornecedor::class);
     }
 
-    // Accessor for backwards compatibility
+    // Accessor para compatibilidade com versões anteriores
     public function getFornecedorNomeAttribute(): string
     {
         return $this->fornecedor->razao_social;
@@ -378,7 +378,7 @@ class Fornecedor extends Model
         return $this->hasMany(Estoque::class);
     }
 
-    // Helper: find by name (for migration/import)
+    // Helper: buscar por nome (para migração/importação)
     public static function findByName(string $name): ?self
     {
         return static::whereRaw(
@@ -387,7 +387,7 @@ class Fornecedor extends Model
         )->first();
     }
 
-    // Helper: find or create by name
+    // Helper: buscar ou criar por nome
     public static function findOrCreateByName(string $name): self
     {
         return static::findByName($name)
@@ -396,7 +396,7 @@ class Fornecedor extends Model
 }
 ```
 
-### 6.2 Import Service (NFe)
+### 6.2 Serviço de Importação (NFe)
 
 ```php
 <?php
@@ -407,7 +407,7 @@ class NfeImportService
 {
     public function importarEstoque(NfeXml $xml): Estoque
     {
-        // Get or create supplier by CNPJ (preferred) or name
+        // Obter ou criar fornecedor por CNPJ (preferido) ou nome
         $fornecedor = Fornecedor::where('cnpj', $xml->emitente->cnpj)->first()
             ?? Fornecedor::findOrCreateByName($xml->emitente->razaoSocial);
 
@@ -420,37 +420,37 @@ class NfeImportService
 }
 ```
 
-### 6.3 Query Examples
+### 6.3 Exemplos de Query
 
 ```php
-// Old: Group by name (slow, error-prone)
+// Antigo: Agrupar por nome (lento, propenso a erros)
 $vendas->groupBy('fornecedor');
 
-// New: Group by FK (fast, reliable)
+// Novo: Agrupar por FK (rápido, confiável)
 $vendas->groupBy('fornecedor_id');
 
-// Old: Filter by name
+// Antigo: Filtrar por nome
 VendaItem::where('fornecedor', 'ACME Corp')->get();
 
-// New: Filter by FK
+// Novo: Filtrar por FK
 VendaItem::where('fornecedor_id', $acmeId)->get();
 
-// Or with relationship
+// Ou com relacionamento
 VendaItem::whereHas('fornecedor', fn($q) =>
     $q->where('razao_social', 'like', '%ACME%')
 )->get();
 
-// Eager load supplier name
+// Eager load do nome do fornecedor
 VendaItem::with('fornecedor:id,razao_social')->get();
 ```
 
-### 6.4 Display in UI
+### 6.4 Exibição na UI
 
 ```php
-// Blade template
+// Template Blade
 {{ $item->fornecedor->razao_social }}
 
-// Or with accessor
+// Ou com accessor
 {{ $item->fornecedor_nome }}
 
 // Vue/Inertia
@@ -459,21 +459,21 @@ VendaItem::with('fornecedor:id,razao_social')->get();
 
 ---
 
-## 7. Special Cases
+## 7. Casos Especiais
 
-### 7.1 "ATELIER STACCATO" Check
+### 7.1 Verificação "ATELIER STACCATO"
 
 ```cpp
-// Current: Magic string comparison
+// Atual: Comparação de string mágica
 if (modelItem.data(0, "fornecedor").toString() == "ATELIER STACCATO") { ... }
 ```
 
 ```php
-// New: Use constant or config
+// Novo: Usar constante ou config
 class Fornecedor extends Model
 {
-    // Known supplier IDs
-    public const ATELIER_STACCATO_ID = 1;  // Or from config
+    // IDs de fornecedores conhecidos
+    public const ATELIER_STACCATO_ID = 1;  // Ou do config
 
     public function isAtelierStaccato(): bool
     {
@@ -481,30 +481,30 @@ class Fornecedor extends Model
     }
 }
 
-// Usage
+// Uso
 if ($item->fornecedor->isAtelierStaccato()) { ... }
 ```
 
-### 7.2 Supplier Name in Reports
+### 7.2 Nome do Fornecedor em Relatórios
 
 ```php
-// For reports/exports, join supplier name
+// Para relatórios/exportações, fazer join do nome do fornecedor
 $items = VendaItem::query()
     ->select('venda_itens.*', 'f.razao_social as fornecedor_nome')
     ->join('fornecedores as f', 'f.id', '=', 'venda_itens.fornecedor_id')
     ->get();
 ```
 
-### 7.3 Historical Data
+### 7.3 Dados Históricos
 
 ```php
-// For audit purposes, may want to snapshot supplier name at transaction time
+// Para fins de auditoria, pode querer fazer snapshot do nome do fornecedor no momento da transação
 CREATE TABLE venda_itens (
     fornecedor_id INTEGER REFERENCES fornecedores(id),
-    fornecedor_nome_snapshot VARCHAR(200),  -- Name at time of sale
+    fornecedor_nome_snapshot VARCHAR(200),  -- Nome no momento da venda
 );
 
-// Set on creation
+// Definir na criação
 $item = VendaItem::create([
     'fornecedor_id' => $fornecedor->id,
     'fornecedor_nome_snapshot' => $fornecedor->razao_social,
@@ -513,21 +513,21 @@ $item = VendaItem::create([
 
 ---
 
-## 8. Benefits Summary
+## 8. Resumo de Benefícios
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| **Storage** | VARCHAR repeated in 9 tables | Single INT FK |
-| **Rename** | Update 9 tables manually | Update 1 table |
-| **Integrity** | None (orphans possible) | FK constraint |
-| **Query speed** | String comparison | INT comparison |
-| **Typos** | Silently break queries | Impossible |
-| **Joins** | By string (slow) | By FK (fast) |
+| Aspecto | Antes | Depois |
+|---------|-------|--------|
+| **Armazenamento** | VARCHAR repetido em 9 tabelas | Único INT FK |
+| **Renomeação** | Atualizar 9 tabelas manualmente | Atualizar 1 tabela |
+| **Integridade** | Nenhuma (órfãos possíveis) | Constraint FK |
+| **Velocidade de query** | Comparação de string | Comparação de INT |
+| **Erros de digitação** | Quebram queries silenciosamente | Impossíveis |
+| **Joins** | Por string (lento) | Por FK (rápido) |
 
 ---
 
-## Related Documents
+## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Full improvements list
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Table flattening (includes fornecedor_id)
-- [../business/04-cadastros-flows.md](../business/04-cadastros-flows.md) - Supplier registration flow
+- [03-improvements.md](./03-improvements.md) - Lista completa de melhorias
+- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Achatamento de tabelas (inclui fornecedor_id)
+- [../business/04-cadastros-flows.md](../business/04-cadastros-flows.md) - Fluxo de cadastro de fornecedor

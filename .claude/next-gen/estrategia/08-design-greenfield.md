@@ -1,165 +1,165 @@
-# Greenfield Business Flow Design
+# Design Greenfield de Fluxo de Negócio
 
-> Status: **Design Proposal**
-> Last updated: 2025-12-27
-> Philosophy: Simple, Reliable, Testable, Event-Driven
-
----
-
-## Table of Contents
-
-1. [Design Philosophy](#1-design-philosophy)
-2. [Core Concepts](#2-core-concepts)
-3. [Bounded Contexts](#3-bounded-contexts)
-4. [The Order Lifecycle](#4-the-order-lifecycle)
-5. [Inventory Management](#5-inventory-management)
-6. [Delivery Management](#6-delivery-management)
-7. [Fiscal & Financial](#7-fiscal--financial)
-8. [State Machines](#8-state-machines)
-9. [Event Architecture](#9-event-architecture)
-10. [Database Schema](#10-database-schema)
-11. [Testing Strategy](#11-testing-strategy)
-12. [Advanced Features](#12-advanced-features)
+> Status: **Proposta de Design**
+> Última atualização: 2025-12-27
+> Filosofia: Simples, Confiável, Testável, Orientado a Eventos
 
 ---
 
-## 1. Design Philosophy
+## Sumário
 
-### 1.1 Guiding Principles
-
-| Principle | Meaning |
-|-----------|---------|
-| **Explicit over implicit** | Every state and transition is named and documented |
-| **Events over mutations** | State changes are events, not updates |
-| **Derived over duplicated** | Calculate values, don't store copies |
-| **Constraints in schema** | Database enforces rules, not just code |
-| **Single responsibility** | Each entity does ONE thing well |
-| **Testable by design** | Pure functions, no hidden dependencies |
-
-### 1.2 What We're Avoiding
-
-| ❌ Avoid |
-|----------|
-| Magic strings for status |
-| Mutable state without history |
-| Split tables (L1/L2 pattern) |
-| Denormalized data |
-| Business logic in controllers |
-| Implicit state transitions |
-| Complex conditionals scattered in code |
-
-### 1.3 What We're Embracing
-
-| ✅ Embrace |
-|------------|
-| Enums for all statuses |
-| Event sourcing for audit trail |
-| Single table with fulfillment records |
-| Normalized references (FKs everywhere) |
-| Domain services for business logic |
-| State machines with explicit guards |
-| Centralized business rules |
+1. [Filosofia de Design](#1-filosofia-de-design)
+2. [Conceitos Principais](#2-conceitos-principais)
+3. [Contextos Delimitados](#3-contextos-delimitados)
+4. [Ciclo de Vida do Pedido](#4-ciclo-de-vida-do-pedido)
+5. [Gestão de Estoque](#5-gestão-de-estoque)
+6. [Gestão de Entregas](#6-gestão-de-entregas)
+7. [Fiscal e Financeiro](#7-fiscal-e-financeiro)
+8. [Máquinas de Estado](#8-máquinas-de-estado)
+9. [Arquitetura de Eventos](#9-arquitetura-de-eventos)
+10. [Schema de Banco de Dados](#10-schema-de-banco-de-dados)
+11. [Estratégia de Testes](#11-estratégia-de-testes)
+12. [Funcionalidades Avançadas](#12-funcionalidades-avançadas)
 
 ---
 
-## 2. Core Concepts
+## 1. Filosofia de Design
 
-### 2.1 The Fulfillment Model
+### 1.1 Princípios Orientadores
 
-**The Big Insight**: An order item doesn't "split" - it gets **fulfilled** in parts.
+| Princípio | Significado |
+|-----------|-------------|
+| **Explícito sobre implícito** | Todo estado e transição é nomeado e documentado |
+| **Eventos sobre mutações** | Mudanças de estado são eventos, não updates |
+| **Derivado sobre duplicado** | Calcular valores, não armazenar cópias |
+| **Constraints no schema** | Banco de dados impõe regras, não apenas código |
+| **Responsabilidade única** | Cada entidade faz UMA coisa bem |
+| **Testável por design** | Funções puras, sem dependências ocultas |
+
+### 1.2 O Que Estamos Evitando
+
+| Evitar |
+|--------|
+| Strings mágicas para status |
+| Estado mutável sem histórico |
+| Tabelas divididas (padrão L1/L2) |
+| Dados desnormalizados |
+| Lógica de negócio em controllers |
+| Transições de estado implícitas |
+| Condicionais complexas espalhadas no código |
+
+### 1.3 O Que Estamos Abraçando
+
+| Adotar |
+|--------|
+| Enums para todos os status |
+| Event sourcing para trilha de auditoria |
+| Tabela única com registros de atendimento |
+| Referências normalizadas (FKs em todo lugar) |
+| Serviços de domínio para lógica de negócio |
+| Máquinas de estado com guards explícitos |
+| Regras de negócio centralizadas |
+
+---
+
+## 2. Conceitos Principais
+
+### 2.1 O Modelo de Atendimento (Fulfillment)
+
+**O Grande Insight**: Um item de pedido não "divide" - ele é **atendido** em partes.
 
 ```mermaid
 flowchart TB
-    subgraph OrderItem["ORDER ITEM: 10 units of 'Mesa de Jantar' @ R$ 500 each"]
-        Status["Status: PARTIALLY_FULFILLED"]
+    subgraph OrderItem["ITEM DO PEDIDO: 10 unidades de 'Mesa de Jantar' @ R$ 500 cada"]
+        Status["Status: PARCIALMENTE_ATENDIDO"]
 
-        subgraph F1["Fulfillment #1: 4 units from Stock #123 (Supplier A)"]
-            F1A["Reserved: 2024-01-05 → Consumed: 2024-01-06"]
-            F1B["Delivered: 2024-01-10 → Invoiced: 2024-01-10"]
-            F1C["Status: INVOICED ✓"]
+        subgraph F1["Atendimento #1: 4 unidades do Estoque #123 (Fornecedor A)"]
+            F1A["Reservado: 05/01/2024 → Consumido: 06/01/2024"]
+            F1B["Entregue: 10/01/2024 → Faturado: 10/01/2024"]
+            F1C["Status: FATURADO"]
         end
 
-        subgraph F2["Fulfillment #2: 4 units from Stock #456 (Supplier A)"]
-            F2A["Reserved: 2024-01-08 → Consumed: 2024-01-09"]
-            F2B["Delivery scheduled: 2024-01-15"]
-            F2C["Status: AWAITING_DELIVERY"]
+        subgraph F2["Atendimento #2: 4 unidades do Estoque #456 (Fornecedor A)"]
+            F2A["Reservado: 08/01/2024 → Consumido: 09/01/2024"]
+            F2B["Entrega agendada: 15/01/2024"]
+            F2C["Status: AGUARDANDO_ENTREGA"]
         end
 
-        subgraph F3["Fulfillment #3: 2 units - UNFULFILLED"]
-            F3A["Waiting for stock (PO #789 expected 2024-01-20)"]
-            F3B["Status: AWAITING_STOCK"]
+        subgraph F3["Atendimento #3: 2 unidades - NÃO ATENDIDO"]
+            F3A["Aguardando estoque (PC #789 previsto 20/01/2024)"]
+            F3B["Status: AGUARDANDO_ESTOQUE"]
         end
     end
 ```
 
-**Why this is better:**
+**Por que isso é melhor:**
 
-| Current System | Fulfillment Model |
-|----------------|-------------------|
-| One item becomes 3 split items | One item with 3 fulfillments |
-| idRelacionado to track splits | Simple parent-child relationship |
-| Status on each split item | Status derived from fulfillments |
-| Hard to see "what did customer order?" | Order item is pristine record |
-| Complex queries to aggregate | Simple aggregation |
+| Sistema Atual | Modelo de Atendimento |
+|---------------|----------------------|
+| Um item vira 3 itens divididos | Um item com 3 atendimentos |
+| idRelacionado para rastrear divisões | Simples relacionamento pai-filho |
+| Status em cada item dividido | Status derivado dos atendimentos |
+| Difícil ver "o que o cliente pediu?" | Item do pedido é registro prístino |
+| Queries complexas para agregar | Agregação simples |
 
-### 2.2 Reservation vs Consumption
+### 2.2 Reserva vs Consumo
 
 ```mermaid
 flowchart LR
-    subgraph Reservation["RESERVATION (soft claim)"]
-        R1["Can expire after timeout"]
-        R2["Can be cancelled anytime"]
-        R3["Multiple reservations compete"]
-        R4["FIFO order determines priority"]
+    subgraph Reservation["RESERVA (claim soft)"]
+        R1["Pode expirar após timeout"]
+        R2["Pode ser cancelada a qualquer momento"]
+        R3["Múltiplas reservas competem"]
+        R4["Ordem FIFO determina prioridade"]
     end
 
-    subgraph Consumption["CONSUMPTION (hard assignment)"]
-        C1["Permanent (until return)"]
-        C2["Creates fulfillment record"]
-        C3["Decrements available stock"]
-        C4["Links to specific order item"]
+    subgraph Consumption["CONSUMO (atribuição hard)"]
+        C1["Permanente (até devolução)"]
+        C2["Cria registro de atendimento"]
+        C3["Decrementa estoque disponível"]
+        C4["Vincula a item específico do pedido"]
     end
 
-    Reservation -->|"Confirm"| Consumption
+    Reservation -->|"Confirmar"| Consumption
 ```
 
-### 2.3 Events as Source of Truth
+### 2.3 Eventos como Fonte da Verdade
 
-Instead of updating status fields, we record events:
+Ao invés de atualizar campos de status, registramos eventos:
 
 ```mermaid
 flowchart TB
-    subgraph EventLog["Events for Order Item #1"]
-        E1["2024-01-01 10:00 | OrderItemCreated | qty: 10, price: 500"]
-        E2["2024-01-05 14:30 | StockReserved | stock_id: 123, qty: 4"]
-        E3["2024-01-06 09:00 | StockConsumed | stock_id: 123, qty: 4"]
-        E4["2024-01-08 11:00 | StockReserved | stock_id: 456, qty: 4"]
-        E5["2024-01-09 15:00 | StockConsumed | stock_id: 456, qty: 4"]
-        E6["2024-01-10 08:00 | DeliveryScheduled | date: 2024-01-10"]
-        E7["2024-01-10 14:00 | ItemDelivered | fulfillment_id: 1"]
-        E8["2024-01-10 16:00 | InvoiceGenerated | nfe_id: 999"]
+    subgraph EventLog["Eventos para Item do Pedido #1"]
+        E1["01/01/2024 10:00 | ItemPedidoCriado | qtd: 10, preço: 500"]
+        E2["05/01/2024 14:30 | EstoqueReservado | estoque_id: 123, qtd: 4"]
+        E3["06/01/2024 09:00 | EstoqueConsumido | estoque_id: 123, qtd: 4"]
+        E4["08/01/2024 11:00 | EstoqueReservado | estoque_id: 456, qtd: 4"]
+        E5["09/01/2024 15:00 | EstoqueConsumido | estoque_id: 456, qtd: 4"]
+        E6["10/01/2024 08:00 | EntregaAgendada | data: 10/01/2024"]
+        E7["10/01/2024 14:00 | ItemEntregue | atendimento_id: 1"]
+        E8["10/01/2024 16:00 | NotaGerada | nfe_id: 999"]
 
         E1 --> E2 --> E3 --> E4 --> E5 --> E6 --> E7 --> E8
     end
 
-    EventLog --> Replay["Current state = replay(events)"]
+    EventLog --> Replay["Estado atual = replay(eventos)"]
 ```
 
 ---
 
-## 3. Bounded Contexts
+## 3. Contextos Delimitados
 
-### 3.1 Context Map
+### 3.1 Mapa de Contextos
 
 ```mermaid
 flowchart TB
     subgraph ERP["ERP STACCATO"]
-        Sales["SALES<br/>Context"]
-        Inventory["INVENTORY<br/>Context"]
-        Delivery["DELIVERY<br/>Context"]
-        Fiscal["FISCAL<br/>Context"]
-        Purchasing["PURCHASING<br/>Context"]
-        Financial["FINANCIAL<br/>Context"]
+        Sales["VENDAS<br/>Contexto"]
+        Inventory["ESTOQUE<br/>Contexto"]
+        Delivery["ENTREGA<br/>Contexto"]
+        Fiscal["FISCAL<br/>Contexto"]
+        Purchasing["COMPRAS<br/>Contexto"]
+        Financial["FINANCEIRO<br/>Contexto"]
 
         Sales --> Inventory
         Inventory --> Delivery
@@ -170,64 +170,64 @@ flowchart TB
     end
 ```
 
-### 3.2 Context Responsibilities
+### 3.2 Responsabilidades dos Contextos
 
-| Context | Owns | Publishes Events |
-|---------|------|------------------|
-| **Sales** | Orders, Items, Customers | OrderCreated, ItemAdded, OrderCancelled |
-| **Inventory** | Stock, Reservations, Consumption | StockReceived, StockReserved, StockConsumed |
-| **Purchasing** | Purchase Orders, Supplier Orders | POCreated, POReceived |
-| **Delivery** | Schedules, Routes, Confirmations | DeliveryScheduled, DeliveryCompleted |
-| **Fiscal** | NFe, Taxes | InvoiceGenerated, InvoiceAuthorized |
-| **Financial** | Payments, Commissions | PaymentReceived, CommissionPaid |
+| Contexto | Possui | Publica Eventos |
+|----------|--------|-----------------|
+| **Vendas** | Pedidos, Itens, Clientes | PedidoCriado, ItemAdicionado, PedidoCancelado |
+| **Estoque** | Estoques, Reservas, Consumos | EstoqueRecebido, EstoqueReservado, EstoqueConsumido |
+| **Compras** | Pedidos de Compra, Pedidos a Fornecedor | PCCriado, PCRecebido |
+| **Entrega** | Agendamentos, Rotas, Confirmações | EntregaAgendada, EntregaConcluída |
+| **Fiscal** | NFe, Impostos | NotaGerada, NotaAutorizada |
+| **Financeiro** | Pagamentos, Comissões | PagamentoRecebido, ComissãoPaga |
 
-### 3.3 Context Communication
+### 3.3 Comunicação Entre Contextos
 
-Contexts communicate via **events**, not direct calls:
+Contextos comunicam via **eventos**, não chamadas diretas:
 
 ```php
-// Sales context publishes
-event(new OrderItemFulfilled($fulfillment));
+// Contexto de Vendas publica
+event(new ItemPedidoAtendido($atendimento));
 
-// Delivery context listens
-class ScheduleDeliveryOnFulfillment
+// Contexto de Entrega escuta
+class AgendarEntregaNoAtendimento
 {
-    public function handle(OrderItemFulfilled $event)
+    public function handle(ItemPedidoAtendido $event)
     {
-        // Auto-schedule delivery if all items ready
+        // Auto-agendar entrega se todos os itens prontos
     }
 }
 
-// Fiscal context listens
-class GenerateInvoiceOnDelivery
+// Contexto Fiscal escuta
+class GerarNotaNaEntrega
 {
-    public function handle(DeliveryCompleted $event)
+    public function handle(EntregaConcluida $event)
     {
-        // Generate NFe for delivered items
+        // Gerar NFe para itens entregues
     }
 }
 ```
 
 ---
 
-## 4. The Order Lifecycle
+## 4. Ciclo de Vida do Pedido
 
-### 4.1 Simplified Flow
+### 4.1 Fluxo Simplificado
 
 ```mermaid
 flowchart LR
-    subgraph OrderLifecycle["ORDER LIFECYCLE"]
-        Create["CREATE<br/>ORDER"]
-        Source["SOURCE<br/>ITEMS"]
-        Deliver["DELIVER<br/>ITEMS"]
-        Invoice["INVOICE<br/>ITEMS"]
+    subgraph OrderLifecycle["CICLO DE VIDA DO PEDIDO"]
+        Create["CRIAR<br/>PEDIDO"]
+        Source["OBTER<br/>ITENS"]
+        Deliver["ENTREGAR<br/>ITENS"]
+        Invoice["FATURAR<br/>ITENS"]
 
         Create --> Source --> Deliver --> Invoice
 
-        Create2["Customer<br/>+ Items<br/>+ Prices"]
-        Source2["Find stock<br/>or order<br/>from supplier"]
-        Deliver2["Schedule<br/>delivery<br/>+ confirm"]
-        Invoice2["Generate<br/>NFe<br/>+ payment"]
+        Create2["Cliente<br/>+ Itens<br/>+ Preços"]
+        Source2["Buscar estoque<br/>ou pedir<br/>do fornecedor"]
+        Deliver2["Agendar<br/>entrega<br/>+ confirmar"]
+        Invoice2["Gerar<br/>NFe<br/>+ pagamento"]
 
         Create -.-> Create2
         Source -.-> Source2
@@ -236,24 +236,24 @@ flowchart LR
     end
 ```
 
-### 4.2 Order Entity
+### 4.2 Entidade Pedido
 
 ```php
 class Order
 {
-    // Identity
+    // Identidade
     public int $id;
     public string $code;              // "V-2024-00001"
 
-    // Relationships
+    // Relacionamentos
     public int $customer_id;
     public ?int $seller_id;
 
-    // Timing
+    // Tempo
     public Carbon $created_at;
     public ?Carbon $closed_at;
 
-    // Derived status (calculated from items)
+    // Status derivado (calculado dos itens)
     public function status(): OrderStatus
     {
         $itemStatuses = $this->items->pluck('status');
@@ -267,7 +267,7 @@ class Order
         // ... etc
     }
 
-    // Derived totals
+    // Totais derivados
     public function totalAmount(): Money
     {
         return $this->items->sum(fn($i) => $i->totalPrice());
@@ -275,22 +275,22 @@ class Order
 }
 ```
 
-### 4.3 Order Item Entity
+### 4.3 Entidade Item do Pedido
 
 ```php
 class OrderItem
 {
-    // Identity
+    // Identidade
     public int $id;
     public int $order_id;
 
-    // What was ordered (immutable after creation)
+    // O que foi pedido (imutável após criação)
     public int $product_id;
     public int $quantity;
     public Money $unit_price;
     public Decimal $discount_percent;
 
-    // Status derived from fulfillments
+    // Status derivado dos atendimentos
     public function status(): ItemStatus
     {
         $fulfilled = $this->fulfillments->sum('quantity');
@@ -308,7 +308,7 @@ class OrderItem
         return ItemStatus::PENDING;
     }
 
-    // How much still needs to be sourced?
+    // Quanto ainda precisa ser obtido?
     public function pendingQuantity(): int
     {
         return $this->quantity - $this->fulfillments->sum('quantity');
@@ -316,63 +316,63 @@ class OrderItem
 }
 ```
 
-### 4.4 Fulfillment Entity
+### 4.4 Entidade Atendimento (Fulfillment)
 
 ```php
 class Fulfillment
 {
-    // Identity
+    // Identidade
     public int $id;
     public int $order_item_id;
 
-    // Source
-    public int $stock_id;           // Which stock entry
-    public int $quantity;           // How many units
+    // Origem
+    public int $stock_id;           // Qual entrada de estoque
+    public int $quantity;           // Quantas unidades
 
     // Status
     public FulfillmentStatus $status;
 
-    // Tracking
-    public ?int $delivery_id;       // Which delivery
-    public ?int $invoice_item_id;   // Which invoice line
+    // Rastreamento
+    public ?int $delivery_id;       // Qual entrega
+    public ?int $invoice_item_id;   // Qual linha da nota
 
     // Timestamps
-    public Carbon $created_at;      // When reserved/consumed
+    public Carbon $created_at;      // Quando reservado/consumido
     public ?Carbon $delivered_at;
     public ?Carbon $invoiced_at;
 }
 
 enum FulfillmentStatus: string
 {
-    case RESERVED = 'reserved';           // Stock claimed, not yet picked
-    case READY = 'ready';                 // Picked, ready for delivery
-    case IN_TRANSIT = 'in_transit';       // Out for delivery
-    case DELIVERED = 'delivered';         // Customer received
-    case INVOICED = 'invoiced';           // NFe generated
-    case RETURNED = 'returned';           // Customer returned
+    case RESERVED = 'reserved';           // Estoque reservado, ainda não separado
+    case READY = 'ready';                 // Separado, pronto para entrega
+    case IN_TRANSIT = 'in_transit';       // Saiu para entrega
+    case DELIVERED = 'delivered';         // Cliente recebeu
+    case INVOICED = 'invoiced';           // NFe gerada
+    case RETURNED = 'returned';           // Cliente devolveu
 }
 ```
 
 ---
 
-## 5. Inventory Management
+## 5. Gestão de Estoque
 
-### 5.1 Stock Entry Entity
+### 5.1 Entidade Entrada de Estoque
 
 ```php
 class StockEntry
 {
-    // Identity
+    // Identidade
     public int $id;
     public int $product_id;
     public int $supplier_id;
 
-    // Quantity tracking
-    public int $quantity_received;      // Original amount
-    public int $quantity_reserved;      // Soft claims (can expire)
-    public int $quantity_consumed;      // Hard assignments
+    // Rastreamento de quantidade
+    public int $quantity_received;      // Quantidade original
+    public int $quantity_reserved;      // Claims soft (podem expirar)
+    public int $quantity_consumed;      // Atribuições hard
 
-    // Derived
+    // Derivado
     public function quantityAvailable(): int
     {
         return $this->quantity_received
@@ -380,38 +380,38 @@ class StockEntry
              - $this->quantity_consumed;
     }
 
-    // Source
+    // Origem
     public ?int $purchase_order_item_id;
-    public ?int $nfe_item_id;           // NFe that created this stock
+    public ?int $nfe_item_id;           // NFe que criou este estoque
 
-    // FIFO ordering
-    public Carbon $received_at;         // When stock arrived
+    // Ordenação FIFO
+    public Carbon $received_at;         // Quando estoque chegou
 
-    // Location
+    // Localização
     public ?string $warehouse_block;    // "A-01", "B-03", etc.
 }
 ```
 
-### 5.2 The FIFO Algorithm
+### 5.2 O Algoritmo FIFO
 
 ```php
 class StockReservationService
 {
     /**
-     * Reserve stock for an order item using FIFO.
-     * Returns list of reservations made.
+     * Reservar estoque para um item de pedido usando FIFO.
+     * Retorna lista de reservas feitas.
      */
     public function reserveForItem(OrderItem $item): Collection
     {
         $needed = $item->pendingQuantity();
         $reservations = collect();
 
-        // Find available stock, oldest first
+        // Buscar estoque disponível, mais antigo primeiro
         $stocks = StockEntry::query()
             ->where('product_id', $item->product_id)
             ->whereRaw('quantity_available() > 0')
             ->orderBy('received_at', 'asc')  // FIFO
-            ->lockForUpdate()                 // Prevent race conditions
+            ->lockForUpdate()                 // Prevenir condições de corrida
             ->get();
 
         foreach ($stocks as $stock) {
@@ -419,7 +419,7 @@ class StockReservationService
 
             $take = min($needed, $stock->quantityAvailable());
 
-            // Create reservation
+            // Criar reserva
             $reservation = Reservation::create([
                 'stock_entry_id' => $stock->id,
                 'order_item_id' => $item->id,
@@ -427,7 +427,7 @@ class StockReservationService
                 'expires_at' => now()->addHours(24),
             ]);
 
-            // Update stock counts
+            // Atualizar contadores do estoque
             $stock->increment('quantity_reserved', $take);
 
             $reservations->push($reservation);
@@ -445,25 +445,25 @@ class StockReservationService
 }
 ```
 
-### 5.3 Reservation → Consumption
+### 5.3 Reserva → Consumo
 
 ```php
 class StockConsumptionService
 {
     /**
-     * Convert reservation to permanent consumption.
-     * Called when order is confirmed / items picked.
+     * Converter reserva em consumo permanente.
+     * Chamado quando pedido é confirmado / itens separados.
      */
     public function consumeReservation(Reservation $reservation): Fulfillment
     {
         DB::transaction(function () use ($reservation, &$fulfillment) {
             $stock = $reservation->stockEntry;
 
-            // Move from reserved to consumed
+            // Mover de reservado para consumido
             $stock->decrement('quantity_reserved', $reservation->quantity);
             $stock->increment('quantity_consumed', $reservation->quantity);
 
-            // Create fulfillment record
+            // Criar registro de atendimento
             $fulfillment = Fulfillment::create([
                 'order_item_id' => $reservation->order_item_id,
                 'stock_id' => $stock->id,
@@ -471,7 +471,7 @@ class StockConsumptionService
                 'status' => FulfillmentStatus::READY,
             ]);
 
-            // Delete reservation
+            // Deletar reserva
             $reservation->delete();
 
             event(new StockConsumed($fulfillment));
@@ -482,7 +482,7 @@ class StockConsumptionService
 }
 ```
 
-### 5.4 Stock Return
+### 5.4 Devolução de Estoque
 
 ```php
 class StockReturnService
@@ -490,11 +490,11 @@ class StockReturnService
     public function processReturn(Fulfillment $fulfillment, int $quantity, string $reason): StockReturn
     {
         return DB::transaction(function () use ($fulfillment, $quantity, $reason) {
-            // Update fulfillment
+            // Atualizar atendimento
             if ($quantity === $fulfillment->quantity) {
                 $fulfillment->update(['status' => FulfillmentStatus::RETURNED]);
             } else {
-                // Partial return - split fulfillment
+                // Devolução parcial - dividir atendimento
                 $fulfillment->decrement('quantity', $quantity);
                 Fulfillment::create([
                     'order_item_id' => $fulfillment->order_item_id,
@@ -504,7 +504,7 @@ class StockReturnService
                 ]);
             }
 
-            // Create return record
+            // Criar registro de devolução
             $return = StockReturn::create([
                 'fulfillment_id' => $fulfillment->id,
                 'stock_entry_id' => $fulfillment->stock_id,
@@ -513,7 +513,7 @@ class StockReturnService
                 'restock' => $this->canRestock($reason),
             ]);
 
-            // If restockable, add back to available
+            // Se restockável, adicionar de volta ao disponível
             if ($return->restock) {
                 $fulfillment->stockEntry->decrement('quantity_consumed', $quantity);
                 event(new StockRestocked($return));
@@ -529,9 +529,9 @@ class StockReturnService
 
 ---
 
-## 6. Delivery Management
+## 6. Gestão de Entregas
 
-### 6.1 Delivery Entity
+### 6.1 Entidade Entrega
 
 ```php
 class Delivery
@@ -547,16 +547,16 @@ class Delivery
     public DeliveryStatus $status;
     public ?string $notes;
 
-    // Address (snapshot at time of delivery)
+    // Endereço (snapshot no momento da entrega)
     public Address $delivery_address;
 
-    // Relationships
+    // Relacionamentos
     public function fulfillments(): HasMany
     {
         return $this->hasMany(Fulfillment::class);
     }
 
-    // Derived from fulfillments
+    // Derivado dos atendimentos
     public function orders(): Collection
     {
         return $this->fulfillments
@@ -571,12 +571,12 @@ enum DeliveryStatus: string
     case LOADING = 'loading';
     case IN_TRANSIT = 'in_transit';
     case COMPLETED = 'completed';
-    case FAILED = 'failed';           // Couldn't deliver
-    case PARTIAL = 'partial';         // Some items refused
+    case FAILED = 'failed';           // Não conseguiu entregar
+    case PARTIAL = 'partial';         // Alguns itens recusados
 }
 ```
 
-### 6.2 Delivery Scheduling Service
+### 6.2 Serviço de Agendamento de Entrega
 
 ```php
 class DeliverySchedulingService
@@ -586,7 +586,7 @@ class DeliverySchedulingService
         Carbon $date,
         int $carrierId
     ): Delivery {
-        // Validate all fulfillments are ready
+        // Validar que todos os atendimentos estão prontos
         $notReady = $fulfillments->filter(
             fn($f) => $f->status !== FulfillmentStatus::READY
         );
@@ -595,7 +595,7 @@ class DeliverySchedulingService
             throw new FulfillmentsNotReadyException($notReady);
         }
 
-        // All fulfillments must be for same customer
+        // Todos os atendimentos devem ser do mesmo cliente
         $customerIds = $fulfillments
             ->map(fn($f) => $f->orderItem->order->customer_id)
             ->unique();
@@ -630,7 +630,7 @@ class DeliverySchedulingService
 }
 ```
 
-### 6.3 Delivery Confirmation
+### 6.3 Confirmação de Entrega
 
 ```php
 class DeliveryConfirmationService
@@ -645,7 +645,7 @@ class DeliveryConfirmationService
             $confirmed = $allFulfillments->whereIn('id', $confirmedFulfillmentIds);
             $refused = $allFulfillments->whereNotIn('id', $confirmedFulfillmentIds);
 
-            // Mark confirmed items as delivered
+            // Marcar itens confirmados como entregues
             $confirmed->each(function ($f) {
                 $f->update([
                     'status' => FulfillmentStatus::DELIVERED,
@@ -654,13 +654,13 @@ class DeliveryConfirmationService
                 event(new ItemDelivered($f));
             });
 
-            // Handle refused items
+            // Tratar itens recusados
             $refused->each(function ($f) {
                 $f->update(['status' => FulfillmentStatus::RETURNED]);
                 event(new ItemRefused($f));
             });
 
-            // Update delivery status
+            // Atualizar status da entrega
             $delivery->update([
                 'status' => $refused->isEmpty()
                     ? DeliveryStatus::COMPLETED
@@ -677,16 +677,16 @@ class DeliveryConfirmationService
 
 ---
 
-## 7. Fiscal & Financial
+## 7. Fiscal e Financeiro
 
-### 7.1 Invoice Generation
+### 7.1 Geração de Nota Fiscal
 
 ```php
 class InvoiceService
 {
     public function generateForDelivery(Delivery $delivery): Invoice
     {
-        // Only invoice delivered items
+        // Apenas faturar itens entregues
         $deliveredFulfillments = $delivery->fulfillments
             ->where('status', FulfillmentStatus::DELIVERED);
 
@@ -694,7 +694,7 @@ class InvoiceService
             throw new NoItemsToInvoiceException();
         }
 
-        // Group by order for proper invoicing
+        // Agrupar por pedido para faturamento correto
         $byOrder = $deliveredFulfillments->groupBy(
             fn($f) => $f->orderItem->order_id
         );
@@ -727,7 +727,7 @@ class InvoiceService
                 }
             }
 
-            // Calculate taxes
+            // Calcular impostos
             $this->taxCalculator->calculate($invoice);
 
             event(new InvoiceCreated($invoice));
@@ -738,7 +738,7 @@ class InvoiceService
 }
 ```
 
-### 7.2 NFe Integration
+### 7.2 Integração NFe
 
 ```php
 interface NFeGateway
@@ -757,10 +757,10 @@ class NFeService
 
     public function authorize(Invoice $invoice): void
     {
-        // Build XML
+        // Construir XML
         $xml = $this->xmlBuilder->build($invoice);
 
-        // Transmit to SEFAZ
+        // Transmitir ao SEFAZ
         $result = $this->gateway->transmit($invoice);
 
         if ($result->isAuthorized()) {
@@ -773,7 +773,7 @@ class NFeService
 
             event(new NFeAuthorized($invoice));
 
-            // Generate payment slips
+            // Gerar boletos
             $this->paymentService->generateBoletos($invoice);
         } else {
             $invoice->update([
@@ -787,7 +787,7 @@ class NFeService
 }
 ```
 
-### 7.3 Payment Tracking
+### 7.3 Rastreamento de Pagamentos
 
 ```php
 class Payment
@@ -802,7 +802,7 @@ class Payment
 
     public PaymentStatus $status;
 
-    // For boleto
+    // Para boleto
     public ?string $boleto_linha_digitavel;
     public ?string $boleto_nosso_numero;
 }
@@ -818,26 +818,26 @@ class PaymentService
 
         event(new PaymentReceived($payment));
 
-        // Check if invoice is fully paid
+        // Verificar se nota está totalmente paga
         $invoice = $payment->invoice;
         if ($invoice->isFullyPaid()) {
             event(new InvoiceFullyPaid($invoice));
 
-            // Trigger commission calculation
+            // Disparar cálculo de comissão
             $this->commissionService->calculateFor($invoice);
         }
     }
 }
 ```
 
-### 7.4 Commission Calculation
+### 7.4 Cálculo de Comissão
 
 ```php
 class CommissionService
 {
     public function calculateFor(Invoice $invoice): Commission
     {
-        // Only calculate after payment received
+        // Apenas calcular após pagamento recebido
         if (!$invoice->isFullyPaid()) {
             throw new InvoiceNotPaidException();
         }
@@ -848,7 +848,7 @@ class CommissionService
             ->order
             ->seller;
 
-        // Get commission rate (from supplier or seller)
+        // Obter taxa de comissão (do fornecedor ou vendedor)
         $rate = $this->getCommissionRate($invoice);
 
         $commission = Commission::create([
@@ -869,9 +869,9 @@ class CommissionService
 
 ---
 
-## 8. State Machines
+## 8. Máquinas de Estado
 
-### 8.1 Order Item State Machine
+### 8.1 Máquina de Estado do Item do Pedido
 
 ```php
 use Spatie\ModelStates\State;
@@ -921,7 +921,7 @@ class Invoiced extends ItemState
     public function color(): string => 'emerald';
     public function label(): string => 'Faturado';
 
-    // Final state - no transitions out
+    // Estado final - sem transições de saída
     public function canTransitionTo(string $state): bool
     {
         return false;
@@ -929,7 +929,7 @@ class Invoiced extends ItemState
 }
 ```
 
-### 8.2 State Machine Configuration
+### 8.2 Configuração da Máquina de Estado
 
 ```php
 class OrderItem extends Model
@@ -942,7 +942,7 @@ class OrderItem extends Model
     {
         parent::boot();
 
-        // Recalculate status when fulfillments change
+        // Recalcular status quando atendimentos mudam
         static::updated(function ($item) {
             $item->recalculateStatus();
         });
@@ -975,7 +975,7 @@ class OrderItem extends Model
 }
 ```
 
-### 8.3 State Transition Guards
+### 8.3 Guards de Transição de Estado
 
 ```php
 class FulfillmentStateMachine
@@ -983,27 +983,27 @@ class FulfillmentStateMachine
     public function canTransition(Fulfillment $f, FulfillmentStatus $to): bool
     {
         return match ([$f->status, $to]) {
-            // From RESERVED
+            // De RESERVED
             [FulfillmentStatus::RESERVED, FulfillmentStatus::READY] => true,
             [FulfillmentStatus::RESERVED, FulfillmentStatus::RETURNED] => true,
 
-            // From READY
+            // De READY
             [FulfillmentStatus::READY, FulfillmentStatus::IN_TRANSIT] =>
                 $f->delivery_id !== null,
 
-            // From IN_TRANSIT
+            // De IN_TRANSIT
             [FulfillmentStatus::IN_TRANSIT, FulfillmentStatus::DELIVERED] => true,
             [FulfillmentStatus::IN_TRANSIT, FulfillmentStatus::RETURNED] => true,
 
-            // From DELIVERED
+            // De DELIVERED
             [FulfillmentStatus::DELIVERED, FulfillmentStatus::INVOICED] =>
                 $f->invoice_item_id !== null,
             [FulfillmentStatus::DELIVERED, FulfillmentStatus::RETURNED] => true,
 
-            // INVOICED is terminal
+            // INVOICED é terminal
             [FulfillmentStatus::INVOICED, $_] => false,
 
-            // RETURNED is terminal
+            // RETURNED é terminal
             [FulfillmentStatus::RETURNED, $_] => false,
 
             default => false,
@@ -1026,41 +1026,41 @@ class FulfillmentStateMachine
 
 ---
 
-## 9. Event Architecture
+## 9. Arquitetura de Eventos
 
-### 9.1 Core Events
+### 9.1 Eventos Principais
 
 ```php
-// Sales Events
+// Eventos de Vendas
 class OrderCreated { public Order $order; }
 class OrderItemAdded { public OrderItem $item; }
 class OrderCancelled { public Order $order; public string $reason; }
 
-// Inventory Events
+// Eventos de Estoque
 class StockReceived { public StockEntry $stock; }
 class StockReserved { public Reservation $reservation; }
 class StockConsumed { public Fulfillment $fulfillment; }
 class StockRestocked { public StockReturn $return; }
 class InsufficientStock { public OrderItem $item; public int $needed; }
 
-// Delivery Events
+// Eventos de Entrega
 class DeliveryScheduled { public Delivery $delivery; }
 class DeliveryCompleted { public Delivery $delivery; }
 class ItemDelivered { public Fulfillment $fulfillment; }
 class ItemRefused { public Fulfillment $fulfillment; }
 
-// Fiscal Events
+// Eventos Fiscais
 class InvoiceCreated { public Invoice $invoice; }
 class NFeAuthorized { public Invoice $invoice; }
 class NFeRejected { public Invoice $invoice; public string $reason; }
 
-// Financial Events
+// Eventos Financeiros
 class PaymentReceived { public Payment $payment; }
 class InvoiceFullyPaid { public Invoice $invoice; }
 class CommissionCalculated { public Commission $commission; }
 ```
 
-### 9.2 Event Listeners (Orchestration)
+### 9.2 Event Listeners (Orquestração)
 
 ```php
 // config/events.php
@@ -1091,7 +1091,7 @@ return [
 ];
 ```
 
-### 9.3 Event Store (Audit Trail)
+### 9.3 Event Store (Trilha de Auditoria)
 
 ```php
 class EventStore extends Model
@@ -1123,15 +1123,15 @@ class StoreEventListener
     }
 }
 
-// Register for all events
+// Registrar para todos os eventos
 Event::listen('*', StoreEventListener::class);
 ```
 
 ---
 
-## 10. Database Schema
+## 10. Schema de Banco de Dados
 
-### 10.1 Core Tables
+### 10.1 Tabelas Principais
 
 ```sql
 -- ENUMS
@@ -1142,7 +1142,7 @@ CREATE TYPE delivery_status AS ENUM ('scheduled', 'loading', 'in_transit', 'comp
 CREATE TYPE invoice_status AS ENUM ('draft', 'pending', 'authorized', 'rejected', 'cancelled');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'overdue', 'cancelled');
 
--- ORDERS
+-- PEDIDOS
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     code VARCHAR(20) UNIQUE NOT NULL,
@@ -1166,7 +1166,7 @@ CREATE TABLE order_items (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- INVENTORY
+-- ESTOQUE
 CREATE TABLE stock_entries (
     id SERIAL PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),
@@ -1180,7 +1180,7 @@ CREATE TABLE stock_entries (
     warehouse_block VARCHAR(10),
     received_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    -- Computed available quantity
+    -- Quantidade disponível calculada
     CONSTRAINT valid_quantities CHECK (
         quantity_reserved >= 0 AND
         quantity_consumed >= 0 AND
@@ -1210,7 +1210,7 @@ CREATE TABLE fulfillments (
     invoiced_at TIMESTAMP
 );
 
--- DELIVERIES
+-- ENTREGAS
 CREATE TABLE deliveries (
     id SERIAL PRIMARY KEY,
     customer_id INTEGER NOT NULL REFERENCES customers(id),
@@ -1219,7 +1219,7 @@ CREATE TABLE deliveries (
     scheduled_date DATE NOT NULL,
     status delivery_status NOT NULL DEFAULT 'scheduled',
 
-    -- Address snapshot
+    -- Snapshot do endereço
     delivery_street VARCHAR(200) NOT NULL,
     delivery_number VARCHAR(20),
     delivery_complement VARCHAR(100),
@@ -1233,21 +1233,21 @@ CREATE TABLE deliveries (
     completed_at TIMESTAMP
 );
 
--- INVOICES
+-- NOTAS FISCAIS
 CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
     customer_id INTEGER NOT NULL REFERENCES customers(id),
     delivery_id INTEGER REFERENCES deliveries(id),
     status invoice_status NOT NULL DEFAULT 'draft',
 
-    -- NFe data
+    -- Dados NFe
     nfe_numero INTEGER,
     nfe_serie INTEGER,
     nfe_chave VARCHAR(44) UNIQUE,
     nfe_protocolo VARCHAR(20),
     nfe_xml TEXT,
 
-    -- Totals
+    -- Totais
     total_produtos DECIMAL(10,2) NOT NULL DEFAULT 0,
     total_frete DECIMAL(10,2) NOT NULL DEFAULT 0,
     total_desconto DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -1270,7 +1270,7 @@ CREATE TABLE invoice_items (
     total DECIMAL(10,2) NOT NULL
 );
 
--- PAYMENTS
+-- PAGAMENTOS
 CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
     invoice_id INTEGER NOT NULL REFERENCES invoices(id),
@@ -1279,7 +1279,7 @@ CREATE TABLE payments (
     due_date DATE NOT NULL,
     status payment_status NOT NULL DEFAULT 'pending',
 
-    -- Boleto data
+    -- Dados boleto
     boleto_linha_digitavel VARCHAR(47),
     boleto_nosso_numero VARCHAR(20),
     boleto_pdf_path VARCHAR(255),
@@ -1304,10 +1304,10 @@ CREATE INDEX idx_events_type ON event_store(event_type);
 CREATE INDEX idx_events_occurred ON event_store(occurred_at);
 ```
 
-### 10.2 Useful Views
+### 10.2 Views Úteis
 
 ```sql
--- Order items with fulfillment summary
+-- Itens de pedido com resumo de atendimento
 CREATE VIEW v_order_items_summary AS
 SELECT
     oi.id,
@@ -1325,7 +1325,7 @@ JOIN products p ON p.id = oi.product_id
 LEFT JOIN fulfillments f ON f.order_item_id = oi.id
 GROUP BY oi.id, p.description;
 
--- Available stock by product (FIFO order)
+-- Estoque disponível por produto (ordem FIFO)
 CREATE VIEW v_stock_available AS
 SELECT
     se.id as stock_entry_id,
@@ -1344,9 +1344,9 @@ ORDER BY se.product_id, se.received_at;
 
 ---
 
-## 11. Testing Strategy
+## 11. Estratégia de Testes
 
-### 11.1 Unit Tests (Pure Business Logic)
+### 11.1 Testes Unitários (Lógica de Negócio Pura)
 
 ```php
 class StockReservationTest extends TestCase
@@ -1376,8 +1376,8 @@ class StockReservationTest extends TestCase
 
         // Assert
         $this->assertCount(2, $reservations);
-        $this->assertEquals(5, $reservations[0]->quantity); // All of old stock
-        $this->assertEquals(2, $reservations[1]->quantity); // Part of new stock
+        $this->assertEquals(5, $reservations[0]->quantity); // Todo o estoque antigo
+        $this->assertEquals(2, $reservations[1]->quantity); // Parte do estoque novo
         $this->assertEquals($oldStock->id, $reservations[0]->stock_entry_id);
     }
 
@@ -1403,7 +1403,7 @@ class StockReservationTest extends TestCase
 }
 ```
 
-### 11.2 State Machine Tests
+### 11.2 Testes de Máquina de Estado
 
 ```php
 class FulfillmentStateMachineTest extends TestCase
@@ -1448,7 +1448,7 @@ class FulfillmentStateMachineTest extends TestCase
 }
 ```
 
-### 11.3 Integration Tests (Full Flows)
+### 11.3 Testes de Integração (Fluxos Completos)
 
 ```php
 class OrderToInvoiceFlowTest extends TestCase
@@ -1464,14 +1464,14 @@ class OrderToInvoiceFlowTest extends TestCase
         $supplier = Supplier::factory()->create();
         $carrier = Carrier::factory()->create();
 
-        // Create stock
+        // Criar estoque
         $stock = StockEntry::factory()->create([
             'product_id' => $product->id,
             'supplier_id' => $supplier->id,
             'quantity_received' => 10,
         ]);
 
-        // 1. Create order
+        // 1. Criar pedido
         $order = Order::create([
             'customer_id' => $customer->id,
             'status' => OrderStatus::CONFIRMED,
@@ -1483,14 +1483,14 @@ class OrderToInvoiceFlowTest extends TestCase
             'unit_price' => 100.00,
         ]);
 
-        // 2. Reserve stock
+        // 2. Reservar estoque
         $reservationService = app(StockReservationService::class);
         $reservations = $reservationService->reserveForItem($item);
 
         $this->assertEquals(5, $reservations->sum('quantity'));
         $this->assertEquals(5, $stock->fresh()->quantity_reserved);
 
-        // 3. Consume stock
+        // 3. Consumir estoque
         $consumptionService = app(StockConsumptionService::class);
         $fulfillment = $consumptionService->consumeReservation($reservations->first());
 
@@ -1498,7 +1498,7 @@ class OrderToInvoiceFlowTest extends TestCase
         $this->assertEquals(5, $stock->fresh()->quantity_consumed);
         $this->assertEquals(0, $stock->fresh()->quantity_reserved);
 
-        // 4. Schedule delivery
+        // 4. Agendar entrega
         $deliveryService = app(DeliverySchedulingService::class);
         $delivery = $deliveryService->scheduleDelivery(
             collect([$fulfillment]),
@@ -1509,14 +1509,14 @@ class OrderToInvoiceFlowTest extends TestCase
         $this->assertEquals(DeliveryStatus::SCHEDULED, $delivery->status);
         $this->assertEquals(FulfillmentStatus::IN_TRANSIT, $fulfillment->fresh()->status);
 
-        // 5. Confirm delivery
+        // 5. Confirmar entrega
         $confirmationService = app(DeliveryConfirmationService::class);
         $confirmationService->confirmDelivery($delivery, [$fulfillment->id]);
 
         $this->assertEquals(DeliveryStatus::COMPLETED, $delivery->fresh()->status);
         $this->assertEquals(FulfillmentStatus::DELIVERED, $fulfillment->fresh()->status);
 
-        // 6. Generate invoice
+        // 6. Gerar nota
         $invoiceService = app(InvoiceService::class);
         $invoice = $invoiceService->generateForDelivery($delivery->fresh());
 
@@ -1524,14 +1524,14 @@ class OrderToInvoiceFlowTest extends TestCase
         $this->assertEquals(500.00, $invoice->total_produtos);
         $this->assertEquals(FulfillmentStatus::INVOICED, $fulfillment->fresh()->status);
 
-        // 7. Verify order status
+        // 7. Verificar status do pedido
         $this->assertEquals(ItemStatus::INVOICED, $item->fresh()->status());
         $this->assertEquals(OrderStatus::COMPLETED, $order->fresh()->status());
     }
 }
 ```
 
-### 11.4 Event-Driven Tests
+### 11.4 Testes Orientados a Eventos
 
 ```php
 class EventFlowTest extends TestCase
@@ -1547,14 +1547,14 @@ class EventFlowTest extends TestCase
             ]))
             ->create();
 
-        // Simulate delivery completion
+        // Simular conclusão de entrega
         $service = app(DeliveryConfirmationService::class);
         $service->confirmDelivery(
             $delivery,
             $delivery->fulfillments->pluck('id')->toArray()
         );
 
-        // AutoGenerateInvoiceListener should fire
+        // AutoGenerateInvoiceListener deve disparar
         Event::assertDispatched(InvoiceCreated::class);
     }
 }
@@ -1562,9 +1562,9 @@ class EventFlowTest extends TestCase
 
 ---
 
-## 12. Advanced Features
+## 12. Funcionalidades Avançadas
 
-### 12.1 Partial Delivery Handling
+### 12.1 Tratamento de Entrega Parcial
 
 ```php
 class PartialDeliveryService
@@ -1579,25 +1579,25 @@ class PartialDeliveryService
             $delivered = $allFulfillments->whereIn('id', $deliveredFulfillmentIds);
             $refused = $allFulfillments->whereNotIn('id', $deliveredFulfillmentIds);
 
-            // Mark delivered items
+            // Marcar itens entregues
             $delivered->each(fn($f) => $f->update([
                 'status' => FulfillmentStatus::DELIVERED,
                 'delivered_at' => now(),
             ]));
 
-            // Handle refused items - create new delivery attempt
+            // Tratar itens recusados - criar nova tentativa de entrega
             if ($refused->isNotEmpty()) {
                 $newDelivery = Delivery::create([
                     'customer_id' => $delivery->customer_id,
                     'carrier_id' => $delivery->carrier_id,
                     'scheduled_date' => now()->addDays(3),
                     'status' => DeliveryStatus::SCHEDULED,
-                    'notes' => "Retry: {$reason}",
+                    'notes' => "Tentativa: {$reason}",
                 ]);
 
                 $refused->each(fn($f) => $f->update([
                     'delivery_id' => $newDelivery->id,
-                    'status' => FulfillmentStatus::READY, // Reset to ready
+                    'status' => FulfillmentStatus::READY, // Reset para pronto
                 ]));
             }
 
@@ -1611,33 +1611,33 @@ class PartialDeliveryService
 }
 ```
 
-### 12.2 Multi-Supplier Same Product
+### 12.2 Múltiplos Fornecedores para Mesmo Produto
 
 ```php
-// The fulfillment model naturally handles this
-// One order item can have fulfillments from different stock entries (suppliers)
+// O modelo de atendimento naturalmente lida com isso
+// Um item de pedido pode ter atendimentos de diferentes entradas de estoque (fornecedores)
 
 $item = OrderItem::find(1);
 
-// Fulfillments show the source
+// Atendimentos mostram a origem
 $item->fulfillments->each(function ($f) {
-    echo "{$f->quantity} from {$f->stockEntry->supplier->name}";
+    echo "{$f->quantity} de {$f->stockEntry->supplier->name}";
 });
 
-// Output:
-// 3 from Supplier A
-// 2 from Supplier B
-// 5 from Supplier C
+// Saída:
+// 3 de Fornecedor A
+// 2 de Fornecedor B
+// 5 de Fornecedor C
 ```
 
-### 12.3 Backorder Management
+### 12.3 Gestão de Backorder
 
 ```php
 class BackorderService
 {
     public function handleInsufficientStock(InsufficientStock $event): void
     {
-        // Find or create purchase order for this product
+        // Buscar ou criar pedido de compra para este produto
         $po = PurchaseOrder::firstOrCreate(
             [
                 'supplier_id' => $event->item->product->default_supplier_id,
@@ -1648,14 +1648,14 @@ class BackorderService
             ]
         );
 
-        // Add item to PO
+        // Adicionar item ao PC
         $po->items()->create([
             'product_id' => $event->item->product_id,
             'quantity' => $event->needed,
-            'linked_order_item_id' => $event->item->id, // Track relationship
+            'linked_order_item_id' => $event->item->id, // Rastrear relacionamento
         ]);
 
-        // Mark order item as backordered
+        // Marcar item do pedido como backorder
         Backorder::create([
             'order_item_id' => $event->item->id,
             'quantity' => $event->needed,
@@ -1665,7 +1665,7 @@ class BackorderService
     }
 }
 
-// When stock arrives, auto-fulfill backorders
+// Quando estoque chega, auto-atender backorders
 class FulfillBackordersOnStockReceived
 {
     public function handle(StockReceived $event): void
@@ -1675,7 +1675,7 @@ class FulfillBackordersOnStockReceived
                 $q->where('product_id', $event->stock->product_id)
             )
             ->where('status', 'pending')
-            ->orderBy('created_at') // FIFO for backorders too
+            ->orderBy('created_at') // FIFO para backorders também
             ->get();
 
         foreach ($backorders as $backorder) {
@@ -1686,11 +1686,11 @@ class FulfillBackordersOnStockReceived
 }
 ```
 
-### 12.4 Price Change Tracking
+### 12.4 Rastreamento de Mudança de Preço
 
 ```php
-// Prices are immutable on order items
-// If price changes needed, create adjustment record
+// Preços são imutáveis nos itens do pedido
+// Se mudança de preço necessária, criar registro de ajuste
 
 class PriceAdjustment
 {
@@ -1703,7 +1703,7 @@ class PriceAdjustment
     public Carbon $created_at;
 }
 
-// The order item's effective price considers adjustments
+// O preço efetivo do item do pedido considera ajustes
 class OrderItem
 {
     public function effectiveUnitPrice(): Money
@@ -1714,23 +1714,23 @@ class OrderItem
 }
 ```
 
-### 12.5 Audit Trail Queries
+### 12.5 Queries de Trilha de Auditoria
 
 ```php
-// What happened to this order?
+// O que aconteceu com este pedido?
 $events = EventStore::query()
     ->where('aggregate_type', 'order')
     ->where('aggregate_id', $orderId)
     ->orderBy('occurred_at')
     ->get();
 
-// Who changed this item's status?
+// Quem mudou o status deste item?
 $transitions = EventStore::query()
     ->where('event_type', FulfillmentTransitioned::class)
     ->whereJsonContains('payload->fulfillment_id', $fulfillmentId)
     ->get();
 
-// Replay order state at specific point in time
+// Reconstruir estado do pedido em ponto específico no tempo
 class OrderStateRebuilder
 {
     public function rebuildAt(int $orderId, Carbon $pointInTime): array
@@ -1749,18 +1749,18 @@ class OrderStateRebuilder
 
 ---
 
-## Summary: Key Differences from Current System
+## Resumo: Principais Diferenças do Sistema Atual
 
-| Aspect | Current System | Greenfield Design |
-|--------|----------------|-------------------|
-| **Item Tracking** | L1/L2 split tables | Single item + fulfillments |
-| **Stock Assignment** | idEstoque on produto | FIFO reservation → consumption |
-| **Status** | Magic strings | Enums with state machines |
-| **Supplier Ref** | VARCHAR copied | FK everywhere |
-| **Audit** | None | Event sourcing |
-| **Partial Delivery** | Split items | Fulfillment records |
-| **Business Logic** | Scattered in UI | Domain services |
-| **Testing** | Minimal | Comprehensive, easy to test |
-| **Concurrency** | Race conditions | Pessimistic locking (FOR UPDATE) |
+| Aspecto | Sistema Atual | Design Greenfield |
+|---------|---------------|-------------------|
+| **Rastreamento de Item** | Tabelas L1/L2 divididas | Item único + atendimentos |
+| **Atribuição de Estoque** | idEstoque no produto | Reserva FIFO → consumo |
+| **Status** | Strings mágicas | Enums com máquinas de estado |
+| **Ref de Fornecedor** | VARCHAR copiado | FK em todo lugar |
+| **Auditoria** | Nenhuma | Event sourcing |
+| **Entrega Parcial** | Dividir itens | Registros de atendimento |
+| **Lógica de Negócio** | Espalhada na UI | Serviços de domínio |
+| **Testes** | Mínimo | Abrangente, fácil de testar |
+| **Concorrência** | Condições de corrida | Lock pessimista (FOR UPDATE) |
 
-The key insight: **Fulfillments are the core concept**, not split items. Everything flows from reservation → consumption → delivery → invoice.
+O insight chave: **Atendimentos são o conceito central**, não itens divididos. Tudo flui de reserva → consumo → entrega → fatura.

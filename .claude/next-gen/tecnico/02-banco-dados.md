@@ -1,8 +1,22 @@
 # Redesign do Schema de Banco de Dados
 
 > Status: **Rascunho**
-> Última atualização: 2025-12-27
+> Última atualização: 2025-12-28
 > Alvo: PostgreSQL 16
+
+---
+
+## Escopo deste Documento
+
+Este documento foca em **decisões técnicas de banco de dados**:
+
+- Por que PostgreSQL (justificativa técnica)
+- Análise dos problemas do schema atual
+- Princípios e convenções de banco de dados
+- Exemplos de correções propostas
+- Busca full-text e indexação
+
+**Para o schema completo redesenhado**, incluindo ENUMs, máquinas de estado e arquitetura de eventos, veja [estrategia/07-esquema-redesenhado.md](../estrategia/07-esquema-redesenhado.md).
 
 ---
 

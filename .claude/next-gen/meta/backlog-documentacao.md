@@ -23,7 +23,7 @@
 | 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | ✅ Feito |
 | 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | ✅ Feito |
-| 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | Pendente |
+| 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | ✅ Feito |
 | 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | Pendente |
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | Pendente |
 | 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | Pendente |
@@ -349,21 +349,21 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 14. Plano de Treinamento de Usuários
+## 14. Plano de Treinamento de Usuários ✅
 
-**Problema**: Usuários precisarão migrar de desktop para web.
+**Arquivo**: [`estrategia/11-treinamento.md`](../estrategia/11-treinamento.md)
 
-**Arquivo sugerido**: `estrategia/11-treinamento.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Perfis de usuário (admin, vendedor, financeiro, operacional)
-- Mapeamento de funcionalidades antigas → novas (onde encontrar cada coisa)
-- Material de treinamento por módulo
-- Vídeos/tutoriais necessários
-- FAQ de transição
-- Período de suporte pós-migração
-- Estratégia de rollout (piloto, gradual, big bang)
+- ✅ 8 perfis de usuário detalhados (Admin, Gerentes, Vendedor, Operacional, etc.)
+- ✅ Mapeamento completo desktop → web (menus, abas, ações)
+- ✅ 8 módulos de treinamento (1-8 horas cada)
+- ✅ Cronograma de rollout gradual por módulo
+- ✅ Lista de vídeos necessários (10 vídeos)
+- ✅ FAQ de transição (15+ perguntas)
+- ✅ Estrutura de suporte (N1/N2/N3)
+- ✅ Métricas de sucesso e indicadores
+- ✅ Programa de usuários-chave (Champions)
 
 ---
 
@@ -533,23 +533,23 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 4  | Design de API - REST + OpenAPI + webhooks              |
 | 2025-12-28 | Item 5  | Estratégia de testes - Unit/Feature/E2E + CI/CD        |
 | 2025-12-28 | Item 7  | Erros e monitoramento - Sentry + logs + alertas        |
+| 2025-12-28 | Item 14 | Treinamento - 8 perfis, 8 módulos, rollout gradual     |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 14 - Plano de treinamento de usuários
-2. [ ] Item 15 - Design System/Guia de UI
-3. [ ] Item 16 - Estratégia de concorrência
-4. [ ] Item 17 - Atalhos de teclado
-5. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 15 - Design System/Guia de UI
+2. [ ] Item 16 - Estratégia de concorrência
+3. [ ] Item 17 - Atalhos de teclado
+4. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-6. [ ] Item 8 - DevOps/Deployment
-7. [ ] Item 9 - Benchmarks de performance
-8. [ ] Item 10 - Substituição de relatórios
-9. [ ] Item 19 - Dicionário de dados
-10. [ ] Item 20 - Matriz de suporte browser/dispositivo
-11. [ ] Item 21 - Auditoria de dependências
+5. [ ] Item 8 - DevOps/Deployment
+6. [ ] Item 9 - Benchmarks de performance
+7. [ ] Item 10 - Substituição de relatórios
+8. [ ] Item 19 - Dicionário de dados
+9. [ ] Item 20 - Matriz de suporte browser/dispositivo
+10. [ ] Item 21 - Auditoria de dependências
 
 ---
 

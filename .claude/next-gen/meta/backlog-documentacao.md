@@ -18,7 +18,7 @@
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | ✅ Feito |
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | ✅ Feito |
-| 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
+| 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | ✅ Feito |
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
 | 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | ✅ Feito |
@@ -266,19 +266,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 9. Benchmarks de Performance
+## 9. Benchmarks de Performance ✅
 
-**Problema**: Sem baseline de performance nem metas.
+**Arquivo**: [`tecnico/04-infraestrutura.md#6-benchmarks-de-performance`](../tecnico/04-infraestrutura.md#6-benchmarks-de-performance)
 
-**Local sugerido**: Adicionar seção em `tecnico/04-infraestrutura.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Baseline do sistema atual
-- Tempos de resposta alvo
-- Otimização de queries
-- Estratégia de cache (Redis)
-- Lazy loading vs eager loading
+- ✅ Metas de tempo de resposta (páginas, API, relatórios, jobs)
+- ✅ Baseline do sistema atual C++ (login, orçamentos, NFe)
+- ✅ Estratégia de cache Redis (camadas, TTL, invalidação)
+- ✅ Otimização de queries (N+1, eager loading, Spatie)
+- ✅ Índices de banco de dados (críticos, partial indexes)
+- ✅ Monitoramento (Debugbar, Telescope, Pulse)
+- ✅ Otimizações de frontend (code splitting, HTTP caching)
+- ✅ Checklist de performance (deploy e produção)
 
 ---
 
@@ -535,15 +536,15 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 17 | Atalhos - mapeamento, Command Palette, acessibilidade  |
 | 2025-12-28 | Item 18 | Impressão - DomPDF, Laravel Excel, ACBr REST, templates |
 | 2025-12-28 | Item 8  | DevOps - Docker, CI/CD, ambientes, backup, rollback      |
+| 2025-12-28 | Item 9  | Performance - metas, cache Redis, queries, índices       |
 
 ### Próximos
 
 **Baixa Prioridade:**
-1. [ ] Item 9 - Benchmarks de performance
-2. [ ] Item 10 - Substituição de relatórios
-3. [ ] Item 19 - Dicionário de dados
-4. [ ] Item 20 - Matriz de suporte browser/dispositivo
-5. [ ] Item 21 - Auditoria de dependências
+1. [ ] Item 10 - Substituição de relatórios
+2. [ ] Item 19 - Dicionário de dados
+3. [ ] Item 20 - Matriz de suporte browser/dispositivo
+4. [ ] Item 21 - Auditoria de dependências
 
 ---
 

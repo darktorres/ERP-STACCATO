@@ -69,7 +69,8 @@ Rewriting the existing C++ Qt desktop ERP application as a modern web applicatio
 │   ├── 02-decisions.md         # Architecture Decision Records
 │   ├── 03-improvements.md      # Pain points & improvement options
 │   ├── 04-l1l2-simplification.md # Deep dive on table flattening
-│   └── 05-fifo-fix.md          # FIFO stock consumption fix
+│   ├── 05-fifo-fix.md          # FIFO stock consumption fix
+│   └── 06-supplier-normalization.md # FK for supplier refs
 │
 └── meta/
     └── tracker.md              # Documentation progress tracker
@@ -182,6 +183,13 @@ Fix stock consumption to properly follow First-In-First-Out:
 - PostgreSQL function + Laravel service implementation
 - Edge cases: concurrent consumption, FEFO, specific lot
 - Migration strategy
+
+### [06 - Supplier Reference Normalization](./strategy/06-supplier-normalization.md)
+Replace denormalized supplier names with proper FK references:
+- Problem: `fornecedor` VARCHAR stored in 9 tables (~85 code refs)
+- Solution: Use `fornecedor_id` FK everywhere
+- Migration: Populate FK from names, handle variations, drop old columns
+- Special cases: historical snapshots, magic string checks
 
 ---
 

@@ -22,7 +22,7 @@
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
 | 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | ✅ Feito |
-| 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | Pendente |
+| 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | ✅ Feito |
 | 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | Pendente |
 | 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | Pendente |
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | Pendente |
@@ -324,22 +324,21 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 13. Documentação de Integrações
+## 13. Documentação de Integrações ✅
 
-**Problema**: Integrações com sistemas externos não estão documentadas.
+**Arquivo**: [`tecnico/09-integracoes.md`](../tecnico/09-integracoes.md)
 
-**Arquivo sugerido**: `tecnico/09-integracoes.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- **ACBr**: Comunicação com ACBrMonitorConsole, comandos, respostas
-- **CNAB 240**: Bancos suportados, layouts, remessa/retorno
-- **APIs de CEP**: ViaCEP, BrasilAPI (fallback)
-- **Consulta CNPJ**: ReceitaWS, alternativas
-- **SEFAZ**: Webservices NFe por estado
-- **Certificados digitais**: A1, A3, renovação
-- Timeouts, retries, circuit breaker
-- Tratamento de erros por integração
+- ✅ **ACBr**: Socket TCP 3434, comandos NFe, parsing de respostas
+- ✅ **CNAB 240**: Itaú, GARE, fornecedor, salário, retorno
+- ✅ **CEP**: Banco local + fallback ViaCEP/BrasilAPI
+- ✅ **SMTP**: Email com anexos (NFe XML/DANFE)
+- ✅ **Google Maps**: Geocodificação de endereços
+- ✅ **QualP**: API de cálculo de frete
+- ✅ **Certificados**: A1/A3, verificação de validade, alertas
+- ✅ **Resiliência**: Retry com backoff, circuit breaker
+- ✅ **Monitoramento**: Health checks, logging estruturado
 
 ---
 
@@ -547,30 +546,30 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 6 | Scripts de migração de dados                            |
 | 2025-12-28 | Item 11 | Checklist de paridade - 152 funcionalidades mapeadas   |
 | 2025-12-28 | Item 12 | Regras de negócio - 10 domínios documentados           |
+| 2025-12-28 | Item 13 | Integrações - 7 sistemas externos documentados         |
 
 ### Próximos
 
 **Alta Prioridade:**
-1. [ ] Item 13 - Documentação de integrações
-2. [ ] Item 22 - Estratégia de validação (request/response/SQL)
+1. [ ] Item 22 - Estratégia de validação (request/response/SQL)
 
 **Média Prioridade:**
-3. [ ] Item 4 - Design de API
-4. [ ] Item 5 - Estratégia de testes
-5. [ ] Item 7 - Tratamento de erros e monitoramento
-6. [ ] Item 14 - Plano de treinamento de usuários
-7. [ ] Item 15 - Design System/Guia de UI
-8. [ ] Item 16 - Estratégia de concorrência
-9. [ ] Item 17 - Atalhos de teclado
-10. [ ] Item 18 - Especificações de impressão
+2. [ ] Item 4 - Design de API
+3. [ ] Item 5 - Estratégia de testes
+4. [ ] Item 7 - Tratamento de erros e monitoramento
+5. [ ] Item 14 - Plano de treinamento de usuários
+6. [ ] Item 15 - Design System/Guia de UI
+7. [ ] Item 16 - Estratégia de concorrência
+8. [ ] Item 17 - Atalhos de teclado
+9. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-11. [ ] Item 8 - DevOps/Deployment
-12. [ ] Item 9 - Benchmarks de performance
-13. [ ] Item 10 - Substituição de relatórios
-14. [ ] Item 19 - Dicionário de dados
-15. [ ] Item 20 - Matriz de suporte browser/dispositivo
-16. [ ] Item 21 - Auditoria de dependências
+10. [ ] Item 8 - DevOps/Deployment
+11. [ ] Item 9 - Benchmarks de performance
+12. [ ] Item 10 - Substituição de relatórios
+13. [ ] Item 19 - Dicionário de dados
+14. [ ] Item 20 - Matriz de suporte browser/dispositivo
+15. [ ] Item 21 - Auditoria de dependências
 
 ---
 

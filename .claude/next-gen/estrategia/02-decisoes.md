@@ -15,6 +15,7 @@
 | ADR-004 | Abordagem de integração NFe         | **Aceito**    | 2025-12-28 |
 | ADR-005 | Estratégia de migração              | **Aceito**    | 2025-12-28 |
 | ADR-006 | Abordagem de multi-tenancy          | **Aceito**    | 2025-12-28 |
+| ADR-007 | Swoole / Laravel Octane             | **Adiado**    | 2025-12-28 |
 
 ---
 
@@ -395,6 +396,106 @@ trait BelongsToLoja
 - Testes para garantir filtro de loja em todas as queries
 - Code review focado em segurança multi-tenant
 - Índice composto `(loja_id, ...)` em tabelas grandes
+
+---
+
+## ADR-007: Swoole / Laravel Octane
+
+### Status - ADR-007
+
+**Adiado** - 2025-12-28
+
+Decisão adiada para após v1 em produção. Reavaliar se performance se tornar gargalo.
+
+### Contexto - ADR-007
+
+Laravel tradicionalmente roda em PHP-FPM (processo por request). Swoole é uma extensão PHP que mantém a aplicação em memória, eliminando cold starts e permitindo async I/O. Laravel Octane é o wrapper oficial.
+
+Questão: Devemos usar Swoole/Octane para melhor performance?
+
+### Opções Avaliadas - ADR-007
+
+| Opção              | Performance | Complexidade | Real-time     |
+| ------------------ | ----------- | ------------ | ------------- |
+| **PHP-FPM**        | Baseline    | Baixa        | Polling/SSE   |
+| **Swoole/Octane**  | 10-100x     | Alta         | WebSocket     |
+| **FrankenPHP**     | 2-4x        | Média        | WebSocket     |
+| **RoadRunner**     | 5-10x       | Média        | WebSocket     |
+
+### Decisão - ADR-007
+
+**Não usar Swoole/Octane na v1**. Usar PHP-FPM tradicional.
+
+Para funcionalidades real-time, usar **Laravel Reverb** (WebSockets oficiais do Laravel) ou polling simples.
+
+### Justificativa - ADR-007
+
+#### Por que NÃO usar Swoole na v1:
+
+1. **Escala não justifica** - ERP interno com ~10-50 usuários simultâneos, PHP-FPM é suficiente
+2. **Complexidade operacional** - Processos long-running requerem:
+   - Supervisord para gerenciar processo
+   - Cuidado com memory leaks
+   - Gestão de conexões de banco
+   - Deploy diferente (restart gracioso)
+3. **Riscos de código stateful**:
+   - Singletons persistem entre requests
+   - Variáveis estáticas acumulam dados
+   - Conexões de banco precisam de pooling
+4. **Incompatibilidade de pacotes** - Alguns pacotes Laravel assumem ciclo request/response tradicional
+5. **Debug mais difícil** - Stack traces e debugging em processos long-running são mais complexos
+6. **Premature optimization** - Otimizar antes de medir é desperdício
+
+#### Alternativas mais simples para real-time:
+
+| Necessidade               | Solução Simples              |
+| ------------------------- | ---------------------------- |
+| Atualização de estoque    | Laravel Reverb ou polling    |
+| Status de NFe             | Polling (SEFAZ é lento)      |
+| Notificações              | Server-Sent Events (SSE)     |
+| Dashboard em tempo real   | Polling com intervalo curto  |
+
+### Quando Reconsiderar - ADR-007
+
+Reavaliar Swoole/Octane se:
+
+1. **Performance virar gargalo** - Tempo de resposta > 500ms consistentemente
+2. **Muitos usuários simultâneos** - > 100 conexões concorrentes
+3. **Muitas chamadas externas** - Async I/O para SEFAZ, bancos (CNAB) em paralelo
+4. **WebSockets intensivos** - Chat, colaboração em tempo real
+
+### Métricas para Decisão Futura - ADR-007
+
+Antes de reconsiderar, medir:
+
+```
+- Tempo médio de resposta (P50, P95, P99)
+- Requests por segundo
+- Uso de memória PHP-FPM
+- Tempo gasto em chamadas externas (SEFAZ, ACBr)
+- Número de usuários simultâneos
+```
+
+Se P95 > 500ms ou requests/segundo insuficiente, então avaliar Octane.
+
+### Consequências - ADR-007
+
+**Positivas:**
+- Simplicidade operacional (deploy tradicional)
+- Menor curva de aprendizado para equipe
+- Debugging familiar
+- Compatibilidade garantida com todos os pacotes Laravel
+
+**Negativas:**
+- Performance menor que poderia ter com Swoole
+- WebSockets requerem serviço separado (Reverb)
+- Cold start em cada request
+
+**Mitigações:**
+- Usar cache agressivamente (Redis)
+- Otimizar queries com eager loading
+- Usar filas para operações pesadas
+- Laravel Reverb para real-time quando necessário
 
 ---
 

@@ -27,7 +27,7 @@
 | 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | ✅ Feito |
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | ✅ Feito |
 | 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | ✅ Feito |
-| 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | Pendente |
+| 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | ✅ Feito |
 | 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
 | 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | Pendente |
 | 21  | [Auditoria de Dependências](#21-auditoria-de-dependências)                    | Baixa      | Pendente |
@@ -421,23 +421,22 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 18. Especificações de Impressão
+## 18. Especificações de Impressão ✅
 
-**Problema**: Múltiplos documentos precisam ser impressos com layouts específicos.
+**Arquivo**: [`tecnico/13-impressao.md`](../tecnico/13-impressao.md)
 
-**Arquivo sugerido**: `tecnico/13-impressao.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- **DANFE**: Layout oficial, validações
-- **Boletos**: Layout bancário, código de barras
-- **Romaneio de entrega**: Itens, endereço, assinatura
-- **Etiquetas**: Produtos, volumes
-- **Relatórios**: Cabeçalho padrão, paginação, totalizadores
-- Biblioteca escolhida (DomPDF, Browsershot, wkhtmltopdf)
-- Impressão direta vs download PDF
-- Configuração de impressora (térmica, laser)
-- Tamanhos de papel (A4, carta, etiqueta)
+- ✅ Inventário completo de documentos (5 PDFs, 6 Excel, DANFE)
+- ✅ Stack de tecnologias (DomPDF, TCPDF, Laravel Excel, ACBr REST)
+- ✅ Templates Blade para PDFs (orçamento, venda, etiqueta pallet)
+- ✅ Exports Laravel Excel (VendaExport, CompraExport, ProtocoloEntrega)
+- ✅ Integração DANFE via ACBr REST API
+- ✅ API de documentos (endpoints download/preview)
+- ✅ Geração assíncrona com Jobs
+- ✅ Especificações de papel (A4, A5, etiquetas)
+- ✅ Composable Vue `useDocumentos`
+- ✅ Checklist de migração de templates
 
 ---
 
@@ -533,19 +532,17 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 15 | Design System - cores, tipografia, componentes Vue     |
 | 2025-12-28 | Item 16 | Concorrência - locks, queues, race conditions          |
 | 2025-12-28 | Item 17 | Atalhos - mapeamento, Command Palette, acessibilidade  |
+| 2025-12-28 | Item 18 | Impressão - DomPDF, Laravel Excel, ACBr REST, templates |
 
 ### Próximos
 
-**Média Prioridade:**
-1. [ ] Item 18 - Especificações de impressão
-
 **Baixa Prioridade:**
-2. [ ] Item 8 - DevOps/Deployment
-3. [ ] Item 9 - Benchmarks de performance
-4. [ ] Item 10 - Substituição de relatórios
-5. [ ] Item 19 - Dicionário de dados
-6. [ ] Item 20 - Matriz de suporte browser/dispositivo
-7. [ ] Item 21 - Auditoria de dependências
+1. [ ] Item 8 - DevOps/Deployment
+2. [ ] Item 9 - Benchmarks de performance
+3. [ ] Item 10 - Substituição de relatórios
+4. [ ] Item 19 - Dicionário de dados
+5. [ ] Item 20 - Matriz de suporte browser/dispositivo
+6. [ ] Item 21 - Auditoria de dependências
 
 ---
 

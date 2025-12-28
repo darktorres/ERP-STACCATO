@@ -10,57 +10,38 @@
 
 The ERP has **6 main interconnected flows**:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           HIGH-LEVEL FLOW                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  CADASTROS          ORÇAMENTO           VENDA              COMPRA           │
-│  (Master Data)      (Quote)             (Sale)             (Purchase)       │
-│       │                 │                  │                   │            │
-│       ▼                 ▼                  ▼                   ▼            │
-│  ┌─────────┐      ┌──────────┐      ┌──────────┐       ┌───────────┐       │
-│  │Fornecedor│      │ Orçamento│─────►│  Venda   │──────►│  Compra   │       │
-│  │ Produto │      │          │      │          │       │(per supplier)     │
-│  │ Cliente │      └──────────┘      └────┬─────┘       └─────┬─────┘       │
-│  └─────────┘                             │                   │             │
-│                                          │                   ▼             │
-│                                          │            ┌───────────┐        │
-│                                          │            │  NFe      │        │
-│                                          │            │ Entrada   │        │
-│                                          │            └─────┬─────┘        │
-│                                          │                  │              │
-│                                          │                  ▼              │
-│                                          │            ┌───────────┐        │
-│                                          │            │  Estoque  │        │
-│                                          │            │ (Receipt) │        │
-│                                          │            └─────┬─────┘        │
-│                                          │                  │              │
-│                                          ▼                  │              │
-│                                    ┌───────────┐            │              │
-│                                    │  Consumo  │◄───────────┘              │
-│                                    │  Estoque  │                           │
-│                                    └─────┬─────┘                           │
-│                                          │                                 │
-│                                          ▼                                 │
-│                                    ┌───────────┐                           │
-│                                    │   NFe     │                           │
-│                                    │  Saída    │                           │
-│                                    └─────┬─────┘                           │
-│                                          │                                 │
-│                                          ▼                                 │
-│                                    ┌───────────┐                           │
-│                                    │  Entrega  │                           │
-│                                    │ (Delivery)│                           │
-│                                    └─────┬─────┘                           │
-│                                          │                                 │
-│                                          ▼                                 │
-│  ┌──────────────────────────────────────────────────────────────────┐     │
-│  │                      FINANCEIRO                                   │     │
-│  │   Contas a Receber (from Venda) ◄──────► Contas a Pagar (from Compra)  │
-│  └──────────────────────────────────────────────────────────────────┘     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Cadastros["CADASTROS (Master Data)"]
+        Fornecedor
+        Produto
+        Cliente
+    end
+
+    subgraph SalesFlow["SALES FLOW"]
+        Orcamento[Orçamento] --> Venda
+        Venda --> Compra["Compra (per supplier)"]
+    end
+
+    subgraph PurchaseFlow["PURCHASE FLOW"]
+        Compra --> NFeEntrada["NFe Entrada"]
+        NFeEntrada --> Estoque["Estoque (Receipt)"]
+    end
+
+    subgraph FulfillmentFlow["FULFILLMENT FLOW"]
+        Venda --> Consumo["Consumo Estoque"]
+        Estoque --> Consumo
+        Consumo --> NFeSaida["NFe Saída"]
+        NFeSaida --> Entrega["Entrega (Delivery)"]
+    end
+
+    subgraph Financeiro["FINANCEIRO"]
+        ContasReceber["Contas a Receber"] <--> ContasPagar["Contas a Pagar"]
+    end
+
+    Entrega --> Financeiro
+    Compra --> ContasPagar
+    Venda --> ContasReceber
 ```
 
 ---
@@ -86,11 +67,20 @@ The ERP has **6 main interconnected flows**:
 
 The system uses a **two-level hierarchy** for both sales and purchases:
 
-```
-LEVEL 1 (Quote/Order)              LEVEL 2 (Fulfillment/Delivery)
-─────────────────────              ───────────────────────────────
-venda_has_produto         ──────►  venda_has_produto2
-pedido_fornecedor_has_produto ──►  pedido_fornecedor_has_produto2
+```mermaid
+flowchart LR
+    subgraph L1["LEVEL 1 (Quote/Order)"]
+        VHP[venda_has_produto]
+        PFHP[pedido_fornecedor_has_produto]
+    end
+
+    subgraph L2["LEVEL 2 (Fulfillment/Delivery)"]
+        VHP2[venda_has_produto2]
+        PFHP2[pedido_fornecedor_has_produto2]
+    end
+
+    VHP --> VHP2
+    PFHP --> PFHP2
 ```
 
 ### Purpose of Each Level
@@ -123,34 +113,26 @@ Each L2 tracks independently:
 
 ### Relationship Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         VENDA STRUCTURE                                  │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  venda (header)                                                         │
-│    │                                                                    │
-│    ├──► venda_has_produto (L1)                                         │
-│    │         │                                                          │
-│    │         ├──► venda_has_produto2 (L2) ◄── Can have MULTIPLE!       │
-│    │         │         │                                                │
-│    │         │         ├──► estoque_has_consumo (multiple per L2)      │
-│    │         │         ├──► idNFeSaida (customer NFe)                  │
-│    │         │         ├──► idNFeEntrada (supplier)                    │
-│    │         │         └──► idNFeFutura (scheduled)                    │
-│    │         │                                                          │
-│    │         ├──► venda_has_produto2 (L2) ◄── Second delivery          │
-│    │         │         └──► ... (own links)                            │
-│    │         │                                                          │
-│    │         └──► pedido_fornecedor_has_produto (L1)                   │
-│    │                    │                                               │
-│    │                    └──► pedido_fornecedor_has_produto2 (L2)       │
-│    │                              │                                     │
-│    │                              └──► estoque_has_compra              │
-│    │                                                                    │
-│    └──► conta_a_receber_has_pagamento (financial)                      │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Venda["venda (header)"]
+
+    Venda --> VHP["venda_has_produto (L1)"]
+    Venda --> CAR["conta_a_receber_has_pagamento"]
+
+    VHP --> VHP2_1["venda_has_produto2 (L2) #1"]
+    VHP --> VHP2_2["venda_has_produto2 (L2) #2"]
+    VHP --> PFHP["pedido_fornecedor_has_produto (L1)"]
+
+    VHP2_1 --> EHC1["estoque_has_consumo"]
+    VHP2_1 --> NFeSaida["idNFeSaida"]
+    VHP2_1 --> NFeEntrada["idNFeEntrada"]
+    VHP2_1 --> NFeFutura["idNFeFutura"]
+
+    VHP2_2 --> EHC2["estoque_has_consumo"]
+
+    PFHP --> PFHP2["pedido_fornecedor_has_produto2 (L2)"]
+    PFHP2 --> EHCompra["estoque_has_compra"]
 ```
 
 ### Key Insight
@@ -177,46 +159,34 @@ Each L2 tracks independently:
 
 ### Conversion Flow
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    ORÇAMENTO → VENDA CONVERSION                          │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌─────────────┐                                                         │
-│  │  ORÇAMENTO  │                                                         │
-│  │   (ATIVO)   │                                                         │
-│  └──────┬──────┘                                                         │
-│         │                                                                │
-│         │ User clicks "Gerar Venda"                                      │
-│         │                                                                │
-│         ▼                                                                │
-│  ┌─────────────────────────────────────────────────────────────┐        │
-│  │ VALIDATION                                                   │        │
-│  │ • Quote not expired (within validade days)                  │        │
-│  │ • Delivery address selected                                  │        │
-│  │ • Customer registration complete                             │        │
-│  └──────────────────────────┬──────────────────────────────────┘        │
-│                             │                                            │
-│                             ▼                                            │
-│  ┌─────────────────────────────────────────────────────────────┐        │
-│  │ COPY PROCESS                                                 │        │
-│  │ 1. Copy header: cliente, vendedor, endereços, valores       │        │
-│  │ 2. Copy items: orcamento_has_produto → venda_has_produto    │        │
-│  │ 3. Create L2: for each item → venda_has_produto2            │        │
-│  │ 4. Set initial status per item:                              │        │
-│  │    • If item.estoque > 0: status = 'ESTOQUE'                │        │
-│  │    • Else: status = 'PENDENTE'                               │        │
-│  └──────────────────────────┬──────────────────────────────────┘        │
-│                             │                                            │
-│                             ▼                                            │
-│  ┌─────────────────────────────────────────────────────────────┐        │
-│  │ FINALIZATION                                                 │        │
-│  │ • Orçamento.status = 'FECHADO'                              │        │
-│  │ • Venda created with idOrcamento link                       │        │
-│  │ • Venda dialog opens for additional processing              │        │
-│  └─────────────────────────────────────────────────────────────┘        │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Orc["ORÇAMENTO (ATIVO)"]
+
+    Orc -->|"User clicks 'Gerar Venda'"| Val
+
+    subgraph Val["VALIDATION"]
+        V1["Quote not expired"]
+        V2["Delivery address selected"]
+        V3["Customer registration complete"]
+    end
+
+    Val --> Copy
+
+    subgraph Copy["COPY PROCESS"]
+        C1["1. Copy header: cliente, vendedor, endereços, valores"]
+        C2["2. Copy items: orcamento_has_produto → venda_has_produto"]
+        C3["3. Create L2: for each item → venda_has_produto2"]
+        C4["4. Set initial status: ESTOQUE or PENDENTE"]
+    end
+
+    Copy --> Final
+
+    subgraph Final["FINALIZATION"]
+        F1["Orçamento.status = 'FECHADO'"]
+        F2["Venda created with idOrcamento link"]
+        F3["Venda dialog opens"]
+    end
 ```
 
 ### Data Transformation
@@ -272,55 +242,39 @@ Compras (purchase orders) are generated when:
 
 ### Flow Diagram
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                      VENDA → COMPRA GENERATION                           │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  venda_has_produto2                      pedido_fornecedor_has_produto2  │
-│  ┌─────────────────┐                     ┌─────────────────────────────┐│
-│  │ status=INICIADO │                     │                             ││
-│  │ or PENDENTE     │                     │                             ││
-│  └────────┬────────┘                     │                             ││
-│           │                              │                             ││
-│           │ [Gerar Compra clicked]       │                             ││
-│           │                              │                             ││
-│           ▼                              ▼                             ││
-│  ┌─────────────────────────────────────────────────────────────────┐  ││
-│  │ FOR EACH SUPPLIER (grouped):                                     │  ││
-│  │                                                                  │  ││
-│  │ 1. Generate new idCompra                                        │  ││
-│  │ 2. Create pedido_fornecedor_has_produto (L1)                    │  ││
-│  │ 3. Create pedido_fornecedor_has_produto2 (L2) with:             │  ││
-│  │    • idVendaProduto2 = source venda item                        │  ││
-│  │    • idCompra = generated purchase ID                           │  ││
-│  │ 4. Update venda_has_produto2:                                   │  ││
-│  │    • status = 'EM COMPRA'                                       │  ││
-│  │    • idCompra = generated purchase ID                           │  ││
-│  │    • dataRealCompra = NOW()                                     │  ││
-│  │    • dataPrevConf = user selected date                          │  ││
-│  │ 5. Generate Excel purchase order document                       │  ││
-│  │ 6. Send email to supplier                                       │  ││
-│  └─────────────────────────────────────────────────────────────────┘  ││
-│                                                                          │
-│  ┌─────────────────┐                     ┌─────────────────────────────┐│
-│  │ status=EM COMPRA│ ◄─────LINKED────►   │ status=PENDENTE             ││
-│  │ idCompra=XXX    │                     │ idVendaProduto2=YYY         ││
-│  └─────────────────┘                     └─────────────────────────────┘│
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    VHP2["venda_has_produto2<br/>status=INICIADO or PENDENTE"]
+
+    VHP2 -->|"Gerar Compra clicked"| Process
+
+    subgraph Process["FOR EACH SUPPLIER (grouped)"]
+        P1["1. Generate new idCompra"]
+        P2["2. Create pedido_fornecedor_has_produto (L1)"]
+        P3["3. Create pedido_fornecedor_has_produto2 (L2)"]
+        P4["4. Update venda_has_produto2: status='EM COMPRA'"]
+        P5["5. Generate Excel purchase order"]
+        P6["6. Send email to supplier"]
+    end
+
+    Process --> Result
+
+    subgraph Result["LINKED RECORDS"]
+        VHP2_Result["venda_has_produto2<br/>status=EM COMPRA<br/>idCompra=XXX"]
+        PFHP2_Result["pedido_fornecedor_has_produto2<br/>status=PENDENTE<br/>idVendaProduto2=YYY"]
+        VHP2_Result <-.->|"LINKED"| PFHP2_Result
+    end
 ```
 
 ### Key: idCompra Links Everything
 
-```
-venda_has_produto2.idCompra ◄────────────────────────────────┐
-                                                              │
-pedido_fornecedor_has_produto2.idCompra ◄────────────────────┤
-                                                              │
-estoque_has_compra.idCompra ◄────────────────────────────────┤
-                                                              │
-conta_a_pagar_has_idcompra.idCompra ◄────────────────────────┘
+```mermaid
+flowchart LR
+    idCompra((idCompra))
+    idCompra --> VHP2["venda_has_produto2.idCompra"]
+    idCompra --> PFHP2["pedido_fornecedor_has_produto2.idCompra"]
+    idCompra --> EHC["estoque_has_compra.idCompra"]
+    idCompra --> CAP["conta_a_pagar_has_idcompra.idCompra"]
 ```
 
 ---
@@ -329,51 +283,35 @@ conta_a_pagar_has_idcompra.idCompra ◄─────────────�
 
 ### Purchase Confirmation Steps
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    PURCHASE → STOCK RECEIPT FLOW                         │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  STEP 1: CONFIRMAR COMPRA (Supplier confirms dispatch)                   │
-│  ────────────────────────────────────────────────────                    │
-│  • pedido_fornecedor_has_produto2.status = 'EM FATURAMENTO'             │
-│  • venda_has_produto2.status = 'EM FATURAMENTO'                         │
-│  • dataRealConf = confirmation date                                      │
-│  • dataPrevFat = expected invoice date                                   │
-│                                                                          │
-│                              │                                           │
-│                              ▼                                           │
-│                                                                          │
-│  STEP 2: FATURAR (Receive supplier invoice/NFe)                         │
-│  ──────────────────────────────────────────────                         │
-│  • Import supplier NFe XML                                               │
-│  • Validate NFe against purchase order                                   │
-│  • pedido_fornecedor_has_produto2.status = 'EM ENTREGA'                 │
-│  • venda_has_produto2.status = 'EM ENTREGA'                             │
-│  • venda_has_produto2.idNFeEntrada = imported NFe ID                    │
-│                                                                          │
-│                              │                                           │
-│                              ▼                                           │
-│                                                                          │
-│  STEP 3: COLETA (Pickup from supplier or transit)                       │
-│  ─────────────────────────────────────────────────                      │
-│  • pedido_fornecedor_has_produto2.status = 'EM COLETA'                  │
-│  • dataRealColeta = pickup date                                          │
-│  • dataPrevReceb = expected receipt date                                 │
-│                                                                          │
-│                              │                                           │
-│                              ▼                                           │
-│                                                                          │
-│  STEP 4: RECEBIMENTO (Receive at warehouse)                             │
-│  ──────────────────────────────────────────                             │
-│  • Create estoque records (one per item)                                │
-│  • Create estoque_has_compra links                                      │
-│  • Assign warehouse location (idBloco = 'ENTRADA')                      │
-│  • pedido_fornecedor_has_produto2.status = 'ESTOQUE'                    │
-│  • venda_has_produto2.status = 'ESTOQUE'                                │
-│  • dataRealReceb = receipt date                                          │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Step1["STEP 1: CONFIRMAR COMPRA"]
+        S1A["Supplier confirms dispatch"]
+        S1B["status = 'EM FATURAMENTO'"]
+        S1C["dataRealConf = confirmation date"]
+    end
+
+    subgraph Step2["STEP 2: FATURAR"]
+        S2A["Import supplier NFe XML"]
+        S2B["Validate NFe against PO"]
+        S2C["status = 'EM ENTREGA'"]
+        S2D["idNFeEntrada = NFe ID"]
+    end
+
+    subgraph Step3["STEP 3: COLETA"]
+        S3A["Pickup from supplier"]
+        S3B["status = 'EM COLETA'"]
+        S3C["dataRealColeta = pickup date"]
+    end
+
+    subgraph Step4["STEP 4: RECEBIMENTO"]
+        S4A["Create estoque records"]
+        S4B["Create estoque_has_compra links"]
+        S4C["Assign warehouse location"]
+        S4D["status = 'ESTOQUE'"]
+    end
+
+    Step1 --> Step2 --> Step3 --> Step4
 ```
 
 ### Estoque Record Creation
@@ -404,47 +342,28 @@ INSERT INTO estoque (
 
 When a sale is ready for delivery, stock is "consumed" (allocated):
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                       STOCK CONSUMPTION FLOW                             │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  TRIGGER: venda_has_produto2 moves to ESTOQUE or shipping               │
-│                                                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │ FUNCTION: Estoque::criarConsumo(idVendaProduto2, quantidade)    │    │
-│  ├─────────────────────────────────────────────────────────────────┤    │
-│  │                                                                 │    │
-│  │ 1. Find available stock (FIFO-like):                           │    │
-│  │    SELECT * FROM estoque                                        │    │
-│  │    WHERE idProduto = ? AND restante > 0                        │    │
-│  │    ORDER BY data_entrada ASC                                    │    │
-│  │                                                                 │    │
-│  │ 2. For each stock batch until quantity fulfilled:              │    │
-│  │    • Calculate consumption: MIN(restante, needed)              │    │
-│  │    • Create estoque_has_consumo record                         │    │
-│  │    • Update estoque.restante -= consumed                       │    │
-│  │                                                                 │    │
-│  │ 3. Link to purchase order via dividirCompra():                 │    │
-│  │    • Find unallocated pedido_fornecedor_has_produto2           │    │
-│  │    • Set idVenda, idVendaProduto2 on purchase line             │    │
-│  │    • Split purchase line if partial quantity                   │    │
-│  │                                                                 │    │
-│  │ 4. Copy lot number to venda_has_produto2                       │    │
-│  │                                                                 │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                                                          │
-│  RESULT:                                                                 │
-│  ┌───────────────────────────────────────────────────────────────┐      │
-│  │ estoque_has_consumo                                           │      │
-│  │ • idEstoque = stock batch used                                │      │
-│  │ • idVendaProduto2 = sale line being fulfilled                │      │
-│  │ • quant = NEGATIVE value (e.g., -100)                        │      │
-│  │ • status = 'CONSUMO'                                          │      │
-│  │ • All tax fields proportionally calculated                    │      │
-│  └───────────────────────────────────────────────────────────────┘      │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Trigger["TRIGGER: venda_has_produto2<br/>moves to ESTOQUE or shipping"]
+
+    Trigger --> Function
+
+    subgraph Function["Estoque::criarConsumo(idVendaProduto2, quantidade)"]
+        F1["1. Find available stock (FIFO):<br/>ORDER BY data_entrada ASC"]
+        F2["2. For each batch until fulfilled:<br/>• Create estoque_has_consumo<br/>• Update estoque.restante"]
+        F3["3. Link to purchase order:<br/>• Set idVenda, idVendaProduto2<br/>• Split if partial"]
+        F4["4. Copy lot number"]
+        F1 --> F2 --> F3 --> F4
+    end
+
+    Function --> Result
+
+    subgraph Result["RESULT: estoque_has_consumo"]
+        R1["idEstoque = stock batch"]
+        R2["idVendaProduto2 = sale line"]
+        R3["quant = NEGATIVE value"]
+        R4["status = 'CONSUMO'"]
+    end
 ```
 
 ### Important: Negative Quantities
@@ -498,87 +417,55 @@ When a sale is cancelled or item returned:
 
 ### NFe Emission Flow (Saída)
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         NFe EMISSION FLOW                                │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User opens CadastrarNFe dialog from Venda                           │
-│     │                                                                    │
-│     ▼                                                                    │
-│  2. validarDados() - Check all required fields                          │
-│     • Emitter (CNPJ, address)                                           │
-│     • Recipient (CNPJ, address)                                         │
-│     • Products with tax calculations                                     │
-│     • Totals                                                             │
-│     │                                                                    │
-│     ▼                                                                    │
-│  3. criarChaveAcesso() - Generate 44-char access key                    │
-│     │                                                                    │
-│     ▼                                                                    │
-│  4. preCadastrarNota() - Insert with status='NOTA PENDENTE'             │
-│     │                                                                    │
-│     ▼                                                                    │
-│  5. montarXML() + gerarNota() - Build XML via ACBr                      │
-│     │                                                                    │
-│     ▼                                                                    │
-│  6. enviarNFe() - Send to SEFAZ via ACBr TCP socket                     │
-│     │                                                                    │
-│     ▼                                                                    │
-│  7. processarResposta() - Handle SEFAZ response                         │
-│     ├── AUTORIZADA → atualizarNFe(status='AUTORIZADA')                  │
-│     ├── DENEGADA → atualizarNFe(status='DENEGADA')                      │
-│     └── ERROR → Show error, allow retry                                  │
-│     │                                                                    │
-│     ▼                                                                    │
-│  8. Update venda_has_produto2.idNFeSaida = new NFe ID                   │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    S1["1. User opens CadastrarNFe dialog"]
+    S2["2. validarDados()<br/>Check emitter, recipient, products, totals"]
+    S3["3. criarChaveAcesso()<br/>Generate 44-char access key"]
+    S4["4. preCadastrarNota()<br/>status='NOTA PENDENTE'"]
+    S5["5. montarXML() + gerarNota()<br/>Build XML via ACBr"]
+    S6["6. enviarNFe()<br/>Send to SEFAZ"]
+    S7["7. processarResposta()"]
+
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
+
+    S7 -->|AUTORIZADA| Auth["status='AUTORIZADA'"]
+    S7 -->|DENEGADA| Den["status='DENEGADA'"]
+    S7 -->|ERROR| Err["Show error, retry"]
+
+    Auth --> S8["8. Update idNFeSaida"]
 ```
 
 ### NFe Import Flow (Entrada)
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         NFe IMPORT FLOW                                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User opens ImportarXML dialog                                        │
-│     • Select NFe from database (RESUMO status from manifest)            │
-│     • OR browse XML file                                                 │
-│     │                                                                    │
-│     ▼                                                                    │
-│  2. Parse XML with XML class                                            │
-│     • Extract products, quantities, prices                              │
-│     • Extract tax data (ICMS, IPI, PIS, COFINS)                        │
-│     • Extract duplicatas (payment installments)                         │
-│     │                                                                    │
-│     ▼                                                                    │
-│  3. parear() - Match XML items to purchase order items                  │
-│     • Green: exact match                                                 │
-│     • Yellow: partial match (split quantity)                            │
-│     • Red: no match found                                                │
-│     │                                                                    │
-│     ▼                                                                    │
-│  4. User confirms matching                                               │
-│     │                                                                    │
-│     ▼                                                                    │
-│  5. cadastrarNFe() - Create stock records                               │
-│     • INSERT INTO estoque (one per item)                                │
-│     • INSERT INTO estoque_has_compra (link to purchase)                 │
-│     • UPDATE nfe SET utilizada = TRUE                                   │
-│     • UPDATE purchase status to 'EM COLETA'                             │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    I1["1. User opens ImportarXML dialog<br/>Select from DB or browse XML"]
+    I2["2. Parse XML<br/>Products, taxes, duplicatas"]
+    I3["3. parear() - Match to PO items"]
+    I4["4. User confirms matching"]
+    I5["5. cadastrarNFe()<br/>Create stock records"]
+
+    I1 --> I2 --> I3 --> I4 --> I5
+
+    I3 --> Green["🟢 Exact match"]
+    I3 --> Yellow["🟡 Partial match"]
+    I3 --> Red["🔴 No match"]
+
+    I5 --> R1["INSERT estoque"]
+    I5 --> R2["INSERT estoque_has_compra"]
+    I5 --> R3["UPDATE nfe.utilizada = TRUE"]
+    I5 --> R4["UPDATE status = 'EM COLETA'"]
 ```
 
 ### Three NFe References per Sale Item
 
-```
-venda_has_produto2
-├── idNFeSaida    → NFe sent TO customer (the sales invoice)
-├── idNFeEntrada  → NFe received FROM supplier (purchase invoice)
-└── idNFeFutura   → NFe for future/scheduled delivery
+```mermaid
+flowchart LR
+    VHP2["venda_has_produto2"]
+    VHP2 --> NFeSaida["idNFeSaida<br/>TO customer"]
+    VHP2 --> NFeEntrada["idNFeEntrada<br/>FROM supplier"]
+    VHP2 --> NFeFutura["idNFeFutura<br/>Future delivery"]
 ```
 
 ---
@@ -589,80 +476,51 @@ venda_has_produto2
 
 **Created**: Automatically when Venda is saved/confirmed
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    RECEIVABLES CREATION FLOW                             │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  TRIGGER: Venda.montarFluxoCaixa() on save                              │
-│                                                                          │
-│  FOR EACH payment method selected:                                       │
-│  │                                                                       │
-│  │  1. Get forma_pagamento config:                                      │
-│  │     • idConta (bank account)                                         │
-│  │     • parcelas (number of installments)                              │
-│  │     • pula1Mes, ajustaDiaUtil, dMaisUm flags                        │
-│  │     • taxa (card fee percentage)                                     │
-│  │                                                                       │
-│  │  2. FOR EACH installment (parcela):                                  │
-│  │     │                                                                 │
-│  │     │  Calculate due date:                                           │
-│  │     │  • Start from payment date                                     │
-│  │     │  • Add 1 day if dMaisUm                                        │
-│  │     │  • Skip 1 month if pula1Mes                                    │
-│  │     │  • Add parcela months                                          │
-│  │     │  • Adjust to business day if ajustaDiaUtil                    │
-│  │     │                                                                 │
-│  │     │  Calculate value:                                              │
-│  │     │  • valorParcela = total / parcelas                            │
-│  │     │  • Handle remainder on first or last                          │
-│  │     │                                                                 │
-│  │     └──► INSERT conta_a_receber_has_pagamento                       │
-│  │          • idVenda, contraParte (customer)                          │
-│  │          • valor, dataPagamento, parcela                            │
-│  │          • status = 'PENDENTE'                                       │
-│  │          • tipo = '1. CRÉDITO' etc.                                 │
-│  │                                                                       │
-│  │  3. IF card payment (DÉBITO/CRÉDITO):                               │
-│  │     └──► INSERT additional row for CARD FEE                         │
-│  │          • tipo = 'Taxa Cartão'                                      │
-│  │          • valor = negative (fee amount)                             │
-│  │                                                                       │
-│  └───────────────────────────────────────────────────────────────────   │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Trigger["TRIGGER: Venda.montarFluxoCaixa() on save"]
+
+    Trigger --> ForEach["FOR EACH payment method"]
+
+    subgraph ForEach["FOR EACH payment method"]
+        GetConfig["1. Get forma_pagamento config<br/>idConta, parcelas, flags, taxa"]
+
+        subgraph Parcelas["2. FOR EACH installment"]
+            CalcDate["Calculate due date<br/>dMaisUm, pula1Mes, ajustaDiaUtil"]
+            CalcVal["Calculate value<br/>total / parcelas"]
+            Insert["INSERT conta_a_receber_has_pagamento<br/>status='PENDENTE'"]
+            CalcDate --> CalcVal --> Insert
+        end
+
+        CardFee["3. IF card: INSERT Taxa Cartão<br/>valor = negative"]
+
+        GetConfig --> Parcelas --> CardFee
+    end
 ```
 
 ### Contas a Pagar (Payables)
 
 **Created**: At purchase CONFIRMATION step (`widgetcompraconfirmar`)
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    PAYABLES CREATION FLOW                                │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  TRIGGER: User confirms purchase in widgetcompraconfirmar                │
-│                                                                          │
-│  1. User imports supplier NFe (XML)                                      │
-│  2. Validates NFe against purchase order                                 │
-│  3. Extracts payment terms (duplicatas from NFe):                       │
-│     • parcela, valor, vencimento                                         │
-│                                                                          │
-│  4. FOR EACH duplicata:                                                  │
-│     └──► INSERT conta_a_pagar_has_pagamento                             │
-│          • contraParte = fornecedor                                      │
-│          • valor = duplicata amount                                      │
-│          • dataVencimento = duplicata date                               │
-│          • status = 'PENDENTE'                                           │
-│          • Link via conta_a_pagar_has_idcompra                          │
-│                                                                          │
-│  ALSO AUTOMATIC (Commissions):                                           │
-│  • When venda has professional commission                                │
-│  • INSERT conta_a_pagar_has_pagamento                                   │
-│  • grupo = 'RT's' (Representatives)                                      │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Trigger["TRIGGER: User confirms purchase"]
+
+    Trigger --> P1["1. Import supplier NFe (XML)"]
+    P1 --> P2["2. Validate NFe against PO"]
+    P2 --> P3["3. Extract duplicatas"]
+
+    P3 --> ForEach
+
+    subgraph ForEach["4. FOR EACH duplicata"]
+        Insert["INSERT conta_a_pagar_has_pagamento<br/>contraParte = fornecedor<br/>status = 'PENDENTE'"]
+    end
+
+    ForEach --> Comm
+
+    subgraph Comm["ALSO: Commissions"]
+        RT["INSERT conta_a_pagar<br/>grupo = 'RT's'"]
+    end
 ```
 
 ### Financial Status Values
@@ -719,53 +577,38 @@ IF card payment:
 
 ### Complete Item Status Flow
 
-```
-VENDA_HAS_PRODUTO2 STATUS STATE MACHINE
-───────────────────────────────────────
+```mermaid
+stateDiagram-v2
+    [*] --> INICIADO
 
-                    ┌──────────────────────────────────────────────┐
-                    │                 CANCELADO                     │
-                    └──────────────────────────────────────────────┘
-                                         ▲
-         ┌───────────────────────────────┼────────────────────────────┐
-         │                               │                            │
-         │                               │                            │
-    ┌────┴────┐    ┌──────────┐    ┌─────┴─────┐    ┌──────────┐    │
-    │INICIADO │───►│EM COMPRA │───►│EM FATUR.  │───►│EM ENTREGA│    │
-    │         │    │          │    │           │    │(supplier)│    │
-    └────┬────┘    └──────────┘    └───────────┘    └────┬─────┘    │
-         │                                               │          │
-         │ (if stock exists)                             │          │
-         │                                               ▼          │
-         │                                         ┌──────────┐     │
-         │                                         │EM COLETA │     │
-         │                                         └────┬─────┘     │
-         │                                              │           │
-         │                                              ▼           │
-         │                                         ┌──────────┐     │
-         └─────────────────────────────────────────│EM RECEB. │     │
-                                                   └────┬─────┘     │
-                                                        │           │
-                                                        ▼           │
-                                                   ┌──────────┐     │
-                                                   │ ESTOQUE  │◄────┘
-                                                   └────┬─────┘
-                                                        │
-                                                        ▼
-                                                   ┌──────────┐
-                                                   │ENTR.AGEND│
-                                                   └────┬─────┘
-                                                        │
-                                                        ▼
-                                                   ┌──────────┐
-                                                   │EM ENTREGA│
-                                                   │(customer)│
-                                                   └────┬─────┘
-                                                        │
-                                                        ▼
-                                                   ┌──────────┐
-                                                   │ ENTREGUE │
-                                                   └──────────┘
+    INICIADO --> EM_COMPRA : Generate PO
+    INICIADO --> ESTOQUE : Stock exists
+    INICIADO --> CANCELADO : Cancel
+
+    EM_COMPRA --> EM_FATURAMENTO : Supplier confirms
+    EM_COMPRA --> CANCELADO : Cancel
+
+    EM_FATURAMENTO --> EM_ENTREGA_SUP : NFe received
+    EM_FATURAMENTO --> CANCELADO : Cancel
+
+    state "EM ENTREGA (supplier)" as EM_ENTREGA_SUP
+    EM_ENTREGA_SUP --> EM_COLETA : Pickup
+    EM_ENTREGA_SUP --> CANCELADO : Cancel
+
+    EM_COLETA --> EM_RECEBIMENTO : Arrive warehouse
+
+    EM_RECEBIMENTO --> ESTOQUE : Received
+
+    ESTOQUE --> ENTREGA_AGEND : Schedule delivery
+
+    state "ENTREGA AGEND." as ENTREGA_AGEND
+    ENTREGA_AGEND --> EM_ENTREGA_CUST : Out for delivery
+
+    state "EM ENTREGA (customer)" as EM_ENTREGA_CUST
+    EM_ENTREGA_CUST --> ENTREGUE : Delivered
+
+    ENTREGUE --> [*]
+    CANCELADO --> [*]
 ```
 
 ---

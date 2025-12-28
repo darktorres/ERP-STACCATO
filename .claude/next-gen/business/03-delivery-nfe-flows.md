@@ -19,84 +19,35 @@
 
 ### Status Transitions
 
-```
-ESTOQUE → ENTREGA AGEND. → EM ENTREGA → ENTREGUE
+```mermaid
+stateDiagram-v2
+    ESTOQUE --> ENTREGA_AGEND : Schedule delivery
+    ENTREGA_AGEND --> EM_ENTREGA : NFe authorized
+    EM_ENTREGA --> ENTREGUE : Confirm delivery
+    state "ENTREGA AGEND." as ENTREGA_AGEND
 ```
 
 ### Complete Flow Diagram
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         DELIVERY FLOW                                    │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  STOCK READY (status = 'ESTOQUE')                                       │
-│       │                                                                  │
-│       ▼                                                                  │
-│  WidgetLogisticaAgendarEntrega                                          │
-│       │                                                                  │
-│       ├── User selects products from view_agendar_entrega               │
-│       ├── User selects vehicle (transportadora_has_veiculo)             │
-│       ├── User selects delivery date                                    │
-│       │                                                                  │
-│       ▼                                                                  │
-│  on_pushButtonAgendarCarga_clicked()                                    │
-│       │                                                                  │
-│       ├── Generate idEvento (groups products for this delivery)         │
-│       │                                                                  │
-│       ├── UPDATE venda_has_produto2                                     │
-│       │   SET status = 'ENTREGA AGEND.', dataPrevEnt = :date           │
-│       │                                                                  │
-│       ├── UPDATE pedido_fornecedor_has_produto2                         │
-│       │   SET status = 'ENTREGA AGEND.', dataPrevEnt = :date           │
-│       │                                                                  │
-│       └── INSERT INTO veiculo_has_produto                               │
-│           (idEvento, idVeiculo, data, status='ENTREGA AGEND.')          │
-│                                                                          │
-│       ▼                                                                  │
-│  STATUS = 'ENTREGA AGEND.'                                              │
-│       │                                                                  │
-│       │  [Optional: Generate NFe Futura or link NFe]                    │
-│       │                                                                  │
-│       ▼                                                                  │
-│  WidgetLogisticaEntregas                                                │
-│       │                                                                  │
-│       ├── on_pushButtonConsultarNFe_clicked()                           │
-│       │   Queries SEFAZ for NFe authorization                           │
-│       │                                                                  │
-│       ├── processarConsultaNFe()                                        │
-│       │   ├── UPDATE nfe SET status = 'AUTORIZADA'                     │
-│       │   ├── UPDATE venda_has_produto2                                │
-│       │   │   SET status = 'EM ENTREGA', idNFeSaida = :idNFe           │
-│       │   ├── UPDATE pedido_fornecedor_has_produto2                    │
-│       │   │   SET status = 'EM ENTREGA'                                │
-│       │   └── UPDATE veiculo_has_produto                               │
-│       │       SET status = 'EM ENTREGA', idNFeSaida = :idNFe           │
-│       │                                                                  │
-│       ▼                                                                  │
-│  STATUS = 'EM ENTREGA'                                                  │
-│       │                                                                  │
-│       ▼                                                                  │
-│  on_pushButtonConfirmarEntrega_clicked()                                │
-│       │                                                                  │
-│       └── Opens InputDialogConfirmacao (Tipo::Entrega)                  │
-│           │                                                              │
-│           ├── User enters: dataRealEnt, entregou, recebeu               │
-│           ├── Optional: Upload delivery photo (WebDAV)                  │
-│           │                                                              │
-│           └── confirmarEntrega()                                        │
-│               ├── UPDATE veiculo_has_produto                            │
-│               │   SET status = 'ENTREGUE'                               │
-│               ├── UPDATE venda_has_produto2                             │
-│               │   SET status = 'ENTREGUE', entregou, recebeu,          │
-│               │       dataRealEnt                                       │
-│               └── UPDATE pedido_fornecedor_has_produto2                 │
-│                   SET status = 'ENTREGUE', dataRealEnt                 │
-│                                                                          │
-│       ▼                                                                  │
-│  STATUS = 'ENTREGUE' (Final)                                            │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Stock["STOCK READY<br/>status = 'ESTOQUE'"]
+
+    Stock --> Agendar["WidgetLogisticaAgendarEntrega<br/>Select products, vehicle, date"]
+
+    Agendar --> AgendarClick["on_pushButtonAgendarCarga_clicked()<br/>Generate idEvento<br/>UPDATE status = 'ENTREGA AGEND.'"]
+
+    AgendarClick --> Agendado["STATUS = 'ENTREGA AGEND.'<br/>Optional: NFe Futura"]
+
+    Agendado --> Entregas["WidgetLogisticaEntregas"]
+
+    Entregas --> ConsultarNFe["processarConsultaNFe()<br/>UPDATE nfe status = 'AUTORIZADA'<br/>UPDATE status = 'EM ENTREGA'"]
+
+    ConsultarNFe --> EmEntrega["STATUS = 'EM ENTREGA'"]
+
+    EmEntrega --> Confirmar["InputDialogConfirmacao<br/>Enter: dataRealEnt, entregou, recebeu<br/>Optional: Upload photo"]
+
+    Confirmar --> Final["STATUS = 'ENTREGUE' (Final)"]
 ```
 
 ### Key Tables
@@ -137,80 +88,52 @@ User marks items as broken → dividirEntrega()
 
 ### Complete Emission Flow
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         NFe EMISSION FLOW                                │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. DATA PREPARATION                                                     │
-│     │                                                                    │
-│     ├── validarDados() - Check all required fields                      │
-│     │   • Emitter: CNPJ, IE, address                                    │
-│     │   • Recipient: Name, CPF/CNPJ, address                            │
-│     │   • Products: NCM, CFOP, quantity, prices                         │
-│     │   • Taxes: ICMS, IPI, PIS, COFINS, IBS, CBS (2025+)              │
-│     │                                                                    │
-│     ├── criarChaveAcesso() - Generate 44-char access key                │
-│     │   UF(2) + AAMM(4) + CNPJ(8) + Model(2) + Series(3) +             │
-│     │   Number(9) + Type(1) + Code(8) + DV(1) = 44 chars               │
-│     │                                                                    │
-│     └── Load UI models: modelVenda, modelLoja, modelProduto             │
-│                                                                          │
-│  2. XML GENERATION                                                       │
-│     │                                                                    │
-│     ├── montarXML() - Build ACBr command string                         │
-│     │   ├── writeIdentificacao() - NFe metadata                         │
-│     │   ├── writeEmitente() - Issuer data                               │
-│     │   ├── writeDestinatario() - Recipient data                        │
-│     │   ├── writeProduto() - For each product:                          │
-│     │   │   ├── [Produto###] - Product details                          │
-│     │   │   ├── [ICMS###] - CST, Base, Rate, Value                     │
-│     │   │   ├── [IPI###] - Classification, CST                          │
-│     │   │   ├── [PIS###] - CST, Base, Rate, Value                      │
-│     │   │   ├── [COFINS###] - CST, Base, Rate, Value                   │
-│     │   │   ├── [IBSCBS###] - IBS/CBS (2025 reform)                    │
-│     │   │   └── [ISel###] - Selective tax                               │
-│     │   ├── writeTotal() - Aggregated totals                            │
-│     │   ├── writeTransportadora() - Transport info                      │
-│     │   ├── writePagamento() - Payment method                           │
-│     │   └── writeComplemento() - Additional info                        │
-│     │                                                                    │
-│     └── gerarNota(acbr) - Send to ACBr                                  │
-│                                                                          │
-│  3. ACBr COMMUNICATION                                                   │
-│     │                                                                    │
-│     ├── TCP Socket to ACBr Monitor (localhost:port)                     │
-│     ├── Command: NFE.CriarNFe("...fields...")                           │
-│     ├── validarSchema() - Validate XML structure                        │
-│     └── Response: OK: <filePath> or ERROR: <message>                    │
-│                                                                          │
-│  4. PRE-REGISTRATION                                                     │
-│     │                                                                    │
-│     ├── preCadastrarNota()                                              │
-│     │   INSERT INTO nfe (status='NOTA PENDENTE', ...)                   │
-│     │                                                                    │
-│     └── Link products:                                                   │
-│         UPDATE venda_has_produto2                                        │
-│         SET status = 'EM ENTREGA', idNFeSaida = :idNFe                  │
-│                                                                          │
-│  5. SEFAZ TRANSMISSION                                                   │
-│     │                                                                    │
-│     ├── enviarNFe(acbr, filePath, idNFe)                                │
-│     │   Command: NFE.EnviarNFe(<file>, lote, assina, ...)              │
-│     │                                                                    │
-│     └── processarResposta()                                             │
-│         ├── REJECTION → Delete NFe, show error, retry                   │
-│         ├── INTERNAL ERROR → Delete NFe, prompt retry                   │
-│         └── AUTHORIZED/DENIED → Update NFe status                       │
-│                                                                          │
-│  6. POST-AUTHORIZATION                                                   │
-│     │                                                                    │
-│     ├── atualizarNFe() - Update status to AUTORIZADA/DENEGADA          │
-│     ├── enviarEmail() - Send to accounting                              │
-│     └── DANFE generation (Windows DLL: ACBrNFe32.dll)                   │
-│         Output: ./pdf/<chaveAcesso>-nfe.pdf                             │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Step1["1. DATA PREPARATION"]
+        P1["validarDados()<br/>Check emitter, recipient, products, taxes"]
+        P2["criarChaveAcesso()<br/>Generate 44-char key"]
+        P3["Load UI models"]
+        P1 --> P2 --> P3
+    end
+
+    subgraph Step2["2. XML GENERATION"]
+        X1["montarXML()"]
+        X2["writeIdentificacao(), writeEmitente()<br/>writeDestinatario(), writeProduto()"]
+        X3["Tax sections: ICMS, IPI, PIS<br/>COFINS, IBSCBS (2025), ISel"]
+        X4["gerarNota(acbr)"]
+        X1 --> X2 --> X3 --> X4
+    end
+
+    subgraph Step3["3. ACBr COMMUNICATION"]
+        A1["TCP Socket to ACBr Monitor"]
+        A2["NFE.CriarNFe()"]
+        A3["validarSchema()"]
+        A1 --> A2 --> A3
+    end
+
+    subgraph Step4["4. PRE-REGISTRATION"]
+        R1["preCadastrarNota()<br/>INSERT nfe status='NOTA PENDENTE'"]
+        R2["UPDATE venda_has_produto2<br/>idNFeSaida = :idNFe"]
+        R1 --> R2
+    end
+
+    subgraph Step5["5. SEFAZ TRANSMISSION"]
+        S1["enviarNFe()"]
+        S2["processarResposta()"]
+        S1 --> S2
+        S2 -->|REJECTION| Retry["Delete & retry"]
+        S2 -->|AUTHORIZED| Auth["Update status"]
+    end
+
+    subgraph Step6["6. POST-AUTHORIZATION"]
+        F1["atualizarNFe() status=AUTORIZADA"]
+        F2["enviarEmail() to accounting"]
+        F3["DANFE PDF generation"]
+        F1 --> F2 --> F3
+    end
+
+    Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6
 ```
 
 ### NFe Status Values
@@ -261,93 +184,70 @@ CNAB (Centro Nacional de Automação Bancária) is the Brazilian bank file stand
 
 ### Payment Status Flow
 
-```
-PENDENTE → CONFERIDO → AGENDADO → PAGO
-                         │
-                    (CNAB remessa)
-                         │
-                    (Bank processes)
-                         │
-                    (CNAB retorno)
-                         ▼
-                       PAGO
+```mermaid
+stateDiagram-v2
+    PENDENTE --> CONFERIDO
+    CONFERIDO --> AGENDADO : CNAB remessa
+    AGENDADO --> PAGO : CNAB retorno
 ```
 
 ### GARE (Tax) Status Flow
 
-```
-PENDENTE GARE → LIBERADO GARE → GERADO GARE → PAGO GARE
-                                     │
-                               (CNAB remessa)
-                                     │
-                               (CNAB retorno)
+```mermaid
+stateDiagram-v2
+    PENDENTE_GARE --> LIBERADO_GARE
+    LIBERADO_GARE --> GERADO_GARE : CNAB remessa
+    GERADO_GARE --> PAGO_GARE : CNAB retorno
+    state "PENDENTE GARE" as PENDENTE_GARE
+    state "LIBERADO GARE" as LIBERADO_GARE
+    state "GERADO GARE" as GERADO_GARE
+    state "PAGO GARE" as PAGO_GARE
 ```
 
 ### Remessa Generation Flow
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    CNAB REMESSA FLOW                                     │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User selects payments in WidgetFinanceiroContas                     │
-│     │                                                                    │
-│  2. Click "Remessa ITAU"                                                │
-│     │                                                                    │
-│  3. montarPagamento() for each payment:                                 │
-│     ├── Salary (RH-SALÁRIOS): Get bank info from usuario table         │
-│     └── Supplier (PRODUTOS-VENDA): Get bank info from fornecedor       │
-│     │                                                                    │
-│  4. remessaPagamentoItau240() / remessaGareItau240()                    │
-│     │                                                                    │
-│     ├── Generate CNAB 240 file:                                         │
-│     │   [Header Arquivo]                                                │
-│     │   [Header Lote] - Salary batch (tipo=30)                         │
-│     │   [Segmento A] - Payment details                                  │
-│     │   [Trailer Lote]                                                  │
-│     │   [Header Lote] - Supplier batch (tipo=20)                       │
-│     │   [Segmento A] - Payment details                                  │
-│     │   [Trailer Lote]                                                  │
-│     │   [Trailer Arquivo]                                               │
-│     │                                                                    │
-│  5. Save to /cnab/itau/cnab[seq].rem                                    │
-│     │                                                                    │
-│  6. INSERT INTO cnab (tipo='REMESSA', banco='ITAU', ...)               │
-│     │                                                                    │
-│  7. UPDATE conta_a_pagar_has_pagamento                                  │
-│     SET status = 'AGENDADO', idCnab = [id]                             │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    S1["1. User selects payments"]
+    S2["2. Click 'Remessa ITAU'"]
+    S3["3. montarPagamento()<br/>Get bank info from usuario/fornecedor"]
+
+    S1 --> S2 --> S3
+
+    subgraph S4["4. remessaPagamentoItau240()"]
+        File["Generate CNAB 240 file:<br/>[Header Arquivo]<br/>[Header Lote] - Salary<br/>[Segmento A] - Details<br/>[Trailer Lote]<br/>[Header Lote] - Supplier<br/>[Trailer Arquivo]"]
+    end
+
+    S3 --> S4
+
+    S5["5. Save to /cnab/itau/cnab[seq].rem"]
+    S6["6. INSERT INTO cnab"]
+    S7["7. UPDATE status = 'AGENDADO'"]
+
+    S4 --> S5 --> S6 --> S7
 ```
 
 ### Retorno Processing Flow
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    CNAB RETORNO FLOW                                     │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User uploads .RET file                                              │
-│     │                                                                    │
-│  2. retornoGareItau240(filePath)                                        │
-│     │                                                                    │
-│  3. Parse file line-by-line:                                            │
-│     ├── Header Lote (position 7 = '1')                                  │
-│     ├── Segmento N (position 13 = 'N')                                  │
-│     │   ├── Extract CNPJ, NF-e number, payment date                    │
-│     │   └── Decode occurrence codes (00=PAID, BD=SCHEDULED, etc.)      │
-│     └── Trailer Lote (position 7 = '5')                                 │
-│     │                                                                    │
-│  4. For successful payments (code 00):                                  │
-│     UPDATE conta_a_pagar_has_pagamento                                   │
-│     SET status = 'PAGO GARE',                                           │
-│         valorReal = valor,                                               │
-│         dataRealizado = [payment_date]                                  │
-│     WHERE idNFe = [nfe_id]                                              │
-│     │                                                                    │
-│  5. INSERT INTO cnab (tipo='RETORNO', ...)                             │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    R1["1. User uploads .RET file"]
+    R2["2. retornoGareItau240(filePath)"]
+
+    R1 --> R2
+
+    subgraph R3["3. Parse file line-by-line"]
+        Parse1["Header Lote (pos 7 = '1')"]
+        Parse2["Segmento N (pos 13 = 'N')<br/>Extract CNPJ, NFe, date<br/>Decode occurrence codes"]
+        Parse3["Trailer Lote (pos 7 = '5')"]
+    end
+
+    R2 --> R3
+
+    R4["4. For code 00 (PAID):<br/>UPDATE status = 'PAGO GARE'"]
+    R5["5. INSERT INTO cnab tipo='RETORNO'"]
+
+    R3 --> R4 --> R5
 ```
 
 ### Key Occurrence Codes
@@ -426,41 +326,24 @@ void criarComissaoProfissional() {
 
 ### Complete Flow Diagram
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    COMMISSION FLOW                                       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  SALE CREATION                                                           │
-│  └── idVenda, idProfissional, representacao=TRUE                        │
-│       │                                                                  │
-│       ▼                                                                  │
-│  PAYMENT SCHEDULE SETUP                                                  │
-│       │                                                                  │
-│       ▼                                                                  │
-│  FOR EACH PAYMENT (if representacao=TRUE && taxaComissao > 0):          │
-│       │                                                                  │
-│       ├── Normal Payment Entry                                          │
-│       │   INSERT conta_a_receber (comissao=FALSE)                       │
-│       │                                                                  │
-│       └── Commission Entry                                               │
-│           INSERT conta_a_receber (                                       │
-│               comissao=TRUE,                                             │
-│               valor = payment × taxaComissao,                           │
-│               dataPagamento = date + 1 month,                           │
-│               grupo = "Comissão Representação"                          │
-│           )                                                              │
-│                                                                          │
-│  IF RETURN/DEVOLUÇÃO:                                                   │
-│       │                                                                  │
-│       └── Commission Reversal                                            │
-│           INSERT conta_a_pagar (                                         │
-│               valor = (price × qty × rt%) × -1,  // NEGATIVE            │
-│               grupo = "RT's",                                            │
-│               dataPagamento = quinzena (15th or 30th)                   │
-│           )                                                              │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Sale["SALE CREATION<br/>representacao=TRUE"]
+
+    Sale --> PaymentSetup["PAYMENT SCHEDULE SETUP"]
+
+    PaymentSetup --> ForEach{"FOR EACH PAYMENT<br/>representacao && taxaComissao > 0"}
+
+    ForEach --> Normal["Normal Payment Entry<br/>INSERT conta_a_receber<br/>comissao=FALSE"]
+
+    ForEach --> Commission["Commission Entry<br/>INSERT conta_a_receber<br/>comissao=TRUE<br/>valor = payment × taxaComissao"]
+
+    Normal --> Check{"RETURN/DEVOLUÇÃO?"}
+    Commission --> Check
+
+    Check -->|Yes| Reversal["Commission Reversal<br/>INSERT conta_a_pagar<br/>valor = NEGATIVE<br/>grupo = 'RT's'"]
+
+    Check -->|No| Done["Done"]
 ```
 
 ### The "Profissional" Entity

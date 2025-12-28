@@ -2,7 +2,7 @@
 
 > Status: **Draft**
 > Last updated: 2025-12-27
-> Focus: Audit, temporal data, search, materialized views
+> Focus: Audit, temporal data, search, pg_ivm materialized views
 
 ---
 
@@ -289,7 +289,134 @@ LIMIT 20;
 ### Problem
 Views recalculate on every query - slow for dashboards.
 
-### Solution: Materialized Views
+### Solution: Materialized Views with pg_ivm (Recommended)
+
+**pg_ivm** (Incremental View Maintenance) provides auto-updating materialized views that only refresh changed rows - not the entire view.
+
+#### Installing pg_ivm
+
+```sql
+-- Install the extension
+CREATE EXTENSION pg_ivm;
+```
+
+#### Creating Incrementally-Maintained Views
+
+```sql
+-- Use create_immv instead of CREATE MATERIALIZED VIEW
+SELECT create_immv('immv_produto_estoque', $$
+    SELECT
+        p.id as produto_id,
+        p.descricao,
+        p.fornecedor_id,
+        f.razao_social as fornecedor_nome,
+        COALESCE(SUM(e.quantidade_disponivel), 0) as estoque_total,
+        COALESCE(AVG(e.custo_unitario), 0) as custo_medio,
+        MAX(e.data_entrada) as ultima_entrada
+    FROM produtos p
+    LEFT JOIN fornecedores f ON p.fornecedor_id = f.id
+    LEFT JOIN estoques e ON p.id = e.produto_id AND e.quantidade_disponivel > 0
+    GROUP BY p.id, p.descricao, p.fornecedor_id, f.razao_social
+$$);
+
+-- The view automatically updates when produtos, fornecedores, or estoques change!
+-- No manual REFRESH needed.
+```
+
+#### pg_ivm vs Standard Materialized Views
+
+| Feature | Standard MV | pg_ivm (IMMV) |
+|---------|-------------|---------------|
+| Auto-update | No (manual REFRESH) | Yes (automatic) |
+| Update speed | Full rebuild | Incremental (only changes) |
+| Consistency | Stale until refresh | Always current |
+| Overhead | None between refreshes | Slight on each DML |
+| Best for | Large, rarely-changing | Frequently-changing data |
+
+#### Supported Query Features
+
+pg_ivm supports most common query patterns:
+
+```sql
+-- Aggregates (SUM, COUNT, AVG, MIN, MAX)
+SELECT create_immv('immv_vendas_por_cliente', $$
+    SELECT
+        cliente_id,
+        COUNT(*) as total_vendas,
+        SUM(total) as valor_total
+    FROM vendas
+    WHERE status = 'completed'
+    GROUP BY cliente_id
+$$);
+
+-- JOINs (INNER, LEFT, RIGHT)
+SELECT create_immv('immv_itens_com_produto', $$
+    SELECT
+        vi.id,
+        vi.venda_id,
+        p.descricao as produto_nome,
+        vi.quantidade,
+        vi.preco_unitario
+    FROM venda_itens vi
+    JOIN produtos p ON p.id = vi.produto_id
+$$);
+
+-- DISTINCT
+SELECT create_immv('immv_fornecedores_ativos', $$
+    SELECT DISTINCT fornecedor_id
+    FROM estoques
+    WHERE quantidade_disponivel > 0
+$$);
+```
+
+#### Limitations
+
+pg_ivm does NOT support:
+- Window functions (`ROW_NUMBER`, `RANK`, etc.)
+- CTEs (`WITH` clauses)
+- Subqueries in `FROM`
+- `UNION`, `INTERSECT`, `EXCEPT`
+- `HAVING` (use CTE workaround in app layer)
+
+For these, use standard materialized views with scheduled refresh.
+
+#### Managing IMMVs
+
+```sql
+-- List all incrementally-maintained materialized views
+SELECT * FROM pg_ivm_immv;
+
+-- Drop an IMMV
+SELECT drop_immv('immv_produto_estoque');
+
+-- Temporarily disable auto-refresh (for bulk operations)
+SELECT immv_set_pause('immv_produto_estoque', true);
+
+-- Re-enable
+SELECT immv_set_pause('immv_produto_estoque', false);
+
+-- Manual refresh if needed
+REFRESH MATERIALIZED VIEW immv_produto_estoque;
+```
+
+#### Best Practices
+
+1. **Use IMMVs for dashboards** - Always-current data without polling
+2. **Pause during bulk imports** - Avoid overhead during large data loads
+3. **Index the IMMV** - Create indexes just like regular tables
+4. **Monitor overhead** - Check if DML operations slow down
+
+```sql
+-- Create indexes on IMMV
+CREATE INDEX idx_immv_estoque_fornecedor ON immv_produto_estoque(fornecedor_id);
+CREATE INDEX idx_immv_estoque_total ON immv_produto_estoque(estoque_total);
+```
+
+---
+
+### Standard Materialized Views (When pg_ivm Doesn't Apply)
+
+For queries with window functions, CTEs, or other unsupported features, use standard materialized views with scheduled refresh:
 
 ```sql
 -- Create materialized view
@@ -323,13 +450,15 @@ SELECT cron.schedule('refresh-estoque', '*/5 * * * *',
 
 ### Candidate Views for Materialization
 
-| View | Refresh Frequency | Reason |
-|------|-------------------|--------|
-| `mv_produto_estoque` | 5 min | Stock levels change often |
-| `mv_vendas_dashboard` | 15 min | Dashboard metrics |
-| `mv_financeiro_resumo` | 1 hour | Financial summary |
-| `mv_fornecedor_performance` | Daily | Supplier metrics |
-| `mv_produto_mais_vendidos` | Daily | Sales ranking |
+| View | Type | Refresh | Reason |
+|------|------|---------|--------|
+| `immv_produto_estoque` | **pg_ivm** | Auto | Stock levels need real-time accuracy |
+| `immv_vendas_dashboard` | **pg_ivm** | Auto | Dashboard must be current |
+| `immv_order_totals` | **pg_ivm** | Auto | Order totals change with items |
+| `immv_cliente_stats` | **pg_ivm** | Auto | Customer purchase history |
+| `mv_financeiro_resumo` | Standard | 1 hour | Complex queries, less frequent |
+| `mv_fornecedor_performance` | Standard | Daily | Historical analysis, window functions |
+| `mv_produto_ranking` | Standard | Daily | Uses RANK() window function |
 
 ### Refresh with Logging
 
@@ -387,7 +516,8 @@ $$ LANGUAGE plpgsql;
 │  ┌───────────────────────▼───────────────────────────────────┐ │
 │  │                    PostgreSQL                              │ │
 │  │  • Temporal tables (valid_from/valid_to)                  │ │
-│  │  • Materialized views (dashboards, aggregates)            │ │
+│  │  • pg_ivm (auto-updating materialized views)              │ │
+│  │  • Standard MVs (complex queries, scheduled refresh)      │ │
 │  │  • Full-text search (tsvector)                            │ │
 │  │  • JSONB (flexible attributes, tax data)                  │ │
 │  │  • ENUMs (type-safe status)                               │ │

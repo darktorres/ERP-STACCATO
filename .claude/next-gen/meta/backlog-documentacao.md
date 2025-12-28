@@ -10,7 +10,7 @@
 
 | #   | Item                                                                          | Prioridade | Status   |
 | --- | ----------------------------------------------------------------------------- | ---------- | -------- |
-| 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | Pendente |
+| 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | ✅ Feito |
 | 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | Pendente |
 | 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | Pendente |
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
@@ -36,12 +36,12 @@
 
 | Módulo            | Arquivo                         | Complexidade | Status   |
 | ----------------- | ------------------------------- | ------------ | -------- |
-| Vendas            | `tecnico/modulos/vendas.md`     | Alta         | Pendente |
-| Estoque           | `tecnico/modulos/estoque.md`    | Alta         | Pendente |
-| Financeiro        | `tecnico/modulos/financeiro.md` | Alta         | Pendente |
-| Logística/Entrega | `tecnico/modulos/logistica.md`  | Média        | Pendente |
-| Relatórios        | `tecnico/modulos/relatorios.md` | Média        | Pendente |
-| Cadastros         | `tecnico/modulos/cadastros.md`  | Baixa        | Pendente |
+| Vendas            | `tecnico/modulos/vendas.md`     | Alta         | ✅ Feito |
+| Estoque           | `tecnico/modulos/estoque.md`    | Alta         | ✅ Feito |
+| Financeiro        | `tecnico/modulos/financeiro.md` | Alta         | ✅ Feito |
+| Logística/Entrega | `tecnico/modulos/logistica.md`  | Média        | ✅ Feito |
+| Relatórios        | `tecnico/modulos/relatorios.md` | Média        | ✅ Feito |
+| Cadastros         | `tecnico/modulos/cadastros.md`  | Baixa        | ✅ Feito |
 
 ### Vendas (Alta Prioridade)
 
@@ -276,13 +276,14 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 | ---------- | ------ | ------------------------------------------------------- |
 | 2025-12-28 | Item A | Fechado ADR-004: NFe via ACBrMonitorConsole ou sped-nfe |
 | 2025-12-28 | Item B | Corrigidos links quebrados em 8 arquivos                |
+| 2025-12-28 | Item 1 | Criadas specs de todos os 6 módulos faltantes           |
 
 ### Próximos
 
-1. [ ] Item 3 - Arquitetura de segurança
-2. [ ] Item 1 - Módulo Vendas
-3. [ ] Item 1 - Módulo Estoque
-4. [ ] Item 6 - Migração de dados
+1. [ ] Item 2 - Fechar ADRs em aberto (ADR-003, ADR-005)
+2. [ ] Item 3 - Arquitetura de segurança
+3. [ ] Item 6 - Scripts de migração de dados
+4. [ ] Item 4 - Design de API
 
 ---
 

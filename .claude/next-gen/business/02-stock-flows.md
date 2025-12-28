@@ -37,29 +37,34 @@ The stock system is **one of the most complex** parts of the ERP with multiple i
 
 ### The 1:N:N Structure
 
-```
-CUSTOMER ORDER                PURCHASE ORDERS              SUPPLIER NFes
-─────────────────            ─────────────────            ─────────────
+```mermaid
+flowchart TB
+    subgraph CustomerOrder["CUSTOMER ORDER"]
+        VHP1["venda_has_produto (L1)"]
+        VHP2["venda_has_produto2 (L2)<br/>Can have MULTIPLE!"]
+        VHP1 --> VHP2
+    end
 
-venda_has_produto (L1)
-    │
-    └──► venda_has_produto2 (L2) ◄── Can have MULTIPLE!
-              │
-              │ [1:N - one sale item can generate multiple purchase orders]
-              │
-              ├──► pedido_fornecedor_has_produto2 (L2)
-              │         │
-              │         │ [1:N - one PO item can be fulfilled by multiple NFes]
-              │         │
-              │         ├──► NFe #1 → estoque records
-              │         ├──► NFe #2 → estoque records
-              │         └──► NFe #3 → estoque records
-              │
-              ├──► pedido_fornecedor_has_produto2 (L2)
-              │         │
-              │         └──► NFe #4 → estoque records
-              │
-              └──► estoque_has_consumo (links stock to sale)
+    subgraph PurchaseOrders["PURCHASE ORDERS (1:N)"]
+        PFHP2_1["pedido_fornecedor_has_produto2"]
+        PFHP2_2["pedido_fornecedor_has_produto2"]
+    end
+
+    subgraph SupplierNFes["SUPPLIER NFes (1:N)"]
+        NFe1["NFe #1 → estoque"]
+        NFe2["NFe #2 → estoque"]
+        NFe3["NFe #3 → estoque"]
+        NFe4["NFe #4 → estoque"]
+    end
+
+    VHP2 --> PFHP2_1
+    VHP2 --> PFHP2_2
+    VHP2 --> EHC["estoque_has_consumo"]
+
+    PFHP2_1 --> NFe1
+    PFHP2_1 --> NFe2
+    PFHP2_1 --> NFe3
+    PFHP2_2 --> NFe4
 ```
 
 ### Junction Tables
@@ -84,60 +89,22 @@ The **idVendaProduto2** is the central linking key:
 
 **User Action**: Click "Marcar Faturado" on purchase orders
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    STOCK CREATION FLOW                                   │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User selects PO(s) in WidgetCompraFaturar                           │
-│     │                                                                    │
-│     ▼                                                                    │
-│  2. on_pushButtonMarcarFaturado_clicked()                               │
-│     • Validates: same supplier for all selected                         │
-│     • Gets billing date from user                                       │
-│     │                                                                    │
-│     ├─── If supplier.representacao = TRUE:                             │
-│     │    └──► faturarRepresentacao() - Skip NFe import                 │
-│     │                                                                    │
-│     └─── If supplier.representacao = FALSE:                            │
-│          └──► Opens ImportarXML dialog                                  │
-│                                                                          │
-│  3. ImportarXML Dialog                                                   │
-│     │                                                                    │
-│     ├─── User loads NFe XML file (lerXML)                              │
-│     │    OR selects unused NFe (usarXMLInutilizado)                    │
-│     │                                                                    │
-│     ▼                                                                    │
-│  4. percorrerXml() - For EACH product in NFe:                          │
-│     │                                                                    │
-│     │  ┌─────────────────────────────────────────────────────────┐     │
-│     │  │ INSERT INTO estoque (                                    │     │
-│     │  │   idEstoque, idNFe, fornecedor, local, idBloco,         │     │
-│     │  │   descricao, quant, restante = quant,                   │     │
-│     │  │   un, codBarras, codComercial, ncm, cfop,               │     │
-│     │  │   valorUnid, valor,                                      │     │
-│     │  │   -- All tax fields from NFe --                          │     │
-│     │  │   tipoICMS, vBC, pICMS, vICMS, vIPI, vPIS, vCOFINS,     │     │
-│     │  │   status = 'EM COLETA',                                  │     │
-│     │  │   valorGare                                              │     │
-│     │  │ )                                                        │     │
-│     │  └─────────────────────────────────────────────────────────┘     │
-│     │                                                                    │
-│     ▼                                                                    │
-│  5. parear() - Match NFe items to PO items                              │
-│     │                                                                    │
-│     ▼                                                                    │
-│  6. criarConsumo() - Link stock to sales (if PO linked to sale)        │
-│     │                                                                    │
-│     ▼                                                                    │
-│  7. on_pushButtonImportar_clicked() - Commit all                        │
-│     • modelEstoque.submitAll()                                          │
-│     • modelEstoque_compra.submitAll()                                   │
-│     • modelConsumo.submitAll()                                          │
-│     • Update NFe: utilizada = TRUE                                      │
-│     • Create financial records (duplicatas, GARE)                       │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    S1["1. User selects PO(s) in WidgetCompraFaturar"]
+    S2["2. on_pushButtonMarcarFaturado_clicked()<br/>Validate same supplier, get date"]
+
+    S1 --> S2
+
+    S2 -->|"representacao = TRUE"| Rep["faturarRepresentacao()<br/>Skip NFe import"]
+    S2 -->|"representacao = FALSE"| S3["3. Opens ImportarXML dialog"]
+
+    S3 --> Load["Load NFe XML or select unused"]
+    Load --> S4["4. percorrerXml()<br/>INSERT INTO estoque<br/>status = 'EM COLETA'"]
+
+    S4 --> S5["5. parear()<br/>Match NFe items to PO items"]
+    S5 --> S6["6. criarConsumo()<br/>Link stock to sales"]
+    S6 --> S7["7. Commit all<br/>submitAll(), utilizada=TRUE"]
 ```
 
 ### Key Fields Created
@@ -381,55 +348,37 @@ SET @restante := (
 
 **Location**: `devolucao.cpp`
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    CUSTOMER RETURN FLOW                                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User opens Devolucao dialog from sale                               │
-│  2. Selects product + quantity to return                                │
-│  3. Enters credit percentage (desconto)                                 │
-│  4. Clicks "Devolver Item"                                              │
-│                                                                          │
-│  devolverItem() does:                                                    │
-│     │                                                                    │
-│     ├── determinarIdDevolucao()                                         │
-│     │   • Creates return venda with "D" suffix (e.g., "1234_D1")       │
-│     │   • venda.devolucao = TRUE                                        │
-│     │   • venda.status = "DEVOLVIDO"                                    │
-│     │                                                                    │
-│     ├── criarComissaoProfissional()                                     │
-│     │   • Creates NEGATIVE commission payment (clawback)               │
-│     │                                                                    │
-│     ├── criarContas()                                                   │
-│     │   • Creates NEGATIVE conta_a_receber record                      │
-│     │   • Status = "RECEBIDO" (immediately!) ◄── BUG!                  │
-│     │                                                                    │
-│     ├── salvarCredito()                                                 │
-│     │   • Adds credit to cliente.credito                               │
-│     │                                                                    │
-│     ├── inserirItens()                                                  │
-│     │   │                                                                │
-│     │   ├── copiarProdutoParaDevolucao()                               │
-│     │   │   • Creates venda_has_produto with NEGATIVE quantity         │
-│     │   │   • Creates venda_has_produto2 with status = "PENDENTE DEV." │
-│     │   │                                                                │
-│     │   ├── IF partial return (quantity < original):                   │
-│     │   │   ├── dividirVenda() - splits venda_has_produto2            │
-│     │   │   ├── dividirCompra() - splits pedido_fornecedor_has_produto2│
-│     │   │   └── dividirConsumo() - splits estoque_has_consumo         │
-│     │   │                                                                │
-│     │   ├── alterarLinhaOriginal()                                     │
-│     │   │   • Original line: status = "DEVOLVIDO"                      │
-│     │   │   • Original line: quant = returned amount only              │
-│     │   │                                                                │
-│     │   └── desvincularCompra()                                        │
-│     │       • Sets PO line: idVenda = NULL, idVendaProduto2 = NULL    │
-│     │                                                                    │
-│     └── atualizarDevolucao()                                           │
-│         • Updates return venda totals                                   │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Start["1. User opens Devolucao dialog"]
+    Start --> Select["2. Select product + quantity"]
+    Select --> Credit["3. Enter credit percentage"]
+    Credit --> Click["4. Click 'Devolver Item'"]
+
+    Click --> devolverItem
+
+    subgraph devolverItem["devolverItem()"]
+        D1["determinarIdDevolucao()<br/>Create return venda with 'D' suffix"]
+        D2["criarComissaoProfissional()<br/>NEGATIVE commission (clawback)"]
+        D3["criarContas()<br/>NEGATIVE conta_a_receber<br/>⚠️ BUG: status='RECEBIDO' immediately"]
+        D4["salvarCredito()<br/>Add to cliente.credito"]
+
+        subgraph inserirItens["inserirItens()"]
+            I1["copiarProdutoParaDevolucao()<br/>NEGATIVE quantity"]
+            I2{"Partial return?"}
+            I3["dividirVenda()<br/>dividirCompra()<br/>dividirConsumo()"]
+            I4["alterarLinhaOriginal()<br/>status='DEVOLVIDO'"]
+            I5["desvincularCompra()"]
+            I1 --> I2
+            I2 -->|Yes| I3
+            I2 -->|No| I4
+            I3 --> I4 --> I5
+        end
+
+        D5["atualizarDevolucao()"]
+
+        D1 --> D2 --> D3 --> D4 --> inserirItens --> D5
+    end
 ```
 
 ### Identified Bugs in Returns
@@ -570,47 +519,25 @@ When `venda_has_produto` is inserted (during orçamento→venda conversion):
 
 **Answer**: Splits are **AUTOMATIC** during NFe import, based on stock availability.
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    SPLIT TRIGGER FLOW                                    │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  1. User imports NFe XML in ImportarXML                                 │
-│     │                                                                    │
-│     ▼                                                                    │
-│  2. parear() matches NFe items to PO items by codComercial + quantity   │
-│     │                                                                    │
-│     ├── EXACT MATCH found → associarIgual() - No split                 │
-│     │                                                                    │
-│     └── QUANTITY MISMATCH → associarDiferente()                        │
-│              │                                                           │
-│              ▼                                                           │
-│  3. Calculate: quantAdicionar = MIN(stockAvailable, purchaseNeeds)      │
-│     │                                                                    │
-│     ├── IF quantAdicionar < purchaseNeeds:                             │
-│     │        │                                                           │
-│     │        ▼                                                           │
-│     │   dividirCompra(rowCompra, quantAdicionar)                        │
-│     │        │                                                           │
-│     │        ├── Splits pedido_fornecedor_has_produto2                 │
-│     │        │   • Original: quant = quantAdicionar                    │
-│     │        │   • New: quant = remainder, idRelacionado = original    │
-│     │        │                                                           │
-│     │        └── IF linked to sale (idVendaProduto2 != 0):            │
-│     │                 │                                                  │
-│     │                 ▼                                                  │
-│     │            dividirVenda(rowVenda, quantAdicionar)                 │
-│     │                 │                                                  │
-│     │                 ├── Splits venda_has_produto2                    │
-│     │                 │   • Original: quant = quantAdicionar           │
-│     │                 │   • New: quant = remainder                     │
-│     │                 │   • New: idRelacionado = original              │
-│     │                 │                                                  │
-│     │                 └── parear() called RECURSIVELY                  │
-│     │                                                                    │
-│     └── ELSE: Perfect match, just link                                 │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    S1["1. User imports NFe XML"]
+    S2["2. parear() matches by codComercial + quantity"]
+
+    S1 --> S2
+
+    S2 -->|"EXACT MATCH"| Igual["associarIgual()<br/>No split needed"]
+    S2 -->|"QUANTITY MISMATCH"| Diff["associarDiferente()"]
+
+    Diff --> Calc["3. quantAdicionar = MIN(stock, needs)"]
+
+    Calc -->|"quantAdicionar < needs"| Split["dividirCompra()"]
+    Calc -->|"Perfect match"| Link["Just link records"]
+
+    Split --> SplitPO["Split pedido_fornecedor_has_produto2<br/>Original: quant = quantAdicionar<br/>New: remainder, idRelacionado = original"]
+
+    SplitPO -->|"idVendaProduto2 != 0"| SplitVenda["dividirVenda()<br/>Split venda_has_produto2"]
+    SplitVenda --> Recurse["parear() RECURSIVE"]
 ```
 
 ### Split Quantity Decision

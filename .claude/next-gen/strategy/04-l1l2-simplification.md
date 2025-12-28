@@ -64,27 +64,20 @@ Original Order: 10 boxes
 
 ### 1.4 Current Table Relationships
 
-```
-┌─────────────────────┐
-│       venda         │
-│  (order header)     │
-└──────────┬──────────┘
-           │ 1:N
-           ▼
-┌─────────────────────┐     Trigger creates
-│  venda_has_produto  │ ─────────────────────┐
-│       (L1)          │                      │
-└──────────┬──────────┘                      │
-           │ 1:N                             │
-           ▼                                 ▼
-┌─────────────────────┐              ┌─────────────────────┐
-│ venda_has_produto2  │◄─────────────│ venda_has_produto2  │
-│   (L2 - original)   │  idRelacionado    (L2 - split)    │
-└──────────┬──────────┘              └─────────────────────┘
-           │
-           ├── estoque_has_consumo (stock link)
-           ├── veiculo_has_produto (delivery link)
-           └── nfe items (invoice link)
+```mermaid
+flowchart TB
+    Venda["venda<br/>(order header)"]
+
+    Venda -->|1:N| L1["venda_has_produto<br/>(L1)"]
+
+    L1 -->|1:N| L2Orig["venda_has_produto2<br/>(L2 - original)"]
+    L1 -.->|"Trigger creates"| L2Orig
+
+    L2Orig <-->|idRelacionado| L2Split["venda_has_produto2<br/>(L2 - split)"]
+
+    L2Orig --> EHC["estoque_has_consumo"]
+    L2Orig --> VHP["veiculo_has_produto"]
+    L2Orig --> NFe["nfe items"]
 ```
 
 ### 1.5 Key Columns in L2

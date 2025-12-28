@@ -34,21 +34,38 @@
 
 ### 1.2 What We're Fixing
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         PROBLEMS → SOLUTIONS                             │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  L1/L2 Tables          →  Single table with parent_id/root_id          │
-│  produto.idEstoque     →  FIFO selection via ORDER BY data_entrada     │
-│  fornecedor VARCHAR    →  fornecedor_id FK everywhere                  │
-│  Status strings        →  PostgreSQL ENUMs + state machine             │
-│  100-col produto       →  Split into produto + precos + tributos       │
-│  No audit trail        →  audit_log + temporal columns                 │
-│  Returns incomplete    →  Proper reversal flow with NFe Devolução      │
-│  idRelacionado chains  →  Clear parent_id + root_id hierarchy          │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Problems["❌ Problems"]
+        P1["L1/L2 Tables"]
+        P2["produto.idEstoque"]
+        P3["fornecedor VARCHAR"]
+        P4["Status strings"]
+        P5["100-col produto"]
+        P6["No audit trail"]
+        P7["Returns incomplete"]
+        P8["idRelacionado chains"]
+    end
+
+    subgraph Solutions["✅ Solutions"]
+        S1["Single table with parent_id/root_id"]
+        S2["FIFO selection via ORDER BY data_entrada"]
+        S3["fornecedor_id FK everywhere"]
+        S4["PostgreSQL ENUMs + state machine"]
+        S5["Split into produto + precos + tributos"]
+        S6["audit_log + temporal columns"]
+        S7["Proper reversal flow with NFe Devolução"]
+        S8["Clear parent_id + root_id hierarchy"]
+    end
+
+    P1 --> S1
+    P2 --> S2
+    P3 --> S3
+    P4 --> S4
+    P5 --> S5
+    P6 --> S6
+    P7 --> S7
+    P8 --> S8
 ```
 
 ---
@@ -57,60 +74,50 @@
 
 ### 2.1 Entity Relationship Overview
 
-```
-                                    ┌─────────────┐
-                                    │   lojas     │
-                                    └──────┬──────┘
-                                           │
-         ┌─────────────────────────────────┼─────────────────────────────────┐
-         │                                 │                                 │
-         ▼                                 ▼                                 ▼
-┌─────────────────┐              ┌─────────────────┐              ┌─────────────────┐
-│  fornecedores   │              │    usuarios     │              │    clientes     │
-└────────┬────────┘              └────────┬────────┘              └────────┬────────┘
-         │                                │                                 │
-         │                                │                                 │
-         ▼                                │                                 │
-┌─────────────────┐                       │                                 │
-│    produtos     │                       │                                 │
-└────────┬────────┘                       │                                 │
-         │                                │                                 │
-         │    ┌───────────────────────────┴───────────────────────────┐    │
-         │    │                                                       │    │
-         ▼    ▼                                                       ▼    ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                                                                              │
-│                              TRANSACTION FLOW                                │
-│                                                                              │
-│   ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐          │
-│   │ orçamento│────►│  venda   │────►│  compra  │────►│   nfe    │          │
-│   │  _itens  │     │  _itens  │     │  _itens  │     │  _itens  │          │
-│   └──────────┘     └────┬─────┘     └────┬─────┘     └────┬─────┘          │
-│                         │                │                │                 │
-│                         │                │                ▼                 │
-│                         │                │         ┌──────────┐            │
-│                         │                └────────►│ estoques │            │
-│                         │                          └────┬─────┘            │
-│                         │                               │                  │
-│                         │                               ▼                  │
-│                         │                    ┌────────────────────┐        │
-│                         └───────────────────►│ estoque_consumos   │        │
-│                                              └─────────┬──────────┘        │
-│                                                        │                   │
-│                                                        ▼                   │
-│                                              ┌────────────────────┐        │
-│                                              │    entregas        │        │
-│                                              └────────────────────┘        │
-│                                                                             │
-└──────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-                    ┌─────────────────────────────────────┐
-                    │            FINANCEIRO               │
-                    │  ┌─────────────┐ ┌─────────────┐   │
-                    │  │ recebíveis  │ │  pagáveis   │   │
-                    │  └─────────────┘ └─────────────┘   │
-                    └─────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph MasterData["Master Data"]
+        Lojas["lojas"]
+        Fornecedores["fornecedores"]
+        Usuarios["usuarios"]
+        Clientes["clientes"]
+        Produtos["produtos"]
+    end
+
+    Lojas --> Fornecedores
+    Lojas --> Usuarios
+    Lojas --> Clientes
+    Fornecedores --> Produtos
+
+    subgraph TransactionFlow["TRANSACTION FLOW"]
+        OrcamentoItens["orcamento_itens"]
+        VendaItens["venda_itens"]
+        CompraItens["compra_itens"]
+        NfeItens["nfe_itens"]
+        Estoques["estoques"]
+        EstoqueConsumos["estoque_consumos"]
+        Entregas["entregas"]
+
+        OrcamentoItens --> VendaItens
+        VendaItens --> CompraItens
+        CompraItens --> NfeItens
+        NfeItens --> Estoques
+        CompraItens --> Estoques
+        Estoques --> EstoqueConsumos
+        VendaItens --> EstoqueConsumos
+        EstoqueConsumos --> Entregas
+    end
+
+    Produtos --> TransactionFlow
+    Usuarios --> TransactionFlow
+    Clientes --> TransactionFlow
+
+    subgraph Financeiro["FINANCEIRO"]
+        Recebiveis["recebíveis"]
+        Pagaveis["pagáveis"]
+    end
+
+    TransactionFlow --> Financeiro
 ```
 
 ### 2.2 Key Design Decisions
@@ -132,122 +139,138 @@
 
 ### 3.1 Complete Flow Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           COMPLETE BUSINESS FLOW                                 │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ 1. QUOTE (Orçamento)                                                     │   │
-│  │    Customer requests quote → Items added → Price calculated → Sent      │   │
-│  │    orcamentos (header) + orcamento_itens (lines)                        │   │
-│  └───────────────────────────────────┬─────────────────────────────────────┘   │
-│                                      │                                          │
-│                                      ▼ [Convert to Sale]                        │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ 2. SALE (Venda)                                                          │   │
-│  │    Quote approved → Sale created → Payment terms set                     │   │
-│  │    vendas (header) + venda_itens (lines)                                │   │
-│  │                                                                          │   │
-│  │    For each item:                                                        │   │
-│  │    ├── origem = 'ESTOQUE' → Consume from existing stock                 │   │
-│  │    └── origem = 'COMPRA' → Generate purchase order                      │   │
-│  └───────────────────────────────────┬─────────────────────────────────────┘   │
-│                                      │                                          │
-│            ┌─────────────────────────┴─────────────────────────┐               │
-│            │                                                   │               │
-│            ▼ [From Stock]                                      ▼ [To Order]    │
-│  ┌─────────────────────────┐                     ┌─────────────────────────┐   │
-│  │ 2a. STOCK CONSUMPTION   │                     │ 3. PURCHASE (Compra)    │   │
-│  │     FIFO selection      │                     │    Group by supplier    │   │
-│  │     estoque_consumos    │                     │    compras + compra_    │   │
-│  │                         │                     │    itens                │   │
-│  └────────────┬────────────┘                     └───────────┬─────────────┘   │
-│               │                                              │                  │
-│               │                                              ▼ [Confirm]        │
-│               │                              ┌───────────────────────────────┐  │
-│               │                              │ 4. NFe IMPORT                 │  │
-│               │                              │    XML received → Parsed      │  │
-│               │                              │    nfes + nfe_itens          │  │
-│               │                              │    → Creates estoque records │  │
-│               │                              └───────────────┬───────────────┘  │
-│               │                                              │                  │
-│               │                                              ▼                  │
-│               │                              ┌───────────────────────────────┐  │
-│               │                              │ 5. STOCK CREATION             │  │
-│               │                              │    estoques (one per NFe line)│  │
-│               │                              │    Linked to compra_item      │  │
-│               │                              └───────────────┬───────────────┘  │
-│               │                                              │                  │
-│               │                                              ▼                  │
-│               │                              ┌───────────────────────────────┐  │
-│               │                              │ 5a. CONSUMPTION (for sale)    │  │
-│               └─────────────────────────────►│     Link stock to venda_item │  │
-│                                              │     estoque_consumos          │  │
-│                                              └───────────────┬───────────────┘  │
-│                                                              │                  │
-│                                                              ▼                  │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ 6. LOGISTICS                                                             │   │
-│  │    ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                 │   │
-│  │    │   COLETA     │→ │ RECEBIMENTO  │→ │   ENTREGA    │                 │   │
-│  │    │ (Pickup)     │  │ (Receiving)  │  │ (Delivery)   │                 │   │
-│  │    └──────────────┘  └──────────────┘  └──────────────┘                 │   │
-│  │    entregas (grouping) + entrega_itens (lines)                          │   │
-│  └───────────────────────────────────┬─────────────────────────────────────┘   │
-│                                      │                                          │
-│                                      ▼                                          │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ 7. NFe SAÍDA                                                             │   │
-│  │    Generate outgoing NFe → SEFAZ authorization → DANFE printed          │   │
-│  │    nfes (tipo = 'SAIDA')                                                │   │
-│  └───────────────────────────────────┬─────────────────────────────────────┘   │
-│                                      │                                          │
-│                                      ▼                                          │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ 8. FINANCIAL                                                             │   │
-│  │    recebíveis (from venda) + pagáveis (from compra)                     │   │
-│  │    → CNAB generation → Bank reconciliation                              │   │
-│  └─────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                 │
-└─────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Step1["1. QUOTE (Orçamento)"]
+        Q1["Customer requests quote"]
+        Q2["Items added"]
+        Q3["Price calculated"]
+        Q4["Sent"]
+        Q1 --> Q2 --> Q3 --> Q4
+        QTables["orcamentos + orcamento_itens"]
+    end
+
+    Step1 -->|Convert to Sale| Step2
+
+    subgraph Step2["2. SALE (Venda)"]
+        S1["Quote approved"]
+        S2["Sale created"]
+        S3["Payment terms set"]
+        S1 --> S2 --> S3
+        STables["vendas + venda_itens"]
+
+        Decision{"For each item"}
+        Decision -->|"origem = 'ESTOQUE'"| FromStock["Consume from existing stock"]
+        Decision -->|"origem = 'COMPRA'"| ToOrder["Generate purchase order"]
+    end
+
+    FromStock --> Step2a
+    ToOrder --> Step3
+
+    subgraph Step2a["2a. STOCK CONSUMPTION"]
+        SC1["FIFO selection"]
+        SC2["estoque_consumos"]
+    end
+
+    subgraph Step3["3. PURCHASE (Compra)"]
+        P1["Group by supplier"]
+        P2["compras + compra_itens"]
+    end
+
+    Step3 -->|Confirm| Step4
+
+    subgraph Step4["4. NFe IMPORT"]
+        N1["XML received"]
+        N2["Parsed"]
+        N3["nfes + nfe_itens"]
+        N4["Creates estoque records"]
+        N1 --> N2 --> N3 --> N4
+    end
+
+    Step4 --> Step5
+
+    subgraph Step5["5. STOCK CREATION"]
+        ST1["estoques (one per NFe line)"]
+        ST2["Linked to compra_item"]
+    end
+
+    Step5 --> Step5a
+    Step2a --> Step5a
+
+    subgraph Step5a["5a. CONSUMPTION (for sale)"]
+        CON1["Link stock to venda_item"]
+        CON2["estoque_consumos"]
+    end
+
+    Step5a --> Step6
+
+    subgraph Step6["6. LOGISTICS"]
+        L1["COLETA<br/>(Pickup)"]
+        L2["RECEBIMENTO<br/>(Receiving)"]
+        L3["ENTREGA<br/>(Delivery)"]
+        L1 --> L2 --> L3
+        LTables["entregas + entrega_itens"]
+    end
+
+    Step6 --> Step7
+
+    subgraph Step7["7. NFe SAÍDA"]
+        NFS1["Generate outgoing NFe"]
+        NFS2["SEFAZ authorization"]
+        NFS3["DANFE printed"]
+        NFS1 --> NFS2 --> NFS3
+        NFTables["nfes (tipo = 'SAIDA')"]
+    end
+
+    Step7 --> Step8
+
+    subgraph Step8["8. FINANCIAL"]
+        F1["recebíveis (from venda)"]
+        F2["pagáveis (from compra)"]
+        F3["CNAB generation"]
+        F4["Bank reconciliation"]
+        F1 --> F3
+        F2 --> F3
+        F3 --> F4
+    end
 ```
 
 ### 3.2 Split Handling
 
-```
-ORIGINAL ORDER: Customer orders 100 units
-                │
-                ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│ venda_itens                                                               │
-│ ┌─────────────────────────────────────────────────────────────────────┐  │
-│ │ id=1, venda_id=100, produto_id=50, quantidade=100                   │  │
-│ │ parent_id=NULL, root_id=NULL  ← Original line                       │  │
-│ │ status='PENDENTE'                                                   │  │
-│ └─────────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────────────────────────────────────────────┘
-                │
-                ▼ NFe arrives with only 60 units (split!)
-                │
-┌───────────────────────────────────────────────────────────────────────────┐
-│ venda_itens (after split)                                                 │
-│ ┌─────────────────────────────────────────────────────────────────────┐  │
-│ │ id=1, quantidade=60, status='ESTOQUE'                               │  │
-│ │ parent_id=NULL, root_id=NULL  ← Updated original                    │  │
-│ └─────────────────────────────────────────────────────────────────────┘  │
-│ ┌─────────────────────────────────────────────────────────────────────┐  │
-│ │ id=2, quantidade=40, status='PENDENTE'                              │  │
-│ │ parent_id=1, root_id=1  ← Split remainder                           │  │
-│ │ split_reason='PARTIAL_NFE'                                          │  │
-│ └─────────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────────────────────────────────────────────┘
-                │
-                ▼ Query: Get all items for original order
-                │
-    SELECT * FROM venda_itens
-    WHERE id = 1 OR root_id = 1;
-    -- Returns both: original (60) + split (40) = 100 total
+```mermaid
+flowchart TB
+    subgraph Original["ORIGINAL ORDER: Customer orders 100 units"]
+        O1["venda_itens"]
+        O2["id=1, venda_id=100, produto_id=50"]
+        O3["quantidade=100"]
+        O4["parent_id=NULL, root_id=NULL ← Original line"]
+        O5["status='PENDENTE'"]
+    end
+
+    Original -->|"NFe arrives with only 60 units (split!)"| AfterSplit
+
+    subgraph AfterSplit["venda_itens (after split)"]
+        subgraph Item1["Updated Original"]
+            A1["id=1, quantidade=60"]
+            A2["parent_id=NULL, root_id=NULL"]
+            A3["status='ESTOQUE'"]
+        end
+
+        subgraph Item2["Split Remainder"]
+            B1["id=2, quantidade=40"]
+            B2["parent_id=1, root_id=1"]
+            B3["status='PENDENTE'"]
+            B4["split_reason='PARTIAL_NFE'"]
+        end
+    end
+
+    AfterSplit --> Query
+
+    subgraph Query["Query: Get all items for original order"]
+        Q1["SELECT * FROM venda_itens"]
+        Q2["WHERE id = 1 OR root_id = 1"]
+        Q3["Returns: original (60) + split (40) = 100 total"]
+    end
 ```
 
 ---
@@ -867,31 +890,34 @@ CREATE INDEX idx_audit_usuario ON audit_log(usuario_id);
 
 ### 5.1 Venda Item Status
 
-```
-                    ┌─────────────────────────────────────────────────────────┐
-                    │                   VENDA ITEM STATUS                      │
-                    └─────────────────────────────────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> PENDENTE
 
-    ┌──────────┐         ┌──────────┐         ┌──────────┐         ┌──────────┐
-    │ PENDENTE │────────►│EM_COMPRA │────────►│CONFIRMADO│────────►│ FATURADO │
-    └────┬─────┘         └──────────┘         └──────────┘         └────┬─────┘
-         │                                                               │
-         │ (from stock)                                                  │
-         │                                                               ▼
-         │              ┌──────────┐         ┌──────────┐         ┌──────────┐
-         └─────────────►│ ESTOQUE  │────────►│ ENTREGA  │────────►│EM_ENTREGA│
-                        └────┬─────┘         │ AGENDADA │         └────┬─────┘
-                             │               └──────────┘              │
-                             │                                         │
-                             ▼                                         ▼
-                    ┌──────────────┐                           ┌──────────┐
-                    │  CANCELADO   │                           │ ENTREGUE │
-                    └──────────────┘                           └────┬─────┘
-                                                                    │
-                                                                    ▼
-                                                              ┌──────────┐
-                                                              │DEVOLVIDO │
-                                                              └──────────┘
+    PENDENTE --> EM_COMPRA : Generate PO
+    PENDENTE --> ESTOQUE : From stock
+    PENDENTE --> CANCELADO : Cancel
+
+    EM_COMPRA --> CONFIRMADO : Supplier confirms
+    CONFIRMADO --> FATURADO : NFe received
+
+    FATURADO --> EM_COLETA : Ready for pickup
+    EM_COLETA --> EM_RECEBIMENTO : Receiving
+    EM_RECEBIMENTO --> ESTOQUE : In stock
+
+    ESTOQUE --> ENTREGA_AGENDADA : Schedule delivery
+    ESTOQUE --> CANCELADO : Cancel
+
+    ENTREGA_AGENDADA --> EM_ENTREGA : Out for delivery
+    ENTREGA_AGENDADA --> ESTOQUE : Unschedule
+
+    EM_ENTREGA --> ENTREGUE : Delivered
+    EM_ENTREGA --> ESTOQUE : Failed delivery
+
+    ENTREGUE --> DEVOLVIDO : Return
+
+    CANCELADO --> [*]
+    DEVOLVIDO --> [*]
 ```
 
 ### 5.2 Transition Rules (Laravel)
@@ -1063,36 +1089,39 @@ class NfeImportadaHandler
 
 ### 8.1 Phases
 
-```
-Phase 1: Create New Schema (Parallel)
-├── Create all new tables in PostgreSQL
-├── Create Laravel models
-├── Unit tests for new services
-└── Duration: 2-4 weeks
+```mermaid
+flowchart TB
+    subgraph Phase1["Phase 1: Create New Schema (Parallel)"]
+        P1A["Create all new tables in PostgreSQL"]
+        P1B["Create Laravel models"]
+        P1C["Unit tests for new services"]
+    end
 
-Phase 2: Data Migration
-├── Migrate master data (fornecedores, clientes, produtos)
-├── Migrate historical transactions
-├── Validate data integrity
-└── Duration: 2-4 weeks
+    subgraph Phase2["Phase 2: Data Migration"]
+        P2A["Migrate master data<br/>(fornecedores, clientes, produtos)"]
+        P2B["Migrate historical transactions"]
+        P2C["Validate data integrity"]
+    end
 
-Phase 3: Dual-Write
-├── New transactions write to both old and new
-├── Reads from old (for safety)
-├── Compare and validate
-└── Duration: 2-4 weeks
+    subgraph Phase3["Phase 3: Dual-Write"]
+        P3A["New transactions write to both old and new"]
+        P3B["Reads from old (for safety)"]
+        P3C["Compare and validate"]
+    end
 
-Phase 4: Switch Reads
-├── Reads from new
-├── Writes still dual
-├── Monitor for issues
-└── Duration: 1-2 weeks
+    subgraph Phase4["Phase 4: Switch Reads"]
+        P4A["Reads from new"]
+        P4B["Writes still dual"]
+        P4C["Monitor for issues"]
+    end
 
-Phase 5: Deprecate Old
-├── Stop writing to old
-├── Keep old tables read-only for reference
-├── Eventually archive/drop
-└── Duration: 2-4 weeks
+    subgraph Phase5["Phase 5: Deprecate Old"]
+        P5A["Stop writing to old"]
+        P5B["Keep old tables read-only for reference"]
+        P5C["Eventually archive/drop"]
+    end
+
+    Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5
 ```
 
 ### 8.2 Data Mapping

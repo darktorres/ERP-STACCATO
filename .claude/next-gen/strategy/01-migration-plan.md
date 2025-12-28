@@ -27,17 +27,23 @@
 
 **Approach**: Gradually replace old system piece by piece.
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Reverse Proxy                     │
-│              (Route based on module)                 │
-├─────────────────────┬───────────────────────────────┤
-│   C++ Desktop App   │        Laravel Web App        │
-│   (Legacy modules)  │       (New modules)           │
-├─────────────────────┴───────────────────────────────┤
-│                  Shared Database                     │
-│        (MySQL → PostgreSQL migration later)         │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Proxy["Reverse Proxy<br/>(Route based on module)"]
+
+    subgraph Apps["Applications"]
+        CPP["C++ Desktop App<br/>(Legacy modules)"]
+        Laravel["Laravel Web App<br/>(New modules)"]
+    end
+
+    subgraph DB["Shared Database"]
+        MySQL["MySQL → PostgreSQL later"]
+    end
+
+    Proxy --> CPP
+    Proxy --> Laravel
+    CPP --> DB
+    Laravel --> DB
 ```
 
 | Pros | Cons |
@@ -298,17 +304,14 @@
 
 Both systems read/write same MySQL database.
 
-```
-┌──────────────┐     ┌──────────────┐
-│  C++ Desktop │     │    Laravel   │
-└──────┬───────┘     └──────┬───────┘
-       │                    │
-       └────────┬───────────┘
-                │
-        ┌───────▼───────┐
-        │     MySQL     │
-        │  (shared DB)  │
-        └───────────────┘
+```mermaid
+flowchart TB
+    CPP["C++ Desktop"]
+    Laravel["Laravel"]
+    MySQL["MySQL<br/>(shared DB)"]
+
+    CPP --> MySQL
+    Laravel --> MySQL
 ```
 
 **Pros**: No sync needed, consistent data

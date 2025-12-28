@@ -269,11 +269,9 @@ LIMIT 20;
 
 ### Option B: Elasticsearch (If Needed Later)
 
-```
-┌─────────────┐     sync      ┌─────────────────┐
-│ PostgreSQL  │ ───────────►  │  Elasticsearch  │
-│  (source)   │               │    (search)     │
-└─────────────┘               └─────────────────┘
+```mermaid
+flowchart LR
+    PostgreSQL["PostgreSQL<br/>(source)"] -->|sync| Elasticsearch["Elasticsearch<br/>(search)"]
 ```
 
 **When to upgrade:**
@@ -500,39 +498,35 @@ $$ LANGUAGE plpgsql;
 
 ## Summary Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        APPLICATION                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
-│  │   Current   │  │   History   │  │     Audit Log           │ │
-│  │   Tables    │  │   Tables    │  │  (who did what when)    │ │
-│  │             │  │  (temporal) │  │                         │ │
-│  └──────┬──────┘  └──────┬──────┘  └────────────┬────────────┘ │
-│         │                │                      │               │
-│         └────────────────┼──────────────────────┘               │
-│                          │                                      │
-│  ┌───────────────────────▼───────────────────────────────────┐ │
-│  │                    PostgreSQL                              │ │
-│  │  • Temporal tables (valid_from/valid_to)                  │ │
-│  │  • pg_ivm (auto-updating materialized views)              │ │
-│  │  • Standard MVs (complex queries, scheduled refresh)      │ │
-│  │  • Full-text search (tsvector)                            │ │
-│  │  • JSONB (flexible attributes, tax data)                  │ │
-│  │  • ENUMs (type-safe status)                               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                          │                                      │
-│                          │ (optional, if needed)                │
-│                          ▼                                      │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │                   Elasticsearch                            │ │
-│  │  • Fuzzy search                                           │ │
-│  │  • Autocomplete                                           │ │
-│  │  • Faceted search                                         │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Application["APPLICATION"]
+        subgraph DataLayer["Data Layer"]
+            CurrentTables["Current<br/>Tables"]
+            HistoryTables["History<br/>Tables<br/>(temporal)"]
+            AuditLog["Audit Log<br/>(who did what when)"]
+        end
+
+        subgraph PostgreSQL["PostgreSQL"]
+            PG1["Temporal tables (valid_from/valid_to)"]
+            PG2["pg_ivm (auto-updating materialized views)"]
+            PG3["Standard MVs (complex queries, scheduled refresh)"]
+            PG4["Full-text search (tsvector)"]
+            PG5["JSONB (flexible attributes, tax data)"]
+            PG6["ENUMs (type-safe status)"]
+        end
+
+        subgraph Optional["Elasticsearch (optional, if needed)"]
+            ES1["Fuzzy search"]
+            ES2["Autocomplete"]
+            ES3["Faceted search"]
+        end
+
+        CurrentTables --> PostgreSQL
+        HistoryTables --> PostgreSQL
+        AuditLog --> PostgreSQL
+        PostgreSQL -.->|"optional"| Optional
+    end
 ```
 
 ---

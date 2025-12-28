@@ -161,44 +161,40 @@ total                         -- Final line total
 
 ### 2.2 Three-Level Discount System
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   PRICING CALCULATION                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  LEVEL 1: Item Discount                                     │
-│  ─────────────────────                                      │
-│  descUnitario = prcUnitario × (1 - desconto%)              │
-│  parcialDesc = quant × descUnitario                        │
-│                                                             │
-│  LEVEL 2: Global Discount                                   │
-│  ────────────────────────                                   │
-│  Can enter as % OR fixed amount                            │
-│  Applied to subTotalLiq (after item discounts)             │
-│  item.total = parcialDesc × (1 - descGlobal%)              │
-│                                                             │
-│  LEVEL 3: Freight                                           │
-│  ────────────────                                           │
-│  Added AFTER all discounts                                  │
-│  Final = subTotalLiq × (1 - descGlobal%) + frete           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph L1["LEVEL 1: Item Discount"]
+        L1A["descUnitario = prcUnitario × (1 - desconto%)"]
+        L1B["parcialDesc = quant × descUnitario"]
+        L1A --> L1B
+    end
+
+    subgraph L2["LEVEL 2: Global Discount"]
+        L2A["Can enter as % OR fixed amount"]
+        L2B["Applied to subTotalLiq"]
+        L2C["item.total = parcialDesc × (1 - descGlobal%)"]
+        L2A --> L2B --> L2C
+    end
+
+    subgraph L3["LEVEL 3: Freight"]
+        L3A["Added AFTER all discounts"]
+        L3B["Final = subTotalLiq × (1 - descGlobal%) + frete"]
+        L3A --> L3B
+    end
+
+    L1 --> L2 --> L3
 ```
 
 ### 2.3 Status Lifecycle
 
-```
-ATIVO (Active)
-    │
-    ├── [Convert to Sale] → FECHADO
-    │
-    ├── [Expires] → EXPIRADO
-    │       │
-    │       └── [Replicate] → REPLICADO
-    │
-    ├── [Lost] → PERDIDO
-    │
-    └── [Cancel] → CANCELADO
+```mermaid
+stateDiagram-v2
+    ATIVO --> FECHADO : Convert to Sale
+    ATIVO --> EXPIRADO : Expires
+    ATIVO --> PERDIDO : Lost
+    ATIVO --> CANCELADO : Cancel
+
+    EXPIRADO --> REPLICADO : Replicate
 ```
 
 ### 2.4 Validity Rules
@@ -279,24 +275,17 @@ estoque_has_consumo.idBloco → galpao.idBloco
 
 ### 3.4 Receiving Flow
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    RECEIVING FLOW                            │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│  1. Items arrive with status = 'EM RECEBIMENTO'             │
-│                                                              │
-│  2. Staff confirms in WidgetLogisticaRecebimento            │
-│     │                                                        │
-│     ├── IF local = "CD" (Distribution Center):              │
-│     │   └── Assign to ENTRADA block                         │
-│     │                                                        │
-│     └── IF local != "CD":                                   │
-│         └── Leave idBloco = NULL                            │
-│                                                              │
-│  3. Status changes to 'ESTOQUE'                             │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Arrive["1. Items arrive<br/>status = 'EM RECEBIMENTO'"]
+
+    Arrive --> Confirm["2. Staff confirms in<br/>WidgetLogisticaRecebimento"]
+
+    Confirm -->|"local = 'CD'"| Entrada["Assign to ENTRADA block"]
+    Confirm -->|"local != 'CD'"| NoBlock["Leave idBloco = NULL"]
+
+    Entrada --> Stock["3. Status = 'ESTOQUE'"]
+    NoBlock --> Stock
 ```
 
 ### 3.5 Stock Movement
@@ -399,27 +388,24 @@ User::temPermissao("view_tab_financeiro")
 
 ### 4.5 Authorization Flow
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                  AUTHORIZATION FLOW                          │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Standard Login                                              │
-│  ──────────────                                              │
-│  User::login(user, password)                                 │
-│  → Query usuario table                                       │
-│  → Validate credentials                                      │
-│  → Set static User::* members                                │
-│                                                              │
-│  Special Authorization                                       │
-│  ─────────────────────                                       │
-│  User::autorizacao(user, senhaUsoUnico)                     │
-│  → Uses one-time password                                    │
-│  → Only for managers/admins                                  │
-│  → Sets valorMinimoFrete limit                              │
-│  → Clears one-time password after use                       │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Standard["Standard Login"]
+        S1["User::login(user, password)"]
+        S2["Query usuario table"]
+        S3["Validate credentials"]
+        S4["Set static User::* members"]
+        S1 --> S2 --> S3 --> S4
+    end
+
+    subgraph Special["Special Authorization"]
+        A1["User::autorizacao(user, senhaUsoUnico)"]
+        A2["Uses one-time password"]
+        A3["Only for managers/admins"]
+        A4["Sets valorMinimoFrete limit"]
+        A5["Clears password after use"]
+        A1 --> A2 --> A3 --> A4 --> A5
+    end
 ```
 
 ### 4.6 Store Access Control

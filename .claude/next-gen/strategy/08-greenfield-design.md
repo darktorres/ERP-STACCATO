@@ -38,27 +38,27 @@
 
 ### 1.2 What We're Avoiding
 
-```
-❌ Magic strings for status
-❌ Mutable state without history
-❌ Split tables (L1/L2 pattern)
-❌ Denormalized data
-❌ Business logic in controllers
-❌ Implicit state transitions
-❌ Complex conditionals scattered in code
-```
+| ❌ Avoid |
+|----------|
+| Magic strings for status |
+| Mutable state without history |
+| Split tables (L1/L2 pattern) |
+| Denormalized data |
+| Business logic in controllers |
+| Implicit state transitions |
+| Complex conditionals scattered in code |
 
 ### 1.3 What We're Embracing
 
-```
-✅ Enums for all statuses
-✅ Event sourcing for audit trail
-✅ Single table with fulfillment records
-✅ Normalized references (FKs everywhere)
-✅ Domain services for business logic
-✅ State machines with explicit guards
-✅ Centralized business rules
-```
+| ✅ Embrace |
+|------------|
+| Enums for all statuses |
+| Event sourcing for audit trail |
+| Single table with fulfillment records |
+| Normalized references (FKs everywhere) |
+| Domain services for business logic |
+| State machines with explicit guards |
+| Centralized business rules |
 
 ---
 
@@ -68,30 +68,28 @@
 
 **The Big Insight**: An order item doesn't "split" - it gets **fulfilled** in parts.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ ORDER ITEM: 10 units of "Mesa de Jantar" @ R$ 500 each          │
-│ Status: PARTIALLY_FULFILLED                                      │
-├─────────────────────────────────────────────────────────────────┤
-│ FULFILLMENTS:                                                    │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ #1: 4 units from Stock #123 (Supplier A)                    │ │
-│ │     Reserved: 2024-01-05 → Consumed: 2024-01-06             │ │
-│ │     Delivered: 2024-01-10 → Invoiced: 2024-01-10            │ │
-│ │     Status: INVOICED ✓                                      │ │
-│ └─────────────────────────────────────────────────────────────┘ │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ #2: 4 units from Stock #456 (Supplier A)                    │ │
-│ │     Reserved: 2024-01-08 → Consumed: 2024-01-09             │ │
-│ │     Delivery scheduled: 2024-01-15                          │ │
-│ │     Status: AWAITING_DELIVERY                               │ │
-│ └─────────────────────────────────────────────────────────────┘ │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ #3: 2 units - UNFULFILLED                                   │ │
-│ │     Waiting for stock (PO #789 expected 2024-01-20)         │ │
-│ │     Status: AWAITING_STOCK                                  │ │
-│ └─────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph OrderItem["ORDER ITEM: 10 units of 'Mesa de Jantar' @ R$ 500 each"]
+        Status["Status: PARTIALLY_FULFILLED"]
+
+        subgraph F1["Fulfillment #1: 4 units from Stock #123 (Supplier A)"]
+            F1A["Reserved: 2024-01-05 → Consumed: 2024-01-06"]
+            F1B["Delivered: 2024-01-10 → Invoiced: 2024-01-10"]
+            F1C["Status: INVOICED ✓"]
+        end
+
+        subgraph F2["Fulfillment #2: 4 units from Stock #456 (Supplier A)"]
+            F2A["Reserved: 2024-01-08 → Consumed: 2024-01-09"]
+            F2B["Delivery scheduled: 2024-01-15"]
+            F2C["Status: AWAITING_DELIVERY"]
+        end
+
+        subgraph F3["Fulfillment #3: 2 units - UNFULFILLED"]
+            F3A["Waiting for stock (PO #789 expected 2024-01-20)"]
+            F3B["Status: AWAITING_STOCK"]
+        end
+    end
 ```
 
 **Why this is better:**
@@ -106,38 +104,45 @@
 
 ### 2.2 Reservation vs Consumption
 
-```
-RESERVATION (soft claim)
-├── Can expire after timeout
-├── Can be cancelled anytime
-├── Multiple reservations compete
-└── FIFO order determines priority
+```mermaid
+flowchart LR
+    subgraph Reservation["RESERVATION (soft claim)"]
+        R1["Can expire after timeout"]
+        R2["Can be cancelled anytime"]
+        R3["Multiple reservations compete"]
+        R4["FIFO order determines priority"]
+    end
 
-CONSUMPTION (hard assignment)
-├── Permanent (until return)
-├── Creates fulfillment record
-├── Decrements available stock
-└── Links to specific order item
+    subgraph Consumption["CONSUMPTION (hard assignment)"]
+        C1["Permanent (until return)"]
+        C2["Creates fulfillment record"]
+        C3["Decrements available stock"]
+        C4["Links to specific order item"]
+    end
+
+    Reservation -->|"Confirm"| Consumption
 ```
 
 ### 2.3 Events as Source of Truth
 
 Instead of updating status fields, we record events:
 
-```
-Events for Order Item #1:
-┌────────────────────────────────────────────────────────────────┐
-│ 2024-01-01 10:00  OrderItemCreated      {qty: 10, price: 500}  │
-│ 2024-01-05 14:30  StockReserved         {stock_id: 123, qty: 4}│
-│ 2024-01-06 09:00  StockConsumed         {stock_id: 123, qty: 4}│
-│ 2024-01-08 11:00  StockReserved         {stock_id: 456, qty: 4}│
-│ 2024-01-09 15:00  StockConsumed         {stock_id: 456, qty: 4}│
-│ 2024-01-10 08:00  DeliveryScheduled     {date: 2024-01-10, ...}│
-│ 2024-01-10 14:00  ItemDelivered         {fulfillment_id: 1}    │
-│ 2024-01-10 16:00  InvoiceGenerated      {nfe_id: 999}          │
-└────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph EventLog["Events for Order Item #1"]
+        E1["2024-01-01 10:00 | OrderItemCreated | qty: 10, price: 500"]
+        E2["2024-01-05 14:30 | StockReserved | stock_id: 123, qty: 4"]
+        E3["2024-01-06 09:00 | StockConsumed | stock_id: 123, qty: 4"]
+        E4["2024-01-08 11:00 | StockReserved | stock_id: 456, qty: 4"]
+        E5["2024-01-09 15:00 | StockConsumed | stock_id: 456, qty: 4"]
+        E6["2024-01-10 08:00 | DeliveryScheduled | date: 2024-01-10"]
+        E7["2024-01-10 14:00 | ItemDelivered | fulfillment_id: 1"]
+        E8["2024-01-10 16:00 | InvoiceGenerated | nfe_id: 999"]
 
-Current state = replay(events)
+        E1 --> E2 --> E3 --> E4 --> E5 --> E6 --> E7 --> E8
+    end
+
+    EventLog --> Replay["Current state = replay(events)"]
 ```
 
 ---
@@ -146,24 +151,23 @@ Current state = replay(events)
 
 ### 3.1 Context Map
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           ERP STACCATO                                   │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │    SALES     │───▶│  INVENTORY   │───▶│   DELIVERY   │              │
-│  │   Context    │    │   Context    │    │   Context    │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│         │                   │                   │                       │
-│         │                   │                   │                       │
-│         ▼                   ▼                   ▼                       │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │   FISCAL     │◀───│  PURCHASING  │    │  FINANCIAL   │              │
-│  │   Context    │    │   Context    │    │   Context    │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph ERP["ERP STACCATO"]
+        Sales["SALES<br/>Context"]
+        Inventory["INVENTORY<br/>Context"]
+        Delivery["DELIVERY<br/>Context"]
+        Fiscal["FISCAL<br/>Context"]
+        Purchasing["PURCHASING<br/>Context"]
+        Financial["FINANCIAL<br/>Context"]
+
+        Sales --> Inventory
+        Inventory --> Delivery
+        Purchasing --> Fiscal
+        Sales --> Fiscal
+        Inventory --> Purchasing
+        Delivery --> Financial
+    end
 ```
 
 ### 3.2 Context Responsibilities
@@ -210,23 +214,26 @@ class GenerateInvoiceOnDelivery
 
 ### 4.1 Simplified Flow
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                         ORDER LIFECYCLE                                 │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐ │
-│  │ CREATE  │───▶│   SOURCE    │───▶│   DELIVER   │───▶│   INVOICE   │ │
-│  │  ORDER  │    │   ITEMS     │    │   ITEMS     │    │   ITEMS     │ │
-│  └─────────┘    └─────────────┘    └─────────────┘    └─────────────┘ │
-│       │               │                   │                  │         │
-│       │               │                   │                  │         │
-│       ▼               ▼                   ▼                  ▼         │
-│   Customer        Find stock          Schedule           Generate      │
-│   + Items         or order            delivery           NFe          │
-│   + Prices        from supplier       + confirm          + payment    │
-│                                                                         │
-└────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph OrderLifecycle["ORDER LIFECYCLE"]
+        Create["CREATE<br/>ORDER"]
+        Source["SOURCE<br/>ITEMS"]
+        Deliver["DELIVER<br/>ITEMS"]
+        Invoice["INVOICE<br/>ITEMS"]
+
+        Create --> Source --> Deliver --> Invoice
+
+        Create2["Customer<br/>+ Items<br/>+ Prices"]
+        Source2["Find stock<br/>or order<br/>from supplier"]
+        Deliver2["Schedule<br/>delivery<br/>+ confirm"]
+        Invoice2["Generate<br/>NFe<br/>+ payment"]
+
+        Create -.-> Create2
+        Source -.-> Source2
+        Deliver -.-> Deliver2
+        Invoice -.-> Invoice2
+    end
 ```
 
 ### 4.2 Order Entity

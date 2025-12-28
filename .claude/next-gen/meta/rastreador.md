@@ -91,6 +91,7 @@ Reorganizado em 2025-12-27 em pastas categóricas:
 
 | Documento | Propósito | Status |
 |-----------|-----------|--------|
+| estrategia/00-comparativo-legado-novo.md | Comparativo consolidado | Completo |
 | estrategia/01-plano-migracao.md | Fases Strangler Fig | Rascunho |
 | estrategia/02-decisoes.md | Registros de Decisão de Arquitetura | Rascunho |
 | estrategia/03-melhorias.md | Pontos problemáticos e melhorias | Rascunho |
@@ -107,6 +108,7 @@ Reorganizado em 2025-12-27 em pastas categóricas:
 ### 2025-12-28
 
 - [x] Traduzidos nomes de pastas e arquivos para português
+- [x] Criado documento comparativo consolidado (00-comparativo-legado-novo.md)
 
 ### 2025-12-27
 

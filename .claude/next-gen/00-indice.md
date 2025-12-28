@@ -11,6 +11,7 @@
 | Precisa... | Vá para |
 |------------|---------|
 | Entender o projeto | [Visão Geral](#visão-geral-do-projeto) |
+| **Comparar legado vs novo** | [estrategia/00-comparativo-legado-novo.md](./estrategia/00-comparativo-legado-novo.md) |
 | Ver arquitetura Laravel | [tecnico/01-arquitetura.md](./tecnico/01-arquitetura.md) |
 | Ver design do banco | [tecnico/02-banco-dados.md](./tecnico/02-banco-dados.md) |
 | Entender fluxos de negócio | [negocios/](#fluxos-de-negócio) |
@@ -65,6 +66,7 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │   └── 04-fluxos-cadastros.md     # Dados mestres, Orçamento, Galpão, Permissões
 │
 ├── estrategia/                    # Estratégia de migração
+│   ├── 00-comparativo-legado-novo.md  # Comparativo consolidado
 │   ├── 01-plano-migracao.md       # Fases do padrão Strangler Fig
 │   ├── 02-decisoes.md             # Registros de Decisão de Arquitetura
 │   ├── 03-melhorias.md            # Pontos problemáticos e opções de melhoria
@@ -146,6 +148,13 @@ Análise profunda do gerenciamento de inventário:
 ---
 
 ## Documentação de Estratégia
+
+### [00 - Comparativo Legado vs Novo](./estrategia/00-comparativo-legado-novo.md)
+Visão consolidada das diferenças entre sistemas:
+- Arquitetura de código (Widgets vs Service Layer)
+- Schema de banco (L1/L2 vs tabela única, FIFO, ENUMs)
+- Segurança (SQL injection vs Eloquent)
+- Auditoria e rastreabilidade
 
 ### [01 - Plano de Migração](./estrategia/01-plano-migracao.md)
 - Padrão Strangler Fig (recomendado)

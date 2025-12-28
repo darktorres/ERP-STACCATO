@@ -199,21 +199,240 @@ Este documento define o glossário de termos de negócio, convenções de nomenc
 
 ---
 
-## Convenções de Nomenclatura
+## Convenções de Nomenclatura SQL
 
-### Banco de Dados (PostgreSQL)
+### Regras Gerais
 
-| Elemento | Convenção | Exemplo |
-|----------|-----------|---------|
-| Tabelas | snake_case, plural | `vendas`, `venda_itens` |
-| Colunas | snake_case | `data_emissao`, `valor_total` |
-| Primary Keys | `id` | `id` |
-| Foreign Keys | `{tabela}_id` | `cliente_id`, `venda_id` |
-| Timestamps | `created_at`, `updated_at` | Laravel padrão |
-| Soft Delete | `deleted_at` | Laravel padrão |
-| Booleanos | `is_*` ou `has_*` | `is_active`, `has_discount` |
+| Regra | Descrição | Correto | Incorreto |
+|-------|-----------|---------|-----------|
+| **snake_case** | Sempre minúsculas com underscore | `data_emissao` | `dataEmissao`, `DataEmissao` |
+| **Sem abreviações** | Nomes completos e descritivos | `quantidade` | `quant`, `qtd`, `qty` |
+| **Português** | Termos de negócio em português | `valor_total` | `total_value` |
+| **Inglês técnico** | Apenas para padrões técnicos | `created_at` | `criado_em` |
 
-### Código PHP (Laravel)
+### Tabelas
+
+| Regra | Convenção | Exemplo |
+|-------|-----------|---------|
+| **Nome** | snake_case, **plural** | `vendas`, `clientes`, `produtos` |
+| **Tabelas de relacionamento** | `{tabela1}_{tabela2}` singular | `venda_item`, `cliente_endereco` |
+| **Tabelas de histórico** | `{tabela}_historico` | `produto_preco_historico` |
+| **Tabelas de configuração** | singular | `configuracao`, `parametro` |
+
+### Colunas - Identificadores
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| **Primary Key** | `id` | `id` |
+| **Foreign Key** | `{tabela_singular}_id` | `cliente_id`, `venda_id` |
+| **FK específica** | `{contexto}_{tabela}_id` | `nfe_entrada_id`, `endereco_entrega_id` |
+| **UUID público** | `uuid` | `uuid` |
+| **Código externo** | `codigo_{sistema}` | `codigo_sefaz`, `codigo_banco` |
+
+### Colunas - Valores Monetários
+
+| Tipo | Prefixo | Exemplo |
+|------|---------|---------|
+| **Preços** | `valor_` | `valor_unitario`, `valor_total`, `valor_desconto` |
+| **Custos** | `custo_` | `custo_unitario`, `custo_medio` |
+| **Totais** | `total_` ou `valor_` | `valor_total`, `total_impostos` |
+| **Percentuais** | `percentual_` ou `_percentual` | `percentual_desconto`, `margem_percentual` |
+
+**Padrão escolhido:** Usar `valor_` para preços/totais de forma consistente.
+
+```sql
+-- CORRETO
+valor_unitario DECIMAL(15,4),
+valor_total DECIMAL(15,2),
+valor_desconto DECIMAL(15,2),
+custo_unitario DECIMAL(15,4),
+
+-- INCORRETO (mistura de padrões)
+preco_unitario DECIMAL(15,4),  -- usar valor_unitario
+total DECIMAL(15,2),            -- usar valor_total
+```
+
+### Colunas - Quantidades
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| **Quantidade simples** | `quantidade` | `quantidade` |
+| **Quantidade específica** | `quantidade_{contexto}` | `quantidade_original`, `quantidade_disponivel` |
+| **Unidades** | `unidade` (não `un`) | `unidade` |
+| **Contadores** | `total_{item}` | `total_itens`, `total_parcelas` |
+
+```sql
+-- CORRETO
+quantidade DECIMAL(15,4) NOT NULL,
+quantidade_disponivel DECIMAL(15,4),
+quantidade_reservada DECIMAL(15,4),
+unidade VARCHAR(10),
+
+-- INCORRETO
+quant DECIMAL(15,4),      -- usar quantidade
+qtd_disp DECIMAL(15,4),   -- usar quantidade_disponivel
+un VARCHAR(10),           -- usar unidade
+```
+
+### Colunas - Datas e Timestamps
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| **Audit timestamps** | `{acao}_at` (inglês) | `created_at`, `updated_at`, `deleted_at` |
+| **Datas de negócio** | `data_{evento}` (português) | `data_emissao`, `data_vencimento` |
+| **Datas previstas** | `data_prevista_{evento}` | `data_prevista_entrega` |
+| **Datas reais** | `data_{evento}` | `data_entrega` (sem prefixo "real") |
+| **Timestamps de ação** | `{acao}_em` ou `{acao}_at` | `cancelado_em`, `autorizado_em` |
+
+```sql
+-- CORRETO
+created_at TIMESTAMP DEFAULT NOW(),
+updated_at TIMESTAMP DEFAULT NOW(),
+data_emissao DATE NOT NULL,
+data_vencimento DATE NOT NULL,
+data_prevista_entrega DATE,
+data_entrega DATE,
+cancelado_em TIMESTAMP,
+
+-- INCORRETO
+dataCriacao TIMESTAMP,           -- usar created_at
+dt_emissao DATE,                 -- usar data_emissao
+data_real_entrega DATE,          -- usar data_entrega
+```
+
+### Colunas - Booleanos
+
+| Prefixo | Uso | Exemplo |
+|---------|-----|---------|
+| **`is_`** | Estado do registro | `is_ativo`, `is_processado` |
+| **`tem_`** | Possui característica | `tem_frete`, `tem_desconto`, `tem_st` |
+| **`permite_`** | Permissão | `permite_parcelamento`, `permite_desconto` |
+| **`requer_`** | Obrigatoriedade | `requer_aprovacao`, `requer_assinatura` |
+
+```sql
+-- CORRETO
+is_ativo BOOLEAN DEFAULT true,
+is_processado BOOLEAN DEFAULT false,
+tem_frete BOOLEAN DEFAULT false,
+tem_substituicao_tributaria BOOLEAN DEFAULT false,
+permite_desconto BOOLEAN DEFAULT true,
+
+-- INCORRETO
+ativo BOOLEAN,            -- usar is_ativo
+frete BOOLEAN,            -- usar tem_frete (ambíguo com valor)
+has_discount BOOLEAN,     -- usar tem_desconto (português)
+```
+
+### Colunas - Texto
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| **Descrições** | `descricao` ou `descricao_{contexto}` | `descricao`, `descricao_complementar` |
+| **Observações** | `observacao` (não `obs`) | `observacao` |
+| **Nomes** | `nome` ou contexto específico | `nome`, `razao_social`, `nome_fantasia` |
+| **Códigos** | `codigo_{tipo}` | `codigo_barras`, `codigo_ncm` |
+
+```sql
+-- CORRETO
+descricao VARCHAR(500) NOT NULL,
+descricao_complementar TEXT,
+observacao TEXT,
+razao_social VARCHAR(200),
+
+-- INCORRETO
+desc VARCHAR(500),        -- usar descricao
+obs TEXT,                 -- usar observacao
+descr VARCHAR(500),       -- usar descricao
+```
+
+### Colunas - Status (ENUMs)
+
+**Regra:** Sempre usar PostgreSQL ENUM types, nunca VARCHAR para status.
+
+```sql
+-- Definição de ENUMs
+CREATE TYPE venda_status AS ENUM (
+    'RASCUNHO',
+    'PENDENTE',
+    'CONFIRMADA',
+    'EM_SEPARACAO',
+    'FATURADA',
+    'EM_ENTREGA',
+    'ENTREGUE',
+    'FINALIZADA',
+    'CANCELADA'
+);
+
+CREATE TYPE nfe_status AS ENUM (
+    'PENDENTE',
+    'PROCESSANDO',
+    'AUTORIZADA',
+    'CANCELADA',
+    'DENEGADA',
+    'INUTILIZADA'
+);
+
+CREATE TYPE parcela_status AS ENUM (
+    'PENDENTE',
+    'VENCIDA',
+    'PAGA',
+    'CANCELADA'
+);
+
+-- Uso nas tabelas
+CREATE TABLE vendas (
+    id SERIAL PRIMARY KEY,
+    status venda_status NOT NULL DEFAULT 'RASCUNHO',
+    -- ...
+);
+
+-- INCORRETO
+status VARCHAR(20) DEFAULT 'PENDENTE',  -- usar ENUM
+```
+
+### Índices e Constraints
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| **Primary Key** | `{tabela}_pkey` | `vendas_pkey` |
+| **Foreign Key** | `{tabela}_{coluna}_fkey` | `vendas_cliente_id_fkey` |
+| **Unique** | `{tabela}_{colunas}_unique` | `produtos_codigo_unique` |
+| **Index** | `idx_{tabela}_{colunas}` | `idx_vendas_cliente_id` |
+| **Check** | `{tabela}_{coluna}_check` | `vendas_valor_total_check` |
+
+```sql
+-- CORRETO
+CREATE INDEX idx_vendas_cliente_id ON vendas(cliente_id);
+CREATE INDEX idx_vendas_data_status ON vendas(data_emissao, status);
+ALTER TABLE vendas ADD CONSTRAINT vendas_valor_total_check
+    CHECK (valor_total >= 0);
+
+-- INCORRETO
+CREATE INDEX vendas_idx ON vendas(cliente_id);  -- usar idx_vendas_...
+```
+
+### Mapeamento Legado → Novo
+
+| Legado (MySQL) | Novo (PostgreSQL) | Regra Aplicada |
+|----------------|-------------------|----------------|
+| `idCliente` | `cliente_id` | FK: `{tabela}_id` |
+| `quant` | `quantidade` | Sem abreviações |
+| `quantCaixa` | `quantidade_caixas` | Sem abreviações + snake_case |
+| `un` | `unidade` | Sem abreviações |
+| `obs` | `observacao` | Sem abreviações |
+| `desc` | `descricao` | Sem abreviações |
+| `prcUnitario` | `valor_unitario` | `valor_` para preços |
+| `prcVenda` | `valor_venda` | `valor_` para preços |
+| `dataPrevEnt` | `data_prevista_entrega` | Nomes completos |
+| `dataRealEnt` | `data_entrega` | Sem "real" redundante |
+| `fornecedor` (VARCHAR) | `fornecedor_id` (FK) | Normalização |
+| `status` (VARCHAR) | `status` (ENUM) | Tipagem forte |
+
+---
+
+## Convenções de Código
+
+### PHP (Laravel)
 
 | Elemento | Convenção | Exemplo |
 |----------|-----------|---------|
@@ -221,10 +440,11 @@ Este documento define o glossário de termos de negócio, convenções de nomenc
 | Controllers | PascalCase + Controller | `VendaController` |
 | Requests | PascalCase + Request | `StoreVendaRequest` |
 | Resources | PascalCase + Resource | `VendaResource` |
-| Enums | PascalCase | `StatusVenda` |
+| Enums | PascalCase | `VendaStatus` |
 | Traits | PascalCase | `HasOptimisticLocking` |
+| Services | PascalCase + Service | `VendaService` |
 
-### Código TypeScript/Vue
+### TypeScript/Vue
 
 | Elemento | Convenção | Exemplo |
 |----------|-----------|---------|
@@ -267,13 +487,13 @@ Este documento define o glossário de termos de negócio, convenções de nomenc
 | `unidade` | VARCHAR(10) | Unidade de medida |
 | `ncm` | VARCHAR(8) | Código NCM |
 | `fornecedor_id` | INTEGER | FK para fornecedores |
-| `preco_custo` | DECIMAL(15,4) | Preço de custo |
-| `preco_venda` | DECIMAL(15,4) | Preço de venda |
+| `custo` | DECIMAL(15,4) | Custo de aquisição |
+| `valor_venda` | DECIMAL(15,4) | Preço de venda |
 | `margem` | DECIMAL(5,2) | Margem de lucro % |
 | `peso` | DECIMAL(10,4) | Peso em KG |
 | `m2_caixa` | DECIMAL(10,4) | M2 por caixa |
 | `pecas_caixa` | INTEGER | Peças por caixa |
-| `ativo` | BOOLEAN | Produto ativo |
+| `is_ativo` | BOOLEAN | Produto ativo |
 | `search_vector` | TSVECTOR | Índice de busca |
 
 ### vendas
@@ -287,11 +507,11 @@ Este documento define o glossário de termos de negócio, convenções de nomenc
 | `loja_id` | INTEGER | FK para loja |
 | `profissional_id` | INTEGER | FK para profissional RT |
 | `endereco_entrega_id` | INTEGER | FK para endereço |
-| `status` | VARCHAR(20) | Enum de status |
+| `status` | venda_status (ENUM) | Status da venda |
 | `subtotal` | DECIMAL(15,2) | Soma dos itens |
-| `desconto` | DECIMAL(15,2) | Desconto total |
-| `frete` | DECIMAL(15,2) | Valor do frete |
-| `total` | DECIMAL(15,2) | Valor final |
+| `valor_desconto` | DECIMAL(15,2) | Desconto total |
+| `valor_frete` | DECIMAL(15,2) | Valor do frete |
+| `valor_total` | DECIMAL(15,2) | Valor final |
 | `observacao` | TEXT | Observações |
 | `created_at` | TIMESTAMP | Data da venda |
 | `updated_at` | TIMESTAMP | Última atualização |
@@ -323,7 +543,7 @@ Este documento define o glossário de termos de negócio, convenções de nomenc
 | `numero` | INTEGER | Número da nota |
 | `serie` | VARCHAR(3) | Série da nota |
 | `chave_acesso` | CHAR(44) | Chave de acesso NFe |
-| `status` | VARCHAR(20) | Enum de status |
+| `status` | nfe_status (ENUM) | Status da NFe |
 | `xml` | TEXT | XML completo |
 | `protocolo` | VARCHAR(50) | Protocolo SEFAZ |
 | `data_emissao` | TIMESTAMP | Data de emissão |

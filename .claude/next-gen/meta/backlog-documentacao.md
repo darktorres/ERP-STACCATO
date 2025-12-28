@@ -8,25 +8,25 @@
 
 ## Visão Geral
 
-| # | Item | Prioridade | Status |
-|---|------|------------|--------|
-| 1 | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes) | Alta | Pendente |
-| 2 | [ADRs em Aberto](#2-adrs-em-aberto) | Alta | Pendente |
-| 3 | [Arquitetura de Segurança](#3-arquitetura-de-segurança) | Alta | Pendente |
-| 4 | [Design de API](#4-design-de-api) | Média | Pendente |
-| 5 | [Estratégia de Testes](#5-estratégia-de-testes) | Média | Pendente |
-| 6 | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados) | Média | Pendente |
-| 7 | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média | Pendente |
-| 8 | [DevOps/Deployment](#8-devopsdeployment) | Baixa | Pendente |
-| 9 | [Benchmarks de Performance](#9-benchmarks-de-performance) | Baixa | Pendente |
-| 10 | [Substituição de Relatórios](#10-substituição-de-relatórios) | Baixa | Pendente |
+| #   | Item                                                                          | Prioridade | Status   |
+| --- | ----------------------------------------------------------------------------- | ---------- | -------- |
+| 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | Pendente |
+| 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | Pendente |
+| 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | Pendente |
+| 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
+| 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
+| 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | Pendente |
+| 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | Pendente |
+| 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
+| 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
+| 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
 
 ### Ganhos Rápidos
 
-| # | Item | Esforço | Status |
-|---|------|---------|--------|
-| A | Fechar ADR-004 (NFe já decidido) | Baixo | ✅ Feito |
-| B | Atualizar links quebrados nos docs | Baixo | ✅ Feito |
+| #   | Item                               | Esforço | Status   |
+| --- | ---------------------------------- | ------- | -------- |
+| A   | Fechar ADR-004 (NFe já decidido)   | Baixo   | ✅ Feito |
+| B   | Atualizar links quebrados nos docs | Baixo   | ✅ Feito |
 
 ---
 
@@ -34,20 +34,21 @@
 
 **Problema**: Apenas `compras.md` e `nfe.md` existem em `tecnico/modulos/`.
 
-| Módulo | Arquivo | Complexidade | Status |
-|--------|---------|--------------|--------|
-| Vendas | `tecnico/modulos/vendas.md` | Alta | Pendente |
-| Estoque | `tecnico/modulos/estoque.md` | Alta | Pendente |
-| Financeiro | `tecnico/modulos/financeiro.md` | Alta | Pendente |
-| Logística/Entrega | `tecnico/modulos/logistica.md` | Média | Pendente |
-| Relatórios | `tecnico/modulos/relatorios.md` | Média | Pendente |
-| Cadastros | `tecnico/modulos/cadastros.md` | Baixa | Pendente |
+| Módulo            | Arquivo                         | Complexidade | Status   |
+| ----------------- | ------------------------------- | ------------ | -------- |
+| Vendas            | `tecnico/modulos/vendas.md`     | Alta         | Pendente |
+| Estoque           | `tecnico/modulos/estoque.md`    | Alta         | Pendente |
+| Financeiro        | `tecnico/modulos/financeiro.md` | Alta         | Pendente |
+| Logística/Entrega | `tecnico/modulos/logistica.md`  | Média        | Pendente |
+| Relatórios        | `tecnico/modulos/relatorios.md` | Média        | Pendente |
+| Cadastros         | `tecnico/modulos/cadastros.md`  | Baixa        | Pendente |
 
 ### Vendas (Alta Prioridade)
 
 **Por que é importante**: Fluxo central do negócio, toca praticamente todos os outros módulos.
 
 **Conteúdo esperado**:
+
 - Classes/Controllers atuais no C++
 - Fluxo de estados (Orçamento → Venda → Entrega)
 - Regras de precificação (3 níveis de desconto)
@@ -61,6 +62,7 @@
 **Por que é importante**: Correção do FIFO precisa de spec detalhada.
 
 **Conteúdo esperado**:
+
 - Modelo de dados atual vs proposto
 - Algoritmo FIFO detalhado
 - Reserva vs Consumo (two-phase)
@@ -73,6 +75,7 @@
 **Por que é importante**: CNAB, boletos, conciliação bancária são críticos.
 
 **Conteúdo esperado**:
+
 - Contas a Pagar (fluxo completo)
 - Contas a Receber (fluxo completo)
 - Geração de CNAB 240
@@ -83,6 +86,7 @@
 ### Logística/Entrega (Média Prioridade)
 
 **Conteúdo esperado**:
+
 - Agendamento de entregas
 - Atribuição de veículos
 - Confirmação de entrega
@@ -91,6 +95,7 @@
 ### Relatórios (Média Prioridade)
 
 **Conteúdo esperado**:
+
 - Inventário de relatórios existentes (LimeReport)
 - Estratégia de substituição
 - Relatórios críticos vs nice-to-have
@@ -98,6 +103,7 @@
 ### Cadastros (Baixa Prioridade)
 
 **Conteúdo esperado**:
+
 - CRUD de Fornecedores, Clientes, Produtos, Transportadoras
 - Validações (CPF, CNPJ, CEP)
 - Busca e filtros
@@ -108,11 +114,11 @@
 
 **Arquivo**: `estrategia/02-decisoes.md`
 
-| ADR | Decisão | Status | Ação |
-|-----|---------|--------|------|
-| ADR-003 | Framework Frontend | Em Aberto | Decidir: Livewire vs Inertia+Vue |
-| ADR-004 | Integração NFe | ✅ **Fechado** | ACBrMonitorConsole ou sped-nfe |
-| ADR-005 | Estratégia de Migração | Em Aberto | Confirmar Strangler Fig |
+| ADR     | Decisão                | Status         | Ação                             |
+| ------- | ---------------------- | -------------- | -------------------------------- |
+| ADR-003 | Framework Frontend     | Em Aberto      | Decidir: Livewire vs Inertia+Vue |
+| ADR-004 | Integração NFe         | ✅ **Fechado** | ACBrMonitorConsole ou sped-nfe   |
+| ADR-005 | Estratégia de Migração | Em Aberto      | Confirmar Strangler Fig          |
 
 ### ~~ADR-004: Integração NFe~~ ✅ Fechado
 
@@ -127,6 +133,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `tecnico/05-seguranca.md`
 
 **Tópicos a documentar**:
+
 - Autenticação (Laravel Sanctum vs Passport)
 - Autorização (Policies, Gates) - migração do RBAC+PBAC atual
 - Validação de entrada (Form Requests)
@@ -144,6 +151,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `tecnico/06-api.md`
 
 **Tópicos a documentar**:
+
 - REST vs GraphQL (decisão)
 - Versionamento de API (`/api/v1/...`)
 - Rate limiting
@@ -161,6 +169,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `tecnico/07-testes.md`
 
 **Tópicos a documentar**:
+
 - Testes unitários (Services)
 - Testes de integração
 - Testes E2E (Cypress/Playwright)
@@ -177,6 +186,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `estrategia/09-migracao-dados.md`
 
 **Tópicos a documentar**:
+
 - Mapeamento de tabelas (antigo → novo)
 - Regras de transformação (L1/L2 → tabela única, etc.)
 - Procedimentos de rollback
@@ -184,7 +194,8 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 - Ordem de migração (dependências entre tabelas)
 
 **Exemplo de conteúdo**:
-```
+
+```text
 | Tabela Antiga | Tabela Nova | Transformações |
 |---------------|-------------|----------------|
 | venda_has_produto + venda_has_produto2 | venda_itens | Merge L1/L2 |
@@ -200,6 +211,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Local sugerido**: Adicionar seção em `tecnico/01-arquitetura.md`
 
 **Tópicos a documentar**:
+
 - Hierarquia de exceções
 - Formato de resposta de erro (API)
 - Logging estruturado
@@ -215,6 +227,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `tecnico/08-devops.md`
 
 **Tópicos a documentar**:
+
 - Configuração Docker
 - Pipeline CI/CD (GitHub Actions?)
 - Configuração de ambientes (dev, staging, prod)
@@ -230,6 +243,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Local sugerido**: Adicionar seção em `tecnico/04-infraestrutura.md`
 
 **Tópicos a documentar**:
+
 - Baseline do sistema atual
 - Tempos de resposta alvo
 - Otimização de queries
@@ -245,6 +259,7 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 **Arquivo sugerido**: `tecnico/modulos/relatorios.md`
 
 **Tópicos a documentar**:
+
 - Inventário de relatórios LimeReport existentes
 - Classificação (crítico vs nice-to-have)
 - Escolha de biblioteca (DomPDF, Laravel Excel, Browsershot)
@@ -257,10 +272,10 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 
 ### Concluídos
 
-| Data | Item | Descrição |
-|------|------|-----------|
+| Data       | Item   | Descrição                                               |
+| ---------- | ------ | ------------------------------------------------------- |
 | 2025-12-28 | Item A | Fechado ADR-004: NFe via ACBrMonitorConsole ou sped-nfe |
-| 2025-12-28 | Item B | Corrigidos links quebrados em 8 arquivos |
+| 2025-12-28 | Item B | Corrigidos links quebrados em 8 arquivos                |
 
 ### Próximos
 

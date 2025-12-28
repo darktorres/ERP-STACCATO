@@ -21,10 +21,12 @@
 ### 1.1 Tabelas de Dois Níveis (Arquitetura L1/L2)
 
 **Problema**: O sistema usa tabelas pareadas para vendas e compras:
+
 - `venda_has_produto` (L1) + `venda_has_produto2` (L2)
 - `pedido_fornecedor_has_produto` (L1) + `pedido_fornecedor_has_produto2` (L2)
 
 **Problemas**:
+
 - Difícil raciocinar sobre qual nível consultar
 - Problemas de sincronização entre níveis
 - Triggers de banco de dados necessários para manter consistência
@@ -32,11 +34,12 @@
 - Links auto-referenciais `idRelacionado` para splits adicionam mais complexidade
 
 **Propósito Atual**:
-| Aspecto | Nível 1 | Nível 2 |
-|---------|---------|---------|
-| Propósito | O que foi pedido | Como está sendo atendido |
-| Granularidade | Agregado | Por-entrega/por-NFe |
-| Status | Status do pedido | Status de atendimento do item |
+
+| Aspecto       | Nível 1          | Nível 2                       |
+| ------------- | ---------------- | ----------------------------- |
+| Propósito     | O que foi pedido | Como está sendo atendido      |
+| Granularidade | Agregado         | Por-entrega/por-NFe           |
+| Status        | Status do pedido | Status de atendimento do item |
 
 **Causa Raiz**: Projetado para lidar com entregas parciais e divisões de pedidos, mas a implementação ficou complexa.
 
@@ -47,12 +50,14 @@
 **Problema**: Consumo de estoque não segue First-In-First-Out corretamente.
 
 **Código Atual** (simplificado):
+
 ```cpp
 // Apenas pega qualquer idEstoque pré-definido no produto
 query.exec("SELECT * FROM estoque WHERE idEstoque = " + produto.idEstoque);
 ```
 
 **Deveria Ser**:
+
 ```sql
 SELECT * FROM estoque
 WHERE produto_id = :produto_id
@@ -62,6 +67,7 @@ LIMIT 1
 ```
 
 **Impacto**:
+
 - Valoração de estoque incorreta
 - Estoque mais antigo pode nunca ser consumido
 - Problemas de auditoria/compliance para produtos perecíveis
@@ -73,15 +79,17 @@ LIMIT 1
 **Problema**: Nome do fornecedor armazenado como VARCHAR em múltiplas tabelas ao invés de FK.
 
 **Tabelas Afetadas**:
-| Tabela | Coluna |
-|--------|--------|
-| `venda_has_produto2` | `fornecedor` |
-| `estoque` | `fornecedor` |
-| `estoque_has_consumo` | `fornecedor` |
-| `compra_avulsa` | `fornecedor` |
+
+| Tabela                           | Coluna       |
+| -------------------------------- | ------------ |
+| `venda_has_produto2`             | `fornecedor` |
+| `estoque`                        | `fornecedor` |
+| `estoque_has_consumo`            | `fornecedor` |
+| `compra_avulsa`                  | `fornecedor` |
 | `pedido_fornecedor_has_produto2` | `fornecedor` |
 
 **Impacto**:
+
 - Se fornecedor muda de nome, precisa atualizar 5+ tabelas
 - Sem integridade referencial
 - Dados inconsistentes possíveis (erros de digitação, variações)
@@ -94,6 +102,7 @@ LIMIT 1
 **Problema**: O fluxo de devoluções tem múltiplos bugs e funcionalidades faltando.
 
 **Problemas Encontrados**:
+
 1. **Sem NFe Devolução automática**: Deveria gerar nota de devolução para fornecedor
 2. **Registros financeiros errados**: Marcado como `RECEBIDO` imediatamente ao invés de pendente
 3. **Observação vazia**: Nenhum motivo capturado para a devolução
@@ -101,6 +110,7 @@ LIMIT 1
 5. **Reversão de comissão incompleta**: Lógica de clawback de RT tem casos de borda
 
 **Evidência no Código**:
+
 ```cpp
 // De devolucao.cpp - TODOs encontrados
 // TODO: gerar NFe de devolução
@@ -114,6 +124,7 @@ LIMIT 1
 **Problema**: Valores de status são strings hardcoded em todo o codebase.
 
 **Exemplos**:
+
 ```cpp
 if (status == "PENDENTE") ...
 if (status == "EM ENTREGA") ...
@@ -121,18 +132,20 @@ if (status == "PEND. APROV.") ...
 ```
 
 **Problemas**:
+
 - Erros de digitação causam bugs silenciosos
 - Sem verificação em tempo de compilação
 - Conjuntos de status diferentes para tabelas diferentes (inconsistente)
 - Difícil encontrar todos os lugares que verificam um status
 
 **Variações de Status Encontradas**:
-| Tabela | Status |
-|--------|--------|
-| `venda_has_produto2` | PENDENTE, ESTOQUE, ENTREGA AGEND., EM ENTREGA, ENTREGUE, DEVOLVIDO |
+
+| Tabela                           | Status                                                             |
+| -------------------------------- | ------------------------------------------------------------------ |
+| `venda_has_produto2`             | PENDENTE, ESTOQUE, ENTREGA AGEND., EM ENTREGA, ENTREGUE, DEVOLVIDO |
 | `pedido_fornecedor_has_produto2` | PENDENTE, CONFIRMADO, FATURADO, EM COLETA, EM RECEBIMENTO, ESTOQUE |
-| `conta_a_pagar` | PENDENTE, CONFERIDO, AGENDADO, PAGO, CANCELADO |
-| `nfe` | NOTA PENDENTE, AUTORIZADA, CANCELADA, DENEGADA |
+| `conta_a_pagar`                  | PENDENTE, CONFERIDO, AGENDADO, PAGO, CANCELADO                     |
+| `nfe`                            | NOTA PENDENTE, AUTORIZADA, CANCELADA, DENEGADA                     |
 
 ---
 
@@ -141,17 +154,19 @@ if (status == "PEND. APROV.") ...
 **Problema**: A tabela `produto` cresceu para 100+ colunas misturando diferentes preocupações.
 
 **Categorias de Colunas**:
-| Categoria | Colunas de Exemplo | Quantidade |
-|----------|-----------------|-------|
-| Dados principais | descricao, codComercial, codBarras | ~10 |
-| Preços | custo, precoVenda, markup, oldPrecoVenda | ~8 |
-| Impostos | ncm, cst, icms, st, mva, ipi, pis, cofins | ~15 |
-| Reforma Tributária (IBS/CBS) | cClassTribIBSCBS, pAliqEfetIBSUF, etc. | ~35 |
-| Estoque | estoqueRestante, quantCaixa, temLote | ~5 |
-| Flags de rastreamento | colunas *Upd para cada campo | ~20+ |
-| Dimensões | m2, altura, largura, profundidade | ~5 |
+
+| Categoria                    | Colunas de Exemplo                        | Quantidade |
+| ---------------------------- | ----------------------------------------- | ---------- |
+| Dados principais             | descricao, codComercial, codBarras        | ~10        |
+| Preços                       | custo, precoVenda, markup, oldPrecoVenda  | ~8         |
+| Impostos                     | ncm, cst, icms, st, mva, ipi, pis, cofins | ~15        |
+| Reforma Tributária (IBS/CBS) | cClassTribIBSCBS, pAliqEfetIBSUF, etc.    | ~35        |
+| Estoque                      | estoqueRestante, quantCaixa, temLote      | ~5         |
+| Flags de rastreamento        | colunas \*Upd para cada campo             | ~20+       |
+| Dimensões                    | m2, altura, largura, profundidade         | ~5         |
 
 **Problemas**:
+
 - Difícil de manter
 - Muitas colunas NULL para campos irrelevantes
 - Colunas de impostos mudam com legislação (reforma 2025 adicionou 35 colunas)
@@ -164,12 +179,14 @@ if (status == "PEND. APROV.") ...
 **Problema**: Rastreamento limitado de quem mudou o quê e quando.
 
 **Estado Atual**:
+
 - Algumas flags booleanas `*Upd` existem
 - Sem rastreamento de usuário
 - Sem timestamp das mudanças
 - Sem preservação de valor antigo
 
 **Impacto**:
+
 - Não consegue responder "quem mudou este preço?"
 - Não consegue reconstruir estado histórico
 - Problemas de compliance/auditoria
@@ -181,7 +198,8 @@ if (status == "PEND. APROV.") ...
 **Problema**: Múltiplas tabelas de junção com propósitos sobrepostos.
 
 **Tabelas de Junção Atuais**:
-```
+
+```text
 estoque_has_compra      - Vincula estoque ao pedido de compra
 estoque_has_consumo     - Vincula estoque ao pedido de venda
 conta_a_pagar_has_idcompra - Vincula pagamento a compra
@@ -196,7 +214,8 @@ veiculo_has_produto     - Vincula entrega a produtos
 
 ### 2.1 Simplificar Tabelas L1/L2
 
-**Opção A: Achatar para Tabela Única**
+#### Opção A: Achatar para Tabela Única
+
 ```sql
 CREATE TABLE venda_itens (
     id SERIAL PRIMARY KEY,
@@ -209,10 +228,12 @@ CREATE TABLE venda_itens (
     -- Todos os outros campos...
 );
 ```
+
 - Prós: Queries mais simples, sem problemas de sincronização
 - Contras: Precisa lidar com splits via auto-referência
 
-**Opção B: Manter Apenas L2, Derivar L1**
+#### Opção B: Manter Apenas L2, Derivar L1
+
 ```sql
 -- L2 é a fonte da verdade
 CREATE TABLE venda_itens (...);
@@ -223,10 +244,12 @@ SELECT venda_id, produto_id, SUM(quantidade) as total
 FROM venda_itens
 GROUP BY venda_id, produto_id;
 ```
+
 - Prós: Fonte única da verdade, L1 sempre consistente
 - Contras: Overhead de agregação
 
-**Opção C: Event Sourcing**
+#### Opção C: Event Sourcing
+
 ```sql
 CREATE TABLE venda_item_events (
     id SERIAL,
@@ -236,6 +259,7 @@ CREATE TABLE venda_item_events (
     created_at TIMESTAMP
 );
 ```
+
 - Prós: Histórico completo, pode reproduzir estado
 - Contras: Mais complexo, precisa CQRS
 
@@ -244,6 +268,7 @@ CREATE TABLE venda_item_events (
 ### 2.2 Corrigir Consumo FIFO
 
 **Correção Simples**:
+
 ```sql
 -- Query FIFO correta
 SELECT id, quantidade_disponivel
@@ -255,7 +280,8 @@ ORDER BY data_entrada ASC
 FOR UPDATE;  -- Travar para consumo
 ```
 
-**Melhor: Serviço de Consumo**
+#### Melhor: Serviço de Consumo
+
 ```php
 class EstoqueConsumoService
 {
@@ -295,6 +321,7 @@ class EstoqueConsumoService
 ### 2.3 Normalizar Referências de Fornecedor
 
 **Migração**:
+
 ```sql
 -- Adicionar colunas FK
 ALTER TABLE venda_has_produto2 ADD COLUMN fornecedor_id INTEGER REFERENCES fornecedores(id);
@@ -316,7 +343,8 @@ ALTER TABLE venda_has_produto2 DROP COLUMN fornecedor;
 ### 2.4 Corrigir Fluxo de Devoluções
 
 **Fluxo Completo de Devoluções**:
-```
+
+```text
 1. Usuário inicia devolução
    +-- Capturar motivo (observação obrigatória)
    +-- Validar quantidades
@@ -348,6 +376,7 @@ ALTER TABLE venda_has_produto2 DROP COLUMN fornecedor;
 ### 2.5 Dividir Tabela Produto
 
 **Estrutura Proposta**:
+
 ```sql
 -- Apenas dados principais do produto
 CREATE TABLE produtos (
@@ -388,6 +417,7 @@ CREATE TABLE produto_atributos (
 ### 2.6 Redesenhar Tratamento de Status
 
 **ENUMs PostgreSQL**:
+
 ```sql
 CREATE TYPE venda_item_status AS ENUM (
     'PENDENTE',
@@ -411,6 +441,7 @@ CREATE TYPE compra_status AS ENUM (
 ```
 
 **Enums PHP**:
+
 ```php
 enum VendaItemStatus: string
 {
@@ -437,31 +468,37 @@ enum VendaItemStatus: string
 A migração habilita funcionalidades não possíveis no sistema atual:
 
 ### 3.1 Trilha de Auditoria Adequada
+
 - Rastrear todas as mudanças com usuário, timestamp, valores antigos/novos
 - Consultar estado histórico em qualquer ponto no tempo
 - Log pronto para compliance
 
 ### 3.2 Queries Temporais
+
 - "Qual era o nível de estoque em 31 de dezembro?"
 - "Qual era o preço do produto X no mês passado?"
 - Relatórios point-in-time para auditorias
 
 ### 3.3 Busca Melhor
+
 - Full-text search do PostgreSQL com stemming em português
 - Correspondência fuzzy para nomes de produtos
 - Busca facetada (por fornecedor, categoria, faixa de preço)
 
 ### 3.4 Atualizações em Tempo Real
+
 - Notificações WebSocket para mudanças de status
 - Atualizações de dashboard ao vivo
 - Colaboração multi-usuário sem refresh
 
 ### 3.5 Design API-First
+
 - Possibilidade de app mobile
 - Integrações com terceiros
 - Notificações via webhook
 
 ### 3.6 Processamento em Background
+
 - Processamento de NFe em filas
 - Geração de CNAB assíncrona
 - Geração de relatórios sem bloquear UI
@@ -470,30 +507,33 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 
 ## 4. Matriz de Prioridade
 
-| # | Melhoria | Impacto | Complexidade | Prioridade |
-|---|----------|---------|--------------|------------|
-| 1 | Corrigir consumo FIFO | Médio | Baixa | **Alta** |
-| 2 | Normalizar refs de fornecedor | Médio | Média | **Alta** |
-| 3 | Redesenhar tratamento de status | Baixo | Baixa | **Alta** |
-| 4 | Adicionar trilha de auditoria | Alto | Média | **Alta** |
-| 5 | Corrigir fluxo de devoluções | Médio | Média | **Média** |
-| 6 | Dividir tabela produto | Médio | Média | **Média** |
-| 7 | Simplificar tabelas L1/L2 | Alto | Alta | **Média** |
-| 8 | Adicionar queries temporais | Médio | Alta | **Baixa** |
+| #   | Melhoria                        | Impacto | Complexidade | Prioridade |
+| --- | ------------------------------- | ------- | ------------ | ---------- |
+| 1   | Corrigir consumo FIFO           | Médio   | Baixa        | **Alta**   |
+| 2   | Normalizar refs de fornecedor   | Médio   | Média        | **Alta**   |
+| 3   | Redesenhar tratamento de status | Baixo   | Baixa        | **Alta**   |
+| 4   | Adicionar trilha de auditoria   | Alto    | Média        | **Alta**   |
+| 5   | Corrigir fluxo de devoluções    | Médio   | Média        | **Média**  |
+| 6   | Dividir tabela produto          | Médio   | Média        | **Média**  |
+| 7   | Simplificar tabelas L1/L2       | Alto    | Alta         | **Média**  |
+| 8   | Adicionar queries temporais     | Médio   | Alta         | **Baixa**  |
 
 ### Ordem Recomendada
 
 **Fase 1 - Ganhos Rápidos** (implementar imediatamente):
+
 - Correção FIFO
 - ENUMs de status
 - Normalização FK de fornecedor
 
 **Fase 2 - Fundação** (durante migração):
+
 - Trilha de auditoria
 - Dividir tabela produto
 - Correção de fluxo de devoluções
 
 **Fase 3 - Arquitetura** (planejamento cuidadoso):
+
 - Simplificação L1/L2
 - Queries temporais
 
@@ -502,22 +542,26 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 ## 5. Decisões Necessárias
 
 ### Decisão 1: Estratégia L1/L2
+
 - [ ] Opção A: Achatar para tabela única
 - [ ] Opção B: Manter apenas L2, derivar L1
 - [ ] Opção C: Event sourcing
 - [ ] Opção D: Manter estrutura atual (apenas limpar)
 
 ### Decisão 2: Método de Consumo de Estoque
+
 - [ ] FIFO simples por data
 - [ ] FIFO por data + localização (bloco do galpão)
 - [ ] Configurável (FIFO/LIFO/lote específico)
 
 ### Decisão 3: Escopo da Trilha de Auditoria
+
 - [ ] Todas as tabelas
 - [ ] Apenas tabelas críticas (vendas, compras, estoque, financeiro)
 - [ ] Configurável por tabela
 
 ### Decisão 4: NFe de Devoluções
+
 - [ ] Gerar automaticamente na confirmação de devolução
 - [ ] Geração manual com dados pré-preenchidos
 - [ ] Opcional (algumas devoluções podem não precisar de NFe)

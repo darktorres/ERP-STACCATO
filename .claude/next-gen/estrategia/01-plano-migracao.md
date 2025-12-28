@@ -11,11 +11,11 @@
 
 **Abordagem**: Construir sistema novo completo, migrar tudo de uma vez.
 
-| Prós | Contras |
-|------|---------|
-| Começar do zero | Alto risco |
-| Sem restrições do legado | Longo tempo sem entrega de valor |
-| Arquitetura consistente | Tudo ou nada |
+| Prós                           | Contras                          |
+| ------------------------------ | -------------------------------- |
+| Começar do zero                | Alto risco                       |
+| Sem restrições do legado       | Longo tempo sem entrega de valor |
+| Arquitetura consistente        | Tudo ou nada                     |
 | Migração de dados mais simples | Equipe bloqueada em bugs antigos |
 
 **Prazo**: 6-12 meses
@@ -46,12 +46,12 @@ flowchart TB
     Laravel --> DB
 ```
 
-| Prós | Contras |
-|------|---------|
-| Valor incremental | Complexidade temporária |
-| Menor risco | Necessidade de manter dois sistemas |
-| Pode validar abordagem cedo | Desafios de sincronização de dados |
-| Equipe aprende enquanto desenvolve | Algum código duplicado |
+| Prós                               | Contras                             |
+| ---------------------------------- | ----------------------------------- |
+| Valor incremental                  | Complexidade temporária             |
+| Menor risco                        | Necessidade de manter dois sistemas |
+| Pode validar abordagem cedo        | Desafios de sincronização de dados  |
+| Equipe aprende enquanto desenvolve | Algum código duplicado              |
 
 **Prazo**: 12-18 meses
 **Risco**: MÉDIO
@@ -62,12 +62,12 @@ flowchart TB
 
 **Abordagem**: Construir sistema novo enquanto o antigo roda, espelhar dados, fazer a virada.
 
-| Prós | Contras |
-|------|---------|
-| Menor risco | Mais caro |
-| Validação completa antes da virada | Infraestrutura duplicada |
-| Rollback fácil | Complexidade de sincronização de dados |
-| Usuários podem comparar | Maior prazo |
+| Prós                               | Contras                                |
+| ---------------------------------- | -------------------------------------- |
+| Menor risco                        | Mais caro                              |
+| Validação completa antes da virada | Infraestrutura duplicada               |
+| Rollback fácil                     | Complexidade de sincronização de dados |
+| Usuários podem comparar            | Maior prazo                            |
 
 **Prazo**: 18-24 meses
 **Risco**: BAIXO
@@ -77,6 +77,7 @@ flowchart TB
 ## Abordagem Recomendada: Strangler Fig
 
 ### Por quê?
+
 1. **Validação antecipada** - Saber se a abordagem funciona antes do compromisso total
 2. **Entrega contínua** - Usuários recebem valor incrementalmente
 3. **Aprendizado da equipe** - Desenvolver habilidades em módulos mais simples primeiro
@@ -91,6 +92,7 @@ flowchart TB
 **Objetivo**: Configurar infraestrutura e padrões.
 
 **Tarefas**:
+
 - [ ] Criar projeto Laravel com stack escolhida
 - [ ] Configurar banco de dados PostgreSQL
 - [ ] Implementar autenticação (usuários do BD legado)
@@ -99,6 +101,7 @@ flowchart TB
 - [ ] Configurar ambiente de desenvolvimento
 
 **Entregas**:
+
 - App Laravel funcionando com login
 - Ambiente de desenvolvimento para equipe
 - Padrões de código documentados
@@ -110,6 +113,7 @@ flowchart TB
 **Objetivo**: Migrar gestão de dados mestres (CRUD mais simples).
 
 **Módulos**:
+
 1. Fornecedor
 2. Cliente
 3. Produto
@@ -117,12 +121,14 @@ flowchart TB
 5. NCM (Classificação fiscal)
 
 **Por que começar aqui**:
+
 - Operações CRUD simples
 - Estabelece padrões
 - Baixa complexidade de regras de negócio
 - Fundação para outros módulos
 
 **Tarefas**:
+
 - [ ] Criar modelos Eloquent
 - [ ] Construir validação de formulários (classes Request)
 - [ ] Implementar controllers CRUD
@@ -131,6 +137,7 @@ flowchart TB
 - [ ] Sincronização de dados com legado (se executando em paralelo)
 
 **Critérios de Sucesso**:
+
 - Usuários podem gerenciar fornecedores/clientes/produtos na web
 - Dados permanecem sincronizados com app desktop
 - Sem perda ou corrupção de dados
@@ -142,6 +149,7 @@ flowchart TB
 **Objetivo**: Migrar fluxo de compras.
 
 **Componentes**:
+
 - Criação de pedido de compra
 - Fluxo de confirmação
 - Vinculação de nota fiscal
@@ -150,6 +158,7 @@ flowchart TB
 **Dependências**: Fase 1 (Cadastros)
 
 **Tarefas**:
+
 - [ ] Implementar CompraService
 - [ ] Criar fluxo de status com eventos
 - [ ] Construir visualizações de lista e detalhe de compras
@@ -157,6 +166,7 @@ flowchart TB
 - [ ] Criar entrada de Estoque no recebimento
 
 **Critérios de Sucesso**:
+
 - Ciclo completo de compras na web
 - Contas a pagar geradas automaticamente
 - Estoque atualizado no recebimento
@@ -168,6 +178,7 @@ flowchart TB
 **Objetivo**: Migrar gestão de estoque.
 
 **Componentes**:
+
 - Entrada/recebimento de estoque
 - Rastreamento de consumo
 - Consultas de estoque
@@ -176,12 +187,14 @@ flowchart TB
 **Dependências**: Fase 2 (Compras)
 
 **Tarefas**:
+
 - [ ] Implementar EstoqueService
 - [ ] Lógica de consumo FIFO/LIFO
 - [ ] Consultas e relatórios de níveis de estoque
 - [ ] Gestão de blocos do galpão
 
 **Critérios de Sucesso**:
+
 - Visibilidade de estoque em tempo real
 - Rastreamento de consumo preciso
 - Atribuição de localização no galpão
@@ -193,6 +206,7 @@ flowchart TB
 **Objetivo**: Migrar gestão financeira.
 
 **Componentes**:
+
 - Contas a Pagar
 - Contas a Receber
 - Registro de pagamentos
@@ -201,12 +215,14 @@ flowchart TB
 **Dependências**: Fase 2 (Compras), Fase 5 (Vendas - parcial)
 
 **Tarefas**:
+
 - [ ] Implementar serviços financeiros
 - [ ] Fluxo de pagamento
 - [ ] Geração/importação de arquivos CNAB
 - [ ] Relatórios financeiros
 
 **Critérios de Sucesso**:
+
 - Rastrear todas as contas a pagar/receber
 - Processar pagamentos
 - Gerar arquivos bancários
@@ -218,6 +234,7 @@ flowchart TB
 **Objetivo**: Migrar fluxo de vendas (mais complexo).
 
 **Componentes**:
+
 - Criação de Orçamento
 - Pedido de venda
 - Alocação de estoque
@@ -227,6 +244,7 @@ flowchart TB
 **Dependências**: Fase 1, 3 (Cadastros, Estoque)
 
 **Tarefas**:
+
 - [ ] Implementar VendaService
 - [ ] Conversão Orçamento → Venda
 - [ ] Lógica de reserva de estoque
@@ -234,6 +252,7 @@ flowchart TB
 - [ ] Integração com Financeiro (recebíveis)
 
 **Critérios de Sucesso**:
+
 - Ciclo completo de vendas
 - Estoque alocado corretamente
 - Financeiro gerado automaticamente
@@ -245,6 +264,7 @@ flowchart TB
 **Objetivo**: Migrar nota fiscal eletrônica.
 
 **Componentes**:
+
 - Emissão de NFe
 - Cancelamento de NFe
 - Importação de NFe (de fornecedores)
@@ -253,6 +273,7 @@ flowchart TB
 **Dependências**: Fase 5 (Vendas), Fase 2 (Compras)
 
 **Tarefas**:
+
 - [ ] Escolher e integrar provedor de NFe
 - [ ] Implementar interface NfeService
 - [ ] Construir fluxo de emissão
@@ -260,6 +281,7 @@ flowchart TB
 - [ ] Gestão de certificados
 
 **Critérios de Sucesso**:
+
 - Emitir NFe válida pela web
 - Importar NFe de fornecedores
 - Cálculos de impostos corretos
@@ -271,6 +293,7 @@ flowchart TB
 **Objetivo**: Migrar gestão de entregas.
 
 **Componentes**:
+
 - Calendário de entregas
 - Planejamento de rotas
 - Atribuição de transportadora
@@ -279,6 +302,7 @@ flowchart TB
 **Dependências**: Fase 5 (Vendas)
 
 **Tarefas**:
+
 - [ ] Componente de calendário
 - [ ] Agendamento de entregas
 - [ ] Rastreamento de status
@@ -290,6 +314,7 @@ flowchart TB
 **Objetivo**: Completar migração, aposentar legado.
 
 **Tarefas**:
+
 - [ ] Migrar todos os relatórios
 - [ ] Treinamento de usuários
 - [ ] Otimização de performance
@@ -328,20 +353,21 @@ flowchart TB
 
 ## Mitigação de Riscos
 
-| Risco | Mitigação |
-|-------|-----------|
-| Corrupção de dados durante sincronização | Testes extensivos, segurança transacional |
-| Usuários confusos com dois sistemas | Comunicação clara, treinamento |
-| Aumento de escopo | Limites de fase rigorosos |
-| Problemas de integração NFe | Começar com SaaS, abstrair interface |
-| Capacidade da equipe | Priorizar, adiar funcionalidades não essenciais |
-| Problemas de performance | Testes de carga em cada fase |
+| Risco                                    | Mitigação                                       |
+| ---------------------------------------- | ----------------------------------------------- |
+| Corrupção de dados durante sincronização | Testes extensivos, segurança transacional       |
+| Usuários confusos com dois sistemas      | Comunicação clara, treinamento                  |
+| Aumento de escopo                        | Limites de fase rigorosos                       |
+| Problemas de integração NFe              | Começar com SaaS, abstrair interface            |
+| Capacidade da equipe                     | Priorizar, adiar funcionalidades não essenciais |
+| Problemas de performance                 | Testes de carga em cada fase                    |
 
 ---
 
 ## Métricas de Sucesso
 
 ### Por Fase
+
 - [ ] Todas as funcionalidades operando
 - [ ] Sem perda de dados
 - [ ] Performance aceitável (< 2s carregamento de página)
@@ -349,6 +375,7 @@ flowchart TB
 - [ ] Aprovação de aceitação do usuário
 
 ### Geral
+
 - [ ] Todos os módulos migrados
 - [ ] Sistema legado aposentado
 - [ ] Usuários treinados
@@ -359,14 +386,14 @@ flowchart TB
 
 ## Requisitos de Equipe
 
-| Papel | Responsabilidade |
-|-------|-----------------|
-| Tech Lead | Decisões de arquitetura, revisão de código |
-| Dev Backend (1-2) | Serviços Laravel, API |
-| Dev Frontend (1) | Componentes Vue/Livewire |
-| DBA | Migração de banco de dados, otimização |
-| QA | Testes, validação |
-| Product Owner | Requisitos, priorização |
+| Papel             | Responsabilidade                           |
+| ----------------- | ------------------------------------------ |
+| Tech Lead         | Decisões de arquitetura, revisão de código |
+| Dev Backend (1-2) | Serviços Laravel, API                      |
+| Dev Frontend (1)  | Componentes Vue/Livewire                   |
+| DBA               | Migração de banco de dados, otimização     |
+| QA                | Testes, validação                          |
+| Product Owner     | Requisitos, priorização                    |
 
 ---
 

@@ -9,6 +9,7 @@
 ## Visão Geral
 
 NFe (Nota Fiscal Eletrônica) é o sistema brasileiro de fatura eletrônica. Este é um dos módulos mais complexos devido a:
+
 - Integração com API governamental (SEFAZ)
 - Assinatura de XML com certificados digitais
 - Regras de validação rigorosas
@@ -20,15 +21,17 @@ NFe (Nota Fiscal Eletrônica) é o sistema brasileiro de fatura eletrônica. Est
 ## Implementação Atual (C++)
 
 ### Classes
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `TabNFe` | `tabnfe.cpp` | Container principal da aba |
-| `WidgetNFe*` | Diversos | Widgets de gestão de NFe |
-| `CadastrarNFe` | `cadastrarnfe.cpp` | Criação/emissão de NFe |
-| `ACBr` | `acbr.cpp` | Wrapper do ACBrLib |
-| `XML` | `xml.cpp` | Geração/parsing de XML |
+
+| Classe         | Arquivo            | Finalidade                 |
+| -------------- | ------------------ | -------------------------- |
+| `TabNFe`       | `tabnfe.cpp`       | Container principal da aba |
+| `WidgetNFe*`   | Diversos           | Widgets de gestão de NFe   |
+| `CadastrarNFe` | `cadastrarnfe.cpp` | Criação/emissão de NFe     |
+| `ACBr`         | `acbr.cpp`         | Wrapper do ACBrLib         |
+| `XML`          | `xml.cpp`          | Geração/parsing de XML     |
 
 ### Integração Atual
+
 - Utiliza **ACBrLib** (biblioteca baseada em Delphi)
 - Chamada via interface DLL
 - Funções: Geração de XML, assinatura, comunicação com SEFAZ
@@ -41,7 +44,7 @@ NFe (Nota Fiscal Eletrônica) é o sistema brasileiro de fatura eletrônica. Est
 
 **Abordagem**: Executar ACBrMonitorConsole no servidor Linux, comunicação via TCP/IP.
 
-```
+```text
 ┌─────────────┐      TCP Socket      ┌─────────────────────┐
 │   Laravel   │ ◄───────────────────►│  ACBrMonitorConsole │
 │   (Linux)   │      porta 3434      │  (mesmo servidor)   │
@@ -49,12 +52,14 @@ NFe (Nota Fiscal Eletrônica) é o sistema brasileiro de fatura eletrônica. Est
 ```
 
 **Características**:
+
 - Versão **console** do ACBrMonitor (não precisa de GUI)
 - Funciona em **Linux headless** (sem Servidor X)
 - Comunicação via **TCP/IP** ou **arquivos TXT**
 - Pode rodar em **segundo plano** como serviço
 
 **Execução**:
+
 ```bash
 # Rodar em segundo plano com log
 ./ACBrMonitorConsole > /var/log/acbr.log 2>&1 &
@@ -64,6 +69,7 @@ sudo systemctl start acbrmonitor
 ```
 
 **Comunicação Laravel**:
+
 ```php
 // app/Services/NFe/AcbrSocketService.php
 class AcbrSocketService
@@ -101,16 +107,19 @@ class AcbrSocketService
 ```
 
 **Prós**:
+
 - Roda no **mesmo servidor Linux** (sem Windows)
 - Gratuito (código aberto)
 - Já conhecemos o ACBr
 - Sem dependência de rede externa
 
 **Contras**:
+
 - Configuração inicial mais complexa
 - Dependências do ACBr no Linux
 
 **Referências**:
+
 - [Como usar ACBrMonitorConsole no Linux](https://acbr.sourceforge.io/ACBrMonitor/ComousaroACBrMonitorConsolenoLin.html)
 - [Curso ACBrLib Linux Server](https://projetoacbr.com.br/cursos/linux-server-acbrlib/)
 
@@ -142,24 +151,28 @@ $response = $tools->sefazEnviaLote([$xml], $idLote);
 ```
 
 **Características**:
+
 - Atualizado para **Reforma Tributária 2025** (NT 2025.002)
 - Aderente aos PSR-1, PSR-2 e PSR-4
 - Requer **certificado A1** (formato .pfx)
 - Documentação e grupo de discussão ativos
 
 **Prós**:
+
 - Controle total
 - Sem dependências externas (100% PHP)
 - Gratuito (código aberto)
 - Roda em qualquer servidor Linux
 
 **Contras**:
+
 - Mais trabalho de desenvolvimento inicial
 - Deve acompanhar atualizações da SEFAZ
 - Gerenciar certificados digitais
 - Tratamento de erros complexo
 
 **Referências**:
+
 - [GitHub sped-nfe](https://github.com/nfephp-org/sped-nfe)
 - [Tutorial Laravel + sped-nfe](https://medium.com/@geovanent/emitindo-uma-nf-e-como-sped-php-9e325570e6c4)
 - [Pacote laravel-nfe](https://github.com/docode-web/laravel-nfe)
@@ -171,11 +184,11 @@ $response = $tools->sefazEnviaLote([$xml], $idLote);
 
 **Problema**: ACBrLib (.so) tem dependência do **FortesReport** que requer interface gráfica para geração de PDF (DANFE).
 
-| Tentativa | Resultado |
-|-----------|-----------|
-| Carregar .so sem GUI | Falha ao executar funções |
-| Xvfb (GUI virtual) | Não funciona na prática |
-| Testes Python/PHP | Biblioteca carrega, funções falham |
+| Tentativa            | Resultado                          |
+| -------------------- | ---------------------------------- |
+| Carregar .so sem GUI | Falha ao executar funções          |
+| Xvfb (GUI virtual)   | Não funciona na prática            |
+| Testes Python/PHP    | Biblioteca carrega, funções falham |
 
 > "ACBrLib tem suas DLL's para Linux, mas são para Desktop com interface gráfica (GUI). Ninguém conseguiu fazer ACBrLib rodar 100% em servidores Linux sem GUI porque suas dependências dependem da GUI, como o FortesReport."
 > — [Fórum Projeto ACBr](https://www.projetoacbr.com.br/forum/topic/76976-acbrlib-linux/)
@@ -186,11 +199,11 @@ $response = $tools->sefazEnviaLote([$xml], $idLote);
 
 ## Recomendação
 
-| Cenário | Opção Recomendada |
-|---------|-------------------|
-| **Servidor Linux único** | ACBrMonitorConsole (Opção 1) |
-| **Controle total / sem dependências** | sped-nfe PHP (Opção 2) |
-| **Migração gradual** | ACBrMonitorConsole primeiro, avaliar sped-nfe depois |
+| Cenário                               | Opção Recomendada                                    |
+| ------------------------------------- | ---------------------------------------------------- |
+| **Servidor Linux único**              | ACBrMonitorConsole (Opção 1)                         |
+| **Controle total / sem dependências** | sped-nfe PHP (Opção 2)                               |
+| **Migração gradual**                  | ACBrMonitorConsole primeiro, avaliar sped-nfe depois |
 
 **Abordagem**:
 
@@ -549,12 +562,14 @@ class ProcessarNFeJob implements ShouldQueue
 ## Cálculos Tributários
 
 ### Tipos de Impostos Atuais
+
 - ICMS (imposto estadual sobre vendas)
 - IPI (imposto federal sobre produtos industrializados)
 - PIS (contribuição social federal)
 - COFINS (contribuição social federal)
 
 ### Novos (Reforma Tributária 2025+)
+
 - IBS (estadual/municipal - substitui ICMS + ISS)
 - CBS (federal - substitui PIS + COFINS)
 - IS (Imposto Seletivo - imposto seletivo)
@@ -609,12 +624,14 @@ class TaxCalculationService
 ## Componentes de UI
 
 ### Lista de NFe
+
 - Filtro por status (Pendente, Autorizada, Rejeitada, Cancelada)
 - Filtro por período
 - Busca por número/chave
 - Ações rápidas (Visualizar XML, Baixar DANFE, Cancelar)
 
 ### Formulário de NFe (Manual)
+
 - Seleção de destinatário
 - Itens de produto com preview de cálculo tributário
 - Informações de pagamento
@@ -622,6 +639,7 @@ class TaxCalculationService
 - Informações adicionais
 
 ### Importação de NFe (do fornecedor)
+
 - Upload de XML
 - Preview de validação
 - Vincular ao pedido de compra
@@ -643,6 +661,7 @@ timer.start(0min);
 ```
 
 **Problemas**:
+
 - Depende do PC do usuário estar ligado
 - Depende do app estar aberto
 - Timer reinicia se app reiniciar
@@ -651,7 +670,7 @@ timer.start(0min);
 
 ### Solução: Serviço no Servidor
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                      SERVIDOR LINUX                         │
 │                                                             │
@@ -670,7 +689,7 @@ timer.start(0min);
 
 ### Fluxo DFe (Distribuição de Documentos Fiscais)
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────┐
 │                        FLUXO DFe                                  │
 ├──────────────────────────────────────────────────────────────────┤
@@ -706,7 +725,7 @@ timer.start(0min);
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### Implementação Laravel
+### Implementação Laravel - DFe
 
 #### Serviço DFe
 
@@ -951,14 +970,14 @@ class DfeConsultarCommand extends Command
 
 ### Migração do Sistema Legado
 
-| Fase | Ação |
-|------|------|
-| 1 | Instalar ACBrMonitorConsole no servidor Linux |
-| 2 | Implementar DfeService + Job no Laravel |
-| 3 | Desabilitar timer no C++ (`User/monitorarNFe = false`) |
-| 4 | Ativar scheduler Laravel (`php artisan schedule:work`) |
-| 5 | Monitorar logs por 1 semana |
-| 6 | Remover código DFe do C++ |
+| Fase | Ação                                                   |
+| ---- | ------------------------------------------------------ |
+| 1    | Instalar ACBrMonitorConsole no servidor Linux          |
+| 2    | Implementar DfeService + Job no Laravel                |
+| 3    | Desabilitar timer no C++ (`User/monitorarNFe = false`) |
+| 4    | Ativar scheduler Laravel (`php artisan schedule:work`) |
+| 5    | Monitorar logs por 1 semana                            |
+| 6    | Remover código DFe do C++                              |
 
 ### Modelo de Dados
 

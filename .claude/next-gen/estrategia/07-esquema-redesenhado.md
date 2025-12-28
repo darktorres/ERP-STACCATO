@@ -23,14 +23,14 @@
 
 ### 1.1 Princípios Orientadores
 
-| Princípio | Implementação |
-|-----------|---------------|
-| **Fonte Única da Verdade** | Uma tabela por conceito, sem duplicação L1/L2 |
-| **Integridade Referencial** | Todas as FKs impostas, sem órfãos |
-| **Explícito > Implícito** | ENUMs de status, não strings mágicas |
-| **Auditar Tudo** | Quem, quando, o que mudou |
-| **FIFO por Padrão** | Estoque consumido por data de entrada |
-| **Núcleo Imutável** | Transações apenas append, correções via novos registros |
+| Princípio                   | Implementação                                           |
+| --------------------------- | ------------------------------------------------------- |
+| **Fonte Única da Verdade**  | Uma tabela por conceito, sem duplicação L1/L2           |
+| **Integridade Referencial** | Todas as FKs impostas, sem órfãos                       |
+| **Explícito > Implícito**   | ENUMs de status, não strings mágicas                    |
+| **Auditar Tudo**            | Quem, quando, o que mudou                               |
+| **FIFO por Padrão**         | Estoque consumido por data de entrada                   |
+| **Núcleo Imutável**         | Transações apenas append, correções via novos registros |
 
 ### 1.2 O Que Estamos Corrigindo
 
@@ -123,6 +123,7 @@ flowchart TB
 ### 2.2 Decisões Chave de Design
 
 **Tabelas de Itens Únicas**: Cada nível do fluxo tem UMA tabela de itens:
+
 - `orcamento_itens` - Itens do Orçamento
 - `venda_itens` - Itens da Venda (com splits via parent_id)
 - `compra_itens` - Itens do pedido de compra
@@ -969,19 +970,20 @@ enum VendaItemStatus: string
 
 ### 6.1 Resumo das Mudanças
 
-| Problema | Atual | Novo Design |
-|----------|-------|-------------|
-| **Tabelas L1/L2** | 2 tabelas + idRelacionado | 1 tabela + parent_id/root_id |
-| **FIFO** | produto.idEstoque | ORDER BY data_entrada |
-| **Refs de fornecedor** | VARCHAR em 9 tabelas | fornecedor_id FK |
-| **Status** | Strings mágicas | ENUMs PostgreSQL |
-| **Tabela produto** | 100+ colunas | Dividida em 3 tabelas |
-| **Auditoria** | Nenhuma | tabela audit_log |
-| **Devoluções** | Incompleto | Fluxo adequado com NFe |
+| Problema               | Atual                     | Novo Design                  |
+| ---------------------- | ------------------------- | ---------------------------- |
+| **Tabelas L1/L2**      | 2 tabelas + idRelacionado | 1 tabela + parent_id/root_id |
+| **FIFO**               | produto.idEstoque         | ORDER BY data_entrada        |
+| **Refs de fornecedor** | VARCHAR em 9 tabelas      | fornecedor_id FK             |
+| **Status**             | Strings mágicas           | ENUMs PostgreSQL             |
+| **Tabela produto**     | 100+ colunas              | Dividida em 3 tabelas        |
+| **Auditoria**          | Nenhuma                   | tabela audit_log             |
+| **Devoluções**         | Incompleto                | Fluxo adequado com NFe       |
 
 ### 6.2 Simplificações de Query
 
-**Antigo: Buscar todos itens de uma venda (com splits)**
+#### Antigo: Buscar todos itens de uma venda (com splits)
+
 ```sql
 -- Complexo: join L1+L2, seguir cadeias idRelacionado
 SELECT vp1.*, vp2.*
@@ -991,7 +993,8 @@ WHERE vp1.idVenda = :venda_id
   OR vp2.idRelacionado IN (SELECT ...)  -- Pesadelo recursivo
 ```
 
-**Novo: Query simples**
+#### Novo: Query simples
+
 ```sql
 -- Fácil: query em tabela única
 SELECT * FROM venda_itens
@@ -1002,13 +1005,15 @@ SELECT * FROM venda_itens
 WHERE root_id = :item_id OR id = :item_id;
 ```
 
-**Antigo: Obter fornecedor do estoque**
+#### Antigo: Obter fornecedor do estoque
+
 ```sql
 -- Baseado em string, propenso a erros
 SELECT * FROM estoque WHERE fornecedor = 'ACME Corp';
 ```
 
-**Novo: Baseado em FK**
+#### Novo: Baseado em FK
+
 ```sql
 -- Rápido, confiável
 SELECT e.* FROM estoques e
@@ -1126,18 +1131,18 @@ flowchart TB
 
 ### 8.2 Mapeamento de Dados
 
-| Tabela Antiga | Tabela(s) Nova(s) | Notas |
-|---------------|-------------------|-------|
-| fornecedor | fornecedores | 1:1, normalizar nomes |
-| cliente | clientes | 1:1 |
-| produto | produtos + produto_precos + produto_tributos | Dividir |
-| venda_has_produto + venda_has_produto2 | venda_itens | Mesclar, adicionar parent_id |
-| pedido_fornecedor_has_produto + _2 | compras + compra_itens | Mesclar |
-| estoque | estoques | Adicionar data_entrada |
-| estoque_has_consumo | estoque_consumos | Limpar |
-| nfe | nfes | Adicionar enum tipo |
-| conta_a_receber | recebiveis | Renomear |
-| conta_a_pagar | pagaveis | Renomear |
+| Tabela Antiga                          | Tabela(s) Nova(s)                            | Notas                        |
+| -------------------------------------- | -------------------------------------------- | ---------------------------- |
+| fornecedor                             | fornecedores                                 | 1:1, normalizar nomes        |
+| cliente                                | clientes                                     | 1:1                          |
+| produto                                | produtos + produto_precos + produto_tributos | Dividir                      |
+| venda_has_produto + venda_has_produto2 | venda_itens                                  | Mesclar, adicionar parent_id |
+| pedido_fornecedor_has_produto +\_2     | compras + compra_itens                       | Mesclar                      |
+| estoque                                | estoques                                     | Adicionar data_entrada       |
+| estoque_has_consumo                    | estoque_consumos                             | Limpar                       |
+| nfe                                    | nfes                                         | Adicionar enum tipo          |
+| conta_a_receber                        | recebiveis                                   | Renomear                     |
+| conta_a_pagar                          | pagaveis                                     | Renomear                     |
 
 ---
 

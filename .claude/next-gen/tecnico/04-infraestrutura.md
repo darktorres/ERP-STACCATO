@@ -19,6 +19,7 @@
 ## 1. Arquitetura de Trilha de Auditoria
 
 ### Requisitos
+
 - Rastrear TODAS as alterações em tabelas críticas
 - Saber QUEM fez a alteração
 - Saber QUANDO aconteceu
@@ -98,13 +99,13 @@ CREATE TRIGGER audit_vendas
 
 ### Casos de Uso
 
-| Consulta | Exemplo |
-|-------|---------|
-| Point-in-time | "Qual era o estoque do produto X em 15 de janeiro?" |
-| Histórico | "Mostrar todas as alterações de preço do produto X em 2024" |
-| Auditoria | "Quem alterou este registro e quando?" |
-| Rollback | "Como era esta venda antes da edição?" |
-| Relatórios | "Qual era nosso total de recebíveis em 31 de dezembro?" |
+| Consulta      | Exemplo                                                     |
+| ------------- | ----------------------------------------------------------- |
+| Point-in-time | "Qual era o estoque do produto X em 15 de janeiro?"         |
+| Histórico     | "Mostrar todas as alterações de preço do produto X em 2024" |
+| Auditoria     | "Quem alterou este registro e quando?"                      |
+| Rollback      | "Como era esta venda antes da edição?"                      |
+| Relatórios    | "Qual era nosso total de recebíveis em 31 de dezembro?"     |
 
 ### Opção A: Tabelas Temporais com Histórico
 
@@ -222,6 +223,7 @@ GROUP BY produto_id;
 ## 3. Arquitetura de Busca
 
 ### Estado Atual
+
 - Índices FULLTEXT do MySQL
 - Queries LIKE com wildcards
 - Lento em conjuntos de dados grandes
@@ -262,6 +264,7 @@ LIMIT 20;
 ```
 
 **Recursos:**
+
 - Stemming (Português)
 - Ranking
 - Busca por frase
@@ -276,6 +279,7 @@ flowchart LR
 ```
 
 **Quando atualizar:**
+
 - Precisa de tolerância a erros de digitação ("meza" encontra "mesa")
 - Precisa de autocomplete com fuzzy
 - Conjunto de dados > 1M produtos
@@ -286,6 +290,7 @@ flowchart LR
 ## 4. Views Materializadas
 
 ### Problema
+
 Views recalculam a cada query - lento para dashboards.
 
 ### Solução: Views Materializadas com pg_ivm (Recomendado)
@@ -324,13 +329,13 @@ $$);
 
 #### pg_ivm vs Views Materializadas Padrão
 
-| Recurso | MV Padrão | pg_ivm (IMMV) |
-|---------|-------------|---------------|
-| Atualização automática | Não (REFRESH manual) | Sim (automática) |
-| Velocidade de atualização | Reconstrução completa | Incremental (apenas alterações) |
-| Consistência | Desatualizada até refresh | Sempre atual |
-| Overhead | Nenhum entre refreshes | Leve em cada DML |
-| Melhor para | Grandes, raramente mudam | Dados que mudam frequentemente |
+| Recurso                   | MV Padrão                 | pg_ivm (IMMV)                   |
+| ------------------------- | ------------------------- | ------------------------------- |
+| Atualização automática    | Não (REFRESH manual)      | Sim (automática)                |
+| Velocidade de atualização | Reconstrução completa     | Incremental (apenas alterações) |
+| Consistência              | Desatualizada até refresh | Sempre atual                    |
+| Overhead                  | Nenhum entre refreshes    | Leve em cada DML                |
+| Melhor para               | Grandes, raramente mudam  | Dados que mudam frequentemente  |
 
 #### Recursos de Query Suportados
 
@@ -371,6 +376,7 @@ $$);
 #### Limitações
 
 pg_ivm NÃO suporta:
+
 - Funções de janela (`ROW_NUMBER`, `RANK`, etc.)
 - CTEs (cláusulas `WITH`)
 - Subqueries em `FROM`
@@ -449,15 +455,15 @@ SELECT cron.schedule('refresh-estoque', '*/5 * * * *',
 
 ### Views Candidatas para Materialização
 
-| View | Tipo | Refresh | Motivo |
-|------|------|---------|--------|
-| `immv_produto_estoque` | **pg_ivm** | Automático | Níveis de estoque precisam de precisão em tempo real |
-| `immv_vendas_dashboard` | **pg_ivm** | Automático | Dashboard deve estar atualizado |
-| `immv_order_totals` | **pg_ivm** | Automático | Totais de pedidos mudam com itens |
-| `immv_cliente_stats` | **pg_ivm** | Automático | Histórico de compras de clientes |
-| `mv_financeiro_resumo` | Padrão | 1 hora | Queries complexas, menos frequente |
-| `mv_fornecedor_performance` | Padrão | Diário | Análise histórica, funções de janela |
-| `mv_produto_ranking` | Padrão | Diário | Usa função de janela RANK() |
+| View                        | Tipo       | Refresh    | Motivo                                               |
+| --------------------------- | ---------- | ---------- | ---------------------------------------------------- |
+| `immv_produto_estoque`      | **pg_ivm** | Automático | Níveis de estoque precisam de precisão em tempo real |
+| `immv_vendas_dashboard`     | **pg_ivm** | Automático | Dashboard deve estar atualizado                      |
+| `immv_order_totals`         | **pg_ivm** | Automático | Totais de pedidos mudam com itens                    |
+| `immv_cliente_stats`        | **pg_ivm** | Automático | Histórico de compras de clientes                     |
+| `mv_financeiro_resumo`      | Padrão     | 1 hora     | Queries complexas, menos frequente                   |
+| `mv_fornecedor_performance` | Padrão     | Diário     | Análise histórica, funções de janela                 |
+| `mv_produto_ranking`        | Padrão     | Diário     | Usa função de janela RANK()                          |
 
 ### Refresh com Log
 
@@ -516,6 +522,7 @@ void Application::runSqlJobs() {
 ```
 
 **Problemas**:
+
 - Se ninguém logar no dia, as tarefas não rodam
 - Depende de alguém usar o app desktop
 - Primeiro usuário do dia tem delay no login
@@ -523,7 +530,7 @@ void Application::runSqlJobs() {
 
 ### Solução: Laravel Scheduler
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                      SERVIDOR LINUX                         │
 │                                                             │
@@ -545,14 +552,14 @@ void Application::runSqlJobs() {
 
 ### Tarefas a Migrar
 
-| Tarefa Atual | Stored Procedure | Novo Job Laravel | Horário |
-|--------------|------------------|------------------|---------|
-| Expirar orçamentos | `invalidar_orcamentos_expirados()` | `ExpirarOrcamentosJob` | 00:01 |
-| Expirar produtos | `invalidar_produtos_expirados()` | `ExpirarProdutosJob` | 00:02 |
-| Staccato Off | `invalidar_staccatoOff()` | `InvalidarStaccatoOffJob` | 00:03 |
-| Download NFe | Widget timer | `ConsultarDFeJob` | */5 min |
-| Auto-confirmar NFe | - | `AutoConfirmarNFeAntigasJob` | 06:00 |
-| Refresh MVs | - | `RefreshMaterializedViewsJob` | */15 min |
+| Tarefa Atual       | Stored Procedure                   | Novo Job Laravel              | Horário   |
+| ------------------ | ---------------------------------- | ----------------------------- | --------- |
+| Expirar orçamentos | `invalidar_orcamentos_expirados()` | `ExpirarOrcamentosJob`        | 00:01     |
+| Expirar produtos   | `invalidar_produtos_expirados()`   | `ExpirarProdutosJob`          | 00:02     |
+| Staccato Off       | `invalidar_staccatoOff()`          | `InvalidarStaccatoOffJob`     | 00:03     |
+| Download NFe       | Widget timer                       | `ConsultarDFeJob`             | \*/5 min  |
+| Auto-confirmar NFe | -                                  | `AutoConfirmarNFeAntigasJob`  | 06:00     |
+| Refresh MVs        | -                                  | `RefreshMaterializedViewsJob` | \*/15 min |
 
 ### Implementação Laravel
 
@@ -712,13 +719,13 @@ ExecStart=/usr/bin/php artisan schedule:run
 
 ### Migração do Sistema Legado
 
-| Fase | Ação |
-|------|------|
-| 1 | Implementar Jobs no Laravel |
-| 2 | Configurar cron no servidor |
-| 3 | Testar em paralelo (ambos rodando) |
-| 4 | Remover `runSqlJobs()` do C++ |
-| 5 | Remover tabela `maintenance` |
+| Fase | Ação                               |
+| ---- | ---------------------------------- |
+| 1    | Implementar Jobs no Laravel        |
+| 2    | Configurar cron no servidor        |
+| 3    | Testar em paralelo (ambos rodando) |
+| 4    | Remover `runSqlJobs()` do C++      |
+| 5    | Remover tabela `maintenance`       |
 
 ### Monitoramento
 

@@ -20,6 +20,7 @@
 ### 1.1 Fornecedor
 
 **Campos Principais:**
+
 ```sql
 idFornecedor (PK)
 razaoSocial, nomeFantasia     -- Razões sociais
@@ -34,11 +35,13 @@ desativado                    -- Flag de exclusão lógica
 ```
 
 **Relacionamentos:**
+
 - `fornecedor_has_endereco` - Múltiplos endereços
 - `produto` - Um-para-muitos (produtos do fornecedor)
 - `pedido_fornecedor` - Pedidos de compra
 
 **Validação:**
+
 - Formato CNPJ: `99.999.999/9999-99`
 - Exclusão lógica via flag `desativado`
 
@@ -47,6 +50,7 @@ desativado                    -- Flag de exclusão lógica
 ### 1.2 Cliente
 
 **Campos Principais:**
+
 ```sql
 idCliente (PK)
 pfpj                          -- PF (pessoa física) ou PJ (pessoa jurídica)
@@ -58,12 +62,14 @@ incompleto                    -- Flag de cadastro incompleto
 ```
 
 **Relacionamentos:**
+
 - `cliente_has_endereco` - Endereços de entrega + faturamento
 - `orcamento` - Orçamentos do cliente
 - `venda` - Vendas do cliente
 - Auto-referência (cliente pai)
 
 **Validação:**
+
 - Formato CPF: `999.999.999-99`
 - Formato CNPJ: `99.999.999/9999-99`
 - Consulta de CEP via API Qualp com geolocalização
@@ -73,6 +79,7 @@ incompleto                    -- Flag de cadastro incompleto
 ### 1.3 Produto
 
 **Campos Principais:**
+
 ```sql
 idProduto (PK)
 idFornecedor (FK)             -- Link do fornecedor
@@ -99,6 +106,7 @@ temLote                       -- Rastreamento de lote
 ```
 
 **Validação:**
+
 - `fornecedor + codComercial` deve ser único
 - Markup calculado automaticamente de custo/preço
 - Descontinuação em estoque zero
@@ -108,6 +116,7 @@ temLote                       -- Rastreamento de lote
 ### 1.4 Transportadora
 
 **Campos Principais:**
+
 ```sql
 idTransportadora (PK)
 razaoSocial, nomeFantasia
@@ -116,6 +125,7 @@ antt                          -- Registro ANTT
 ```
 
 **Relacionamentos:**
+
 - `transportadora_has_endereco` - Endereços
 - `transportadora_has_veiculo` - Veículos (modelo, placa, capacidade)
 - `veiculo_has_produto` - Rastreamento de entrega com GPS
@@ -127,6 +137,7 @@ antt                          -- Registro ANTT
 ### 2.1 Estrutura de Tabelas
 
 **Tabela Principal: `orcamento`**
+
 ```sql
 idOrcamento (PK)
 idCliente, idProfissionalRel, idUsuario
@@ -144,6 +155,7 @@ total                         -- Total final
 ```
 
 **Itens: `orcamento_has_produto`**
+
 ```sql
 idOrcamentoProduto (PK)
 idOrcamento (FK)
@@ -226,11 +238,13 @@ ELSE:
 **Gatilho**: `on_pushButtonGerarVenda_clicked()`
 
 **Validações**:
+
 1. Orçamento não expirado
 2. Endereço de entrega selecionado
 3. Cadastro do cliente completo
 
 **Processo**:
+
 1. Copiar cabeçalho: cliente, vendedor, endereços, valores
 2. Copiar itens: `orcamento_has_produto` → `venda_has_produto`
 3. Trigger cria `venda_has_produto2` (N2)
@@ -244,6 +258,7 @@ ELSE:
 ### 3.1 Estrutura de Blocos
 
 **Tabela: `galpao`**
+
 ```sql
 idBloco (PK)
 label                         -- "ENTRADA", "A1", "B2", etc.
@@ -302,6 +317,7 @@ on_pushButtonMover_clicked() {
 ```
 
 **Tipos de Movimentação:**
+
 - `EST. LOJA` - Inventário da loja (tabela estoque)
 - `CLIENTE` - Alocado para cliente (tabela estoque_has_consumo)
 
@@ -337,18 +353,18 @@ CREATE TABLE usuario (
 
 ### 4.2 Perfis de Usuário (tipo)
 
-| Perfil | Descrição | Nível de Acesso |
-|--------|-----------|-----------------|
-| ADMINISTRADOR | Administrador completo do sistema | Total |
-| DIRETOR | Diretor | Total |
-| ADMINISTRATIVO | Equipe administrativa | Alto |
-| GERENTE LOJA | Gerente de loja | Médio-Alto |
-| GERENTE DEPARTAMENTO | Gerente de departamento | Médio-Alto |
-| GERENTE FINANCEIRO | Gerente financeiro | Médio-Alto |
-| VENDEDOR | Vendedor | Baixo |
-| VENDEDOR ESPECIAL | Vendedor especial | Baixo-Médio |
-| OPERACIONAL | Equipe operacional | Baixo |
-| ASSISTENTE ADMINISTRATIVO | Assistente administrativo | Baixo |
+| Perfil                    | Descrição                         | Nível de Acesso |
+| ------------------------- | --------------------------------- | --------------- |
+| ADMINISTRADOR             | Administrador completo do sistema | Total           |
+| DIRETOR                   | Diretor                           | Total           |
+| ADMINISTRATIVO            | Equipe administrativa             | Alto            |
+| GERENTE LOJA              | Gerente de loja                   | Médio-Alto      |
+| GERENTE DEPARTAMENTO      | Gerente de departamento           | Médio-Alto      |
+| GERENTE FINANCEIRO        | Gerente financeiro                | Médio-Alto      |
+| VENDEDOR                  | Vendedor                          | Baixo           |
+| VENDEDOR ESPECIAL         | Vendedor especial                 | Baixo-Médio     |
+| OPERACIONAL               | Equipe operacional                | Baixo           |
+| ASSISTENTE ADMINISTRATIVO | Assistente administrativo         | Baixo           |
 
 ### 4.3 Tabela de Permissões
 
@@ -419,13 +435,13 @@ flowchart TB
 
 ### 4.7 Acesso em Nível de Funcionalidade
 
-| Funcionalidade | Permissão Necessária |
-|----------------|---------------------|
-| Gerenciamento de usuários | `isAdmin()` |
-| Desativação de produto | `isAdministrativo()` |
-| Ajuste de frete | permissão `ajusteFrete` |
-| Config de email/NFe | `isAdministrativo()` |
-| Teto de comissão | `isAdmin()` para exceder limite da loja |
+| Funcionalidade            | Permissão Necessária                    |
+| ------------------------- | --------------------------------------- |
+| Gerenciamento de usuários | `isAdmin()`                             |
+| Desativação de produto    | `isAdministrativo()`                    |
+| Ajuste de frete           | permissão `ajusteFrete`                 |
+| Config de email/NFe       | `isAdministrativo()`                    |
+| Teto de comissão          | `isAdmin()` para exceder limite da loja |
 
 ---
 
@@ -433,11 +449,11 @@ flowchart TB
 
 Todos os fluxos restantes estão agora documentados:
 
-| Fluxo | Tabelas Principais | Arquivos |
-|-------|-------------------|----------|
-| Cadastros | fornecedor, cliente, produto, transportadora | cadastro*.cpp |
-| Orçamento | orcamento, orcamento_has_produto | orcamento.cpp |
-| Galpão | galpao, estoque.idBloco | widgetgalpao.cpp |
-| Permissões | usuario, usuario_has_permissao | user.cpp, logindialog.cpp |
+| Fluxo      | Tabelas Principais                           | Arquivos                  |
+| ---------- | -------------------------------------------- | ------------------------- |
+| Cadastros  | fornecedor, cliente, produto, transportadora | cadastro\*.cpp            |
+| Orçamento  | orcamento, orcamento_has_produto             | orcamento.cpp             |
+| Galpão     | galpao, estoque.idBloco                      | widgetgalpao.cpp          |
+| Permissões | usuario, usuario_has_permissao               | user.cpp, logindialog.cpp |
 
 **Documentação agora cobre 100% dos fluxos de negócio.**

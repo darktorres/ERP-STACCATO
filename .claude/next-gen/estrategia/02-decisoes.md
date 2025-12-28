@@ -16,6 +16,7 @@
 | ADR-005 | Estratégia de migração              | **Aceito**    | 2025-12-28 |
 | ADR-006 | Abordagem de multi-tenancy          | **Aceito**    | 2025-12-28 |
 | ADR-007 | Swoole / Laravel Octane             | **Adiado**    | 2025-12-28 |
+| ADR-008 | Seleção manual de estoque (1:1)     | **Aceito**    | 2025-12-28 |
 
 ---
 
@@ -496,6 +497,116 @@ Se P95 > 500ms ou requests/segundo insuficiente, então avaliar Octane.
 - Otimizar queries com eager loading
 - Usar filas para operações pesadas
 - Laravel Reverb para real-time quando necessário
+
+---
+
+## ADR-008: Seleção Manual de Estoque (1:1)
+
+### Status - ADR-008
+
+**Aceito** - 2025-12-28
+
+### Contexto - ADR-008
+
+Sistema atual usa `estoque_has_consumo` para vincular itens de venda a estoques.
+O sistema legado tentava fazer FIFO automático via `produto.idEstoque`, mas estava quebrado.
+
+Questão: Como vincular `venda_itens` a `estoques` no novo sistema?
+
+### Opções Avaliadas - ADR-008
+
+| Opção                      | Descrição                                      | Prós                     | Contras                          |
+| -------------------------- | ---------------------------------------------- | ------------------------ | -------------------------------- |
+| **FIFO Automático**        | Sistema seleciona estoque mais antigo          | Menos trabalho manual    | Ignora variação de lote          |
+| **Seleção Manual 1:1**     | Usuário escolhe qual estoque usar              | Controle total           | Mais cliques                     |
+| **Seleção Manual 1:N**     | Um item pode consumir de múltiplos estoques    | Flexível                 | Complexidade, rastreio difícil   |
+
+### Decisão - ADR-008
+
+Usar **Seleção Manual com vínculo 1:1** entre `venda_item` e `estoque`.
+
+Implementado via tabela `estoque_consumos` com constraints de unicidade.
+
+### Justificativa - ADR-008
+
+1. **Variação de lote** - Produtos como cerâmicas têm diferenças de tom/calibre entre lotes.
+   Cliente comprando 100m² precisa receber do mesmo lote para consistência visual.
+
+2. **Controle do operador** - O operador conhece o estoque físico e pode escolher
+   o lote mais adequado (localização, condição, prazo de validade).
+
+3. **Simplicidade de rastreio** - Com 1:1, cada item de venda aponta para exatamente
+   um registro de estoque. Sem ambiguidade.
+
+4. **Splits quando necessário** - Se estoque insuficiente, operador faz split do
+   `venda_item` (via parent_id) e vincula cada parte a um estoque diferente.
+
+5. **Auditoria** - Tabela `estoque_consumos` mantém histórico de pareamentos,
+   incluindo estornos com motivo e responsável.
+
+### Implementação - ADR-008
+
+```sql
+-- Tabela de vínculo com constraint 1:1
+CREATE TABLE estoque_consumos (
+    id SERIAL PRIMARY KEY,
+    venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id),
+    estoque_id INTEGER NOT NULL REFERENCES estoques(id),
+    quantidade DECIMAL(15,4) NOT NULL,
+    custo_unitario DECIMAL(15,4) NOT NULL,
+    motivo consumo_motivo NOT NULL DEFAULT 'VENDA',
+
+    -- Auditoria de estorno
+    is_estornado BOOLEAN DEFAULT FALSE,
+    estornado_em TIMESTAMP,
+    estorno_motivo VARCHAR(200),
+    estornado_por INTEGER REFERENCES usuarios(id),
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    created_by INTEGER REFERENCES usuarios(id)
+);
+
+-- CONSTRAINT 1:1: Apenas um consumo ativo por venda_item
+CREATE UNIQUE INDEX idx_consumos_venda_item_ativo
+    ON estoque_consumos(venda_item_id)
+    WHERE NOT is_estornado;
+
+-- CONSTRAINT 1:1: Cada estoque só pode ser consumido uma vez
+CREATE UNIQUE INDEX idx_consumos_estoque_ativo
+    ON estoque_consumos(estoque_id)
+    WHERE NOT is_estornado;
+```
+
+### Fluxo de Uso - ADR-008
+
+```
+1. venda_item criado (status=PENDENTE)
+2. NFe de entrada chega → cria registro em estoques
+3. Usuário abre tela de "Parear"
+4. Sistema mostra estoques disponíveis para o produto
+5. Usuário seleciona estoque desejado (vê lote, tom, quantidade)
+6. Sistema cria estoque_consumo e atualiza status para ESTOQUE
+7. Se estoque insuficiente → usuário faz split do item primeiro
+```
+
+### Consequências - ADR-008
+
+**Positivas:**
+- Controle total sobre qual lote vai para qual cliente
+- Consistência visual garantida (mesmo tom/calibre)
+- Rastreabilidade clara (1 item = 1 estoque)
+- Histórico de pareamentos e estornos
+
+**Negativas:**
+- Requer ação manual do operador
+- Mais cliques que FIFO automático
+- Operador precisa entender o processo
+
+**Mitigações:**
+- Interface intuitiva mostrando estoques com lote/tom/quantidade
+- Sugestão de estoque (ordenado por data de entrada)
+- Atalhos de teclado para pareamento rápido
+- Validação impedindo parear com quantidade insuficiente
 
 ---
 

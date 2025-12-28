@@ -1,50 +1,50 @@
-# FIFO Stock Consumption Fix - Deep Exploration
+# Correção de Consumo de Estoque FIFO - Exploração Detalhada
 
-> Status: **Analysis**
-> Last updated: 2025-12-27
-> Focus: Fix stock consumption to properly follow First-In-First-Out
-
----
-
-## Table of Contents
-
-1. [Current Problem](#1-current-problem)
-2. [Root Cause Analysis](#2-root-cause-analysis)
-3. [Proposed Solution](#3-proposed-solution)
-4. [Implementation Details](#4-implementation-details)
-5. [Edge Cases](#5-edge-cases)
-6. [Migration Strategy](#6-migration-strategy)
+> Status: **Análise**
+> Última atualização: 2025-12-27
+> Foco: Corrigir consumo de estoque para seguir First-In-First-Out corretamente
 
 ---
 
-## 1. Current Problem
+## Sumário
 
-### 1.1 What FIFO Means
+1. [Problema Atual](#1-problema-atual)
+2. [Análise de Causa Raiz](#2-análise-de-causa-raiz)
+3. [Solução Proposta](#3-solução-proposta)
+4. [Detalhes de Implementação](#4-detalhes-de-implementação)
+5. [Casos de Borda](#5-casos-de-borda)
+6. [Estratégia de Migração](#6-estratégia-de-migração)
 
-**First-In-First-Out (FIFO)**: Oldest stock should be consumed first.
+---
+
+## 1. Problema Atual
+
+### 1.1 O Que FIFO Significa
+
+**First-In-First-Out (FIFO)**: Estoque mais antigo deve ser consumido primeiro.
 
 ```
-Received Jan 1:  100 units @ R$10.00  ← Should be consumed FIRST
-Received Jan 15:  50 units @ R$12.00  ← Should be consumed SECOND
-Received Jan 30:  75 units @ R$11.00  ← Should be consumed THIRD
+Recebido 01 Jan:  100 unidades @ R$10,00  ← Deve ser consumido PRIMEIRO
+Recebido 15 Jan:   50 unidades @ R$12,00  ← Deve ser consumido SEGUNDO
+Recebido 30 Jan:   75 unidades @ R$11,00  ← Deve ser consumido TERCEIRO
 ```
 
-### 1.2 Why It Matters
+### 1.2 Por Que Importa
 
-| Issue | Impact |
-|-------|--------|
-| **Inventory valuation** | COGS calculated incorrectly |
-| **Perishable goods** | Old stock never used, expires |
-| **Tax compliance** | Brazilian tax law assumes FIFO for some calcs |
-| **Audit trail** | Can't trace which batch was sold |
-| **Stock rotation** | Old stock accumulates |
+| Problema | Impacto |
+|----------|---------|
+| **Valoração de estoque** | CMV calculado incorretamente |
+| **Produtos perecíveis** | Estoque antigo nunca usado, expira |
+| **Compliance fiscal** | Lei tributária brasileira assume FIFO para alguns cálculos |
+| **Trilha de auditoria** | Não consegue rastrear qual lote foi vendido |
+| **Rotação de estoque** | Estoque antigo acumula |
 
-### 1.3 Current Behavior
+### 1.3 Comportamento Atual
 
-The system does **NOT** implement FIFO correctly:
+O sistema **NÃO** implementa FIFO corretamente:
 
 ```cpp
-// venda.cpp:1046 - Current stock consumption
+// venda.cpp:1046 - Consumo de estoque atual
 query.prepare(
     "SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant "
     "FROM venda_has_produto2 vp2 "
@@ -53,107 +53,107 @@ query.prepare(
 );
 ```
 
-**Problem**: Uses `p.idEstoque` - a single pre-set stock ID stored on the `produto` table.
+**Problema**: Usa `p.idEstoque` - um ID de estoque único pré-definido armazenado na tabela `produto`.
 
 ---
 
-## 2. Root Cause Analysis
+## 2. Análise de Causa Raiz
 
-### 2.1 The `produto.idEstoque` Column
+### 2.1 A Coluna `produto.idEstoque`
 
-The `produto` table has an `idEstoque` column that:
-- Points to ONE specific stock record
-- Is manually set (or set by last NFe import)
-- Has no FIFO logic
+A tabela `produto` tem uma coluna `idEstoque` que:
+- Aponta para UM registro de estoque específico
+- É definida manualmente (ou definida pela última importação de NFe)
+- Não tem lógica FIFO
 
 ```sql
--- Current: produto points to a specific stock
+-- Atual: produto aponta para um estoque específico
 produto (idProduto=123, idEstoque=456)
-        └── estoque (idEstoque=456)  -- Just this one, regardless of age
+        +-- estoque (idEstoque=456)  -- Apenas este, independente da idade
 
--- Multiple stock records exist, but only one is linked
-estoque (idEstoque=455, idProduto=123, data_entrada='2025-01-01')  -- OLDEST, ignored!
-estoque (idEstoque=456, idProduto=123, data_entrada='2025-01-15')  -- Used (by chance)
-estoque (idEstoque=457, idProduto=123, data_entrada='2025-01-30')  -- NEWEST, ignored!
+-- Múltiplos registros de estoque existem, mas apenas um está vinculado
+estoque (idEstoque=455, idProduto=123, data_entrada='2025-01-01')  -- MAIS ANTIGO, ignorado!
+estoque (idEstoque=456, idProduto=123, data_entrada='2025-01-15')  -- Usado (por acaso)
+estoque (idEstoque=457, idProduto=123, data_entrada='2025-01-30')  -- MAIS NOVO, ignorado!
 ```
 
-### 2.2 When Stock is Consumed
+### 2.2 Quando Estoque é Consumido
 
-**Path 1: Via NFe Import** (`importarxml.cpp`)
-- Stock IS properly linked to specific purchase/sale
-- Creates `estoque_has_consumo` with specific `idEstoque`
-- This is OK - it's deterministic
+**Caminho 1: Via Importação de NFe** (`importarxml.cpp`)
+- Estoque É corretamente vinculado a compra/venda específica
+- Cria `estoque_has_consumo` com `idEstoque` específico
+- Isso está OK - é determinístico
 
-**Path 2: Via Stock Sale** (`venda.cpp:criarConsumos`)
-- Uses `produto.idEstoque` (the problem!)
-- No ORDER BY, no FIFO selection
-- Just takes whatever is pre-set
+**Caminho 2: Via Venda de Estoque** (`venda.cpp:criarConsumos`)
+- Usa `produto.idEstoque` (o problema!)
+- Sem ORDER BY, sem seleção FIFO
+- Apenas pega o que está pré-definido
 
-### 2.3 Code Flow
+### 2.3 Fluxo de Código
 
 ```
-Customer buys product from existing stock:
-    │
-    ├── Sale created with vp2.estoque > 0
-    │
-    ├── Venda::criarConsumos() called
-    │
-    ├── Query: SELECT p.idEstoque ...
-    │       │
-    │       └── Gets SINGLE idEstoque from produto table
-    │           (No FIFO consideration!)
-    │
-    └── Estoque::criarConsumo(idEstoque, quantity)
-            │
-            └── Consumes from that ONE stock record
+Cliente compra produto do estoque existente:
+    |
+    +-- Venda criada com vp2.estoque > 0
+    |
+    +-- Venda::criarConsumos() chamado
+    |
+    +-- Query: SELECT p.idEstoque ...
+    |       |
+    |       +-- Obtém ÚNICO idEstoque da tabela produto
+    |           (Sem consideração de FIFO!)
+    |
+    +-- Estoque::criarConsumo(idEstoque, quantidade)
+            |
+            +-- Consome daquele ÚNICO registro de estoque
 ```
 
-### 2.4 Related Issues
+### 2.4 Problemas Relacionados
 
-1. **No automatic stock selection**: User must manually set `produto.idEstoque`
-2. **One stock per product**: Can't easily consume from multiple batches
-3. **No batch tracking**: Lost traceability to original NFe/lot
+1. **Sem seleção automática de estoque**: Usuário deve definir manualmente `produto.idEstoque`
+2. **Um estoque por produto**: Não consegue facilmente consumir de múltiplos lotes
+3. **Sem rastreamento de lote**: Rastreabilidade perdida para NFe/lote original
 
 ---
 
-## 3. Proposed Solution
+## 3. Solução Proposta
 
-### 3.1 Overview
+### 3.1 Visão Geral
 
-Replace single `produto.idEstoque` with **dynamic FIFO selection**:
+Substituir `produto.idEstoque` único por **seleção FIFO dinâmica**:
 
 ```sql
--- NEW: Query oldest available stock
+-- NOVO: Query de estoque mais antigo disponível
 SELECT id, quantidade_disponivel, custo_unitario, data_entrada
 FROM estoques
 WHERE produto_id = :produto_id
   AND loja_id = :loja_id
   AND quantidade_disponivel > 0
-ORDER BY data_entrada ASC  -- FIFO: oldest first
-FOR UPDATE;  -- Lock for concurrent safety
+ORDER BY data_entrada ASC  -- FIFO: mais antigo primeiro
+FOR UPDATE;  -- Travar para segurança de concorrência
 ```
 
-### 3.2 Key Changes
+### 3.2 Mudanças Chave
 
-| Aspect | Current | Proposed |
-|--------|---------|----------|
-| Stock selection | Manual via `produto.idEstoque` | Automatic FIFO |
-| Multiple batches | No | Yes - consume from multiple |
-| Locking | None | `FOR UPDATE` during consumption |
-| Traceability | Lost | Full batch tracking |
+| Aspecto | Atual | Proposto |
+|---------|-------|----------|
+| Seleção de estoque | Manual via `produto.idEstoque` | FIFO automático |
+| Múltiplos lotes | Não | Sim - consumir de múltiplos |
+| Travamento | Nenhum | `FOR UPDATE` durante consumo |
+| Rastreabilidade | Perdida | Rastreamento completo de lote |
 
-### 3.3 New Schema
+### 3.3 Novo Schema
 
 ```sql
--- Remove produto.idEstoque (no longer needed)
+-- Remover produto.idEstoque (não mais necessário)
 ALTER TABLE produtos DROP COLUMN idEstoque;
 
--- Ensure estoque has proper indexes
+-- Garantir que estoque tem índices adequados
 CREATE INDEX idx_estoques_fifo
     ON estoques(produto_id, loja_id, data_entrada)
     WHERE quantidade_disponivel > 0;
 
--- Add batch/lot tracking
+-- Adicionar rastreamento de lote
 ALTER TABLE estoques ADD COLUMN lote VARCHAR(50);
 ALTER TABLE estoques ADD COLUMN data_validade DATE;
 ALTER TABLE estoques ADD COLUMN data_entrada TIMESTAMP DEFAULT NOW();
@@ -161,9 +161,9 @@ ALTER TABLE estoques ADD COLUMN data_entrada TIMESTAMP DEFAULT NOW();
 
 ---
 
-## 4. Implementation Details
+## 4. Detalhes de Implementação
 
-### 4.1 PostgreSQL Function
+### 4.1 Função PostgreSQL
 
 ```sql
 CREATE OR REPLACE FUNCTION consumir_estoque_fifo(
@@ -182,7 +182,7 @@ DECLARE
     v_estoque RECORD;
     v_consumir DECIMAL;
 BEGIN
-    -- Lock and iterate through available stock (FIFO order)
+    -- Travar e iterar pelo estoque disponível (ordem FIFO)
     FOR v_estoque IN
         SELECT id, quantidade_disponivel, custo_unitario
         FROM estoques
@@ -194,16 +194,16 @@ BEGIN
     LOOP
         EXIT WHEN v_restante <= 0;
 
-        -- Calculate how much to take from this batch
+        -- Calcular quanto tirar deste lote
         v_consumir := LEAST(v_restante, v_estoque.quantidade_disponivel);
 
-        -- Update stock
+        -- Atualizar estoque
         UPDATE estoques
         SET quantidade_disponivel = quantidade_disponivel - v_consumir,
             updated_at = NOW()
         WHERE id = v_estoque.id;
 
-        -- Create consumption record
+        -- Criar registro de consumo
         INSERT INTO estoque_consumos (
             estoque_id, venda_item_id, quantidade,
             custo_unitario, motivo, created_at
@@ -212,7 +212,7 @@ BEGIN
             v_estoque.custo_unitario, p_motivo, NOW()
         );
 
-        -- Return consumed batch info
+        -- Retornar info do lote consumido
         estoque_id := v_estoque.id;
         quantidade_consumida := v_consumir;
         custo_unitario := v_estoque.custo_unitario;
@@ -221,7 +221,7 @@ BEGIN
         v_restante := v_restante - v_consumir;
     END LOOP;
 
-    -- Check if we fulfilled the entire request
+    -- Verificar se atendemos o pedido inteiro
     IF v_restante > 0 THEN
         RAISE EXCEPTION 'Estoque insuficiente. Faltam % unidades', v_restante;
     END IF;
@@ -229,7 +229,7 @@ END;
 $$ LANGUAGE plpgsql;
 ```
 
-### 4.2 Laravel Service
+### 4.2 Serviço Laravel
 
 ```php
 <?php
@@ -245,7 +245,7 @@ use Illuminate\Support\Facades\DB;
 class EstoqueConsumoService
 {
     /**
-     * Consume stock using FIFO
+     * Consumir estoque usando FIFO
      *
      * @param int $produtoId
      * @param int $lojaId
@@ -266,7 +266,7 @@ class EstoqueConsumoService
             $consumos = collect();
             $restante = $quantidade;
 
-            // Get available stock in FIFO order with lock
+            // Obter estoque disponível em ordem FIFO com lock
             $estoques = Estoque::where('produto_id', $produtoId)
                 ->where('loja_id', $lojaId)
                 ->where('quantidade_disponivel', '>', 0)
@@ -279,10 +279,10 @@ class EstoqueConsumoService
 
                 $consumir = min($restante, $estoque->quantidade_disponivel);
 
-                // Update stock
+                // Atualizar estoque
                 $estoque->decrement('quantidade_disponivel', $consumir);
 
-                // Create consumption record
+                // Criar registro de consumo
                 $consumo = EstoqueConsumo::create([
                     'estoque_id' => $estoque->id,
                     'venda_item_id' => $vendaItemId,
@@ -306,7 +306,7 @@ class EstoqueConsumoService
     }
 
     /**
-     * Check available stock (FIFO preview)
+     * Verificar estoque disponível (preview FIFO)
      */
     public function verificarDisponibilidade(int $produtoId, int $lojaId): array
     {
@@ -330,16 +330,16 @@ class EstoqueConsumoService
     }
 
     /**
-     * Reverse consumption (for returns)
+     * Reverter consumo (para devoluções)
      */
     public function estornarConsumo(EstoqueConsumo $consumo): void
     {
         DB::transaction(function () use ($consumo) {
-            // Return quantity to stock
+            // Retornar quantidade ao estoque
             Estoque::where('id', $consumo->estoque_id)
                 ->increment('quantidade_disponivel', $consumo->quantidade);
 
-            // Mark consumption as reversed
+            // Marcar consumo como revertido
             $consumo->update([
                 'estornado' => true,
                 'estornado_at' => now(),
@@ -349,7 +349,7 @@ class EstoqueConsumoService
 }
 ```
 
-### 4.3 Updated VendaService
+### 4.3 VendaService Atualizado
 
 ```php
 <?php
@@ -367,13 +367,13 @@ class VendaService
     ) {}
 
     /**
-     * Create stock consumptions for sale items marked as from stock
+     * Criar consumos de estoque para itens de venda marcados como de estoque
      */
     public function criarConsumos(Venda $venda): void
     {
         $itensEstoque = $venda->itens()
-            ->where('origem', 'ESTOQUE')  // Only items from existing stock
-            ->whereNull('consumido_at')   // Not yet consumed
+            ->where('origem', 'ESTOQUE')  // Apenas itens de estoque existente
+            ->whereNull('consumido_at')   // Ainda não consumido
             ->get();
 
         foreach ($itensEstoque as $item) {
@@ -385,7 +385,7 @@ class VendaService
                 motivo: 'VENDA'
             );
 
-            // Mark item as consumed
+            // Marcar item como consumido
             $item->update([
                 'consumido_at' => now(),
                 'custo_real' => $consumos->sum(fn($c) => $c->quantidade * $c->custo_unitario),
@@ -395,10 +395,10 @@ class VendaService
 }
 ```
 
-### 4.4 Schema Changes
+### 4.4 Mudanças de Schema
 
 ```sql
--- New consumption table (replaces estoque_has_consumo)
+-- Nova tabela de consumo (substitui estoque_has_consumo)
 CREATE TABLE estoque_consumos (
     id SERIAL PRIMARY KEY,
     estoque_id INTEGER NOT NULL REFERENCES estoques(id),
@@ -409,12 +409,12 @@ CREATE TABLE estoque_consumos (
     custo_unitario DECIMAL(15,4) NOT NULL,
     motivo VARCHAR(50) NOT NULL,  -- VENDA, AJUSTE, QUEBRA, TRANSFERENCIA
 
-    -- Reversal tracking
+    -- Rastreamento de reversão
     estornado BOOLEAN DEFAULT FALSE,
     estornado_at TIMESTAMP,
     estornado_por INTEGER REFERENCES usuarios(id),
 
-    -- Audit
+    -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
     created_by INTEGER REFERENCES usuarios(id)
 );
@@ -425,44 +425,44 @@ CREATE INDEX idx_consumos_venda ON estoque_consumos(venda_item_id);
 
 ---
 
-## 5. Edge Cases
+## 5. Casos de Borda
 
-### 5.1 Insufficient Stock
+### 5.1 Estoque Insuficiente
 
 ```php
-// Current: Silent failure or cryptic error
-// Proposed: Clear exception with details
+// Atual: Falha silenciosa ou erro críptico
+// Proposto: Exceção clara com detalhes
 
 try {
     $this->estoqueService->consumirFifo($produtoId, $lojaId, 100);
 } catch (EstoqueInsuficienteException $e) {
     // $e->getQuantidadeFaltante() = 25
     // $e->getQuantidadeDisponivel() = 75
-    // Show user-friendly message
+    // Mostrar mensagem amigável ao usuário
 }
 ```
 
-### 5.2 Concurrent Consumption
+### 5.2 Consumo Concorrente
 
 ```php
-// FOR UPDATE lock prevents race conditions
-// If two sales try to consume same stock simultaneously:
-// - First transaction locks rows
-// - Second transaction waits
-// - After first commits, second sees updated quantities
+// Lock FOR UPDATE previne condições de corrida
+// Se duas vendas tentam consumir o mesmo estoque simultaneamente:
+// - Primeira transação trava as linhas
+// - Segunda transação espera
+// - Após primeira fazer commit, segunda vê quantidades atualizadas
 ```
 
-### 5.3 Multiple Warehouses (Lojas)
+### 5.3 Múltiplos Armazéns (Lojas)
 
 ```php
-// FIFO per warehouse
+// FIFO por armazém
 $consumos = $this->estoqueService->consumirFifo(
     produtoId: $produtoId,
-    lojaId: $venda->loja_id,  // Only from this warehouse
+    lojaId: $venda->loja_id,  // Apenas deste armazém
     quantidade: $quantidade
 );
 
-// Cross-warehouse transfer if needed
+// Transferência entre armazéns se necessário
 $this->estoqueService->transferir(
     produtoId: $produtoId,
     lojaOrigem: 1,
@@ -471,16 +471,16 @@ $this->estoqueService->transferir(
 );
 ```
 
-### 5.4 Lot/Batch Specific Consumption
+### 5.4 Consumo de Lote Específico
 
 ```php
-// Sometimes need specific lot (quality issue, customer request)
+// Às vezes precisa lote específico (problema de qualidade, pedido do cliente)
 public function consumirLoteEspecifico(
     int $estoqueId,
     float $quantidade,
     int $vendaItemId
 ): EstoqueConsumo {
-    // Bypass FIFO for specific batch
+    // Ignorar FIFO para lote específico
     $estoque = Estoque::lockForUpdate()->findOrFail($estoqueId);
 
     if ($estoque->quantidade_disponivel < $quantidade) {
@@ -499,58 +499,58 @@ public function consumirLoteEspecifico(
 }
 ```
 
-### 5.5 Expiration Date Priority
+### 5.5 Prioridade por Data de Validade
 
 ```php
-// FEFO: First-Expired, First-Out (for perishables)
+// FEFO: First-Expired, First-Out (para perecíveis)
 public function consumirFefo(int $produtoId, int $lojaId, float $quantidade): Collection
 {
     $estoques = Estoque::where('produto_id', $produtoId)
         ->where('loja_id', $lojaId)
         ->where('quantidade_disponivel', '>', 0)
         ->orderByRaw('COALESCE(data_validade, DATE "9999-12-31") ASC')  // FEFO
-        ->orderBy('data_entrada', 'asc')  // Then FIFO
+        ->orderBy('data_entrada', 'asc')  // Depois FIFO
         ->lockForUpdate()
         ->get();
 
-    // ... rest same as FIFO
+    // ... resto igual ao FIFO
 }
 ```
 
 ---
 
-## 6. Migration Strategy
+## 6. Estratégia de Migração
 
-### Phase 1: Add New Columns (Non-Breaking)
+### Fase 1: Adicionar Novas Colunas (Sem Quebra)
 
 ```sql
--- Add data_entrada if missing
+-- Adicionar data_entrada se faltando
 ALTER TABLE estoque ADD COLUMN IF NOT EXISTS data_entrada TIMESTAMP;
 
--- Populate from NFe date for existing records
+-- Popular a partir de data da NFe para registros existentes
 UPDATE estoque e
 SET data_entrada = n.dataEmissao
 FROM nfe n
 WHERE e.idNFe = n.idNFe
   AND e.data_entrada IS NULL;
 
--- Default for any remaining
+-- Padrão para qualquer restante
 UPDATE estoque
 SET data_entrada = created_at
 WHERE data_entrada IS NULL;
 
--- Make non-nullable going forward
+-- Tornar obrigatório daqui pra frente
 ALTER TABLE estoque ALTER COLUMN data_entrada SET NOT NULL;
 ALTER TABLE estoque ALTER COLUMN data_entrada SET DEFAULT NOW();
 ```
 
-### Phase 2: Create New Service (Parallel)
+### Fase 2: Criar Novo Serviço (Paralelo)
 
 ```php
-// Create new service alongside old code
+// Criar novo serviço junto com código antigo
 class EstoqueConsumoService { ... }
 
-// Feature flag for gradual rollout
+// Feature flag para rollout gradual
 if (config('features.fifo_consumption')) {
     $this->newService->consumirFifo(...);
 } else {
@@ -558,48 +558,48 @@ if (config('features.fifo_consumption')) {
 }
 ```
 
-### Phase 3: Migrate Consumption Logic
+### Fase 3: Migrar Lógica de Consumo
 
 ```php
-// Replace venda.cpp criarConsumos() equivalent
-// Old: Use produto.idEstoque
-// New: Use EstoqueConsumoService::consumirFifo()
+// Substituir equivalente de venda.cpp criarConsumos()
+// Antigo: Usa produto.idEstoque
+// Novo: Usa EstoqueConsumoService::consumirFifo()
 ```
 
-### Phase 4: Remove produto.idEstoque
+### Fase 4: Remover produto.idEstoque
 
 ```sql
--- After all code migrated
+-- Após todo código migrado
 ALTER TABLE produto DROP COLUMN idEstoque;
 ```
 
 ---
 
-## Summary
+## Resumo
 
-### Problem
-- `produto.idEstoque` points to ONE stock record (no FIFO)
-- No automatic stock selection
-- Oldest stock may never be consumed
+### Problema
+- `produto.idEstoque` aponta para UM registro de estoque (sem FIFO)
+- Sem seleção automática de estoque
+- Estoque mais antigo pode nunca ser consumido
 
-### Solution
-- Remove `produto.idEstoque`
-- Add `estoques.data_entrada` for FIFO ordering
-- Create `EstoqueConsumoService` with FIFO query
-- Lock rows during consumption to prevent races
-- Support multiple batches per consumption
+### Solução
+- Remover `produto.idEstoque`
+- Adicionar `estoques.data_entrada` para ordenação FIFO
+- Criar `EstoqueConsumoService` com query FIFO
+- Travar linhas durante consumo para prevenir corridas
+- Suportar múltiplos lotes por consumo
 
-### Benefits
-- Proper FIFO compliance
-- Batch traceability
-- Correct inventory valuation
-- Concurrent-safe consumption
-- Flexible (FIFO, FEFO, specific lot)
+### Benefícios
+- Compliance FIFO adequado
+- Rastreabilidade de lote
+- Valoração de estoque correta
+- Consumo seguro para concorrência
+- Flexível (FIFO, FEFO, lote específico)
 
 ---
 
-## Related Documents
+## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Full improvements list
-- [../business/02-stock-flows.md](../business/02-stock-flows.md) - Stock flow analysis
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Table flattening (affects consumption)
+- [03-improvements.md](./03-improvements.md) - Lista completa de melhorias
+- [../business/02-stock-flows.md](../business/02-stock-flows.md) - Análise de fluxo de estoque
+- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Achatamento de tabelas (afeta consumo)

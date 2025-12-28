@@ -1,61 +1,61 @@
-# Redesigned Business Flow & Schema
+# Fluxo de Negócio e Schema Redesenhados
 
 > Status: **Brainstorming**
-> Last updated: 2025-12-27
-> Purpose: Holistic redesign addressing all identified pain points
+> Última atualização: 2025-12-27
+> Propósito: Redesenho holístico abordando todos os pontos de dor identificados
 
 ---
 
-## Table of Contents
+## Sumário
 
-1. [Design Principles](#1-design-principles)
-2. [Core Entity Model](#2-core-entity-model)
-3. [The Order-to-Delivery Flow](#3-the-order-to-delivery-flow)
-4. [Complete Schema](#4-complete-schema)
-5. [Status State Machines](#5-status-state-machines)
-6. [Key Improvements](#6-key-improvements)
-7. [Event-Driven Architecture](#7-event-driven-architecture)
-8. [Migration Path](#8-migration-path)
+1. [Princípios de Design](#1-princípios-de-design)
+2. [Modelo de Entidades Principal](#2-modelo-de-entidades-principal)
+3. [Fluxo do Pedido até a Entrega](#3-fluxo-do-pedido-até-a-entrega)
+4. [Schema Completo](#4-schema-completo)
+5. [Máquinas de Estado de Status](#5-máquinas-de-estado-de-status)
+6. [Principais Melhorias](#6-principais-melhorias)
+7. [Arquitetura Orientada a Eventos](#7-arquitetura-orientada-a-eventos)
+8. [Caminho de Migração](#8-caminho-de-migração)
 
 ---
 
-## 1. Design Principles
+## 1. Princípios de Design
 
-### 1.1 Guiding Principles
+### 1.1 Princípios Orientadores
 
-| Principle | Implementation |
-|-----------|----------------|
-| **Single Source of Truth** | One table per concept, no L1/L2 duplication |
-| **Referential Integrity** | All FKs enforced, no orphans |
-| **Explicit > Implicit** | Status enums, not magic strings |
-| **Audit Everything** | Who, when, what changed |
-| **FIFO by Default** | Stock consumed by entry date |
-| **Immutable Core** | Transactions append-only, corrections via new records |
+| Princípio | Implementação |
+|-----------|---------------|
+| **Fonte Única da Verdade** | Uma tabela por conceito, sem duplicação L1/L2 |
+| **Integridade Referencial** | Todas as FKs impostas, sem órfãos |
+| **Explícito > Implícito** | ENUMs de status, não strings mágicas |
+| **Auditar Tudo** | Quem, quando, o que mudou |
+| **FIFO por Padrão** | Estoque consumido por data de entrada |
+| **Núcleo Imutável** | Transações apenas append, correções via novos registros |
 
-### 1.2 What We're Fixing
+### 1.2 O Que Estamos Corrigindo
 
 ```mermaid
 flowchart LR
-    subgraph Problems["❌ Problems"]
-        P1["L1/L2 Tables"]
+    subgraph Problems["Problemas"]
+        P1["Tabelas L1/L2"]
         P2["produto.idEstoque"]
         P3["fornecedor VARCHAR"]
-        P4["Status strings"]
-        P5["100-col produto"]
-        P6["No audit trail"]
-        P7["Returns incomplete"]
-        P8["idRelacionado chains"]
+        P4["Strings de status"]
+        P5["produto 100 colunas"]
+        P6["Sem trilha de auditoria"]
+        P7["Devoluções incompletas"]
+        P8["Cadeias idRelacionado"]
     end
 
-    subgraph Solutions["✅ Solutions"]
-        S1["Single table with parent_id/root_id"]
-        S2["FIFO selection via ORDER BY data_entrada"]
-        S3["fornecedor_id FK everywhere"]
-        S4["PostgreSQL ENUMs + state machine"]
-        S5["Split into produto + precos + tributos"]
-        S6["audit_log + temporal columns"]
-        S7["Proper reversal flow with NFe Devolução"]
-        S8["Clear parent_id + root_id hierarchy"]
+    subgraph Solutions["Soluções"]
+        S1["Tabela única com parent_id/root_id"]
+        S2["Seleção FIFO via ORDER BY data_entrada"]
+        S3["fornecedor_id FK em todo lugar"]
+        S4["ENUMs PostgreSQL + máquina de estados"]
+        S5["Dividir em produto + preços + tributos"]
+        S6["audit_log + colunas temporais"]
+        S7["Fluxo de reversão adequado com NFe Devolução"]
+        S8["Hierarquia clara parent_id + root_id"]
     end
 
     P1 --> S1
@@ -70,13 +70,13 @@ flowchart LR
 
 ---
 
-## 2. Core Entity Model
+## 2. Modelo de Entidades Principal
 
-### 2.1 Entity Relationship Overview
+### 2.1 Visão Geral do Relacionamento de Entidades
 
 ```mermaid
 flowchart TB
-    subgraph MasterData["Master Data"]
+    subgraph MasterData["Dados Mestres"]
         Lojas["lojas"]
         Fornecedores["fornecedores"]
         Usuarios["usuarios"]
@@ -89,7 +89,7 @@ flowchart TB
     Lojas --> Clientes
     Fornecedores --> Produtos
 
-    subgraph TransactionFlow["TRANSACTION FLOW"]
+    subgraph TransactionFlow["FLUXO DE TRANSAÇÕES"]
         OrcamentoItens["orcamento_itens"]
         VendaItens["venda_itens"]
         CompraItens["compra_itens"]
@@ -113,101 +113,101 @@ flowchart TB
     Clientes --> TransactionFlow
 
     subgraph Financeiro["FINANCEIRO"]
-        Recebiveis["recebíveis"]
-        Pagaveis["pagáveis"]
+        Recebiveis["recebiveis"]
+        Pagaveis["pagaveis"]
     end
 
     TransactionFlow --> Financeiro
 ```
 
-### 2.2 Key Design Decisions
+### 2.2 Decisões Chave de Design
 
-**Single Item Tables**: Each level of the flow has ONE item table:
-- `orcamento_itens` - Quote line items
-- `venda_itens` - Sale line items (with splits via parent_id)
-- `compra_itens` - Purchase order line items
-- `nfe_itens` - NFe line items
-- `estoques` - Stock records (one per batch/NFe line)
-- `estoque_consumos` - Consumption records (FIFO)
-- `entrega_itens` - Delivery line items
+**Tabelas de Itens Únicas**: Cada nível do fluxo tem UMA tabela de itens:
+- `orcamento_itens` - Itens do Orçamento
+- `venda_itens` - Itens da Venda (com splits via parent_id)
+- `compra_itens` - Itens do pedido de compra
+- `nfe_itens` - Itens da NFe
+- `estoques` - Registros de estoque (um por lote/linha NFe)
+- `estoque_consumos` - Registros de consumo (FIFO)
+- `entrega_itens` - Itens de entrega
 
-**Linking Strategy**: Clear FK relationships, no denormalized copies
+**Estratégia de Vinculação**: Relacionamentos FK claros, sem cópias desnormalizadas
 
 ---
 
-## 3. The Order-to-Delivery Flow
+## 3. Fluxo do Pedido até a Entrega
 
-### 3.1 Complete Flow Diagram
+### 3.1 Diagrama de Fluxo Completo
 
 ```mermaid
 flowchart TB
-    subgraph Step1["1. QUOTE (Orçamento)"]
-        Q1["Customer requests quote"]
-        Q2["Items added"]
-        Q3["Price calculated"]
-        Q4["Sent"]
+    subgraph Step1["1. ORÇAMENTO"]
+        Q1["Cliente solicita orçamento"]
+        Q2["Itens adicionados"]
+        Q3["Preço calculado"]
+        Q4["Enviado"]
         Q1 --> Q2 --> Q3 --> Q4
         QTables["orcamentos + orcamento_itens"]
     end
 
-    Step1 -->|Convert to Sale| Step2
+    Step1 -->|Converter para Venda| Step2
 
-    subgraph Step2["2. SALE (Venda)"]
-        S1["Quote approved"]
-        S2["Sale created"]
-        S3["Payment terms set"]
+    subgraph Step2["2. VENDA"]
+        S1["Orçamento aprovado"]
+        S2["Venda criada"]
+        S3["Condições de pagamento definidas"]
         S1 --> S2 --> S3
         STables["vendas + venda_itens"]
 
-        Decision{"For each item"}
-        Decision -->|"origem = 'ESTOQUE'"| FromStock["Consume from existing stock"]
-        Decision -->|"origem = 'COMPRA'"| ToOrder["Generate purchase order"]
+        Decision{"Para cada item"}
+        Decision -->|"origem = 'ESTOQUE'"| FromStock["Consumir do estoque existente"]
+        Decision -->|"origem = 'COMPRA'"| ToOrder["Gerar pedido de compra"]
     end
 
     FromStock --> Step2a
     ToOrder --> Step3
 
-    subgraph Step2a["2a. STOCK CONSUMPTION"]
-        SC1["FIFO selection"]
+    subgraph Step2a["2a. CONSUMO DE ESTOQUE"]
+        SC1["Seleção FIFO"]
         SC2["estoque_consumos"]
     end
 
-    subgraph Step3["3. PURCHASE (Compra)"]
-        P1["Group by supplier"]
+    subgraph Step3["3. COMPRA"]
+        P1["Agrupar por fornecedor"]
         P2["compras + compra_itens"]
     end
 
-    Step3 -->|Confirm| Step4
+    Step3 -->|Confirmar| Step4
 
-    subgraph Step4["4. NFe IMPORT"]
-        N1["XML received"]
-        N2["Parsed"]
+    subgraph Step4["4. IMPORTAÇÃO NFe"]
+        N1["XML recebido"]
+        N2["Parseado"]
         N3["nfes + nfe_itens"]
-        N4["Creates estoque records"]
+        N4["Cria registros de estoque"]
         N1 --> N2 --> N3 --> N4
     end
 
     Step4 --> Step5
 
-    subgraph Step5["5. STOCK CREATION"]
-        ST1["estoques (one per NFe line)"]
-        ST2["Linked to compra_item"]
+    subgraph Step5["5. CRIAÇÃO DE ESTOQUE"]
+        ST1["estoques (um por linha NFe)"]
+        ST2["Vinculado ao compra_item"]
     end
 
     Step5 --> Step5a
     Step2a --> Step5a
 
-    subgraph Step5a["5a. CONSUMPTION (for sale)"]
-        CON1["Link stock to venda_item"]
+    subgraph Step5a["5a. CONSUMO (para venda)"]
+        CON1["Vincular estoque ao venda_item"]
         CON2["estoque_consumos"]
     end
 
     Step5a --> Step6
 
-    subgraph Step6["6. LOGISTICS"]
-        L1["COLETA<br/>(Pickup)"]
-        L2["RECEBIMENTO<br/>(Receiving)"]
-        L3["ENTREGA<br/>(Delivery)"]
+    subgraph Step6["6. LOGÍSTICA"]
+        L1["COLETA"]
+        L2["RECEBIMENTO"]
+        L3["ENTREGA"]
         L1 --> L2 --> L3
         LTables["entregas + entrega_itens"]
     end
@@ -215,48 +215,48 @@ flowchart TB
     Step6 --> Step7
 
     subgraph Step7["7. NFe SAÍDA"]
-        NFS1["Generate outgoing NFe"]
-        NFS2["SEFAZ authorization"]
-        NFS3["DANFE printed"]
+        NFS1["Gerar NFe de saída"]
+        NFS2["Autorização SEFAZ"]
+        NFS3["DANFE impresso"]
         NFS1 --> NFS2 --> NFS3
         NFTables["nfes (tipo = 'SAIDA')"]
     end
 
     Step7 --> Step8
 
-    subgraph Step8["8. FINANCIAL"]
-        F1["recebíveis (from venda)"]
-        F2["pagáveis (from compra)"]
-        F3["CNAB generation"]
-        F4["Bank reconciliation"]
+    subgraph Step8["8. FINANCEIRO"]
+        F1["recebiveis (da venda)"]
+        F2["pagaveis (da compra)"]
+        F3["Geração CNAB"]
+        F4["Conciliação bancária"]
         F1 --> F3
         F2 --> F3
         F3 --> F4
     end
 ```
 
-### 3.2 Split Handling
+### 3.2 Tratamento de Splits
 
 ```mermaid
 flowchart TB
-    subgraph Original["ORIGINAL ORDER: Customer orders 100 units"]
+    subgraph Original["PEDIDO ORIGINAL: Cliente pede 100 unidades"]
         O1["venda_itens"]
         O2["id=1, venda_id=100, produto_id=50"]
         O3["quantidade=100"]
-        O4["parent_id=NULL, root_id=NULL ← Original line"]
+        O4["parent_id=NULL, root_id=NULL - Linha original"]
         O5["status='PENDENTE'"]
     end
 
-    Original -->|"NFe arrives with only 60 units (split!)"| AfterSplit
+    Original -->|"NFe chega com apenas 60 unidades (split!)"| AfterSplit
 
-    subgraph AfterSplit["venda_itens (after split)"]
-        subgraph Item1["Updated Original"]
+    subgraph AfterSplit["venda_itens (após split)"]
+        subgraph Item1["Original Atualizado"]
             A1["id=1, quantidade=60"]
             A2["parent_id=NULL, root_id=NULL"]
             A3["status='ESTOQUE'"]
         end
 
-        subgraph Item2["Split Remainder"]
+        subgraph Item2["Resto do Split"]
             B1["id=2, quantidade=40"]
             B2["parent_id=1, root_id=1"]
             B3["status='PENDENTE'"]
@@ -266,68 +266,68 @@ flowchart TB
 
     AfterSplit --> Query
 
-    subgraph Query["Query: Get all items for original order"]
+    subgraph Query["Query: Obter todos itens do pedido original"]
         Q1["SELECT * FROM venda_itens"]
         Q2["WHERE id = 1 OR root_id = 1"]
-        Q3["Returns: original (60) + split (40) = 100 total"]
+        Q3["Retorna: original (60) + split (40) = 100 total"]
     end
 ```
 
 ---
 
-## 4. Complete Schema
+## 4. Schema Completo
 
 ### 4.1 ENUMs
 
 ```sql
--- Venda Item Status
+-- Status de Item de Venda
 CREATE TYPE venda_item_status AS ENUM (
-    'PENDENTE',           -- Awaiting purchase
-    'EM_COMPRA',          -- Purchase order created
-    'CONFIRMADO',         -- Supplier confirmed
-    'FATURADO',           -- NFe received
-    'EM_COLETA',          -- Ready for pickup
-    'EM_RECEBIMENTO',     -- Being received
-    'ESTOQUE',            -- In stock
-    'ENTREGA_AGENDADA',   -- Delivery scheduled
-    'EM_ENTREGA',         -- Out for delivery
-    'ENTREGUE',           -- Delivered
-    'DEVOLVIDO',          -- Returned
-    'CANCELADO'           -- Cancelled
+    'PENDENTE',           -- Aguardando compra
+    'EM_COMPRA',          -- Pedido de compra criado
+    'CONFIRMADO',         -- Fornecedor confirmou
+    'FATURADO',           -- NFe recebida
+    'EM_COLETA',          -- Pronto para coleta
+    'EM_RECEBIMENTO',     -- Sendo recebido
+    'ESTOQUE',            -- Em estoque
+    'ENTREGA_AGENDADA',   -- Entrega agendada
+    'EM_ENTREGA',         -- Saiu para entrega
+    'ENTREGUE',           -- Entregue
+    'DEVOLVIDO',          -- Devolvido
+    'CANCELADO'           -- Cancelado
 );
 
--- Compra Item Status
+-- Status de Item de Compra
 CREATE TYPE compra_item_status AS ENUM (
-    'PENDENTE',           -- Awaiting confirmation
-    'CONFIRMADO',         -- Supplier confirmed
-    'FATURADO',           -- NFe received
-    'EM_COLETA',          -- Ready for pickup
-    'EM_RECEBIMENTO',     -- Being received
-    'RECEBIDO',           -- In stock
-    'CANCELADO'           -- Cancelled
+    'PENDENTE',           -- Aguardando confirmação
+    'CONFIRMADO',         -- Fornecedor confirmou
+    'FATURADO',           -- NFe recebida
+    'EM_COLETA',          -- Pronto para coleta
+    'EM_RECEBIMENTO',     -- Sendo recebido
+    'RECEBIDO',           -- Em estoque
+    'CANCELADO'           -- Cancelado
 );
 
--- NFe Status
+-- Status de NFe
 CREATE TYPE nfe_status AS ENUM (
-    'RASCUNHO',           -- Draft
-    'PENDENTE',           -- Awaiting authorization
-    'PROCESSANDO',        -- Sent to SEFAZ
-    'AUTORIZADA',         -- Authorized
-    'REJEITADA',          -- Rejected
-    'CANCELADA',          -- Cancelled
-    'DENEGADA',           -- Denied
-    'INUTILIZADA'         -- Voided range
+    'RASCUNHO',           -- Rascunho
+    'PENDENTE',           -- Aguardando autorização
+    'PROCESSANDO',        -- Enviado ao SEFAZ
+    'AUTORIZADA',         -- Autorizada
+    'REJEITADA',          -- Rejeitada
+    'CANCELADA',          -- Cancelada
+    'DENEGADA',           -- Denegada
+    'INUTILIZADA'         -- Faixa inutilizada
 );
 
--- NFe Type
+-- Tipo de NFe
 CREATE TYPE nfe_tipo AS ENUM (
-    'ENTRADA',            -- Incoming (from supplier)
-    'SAIDA',              -- Outgoing (to customer)
-    'DEVOLUCAO_ENTRADA',  -- Return from customer
-    'DEVOLUCAO_SAIDA'     -- Return to supplier
+    'ENTRADA',            -- Entrada (do fornecedor)
+    'SAIDA',              -- Saída (para cliente)
+    'DEVOLUCAO_ENTRADA',  -- Devolução do cliente
+    'DEVOLUCAO_SAIDA'     -- Devolução para fornecedor
 );
 
--- Financeiro Status
+-- Status Financeiro
 CREATE TYPE financeiro_status AS ENUM (
     'PENDENTE',
     'AGENDADO',
@@ -338,10 +338,10 @@ CREATE TYPE financeiro_status AS ENUM (
 );
 ```
 
-### 4.2 Master Data Tables
+### 4.2 Tabelas de Dados Mestres
 
 ```sql
--- Lojas (Stores/Warehouses)
+-- Lojas (Lojas/Armazéns)
 CREATE TABLE lojas (
     id SERIAL PRIMARY KEY,
     codigo VARCHAR(10) UNIQUE NOT NULL,
@@ -349,10 +349,10 @@ CREATE TABLE lojas (
     cnpj VARCHAR(18) UNIQUE NOT NULL,
     inscricao_estadual VARCHAR(20),
 
-    -- Address
+    -- Endereço
     endereco_id INTEGER REFERENCES enderecos(id),
 
-    -- Settings
+    -- Configurações
     config JSONB DEFAULT '{}',
 
     ativo BOOLEAN DEFAULT TRUE,
@@ -360,7 +360,7 @@ CREATE TABLE lojas (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Fornecedores (Suppliers)
+-- Fornecedores
 CREATE TABLE fornecedores (
     id SERIAL PRIMARY KEY,
     razao_social VARCHAR(200) NOT NULL,
@@ -368,16 +368,16 @@ CREATE TABLE fornecedores (
     cnpj VARCHAR(18) UNIQUE,
     inscricao_estadual VARCHAR(20),
 
-    -- Contact
+    -- Contato
     email VARCHAR(200),
     telefone VARCHAR(20),
 
-    -- Banking
+    -- Dados bancários
     banco VARCHAR(100),
     agencia VARCHAR(20),
     conta VARCHAR(20),
 
-    -- Business rules
+    -- Regras de negócio
     comissao_percentual DECIMAL(5,2) DEFAULT 0,
     frete_pago_loja BOOLEAN DEFAULT FALSE,
     is_representacao BOOLEAN DEFAULT FALSE,
@@ -388,7 +388,7 @@ CREATE TABLE fornecedores (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Clientes (Customers)
+-- Clientes
 CREATE TABLE clientes (
     id SERIAL PRIMARY KEY,
     tipo CHAR(2) NOT NULL CHECK (tipo IN ('PF', 'PJ')),
@@ -397,11 +397,11 @@ CREATE TABLE clientes (
     cpf_cnpj VARCHAR(18) UNIQUE NOT NULL,
     inscricao_estadual VARCHAR(20),
 
-    -- Contact
+    -- Contato
     email VARCHAR(200),
     telefone VARCHAR(20),
 
-    -- Credit
+    -- Crédito
     limite_credito DECIMAL(15,2) DEFAULT 0,
     saldo_credito DECIMAL(15,2) DEFAULT 0,
 
@@ -414,23 +414,23 @@ CREATE TABLE clientes (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Produtos (Products) - SPLIT from mega-table
+-- Produtos - DIVIDIDO da mega-tabela
 CREATE TABLE produtos (
     id SERIAL PRIMARY KEY,
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
 
-    -- Identification
+    -- Identificação
     codigo_comercial VARCHAR(100) NOT NULL,
     codigo_barras VARCHAR(50),
     descricao VARCHAR(500) NOT NULL,
     descricao_curta VARCHAR(100),
 
-    -- Units
+    -- Unidades
     unidade VARCHAR(10) DEFAULT 'UN',
     unidades_por_caixa DECIMAL(10,4) DEFAULT 1,
     peso_kg DECIMAL(10,4),
 
-    -- Classification
+    -- Classificação
     ncm_id INTEGER REFERENCES ncms(id),
     categoria_id INTEGER REFERENCES categorias(id),
 
@@ -444,7 +444,7 @@ CREATE TABLE produtos (
     UNIQUE(fornecedor_id, codigo_comercial)
 );
 
--- Preços (versioned pricing)
+-- Preços (versionados)
 CREATE TABLE produto_precos (
     id SERIAL PRIMARY KEY,
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
@@ -462,7 +462,7 @@ CREATE TABLE produto_precos (
     created_by INTEGER REFERENCES usuarios(id)
 );
 
--- Tributos (tax configuration)
+-- Tributos (configuração de impostos)
 CREATE TABLE produto_tributos (
     produto_id INTEGER PRIMARY KEY REFERENCES produtos(id),
 
@@ -491,27 +491,27 @@ CREATE TABLE produto_tributos (
 );
 ```
 
-### 4.3 Transaction Tables
+### 4.3 Tabelas de Transações
 
 ```sql
--- Vendas (Sales Header)
+-- Vendas (Cabeçalho)
 CREATE TABLE vendas (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     cliente_id INTEGER NOT NULL REFERENCES clientes(id),
     vendedor_id INTEGER NOT NULL REFERENCES usuarios(id),
 
-    -- Dates
+    -- Datas
     data_emissao DATE NOT NULL DEFAULT CURRENT_DATE,
 
-    -- Totals (denormalized for performance)
+    -- Totais (desnormalizados para performance)
     subtotal DECIMAL(15,2) NOT NULL DEFAULT 0,
     desconto_percentual DECIMAL(5,2) DEFAULT 0,
     desconto_valor DECIMAL(15,2) DEFAULT 0,
     frete DECIMAL(15,2) DEFAULT 0,
     total DECIMAL(15,2) NOT NULL DEFAULT 0,
 
-    -- Delivery
+    -- Entrega
     endereco_entrega_id INTEGER REFERENCES enderecos(id),
 
     -- Status
@@ -521,78 +521,78 @@ CREATE TABLE vendas (
     -- Links
     orcamento_id INTEGER REFERENCES orcamentos(id),
 
-    -- Audit
+    -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
     created_by INTEGER REFERENCES usuarios(id)
 );
 
--- Venda Itens (Single table, no L1/L2!)
+-- Venda Itens (Tabela única, sem L1/L2!)
 CREATE TABLE venda_itens (
     id SERIAL PRIMARY KEY,
     venda_id INTEGER NOT NULL REFERENCES vendas(id) ON DELETE CASCADE,
 
-    -- Split hierarchy
+    -- Hierarquia de split
     parent_id INTEGER REFERENCES venda_itens(id),
     root_id INTEGER REFERENCES venda_itens(id),
     split_reason VARCHAR(50),  -- PARTIAL_NFE, PARTIAL_DELIVERY, RETURN
 
-    -- Product (FK, not denormalized!)
+    -- Produto (FK, não desnormalizado!)
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
 
-    -- Quantities
+    -- Quantidades
     quantidade DECIMAL(15,4) NOT NULL,
     quantidade_caixas DECIMAL(15,4),
     unidade VARCHAR(10) DEFAULT 'UN',
 
-    -- Pricing (snapshot at sale time)
+    -- Preços (snapshot no momento da venda)
     preco_unitario DECIMAL(15,4) NOT NULL,
     desconto_item_percentual DECIMAL(5,2) DEFAULT 0,
     preco_com_desconto DECIMAL(15,4),
     total DECIMAL(15,2) NOT NULL,
 
-    -- Denormalized for display (snapshot)
+    -- Desnormalizados para exibição (snapshot)
     descricao_produto VARCHAR(500),
     codigo_comercial VARCHAR(100),
 
-    -- Source
+    -- Origem
     origem VARCHAR(20) NOT NULL CHECK (origem IN ('COMPRA', 'ESTOQUE')),
 
     -- Status
     status venda_item_status NOT NULL DEFAULT 'PENDENTE',
 
-    -- Dates
+    -- Datas
     data_prev_entrega DATE,
     data_real_entrega TIMESTAMP,
 
-    -- Delivery
+    -- Entrega
     entregue_por VARCHAR(100),
     recebido_por VARCHAR(100),
 
     -- NFe
     nfe_saida_id INTEGER REFERENCES nfes(id),
 
-    -- Audit
+    -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Compras (Purchase Header)
+-- Compras (Cabeçalho)
 CREATE TABLE compras (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
 
     -- Links
-    venda_id INTEGER REFERENCES vendas(id),  -- If generated from sale
+    venda_id INTEGER REFERENCES vendas(id),  -- Se gerada de venda
 
-    -- Totals
+    -- Totais
     subtotal DECIMAL(15,2) DEFAULT 0,
     frete DECIMAL(15,2) DEFAULT 0,
     total DECIMAL(15,2) DEFAULT 0,
 
-    -- Dates
+    -- Datas
     data_emissao DATE DEFAULT CURRENT_DATE,
     data_prev_entrega DATE,
     data_real_entrega DATE,
@@ -612,22 +612,22 @@ CREATE TABLE compra_itens (
     id SERIAL PRIMARY KEY,
     compra_id INTEGER NOT NULL REFERENCES compras(id) ON DELETE CASCADE,
 
-    -- Split hierarchy
+    -- Hierarquia de split
     parent_id INTEGER REFERENCES compra_itens(id),
     root_id INTEGER REFERENCES compra_itens(id),
     split_reason VARCHAR(50),
 
-    -- Product
+    -- Produto
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
 
-    -- Link to sale item (if from sale)
+    -- Link para item de venda (se de venda)
     venda_item_id INTEGER REFERENCES venda_itens(id),
 
-    -- Quantities
+    -- Quantidades
     quantidade DECIMAL(15,4) NOT NULL,
     quantidade_caixas DECIMAL(15,4),
 
-    -- Pricing
+    -- Preços
     preco_unitario DECIMAL(15,4),
     total DECIMAL(15,2),
 
@@ -639,68 +639,68 @@ CREATE TABLE compra_itens (
 );
 ```
 
-### 4.4 Stock Tables
+### 4.4 Tabelas de Estoque
 
 ```sql
--- Estoques (Stock - one record per batch/NFe line)
+-- Estoques (Estoque - um registro por lote/linha NFe)
 CREATE TABLE estoques (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
 
-    -- Source
+    -- Origem
     nfe_entrada_id INTEGER REFERENCES nfes(id),
     nfe_item_id INTEGER REFERENCES nfe_itens(id),
     compra_item_id INTEGER REFERENCES compra_itens(id),
 
-    -- Quantities
+    -- Quantidades
     quantidade_original DECIMAL(15,4) NOT NULL,
     quantidade_disponivel DECIMAL(15,4) NOT NULL,
 
-    -- Cost
+    -- Custo
     custo_unitario DECIMAL(15,4) NOT NULL,
     custo_total DECIMAL(15,2) NOT NULL,
 
-    -- Tracking
+    -- Rastreamento
     lote VARCHAR(50),
     data_validade DATE,
 
-    -- Location
+    -- Localização
     bloco_id INTEGER REFERENCES galpao_blocos(id),
 
     -- Status
     status VARCHAR(20) DEFAULT 'DISPONIVEL',
 
-    -- FIFO key
+    -- Chave FIFO
     data_entrada TIMESTAMP NOT NULL DEFAULT NOW(),
 
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Index for FIFO
+-- Índice para FIFO
 CREATE INDEX idx_estoques_fifo
     ON estoques(produto_id, loja_id, data_entrada)
     WHERE quantidade_disponivel > 0;
 
--- Estoque Consumos (Stock Consumption - FIFO records)
+-- Estoque Consumos (Consumo de Estoque - registros FIFO)
 CREATE TABLE estoque_consumos (
     id SERIAL PRIMARY KEY,
     estoque_id INTEGER NOT NULL REFERENCES estoques(id),
 
-    -- What consumed it
+    -- O que consumiu
     venda_item_id INTEGER REFERENCES venda_itens(id),
 
-    -- Quantities
+    -- Quantidades
     quantidade DECIMAL(15,4) NOT NULL,
     custo_unitario DECIMAL(15,4) NOT NULL,
     custo_total DECIMAL(15,2) NOT NULL,
 
-    -- Type
+    -- Tipo
     motivo VARCHAR(50) NOT NULL,  -- VENDA, AJUSTE, QUEBRA, TRANSFERENCIA
 
-    -- Reversal
+    -- Reversão
     estornado BOOLEAN DEFAULT FALSE,
     estornado_at TIMESTAMP,
     estorno_motivo VARCHAR(200),
@@ -710,28 +710,28 @@ CREATE TABLE estoque_consumos (
 );
 ```
 
-### 4.5 NFe Tables
+### 4.5 Tabelas de NFe
 
 ```sql
--- NFes (Header)
+-- NFes (Cabeçalho)
 CREATE TABLE nfes (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
 
-    -- Type
+    -- Tipo
     tipo nfe_tipo NOT NULL,
     modelo VARCHAR(2) DEFAULT '55',  -- 55=NFe, 65=NFCe
 
-    -- Identification
+    -- Identificação
     numero INTEGER,
     serie INTEGER DEFAULT 1,
     chave VARCHAR(44) UNIQUE,
 
-    -- Parties
-    emitente_id INTEGER,  -- FK to fornecedor or loja
-    destinatario_id INTEGER,  -- FK to cliente or fornecedor
+    -- Partes
+    emitente_id INTEGER,  -- FK para fornecedor ou loja
+    destinatario_id INTEGER,  -- FK para cliente ou fornecedor
 
-    -- Totals
+    -- Totais
     valor_produtos DECIMAL(15,2),
     valor_frete DECIMAL(15,2),
     valor_total DECIMAL(15,2),
@@ -744,7 +744,7 @@ CREATE TABLE nfes (
     xml_envio TEXT,
     xml_retorno TEXT,
 
-    -- Dates
+    -- Datas
     data_emissao TIMESTAMP,
     data_autorizacao TIMESTAMP,
 
@@ -763,22 +763,22 @@ CREATE TABLE nfe_itens (
 
     numero_item INTEGER NOT NULL,
 
-    -- Product
+    -- Produto
     produto_id INTEGER REFERENCES produtos(id),
     codigo VARCHAR(100),
     descricao VARCHAR(500),
     ncm VARCHAR(10),
     cfop VARCHAR(4),
 
-    -- Quantities
+    -- Quantidades
     quantidade DECIMAL(15,4) NOT NULL,
     unidade VARCHAR(10),
 
-    -- Values
+    -- Valores
     valor_unitario DECIMAL(15,4),
     valor_total DECIMAL(15,2),
 
-    -- Taxes (JSONB for flexibility)
+    -- Impostos (JSONB para flexibilidade)
     impostos JSONB,
 
     -- Links
@@ -789,33 +789,33 @@ CREATE TABLE nfe_itens (
 );
 ```
 
-### 4.6 Financial Tables
+### 4.6 Tabelas Financeiras
 
 ```sql
--- Recebíveis (Accounts Receivable)
+-- Recebíveis (Contas a Receber)
 CREATE TABLE recebiveis (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     cliente_id INTEGER NOT NULL REFERENCES clientes(id),
     venda_id INTEGER REFERENCES vendas(id),
 
-    -- Payment info
+    -- Info de pagamento
     tipo_pagamento VARCHAR(50),  -- BOLETO, CARTAO, PIX, etc.
     parcela INTEGER DEFAULT 1,
     total_parcelas INTEGER DEFAULT 1,
 
-    -- Values
+    -- Valores
     valor DECIMAL(15,2) NOT NULL,
     valor_recebido DECIMAL(15,2) DEFAULT 0,
 
-    -- Dates
+    -- Datas
     data_vencimento DATE NOT NULL,
     data_recebimento DATE,
 
     -- Status
     status financeiro_status DEFAULT 'PENDENTE',
 
-    -- Bank
+    -- Banco
     nosso_numero VARCHAR(50),
     linha_digitavel VARCHAR(100),
 
@@ -823,23 +823,23 @@ CREATE TABLE recebiveis (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Pagáveis (Accounts Payable)
+-- Pagáveis (Contas a Pagar)
 CREATE TABLE pagaveis (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
     compra_id INTEGER REFERENCES compras(id),
 
-    -- Payment info
+    -- Info de pagamento
     tipo VARCHAR(50),  -- DUPLICATA, BOLETO, etc.
     parcela INTEGER DEFAULT 1,
     total_parcelas INTEGER DEFAULT 1,
 
-    -- Values
+    -- Valores
     valor DECIMAL(15,2) NOT NULL,
     valor_pago DECIMAL(15,2) DEFAULT 0,
 
-    -- Dates
+    -- Datas
     data_vencimento DATE NOT NULL,
     data_pagamento DATE,
 
@@ -851,28 +851,28 @@ CREATE TABLE pagaveis (
 );
 ```
 
-### 4.7 Audit Table
+### 4.7 Tabela de Auditoria
 
 ```sql
--- Audit Log
+-- Log de Auditoria
 CREATE TABLE audit_log (
     id BIGSERIAL PRIMARY KEY,
 
-    -- What changed
+    -- O que mudou
     tabela VARCHAR(100) NOT NULL,
     registro_id INTEGER NOT NULL,
     acao VARCHAR(20) NOT NULL,  -- INSERT, UPDATE, DELETE
 
-    -- Changes
+    -- Mudanças
     dados_antigos JSONB,
     dados_novos JSONB,
     campos_alterados TEXT[],
 
-    -- Who and when
+    -- Quem e quando
     usuario_id INTEGER REFERENCES usuarios(id),
     ip_address INET,
 
-    -- Context
+    -- Contexto
     transacao_id VARCHAR(100),
     modulo VARCHAR(50),
 
@@ -886,41 +886,41 @@ CREATE INDEX idx_audit_usuario ON audit_log(usuario_id);
 
 ---
 
-## 5. Status State Machines
+## 5. Máquinas de Estado de Status
 
-### 5.1 Venda Item Status
+### 5.1 Status de Item de Venda
 
 ```mermaid
 stateDiagram-v2
     [*] --> PENDENTE
 
-    PENDENTE --> EM_COMPRA : Generate PO
-    PENDENTE --> ESTOQUE : From stock
-    PENDENTE --> CANCELADO : Cancel
+    PENDENTE --> EM_COMPRA : Gerar PC
+    PENDENTE --> ESTOQUE : Do estoque
+    PENDENTE --> CANCELADO : Cancelar
 
-    EM_COMPRA --> CONFIRMADO : Supplier confirms
-    CONFIRMADO --> FATURADO : NFe received
+    EM_COMPRA --> CONFIRMADO : Fornecedor confirma
+    CONFIRMADO --> FATURADO : NFe recebida
 
-    FATURADO --> EM_COLETA : Ready for pickup
-    EM_COLETA --> EM_RECEBIMENTO : Receiving
-    EM_RECEBIMENTO --> ESTOQUE : In stock
+    FATURADO --> EM_COLETA : Pronto para coleta
+    EM_COLETA --> EM_RECEBIMENTO : Recebendo
+    EM_RECEBIMENTO --> ESTOQUE : Em estoque
 
-    ESTOQUE --> ENTREGA_AGENDADA : Schedule delivery
-    ESTOQUE --> CANCELADO : Cancel
+    ESTOQUE --> ENTREGA_AGENDADA : Agendar entrega
+    ESTOQUE --> CANCELADO : Cancelar
 
-    ENTREGA_AGENDADA --> EM_ENTREGA : Out for delivery
-    ENTREGA_AGENDADA --> ESTOQUE : Unschedule
+    ENTREGA_AGENDADA --> EM_ENTREGA : Saiu para entrega
+    ENTREGA_AGENDADA --> ESTOQUE : Desagendar
 
-    EM_ENTREGA --> ENTREGUE : Delivered
-    EM_ENTREGA --> ESTOQUE : Failed delivery
+    EM_ENTREGA --> ENTREGUE : Entregue
+    EM_ENTREGA --> ESTOQUE : Entrega falhou
 
-    ENTREGUE --> DEVOLVIDO : Return
+    ENTREGUE --> DEVOLVIDO : Devolução
 
     CANCELADO --> [*]
     DEVOLVIDO --> [*]
 ```
 
-### 5.2 Transition Rules (Laravel)
+### 5.2 Regras de Transição (Laravel)
 
 ```php
 enum VendaItemStatus: string
@@ -965,52 +965,52 @@ enum VendaItemStatus: string
 
 ---
 
-## 6. Key Improvements
+## 6. Principais Melhorias
 
-### 6.1 Summary of Changes
+### 6.1 Resumo das Mudanças
 
-| Problem | Current | New Design |
-|---------|---------|------------|
-| **L1/L2 Tables** | 2 tables + idRelacionado | 1 table + parent_id/root_id |
+| Problema | Atual | Novo Design |
+|----------|-------|-------------|
+| **Tabelas L1/L2** | 2 tabelas + idRelacionado | 1 tabela + parent_id/root_id |
 | **FIFO** | produto.idEstoque | ORDER BY data_entrada |
-| **Supplier refs** | VARCHAR in 9 tables | fornecedor_id FK |
-| **Status** | Magic strings | PostgreSQL ENUMs |
-| **Produto table** | 100+ columns | Split into 3 tables |
-| **Audit** | None | audit_log table |
-| **Returns** | Incomplete | Proper flow with NFe |
+| **Refs de fornecedor** | VARCHAR em 9 tabelas | fornecedor_id FK |
+| **Status** | Strings mágicas | ENUMs PostgreSQL |
+| **Tabela produto** | 100+ colunas | Dividida em 3 tabelas |
+| **Auditoria** | Nenhuma | tabela audit_log |
+| **Devoluções** | Incompleto | Fluxo adequado com NFe |
 
-### 6.2 Query Simplifications
+### 6.2 Simplificações de Query
 
-**Old: Find all items for a sale (with splits)**
+**Antigo: Buscar todos itens de uma venda (com splits)**
 ```sql
--- Complex: join L1+L2, follow idRelacionado chains
+-- Complexo: join L1+L2, seguir cadeias idRelacionado
 SELECT vp1.*, vp2.*
 FROM venda_has_produto vp1
 JOIN venda_has_produto2 vp2 ON vp1.idVendaProduto = vp2.idVendaProdutoFK
 WHERE vp1.idVenda = :venda_id
-  OR vp2.idRelacionado IN (SELECT ...)  -- Recursive nightmare
+  OR vp2.idRelacionado IN (SELECT ...)  -- Pesadelo recursivo
 ```
 
-**New: Simple query**
+**Novo: Query simples**
 ```sql
--- Easy: query single table
+-- Fácil: query em tabela única
 SELECT * FROM venda_itens
 WHERE venda_id = :venda_id;
 
--- Get splits for an item
+-- Obter splits de um item
 SELECT * FROM venda_itens
 WHERE root_id = :item_id OR id = :item_id;
 ```
 
-**Old: Get supplier for stock**
+**Antigo: Obter fornecedor do estoque**
 ```sql
--- String-based, error-prone
+-- Baseado em string, propenso a erros
 SELECT * FROM estoque WHERE fornecedor = 'ACME Corp';
 ```
 
-**New: FK-based**
+**Novo: Baseado em FK**
 ```sql
--- Fast, reliable
+-- Rápido, confiável
 SELECT e.* FROM estoques e
 JOIN fornecedores f ON e.fornecedor_id = f.id
 WHERE f.id = :fornecedor_id;
@@ -1018,36 +1018,36 @@ WHERE f.id = :fornecedor_id;
 
 ---
 
-## 7. Event-Driven Architecture
+## 7. Arquitetura Orientada a Eventos
 
-### 7.1 Key Events
+### 7.1 Eventos Chave
 
 ```php
-// Sale events
-VendaCriada::class        // → Generate purchase orders if needed
+// Eventos de venda
+VendaCriada::class        // → Gerar pedidos de compra se necessário
 VendaItemAdicionado::class
-VendaCancelada::class     // → Reverse consumptions, cancel purchases
+VendaCancelada::class     // → Reverter consumos, cancelar compras
 
-// Purchase events
+// Eventos de compra
 CompraCriada::class
-CompraConfirmada::class   // → Create pagáveis
-NfeImportada::class       // → Create estoques, link to compra
+CompraConfirmada::class   // → Criar pagáveis
+NfeImportada::class       // → Criar estoques, vincular a compra
 
-// Stock events
+// Eventos de estoque
 EstoqueCriado::class
-EstoqueConsumido::class   // → Update quantidade_disponivel
-EstoqueEstornado::class   // → Reverse consumption
+EstoqueConsumido::class   // → Atualizar quantidade_disponivel
+EstoqueEstornado::class   // → Reverter consumo
 
-// Delivery events
+// Eventos de entrega
 EntregaAgendada::class
-EntregaConfirmada::class  // → Update financeiro, emit NFe
+EntregaConfirmada::class  // → Atualizar financeiro, emitir NFe
 
-// Financial events
+// Eventos financeiros
 RecebimentoConfirmado::class
 PagamentoRealizado::class
 ```
 
-### 7.2 Event Handler Example
+### 7.2 Exemplo de Handler de Evento
 
 ```php
 class NfeImportadaHandler
@@ -1056,7 +1056,7 @@ class NfeImportadaHandler
     {
         $nfe = $event->nfe;
 
-        // Create stock for each NFe item
+        // Criar estoque para cada item da NFe
         foreach ($nfe->itens as $item) {
             $estoque = Estoque::create([
                 'loja_id' => $nfe->loja_id,
@@ -1071,7 +1071,7 @@ class NfeImportadaHandler
                 'data_entrada' => $nfe->data_emissao,
             ]);
 
-            // If linked to sale, create consumption
+            // Se vinculado a venda, criar consumo
             if ($item->venda_item_id) {
                 $this->consumoService->consumirParaVenda(
                     $estoque,
@@ -1085,66 +1085,66 @@ class NfeImportadaHandler
 
 ---
 
-## 8. Migration Path
+## 8. Caminho de Migração
 
-### 8.1 Phases
+### 8.1 Fases
 
 ```mermaid
 flowchart TB
-    subgraph Phase1["Phase 1: Create New Schema (Parallel)"]
-        P1A["Create all new tables in PostgreSQL"]
-        P1B["Create Laravel models"]
-        P1C["Unit tests for new services"]
+    subgraph Phase1["Fase 1: Criar Novo Schema (Paralelo)"]
+        P1A["Criar todas novas tabelas no PostgreSQL"]
+        P1B["Criar modelos Laravel"]
+        P1C["Testes unitários para novos serviços"]
     end
 
-    subgraph Phase2["Phase 2: Data Migration"]
-        P2A["Migrate master data<br/>(fornecedores, clientes, produtos)"]
-        P2B["Migrate historical transactions"]
-        P2C["Validate data integrity"]
+    subgraph Phase2["Fase 2: Migração de Dados"]
+        P2A["Migrar dados mestres<br/>(fornecedores, clientes, produtos)"]
+        P2B["Migrar transações históricas"]
+        P2C["Validar integridade dos dados"]
     end
 
-    subgraph Phase3["Phase 3: Dual-Write"]
-        P3A["New transactions write to both old and new"]
-        P3B["Reads from old (for safety)"]
-        P3C["Compare and validate"]
+    subgraph Phase3["Fase 3: Escrita Dupla"]
+        P3A["Novas transações escrevem em ambos antigo e novo"]
+        P3B["Leituras do antigo (por segurança)"]
+        P3C["Comparar e validar"]
     end
 
-    subgraph Phase4["Phase 4: Switch Reads"]
-        P4A["Reads from new"]
-        P4B["Writes still dual"]
-        P4C["Monitor for issues"]
+    subgraph Phase4["Fase 4: Trocar Leituras"]
+        P4A["Leituras do novo"]
+        P4B["Escritas ainda duplas"]
+        P4C["Monitorar problemas"]
     end
 
-    subgraph Phase5["Phase 5: Deprecate Old"]
-        P5A["Stop writing to old"]
-        P5B["Keep old tables read-only for reference"]
-        P5C["Eventually archive/drop"]
+    subgraph Phase5["Fase 5: Depreciar Antigo"]
+        P5A["Parar de escrever no antigo"]
+        P5B["Manter tabelas antigas somente leitura para referência"]
+        P5C["Eventualmente arquivar/dropar"]
     end
 
     Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5
 ```
 
-### 8.2 Data Mapping
+### 8.2 Mapeamento de Dados
 
-| Old Table | New Table(s) | Notes |
-|-----------|--------------|-------|
-| fornecedor | fornecedores | 1:1, normalize names |
+| Tabela Antiga | Tabela(s) Nova(s) | Notas |
+|---------------|-------------------|-------|
+| fornecedor | fornecedores | 1:1, normalizar nomes |
 | cliente | clientes | 1:1 |
-| produto | produtos + produto_precos + produto_tributos | Split |
-| venda_has_produto + venda_has_produto2 | venda_itens | Merge, add parent_id |
-| pedido_fornecedor_has_produto + _2 | compras + compra_itens | Merge |
-| estoque | estoques | Add data_entrada |
-| estoque_has_consumo | estoque_consumos | Clean up |
-| nfe | nfes | Add tipo enum |
-| conta_a_receber | recebiveis | Rename |
-| conta_a_pagar | pagaveis | Rename |
+| produto | produtos + produto_precos + produto_tributos | Dividir |
+| venda_has_produto + venda_has_produto2 | venda_itens | Mesclar, adicionar parent_id |
+| pedido_fornecedor_has_produto + _2 | compras + compra_itens | Mesclar |
+| estoque | estoques | Adicionar data_entrada |
+| estoque_has_consumo | estoque_consumos | Limpar |
+| nfe | nfes | Adicionar enum tipo |
+| conta_a_receber | recebiveis | Renomear |
+| conta_a_pagar | pagaveis | Renomear |
 
 ---
 
-## Related Documents
+## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Pain points this addresses
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - L1/L2 details
-- [05-fifo-fix.md](./05-fifo-fix.md) - FIFO implementation
-- [06-supplier-normalization.md](./06-supplier-normalization.md) - FK normalization
-- [../business/](../business/) - Current flow documentation
+- [03-improvements.md](./03-improvements.md) - Pontos de dor que isso aborda
+- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Detalhes L1/L2
+- [05-fifo-fix.md](./05-fifo-fix.md) - Implementação FIFO
+- [06-supplier-normalization.md](./06-supplier-normalization.md) - Normalização FK
+- [../business/](../business/) - Documentação de fluxos atuais

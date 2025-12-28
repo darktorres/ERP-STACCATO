@@ -1,45 +1,45 @@
-# Module: NFe (Electronic Invoice)
+# Módulo: NFe (Nota Fiscal Eletrônica)
 
-> Status: **Draft**
-> Priority: 6 (after Vendas)
-> Complexity: **High**
-
----
-
-## Overview
-
-NFe (Nota Fiscal Eletrônica) is the Brazilian electronic invoice system. This is one of the most complex modules due to:
-- Government API integration (SEFAZ)
-- XML signing with digital certificates
-- Strict validation rules
-- Multiple document types (NFe, NFCe, NFSe)
-- Tax calculations (ICMS, IPI, PIS, COFINS, IBS, CBS)
+> Status: **Rascunho**
+> Prioridade: 6 (após Vendas)
+> Complexidade: **Alta**
 
 ---
 
-## Current Implementation (C++)
+## Visão Geral
+
+NFe (Nota Fiscal Eletrônica) é o sistema brasileiro de fatura eletrônica. Este é um dos módulos mais complexos devido a:
+- Integração com API governamental (SEFAZ)
+- Assinatura de XML com certificados digitais
+- Regras de validação rigorosas
+- Múltiplos tipos de documentos (NFe, NFCe, NFSe)
+- Cálculos tributários (ICMS, IPI, PIS, COFINS, IBS, CBS)
+
+---
+
+## Implementação Atual (C++)
 
 ### Classes
-| Class | File | Purpose |
-|-------|------|---------|
-| `TabNFe` | `tabnfe.cpp` | Main tab container |
-| `WidgetNFe*` | Various | NFe management widgets |
-| `CadastrarNFe` | `cadastrarnfe.cpp` | NFe creation/emission |
-| `ACBr` | `acbr.cpp` | ACBrLib wrapper |
-| `XML` | `xml.cpp` | XML generation/parsing |
+| Classe | Arquivo | Finalidade |
+|--------|---------|------------|
+| `TabNFe` | `tabnfe.cpp` | Container principal da aba |
+| `WidgetNFe*` | Diversos | Widgets de gestão de NFe |
+| `CadastrarNFe` | `cadastrarnfe.cpp` | Criação/emissão de NFe |
+| `ACBr` | `acbr.cpp` | Wrapper do ACBrLib |
+| `XML` | `xml.cpp` | Geração/parsing de XML |
 
-### Current Integration
-- Uses **ACBrLib** (Delphi-based library)
-- Called via DLL interface
-- Handles: XML generation, signing, SEFAZ communication
+### Integração Atual
+- Utiliza **ACBrLib** (biblioteca baseada em Delphi)
+- Chamada via interface DLL
+- Funções: Geração de XML, assinatura, comunicação com SEFAZ
 
 ---
 
-## Integration Options
+## Opções de Integração
 
-### Option 1: Keep ACBr (via CLI/API)
+### Opção 1: Manter ACBr (via CLI/API)
 
-**Approach**: Run ACBr as a Windows service, call via REST API or CLI.
+**Abordagem**: Executar ACBr como serviço Windows, chamar via API REST ou CLI.
 
 ```
 ┌─────────────┐      HTTP/REST      ┌─────────────┐
@@ -48,25 +48,25 @@ NFe (Nota Fiscal Eletrônica) is the Brazilian electronic invoice system. This i
 └─────────────┘                     └─────────────┘
 ```
 
-**Pros**:
-- Already works
-- No reimplementation
-- Free (open source)
+**Prós**:
+- Já funciona
+- Sem reimplementação
+- Gratuito (código aberto)
 
-**Cons**:
-- Requires Windows server
-- Extra infrastructure
-- Network dependency
-- Complex deployment
+**Contras**:
+- Requer servidor Windows
+- Infraestrutura adicional
+- Dependência de rede
+- Deploy complexo
 
-### Option 2: SaaS Provider
+### Opção 2: Provedor SaaS
 
-**Providers**: Focus NFe, Enotas, Tecnospeed, Olist
+**Provedores**: Focus NFe, Enotas, Tecnospeed, Olist
 
-**Approach**: API calls to third-party service.
+**Abordagem**: Chamadas de API para serviço de terceiros.
 
 ```php
-// Example with Focus NFe
+// Exemplo com Focus NFe
 $response = Http::withHeaders([
     'Authorization' => 'Bearer ' . config('services.focus.token'),
 ])->post('https://api.focusnfe.com.br/v2/nfe', [
@@ -78,22 +78,22 @@ $response = Http::withHeaders([
 ]);
 ```
 
-**Pros**:
-- Simple integration
-- No infrastructure to manage
-- Updates handled by provider
-- Support included
+**Prós**:
+- Integração simples
+- Sem infraestrutura para gerenciar
+- Atualizações tratadas pelo provedor
+- Suporte incluso
 
-**Cons**:
-- Monthly cost (R$ 50-500+/month based on volume)
-- Vendor lock-in
-- Internet dependency
+**Contras**:
+- Custo mensal (R$ 50-500+/mês baseado no volume)
+- Dependência de fornecedor
+- Dependência de internet
 
-### Option 3: Native PHP (sped-nfe)
+### Opção 3: PHP Nativo (sped-nfe)
 
-**Library**: [nfephp-org/sped-nfe](https://github.com/nfephp-org/sped-nfe)
+**Biblioteca**: [nfephp-org/sped-nfe](https://github.com/nfephp-org/sped-nfe)
 
-**Approach**: Pure PHP implementation.
+**Abordagem**: Implementação em PHP puro.
 
 ```php
 use NFePHP\NFe\Make;
@@ -103,49 +103,49 @@ $nfe = new Make();
 $nfe->taginfNFe($std);
 $nfe->tagide($std);
 $nfe->tagemit($std);
-// ... build XML
+// ... construir XML
 
 $tools = new Tools($config, Certificate::readPfx($certPath, $password));
 $response = $tools->sefazEnviaLote([$xml], $idLote);
 ```
 
-**Pros**:
-- Full control
-- No external dependencies
-- Free (open source)
-- Runs on any server
+**Prós**:
+- Controle total
+- Sem dependências externas
+- Gratuito (código aberto)
+- Roda em qualquer servidor
 
-**Cons**:
-- More development work
-- Must maintain updates (SEFAZ changes)
-- Handle certificate management
-- Complex error handling
-
----
-
-## Recommendation
-
-**Hybrid Approach**:
-
-1. **Start with SaaS** (Focus NFe or Enotas)
-   - Faster to market
-   - Lower initial complexity
-   - Can switch later
-
-2. **Abstract behind service interface**
-   - Easy to swap implementations
-   - Test with mocks
-
-3. **Consider native PHP later** if:
-   - Volume justifies cost savings
-   - Need more control
-   - Team has capacity
+**Contras**:
+- Mais trabalho de desenvolvimento
+- Deve manter atualizações (mudanças da SEFAZ)
+- Gerenciar certificados
+- Tratamento de erros complexo
 
 ---
 
-## Laravel Implementation
+## Recomendação
 
-### Service Interface
+**Abordagem Híbrida**:
+
+1. **Começar com SaaS** (Focus NFe ou Enotas)
+   - Mais rápido para produção
+   - Menor complexidade inicial
+   - Pode trocar depois
+
+2. **Abstrair atrás de interface de serviço**
+   - Fácil trocar implementações
+   - Testar com mocks
+
+3. **Considerar PHP nativo depois** se:
+   - Volume justificar economia de custos
+   - Precisar de mais controle
+   - Equipe tiver capacidade
+
+---
+
+## Implementação Laravel
+
+### Interface de Serviço
 
 ```php
 // app/Contracts/NfeServiceInterface.php
@@ -174,7 +174,7 @@ class NfeResult
 }
 ```
 
-### SaaS Implementation (Focus NFe)
+### Implementação SaaS (Focus NFe)
 
 ```php
 // app/Services/NFe/FocusNfeService.php
@@ -227,7 +227,7 @@ class FocusNfeService implements NfeServiceInterface
                 'justificativa' => $justificativa,
             ]);
 
-        // ... handle response
+        // ... tratar resposta
     }
 
     private function buildPayload(Nfe $nfe): array
@@ -239,7 +239,7 @@ class FocusNfeService implements NfeServiceInterface
             'finalidade_emissao' => 1, // Normal
             'cnpj_emitente' => $nfe->loja->cnpj,
             'nome_emitente' => $nfe->loja->razao_social,
-            // ... complete payload
+            // ... payload completo
             'items' => $nfe->itens->map(fn($item) => [
                 'numero_item' => $item->numero,
                 'codigo_produto' => $item->produto->codigo,
@@ -250,14 +250,14 @@ class FocusNfeService implements NfeServiceInterface
                 'valor_unitario' => $item->valor_unitario,
                 'valor_total' => $item->valor_total,
                 'icms_situacao_tributaria' => $item->cst_icms,
-                // ... tax fields
+                // ... campos de impostos
             ])->toArray(),
         ];
     }
 }
 ```
 
-### Service Provider Registration
+### Registro do Service Provider
 
 ```php
 // app/Providers/NfeServiceProvider.php
@@ -275,8 +275,8 @@ class NfeServiceProvider extends ServiceProvider
             return match (config('nfe.driver')) {
                 'focus' => new FocusNfeService(),
                 'sped' => new SpedNfeService(),
-                'mock' => new MockNfeService(), // for testing
-                default => throw new \Exception('Invalid NFe driver'),
+                'mock' => new MockNfeService(), // para testes
+                default => throw new \Exception('Driver NFe inválido'),
             };
         });
     }
@@ -350,7 +350,7 @@ enum NfeTipo: string
 }
 ```
 
-### Job (Background Processing)
+### Job (Processamento em Background)
 
 ```php
 // app/Jobs/ProcessarNFeJob.php
@@ -409,20 +409,20 @@ class ProcessarNFeJob implements ShouldQueue
 
 ---
 
-## Tax Calculations
+## Cálculos Tributários
 
-### Current Tax Types
-- ICMS (state sales tax)
-- IPI (federal manufacturing tax)
-- PIS (federal social contribution)
-- COFINS (federal social contribution)
+### Tipos de Impostos Atuais
+- ICMS (imposto estadual sobre vendas)
+- IPI (imposto federal sobre produtos industrializados)
+- PIS (contribuição social federal)
+- COFINS (contribuição social federal)
 
-### New (Reforma Tributária 2025+)
-- IBS (state/municipal - replaces ICMS + ISS)
-- CBS (federal - replaces PIS + COFINS)
-- IS (Imposto Seletivo - selective tax)
+### Novos (Reforma Tributária 2025+)
+- IBS (estadual/municipal - substitui ICMS + ISS)
+- CBS (federal - substitui PIS + COFINS)
+- IS (Imposto Seletivo - imposto seletivo)
 
-### Tax Service
+### Serviço de Cálculo de Impostos
 
 ```php
 // app/Services/NFe/TaxCalculationService.php
@@ -433,7 +433,7 @@ class TaxCalculationService
         $produto = $item->produto;
         $ncm = $produto->ncm;
 
-        // Get applicable tax rules
+        // Obter regras tributárias aplicáveis
         $regras = $this->getRegras($ncm, $item->cfop);
 
         return [
@@ -441,7 +441,7 @@ class TaxCalculationService
             'ipi' => $this->calcularIPI($item, $regras),
             'pis' => $this->calcularPIS($item, $regras),
             'cofins' => $this->calcularCOFINS($item, $regras),
-            // Future:
+            // Futuro:
             // 'ibs' => $this->calcularIBS($item, $regras),
             // 'cbs' => $this->calcularCBS($item, $regras),
         ];
@@ -463,54 +463,54 @@ class TaxCalculationService
         ];
     }
 
-    // ... other tax calculations
+    // ... outros cálculos de impostos
 }
 ```
 
 ---
 
-## UI Components
+## Componentes de UI
 
-### NFe List
-- Status filter (Pendente, Autorizada, Rejeitada, Cancelada)
-- Date range filter
-- Search by number/key
-- Quick actions (View XML, Download DANFE, Cancel)
+### Lista de NFe
+- Filtro por status (Pendente, Autorizada, Rejeitada, Cancelada)
+- Filtro por período
+- Busca por número/chave
+- Ações rápidas (Visualizar XML, Baixar DANFE, Cancelar)
 
-### NFe Form (Manual)
-- Recipient selection
-- Product line items with tax calculation preview
-- Payment info
-- Transport info
-- Additional info
+### Formulário de NFe (Manual)
+- Seleção de destinatário
+- Itens de produto com preview de cálculo tributário
+- Informações de pagamento
+- Informações de transporte
+- Informações adicionais
 
-### NFe Import (from supplier)
-- XML upload
-- Validation preview
-- Link to purchase order
-- Auto-populate estoque
+### Importação de NFe (do fornecedor)
+- Upload de XML
+- Preview de validação
+- Vincular ao pedido de compra
+- Auto-preencher estoque
 
 ---
 
-## Scheduled Tasks
+## Tarefas Agendadas
 
 ```php
-// Check pending NFe status
+// Verificar status de NFe pendentes
 $schedule->job(new ConsultarNFePendentesJob)->everyFiveMinutes();
 
-// Download NFe from SEFAZ (DFe)
+// Baixar NFe da SEFAZ (DFe)
 $schedule->job(new BaixarNFeRecebidasJob)->hourly();
 
-// Retry failed emissions
+// Retentar emissões falhas
 $schedule->job(new RetentarNFeRejeitadasJob)->everyThirtyMinutes();
 ```
 
 ---
 
-## Testing Strategy
+## Estratégia de Testes
 
 ```php
-// Use mock service in tests
+// Usar serviço mock nos testes
 public function test_emitir_nfe_sucesso()
 {
     $this->mock(NfeServiceInterface::class, function ($mock) {

@@ -71,7 +71,6 @@ Reorganizado em 2025-12-27 em pastas categóricas. Atualizado em 2025-12-28 com 
 │       └── vendas.md
 │
 └── meta/
-    ├── backlog-documentacao.md       # Backlog de melhorias
     └── rastreador.md                 # Este arquivo
 ```
 

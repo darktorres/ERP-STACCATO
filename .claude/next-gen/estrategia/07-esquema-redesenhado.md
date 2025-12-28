@@ -1,8 +1,22 @@
 # Fluxo de Negócio e Schema Redesenhados
 
 > Status: **Brainstorming**
-> Última atualização: 2025-12-27
+> Última atualização: 2025-12-28
 > Propósito: Redesenho holístico abordando todos os pontos de dor identificados
+
+---
+
+## Escopo deste Documento
+
+Este documento apresenta a **solução completa de redesign**:
+
+- Schema PostgreSQL completo com todas as tabelas
+- ENUMs de status e tipos
+- Máquinas de estado com regras de transição
+- Arquitetura orientada a eventos
+- Caminho de migração em 5 fases
+
+**Para a justificativa técnica do PostgreSQL** e análise detalhada dos problemas atuais, veja [tecnico/02-banco-dados.md](../tecnico/02-banco-dados.md).
 
 ---
 

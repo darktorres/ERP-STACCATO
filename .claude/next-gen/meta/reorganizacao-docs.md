@@ -119,9 +119,11 @@ Mesma estrutura desatualizada do índice principal.
   - [x] `02-banco-dados.md` ↔ `07-esquema-redesenhado.md`
   - [x] `09-integracoes.md` ↔ `modulos/nfe.md`
 
-### Prioridade 2 (Decisão)
+### Prioridade 2 (Decisão) ✅ COMPLETO
 
-- [ ] Decidir sobre `banco-dados` + `esquema-redesenhado`: mesclar ou separar com escopos claros
+- [x] Decidir sobre `banco-dados` + `esquema-redesenhado`: **MANTER SEPARADOS** com escopos claros
+  - `02-banco-dados.md`: Justificativa PostgreSQL, análise de problemas, princípios DB
+  - `07-esquema-redesenhado.md`: Schema completo, ENUMs, state machines, eventos, migração
 
 ---
 

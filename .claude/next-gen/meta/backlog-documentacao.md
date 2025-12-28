@@ -20,6 +20,17 @@
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
+| 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | Pendente |
+| 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | Pendente |
+| 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | Pendente |
+| 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | Pendente |
+| 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | Pendente |
+| 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | Pendente |
+| 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | Pendente |
+| 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | Pendente |
+| 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
+| 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | Pendente |
+| 21  | [Auditoria de Dependências](#21-auditoria-de-dependências)                    | Baixa      | Pendente |
 
 ### Ganhos Rápidos
 
@@ -278,6 +289,211 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
+## 11. Checklist de Paridade de Funcionalidades
+
+**Problema**: Risco de perder funcionalidades na migração sem mapeamento explícito.
+
+**Arquivo sugerido**: `estrategia/10-paridade-funcionalidades.md`
+
+**Tópicos a documentar**:
+
+- Inventário completo de funcionalidades do C++ (por módulo)
+- Mapeamento C++ → Laravel para cada funcionalidade
+- Status de implementação (Não iniciado / Em progresso / Completo / Descartado)
+- Funcionalidades a serem removidas intencionalmente (com justificativa)
+- Funcionalidades novas (não existem no C++)
+- Critérios de aceitação para cada funcionalidade crítica
+
+---
+
+## 12. Regras de Negócio Detalhadas
+
+**Problema**: Regras de negócio estão espalhadas no código C++ sem documentação centralizada.
+
+**Arquivo sugerido**: `negocios/05-regras-negocio.md`
+
+**Tópicos a documentar**:
+
+- Regras de precificação (3 níveis de desconto, margens)
+- Cálculo de comissões (RT - Representante Técnico)
+- Regras de crédito de cliente (limite, bloqueio)
+- Cálculos de impostos (ICMS, IPI, ST, PIS, COFINS)
+- Regras de frete (por região, peso, valor mínimo)
+- Regras de reserva de estoque (tempo máximo, prioridade)
+- Regras de devolução e estorno
+- Regras de aprovação (descontos acima do limite, cancelamentos)
+
+---
+
+## 13. Documentação de Integrações
+
+**Problema**: Integrações com sistemas externos não estão documentadas.
+
+**Arquivo sugerido**: `tecnico/09-integracoes.md`
+
+**Tópicos a documentar**:
+
+- **ACBr**: Comunicação com ACBrMonitorConsole, comandos, respostas
+- **CNAB 240**: Bancos suportados, layouts, remessa/retorno
+- **APIs de CEP**: ViaCEP, BrasilAPI (fallback)
+- **Consulta CNPJ**: ReceitaWS, alternativas
+- **SEFAZ**: Webservices NFe por estado
+- **Certificados digitais**: A1, A3, renovação
+- Timeouts, retries, circuit breaker
+- Tratamento de erros por integração
+
+---
+
+## 14. Plano de Treinamento de Usuários
+
+**Problema**: Usuários precisarão migrar de desktop para web.
+
+**Arquivo sugerido**: `estrategia/11-treinamento.md`
+
+**Tópicos a documentar**:
+
+- Perfis de usuário (admin, vendedor, financeiro, operacional)
+- Mapeamento de funcionalidades antigas → novas (onde encontrar cada coisa)
+- Material de treinamento por módulo
+- Vídeos/tutoriais necessários
+- FAQ de transição
+- Período de suporte pós-migração
+- Estratégia de rollout (piloto, gradual, big bang)
+
+---
+
+## 15. Design System/Guia de UI
+
+**Problema**: Sem padrões visuais definidos para componentes.
+
+**Arquivo sugerido**: `tecnico/10-design-system.md`
+
+**Tópicos a documentar**:
+
+- Paleta de cores (primária, secundária, status, neutros)
+- Tipografia (fontes, tamanhos, pesos)
+- Espaçamentos (grid, margens, paddings)
+- Componentes base (botões, inputs, selects, tabelas)
+- Componentes complexos (modais, drawers, toasts)
+- Estados (hover, focus, disabled, loading, error)
+- Ícones (biblioteca escolhida, convenções)
+- Responsividade (breakpoints, comportamento mobile)
+- Acessibilidade (WCAG 2.1 AA, ARIA)
+- Temas (light/dark se aplicável)
+
+---
+
+## 16. Estratégia de Concorrência
+
+**Problema**: Múltiplos usuários podem tentar editar/consumir os mesmos recursos.
+
+**Arquivo sugerido**: `tecnico/11-concorrencia.md`
+
+**Tópicos a documentar**:
+
+- **Estoque**: Reserva pessimista vs otimista
+- **Edição de registros**: Optimistic locking com `updated_at`
+- **Transações longas**: Timeout, liberação automática
+- **Filas**: Jobs que modificam estoque/financeiro
+- **Race conditions conhecidas**: Cenários e soluções
+- Testes de concorrência (stress test)
+
+---
+
+## 17. Atalhos de Teclado
+
+**Problema**: App C++ tem navegação por teclado extensiva que precisa ser preservada.
+
+**Arquivo sugerido**: `tecnico/12-atalhos-teclado.md`
+
+**Tópicos a documentar**:
+
+- Inventário de atalhos do C++ atual
+- Mapeamento para atalhos web (considerando conflitos com browser)
+- Navegação por Tab entre campos
+- Enter para confirmar/avançar
+- Esc para cancelar/fechar
+- Atalhos globais (Ctrl+N novo, Ctrl+S salvar, etc.)
+- Atalhos por módulo
+- Implementação Vue (VueUse `useMagicKeys` ou similar)
+- Acessibilidade (focus visible, skip links)
+
+---
+
+## 18. Especificações de Impressão
+
+**Problema**: Múltiplos documentos precisam ser impressos com layouts específicos.
+
+**Arquivo sugerido**: `tecnico/13-impressao.md`
+
+**Tópicos a documentar**:
+
+- **DANFE**: Layout oficial, validações
+- **Boletos**: Layout bancário, código de barras
+- **Romaneio de entrega**: Itens, endereço, assinatura
+- **Etiquetas**: Produtos, volumes
+- **Relatórios**: Cabeçalho padrão, paginação, totalizadores
+- Biblioteca escolhida (DomPDF, Browsershot, wkhtmltopdf)
+- Impressão direta vs download PDF
+- Configuração de impressora (térmica, laser)
+- Tamanhos de papel (A4, carta, etiqueta)
+
+---
+
+## 19. Dicionário de Dados
+
+**Problema**: Sem documentação centralizada de termos e campos do banco.
+
+**Arquivo sugerido**: `tecnico/14-dicionario-dados.md`
+
+**Tópicos a documentar**:
+
+- Glossário de termos de negócio (RT, L1, L2, galpão, bloco, etc.)
+- Significado de cada coluna das tabelas principais
+- Valores possíveis de enums (status, tipos)
+- Unidades de medida
+- Convenções de nomenclatura
+- Campos legados vs novos
+- Campos calculados vs armazenados
+
+---
+
+## 20. Matriz de Suporte Browser/Dispositivo
+
+**Problema**: Sem definição de quais browsers/dispositivos serão suportados.
+
+**Arquivo sugerido**: `tecnico/15-compatibilidade.md`
+
+**Tópicos a documentar**:
+
+- Browsers suportados (Chrome, Firefox, Edge, Safari - versões mínimas)
+- Dispositivos (Desktop, Tablet, Mobile)
+- Resoluções mínimas
+- Funcionalidades que requerem desktop (impressão, certificado digital)
+- Testes de compatibilidade (BrowserStack, manual)
+- Polyfills necessários
+- Progressive enhancement vs graceful degradation
+
+---
+
+## 21. Auditoria de Dependências
+
+**Problema**: Sem inventário de pacotes e suas licenças/riscos.
+
+**Arquivo sugerido**: `tecnico/16-dependencias.md`
+
+**Tópicos a documentar**:
+
+- **Composer packages**: Lista completa com versões e licenças
+- **NPM packages**: Lista completa com versões e licenças
+- Pacotes críticos (sem alternativa fácil)
+- Pacotes com vulnerabilidades conhecidas
+- Estratégia de atualização (Dependabot, manual)
+- Licenças problemáticas (GPL, copyleft)
+- Alternativas para pacotes abandonados
+
+---
+
 ## Progresso
 
 ### Concluídos
@@ -293,10 +509,28 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ### Próximos
 
-1. [ ] Item 4 - Design de API
-2. [ ] Item 5 - Estratégia de testes
-3. [ ] Item 7 - Tratamento de erros e monitoramento
-4. [ ] Item 8 - DevOps/Deployment
+**Alta Prioridade:**
+1. [ ] Item 11 - Checklist de paridade de funcionalidades
+2. [ ] Item 12 - Regras de negócio detalhadas
+3. [ ] Item 13 - Documentação de integrações
+
+**Média Prioridade:**
+4. [ ] Item 4 - Design de API
+5. [ ] Item 5 - Estratégia de testes
+6. [ ] Item 7 - Tratamento de erros e monitoramento
+7. [ ] Item 14 - Plano de treinamento de usuários
+8. [ ] Item 15 - Design System/Guia de UI
+9. [ ] Item 16 - Estratégia de concorrência
+10. [ ] Item 17 - Atalhos de teclado
+11. [ ] Item 18 - Especificações de impressão
+
+**Baixa Prioridade:**
+12. [ ] Item 8 - DevOps/Deployment
+13. [ ] Item 9 - Benchmarks de performance
+14. [ ] Item 10 - Substituição de relatórios
+15. [ ] Item 19 - Dicionário de dados
+16. [ ] Item 20 - Matriz de suporte browser/dispositivo
+17. [ ] Item 21 - Auditoria de dependências
 
 ---
 

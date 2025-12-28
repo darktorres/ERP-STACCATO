@@ -17,7 +17,7 @@
 | Entender fluxos de negócio      | [negocios/](#fluxos-de-negócio)                                                        |
 | Verificar fases da migração     | [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md)                   |
 | Ver decisões em aberto          | [estrategia/02-decisoes.md](./estrategia/02-decisoes.md)                               |
-| **Ver backlog de documentação** | [meta/backlog-documentacao.md](./meta/backlog-documentacao.md)                         |
+| Ver rastreador de progresso     | [meta/rastreador.md](./meta/rastreador.md)                                             |
 
 ---
 
@@ -103,7 +103,6 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │       └── vendas.md                 # Módulo de Vendas
 │
 └── meta/                             # Meta-documentação
-    ├── backlog-documentacao.md       # Backlog de melhorias pendentes
     └── rastreador.md                 # Rastreador de progresso
 ```
 
@@ -281,7 +280,6 @@ Pontos problemáticos e oportunidades de melhoria:
 
 | Doc | Descrição |
 |-----|-----------|
-| [backlog-documentacao.md](./meta/backlog-documentacao.md) | Backlog de melhorias pendentes |
 | [rastreador.md](./meta/rastreador.md) | Rastreador de progresso |
 
 ---

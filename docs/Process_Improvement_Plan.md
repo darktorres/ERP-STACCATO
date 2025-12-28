@@ -9,12 +9,14 @@ The current ERP Staccato system suffers from significant technical debt and proc
 ### 1. Status Management Problems
 
 **Current Issues:**
+
 - Hard-coded status strings scattered throughout codebase
 - No validation of status transitions
 - Inconsistent status values between modules
 - Risk of data corruption from invalid status changes
 
 **Example Problem:**
+
 ```cpp
 // In widgetcompragerar.cpp - Hard-coded strings everywhere
 UPDATE venda_has_produto2 SET status = 'EM COMPRA' WHERE status = 'INICIADO'
@@ -24,6 +26,7 @@ UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA' WHERE status = 'P
 ### 2. Database Design Flaws
 
 **Current Issues:**
+
 - Poor normalization (venda_has_produto2 table with 50+ columns)
 - Missing foreign key constraints
 - No check constraints for status validation
@@ -32,6 +35,7 @@ UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA' WHERE status = 'P
 ### 3. Transaction Management Risks
 
 **Current Issues:**
+
 - ALTER TABLE operations within transactions
 - No proper rollback mechanisms
 - Risk of deadlocks and data corruption
@@ -43,6 +47,7 @@ UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA' WHERE status = 'P
 #### 1.1 Implement Proper Status Management
 
 **Create Status Enums:**
+
 ```cpp
 // src/common/status_types.h
 namespace Status {
@@ -54,7 +59,7 @@ namespace Status {
         ENTREGUE,
         CANCELADO
     };
-    
+
     enum class Purchase {
         PENDENTE,
         INICIADO,
@@ -64,7 +69,7 @@ namespace Status {
         ESTOQUE,
         CANCELADO
     };
-    
+
     enum class Inventory {
         TEMP,
         CONSUMO,
@@ -75,6 +80,7 @@ namespace Status {
 ```
 
 **Create Status Manager:**
+
 ```cpp
 // src/common/status_manager.h
 class StatusManager {
@@ -90,6 +96,7 @@ public:
 #### 1.2 Fix Transaction Management
 
 **Before (Dangerous):**
+
 ```cpp
 // Current problematic code
 qApp->startTransaction("GerarCompra");
@@ -99,6 +106,7 @@ qApp->endTransaction();
 ```
 
 **After (Safe):**
+
 ```cpp
 // Improved transaction handling
 class TransactionScope {
@@ -111,14 +119,14 @@ public:
 
 void WidgetCompraGerar::gerarCompra() {
     TransactionScope transaction("GerarCompra");
-    
+
     try {
         // All business logic here
         validateCompraData();
         updateOrderStatus();
         generateExcelFiles();
         sendEmails();
-        
+
         transaction.commit();
     } catch (const std::exception& e) {
         // Transaction automatically rolled back by destructor
@@ -130,12 +138,14 @@ void WidgetCompraGerar::gerarCompra() {
 #### 1.3 Implement Input Validation
 
 **Current Problem:**
+
 ```cpp
 // No validation - SQL injection risk
 query.exec("UPDATE table SET status = '" + userInput + "'");
 ```
 
 **Improved Solution:**
+
 ```cpp
 // Proper validation and parameterized queries
 class Validator {
@@ -150,7 +160,7 @@ void updateStatus(const QString& newStatus) {
     if (!Validator::isValidStatus(newStatus, getValidStatesForCurrentStatus())) {
         throw ValidationError("Status inválido: " + newStatus);
     }
-    
+
     SqlQuery query;
     query.prepare("UPDATE table SET status = :status WHERE id = :id");
     query.bindValue(":status", newStatus);
@@ -164,16 +174,19 @@ void updateStatus(const QString& newStatus) {
 #### 2.1 Streamlined Purchase Workflow
 
 **Current Complex Flow:**
-```
+
+```text
 PENDENTE → INICIADO → EM COMPRA → EM FATURAMENTO → EM ENTREGA → EM COLETA → EM RECEBIMENTO → ESTOQUE
 ```
 
 **Proposed Simplified Flow:**
-```
+
+```text
 SOLICITADO → EM_COMPRA → RECEBIDO → ESTOQUE
 ```
 
 **Benefits:**
+
 - Reduces 8 states to 4 states
 - Eliminates redundant logistics states
 - Clearer business meaning
@@ -182,18 +195,20 @@ SOLICITADO → EM_COMPRA → RECEBIDO → ESTOQUE
 #### 2.2 Unified Sales Process
 
 **Current Issues:**
+
 - Separate Orcamento and Venda classes with duplicated logic
 - Complex conversion process between quote and sale
 - Inconsistent data handling
 
 **Proposed Solution:**
+
 ```cpp
 // Unified sales document with polymorphic behavior
 class SalesDocument {
 protected:
     enum Type { QUOTE, SALE };
     Type documentType;
-    
+
 public:
     virtual void save() = 0;
     virtual void generatePDF() = 0;
@@ -212,6 +227,7 @@ public:
 #### 2.3 Simplified Status States
 
 **Purchase Process:**
+
 ```mermaid
 stateDiagram-v2
     [*] --> Solicitado
@@ -224,6 +240,7 @@ stateDiagram-v2
 ```
 
 **Sales Process:**
+
 ```mermaid
 stateDiagram-v2
     [*] --> Orcamento
@@ -242,28 +259,30 @@ stateDiagram-v2
 #### 3.1 Normalized Database Schema
 
 **Current Problem - venda_has_produto2 (50+ columns):**
+
 ```sql
 CREATE TABLE venda_has_produto2 (
     -- Core fields
     idVendaProduto2 INT PRIMARY KEY,
     idVenda INT,
     idProduto INT,
-    
+
     -- Duplicated purchase info
     idCompra INT,
     ordemCompra VARCHAR(45),
     dataRealCompra DATE,
-    
+
     -- Duplicated logistics info
     dataColeta DATE,
     dataRecebimento DATE,
     dataEntrega DATE,
-    
+
     -- 40+ more columns...
 );
 ```
 
 **Proposed Normalized Design:**
+
 ```sql
 -- Core sales products table
 CREATE TABLE sales_items (
@@ -275,7 +294,7 @@ CREATE TABLE sales_items (
     status ENUM('PENDENTE', 'EM_SEPARACAO', 'EM_ENTREGA', 'ENTREGUE') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (sale_id) REFERENCES sales(id),
     FOREIGN KEY (product_id) REFERENCES products(id),
     INDEX idx_sale_status (sale_id, status),
@@ -288,7 +307,7 @@ CREATE TABLE purchase_allocations (
     sales_item_id INT NOT NULL,
     purchase_item_id INT NOT NULL,
     allocated_quantity DECIMAL(10,4) NOT NULL,
-    
+
     FOREIGN KEY (sales_item_id) REFERENCES sales_items(id),
     FOREIGN KEY (purchase_item_id) REFERENCES purchase_items(id),
     UNIQUE KEY unique_allocation (sales_item_id, purchase_item_id)
@@ -302,7 +321,7 @@ CREATE TABLE logistics_events (
     event_date DATE NOT NULL,
     vehicle_id INT,
     notes TEXT,
-    
+
     FOREIGN KEY (sales_item_id) REFERENCES sales_items(id),
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
     INDEX idx_item_date (sales_item_id, event_date)
@@ -318,17 +337,17 @@ class StateMachine {
 private:
     StateType currentState;
     std::map<StateType, std::vector<StateType>> validTransitions;
-    
+
 public:
     StateMachine(StateType initial) : currentState(initial) {}
-    
+
     bool canTransitionTo(StateType newState) const {
         auto it = validTransitions.find(currentState);
         if (it == validTransitions.end()) return false;
-        
+
         return std::find(it->second.begin(), it->second.end(), newState) != it->second.end();
     }
-    
+
     void transitionTo(StateType newState) {
         if (!canTransitionTo(newState)) {
             throw InvalidTransitionError(
@@ -339,7 +358,7 @@ public:
         }
         currentState = newState;
     }
-    
+
     StateType getCurrentState() const { return currentState; }
     std::vector<StateType> getValidNextStates() const {
         auto it = validTransitions.find(currentState);
@@ -353,22 +372,24 @@ public:
 #### 4.1 Simplified Widget Structure
 
 **Current Problem:**
+
 - Too many tabs and widgets
 - Confusing navigation
 - Duplicated functionality
 
 **Proposed Solution:**
+
 ```cpp
 // Unified purchase management widget
 class PurchaseManagementWidget : public QWidget {
 private:
     enum View { PENDING, ACTIVE, COMPLETED, HISTORY };
     View currentView = PENDING;
-    
+
 public:
     void setView(View view);
     void refreshCurrentView();
-    
+
 private slots:
     void onCreatePurchaseOrder();
     void onConfirmDelivery();
@@ -383,23 +404,23 @@ private slots:
 class StatusAwareWidget : public QWidget {
 private:
     Status::Purchase currentStatus;
-    
+
     void updateUI() {
         // Clear all actions
         clearActions();
-        
+
         // Add actions based on current status
         switch (currentStatus) {
             case Status::Purchase::PENDENTE:
                 addAction("Gerar Pedido", &PurchaseManagementWidget::generateOrder);
                 addAction("Compra Avulsa", &PurchaseManagementWidget::createAdHocPurchase);
                 break;
-                
+
             case Status::Purchase::EM_COMPRA:
                 addAction("Confirmar Entrega", &PurchaseManagementWidget::confirmDelivery);
                 addAction("Cancelar Pedido", &PurchaseManagementWidget::cancelOrder);
                 break;
-                
+
             case Status::Purchase::RECEBIDO:
                 addAction("Mover para Estoque", &PurchaseManagementWidget::moveToInventory);
                 break;
@@ -413,6 +434,7 @@ private:
 #### 5.1 Query Optimization
 
 **Current Problem - N+1 Query Pattern:**
+
 ```cpp
 // Inefficient: One query per product
 for (const auto& produto : produtos) {
@@ -425,13 +447,14 @@ for (const auto& produto : produtos) {
 ```
 
 **Optimized Solution:**
+
 ```cpp
 // Efficient: Single query with JOIN
 SqlQuery query;
 query.prepare(R"(
-    SELECT p.*, e.quantidade, e.localizacao 
-    FROM produtos p 
-    LEFT JOIN estoque e ON p.id = e.idProduto 
+    SELECT p.*, e.quantidade, e.localizacao
+    FROM produtos p
+    LEFT JOIN estoque e ON p.id = e.idProduto
     WHERE p.id IN (:productIds)
 )");
 query.bindValue(":productIds", productIdList);
@@ -450,19 +473,19 @@ while (query.next()) {
 class CacheManager {
 private:
     QCache<QString, QVariant> cache;
-    
+
 public:
     template<typename T>
     T get(const QString& key, std::function<T()> loader) {
         if (cache.contains(key)) {
             return cache[key].value<T>();
         }
-        
+
         T value = loader();
         cache.insert(key, QVariant::fromValue(value));
         return value;
     }
-    
+
     void invalidate(const QString& pattern);
 };
 
@@ -476,30 +499,35 @@ auto products = cacheManager.get<QList<Product>>(
 ## Implementation Roadmap
 
 ### Week 1-2: Critical Fixes
+
 - [ ] Implement status enums and validation
 - [ ] Fix transaction management
 - [ ] Add input validation
 - [ ] Create proper error handling
 
-### Week 3-6: Process Simplification  
+### Week 3-6: Process Simplification
+
 - [ ] Simplify purchase workflow
 - [ ] Unify sales process
 - [ ] Implement state machines
 - [ ] Reduce widget complexity
 
 ### Week 7-14: Database Redesign
+
 - [ ] Create normalized schema
 - [ ] Migrate existing data
 - [ ] Add proper constraints
 - [ ] Implement foreign keys
 
 ### Week 15-20: UI Improvements
+
 - [ ] Redesign widget hierarchy
 - [ ] Implement status-based UI
 - [ ] Simplify navigation
 - [ ] Add contextual actions
 
 ### Week 21-24: Performance Optimization
+
 - [ ] Optimize database queries
 - [ ] Implement caching
 - [ ] Add performance monitoring
@@ -508,18 +536,21 @@ auto products = cacheManager.get<QList<Product>>(
 ## Risk Mitigation
 
 ### Data Migration Strategy
+
 1. **Create parallel tables** with new schema
 2. **Dual-write system** during transition
 3. **Gradual migration** with validation
 4. **Rollback plan** if issues arise
 
 ### Testing Strategy
+
 1. **Unit tests** for status transitions
 2. **Integration tests** for workflows
 3. **Performance tests** for query optimization
 4. **User acceptance testing** for UI changes
 
 ### Deployment Strategy
+
 1. **Feature flags** for gradual rollout
 2. **Blue-green deployment** for zero downtime
 3. **Monitoring** for early issue detection
@@ -528,16 +559,19 @@ auto products = cacheManager.get<QList<Product>>(
 ## Expected Benefits
 
 ### Immediate (Phase 1)
+
 - 90% reduction in status-related bugs
 - Improved data integrity
 - Better error handling and user feedback
 
 ### Medium-term (Phases 2-3)
+
 - 50% reduction in code complexity
 - 60% faster query performance
 - Simplified maintenance and debugging
 
 ### Long-term (Phases 4-5)
+
 - 75% reduction in user confusion
 - Modern, maintainable architecture
 - Foundation for future enhancements
@@ -547,6 +581,7 @@ auto products = cacheManager.get<QList<Product>>(
 This comprehensive improvement plan addresses the critical issues in the ERP Staccato system while maintaining business continuity. The phased approach allows for gradual implementation with minimal risk to ongoing operations.
 
 The key to success will be:
+
 1. **Strong commitment** to following the new patterns
 2. **Thorough testing** at each phase
 3. **User training** on improved processes

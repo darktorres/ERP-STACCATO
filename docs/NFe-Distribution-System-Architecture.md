@@ -40,20 +40,20 @@ graph TD
     A --> D[ACBr Integration]
     A --> E[Database Layer]
     A --> F[Event Processing]
-    
+
     B --> G[downloadAutomatico]
     C --> H[on_pushButtonBaixarNFe_clicked]
     G --> I[consultarSefaz]
     H --> I
-    
+
     I --> J[buscarNFes]
     J --> K[enviarComando]
     K --> L[processarResposta]
-    
+
     L --> M[processarEventoPrincipal]
     L --> N[processarEventoNFe]
     L --> O[processarEventoInformacao]
-    
+
     F --> P[darCiencia]
     F --> Q[confirmar]
     F --> R[desconhecer]
@@ -83,6 +83,7 @@ timer.start(tempoTimer);
 ```
 
 **Estados do Timer**:
+
 - `15min` - Intervalo padrão para consultas normais
 - `1h` - Intervalo após consumo indevido ou nenhum documento localizado
 - Tipo `VeryCoarseTimer` - Otimizado para economia de energia
@@ -90,10 +91,12 @@ timer.start(tempoTimer);
 ### 2. Controle de NSU (Número Sequencial Único)
 
 **Campos Principais**:
+
 - `ultimoNSU`: Último NSU processado pelo sistema
 - `maximoNSU`: Último NSU disponível na SEFAZ
 
 **Funcionalidades**:
+
 - Controle sequencial de documentos
 - Detecção de dessincronização automática
 - Reset para ressincronização (NSU = 0)
@@ -110,6 +113,7 @@ bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
 ```
 
 **Previne**:
+
 - Consultas simultâneas de múltiplos PCs
 - Consumo indevido na SEFAZ
 - Concorrência desnecessária
@@ -118,6 +122,7 @@ bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
 
 **Conexão**: Via socket TCP com ACBrMonitor
 **Comandos Principais**:
+
 - `NFe.DistribuicaoDFePorUltNSU()` - Consulta principal
 - `NFE.EnviarEvento()` - Eventos de manifestação
 
@@ -136,23 +141,23 @@ sequenceDiagram
 
     Timer->>Widget: timeout signal (15min/1h)
     Widget->>Widget: downloadAutomatico()
-    
+
     Note over Widget: Verifica se monitoramento está ativo
     Widget->>Widget: User::getSetting("User/monitorarNFe")
-    
+
     Widget->>Widget: consultarSefaz()
     Widget->>Config: SELECT monitorarCNPJ1, monitorarServidor1...
     Config-->>Widget: Configurações de CNPJs
-    
+
     loop Para cada CNPJ configurado
         Widget->>Widget: buscarNFes(cnpjRaiz, servidor, porta)
         Widget->>DB: SELECT idLoja, cnpj, ultimoNSU, maximoNSU FROM loja
         DB-->>Widget: Lista de filiais
-        
+
         loop Para cada filial
             Widget->>Widget: houveConsultaEmOutroPc()
             Widget->>DB: SELECT timestampdiff(SECOND, ultimaConsultaNSU, NOW())
-            
+
             alt Consulta recente (< 65min)
                 Widget->>Widget: continue (pula filial)
             else Pode consultar
@@ -161,22 +166,22 @@ sequenceDiagram
                 ACBr->>SEFAZ: Consulta distribuição DFe
                 SEFAZ-->>ACBr: Resposta com documentos
                 ACBr-->>Widget: Resposta formatada
-                
+
                 alt Sucesso
                     Widget->>Widget: processarResposta()
                     Widget->>DB: INSERT/UPDATE nfe, UPDATE loja NSUs
-                    
+
                     loop Enquanto ultimoNSU < maximoNSU
                         Widget->>Widget: enviarComando() novamente
                     end
-                    
+
                     Widget->>Widget: Processar eventos (ciência, confirmação, etc.)
                     Widget->>DB: UPDATE loja SET ultimaConsultaNSU = NOW()
-                    
+
                 alt Consumo Indevido
                     Widget->>DB: UPDATE loja SET ultimaConsultaNSU = NOW()
                     Widget->>Widget: return false (pula para próximo CNPJ)
-                    
+
                 alt Dessincronização NSU
                     Widget->>DB: UPDATE loja SET ultimoNSU = 0, maximoNSU = 0, ultimaConsultaNSU = NOW()
                     Widget->>Widget: return false (pula para próximo CNPJ)
@@ -184,16 +189,18 @@ sequenceDiagram
             end
         end
     end
-    
+
     Widget->>Timer: timer.start(tempoTimer)
 ```
 
 **Detalhamento das Etapas**:
 
 #### Etapa 1: Inicialização (`downloadAutomatico`)
+
 **Localização**: `widgetnfedistribuicao.cpp:25-46`
 
-1. **Verificação de Habilitação**: 
+1. **Verificação de Habilitação**:
+
    ```cpp
    if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
    ```
@@ -204,6 +211,7 @@ sequenceDiagram
    - Configura modo silencioso (`qApp->setSilent(true)`)
 
 3. **Tratamento de Exceções**:
+
    ```cpp
    try {
      consultarSefaz();
@@ -215,24 +223,29 @@ sequenceDiagram
    ```
 
 #### Etapa 2: Configuração (`consultarSefaz`)
+
 **Localização**: `widgetnfedistribuicao.cpp:938-956`
 
 Carrega configurações do banco:
+
 - `monitorarCNPJ1/2`: CNPJs raiz para monitoramento
 - `monitorarServidor1/2`: IPs dos servidores ACBr
 - `monitorarPorta1/2`: Portas dos serviços ACBr
 
 #### Etapa 3: Processamento por CNPJ (`buscarNFes`)
+
 **Localização**: `widgetnfedistribuicao.cpp:236-316`
 
 **Consulta de Filiais**:
+
 ```sql
-SELECT idLoja, cnpj, ultimoNSU, maximoNSU 
-FROM loja 
+SELECT idLoja, cnpj, ultimoNSU, maximoNSU
+FROM loja
 WHERE cnpj LIKE 'cnpjRaiz%' AND desativado = FALSE
 ```
 
 **Loop Principal**:
+
 1. Para cada filial encontrada
 2. Verifica controle temporal (`houveConsultaEmOutroPc`)
 3. Executa consulta principal (`enviarComando`)
@@ -253,24 +266,25 @@ sequenceDiagram
 
     User->>UI: Clica "Baixar NFe"
     UI->>Widget: on_pushButtonBaixarNFe_clicked()
-    
+
     Widget->>Widget: timer.stop()
     Widget->>Widget: consultarSefaz()
-    
+
     Note over Widget: Mesmo fluxo da consulta automática
     Widget->>Widget: [Fluxo idêntico ao automático]
-    
+
     alt Sucesso
         Widget->>UI: qApp->enqueueInformation("Operação realizada com sucesso!")
     else Erro
         Widget->>Widget: timer.start(tempoTimer)
         Widget->>UI: throw exception
     end
-    
+
     Widget->>Widget: timer.start(tempoTimer)
 ```
 
 **Diferenças da Consulta Automática**:
+
 - Iniciada por ação do usuário
 - Para o timer durante execução
 - Mostra mensagem de sucesso/erro
@@ -283,21 +297,21 @@ flowchart TD
     A[enviarComando] --> B[Montar comando NFe.DistribuicaoDFePorUltNSU]
     B --> C[acbr.enviarComando]
     C --> D{Analisar Resposta}
-    
+
     D --> E[Consumo Indevido?]
     E -->|Sim| F[UPDATE ultimaConsultaNSU = NOW]
     F --> G[return false]
-    
+
     D --> H[Dessincronização NSU?]
     H -->|Sim| I[UPDATE ultimoNSU=0, maximoNSU=0, ultimaConsultaNSU=NOW]
     I --> J[return false]
-    
+
     D --> K[Erro de Certificado?]
     K -->|Sim| L[throw RuntimeError]
-    
+
     D --> M[Outros Erros?]
     M -->|Sim| N[throw RuntimeException]
-    
+
     D --> O[Sucesso]
     O --> P[processarResposta]
     P --> Q[Atualizar NSUs e NFes]
@@ -307,6 +321,7 @@ flowchart TD
 **Tratamentos Especiais**:
 
 1. **Consumo Indevido** (linha 186):
+
    ```cpp
    // Atualizar timestamp para registrar que houve consulta recente (outro PC)
    SqlQuery queryUpdate;
@@ -314,6 +329,7 @@ flowchart TD
    ```
 
 2. **Dessincronização de NSU** (linha 204):
+
    ```cpp
    // Resetar NSUs no banco e atualizar timestamp para aguardar 1h
    SqlQuery queryReset;
@@ -335,6 +351,7 @@ tempoTimer = 1h;
 ```
 
 **Estados do Timer**:
+
 - **15 minutos**: Operação normal com documentos encontrados
 - **1 hora**: Nenhum documento localizado, consumo indevido ou dessincronização
 
@@ -347,13 +364,14 @@ bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
   // Consulta tempo desde última distribuição
   QSqlQuery query;
   query.exec("SELECT timestampdiff(SECOND, ultimaConsultaNSU, NOW()) / 60 AS tempo FROM loja WHERE idLoja = " + idLoja);
-  
+
   // Bloqueia se passou menos de 60 minutos (margem: 65min implementada)
   return query.value("tempo").toInt() < 60;
 }
 ```
 
 **Campos de Controle**:
+
 - `ultimaConsultaNSU`: Timestamp da última consulta
 - Margem de segurança: 65 minutos (recentemente atualizado de 60)
 
@@ -364,7 +382,7 @@ bool WidgetNFeDistribuicao::houveConsultaEmOutroPc() {
 O NSU é o mecanismo de controle sequencial da SEFAZ para distribuição de documentos:
 
 - **ultimoNSU**: Último documento processado pelo sistema local
-- **maximoNSU**: Último documento disponível na SEFAZ  
+- **maximoNSU**: Último documento disponível na SEFAZ
 - **Regra**: Sistema sempre consulta a partir do `ultimoNSU + 1`
 
 ### Fluxo de Sincronização
@@ -406,6 +424,7 @@ void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, cons
 **Sintoma**: Erro "Deve ser utilizado o ultNSU nas solicitacoes subsequentes"
 
 **Correção Automática**:
+
 1. Detecta erro específico
 2. Reseta NSU local para 0 (linha 209)
 3. Atualiza timestamp para aguardar 1h
@@ -418,19 +437,19 @@ void WidgetNFeDistribuicao::processarEventoPrincipal(const QString &evento, cons
 ```mermaid
 flowchart TD
     A[Resposta ACBr] --> B{Tipo de Erro}
-    
+
     B --> C[Consumo Indevido]
     C --> D[UPDATE ultimaConsultaNSU<br/>return false]
-    
+
     B --> E[Dessincronização NSU]
     E --> F[RESET NSUs = 0<br/>UPDATE ultimaConsultaNSU<br/>return false]
-    
+
     B --> G[Certificado Inválido]
     G --> H[throw RuntimeError<br/>Para tudo]
-    
+
     B --> I[Outros Erros SEFAZ]
     I --> J[throw RuntimeException<br/>Para processamento atual]
-    
+
     B --> K[Sucesso]
     K --> L[processarResposta<br/>return true]
 ```
@@ -438,20 +457,25 @@ flowchart TD
 ### Estratégias de Recuperação
 
 #### 1. Consumo Indevido
+
 **Causa**: Consulta muito recente (< 1h)  
-**Estratégia**: 
+**Estratégia**:
+
 - Atualiza `ultimaConsultaNSU` para sincronizar controle local
-- Pula CNPJ atual, continua outros  
+- Pula CNPJ atual, continua outros
 - Define timer para 1h
 
 #### 2. Dessincronização NSU
+
 **Causa**: NSU local desatualizado  
 **Estratégia**:
+
 - Reset completo: `ultimoNSU = 0, maximoNSU = 0`
 - Força pausa de 1h
 - Próxima consulta obterá NSU correto da SEFAZ
 
 #### 3. Erros de Certificado
+
 **Causa**: Certificado digital inválido/expirado  
 **Estratégia**: Para execução completa (throw RuntimeError)
 
@@ -462,7 +486,7 @@ flowchart TD
 O sistema suporta 4 tipos de manifestação do destinatário:
 
 1. **Ciência da Operação** (210210)
-2. **Confirmação da Operação** (210200)  
+2. **Confirmação da Operação** (210200)
 3. **Desconhecimento da Operação** (210220)
 4. **Operação não Realizada** (210240)
 
@@ -480,14 +504,14 @@ sequenceDiagram
 
     User->>UI: Seleciona NFes + Clica botão evento
     UI->>Widget: on_pushButton*_clicked()
-    
+
     Widget->>Model: Marca registros selecionados
     Note over Model: setData(row, "ciencia/confirmar/etc", true)
-    
+
     alt Monitoramento Ativo
         Widget->>Widget: Chama função específica (darCiencia/confirmar/etc)
         Widget->>Model: multiMatch({"ciencia": true})
-        
+
         loop Processar até 20 registros por vez
             Widget->>Widget: enviarEvento(acbr, operacao, selection)
             Widget->>Widget: Montar comando XML
@@ -498,7 +522,7 @@ sequenceDiagram
             Widget->>Widget: Processar resultado
             Widget->>DB: Atualizar status das NFes
         end
-        
+
     else Monitoramento Inativo
         Widget->>Widget: agendarOperacao()
         Widget->>DB: submitAll() - salva para processar depois
@@ -532,28 +556,28 @@ for (const auto row : selection) {
 flowchart TD
     A[Resposta do Evento] --> B[Split por eventos individuais]
     B --> C{Para cada evento}
-    
+
     C --> D[Extrair XMotivo]
     D --> E{Tipo de Motivo}
-    
+
     E --> F["Lote de evento processado"]
     F --> G[continue - ignora]
-    
+
     E --> H["Evento registrado e vinculado"]
     H --> I[UPDATE nfe SET statusDistribuicao = operacao]
-    
+
     E --> J["Duplicidade de evento"]
     J --> I
-    
+
     E --> K["Ciência após manifestação final"]
     K --> L[UPDATE statusDistribuicao = 'FINALIZADA']
-    
+
     E --> M["NFe cancelada ou denegada"]
     M --> N[UPDATE status = 'CANCELADA']
-    
+
     E --> O["Evento apresentado após prazo"]
     O --> P[UPDATE statusDistribuicao = 'FINALIZADA']
-    
+
     E --> Q[Evento não tratado]
     Q --> R[Log exceção + Limpar flags]
 ```
@@ -565,7 +589,7 @@ flowchart TD
 A resposta da SEFAZ contém múltiplos blocos separados por `\r\n\r\n`:
 
 1. **[DistribuicaoDFe]**: Informações principais (NSU, status)
-2. **[ResDFe...]**: Resumos de NFe  
+2. **[ResDFe...]**: Resumos de NFe
 3. **[ResEve...]**: Eventos de informação
 
 ### Função `processarResposta()`
@@ -577,14 +601,14 @@ void WidgetNFeDistribuicao::processarResposta(const QString &resposta, const QSt
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
 
   for (const auto &evento : eventos) {
-    if (evento.contains("[DistribuicaoDFe]", Qt::CaseInsensitive)) { 
-      processarEventoPrincipal(evento, idLoja); 
+    if (evento.contains("[DistribuicaoDFe]", Qt::CaseInsensitive)) {
+      processarEventoPrincipal(evento, idLoja);
     }
-    if (evento.contains("[ResDFe", Qt::CaseInsensitive)) { 
-      processarEventoNFe(evento); 
+    if (evento.contains("[ResDFe", Qt::CaseInsensitive)) {
+      processarEventoNFe(evento);
     }
-    if (evento.contains("[ResEve", Qt::CaseInsensitive)) { 
-      processarEventoInformacao(evento); 
+    if (evento.contains("[ResEve", Qt::CaseInsensitive)) {
+      processarEventoInformacao(evento);
     }
   }
 }
@@ -595,6 +619,7 @@ void WidgetNFeDistribuicao::processarResposta(const QString &resposta, const QSt
 **Localização**: linha 775-834
 
 **Extração de Dados**:
+
 ```cpp
 const QString chaveAcesso = qApp->findTag(evento, "chDFe=");
 const QString numeroNFe = chaveAcesso.mid(25, 9);
@@ -610,14 +635,14 @@ const QString xml = qApp->findTag(evento, "XML=");
 ```mermaid
 flowchart TD
     A[processarEventoNFe] --> B{NFe já cadastrada?}
-    
+
     B -->|Não| C[Primeira vez]
     C --> D{Tipo de Schema}
     D -->|procNFe| E[status = 'AUTORIZADA'<br/>ciencia = 0]
     D -->|resNFe| F[status = 'RESUMO'<br/>ciencia = 1]
     E --> G[INSERT INTO nfe]
     F --> G
-    
+
     B -->|Sim| H{Status atual}
     H -->|AUTORIZADA| I[return - não atualiza]
     H -->|RESUMO| J{Novo schema?}
@@ -632,8 +657,9 @@ flowchart TD
 Processa eventos já registrados na SEFAZ sobre NFes conhecidas:
 
 **Tipos de Eventos Processados**:
+
 - **Ciência da Operação**: Atualiza status para 'CIÊNCIA'
-- **Confirmação da Operação**: Atualiza status para 'CONFIRMAÇÃO'  
+- **Confirmação da Operação**: Atualiza status para 'CONFIRMAÇÃO'
 - **Cancelamento**: Atualiza status para 'CANCELADA'
 
 ## Segurança e Controles
@@ -646,6 +672,7 @@ Processa eventos já registrados na SEFAZ sobre NFes conhecidas:
 ### 2. Integridade de Dados
 
 **Transações de Banco**:
+
 ```cpp
 qApp->startTransaction("NFeDistribuicao::enviarComando");
 // Operações de banco...
@@ -657,6 +684,7 @@ qApp->endTransaction();
 ### 3. Tratamento de Falhas
 
 **Robustez**:
+
 - Continua processamento mesmo com erro em CNPJs individuais
 - Recovery automático de dessincronização NSU
 - Timeouts configuráveis para conexões ACBr
@@ -664,6 +692,7 @@ qApp->endTransaction();
 ### 4. Logging e Auditoria
 
 **Debug Extensivo**:
+
 ```cpp
 qDebug() << "pesquisar cnpj - nsu: " << cnpjDest << " - " << ultimoNSU;
 qDebug() << "CONSUMO INDEVIDO para CNPJ" << cnpjDest;
@@ -671,6 +700,7 @@ qDebug() << "DESSINCRONIZAÇÃO DE NSU DETECTADA";
 ```
 
 **Log de Exceções**:
+
 ```cpp
 Log::createLog("Exceção", "Evento não tratado: \nChave: " + chaveAcesso + "\nEvento:" + evento);
 ```
@@ -679,27 +709,31 @@ Log::createLog("Exceção", "Evento não tratado: \nChave: " + chaveAcesso + "\n
 
 ### Configurações de Timer
 
-**Localização**: Classe header - `tempoTimer` 
+**Localização**: Classe header - `tempoTimer`
 
 **Valores Padrão**:
+
 - 15 minutos: Operação normal
 - 1 hora: Casos especiais (consumo indevido, sem documentos)
 
 ### Configurações de Database
 
 **Tabela `config`**:
-- `monitorarCNPJ1/2`: CNPJs raiz para monitoramento  
+
+- `monitorarCNPJ1/2`: CNPJs raiz para monitoramento
 - `monitorarServidor1/2`: Endereços dos servidores ACBr
 - `monitorarPorta1/2`: Portas dos serviços ACBr
 
 **Tabela `loja`**:
+
 - `ultimoNSU/maximoNSU`: Controle sequencial por filial
 - `ultimaConsultaNSU`: Controle temporal de consultas
 - `desativado`: Flag para ativar/desativar filiais
 
 ### Configurações de Usuário
 
-**Setting `User/monitorarNFe`**: 
+**Setting `User/monitorarNFe`**:
+
 - Controla se o sistema executa consultas automáticas
 - Afeta comportamento de eventos (imediato vs agendado)
 
@@ -707,32 +741,38 @@ Log::createLog("Exceção", "Evento não tratado: \nChave: " + chaveAcesso + "\n
 
 **Baseado nos comentários do código**:
 
-1. **Parametrização de Estado**: 
+1. **Parametrização de Estado**:
+
    ```cpp
    // TODO: parametrizar o código do estado em vez de usar 35
    ```
 
-2. **XML de Usuário**: 
+2. **XML de Usuário**:
+
    ```cpp
    // TODO: utilizar o xml do usuario quando importar um já cadastrado como RESUMO
    ```
 
-3. **Auto-confirmação**: 
+3. **Auto-confirmação**:
+
    ```cpp
    // TODO: autoconfirmar nfes com mais de x dias para evitar perder o prazo
    ```
 
-4. **Performance da Tabela**: 
+4. **Performance da Tabela**:
+
    ```cpp
    // TODO: ordenar no banco de dados em vez de localmente para ser rápido
    ```
 
-5. **Formatação de Dados**: 
+5. **Formatação de Dados**:
+
    ```cpp
    // TODO: criar um cnpj/cpf delegate para formatar o valor na tabela
    ```
 
-6. **UX - Legenda**: 
+6. **UX - Legenda**:
+
    ```cpp
    // TODO: colocar legenda de cor explicando o que significa cada cor
    ```
@@ -743,7 +783,7 @@ O Sistema de Distribuição de NFe é uma solução robusta e complexa que geren
 
 - **Consultas periódicas** com controle de temporização inteligente
 - **Sincronização de NSU** com detecção e correção automática de problemas
-- **Processamento de eventos** de manifestação do destinatário  
+- **Processamento de eventos** de manifestação do destinatário
 - **Controle multi-PC** para evitar consumo indevido
 - **Tratamento abrangente de erros** com estratégias de recuperação
 

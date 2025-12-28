@@ -13,7 +13,7 @@
 | 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | ✅ Feito |
 | 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | ✅ Feito |
 | 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | ✅ Feito |
-| 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
+| 4   | [Design de API](#4-design-de-api)                                             | Média      | ✅ Feito |
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | Pendente |
@@ -172,21 +172,24 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 4. Design de API
+## 4. Design de API ✅
 
-**Problema**: Mencionado como "API-first" mas sem especificação.
+**Arquivo**: [`tecnico/06-api.md`](../tecnico/06-api.md)
 
-**Arquivo sugerido**: `tecnico/06-api.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- REST vs GraphQL (decisão)
-- Versionamento de API (`/api/v1/...`)
-- Rate limiting
-- Catálogo de webhooks
-- Documentação OpenAPI/Swagger
-- Formato de resposta (JSON:API? Custom?)
-- Paginação, filtros, ordenação
+- ✅ Arquitetura REST com JSON
+- ✅ Versionamento via URL (`/api/v1/...`)
+- ✅ Catálogo completo de endpoints (Cadastros, Vendas, Compras, Estoque, Financeiro, NFe, Logística)
+- ✅ Autenticação com Laravel Sanctum (SPA + API tokens)
+- ✅ Autorização com Gates/Policies e multi-tenancy
+- ✅ Rate limiting configurável por endpoint
+- ✅ Formato de resposta padronizado (sucesso, erro, coleções)
+- ✅ Paginação, filtros e ordenação com Spatie Query Builder
+- ✅ Sistema de webhooks com retry e assinatura
+- ✅ Documentação OpenAPI com L5-Swagger
+- ✅ Integrações externas (Google Maps, QualP, CEP)
+- ✅ Testes de API e contratos
 
 ---
 
@@ -523,26 +526,26 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 12 | Regras de negócio - 10 domínios documentados           |
 | 2025-12-28 | Item 13 | Integrações - 7 sistemas externos documentados         |
 | 2025-12-28 | Item 22 | Estratégia de validação - 5 camadas documentadas       |
+| 2025-12-28 | Item 4  | Design de API - REST + OpenAPI + webhooks              |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 4 - Design de API
-2. [ ] Item 5 - Estratégia de testes
-3. [ ] Item 7 - Tratamento de erros e monitoramento
-4. [ ] Item 14 - Plano de treinamento de usuários
-5. [ ] Item 15 - Design System/Guia de UI
-6. [ ] Item 16 - Estratégia de concorrência
-7. [ ] Item 17 - Atalhos de teclado
-8. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 5 - Estratégia de testes
+2. [ ] Item 7 - Tratamento de erros e monitoramento
+3. [ ] Item 14 - Plano de treinamento de usuários
+4. [ ] Item 15 - Design System/Guia de UI
+5. [ ] Item 16 - Estratégia de concorrência
+6. [ ] Item 17 - Atalhos de teclado
+7. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-9. [ ] Item 8 - DevOps/Deployment
-10. [ ] Item 9 - Benchmarks de performance
-11. [ ] Item 10 - Substituição de relatórios
-12. [ ] Item 19 - Dicionário de dados
-13. [ ] Item 20 - Matriz de suporte browser/dispositivo
-14. [ ] Item 21 - Auditoria de dependências
+8. [ ] Item 8 - DevOps/Deployment
+9. [ ] Item 9 - Benchmarks de performance
+10. [ ] Item 10 - Substituição de relatórios
+11. [ ] Item 19 - Dicionário de dados
+12. [ ] Item 20 - Matriz de suporte browser/dispositivo
+13. [ ] Item 21 - Auditoria de dependências
 
 ---
 

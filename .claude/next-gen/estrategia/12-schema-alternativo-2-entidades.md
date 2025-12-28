@@ -1101,6 +1101,95 @@ Loja B (entrada):
 
 ---
 
+## Como Outros ERPs Fazem
+
+### SAP MM (Tradicional 3+ Entidades)
+
+SAP usa **tabelas separadas** para cada conceito:
+
+| Camada | Tabelas | Propósito |
+|--------|---------|-----------|
+| **Pedido de Compra** | EKKO (header), EKPO (itens) | O que pedimos |
+| **Documento Material** | MKPF (header), MSEG (itens) | Movimentações |
+| **Estoque** | MARD, MCHB | Inventário por local/lote |
+| **Histórico** | EKBE | Histórico do PO (GR, IR) |
+
+Quando mercadoria é recebida, SAP cria um **Material Document** (MKPF/MSEG) que referencia o PO e atualiza tabelas de estoque. Claramente um **modelo 3+ entidades**.
+
+### Odoo (Baseado em Movimentos / Double-Entry)
+
+Odoo usa um sistema **double-entry estilo contabilidade**:
+
+```
+purchase.order.line  →  stock.picking  →  stock.move  →  stock.quant
+    (o que comprar)      (doc transfer)   (movimento)    (inventário)
+```
+
+**Insight chave**: `stock.quant` representa estado atual do inventário. Diferente de versões antigas onde qty_available era calculado de todo histórico de stock.move (O(n)), quants só representam estoque atualmente disponível (O(log n)).
+
+Quants habilitam FIFO rastreando **QUAIS unidades** estão em estoque, não apenas quantidade. Cada novo stock.move cria/modifica quants.
+
+| Entidade | Papel |
+|----------|-------|
+| `stock.move` | Movimento planejado (como lançamento contábil) |
+| `stock.move.line` | Detalhes do movimento real |
+| `stock.quant` | Saldo atual (derivado dos moves) |
+
+Isso é essencialmente **4 entidades** com quant sendo uma view materializada dos moves.
+
+### ERPNext (Similar ao Odoo)
+
+Usa abordagem Stock Ledger Entry onde inventário é a soma de todas as movimentações.
+
+---
+
+### Padrão da Indústria: Documentos de Movimento
+
+Todos os grandes ERPs têm um **documento de movimento/transação** entre pedido e inventário:
+
+```
+SAP:       Purchase Order → Material Document → Stock
+Odoo:      Purchase Order → Stock Picking/Move → Stock Quant
+ERPNext:   Purchase Order → Stock Entry → Stock Ledger
+```
+
+Isso valida a abordagem do **modelo 3-entidades**. Nenhum deles funde "item do pedido" com "item de inventário" diretamente.
+
+---
+
+### Comparação com Nossos Modelos
+
+| Aspecto | SAP | Odoo | Nosso 3-Ent | Nosso 2-Ent |
+|---------|-----|------|-------------|-------------|
+| Entidade de pedido | EKPO | purchase.order.line | compra_itens | compra_itens |
+| Entidade de movimento | MSEG | stock.move | implícito | implícito |
+| Entidade de inventário | MARD/MCHB | stock.quant | estoques | (merged em compra_itens) |
+| Entidade de alocação | - | stock.move.line | estoque_consumos | alocacoes |
+
+**Diferença chave:** ERPs grandes nunca fundem pedido com inventário. Sempre têm tabela separada "o que temos" derivada de "o que aconteceu."
+
+---
+
+### Por Que ERPs Mantêm Separado
+
+1. **Pedido vs Realidade**: Pedido é intenção; inventário é fato
+2. **Múltiplas origens**: Inventário pode vir de devoluções, ajustes, transferências - não só compras
+3. **Trilha de auditoria**: Material documents no SAP, stock.move no Odoo rastreiam cada mudança
+4. **Performance**: stock.quant no Odoo foi projetado especificamente para evitar calcular de todos os moves históricos
+
+---
+
+### Fontes
+
+- [SAP MKPF Table Structure](https://www.tcodesearch.com/sap-tables/MKPF)
+- [SAP MSEG Table Structure](https://www.tcodesearch.com/sap-tables/detail?id=MSEG)
+- [SAP MM Tables and Relationships](https://myeasybi.com/2022/06/21/mastering-sap-mm-tables-and-relationships/)
+- [Odoo stock.quant vs stock.move](https://www.odoo.com/forum/help-1/what-is-the-relationship-between-a-stockpicking-a-stockmove-and-a-stockquant-i-want-to-back-date-some-inventory-movements-122532)
+- [Odoo Stock Module Source](https://github.com/maestrano/odoo/blob/master/addons/stock/stock.py)
+- [Oracle Inventory Management](https://docs.oracle.com/cd/E59555_01/OFBSK/ofbsk_chap31.htm)
+
+---
+
 ## Questões em Aberto
 
 1. **Nomenclatura**: Renomear `compra_itens` para algo mais genérico?

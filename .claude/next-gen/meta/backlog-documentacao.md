@@ -25,7 +25,7 @@
 | 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | ✅ Feito |
 | 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | ✅ Feito |
 | 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | ✅ Feito |
-| 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | Pendente |
+| 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | ✅ Feito |
 | 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | Pendente |
 | 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | Pendente |
 | 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
@@ -386,20 +386,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 16. Estratégia de Concorrência
+## 16. Estratégia de Concorrência ✅
 
-**Problema**: Múltiplos usuários podem tentar editar/consumir os mesmos recursos.
+**Arquivo**: [`tecnico/11-concorrencia.md`](../tecnico/11-concorrencia.md)
 
-**Arquivo sugerido**: `tecnico/11-concorrencia.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- **Estoque**: Reserva pessimista vs otimista
-- **Edição de registros**: Optimistic locking com `updated_at`
-- **Transações longas**: Timeout, liberação automática
-- **Filas**: Jobs que modificam estoque/financeiro
-- **Race conditions conhecidas**: Cenários e soluções
-- Testes de concorrência (stress test)
+- ✅ Optimistic locking com `updated_at` (edição de registros)
+- ✅ Pessimistic locking com `SELECT FOR UPDATE` (estoque)
+- ✅ Atomic updates para crédito (increment/decrement)
+- ✅ Queue-based processing com `ShouldBeUnique`
+- ✅ Database locks com expiração para edições longas
+- ✅ Cenários de race condition documentados
+- ✅ Tratamento de deadlocks com retry
+- ✅ Testes de concorrência e stress
 
 ---
 
@@ -533,21 +533,21 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 7  | Erros e monitoramento - Sentry + logs + alertas        |
 | 2025-12-28 | Item 14 | Treinamento - 8 perfis, 8 módulos, rollout gradual     |
 | 2025-12-28 | Item 15 | Design System - cores, tipografia, componentes Vue     |
+| 2025-12-28 | Item 16 | Concorrência - locks, queues, race conditions          |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 16 - Estratégia de concorrência
-2. [ ] Item 17 - Atalhos de teclado
-3. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 17 - Atalhos de teclado
+2. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-4. [ ] Item 8 - DevOps/Deployment
-5. [ ] Item 9 - Benchmarks de performance
-6. [ ] Item 10 - Substituição de relatórios
-7. [ ] Item 19 - Dicionário de dados
-8. [ ] Item 20 - Matriz de suporte browser/dispositivo
-9. [ ] Item 21 - Auditoria de dependências
+3. [ ] Item 8 - DevOps/Deployment
+4. [ ] Item 9 - Benchmarks de performance
+5. [ ] Item 10 - Substituição de relatórios
+6. [ ] Item 19 - Dicionário de dados
+7. [ ] Item 20 - Matriz de suporte browser/dispositivo
+8. [ ] Item 21 - Auditoria de dependências
 
 ---
 

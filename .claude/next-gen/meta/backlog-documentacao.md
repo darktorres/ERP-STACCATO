@@ -16,7 +16,7 @@
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | ✅ Feito |
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | ✅ Feito |
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
-| 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | Pendente |
+| 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | ✅ Feito |
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
@@ -232,19 +232,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 7. Tratamento de Erros e Monitoramento
+## 7. Tratamento de Erros e Monitoramento ✅
 
-**Problema**: Sem estratégia padronizada de erros e monitoramento.
+**Arquivo**: [`tecnico/08-erros-monitoramento.md`](../tecnico/08-erros-monitoramento.md)
 
-**Local sugerido**: Adicionar seção em `tecnico/01-arquitetura.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Hierarquia de exceções
-- Formato de resposta de erro (API)
-- Logging estruturado
-- Monitoramento (Sentry? Laravel Telescope?)
-- Alertas
+- ✅ Hierarquia de exceções (Business, Integration, Infrastructure, Security)
+- ✅ Exception Handler com JSON responses
+- ✅ Logging estruturado (business, integrations, security, performance)
+- ✅ Monitoramento com Sentry, Telescope (dev), Pulse (prod)
+- ✅ Health checks (database, redis, cache, queue, storage, acbr)
+- ✅ Sistema de alertas (Slack, Email)
+- ✅ Métricas customizadas
+- ✅ Dashboard de erros
 
 ---
 
@@ -531,24 +532,24 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 22 | Estratégia de validação - 5 camadas documentadas       |
 | 2025-12-28 | Item 4  | Design de API - REST + OpenAPI + webhooks              |
 | 2025-12-28 | Item 5  | Estratégia de testes - Unit/Feature/E2E + CI/CD        |
+| 2025-12-28 | Item 7  | Erros e monitoramento - Sentry + logs + alertas        |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 7 - Tratamento de erros e monitoramento
-2. [ ] Item 14 - Plano de treinamento de usuários
-3. [ ] Item 15 - Design System/Guia de UI
-4. [ ] Item 16 - Estratégia de concorrência
-5. [ ] Item 17 - Atalhos de teclado
-6. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 14 - Plano de treinamento de usuários
+2. [ ] Item 15 - Design System/Guia de UI
+3. [ ] Item 16 - Estratégia de concorrência
+4. [ ] Item 17 - Atalhos de teclado
+5. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-7. [ ] Item 8 - DevOps/Deployment
-8. [ ] Item 9 - Benchmarks de performance
-9. [ ] Item 10 - Substituição de relatórios
-10. [ ] Item 19 - Dicionário de dados
-11. [ ] Item 20 - Matriz de suporte browser/dispositivo
-12. [ ] Item 21 - Auditoria de dependências
+6. [ ] Item 8 - DevOps/Deployment
+7. [ ] Item 9 - Benchmarks de performance
+8. [ ] Item 10 - Substituição de relatórios
+9. [ ] Item 19 - Dicionário de dados
+10. [ ] Item 20 - Matriz de suporte browser/dispositivo
+11. [ ] Item 21 - Auditoria de dependências
 
 ---
 

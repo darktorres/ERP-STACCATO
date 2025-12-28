@@ -24,7 +24,7 @@
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | ✅ Feito |
 | 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | ✅ Feito |
 | 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | ✅ Feito |
-| 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | Pendente |
+| 15  | [Design System/Guia de UI](#15-design-systemguia-de-ui)                       | Média      | ✅ Feito |
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | Pendente |
 | 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | Pendente |
 | 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | Pendente |
@@ -367,24 +367,22 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 15. Design System/Guia de UI
+## 15. Design System/Guia de UI ✅
 
-**Problema**: Sem padrões visuais definidos para componentes.
+**Arquivo**: [`tecnico/10-design-system.md`](../tecnico/10-design-system.md)
 
-**Arquivo sugerido**: `tecnico/10-design-system.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Paleta de cores (primária, secundária, status, neutros)
-- Tipografia (fontes, tamanhos, pesos)
-- Espaçamentos (grid, margens, paddings)
-- Componentes base (botões, inputs, selects, tabelas)
-- Componentes complexos (modais, drawers, toasts)
-- Estados (hover, focus, disabled, loading, error)
-- Ícones (biblioteca escolhida, convenções)
-- Responsividade (breakpoints, comportamento mobile)
-- Acessibilidade (WCAG 2.1 AA, ARIA)
-- Temas (light/dark se aplicável)
+- ✅ Paleta de cores (primária, secundária, status, contexto de negócio)
+- ✅ Tipografia (Inter, escala, hierarquia)
+- ✅ Espaçamento (sistema 4px, grid)
+- ✅ Componentes base (Button, Input, Select, Checkbox)
+- ✅ Componentes complexos (Card, Table, Modal, Toast, Badge)
+- ✅ Estados de interação (hover, focus, disabled, loading, error)
+- ✅ Iconografia (Heroicons, tamanhos, cores)
+- ✅ Responsividade (breakpoints, padrões de layout)
+- ✅ Acessibilidade (WCAG 2.1 AA, ARIA)
+- ✅ Estrutura de componentes Vue
 
 ---
 
@@ -534,22 +532,22 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 5  | Estratégia de testes - Unit/Feature/E2E + CI/CD        |
 | 2025-12-28 | Item 7  | Erros e monitoramento - Sentry + logs + alertas        |
 | 2025-12-28 | Item 14 | Treinamento - 8 perfis, 8 módulos, rollout gradual     |
+| 2025-12-28 | Item 15 | Design System - cores, tipografia, componentes Vue     |
 
 ### Próximos
 
 **Média Prioridade:**
-1. [ ] Item 15 - Design System/Guia de UI
-2. [ ] Item 16 - Estratégia de concorrência
-3. [ ] Item 17 - Atalhos de teclado
-4. [ ] Item 18 - Especificações de impressão
+1. [ ] Item 16 - Estratégia de concorrência
+2. [ ] Item 17 - Atalhos de teclado
+3. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-5. [ ] Item 8 - DevOps/Deployment
-6. [ ] Item 9 - Benchmarks de performance
-7. [ ] Item 10 - Substituição de relatórios
-8. [ ] Item 19 - Dicionário de dados
-9. [ ] Item 20 - Matriz de suporte browser/dispositivo
-10. [ ] Item 21 - Auditoria de dependências
+4. [ ] Item 8 - DevOps/Deployment
+5. [ ] Item 9 - Benchmarks de performance
+6. [ ] Item 10 - Substituição de relatórios
+7. [ ] Item 19 - Dicionário de dados
+8. [ ] Item 20 - Matriz de suporte browser/dispositivo
+9. [ ] Item 21 - Auditoria de dependências
 
 ---
 

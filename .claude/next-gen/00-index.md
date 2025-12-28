@@ -70,7 +70,9 @@ Rewriting the existing C++ Qt desktop ERP application as a modern web applicatio
 │   ├── 03-improvements.md      # Pain points & improvement options
 │   ├── 04-l1l2-simplification.md # Deep dive on table flattening
 │   ├── 05-fifo-fix.md          # FIFO stock consumption fix
-│   └── 06-supplier-normalization.md # FK for supplier refs
+│   ├── 06-supplier-normalization.md # FK for supplier refs
+│   ├── 07-redesigned-schema.md # Complete redesigned schema
+│   └── 08-greenfield-design.md # Greenfield business flow design
 │
 └── meta/
     └── tracker.md              # Documentation progress tracker
@@ -190,6 +192,25 @@ Replace denormalized supplier names with proper FK references:
 - Solution: Use `fornecedor_id` FK everywhere
 - Migration: Populate FK from names, handle variations, drop old columns
 - Special cases: historical snapshots, magic string checks
+
+### [07 - Redesigned Schema](./strategy/07-redesigned-schema.md)
+Complete redesigned schema addressing all identified pain points:
+- Design principles (single item table, FIFO by default, normalized FKs)
+- Complete PostgreSQL schema with ENUMs
+- Entity model and order-to-delivery flow diagram
+- Status state machines with transition rules
+- Event-driven architecture
+- 5-phase migration path
+
+### [08 - Greenfield Design](./strategy/08-greenfield-design.md)
+Complete reimagination of business flows as if building from scratch:
+- **Fulfillment Model**: Items don't split - they get fulfilled in parts
+- **Bounded Contexts**: Sales, Inventory, Purchasing, Delivery, Fiscal, Financial
+- **Event Sourcing**: State derived from events, complete audit trail
+- **Reservation → Consumption**: Two-step stock claiming with FIFO
+- **State Machines**: Explicit transitions with guards
+- **Testing Strategy**: Unit, state machine, integration, event-driven tests
+- **Advanced Features**: Partial delivery, backorders, price tracking
 
 ---
 

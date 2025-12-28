@@ -1,7 +1,8 @@
 # Avaliação de Framework Frontend
 
-> Status: **Em Aberto - Decisão Necessária**
-> Última atualização: 2025-12-27
+> Status: **Decidido - Inertia + Vue 3**
+> Última atualização: 2025-12-28
+> ADR: [ADR-003](../estrategia/02-decisoes.md#adr-003-seleção-de-framework-frontend)
 
 ---
 
@@ -422,18 +423,30 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 
 ---
 
-## Questões a Resolver
+## Decisão Final
 
-1. **Experiência da equipe com Vue?** Se nenhuma, Livewire pode ser mais rápido para começar
-2. **App mobile planejado?** Se sim, considere abordagem API-first
-3. **Requisitos offline?** Crítico para trabalho em campo?
-4. **Necessidades de tempo real?** Chat, atualizações ao vivo, notificações?
+**Inertia + Vue 3** foi escolhido como stack frontend. Ver [ADR-003](../estrategia/02-decisoes.md#adr-003-seleção-de-framework-frontend) para justificativa completa.
+
+### Stack Definida
+
+| Componente   | Tecnologia       | Propósito                        |
+| ------------ | ---------------- | -------------------------------- |
+| Framework    | Inertia.js       | Integração Laravel ↔ Vue         |
+| Frontend     | Vue 3            | Composition API, reatividade     |
+| Tipagem      | TypeScript       | Segurança de tipos               |
+| CSS          | Tailwind CSS     | Utility-first, produtividade     |
+| Componentes  | PrimeVue         | Tabelas, formulários, diálogos   |
+| Utilitários  | VueUse           | Composables reutilizáveis        |
+| Build        | Vite             | Build rápido, HMR                |
 
 ---
 
 ## Próximos Passos
 
-1. Construir um protótipo de um módulo (Cadastro Fornecedor) em cada abordagem
-2. Comparar velocidade de desenvolvimento e qualidade de código
-3. Obter feedback da equipe sobre experiência de desenvolvimento
-4. Tomar decisão final
+1. ~~Construir um protótipo de um módulo (Cadastro Fornecedor) em cada abordagem~~
+2. ~~Comparar velocidade de desenvolvimento e qualidade de código~~
+3. ~~Obter feedback da equipe sobre experiência de desenvolvimento~~
+4. ~~Tomar decisão final~~ ✅ **Decisão: Inertia + Vue 3**
+5. Configurar projeto Laravel com Inertia + Vue 3 + TypeScript
+6. Criar componentes base (Layout, Navegação, Tabela, Formulário)
+7. Documentar padrões de código Vue

@@ -11,10 +11,10 @@
 | ------- | ----------------------------------- | ------------- | ---------- |
 | ADR-001 | Usar Laravel como framework backend | **Aceito**    | 2025-12-27 |
 | ADR-002 | Usar PostgreSQL como banco de dados | **Aceito**    | 2025-12-27 |
-| ADR-003 | Seleção de framework frontend       | **Em Aberto** | -          |
+| ADR-003 | Seleção de framework frontend       | **Aceito**    | 2025-12-28 |
 | ADR-004 | Abordagem de integração NFe         | **Aceito**    | 2025-12-28 |
-| ADR-005 | Estratégia de migração              | **Em Aberto** | -          |
-| ADR-006 | Abordagem de multi-tenancy          | **Em Aberto** | -          |
+| ADR-005 | Estratégia de migração              | **Aceito**    | 2025-12-28 |
+| ADR-006 | Abordagem de multi-tenancy          | **Aceito**    | 2025-12-28 |
 
 ---
 
@@ -94,7 +94,7 @@ Migrar para **PostgreSQL 16**.
 
 ### Status - ADR-003
 
-**Em Aberto** - Decisão necessária
+**Aceito** - 2025-12-28
 
 ### Contexto - ADR-003
 
@@ -116,17 +116,48 @@ Ver análise detalhada em [../tecnico/03-frontend.md](../tecnico/03-frontend.md)
 | Complexidade            | Baixa      | Média       | Média         | Alta              |
 | Habilidades necessárias | Apenas PHP | PHP + Vue   | PHP + React   | Equipes separadas |
 
-### Recomendação - ADR-003
-
-**Inertia + Vue** - Melhor equilíbrio entre interatividade e simplicidade.
-
 ### Decisão - ADR-003
 
-Pendente input da equipe.
+Usar **Inertia.js + Vue 3** como stack frontend.
+
+### Justificativa - ADR-003
+
+1. **Experiência estilo SPA** sem complexidade de construir/versionar API separada
+2. **Reatividade do Vue** lida bem com formulários complexos de ERP (multi-step, inline editing)
+3. **Recarregamentos parciais** do Inertia reduzem transferência de dados
+4. **TypeScript suportado** para segurança de tipos
+5. **Ecossistema crescente** (PrimeVue para componentes, VueUse para composables)
+6. **Curva de aprendizado razoável** - mais simples que SPA completo, mais poderoso que Livewire
+
+### Stack Definida - ADR-003
+
+| Componente   | Tecnologia       | Propósito                        |
+| ------------ | ---------------- | -------------------------------- |
+| Framework    | Inertia.js       | Integração Laravel ↔ Vue         |
+| Frontend     | Vue 3            | Composition API, reatividade     |
+| Tipagem      | TypeScript       | Segurança de tipos               |
+| CSS          | Tailwind CSS     | Utility-first, produtividade     |
+| Componentes  | PrimeVue         | Tabelas, formulários, diálogos   |
+| Utilitários  | VueUse           | Composables reutilizáveis        |
+| Build        | Vite             | Build rápido, HMR                |
 
 ### Consequências - ADR-003
 
-A ser preenchido após decisão.
+**Positivas:**
+- UX fluida estilo SPA para usuários acostumados ao desktop Qt
+- Componentização facilita reutilização entre módulos
+- TypeScript previne erros em tempo de desenvolvimento
+- PrimeVue oferece componentes enterprise-ready (DataTable com edição inline)
+
+**Negativas:**
+- Equipe precisará aprender Vue 3 e TypeScript
+- Build step necessário (Vite)
+- Bundle inicial maior que Livewire puro
+
+**Mitigações:**
+- Treinamento inicial em Vue 3 Composition API
+- Documentação de padrões de código Vue
+- Lazy loading de rotas para reduzir bundle inicial
 
 ---
 
@@ -190,7 +221,7 @@ Servidor de produção é Linux headless (sem interface gráfica).
 
 ### Status - ADR-005
 
-**Em Aberto** - Decisão necessária
+**Aceito** - 2025-12-28
 
 ### Contexto - ADR-005
 
@@ -206,17 +237,82 @@ Necessidade de decidir como fazer a transição do desktop C++ para web Laravel.
 
 Ver análise detalhada em [01-plano-migracao.md](./01-plano-migracao.md)
 
-### Recomendação - ADR-005
-
-**Strangler Fig** - Migração incremental com banco de dados compartilhado.
-
 ### Decisão - ADR-005
 
-Pendente aprovação dos stakeholders.
+Usar **Strangler Fig Pattern** - migração incremental com banco de dados compartilhado.
+
+### Justificativa - ADR-005
+
+1. **Validação antecipada** - Saber se a abordagem funciona antes do compromisso total
+2. **Entrega contínua** - Usuários recebem valor incrementalmente a cada fase
+3. **Aprendizado da equipe** - Desenvolver habilidades em módulos mais simples primeiro
+4. **Mitigação de riscos** - Pode ajustar o curso baseado nos aprendizados
+5. **Sem sincronização complexa** - BD compartilhado evita problemas de sync
+
+### Plano de Execução - ADR-005
+
+```mermaid
+flowchart LR
+    subgraph Fase0["Fase 0"]
+        F0["Fundação<br/>Laravel + Auth"]
+    end
+    subgraph Fase1["Fase 1"]
+        F1["Cadastros<br/>CRUD simples"]
+    end
+    subgraph Fase2["Fase 2"]
+        F2["Compras<br/>Fluxo completo"]
+    end
+    subgraph Fase3["Fase 3"]
+        F3["Estoque<br/>FIFO corrigido"]
+    end
+    subgraph Fase4["Fase 4"]
+        F4["Financeiro<br/>CNAB"]
+    end
+    subgraph Fase5["Fase 5"]
+        F5["Vendas<br/>Mais complexo"]
+    end
+    subgraph Fase6["Fase 6"]
+        F6["NFe<br/>Integração"]
+    end
+    subgraph Fase7["Fase 7"]
+        F7["Logística"]
+    end
+    subgraph Fase8["Fase 8"]
+        F8["Relatórios<br/>Aposentar legado"]
+    end
+
+    F0 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7 --> F8
+```
+
+| Fase | Módulo     | Duração   | Dependências          |
+| ---- | ---------- | --------- | --------------------- |
+| 0    | Fundação   | Mês 1-2   | -                     |
+| 1    | Cadastros  | Mês 2-4   | Fase 0                |
+| 2    | Compras    | Mês 4-6   | Fase 1                |
+| 3    | Estoque    | Mês 6-8   | Fase 2                |
+| 4    | Financeiro | Mês 8-10  | Fase 2, 5 (parcial)   |
+| 5    | Vendas     | Mês 10-13 | Fase 1, 3             |
+| 6    | NFe        | Mês 13-15 | Fase 2, 5             |
+| 7    | Logística  | Mês 15-16 | Fase 5                |
+| 8    | Relatórios | Mês 16-18 | Todas                 |
 
 ### Consequências - ADR-005
 
-A ser preenchido após decisão.
+**Positivas:**
+- Risco controlado com entregas incrementais
+- Usuários podem usar web antes da migração completa
+- Feedback antecipado permite ajustes
+- Equipe ganha experiência gradualmente
+
+**Negativas:**
+- Complexidade temporária de manter dois sistemas
+- Mudanças de schema afetam ambos os sistemas
+- Período de transição mais longo
+
+**Mitigações:**
+- Documentação clara de quais módulos estão em qual sistema
+- Feature flags para controlar acesso gradual
+- Testes de regressão extensivos no legado
 
 ---
 
@@ -224,7 +320,7 @@ A ser preenchido após decisão.
 
 ### Status - ADR-006
 
-**Em Aberto** - Decisão necessária
+**Aceito** - 2025-12-28
 
 ### Contexto - ADR-006
 
@@ -239,18 +335,66 @@ Necessidade de decidir estratégia de multi-tenancy para versão web.
 | **Schema por tenant**    | Médio      | Médio        | Médio                 |
 | **Banco por tenant**     | Alto       | Alto         | Cross-tenant complexo |
 
-### Recomendação - ADR-006
-
-**BD Único com tenant_id** (padrão atual) - mais simples, comprovado.
-Pode evoluir para schema-por-tenant depois se necessário.
-
 ### Decisão - ADR-006
 
-Pendente esclarecimento de requisitos.
+Manter **BD Único com coluna `loja_id`** (tenant_id) - padrão atual.
+
+### Justificativa - ADR-006
+
+1. **Padrão comprovado** - Sistema atual já usa `idLoja` há anos sem problemas
+2. **Simplicidade** - Queries simples com `WHERE loja_id = ?`
+3. **Relatórios cross-tenant** - Consolidação fácil para administradores
+4. **Migração zero** - Não precisa reestruturar banco de dados
+5. **Escalabilidade suficiente** - Volume atual não justifica isolamento maior
+
+### Implementação - ADR-006
+
+```php
+// app/Traits/BelongsToLoja.php
+trait BelongsToLoja
+{
+    protected static function bootBelongsToLoja(): void
+    {
+        // Auto-scope para loja do usuário logado
+        static::addGlobalScope('loja', function (Builder $builder) {
+            if (auth()->check() && !auth()->user()->isAdmin()) {
+                $builder->where('loja_id', auth()->user()->loja_id);
+            }
+        });
+
+        // Auto-preenche loja_id ao criar
+        static::creating(function (Model $model) {
+            if (!$model->loja_id && auth()->check()) {
+                $model->loja_id = auth()->user()->loja_id;
+            }
+        });
+    }
+
+    public function loja(): BelongsTo
+    {
+        return $this->belongsTo(Loja::class);
+    }
+}
+```
 
 ### Consequências - ADR-006
 
-A ser preenchido após decisão.
+**Positivas:**
+- Zero esforço de migração de dados
+- Queries simples e performáticas
+- Administradores veem todas as lojas facilmente
+- Backup/restore simplificado (único banco)
+
+**Negativas:**
+- Menor isolamento de dados entre lojas
+- Risco de query sem filtro de loja vazar dados
+- Índices compostos necessários para performance
+
+**Mitigações:**
+- Global Scope automático por loja
+- Testes para garantir filtro de loja em todas as queries
+- Code review focado em segurança multi-tenant
+- Índice composto `(loja_id, ...)` em tabelas grandes
 
 ---
 

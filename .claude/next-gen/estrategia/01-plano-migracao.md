@@ -1,7 +1,8 @@
 # Plano de Migração
 
-> Status: **Rascunho**
-> Última atualização: 2025-12-27
+> Status: **Aprovado - Strangler Fig**
+> Última atualização: 2025-12-28
+> ADR: [ADR-005](./02-decisoes.md#adr-005-estratégia-de-migração)
 
 ---
 

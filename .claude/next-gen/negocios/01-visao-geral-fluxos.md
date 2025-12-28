@@ -85,18 +85,18 @@ flowchart LR
 
 ### Propósito de Cada Nível
 
-| Aspecto | Nível 1 | Nível 2 |
-|---------|---------|---------|
-| **Propósito** | O que foi pedido | Como está sendo atendido |
+| Aspecto           | Nível 1                     | Nível 2                                            |
+| ----------------- | --------------------------- | -------------------------------------------------- |
+| **Propósito**     | O que foi pedido            | Como está sendo atendido                           |
 | **Granularidade** | Um por produto no orçamento | **Pode ter MÚLTIPLOS por N1** (entregas divididas) |
-| **Status** | Status do nível do pedido | Status do fluxo de trabalho do item |
-| **Links NFe** | Nenhum | 3 referências NFe (Entrada, Saída, Futura) |
-| **Link Estoque** | Nenhum | Links para estoque_has_consumo |
-| **Datas** | Datas do pedido | Todas as datas do fluxo (6 pares de datas) |
+| **Status**        | Status do nível do pedido   | Status do fluxo de trabalho do item                |
+| **Links NFe**     | Nenhum                      | 3 referências NFe (Entrada, Saída, Futura)         |
+| **Link Estoque**  | Nenhum                      | Links para estoque_has_consumo                     |
+| **Datas**         | Datas do pedido             | Todas as datas do fluxo (6 pares de datas)         |
 
 ### Exemplo de Entrega Dividida
 
-```
+```text
 Cliente pede: 100 unidades do Produto A (venda_has_produto qty=100)
 
 Dividido em 3 entregas:
@@ -138,6 +138,7 @@ flowchart TB
 ### Insight Principal
 
 **Nível 2 é o "burro de carga"** - ele rastreia o atendimento real:
+
 - `venda_has_produto2.idVendaProduto2` é A CHAVE que conecta:
   - Qual estoque foi consumido (`estoque_has_consumo`)
   - O que foi comprado (`pedido_fornecedor_has_produto2`)
@@ -149,13 +150,13 @@ flowchart TB
 
 ### Valores de Status: Orçamento
 
-| Status | Descrição | Transições Para |
-|--------|-----------|-----------------|
-| `ATIVO` | Orçamento ativo, pode ser convertido | FECHADO, EXPIRADO, PERDIDO |
-| `EXPIRADO` | Passou da data de validade | REPLICADO (se replicado) |
-| `REPLICADO` | Origem de um orçamento replicado | - |
-| `FECHADO` | Convertido para Venda | - |
-| `PERDIDO` | Marcado manualmente como perdido | - |
+| Status      | Descrição                            | Transições Para            |
+| ----------- | ------------------------------------ | -------------------------- |
+| `ATIVO`     | Orçamento ativo, pode ser convertido | FECHADO, EXPIRADO, PERDIDO |
+| `EXPIRADO`  | Passou da data de validade           | REPLICADO (se replicado)   |
+| `REPLICADO` | Origem de um orçamento replicado     | -                          |
+| `FECHADO`   | Convertido para Venda                | -                          |
+| `PERDIDO`   | Marcado manualmente como perdido     | -                          |
 
 ### Fluxo de Conversão
 
@@ -191,7 +192,7 @@ flowchart TB
 
 ### Transformação de Dados
 
-```
+```text
 ORÇAMENTO                          VENDA
 ─────────                          ─────
 idOrcamento          ───────────►  idOrcamento (FK)
@@ -219,26 +220,27 @@ representacao        ───────────►  representacao
 ### Quando as Compras São Geradas
 
 Compras (pedidos de compra) são geradas quando:
+
 1. Usuário abre a aba "Gerar Compra" no módulo de Compras
 2. Seleciona itens pendentes (status = INICIADO ou PENDENTE)
 3. Clica no botão "Gerar Compra"
 
 ### Valores de Status: Item da Venda (venda_has_produto2)
 
-| Status | Descrição | Próximo Status |
-|--------|-----------|----------------|
-| `INICIADO` | Estado inicial após criação da venda | EM COMPRA, ESTOQUE |
-| `PENDENTE` | Aguardando ação | EM COMPRA, ESTOQUE |
-| `EM COMPRA` | Pedido de compra gerado | EM FATURAMENTO |
-| `EM FATURAMENTO` | Fornecedor confirmou/despachou | EM ENTREGA |
-| `EM ENTREGA` | Mercadorias em trânsito | EM RECEBIMENTO, ESTOQUE |
-| `EM RECEBIMENTO` | Sendo recebido no armazém | ESTOQUE |
-| `ESTOQUE` | Em estoque, pronto para entrega | ENTREGA AGEND. |
-| `ENTREGA AGEND.` | Entrega agendada | EM ENTREGA (para cliente) |
-| `EM ENTREGA` | Saiu para entrega | ENTREGUE |
-| `ENTREGUE` | Entregue ao cliente | (final) |
-| `CANCELADO` | Cancelado | (final) |
-| `DEVOLVIDO` | Devolvido | (final) |
+| Status           | Descrição                            | Próximo Status            |
+| ---------------- | ------------------------------------ | ------------------------- |
+| `INICIADO`       | Estado inicial após criação da venda | EM COMPRA, ESTOQUE        |
+| `PENDENTE`       | Aguardando ação                      | EM COMPRA, ESTOQUE        |
+| `EM COMPRA`      | Pedido de compra gerado              | EM FATURAMENTO            |
+| `EM FATURAMENTO` | Fornecedor confirmou/despachou       | EM ENTREGA                |
+| `EM ENTREGA`     | Mercadorias em trânsito              | EM RECEBIMENTO, ESTOQUE   |
+| `EM RECEBIMENTO` | Sendo recebido no armazém            | ESTOQUE                   |
+| `ESTOQUE`        | Em estoque, pronto para entrega      | ENTREGA AGEND.            |
+| `ENTREGA AGEND.` | Entrega agendada                     | EM ENTREGA (para cliente) |
+| `EM ENTREGA`     | Saiu para entrega                    | ENTREGUE                  |
+| `ENTREGUE`       | Entregue ao cliente                  | (final)                   |
+| `CANCELADO`      | Cancelado                            | (final)                   |
+| `DEVOLVIDO`      | Devolvido                            | (final)                   |
 
 ### Diagrama de Fluxo
 
@@ -370,7 +372,7 @@ flowchart TB
 
 O consumo de estoque é armazenado como valores **NEGATIVOS** em `estoque_has_consumo.quant`:
 
-```
+```text
 estoque.quant = 100          (original recebido)
 estoque.restante = 100       (disponível)
 
@@ -397,23 +399,23 @@ Quando uma venda é cancelada ou item devolvido:
 
 ### Tipos de NFe
 
-| Tipo | Direção | Propósito |
-|------|---------|-----------|
-| `SAIDA` | Saída | Nota fiscal PARA cliente |
-| `ENTRADA` | Entrada | Nota fiscal DO fornecedor |
-| `FUTURA` | Agendada | Nota fiscal de entrega futura |
-| `DEVOLUCAO` | Devolução | Nota de crédito de devolução |
+| Tipo        | Direção   | Propósito                     |
+| ----------- | --------- | ----------------------------- |
+| `SAIDA`     | Saída     | Nota fiscal PARA cliente      |
+| `ENTRADA`   | Entrada   | Nota fiscal DO fornecedor     |
+| `FUTURA`    | Agendada  | Nota fiscal de entrega futura |
+| `DEVOLUCAO` | Devolução | Nota de crédito de devolução  |
 
 ### Valores de Status da NFe
 
-| Status | Descrição |
-|--------|-----------|
-| `NOTA PENDENTE` | Pré-cadastrada, aguardando SEFAZ |
-| `AUTORIZADA` | Aprovada pela SEFAZ |
-| `DENEGADA` | Rejeitada pela SEFAZ |
-| `CANCELADA` | Cancelada após aprovação |
-| `RESUMO` | Resumo do manifesto (não é XML completo) |
-| `INUTILIZADA` | Número inutilizado |
+| Status          | Descrição                                |
+| --------------- | ---------------------------------------- |
+| `NOTA PENDENTE` | Pré-cadastrada, aguardando SEFAZ         |
+| `AUTORIZADA`    | Aprovada pela SEFAZ                      |
+| `DENEGADA`      | Rejeitada pela SEFAZ                     |
+| `CANCELADA`     | Cancelada após aprovação                 |
+| `RESUMO`        | Resumo do manifesto (não é XML completo) |
+| `INUTILIZADA`   | Número inutilizado                       |
 
 ### Fluxo de Emissão de NFe (Saída)
 
@@ -525,19 +527,19 @@ flowchart TB
 
 ### Valores de Status Financeiro
 
-| Status | Descrição |
-|--------|-----------|
-| `PENDENTE` | Ainda não pago |
-| `CONFERIDO` | Verificado/confirmado |
-| `AGENDADO` | Agendado para pagamento |
-| `RECEBIDO` | Pagamento recebido (recebíveis) |
-| `PAGO` | Pagamento efetuado (pagáveis) |
-| `CANCELADO` | Cancelado |
-| `PAGO GARE` | Pagamento de imposto concluído |
+| Status      | Descrição                       |
+| ----------- | ------------------------------- |
+| `PENDENTE`  | Ainda não pago                  |
+| `CONFERIDO` | Verificado/confirmado           |
+| `AGENDADO`  | Agendado para pagamento         |
+| `RECEBIDO`  | Pagamento recebido (recebíveis) |
+| `PAGO`      | Pagamento efetuado (pagáveis)   |
+| `CANCELADO` | Cancelado                       |
+| `PAGO GARE` | Pagamento de imposto concluído  |
 
 ### Registro de Pagamento
 
-```
+```text
 Usuário edita coluna dataRealizado no diálogo Contas
     │
     ▼
@@ -560,20 +562,20 @@ SE pagamento cartão:
 
 ### Todas as Colunas de Status por Tabela
 
-| Tabela | Coluna | Valores |
-|--------|--------|---------|
-| `venda` | status | ATIVO, CANCELADO, ENTREGUE, DEVOLVIDO |
-| `venda` | statusFinanceiro | PENDENTE, CONFERIDO, LIBERADO, PAGO, CANCELADO |
-| `venda_has_produto2` | status | INICIADO, PENDENTE, EM COMPRA, EM FATURAMENTO, EM ENTREGA, EM RECEBIMENTO, EM COLETA, ESTOQUE, ENTREGA AGEND., ENTREGUE, CANCELADO, DEVOLVIDO, DEVOLVIDO ESTOQUE, QUEBRADO, REPO. ENTREGA, REPO. RECEB. |
-| `pedido_fornecedor_has_produto` | status | PENDENTE, CONFIRMADO, FATURADO, CANCELADO |
-| `pedido_fornecedor_has_produto2` | status | (mesmo que venda_has_produto2) |
-| `compra_avulsa` | status | PEND. APROV., CONFERIDO, COMPRADO, CANCELADO |
-| `estoque` | status | TEMP, ESTOQUE, CANCELADO |
-| `estoque_has_consumo` | status | TEMP, CONSUMO, AJUSTE, DEVOLVIDO |
-| `nfe` | status | NOTA PENDENTE, AUTORIZADA, DENEGADA, CANCELADA, RESUMO, INUTILIZADA |
-| `conta_a_receber` | status | PENDENTE, CONFERIDO, AGENDADO, RECEBIDO, CANCELADO |
-| `conta_a_pagar` | status | PENDENTE, CONFERIDO, AGENDADO, PAGO, CANCELADO, PAGO GARE, PENDENTE GARE, LIBERADO GARE |
-| `orcamento` | status | ATIVO, EXPIRADO, REPLICADO, FECHADO, PERDIDO |
+| Tabela                           | Coluna           | Valores                                                                                                                                                                                                 |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `venda`                          | status           | ATIVO, CANCELADO, ENTREGUE, DEVOLVIDO                                                                                                                                                                   |
+| `venda`                          | statusFinanceiro | PENDENTE, CONFERIDO, LIBERADO, PAGO, CANCELADO                                                                                                                                                          |
+| `venda_has_produto2`             | status           | INICIADO, PENDENTE, EM COMPRA, EM FATURAMENTO, EM ENTREGA, EM RECEBIMENTO, EM COLETA, ESTOQUE, ENTREGA AGEND., ENTREGUE, CANCELADO, DEVOLVIDO, DEVOLVIDO ESTOQUE, QUEBRADO, REPO. ENTREGA, REPO. RECEB. |
+| `pedido_fornecedor_has_produto`  | status           | PENDENTE, CONFIRMADO, FATURADO, CANCELADO                                                                                                                                                               |
+| `pedido_fornecedor_has_produto2` | status           | (mesmo que venda_has_produto2)                                                                                                                                                                          |
+| `compra_avulsa`                  | status           | PEND. APROV., CONFERIDO, COMPRADO, CANCELADO                                                                                                                                                            |
+| `estoque`                        | status           | TEMP, ESTOQUE, CANCELADO                                                                                                                                                                                |
+| `estoque_has_consumo`            | status           | TEMP, CONSUMO, AJUSTE, DEVOLVIDO                                                                                                                                                                        |
+| `nfe`                            | status           | NOTA PENDENTE, AUTORIZADA, DENEGADA, CANCELADA, RESUMO, INUTILIZADA                                                                                                                                     |
+| `conta_a_receber`                | status           | PENDENTE, CONFERIDO, AGENDADO, RECEBIDO, CANCELADO                                                                                                                                                      |
+| `conta_a_pagar`                  | status           | PENDENTE, CONFERIDO, AGENDADO, PAGO, CANCELADO, PAGO GARE, PENDENTE GARE, LIBERADO GARE                                                                                                                 |
+| `orcamento`                      | status           | ATIVO, EXPIRADO, REPLICADO, FECHADO, PERDIDO                                                                                                                                                            |
 
 ### Fluxo Completo de Status do Item
 
@@ -617,7 +619,7 @@ stateDiagram-v2
 
 ### Invariantes Que SEMPRE Devem Ser Verdadeiras
 
-```
+```text
 INTEGRIDADE FINANCEIRA:
 ──────────────────────
 1. SUM(conta_a_receber.valor) para venda == venda.total
@@ -649,7 +651,7 @@ INTEGRIDADE NFe:
 
 ### Regras de Cascata de Status
 
-```
+```text
 Quando status de compra muda → status de venda_has_produto2 muda
     via stored procedure: update_venda_status()
 
@@ -670,15 +672,15 @@ Quando venda cancelada →
 
 ### Problemas Identificados na Análise
 
-| Problema | Impacto | Causa |
-|----------|---------|-------|
-| **Nomes de fornecedor desnormalizados** | Atualizações requerem 5+ tabelas | fornecedor armazenado como VARCHAR, não FK |
-| **Sem transações atômicas** | Estado inconsistente possível | Updates SQL separados, não encapsulados |
-| **Status como strings** | Sem validação | Deveria ser ENUM |
-| **Complexidade de dois níveis** | Difícil de consultar | Crescimento orgânico |
-| **Pagáveis na confirmação** | Problemas de timing? | Criado na etapa de confirmação, não no pedido |
-| **Sem trilha de auditoria** | Não consegue rastrear mudanças | Sem tabelas de histórico |
-| **Quantidades negativas** | Confuso | estoque_has_consumo.quant é negativo |
+| Problema                                | Impacto                          | Causa                                         |
+| --------------------------------------- | -------------------------------- | --------------------------------------------- |
+| **Nomes de fornecedor desnormalizados** | Atualizações requerem 5+ tabelas | fornecedor armazenado como VARCHAR, não FK    |
+| **Sem transações atômicas**             | Estado inconsistente possível    | Updates SQL separados, não encapsulados       |
+| **Status como strings**                 | Sem validação                    | Deveria ser ENUM                              |
+| **Complexidade de dois níveis**         | Difícil de consultar             | Crescimento orgânico                          |
+| **Pagáveis na confirmação**             | Problemas de timing?             | Criado na etapa de confirmação, não no pedido |
+| **Sem trilha de auditoria**             | Não consegue rastrear mudanças   | Sem tabelas de histórico                      |
+| **Quantidades negativas**               | Confuso                          | estoque_has_consumo.quant é negativo          |
 
 ### Regras Esclarecidas
 

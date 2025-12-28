@@ -23,7 +23,7 @@
 
 **First-In-First-Out (FIFO)**: Estoque mais antigo deve ser consumido primeiro.
 
-```
+```text
 Recebido 01 Jan:  100 unidades @ R$10,00  ← Deve ser consumido PRIMEIRO
 Recebido 15 Jan:   50 unidades @ R$12,00  ← Deve ser consumido SEGUNDO
 Recebido 30 Jan:   75 unidades @ R$11,00  ← Deve ser consumido TERCEIRO
@@ -31,13 +31,13 @@ Recebido 30 Jan:   75 unidades @ R$11,00  ← Deve ser consumido TERCEIRO
 
 ### 1.2 Por Que Importa
 
-| Problema | Impacto |
-|----------|---------|
-| **Valoração de estoque** | CMV calculado incorretamente |
-| **Produtos perecíveis** | Estoque antigo nunca usado, expira |
-| **Compliance fiscal** | Lei tributária brasileira assume FIFO para alguns cálculos |
-| **Trilha de auditoria** | Não consegue rastrear qual lote foi vendido |
-| **Rotação de estoque** | Estoque antigo acumula |
+| Problema                 | Impacto                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| **Valoração de estoque** | CMV calculado incorretamente                               |
+| **Produtos perecíveis**  | Estoque antigo nunca usado, expira                         |
+| **Compliance fiscal**    | Lei tributária brasileira assume FIFO para alguns cálculos |
+| **Trilha de auditoria**  | Não consegue rastrear qual lote foi vendido                |
+| **Rotação de estoque**   | Estoque antigo acumula                                     |
 
 ### 1.3 Comportamento Atual
 
@@ -62,6 +62,7 @@ query.prepare(
 ### 2.1 A Coluna `produto.idEstoque`
 
 A tabela `produto` tem uma coluna `idEstoque` que:
+
 - Aponta para UM registro de estoque específico
 - É definida manualmente (ou definida pela última importação de NFe)
 - Não tem lógica FIFO
@@ -80,18 +81,20 @@ estoque (idEstoque=457, idProduto=123, data_entrada='2025-01-30')  -- MAIS NOVO,
 ### 2.2 Quando Estoque é Consumido
 
 **Caminho 1: Via Importação de NFe** (`importarxml.cpp`)
+
 - Estoque É corretamente vinculado a compra/venda específica
 - Cria `estoque_has_consumo` com `idEstoque` específico
 - Isso está OK - é determinístico
 
 **Caminho 2: Via Venda de Estoque** (`venda.cpp:criarConsumos`)
+
 - Usa `produto.idEstoque` (o problema!)
 - Sem ORDER BY, sem seleção FIFO
 - Apenas pega o que está pré-definido
 
 ### 2.3 Fluxo de Código
 
-```
+```text
 Cliente compra produto do estoque existente:
     |
     +-- Venda criada com vp2.estoque > 0
@@ -135,12 +138,12 @@ FOR UPDATE;  -- Travar para segurança de concorrência
 
 ### 3.2 Mudanças Chave
 
-| Aspecto | Atual | Proposto |
-|---------|-------|----------|
-| Seleção de estoque | Manual via `produto.idEstoque` | FIFO automático |
-| Múltiplos lotes | Não | Sim - consumir de múltiplos |
-| Travamento | Nenhum | `FOR UPDATE` durante consumo |
-| Rastreabilidade | Perdida | Rastreamento completo de lote |
+| Aspecto            | Atual                          | Proposto                      |
+| ------------------ | ------------------------------ | ----------------------------- |
+| Seleção de estoque | Manual via `produto.idEstoque` | FIFO automático               |
+| Múltiplos lotes    | Não                            | Sim - consumir de múltiplos   |
+| Travamento         | Nenhum                         | `FOR UPDATE` durante consumo  |
+| Rastreabilidade    | Perdida                        | Rastreamento completo de lote |
 
 ### 3.3 Novo Schema
 
@@ -578,11 +581,13 @@ ALTER TABLE produto DROP COLUMN idEstoque;
 ## Resumo
 
 ### Problema
+
 - `produto.idEstoque` aponta para UM registro de estoque (sem FIFO)
 - Sem seleção automática de estoque
 - Estoque mais antigo pode nunca ser consumido
 
 ### Solução
+
 - Remover `produto.idEstoque`
 - Adicionar `estoques.data_entrada` para ordenação FIFO
 - Criar `EstoqueConsumoService` com query FIFO
@@ -590,6 +595,7 @@ ALTER TABLE produto DROP COLUMN idEstoque;
 - Suportar múltiplos lotes por consumo
 
 ### Benefícios
+
 - Compliance FIFO adequado
 - Rastreabilidade de lote
 - Valoração de estoque correta

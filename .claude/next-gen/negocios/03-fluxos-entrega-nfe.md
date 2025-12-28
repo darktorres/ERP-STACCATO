@@ -52,22 +52,23 @@ flowchart TB
 
 ### Tabelas Principais
 
-| Tabela | Propósito |
-|--------|-----------|
-| `venda_has_produto2` | Rastreamento principal de status do produto |
-| `pedido_fornecedor_has_produto2` | Status paralelo do pedido de compra |
-| `veiculo_has_produto` | Agrupamento de entrega por veículo/evento |
-| `transportadora_has_veiculo` | Cadastro de veículos |
+| Tabela                           | Propósito                                   |
+| -------------------------------- | ------------------------------------------- |
+| `venda_has_produto2`             | Rastreamento principal de status do produto |
+| `pedido_fornecedor_has_produto2` | Status paralelo do pedido de compra         |
+| `veiculo_has_produto`            | Agrupamento de entrega por veículo/evento   |
+| `transportadora_has_veiculo`     | Cadastro de veículos                        |
 
 ### Geração de Documento de Entrega
 
 Dois arquivos Excel gerados a partir de modelos:
+
 - `espelho_entrega.xlsx` → Comprovante de entrega
 - `modelo_checklist.xlsx` → Checklist de verificação física
 
 ### Tratamento de Itens Quebrados
 
-```
+```text
 Usuário marca itens como quebrados → dividirEntrega()
     │
     ├── Linha original: ENTREGUE (qty reduzida)
@@ -138,12 +139,12 @@ flowchart TB
 
 ### Valores de Status da NFe
 
-| Status | Significado |
-|--------|-------------|
+| Status          | Significado                       |
+| --------------- | --------------------------------- |
 | `NOTA PENDENTE` | Pré-SEFAZ, aguardando autorização |
-| `AUTORIZADA` | Aprovada pela SEFAZ |
-| `DENEGADA` | Negada pela SEFAZ |
-| `CANCELADA` | Cancelada após autorização |
+| `AUTORIZADA`    | Aprovada pela SEFAZ               |
+| `DENEGADA`      | Negada pela SEFAZ                 |
+| `CANCELADA`     | Cancelada após autorização        |
 
 ### Fluxo de Cancelamento de NFe
 
@@ -158,6 +159,7 @@ flowchart TB
 ### Reforma Tributária 2025 (IBS/CBS/IS)
 
 Novas seções XML adicionadas:
+
 - `[IBSCBS###]` - IBS (estadual+municipal) e CBS (federal)
 - `[gIBSUF###]` - IBS Estadual
 - `[gIBSMun###]` - IBS Municipal
@@ -177,10 +179,10 @@ CNAB (Centro Nacional de Automação Bancária) é o padrão brasileiro de arqui
 
 ### Tipos de Arquivo
 
-| Tipo | Direção | Propósito |
-|------|---------|-----------|
-| **Remessa** | Saída | Instruções de pagamento para o banco |
-| **Retorno** | Entrada | Confirmações de pagamento do banco |
+| Tipo        | Direção | Propósito                            |
+| ----------- | ------- | ------------------------------------ |
+| **Remessa** | Saída   | Instruções de pagamento para o banco |
+| **Retorno** | Entrada | Confirmações de pagamento do banco   |
 
 ### Fluxo de Status de Pagamento
 
@@ -252,12 +254,12 @@ flowchart TB
 
 ### Principais Códigos de Ocorrência
 
-| Código | Significado |
-|--------|-------------|
-| 00 | PAGAMENTO EFETUADO |
-| BD | PAGAMENTO AGENDADO |
-| CE | PAGAMENTO CANCELADO |
-| SS | CANCELADO POR INSUFICIÊNCIA DE SALDO |
+| Código | Significado                          |
+| ------ | ------------------------------------ |
+| 00     | PAGAMENTO EFETUADO                   |
+| BD     | PAGAMENTO AGENDADO                   |
+| CE     | PAGAMENTO CANCELADO                  |
+| SS     | CANCELADO POR INSUFICIÊNCIA DE SALDO |
 
 ### Não Implementado
 
@@ -271,7 +273,7 @@ flowchart TB
 
 ### Fórmula
 
-```
+```text
 Comissão = Valor da Venda × (Percentual de Comissão / 100)
 ```
 
@@ -298,11 +300,13 @@ if (calculaComissao) {
 ### Tabelas de Armazenamento
 
 **Recebíveis** (`conta_a_receber_has_pagamento`):
+
 - Flag `comissao = TRUE`
 - `grupo = "Comissão Representação"`
 - `dataPagamento = data_pagamento + 1 mês`
 
 **Pagáveis para Estornos** (`conta_a_pagar_has_pagamento`):
+
 - Valor negativo para estornos de devolução
 - `grupo = "RT's"`
 
@@ -324,7 +328,7 @@ void criarComissaoProfissional() {
 }
 ```
 
-### Diagrama de Fluxo Completo
+### Diagrama de Fluxo Completo - Comissão
 
 ```mermaid
 flowchart TB
@@ -366,9 +370,9 @@ CREATE TABLE profissional (
 
 Todos os 4 fluxos críticos estão agora documentados:
 
-| Fluxo | Arquivos Principais | Status |
-|-------|---------------------|--------|
-| Entrega | `widgetlogistica*.cpp`, `inputdialogconfirmacao.cpp` | Completo |
-| Emissão de NFe | `cadastrarnfe.cpp`, `acbr.cpp` | Completo |
-| CNAB/Banco | `cnab.cpp`, `widgetfinanceirocontas.cpp` | Completo |
-| Comissão | `venda.cpp`, `devolucao.cpp`, `cadastroprofissional.cpp` | Completo |
+| Fluxo          | Arquivos Principais                                      | Status   |
+| -------------- | -------------------------------------------------------- | -------- |
+| Entrega        | `widgetlogistica*.cpp`, `inputdialogconfirmacao.cpp`     | Completo |
+| Emissão de NFe | `cadastrarnfe.cpp`, `acbr.cpp`                           | Completo |
+| CNAB/Banco     | `cnab.cpp`, `widgetfinanceirocontas.cpp`                 | Completo |
+| Comissão       | `venda.cpp`, `devolucao.cpp`, `cadastroprofissional.cpp` | Completo |

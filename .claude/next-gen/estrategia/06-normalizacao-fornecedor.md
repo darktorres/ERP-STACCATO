@@ -38,14 +38,14 @@ estoque (fornecedor_id INT FK)              -- 123
 
 ### 1.2 Por Que é um Problema
 
-| Problema | Impacto |
-|----------|---------|
-| **Inconsistência de dados** | Erros de digitação, variações ("ACME Corp" vs "Acme Corp") |
-| **Pesadelo de renomeação** | Se fornecedor muda de nome, precisa atualizar 5+ tabelas |
-| **Sem integridade referencial** | Pode ter referências órfãs |
-| **Ineficiência de query** | Comparação de string mais lenta que INT |
-| **Desperdício de armazenamento** | VARCHAR repetido vs único INT FK |
-| **Sem cascade** | Deletar fornecedor deixa registros órfãos |
+| Problema                         | Impacto                                                    |
+| -------------------------------- | ---------------------------------------------------------- |
+| **Inconsistência de dados**      | Erros de digitação, variações ("ACME Corp" vs "Acme Corp") |
+| **Pesadelo de renomeação**       | Se fornecedor muda de nome, precisa atualizar 5+ tabelas   |
+| **Sem integridade referencial**  | Pode ter referências órfãs                                 |
+| **Ineficiência de query**        | Comparação de string mais lenta que INT                    |
+| **Desperdício de armazenamento** | VARCHAR repetido vs único INT FK                           |
+| **Sem cascade**                  | Deletar fornecedor deixa registros órfãos                  |
 
 ### 1.3 Exemplo Real do Código
 
@@ -62,17 +62,17 @@ query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
 ### 2.1 Tabelas com Fornecedor Desnormalizado
 
-| Tabela | Coluna | Contagem de Uso no Código |
-|--------|--------|---------------------------|
-| `produto` | `fornecedor` | ~15 arquivos |
-| `venda_has_produto` | `fornecedor` | ~10 arquivos |
-| `venda_has_produto2` | `fornecedor` | ~20 arquivos |
-| `pedido_fornecedor_has_produto` | `fornecedor` | ~8 arquivos |
-| `pedido_fornecedor_has_produto2` | `fornecedor` | ~12 arquivos |
-| `estoque` | `fornecedor` | ~8 arquivos |
-| `estoque_has_consumo` | `fornecedor` | ~5 arquivos |
-| `compra_avulsa` | `fornecedor` | ~3 arquivos |
-| `orcamento_has_produto` | `fornecedor` | ~5 arquivos |
+| Tabela                           | Coluna       | Contagem de Uso no Código |
+| -------------------------------- | ------------ | ------------------------- |
+| `produto`                        | `fornecedor` | ~15 arquivos              |
+| `venda_has_produto`              | `fornecedor` | ~10 arquivos              |
+| `venda_has_produto2`             | `fornecedor` | ~20 arquivos              |
+| `pedido_fornecedor_has_produto`  | `fornecedor` | ~8 arquivos               |
+| `pedido_fornecedor_has_produto2` | `fornecedor` | ~12 arquivos              |
+| `estoque`                        | `fornecedor` | ~8 arquivos               |
+| `estoque_has_consumo`            | `fornecedor` | ~5 arquivos               |
+| `compra_avulsa`                  | `fornecedor` | ~3 arquivos               |
+| `orcamento_has_produto`          | `fornecedor` | ~5 arquivos               |
 
 **Total**: ~9 tabelas, ~85+ referências de código
 
@@ -108,7 +108,8 @@ WHERE p.fornecedor != f.razaoSocial
 
 ### 3.2 Padrões de Código a Corrigir
 
-**Padrão 1: Definindo nome do fornecedor manualmente**
+#### Padrão 1: Definindo nome do fornecedor manualmente
+
 ```cpp
 // Atual: Copia string do nome
 modelEstoque.setData(newRow, "fornecedor", xml.xNome);
@@ -117,7 +118,8 @@ modelEstoque.setData(newRow, "fornecedor", xml.xNome);
 modelEstoque.setData(newRow, "fornecedor_id", fornecedorId);
 ```
 
-**Padrão 2: Comparando por nome**
+#### Padrão 2: Comparando por nome
+
 ```cpp
 // Atual: Comparação de string
 if (modelItem.data(0, "fornecedor").toString() == "ATELIER STACCATO") { ... }
@@ -126,7 +128,8 @@ if (modelItem.data(0, "fornecedor").toString() == "ATELIER STACCATO") { ... }
 if (modelItem.data(0, "fornecedor_id").toInt() == ATELIER_STACCATO_ID) { ... }
 ```
 
-**Padrão 3: Agrupando por fornecedor**
+#### Padrão 3: Agrupando por fornecedor
+
 ```cpp
 // Atual: Agrupar por nome (lento, propenso a erros)
 for (row : rows) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
@@ -515,14 +518,14 @@ $item = VendaItem::create([
 
 ## 8. Resumo de Benefícios
 
-| Aspecto | Antes | Depois |
-|---------|-------|--------|
-| **Armazenamento** | VARCHAR repetido em 9 tabelas | Único INT FK |
-| **Renomeação** | Atualizar 9 tabelas manualmente | Atualizar 1 tabela |
-| **Integridade** | Nenhuma (órfãos possíveis) | Constraint FK |
-| **Velocidade de query** | Comparação de string | Comparação de INT |
-| **Erros de digitação** | Quebram queries silenciosamente | Impossíveis |
-| **Joins** | Por string (lento) | Por FK (rápido) |
+| Aspecto                 | Antes                           | Depois             |
+| ----------------------- | ------------------------------- | ------------------ |
+| **Armazenamento**       | VARCHAR repetido em 9 tabelas   | Único INT FK       |
+| **Renomeação**          | Atualizar 9 tabelas manualmente | Atualizar 1 tabela |
+| **Integridade**         | Nenhuma (órfãos possíveis)      | Constraint FK      |
+| **Velocidade de query** | Comparação de string            | Comparação de INT  |
+| **Erros de digitação**  | Quebram queries silenciosamente | Impossíveis        |
+| **Joins**               | Por string (lento)              | Por FK (rápido)    |
 
 ---
 

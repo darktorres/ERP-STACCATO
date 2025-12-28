@@ -9,21 +9,22 @@
 ## Implementação Atual (C++)
 
 ### Classes
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `TabCompras` | `tabcompras.cpp` | Container principal da aba |
-| `WidgetCompraGerar` | `widgetcompragerar.cpp` | Gerar pedidos de compra |
-| `WidgetCompraConfirmar` | `widgetcompraconfirmar.cpp` | Confirmar pedidos |
-| `WidgetCompraFaturar` | `widgetcomprafaturar.cpp` | Faturar pedidos |
+
+| Classe                  | Arquivo                     | Finalidade                 |
+| ----------------------- | --------------------------- | -------------------------- |
+| `TabCompras`            | `tabcompras.cpp`            | Container principal da aba |
+| `WidgetCompraGerar`     | `widgetcompragerar.cpp`     | Gerar pedidos de compra    |
+| `WidgetCompraConfirmar` | `widgetcompraconfirmar.cpp` | Confirmar pedidos          |
+| `WidgetCompraFaturar`   | `widgetcomprafaturar.cpp`   | Faturar pedidos            |
 | `WidgetCompraPendentes` | `widgetcomprapendentes.cpp` | Lista de pedidos pendentes |
-| `WidgetCompraResumo` | `widgetcompraresumo.cpp` | Resumo do pedido |
-| `WidgetCompraDevolucao` | `widgetcompradevolucao.cpp` | Devoluções |
-| `WidgetCompraHistorico` | `widgetcomprahistorico.cpp` | Histórico de pedidos |
-| `CompraAvulsa` | `compraavulsa.cpp` | Compras avulsas |
+| `WidgetCompraResumo`    | `widgetcompraresumo.cpp`    | Resumo do pedido           |
+| `WidgetCompraDevolucao` | `widgetcompradevolucao.cpp` | Devoluções                 |
+| `WidgetCompraHistorico` | `widgetcomprahistorico.cpp` | Histórico de pedidos       |
+| `CompraAvulsa`          | `compraavulsa.cpp`          | Compras avulsas            |
 
 ### Fluxo Atual
 
-```
+```text
 Venda Criada
     ↓
 [GERAR] Gerar Pedido de Compra
@@ -39,6 +40,7 @@ Venda Criada
 ```
 
 ### Tabelas do Banco de Dados (Atual)
+
 - `pedido_fornecedor_has_produto` (Nível 1)
 - `pedido_fornecedor_has_produto2` (Nível 2)
 - `compra_avulsa` (Compras avulsas)
@@ -370,12 +372,14 @@ Route::middleware(['auth'])->group(function () {
 ## Componentes de UI Necessários
 
 ### Visualização em Lista
+
 - Tabela de dados filtrável (status, fornecedor, período)
 - Ações rápidas (confirmar, visualizar)
 - Badges de status com cores
 - Paginação
 
 ### Visualização de Detalhes
+
 - Cabeçalho com informações do pedido
 - Tabela de itens com capacidade de edição
 - Linha do tempo de status
@@ -383,6 +387,7 @@ Route::middleware(['auth'])->group(function () {
 - Documentos relacionados (NFe, Contas a Pagar)
 
 ### Formulário (Compra Avulsa)
+
 - Seleção de fornecedor (com busca)
 - Itens de produto
 - Condições de pagamento
@@ -392,24 +397,26 @@ Route::middleware(['auth'])->group(function () {
 
 ## Eventos
 
-| Evento | Dispara |
-|--------|---------|
-| `CompraConfirmada` | Gerar Contas a Pagar, Notificar fornecedor |
-| `CompraFaturada` | Vincular NFe, Atualizar financeiro |
-| `CompraRecebida` | Criar entradas no Estoque, Atualizar itens da Venda |
-| `CompraCancelada` | Reverter Contas a Pagar, Notificar |
+| Evento             | Dispara                                             |
+| ------------------ | --------------------------------------------------- |
+| `CompraConfirmada` | Gerar Contas a Pagar, Notificar fornecedor          |
+| `CompraFaturada`   | Vincular NFe, Atualizar financeiro                  |
+| `CompraRecebida`   | Criar entradas no Estoque, Atualizar itens da Venda |
+| `CompraCancelada`  | Reverter Contas a Pagar, Notificar                  |
 
 ---
 
 ## Considerações de Migração
 
 ### Migração de Dados
+
 1. Mapear `pedido_fornecedor_has_produto` → `compras`
 2. Mapear `pedido_fornecedor_has_produto2` → `compra_itens`
 3. Normalizar referências de fornecedor (nome → FK)
 4. Mapear campos de data para nova nomenclatura
 
 ### Mudanças Incompatíveis
+
 - Estrutura de tabela em dois níveis simplificada para um nível
 - Valores de status podem diferir
 - Referência ao fornecedor agora é apenas FK

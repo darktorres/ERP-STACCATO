@@ -20,6 +20,7 @@ query.exec("UPDATE produto SET fornecedor = '" + data("razaoSocial").toString() 
 ```
 
 Alguns arquivos usam queries parametrizadas corretamente (inconsistente):
+
 ```cpp
 // SEGURO - Encontrado em cadastroproduto.cpp:88-90
 query.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor");
@@ -29,6 +30,7 @@ query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
 ### 2. Lógica de Negócio em Widgets (MÉDIA)
 
 Lógica espalhada em:
+
 - Classes de Widget (`WidgetCompra*`, `WidgetEstoque*`)
 - Classes de Dialog (`CadastroProduto`, `Venda`)
 - Classe utilitária SQL estática (`Sql::contasPagar()`, `Sql::updateVendaStatus()`)
@@ -39,6 +41,7 @@ Lógica espalhada em:
 ### 3. Estado Global via Macro `qApp` (MÉDIA)
 
 Tudo acessado globalmente:
+
 - Conexão com banco de dados
 - Configuração
 - Estado de transação
@@ -51,7 +54,7 @@ Dificulta testes e isolamento.
 
 ## Estrutura de Diretórios Laravel Proposta
 
-```
+```text
 app/
 ├── Models/                    # Modelos Eloquent com relacionamentos
 │   ├── Produto.php
@@ -392,33 +395,33 @@ class StoreFornecedorRequest extends FormRequest
 
 ## Mapeamento de Módulo para Controller/Service
 
-| Classe C++ | Controller Laravel | Service Laravel |
-|-----------|-------------------|-----------------|
-| `TabCompras` | `CompraController` | `CompraService` |
-| `WidgetCompraGerar` | `CompraController@create` | `CompraService@gerar()` |
-| `WidgetCompraConfirmar` | `CompraController@confirmar` | `CompraService@confirmar()` |
-| `WidgetCompraFaturar` | `CompraController@faturar` | `CompraService@faturar()` |
-| `TabEstoque` | `EstoqueController` | `EstoqueService` |
-| `Estoque` (dialog) | `EstoqueController@show` | `EstoqueService@visualizar()` |
-| `TabFinanceiro` | `ContaPagarController`, `ContaReceberController` | `FinanceiroService` |
-| `TabNFe` | `NfeController` | `NfeService` |
-| `CadastroNFe` | `NfeController@store` | `NfeEmissaoService` |
-| `TabLogistica` | `EntregaController` | `LogisticaService` |
-| `TabGalpao` | `ArmazemController` | `ArmazemService` |
-| `CadastroProduto` | `ProdutoController` | `ProdutoService` |
-| `CadastroCliente` | `ClienteController` | - (CRUD simples) |
-| `CadastroFornecedor` | `FornecedorController` | - (CRUD simples) |
+| Classe C++              | Controller Laravel                               | Service Laravel               |
+| ----------------------- | ------------------------------------------------ | ----------------------------- |
+| `TabCompras`            | `CompraController`                               | `CompraService`               |
+| `WidgetCompraGerar`     | `CompraController@create`                        | `CompraService@gerar()`       |
+| `WidgetCompraConfirmar` | `CompraController@confirmar`                     | `CompraService@confirmar()`   |
+| `WidgetCompraFaturar`   | `CompraController@faturar`                       | `CompraService@faturar()`     |
+| `TabEstoque`            | `EstoqueController`                              | `EstoqueService`              |
+| `Estoque` (dialog)      | `EstoqueController@show`                         | `EstoqueService@visualizar()` |
+| `TabFinanceiro`         | `ContaPagarController`, `ContaReceberController` | `FinanceiroService`           |
+| `TabNFe`                | `NfeController`                                  | `NfeService`                  |
+| `CadastroNFe`           | `NfeController@store`                            | `NfeEmissaoService`           |
+| `TabLogistica`          | `EntregaController`                              | `LogisticaService`            |
+| `TabGalpao`             | `ArmazemController`                              | `ArmazemService`              |
+| `CadastroProduto`       | `ProdutoController`                              | `ProdutoService`              |
+| `CadastroCliente`       | `ClienteController`                              | - (CRUD simples)              |
+| `CadastroFornecedor`    | `FornecedorController`                           | - (CRUD simples)              |
 
 ---
 
 ## Jobs em Background
 
-| Implementação Atual | Job Laravel |
-|-----------------------|-------------|
-| Assinatura NFe via ACBr | `ProcessarNFeJob` |
-| Geração de CNAB | `GerarCnabJob` |
-| Importação tabela IBPT | `ImportarIbptJob` |
-| Geração de relatórios | `GerarRelatorioJob` |
+| Implementação Atual     | Job Laravel         |
+| ----------------------- | ------------------- |
+| Assinatura NFe via ACBr | `ProcessarNFeJob`   |
+| Geração de CNAB         | `GerarCnabJob`      |
+| Importação tabela IBPT  | `ImportarIbptJob`   |
+| Geração de relatórios   | `GerarRelatorioJob` |
 
 ---
 
@@ -446,7 +449,7 @@ protected function schedule(Schedule $schedule)
 
 ## Estratégia de Testes
 
-```
+```text
 tests/
 ├── Unit/
 │   ├── Services/

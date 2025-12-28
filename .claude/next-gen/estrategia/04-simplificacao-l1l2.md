@@ -24,12 +24,14 @@
 ### 1.1 As Duas Tabelas
 
 **Nível 1 (L1)**: `venda_has_produto`
+
 - Criado quando: Orçamento/Pedido é colocado
 - Propósito: "O que o cliente pediu"
 - Granularidade: Uma linha por produto no pedido
 - Contém: Quantidades originais, preços, descontos
 
 **Nível 2 (L2)**: `venda_has_produto2`
+
 - Criado quando: L1 é criado (trigger copia dados)
 - Propósito: "Como o pedido está sendo atendido"
 - Granularidade: Pode ter MÚLTIPLAS linhas por linha L1 (splits)
@@ -38,10 +40,11 @@
 ### 1.2 O Padrão `idRelacionado`
 
 Quando um item é **dividido** (entrega parcial, itens quebrados, devoluções), uma nova linha L2 é criada com:
+
 - Novo `idVendaProduto2` (chave primária)
 - `idRelacionado` = `idVendaProduto2` original (link para pai)
 
-```
+```text
 Pedido Original: 10 caixas
     |
     +-- [idVendaProduto2=100] 10 caixas, status=PENDENTE
@@ -55,12 +58,12 @@ Pedido Original: 10 caixas
 
 ### 1.3 Cenários de Split
 
-| Cenário | O Que Acontece |
-|---------|----------------|
-| **NFe Parcial** | NFe tem menos qtd que PC → `dividirCompra()` + `dividirVenda()` |
-| **Itens quebrados** | Entrega tem itens danificados → `dividirEntrega()` |
-| **Entrega parcial** | Apenas algumas caixas cabem no caminhão → `dividirVenda()` |
-| **Devoluções** | Cliente devolve itens → novo L2 com qtd negativa |
+| Cenário             | O Que Acontece                                                  |
+| ------------------- | --------------------------------------------------------------- |
+| **NFe Parcial**     | NFe tem menos qtd que PC → `dividirCompra()` + `dividirVenda()` |
+| **Itens quebrados** | Entrega tem itens danificados → `dividirEntrega()`              |
+| **Entrega parcial** | Apenas algumas caixas cabem no caminhão → `dividirVenda()`      |
+| **Devoluções**      | Cliente devolve itens → novo L2 com qtd negativa                |
 
 ### 1.4 Relacionamentos de Tabelas Atuais
 
@@ -126,11 +129,13 @@ idEvento             -- Agrupamento de evento de entrega
 ### 2.1 Complexidade de Sincronização
 
 L1 e L2 devem permanecer sincronizados:
+
 - Triggers copiam L1 → L2 no insert
 - Updates de preços em L1 devem propagar para L2
 - Totais em L1 devem igualar soma de L2
 
 **Bugs atuais encontrados:**
+
 - Totais de L1 às vezes não batem com somas de L2 após splits
 - Cancelar linhas L2 nem sempre atualiza L1
 
@@ -139,6 +144,7 @@ L1 e L2 devem permanecer sincronizados:
 Pergunta simples: "Qual o status do item X do pedido?"
 
 **Abordagem atual:**
+
 ```sql
 -- Precisa verificar ambas tabelas e agregar
 SELECT
@@ -154,7 +160,8 @@ GROUP BY vp1.idVendaProduto;
 ### 2.3 Rastreamento de Cadeia de Splits
 
 Quando splits cascateiam, o rastreamento fica complexo:
-```
+
+```text
 Original (100)
   → Split A (101, relacionado a 100)
     → Split B (102, relacionado a 101)  -- Perdeu conexão com original!
@@ -165,12 +172,14 @@ Precisa query recursiva para encontrar item original.
 ### 2.4 Dados Redundantes
 
 Muitas colunas duplicadas entre L1 e L2:
+
 - `produto`, `fornecedor`, `un`, `prcUnitario`
 - Desperdiça armazenamento, cria risco de inconsistência
 
 ### 2.5 Lógica de Negócio Espalhada
 
 Código para lidar com splits em 10+ arquivos:
+
 - `importarxml.cpp` - dividirCompra(), dividirVenda()
 - `inputdialogconfirmacao.cpp` - dividirEntrega()
 - `devolucao.cpp` - split na devolução
@@ -566,12 +575,12 @@ CREATE TRIGGER tr_refresh_resumo
 
 ### 4.3 Prós/Contras vs Opção A
 
-| Aspecto | Opção A | Opção B |
-|---------|---------|---------|
-| Consistência | Agregação manual | Auto-refresh |
-| Performance | Agregação em tempo de query | Pré-calculado |
-| Frescura | Sempre atual | Pequeno delay |
-| Complexidade | Mais simples | Precisa gerenciar MV |
+| Aspecto      | Opção A                     | Opção B              |
+| ------------ | --------------------------- | -------------------- |
+| Consistência | Agregação manual            | Auto-refresh         |
+| Performance  | Agregação em tempo de query | Pré-calculado        |
+| Frescura     | Sempre atual                | Pequeno delay        |
+| Complexidade | Mais simples                | Precisa gerenciar MV |
 
 ---
 
@@ -630,6 +639,7 @@ FROM events_ordered;
 ### 5.4 Quando Usar
 
 Event sourcing é **overkill** para este caso de uso a menos que:
+
 - Precise de histórico completo de auditoria
 - Precise reproduzir/desfazer transações
 - Construindo arquitetura CQRS
@@ -640,16 +650,16 @@ Event sourcing é **overkill** para este caso de uso a menos que:
 
 ## 6. Matriz de Comparação
 
-| Critério | L1/L2 Atual | Opção A: Achatar | Opção B: Derivar L1 | Opção C: Eventos |
-|----------|-------------|------------------|---------------------|------------------|
-| **Complexidade** | Alta | Baixa | Média | Alta |
-| **Simplicidade de query** | Complexa | Simples | Simples | Complexa |
-| **Problemas de sync** | Sim | Não | Não | Não |
-| **Rastreamento de splits** | Confuso | Claro (root_id) | Claro | Histórico completo |
-| **Performance** | Média | Boa | Boa (cacheada) | Precisa otimização |
-| **Esforço de migração** | N/A | Médio | Médio | Alto |
-| **Trilha de auditoria** | Ruim | Pode adicionar | Pode adicionar | Built-in |
-| **Flexibilidade** | Baixa | Média | Média | Máxima |
+| Critério                   | L1/L2 Atual | Opção A: Achatar | Opção B: Derivar L1 | Opção C: Eventos   |
+| -------------------------- | ----------- | ---------------- | ------------------- | ------------------ |
+| **Complexidade**           | Alta        | Baixa            | Média               | Alta               |
+| **Simplicidade de query**  | Complexa    | Simples          | Simples             | Complexa           |
+| **Problemas de sync**      | Sim         | Não              | Não                 | Não                |
+| **Rastreamento de splits** | Confuso     | Claro (root_id)  | Claro               | Histórico completo |
+| **Performance**            | Média       | Boa              | Boa (cacheada)      | Precisa otimização |
+| **Esforço de migração**    | N/A         | Médio            | Médio               | Alto               |
+| **Trilha de auditoria**    | Ruim        | Pode adicionar   | Pode adicionar      | Built-in           |
+| **Flexibilidade**          | Baixa       | Média            | Média               | Máxima             |
 
 ---
 
@@ -658,13 +668,14 @@ Event sourcing é **overkill** para este caso de uso a menos que:
 ### Primária: Opção A (Achatar para Tabela Única)
 
 **Por quê:**
+
 1. Modelo mental mais simples
 2. Hierarquia de splits clara com `parent_id` / `root_id`
 3. Queries fáceis
 4. Boa performance
 5. Esforço de migração moderado
 
-### Com Melhorias:
+### Com Melhorias
 
 1. **Adicionar `root_id`** para acesso rápido ao item original
 2. **Adicionar `split_reason`** para auditoria/debug

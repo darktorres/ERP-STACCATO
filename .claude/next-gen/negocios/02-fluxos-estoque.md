@@ -69,14 +69,15 @@ flowchart TB
 
 ### Tabelas de Junção
 
-| Tabela | Propósito | Links |
-|--------|-----------|-------|
-| `estoque_has_compra` | Estoque NFe → Pedido de compra | idEstoque ↔ idCompra, idPedido2 |
-| `estoque_has_consumo` | Estoque NFe → Pedido de venda | idEstoque ↔ idVendaProduto2 |
+| Tabela                | Propósito                      | Links                           |
+| --------------------- | ------------------------------ | ------------------------------- |
+| `estoque_has_compra`  | Estoque NFe → Pedido de compra | idEstoque ↔ idCompra, idPedido2 |
+| `estoque_has_consumo` | Estoque NFe → Pedido de venda  | idEstoque ↔ idVendaProduto2     |
 
 ### Insight Principal
 
 O **idVendaProduto2** é a chave central de vinculação:
+
 - Armazenado em `pedido_fornecedor_has_produto2.idVendaProduto2`
 - Armazenado em `estoque_has_consumo.idVendaProduto2`
 - Vincula tudo de volta ao pedido do cliente
@@ -109,13 +110,13 @@ flowchart TB
 
 ### Campos Principais Criados
 
-| Campo | Valor | Notas |
-|-------|-------|-------|
-| `quant` | Do XML da NFe | Quantidade original recebida |
-| `restante` | = quant | Inicialmente quantidade total disponível |
-| `status` | 'EM COLETA' | Pronto para retirada no armazém |
-| `idNFe` | FK para nfe | Link para NFe de origem |
-| `valorUnid` | (valor + vIPI - desconto) / quant | Custo unitário |
+| Campo       | Valor                             | Notas                                    |
+| ----------- | --------------------------------- | ---------------------------------------- |
+| `quant`     | Do XML da NFe                     | Quantidade original recebida             |
+| `restante`  | = quant                           | Inicialmente quantidade total disponível |
+| `status`    | 'EM COLETA'                       | Pronto para retirada no armazém          |
+| `idNFe`     | FK para nfe                       | Link para NFe de origem                  |
+| `valorUnid` | (valor + vIPI - desconto) / quant | Custo unitário                           |
 
 ---
 
@@ -164,12 +165,12 @@ void ImportarXML::parear() {
 
 ### Codificação por Cores
 
-| Cor | Valor | Significado |
-|-----|-------|-------------|
-| Verde | 1 | Correspondência perfeita - pronto para importar |
-| Amarelo | 2 | Correspondência parcial - divergência de quantidade |
-| Vermelho | 3 | Sem correspondência encontrada |
-| Verde Escuro | 4 | Consumo criado |
+| Cor          | Valor | Significado                                         |
+| ------------ | ----- | --------------------------------------------------- |
+| Verde        | 1     | Correspondência perfeita - pronto para importar     |
+| Amarelo      | 2     | Correspondência parcial - divergência de quantidade |
+| Vermelho     | 3     | Sem correspondência encontrada                      |
+| Verde Escuro | 4     | Consumo criado                                      |
 
 ### Quando as Quantidades Não Correspondem
 
@@ -274,19 +275,20 @@ void criarConsumo(rowCompra, rowEstoque) {
 
 ### Valores de Status do Consumo
 
-| Status | Significado |
-|--------|-------------|
-| `PRÉ-CONSUMO` | Reservado mas não separado |
-| `CONSUMO` | Fisicamente separado do armazém |
-| `AJUSTE` | Ajuste (itens quebrados, etc.) |
-| `DEVOLVIDO` | Retornado ao estoque |
-| `CANCELADO` | Cancelado |
+| Status        | Significado                     |
+| ------------- | ------------------------------- |
+| `PRÉ-CONSUMO` | Reservado mas não separado      |
+| `CONSUMO`     | Fisicamente separado do armazém |
+| `AJUSTE`      | Ajuste (itens quebrados, etc.)  |
+| `DEVOLVIDO`   | Retornado ao estoque            |
+| `CANCELADO`   | Cancelado                       |
 
 ### Múltiplos Consumos por Item de Venda
 
 **Crítico**: Um `idVendaProduto2` pode ter MÚLTIPLOS registros `estoque_has_consumo`!
 
 Isso acontece quando:
+
 - Estoque vem de múltiplas NFes
 - Estoque vem de múltiplos lotes
 - Entregas parciais
@@ -338,11 +340,11 @@ SET @restante := (
 
 ### Dois Tipos de Devoluções
 
-| Tipo | Status | Ação |
-|------|--------|------|
-| Devolução do Cliente | `DEVOLVIDO` | Cliente devolve item, crédito emitido |
-| Devolução para Estoque | `DEVOLVIDO ESTOQUE` | Item retorna ao inventário |
-| Devolução para Fornecedor | `DEVOLVIDO FORN.` | Item devolvido ao fornecedor |
+| Tipo                      | Status              | Ação                                  |
+| ------------------------- | ------------------- | ------------------------------------- |
+| Devolução do Cliente      | `DEVOLVIDO`         | Cliente devolve item, crédito emitido |
+| Devolução para Estoque    | `DEVOLVIDO ESTOQUE` | Item retorna ao inventário            |
+| Devolução para Fornecedor | `DEVOLVIDO FORN.`   | Item devolvido ao fornecedor          |
 
 ### Fluxo de Devolução do Cliente
 
@@ -383,16 +385,16 @@ flowchart TB
 
 ### Bugs Identificados nas Devoluções
 
-| # | Severidade | Problema | Localização |
-|---|------------|----------|-------------|
-| 1 | **ALTA** | Registro financeiro marcado `RECEBIDO` imediatamente (ignora fluxo de trabalho) | devolucao.cpp:554 |
-| 2 | **ALTA** | NFe de Devolução não criada automaticamente | devolucao.cpp:941-947 (TODOs) |
-| 3 | **ALTA** | Registros financeiros têm `observacao` vazia (sem trilha de auditoria) | devolucao.cpp:552 |
-| 4 | **MÉDIA** | `quantUpd = 5` hard-coded em vez de const | widgetcompradevolucao.cpp:173 |
-| 5 | **MÉDIA** | `quantUpd` faltando em registros de consumo divididos | devolucao.cpp:859 |
-| 6 | **MÉDIA** | Crédito do cliente não tem trilha de auditoria do motivo | devolucao.cpp:569 |
-| 7 | **MÉDIA** | Vinculação `idRelacionado` confusa para devoluções parciais | devolucao.cpp:696,734 |
-| 8 | **BAIXA** | Itens `PENDENTE DEV.` não podem ser devolvidos novamente | devolucao.cpp:90 |
+| #   | Severidade | Problema                                                                        | Localização                   |
+| --- | ---------- | ------------------------------------------------------------------------------- | ----------------------------- |
+| 1   | **ALTA**   | Registro financeiro marcado `RECEBIDO` imediatamente (ignora fluxo de trabalho) | devolucao.cpp:554             |
+| 2   | **ALTA**   | NFe de Devolução não criada automaticamente                                     | devolucao.cpp:941-947 (TODOs) |
+| 3   | **ALTA**   | Registros financeiros têm `observacao` vazia (sem trilha de auditoria)          | devolucao.cpp:552             |
+| 4   | **MÉDIA**  | `quantUpd = 5` hard-coded em vez de const                                       | widgetcompradevolucao.cpp:173 |
+| 5   | **MÉDIA**  | `quantUpd` faltando em registros de consumo divididos                           | devolucao.cpp:859             |
+| 6   | **MÉDIA**  | Crédito do cliente não tem trilha de auditoria do motivo                        | devolucao.cpp:569             |
+| 7   | **MÉDIA**  | Vinculação `idRelacionado` confusa para devoluções parciais                     | devolucao.cpp:696,734         |
+| 8   | **BAIXA**  | Itens `PENDENTE DEV.` não podem ser devolvidos novamente                        | devolucao.cpp:90              |
 
 ### TODOs no Código de Devoluções
 
@@ -412,17 +414,18 @@ flowchart TB
 
 ### Problemas Críticos
 
-| Problema | Impacto | Causa Raiz |
-|----------|---------|------------|
-| **FIFO não implementado** | Estoque errado consumido | `produto.idEstoque` não mantido |
-| **Divisão multi-estoque faltando** | Não consegue atender de múltiplos lotes | Sem lógica para dividir entre entradas de estoque |
-| **Devoluções ignoram fluxo financeiro** | Não consegue auditar devoluções | Status definido como RECEBIDO imediatamente |
-| **Sem NFe Devolução** | Problemas de conformidade fiscal | Funcionalidade não implementada |
-| **Semântica de quantidade negativa confusa** | Confusão em relatórios | Padrões de uso misturados |
+| Problema                                     | Impacto                                 | Causa Raiz                                        |
+| -------------------------------------------- | --------------------------------------- | ------------------------------------------------- |
+| **FIFO não implementado**                    | Estoque errado consumido                | `produto.idEstoque` não mantido                   |
+| **Divisão multi-estoque faltando**           | Não consegue atender de múltiplos lotes | Sem lógica para dividir entre entradas de estoque |
+| **Devoluções ignoram fluxo financeiro**      | Não consegue auditar devoluções         | Status definido como RECEBIDO imediatamente       |
+| **Sem NFe Devolução**                        | Problemas de conformidade fiscal        | Funcionalidade não implementada                   |
+| **Semântica de quantidade negativa confusa** | Confusão em relatórios                  | Padrões de uso misturados                         |
 
 ### Detalhe do Problema FIFO
 
 **Implementação Atual**:
+
 ```cpp
 // De venda.cpp:1046
 query.prepare("SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant
@@ -434,6 +437,7 @@ query.prepare("SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant
 **Problema**: Sem cláusula `ORDER BY`! Depende inteiramente de `produto.idEstoque` estar pré-definido.
 
 **Deveria Ser**:
+
 ```sql
 SELECT e.idEstoque
 FROM estoque e
@@ -449,6 +453,7 @@ LIMIT 1
 **Localização**: `inputdialogconfirmacao.cpp:553-601`
 
 Quando mercadorias são danificadas e precisam desfazer consumo:
+
 ```cpp
 querySelect.prepare(
     "SELECT ... FROM estoque_has_consumo ehc
@@ -486,6 +491,7 @@ THEN EXISTS linha em estoque_has_consumo com status = 'DEVOLVIDO'
 ### Limites de Transação
 
 Código atual encapsula importação de NFe em transação:
+
 ```cpp
 qApp->startTransaction("ImportarXML::on_pushButtonImportar");
 try {
@@ -509,6 +515,7 @@ Mas o fluxo de devoluções tem **múltiplas transações separadas** - risco de
 **Mecanismo**: Trigger do banco + stored procedure
 
 Quando `venda_has_produto` é inserido (durante conversão orçamento→venda):
+
 1. Trigger dispara automaticamente
 2. Chama procedure `copy_into_venda_has_produto2`
 3. Cria UM `venda_has_produto2` por `venda_has_produto`
@@ -554,7 +561,7 @@ const double quantAdicionar = qMin(estoqueDisponivel, quantCompra);
 
 ### Cenário de Exemplo
 
-```
+```text
 Pedido Original: 100 unidades do Produto X
 
 NFe #1 chega com 60 unidades:
@@ -572,6 +579,7 @@ NFe #2 chega com 50 unidades:
 **Localização**: `devolucao.cpp:740` - `dividirVenda()`
 
 Quando cliente devolve quantidade PARCIAL:
+
 - Linha original: status='DEVOLVIDO', quant=quantidade devolvida
 - Nova linha: quant=restante, idRelacionado=original
 
@@ -600,7 +608,7 @@ venda_has_produto2:
 
 ### Relacionamento Pai-Filho
 
-```
+```text
 venda_has_produto (idVendaProduto1)
     │
     └── idVendaProdutoFK em venda_has_produto2

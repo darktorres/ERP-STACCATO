@@ -8,15 +8,15 @@
 
 ## Por que PostgreSQL
 
-| Recurso | Benefício para Este Projeto |
-|---------|-------------------------|
-| **JSONB Nativo** | Dados de impostos flexíveis, atributos de produto, logs de auditoria |
-| **ENUM Nativo** | Campos de status com type-safety |
-| **Restrições CHECK** | Aplicação de regras de negócio no nível do BD |
-| **Busca full-text** | tsvector integrado para busca de produtos |
-| **Melhor concorrência** | MVCC lida bem com usuários simultâneos |
-| **Schemas** | Opção de multi-tenancy (schema por loja) |
-| **Particionamento** | Particionamento de tabelas para tabelas de transação grandes |
+| Recurso                 | Benefício para Este Projeto                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| **JSONB Nativo**        | Dados de impostos flexíveis, atributos de produto, logs de auditoria |
+| **ENUM Nativo**         | Campos de status com type-safety                                     |
+| **Restrições CHECK**    | Aplicação de regras de negócio no nível do BD                        |
+| **Busca full-text**     | tsvector integrado para busca de produtos                            |
+| **Melhor concorrência** | MVCC lida bem com usuários simultâneos                               |
+| **Schemas**             | Opção de multi-tenancy (schema por loja)                             |
+| **Particionamento**     | Particionamento de tabelas para tabelas de transação grandes         |
 
 ---
 
@@ -26,12 +26,12 @@
 
 Nomes de fornecedores armazenados como VARCHAR em múltiplas tabelas em vez de FK:
 
-| Tabela | Coluna |
-|-------|--------|
-| `venda_has_produto2` | `fornecedor` |
-| `estoque` | `fornecedor` |
-| `estoque_has_consumo` | `fornecedor` |
-| `compra_avulsa` | `fornecedor` |
+| Tabela                           | Coluna       |
+| -------------------------------- | ------------ |
+| `venda_has_produto2`             | `fornecedor` |
+| `estoque`                        | `fornecedor` |
+| `estoque_has_consumo`            | `fornecedor` |
+| `compra_avulsa`                  | `fornecedor` |
 | `pedido_fornecedor_has_produto2` | `fornecedor` |
 
 **Impacto**: Se o nome do fornecedor mudar, requer atualização de 5+ tabelas.
@@ -43,6 +43,7 @@ Nomes de fornecedores armazenados como VARCHAR em múltiplas tabelas em vez de F
 ### 2. Mega-Tabela: `produto`
 
 A tabela `produto` tem **100+ colunas** incluindo:
+
 - Dados principais do produto
 - Múltiplas flags de rastreamento `*Upd` para cada campo
 - Campos calculados (`estoqueRestante`)
@@ -104,6 +105,7 @@ ORDER BY produto_id, vigencia_inicio DESC;
 ### 3. Tabelas de Detalhe em Dois Níveis
 
 Padrão atual usa dois níveis:
+
 - `venda_has_produto` (Nível 1 - agregado)
 - `venda_has_produto2` (Nível 2 - detalhado)
 
@@ -467,18 +469,23 @@ CREATE INDEX idx_estoque_consumos_estoque ON estoque_consumos(estoque_id);
 ## Estratégia de Migração
 
 ### Fase 1: Novas Tabelas
+
 Criar novas tabelas normalizadas junto às existentes.
 
 ### Fase 2: Escrita Dupla
+
 Escrever em ambas tabelas antigas e novas durante a transição.
 
 ### Fase 3: Backfill
+
 Migrar dados históricos das tabelas antigas para as novas.
 
 ### Fase 4: Mudar Leituras
+
 Apontar leituras da aplicação para as novas tabelas.
 
 ### Fase 5: Limpeza
+
 Remover tabelas antigas após validação.
 
 ---

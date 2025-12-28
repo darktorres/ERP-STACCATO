@@ -7,34 +7,37 @@
 
 ## Visão Geral das Opções
 
-| Opção | Tipo | Curva de Aprendizado | Interatividade | Complexidade |
-|--------|------|----------------|---------------|------------|
-| **Livewire** | Renderizado no servidor | Baixa | Média | Baixa |
-| **Inertia + Vue** | Estilo SPA | Média | Alta | Média |
-| **Inertia + React** | Estilo SPA | Média-Alta | Alta | Média |
-| **SPA Completo + API** | Desacoplado | Alta | Máxima | Alta |
+| Opção                  | Tipo                    | Curva de Aprendizado | Interatividade | Complexidade |
+| ---------------------- | ----------------------- | -------------------- | -------------- | ------------ |
+| **Livewire**           | Renderizado no servidor | Baixa                | Média          | Baixa        |
+| **Inertia + Vue**      | Estilo SPA              | Média                | Alta           | Média        |
+| **Inertia + React**    | Estilo SPA              | Média-Alta           | Alta           | Média        |
+| **SPA Completo + API** | Desacoplado             | Alta                 | Máxima         | Alta         |
 
 ---
 
 ## Opção 1: Livewire
 
-### O que é?
+### O que é? - Livewire
+
 Renderização no servidor com atualizações reativas via AJAX. Componentes escritos em PHP.
 
-### Prós
+### Prós - Livewire
+
 - Permanece no ecossistema PHP (sem framework JS para aprender)
 - Modelo mental mais simples
 - Menos ferramentas de build
 - Bom para aplicações com muito CRUD
 - Recursos de tempo real com Livewire 3
 
-### Contras
+### Contras - Livewire
+
 - Mais carga no servidor (toda interação acessa o servidor)
 - UX menos fluida comparada a SPA verdadeira
 - Interações complexas podem ser complicadas
 - Capacidade offline limitada
 
-### Exemplo de Componente
+### Exemplo de Componente - Livewire
 
 ```php
 <?php
@@ -137,10 +140,12 @@ class ListaCompras extends Component
 
 ## Opção 2: Inertia + Vue
 
-### O que é?
+### O que é? - Inertia + Vue
+
 Experiência estilo SPA sem construir uma API. Servidor renderiza dados, Vue cuida da UI.
 
-### Prós
+### Prós - Inertia + Vue
+
 - Sensação de SPA sem complexidade de API
 - Ótima experiência de desenvolvimento
 - Reatividade do Vue para formulários complexos
@@ -148,13 +153,14 @@ Experiência estilo SPA sem construir uma API. Servidor renderiza dados, Vue cui
 - Bom suporte a TypeScript
 - Recarregamentos parciais para performance
 
-### Contras
+### Contras - Inertia + Vue
+
 - Precisa conhecer Vue.js
 - Etapa de build necessária (Vite)
 - Ligeiramente mais complexo que Livewire
 - Tamanho inicial do bundle maior
 
-### Exemplo de Componente
+### Exemplo de Componente - Inertia + Vue
 
 ```php
 <?php
@@ -190,52 +196,63 @@ class CompraController extends Controller
 ```vue
 <!-- resources/js/Pages/Compras/Index.vue -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { useDebounceFn } from '@vueuse/core'
-import Layout from '@/Layouts/AppLayout.vue'
-import Pagination from '@/Components/Pagination.vue'
-import Badge from '@/Components/Badge.vue'
+import { ref, watch } from "vue";
+import { router } from "@inertiajs/vue3";
+import { useDebounceFn } from "@vueuse/core";
+import Layout from "@/Layouts/AppLayout.vue";
+import Pagination from "@/Components/Pagination.vue";
+import Badge from "@/Components/Badge.vue";
 
 interface Compra {
-  id: number
-  fornecedor: { id: number; razao_social: string }
-  status: string
-  status_label: string
-  status_color: string
-  total: number
+  id: number;
+  fornecedor: { id: number; razao_social: string };
+  status: string;
+  status_label: string;
+  status_color: string;
+  total: number;
 }
 
 const props = defineProps<{
-  compras: { data: Compra[]; links: any[] }
-  filters: { status?: string; search?: string }
-  statusOptions: { value: string; label: string }[]
-}>()
+  compras: { data: Compra[]; links: any[] };
+  filters: { status?: string; search?: string };
+  statusOptions: { value: string; label: string }[];
+}>();
 
-const search = ref(props.filters.search ?? '')
-const status = ref(props.filters.status ?? '')
+const search = ref(props.filters.search ?? "");
+const status = ref(props.filters.status ?? "");
 
 const applyFilters = useDebounceFn(() => {
-  router.get('/compras', {
-    search: search.value || undefined,
-    status: status.value || undefined,
-  }, {
-    preserveState: true,
-    replace: true,
-  })
-}, 300)
+  router.get(
+    "/compras",
+    {
+      search: search.value || undefined,
+      status: status.value || undefined,
+    },
+    {
+      preserveState: true,
+      replace: true,
+    },
+  );
+}, 300);
 
-watch([search, status], applyFilters)
+watch([search, status], applyFilters);
 
 const sortBy = (field: string) => {
-  router.get('/compras', {
-    ...props.filters,
-    sort: field,
-    direction: props.filters.sort === field && props.filters.direction === 'asc' ? 'desc' : 'asc',
-  }, {
-    preserveState: true,
-  })
-}
+  router.get(
+    "/compras",
+    {
+      ...props.filters,
+      sort: field,
+      direction:
+        props.filters.sort === field && props.filters.direction === "asc"
+          ? "desc"
+          : "asc",
+    },
+    {
+      preserveState: true,
+    },
+  );
+};
 </script>
 
 <template>
@@ -260,7 +277,9 @@ const sortBy = (field: string) => {
       <thead>
         <tr>
           <th @click="sortBy('id')" class="cursor-pointer">ID</th>
-          <th @click="sortBy('fornecedor_id')" class="cursor-pointer">Fornecedor</th>
+          <th @click="sortBy('fornecedor_id')" class="cursor-pointer">
+            Fornecedor
+          </th>
           <th @click="sortBy('status')" class="cursor-pointer">Status</th>
           <th @click="sortBy('total')" class="cursor-pointer">Total</th>
         </tr>
@@ -270,9 +289,16 @@ const sortBy = (field: string) => {
           <td>{{ compra.id }}</td>
           <td>{{ compra.fornecedor.razao_social }}</td>
           <td>
-            <Badge :color="compra.status_color">{{ compra.status_label }}</Badge>
+            <Badge :color="compra.status_color">{{
+              compra.status_label
+            }}</Badge>
           </td>
-          <td>R$ {{ compra.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</td>
+          <td>
+            R$
+            {{
+              compra.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+            }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -288,13 +314,15 @@ const sortBy = (field: string) => {
 
 Similar ao Vue mas usando o ecossistema React.
 
-### Prós
+### Prós - Inertia + React
+
 - Ecossistema maior que Vue
 - Melhor suporte a TypeScript
 - Maior demanda no mercado de trabalho
 - Mais bibliotecas de componentes (shadcn/ui, Radix)
 
-### Contras
+### Contras - Inertia + React
+
 - Mais boilerplate que Vue
 - Curva de aprendizado do JSX
 - Hooks podem ser confusos inicialmente
@@ -305,13 +333,15 @@ Similar ao Vue mas usando o ecossistema React.
 
 Frontend completamente separado (React/Vue) com Laravel apenas como API.
 
-### Prós
+### Prós - SPA Completo + API
+
 - Máxima flexibilidade
 - App mobile pode usar mesma API
 - Frontend pode ser hospedado em CDN
 - Clara separação de responsabilidades
 
-### Contras
+### Contras - SPA Completo + API
+
 - Duas bases de código para manter
 - Complexidade de versionamento de API
 - Autenticação mais complexa (tokens)
@@ -321,21 +351,22 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 
 ## Comparação para Casos de Uso de ERP
 
-| Caso de Uso | Livewire | Inertia+Vue | SPA Completo |
-|----------|----------|-------------|----------|
-| **Tabelas de Dados** | Bom | Excelente | Excelente |
-| **Formulários Complexos** | Médio | Excelente | Excelente |
-| **Atualizações em Tempo Real** | Bom (polling) | Médio | Excelente (WS) |
-| **Suporte Offline** | Nenhum | Limitado | Possível |
-| **Impressão/Relatórios** | Fácil | Médio | Complexo |
-| **Curva de Aprendizado** | Baixa | Média | Alta |
-| **Familiaridade da Equipe** | Apenas PHP | PHP + Vue | PHP + React/Vue |
+| Caso de Uso                    | Livewire      | Inertia+Vue | SPA Completo    |
+| ------------------------------ | ------------- | ----------- | --------------- |
+| **Tabelas de Dados**           | Bom           | Excelente   | Excelente       |
+| **Formulários Complexos**      | Médio         | Excelente   | Excelente       |
+| **Atualizações em Tempo Real** | Bom (polling) | Médio       | Excelente (WS)  |
+| **Suporte Offline**            | Nenhum        | Limitado    | Possível        |
+| **Impressão/Relatórios**       | Fácil         | Médio       | Complexo        |
+| **Curva de Aprendizado**       | Baixa         | Média       | Alta            |
+| **Familiaridade da Equipe**    | Apenas PHP    | PHP + Vue   | PHP + React/Vue |
 
 ---
 
 ## Recursos Desktop Atuais a Considerar
 
 ### 1. Tabelas de Dados Pesadas
+
 - TableView do Qt com delegates
 - Edição inline
 - Formatação customizada de células (moeda, datas)
@@ -344,6 +375,7 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 **Melhor opção**: Inertia + Vue com TanStack Table ou AG Grid
 
 ### 2. Formulários Multi-Etapas Complexos
+
 - Cadastro de produto com abas
 - Criação de venda com itens de linha
 - Visibilidade dinâmica de campos
@@ -351,6 +383,7 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 **Melhor opção**: Inertia + Vue (melhor gerenciamento de estado)
 
 ### 3. Recursos em Tempo Real
+
 - Atualizações de nível de estoque
 - Mudanças de status de pedidos
 - Polling de status de NFe
@@ -358,6 +391,7 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 **Melhor opção**: SPA completo com WebSockets, ou Livewire com polling
 
 ### 4. Navegação por Teclado
+
 - Tab entre campos
 - Enter para enviar
 - Atalhos de teclado
@@ -378,6 +412,7 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 6. **Ecossistema crescente** (PrimeVue, Headless UI)
 
 ### Stack Sugerida
+
 - **Inertia.js** - Integração com Laravel
 - **Vue 3** - Composition API
 - **TypeScript** - Segurança de tipos

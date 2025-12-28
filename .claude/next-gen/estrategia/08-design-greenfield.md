@@ -27,38 +27,38 @@
 
 ### 1.1 Princípios Orientadores
 
-| Princípio | Significado |
-|-----------|-------------|
+| Princípio                     | Significado                                     |
+| ----------------------------- | ----------------------------------------------- |
 | **Explícito sobre implícito** | Todo estado e transição é nomeado e documentado |
-| **Eventos sobre mutações** | Mudanças de estado são eventos, não updates |
-| **Derivado sobre duplicado** | Calcular valores, não armazenar cópias |
-| **Constraints no schema** | Banco de dados impõe regras, não apenas código |
-| **Responsabilidade única** | Cada entidade faz UMA coisa bem |
-| **Testável por design** | Funções puras, sem dependências ocultas |
+| **Eventos sobre mutações**    | Mudanças de estado são eventos, não updates     |
+| **Derivado sobre duplicado**  | Calcular valores, não armazenar cópias          |
+| **Constraints no schema**     | Banco de dados impõe regras, não apenas código  |
+| **Responsabilidade única**    | Cada entidade faz UMA coisa bem                 |
+| **Testável por design**       | Funções puras, sem dependências ocultas         |
 
 ### 1.2 O Que Estamos Evitando
 
-| Evitar |
-|--------|
-| Strings mágicas para status |
-| Estado mutável sem histórico |
-| Tabelas divididas (padrão L1/L2) |
-| Dados desnormalizados |
-| Lógica de negócio em controllers |
-| Transições de estado implícitas |
+| Evitar                                      |
+| ------------------------------------------- |
+| Strings mágicas para status                 |
+| Estado mutável sem histórico                |
+| Tabelas divididas (padrão L1/L2)            |
+| Dados desnormalizados                       |
+| Lógica de negócio em controllers            |
+| Transições de estado implícitas             |
 | Condicionais complexas espalhadas no código |
 
 ### 1.3 O Que Estamos Abraçando
 
-| Adotar |
-|--------|
-| Enums para todos os status |
-| Event sourcing para trilha de auditoria |
-| Tabela única com registros de atendimento |
+| Adotar                                       |
+| -------------------------------------------- |
+| Enums para todos os status                   |
+| Event sourcing para trilha de auditoria      |
+| Tabela única com registros de atendimento    |
 | Referências normalizadas (FKs em todo lugar) |
-| Serviços de domínio para lógica de negócio |
-| Máquinas de estado com guards explícitos |
-| Regras de negócio centralizadas |
+| Serviços de domínio para lógica de negócio   |
+| Máquinas de estado com guards explícitos     |
+| Regras de negócio centralizadas              |
 
 ---
 
@@ -94,13 +94,13 @@ flowchart TB
 
 **Por que isso é melhor:**
 
-| Sistema Atual | Modelo de Atendimento |
-|---------------|----------------------|
-| Um item vira 3 itens divididos | Um item com 3 atendimentos |
-| idRelacionado para rastrear divisões | Simples relacionamento pai-filho |
-| Status em cada item dividido | Status derivado dos atendimentos |
+| Sistema Atual                        | Modelo de Atendimento              |
+| ------------------------------------ | ---------------------------------- |
+| Um item vira 3 itens divididos       | Um item com 3 atendimentos         |
+| idRelacionado para rastrear divisões | Simples relacionamento pai-filho   |
+| Status em cada item dividido         | Status derivado dos atendimentos   |
 | Difícil ver "o que o cliente pediu?" | Item do pedido é registro prístino |
-| Queries complexas para agregar | Agregação simples |
+| Queries complexas para agregar       | Agregação simples                  |
 
 ### 2.2 Reserva vs Consumo
 
@@ -172,14 +172,14 @@ flowchart TB
 
 ### 3.2 Responsabilidades dos Contextos
 
-| Contexto | Possui | Publica Eventos |
-|----------|--------|-----------------|
-| **Vendas** | Pedidos, Itens, Clientes | PedidoCriado, ItemAdicionado, PedidoCancelado |
-| **Estoque** | Estoques, Reservas, Consumos | EstoqueRecebido, EstoqueReservado, EstoqueConsumido |
-| **Compras** | Pedidos de Compra, Pedidos a Fornecedor | PCCriado, PCRecebido |
-| **Entrega** | Agendamentos, Rotas, Confirmações | EntregaAgendada, EntregaConcluída |
-| **Fiscal** | NFe, Impostos | NotaGerada, NotaAutorizada |
-| **Financeiro** | Pagamentos, Comissões | PagamentoRecebido, ComissãoPaga |
+| Contexto       | Possui                                  | Publica Eventos                                     |
+| -------------- | --------------------------------------- | --------------------------------------------------- |
+| **Vendas**     | Pedidos, Itens, Clientes                | PedidoCriado, ItemAdicionado, PedidoCancelado       |
+| **Estoque**    | Estoques, Reservas, Consumos            | EstoqueRecebido, EstoqueReservado, EstoqueConsumido |
+| **Compras**    | Pedidos de Compra, Pedidos a Fornecedor | PCCriado, PCRecebido                                |
+| **Entrega**    | Agendamentos, Rotas, Confirmações       | EntregaAgendada, EntregaConcluída                   |
+| **Fiscal**     | NFe, Impostos                           | NotaGerada, NotaAutorizada                          |
+| **Financeiro** | Pagamentos, Comissões                   | PagamentoRecebido, ComissãoPaga                     |
 
 ### 3.3 Comunicação Entre Contextos
 
@@ -1751,16 +1751,16 @@ class OrderStateRebuilder
 
 ## Resumo: Principais Diferenças do Sistema Atual
 
-| Aspecto | Sistema Atual | Design Greenfield |
-|---------|---------------|-------------------|
-| **Rastreamento de Item** | Tabelas L1/L2 divididas | Item único + atendimentos |
-| **Atribuição de Estoque** | idEstoque no produto | Reserva FIFO → consumo |
-| **Status** | Strings mágicas | Enums com máquinas de estado |
-| **Ref de Fornecedor** | VARCHAR copiado | FK em todo lugar |
-| **Auditoria** | Nenhuma | Event sourcing |
-| **Entrega Parcial** | Dividir itens | Registros de atendimento |
-| **Lógica de Negócio** | Espalhada na UI | Serviços de domínio |
-| **Testes** | Mínimo | Abrangente, fácil de testar |
-| **Concorrência** | Condições de corrida | Lock pessimista (FOR UPDATE) |
+| Aspecto                   | Sistema Atual           | Design Greenfield            |
+| ------------------------- | ----------------------- | ---------------------------- |
+| **Rastreamento de Item**  | Tabelas L1/L2 divididas | Item único + atendimentos    |
+| **Atribuição de Estoque** | idEstoque no produto    | Reserva FIFO → consumo       |
+| **Status**                | Strings mágicas         | Enums com máquinas de estado |
+| **Ref de Fornecedor**     | VARCHAR copiado         | FK em todo lugar             |
+| **Auditoria**             | Nenhuma                 | Event sourcing               |
+| **Entrega Parcial**       | Dividir itens           | Registros de atendimento     |
+| **Lógica de Negócio**     | Espalhada na UI         | Serviços de domínio          |
+| **Testes**                | Mínimo                  | Abrangente, fácil de testar  |
+| **Concorrência**          | Condições de corrida    | Lock pessimista (FOR UPDATE) |
 
 O insight chave: **Atendimentos são o conceito central**, não itens divididos. Tudo flui de reserva → consumo → entrega → fatura.

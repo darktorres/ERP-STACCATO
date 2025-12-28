@@ -113,11 +113,11 @@ INSERT INTO venda_itens (
     quantidade_caixas,
     unidade,
     unidades_por_caixa,
-    preco_unitario,
+    valor_unitario,
     desconto_percentual,
-    preco_com_desconto,
+    valor_com_desconto,
     desconto_global_percentual,
-    total,
+    valor_total,
     descricao_produto,
     codigo_comercial,
     ncm,
@@ -194,11 +194,11 @@ SELECT
     l2.caixas as quantidade_caixas,
     l2.un as unidade,
     l2.quantCaixa as unidades_por_caixa,
-    l2.prcUnitario as preco_unitario,
+    l2.prcUnitario as valor_unitario,
     l2.desconto as desconto_percentual,
-    l2.descUnitario as preco_com_desconto,
+    l2.descUnitario as valor_com_desconto,
     l2.descGlobal as desconto_global_percentual,
-    l2.total,
+    l2.total as valor_total,
     l2.produto as descricao_produto,
     l2.codComercial as codigo_comercial,
     l2.ncm,
@@ -257,7 +257,7 @@ FROM fornecedor_mapping
 WHERE fornecedor_id IS NULL;
 
 -- Passo 2: Criar fornecedores faltantes (se necessário)
-INSERT INTO fornecedores (razao_social, ativo, created_at)
+INSERT INTO fornecedores (razao_social, is_ativo, created_at)
 SELECT nome_legado, true, NOW()
 FROM fornecedor_mapping
 WHERE fornecedor_id IS NULL;
@@ -298,7 +298,7 @@ Converter `SHA_PASSWORD()` para bcrypt.
 // Ver tecnico/05-seguranca.md para implementação
 
 // Durante migração inicial, apenas copiar hash legado:
-INSERT INTO usuarios (id, username, password_legado, ativo, ...)
+INSERT INTO usuarios (id, username, password_legado, is_ativo, ...)
 SELECT idUsuario, user, password, NOT desativado, ...
 FROM usuario;
 
@@ -363,8 +363,8 @@ INSERT INTO produtos (
     quantidade_caixa,
     ncm,
     tem_lote,
-    descontinuado,
-    ativo,
+    is_descontinuado,
+    is_ativo,
     created_at
 )
 SELECT
@@ -387,7 +387,7 @@ FROM produto;
 INSERT INTO produto_precos (
     produto_id,
     custo,
-    preco_venda,
+    valor_venda,
     margem,
     vigencia_inicio,
     created_at
@@ -778,3 +778,4 @@ class MigrarDadosCommand extends Command
 - [06-normalizacao-fornecedor.md](./06-normalizacao-fornecedor.md) - Normalização de fornecedor
 - [07-esquema-redesenhado.md](./07-esquema-redesenhado.md) - Schema novo completo
 - [../tecnico/02-banco-dados.md](../tecnico/02-banco-dados.md) - Decisões de banco de dados
+- [../tecnico/15-dicionario-dados.md](../tecnico/15-dicionario-dados.md) - Convenções de nomeação SQL

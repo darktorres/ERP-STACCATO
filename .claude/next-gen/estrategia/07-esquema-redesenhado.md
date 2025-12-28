@@ -351,6 +351,32 @@ CREATE TYPE financeiro_status AS ENUM (
     'ATRASADO',
     'CANCELADO'
 );
+
+-- Status de Venda (cabeçalho)
+CREATE TYPE venda_status AS ENUM (
+    'ABERTA',             -- Em andamento
+    'PARCIAL',            -- Alguns itens entregues
+    'CONCLUIDA',          -- Todos itens entregues
+    'CANCELADA'           -- Cancelada
+);
+
+-- Status de Compra (cabeçalho)
+CREATE TYPE compra_status AS ENUM (
+    'PENDENTE',           -- Aguardando envio
+    'ENVIADA',            -- Enviada ao fornecedor
+    'CONFIRMADA',         -- Confirmada pelo fornecedor
+    'PARCIAL',            -- Parcialmente recebida
+    'RECEBIDA',           -- Totalmente recebida
+    'CANCELADA'           -- Cancelada
+);
+
+-- Status de Estoque
+CREATE TYPE estoque_status AS ENUM (
+    'DISPONIVEL',         -- Disponível para venda
+    'RESERVADO',          -- Reservado para venda
+    'CONSUMIDO',          -- Totalmente consumido
+    'BLOQUEADO'           -- Bloqueado (avaria, etc)
+);
 ```
 
 ### 4.2 Tabelas de Dados Mestres
@@ -370,7 +396,7 @@ CREATE TABLE lojas (
     -- Configurações
     config JSONB DEFAULT '{}',
 
-    ativo BOOLEAN DEFAULT TRUE,
+    is_ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -394,11 +420,11 @@ CREATE TABLE fornecedores (
 
     -- Regras de negócio
     comissao_percentual DECIMAL(5,2) DEFAULT 0,
-    frete_pago_loja BOOLEAN DEFAULT FALSE,
+    is_frete_pago_loja BOOLEAN DEFAULT FALSE,
     is_representacao BOOLEAN DEFAULT FALSE,
     prazo_entrega_dias INTEGER DEFAULT 30,
 
-    ativo BOOLEAN DEFAULT TRUE,
+    is_ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -423,8 +449,8 @@ CREATE TABLE clientes (
     -- Links
     vendedor_id INTEGER REFERENCES usuarios(id),
 
-    incompleto BOOLEAN DEFAULT FALSE,
-    ativo BOOLEAN DEFAULT TRUE,
+    is_incompleto BOOLEAN DEFAULT FALSE,
+    is_ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -452,7 +478,7 @@ CREATE TABLE produtos (
     -- Flags
     tem_lote BOOLEAN DEFAULT FALSE,
 
-    ativo BOOLEAN DEFAULT TRUE,
+    is_ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
 
@@ -465,9 +491,9 @@ CREATE TABLE produto_precos (
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
 
     custo DECIMAL(15,4) NOT NULL,
-    preco_venda DECIMAL(15,4) NOT NULL,
+    valor_venda DECIMAL(15,4) NOT NULL,
     markup DECIMAL(7,4) GENERATED ALWAYS AS (
-        CASE WHEN custo > 0 THEN (preco_venda / custo - 1) * 100 ELSE 0 END
+        CASE WHEN custo > 0 THEN (valor_venda / custo - 1) * 100 ELSE 0 END
     ) STORED,
 
     vigencia_inicio DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -530,8 +556,8 @@ CREATE TABLE vendas (
     endereco_entrega_id INTEGER REFERENCES enderecos(id),
 
     -- Status
-    status VARCHAR(20) DEFAULT 'ABERTA',
-    status_financeiro VARCHAR(20) DEFAULT 'PENDENTE',
+    status venda_status NOT NULL DEFAULT 'ABERTA',
+    status_financeiro financeiro_status NOT NULL DEFAULT 'PENDENTE',
 
     -- Links
     orcamento_id INTEGER REFERENCES orcamentos(id),
@@ -561,11 +587,11 @@ CREATE TABLE venda_itens (
     quantidade_caixas DECIMAL(15,4),
     unidade VARCHAR(10) DEFAULT 'UN',
 
-    -- Preços (snapshot no momento da venda)
-    preco_unitario DECIMAL(15,4) NOT NULL,
+    -- Valores (snapshot no momento da venda)
+    valor_unitario DECIMAL(15,4) NOT NULL,
     desconto_item_percentual DECIMAL(5,2) DEFAULT 0,
-    preco_com_desconto DECIMAL(15,4),
-    total DECIMAL(15,2) NOT NULL,
+    valor_com_desconto DECIMAL(15,4),
+    valor_total DECIMAL(15,2) NOT NULL,
 
     -- Desnormalizados para exibição (snapshot)
     descricao_produto VARCHAR(500),
@@ -613,7 +639,7 @@ CREATE TABLE compras (
     data_real_entrega DATE,
 
     -- Status
-    status VARCHAR(20) DEFAULT 'PENDENTE',
+    status compra_status NOT NULL DEFAULT 'PENDENTE',
 
     -- NFe
     nfe_entrada_id INTEGER REFERENCES nfes(id),
@@ -642,9 +668,9 @@ CREATE TABLE compra_itens (
     quantidade DECIMAL(15,4) NOT NULL,
     quantidade_caixas DECIMAL(15,4),
 
-    -- Preços
-    preco_unitario DECIMAL(15,4),
-    total DECIMAL(15,2),
+    -- Valores
+    valor_unitario DECIMAL(15,4),
+    valor_total DECIMAL(15,2),
 
     -- Status
     status compra_item_status DEFAULT 'PENDENTE',
@@ -685,7 +711,7 @@ CREATE TABLE estoques (
     bloco_id INTEGER REFERENCES galpao_blocos(id),
 
     -- Status
-    status VARCHAR(20) DEFAULT 'DISPONIVEL',
+    status estoque_status NOT NULL DEFAULT 'DISPONIVEL',
 
     -- Chave FIFO
     data_entrada TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -716,7 +742,7 @@ CREATE TABLE estoque_consumos (
     motivo VARCHAR(50) NOT NULL,  -- VENDA, AJUSTE, QUEBRA, TRANSFERENCIA
 
     -- Reversão
-    estornado BOOLEAN DEFAULT FALSE,
+    is_estornado BOOLEAN DEFAULT FALSE,
     estornado_at TIMESTAMP,
     estorno_motivo VARCHAR(200),
 
@@ -1157,6 +1183,20 @@ flowchart TB
 | nfe                                    | nfes                                         | Adicionar enum tipo          |
 | conta_a_receber                        | recebiveis                                   | Renomear                     |
 | conta_a_pagar                          | pagaveis                                     | Renomear                     |
+
+### 8.3 Convenções de Nomeação Aplicadas
+
+Este schema segue as convenções definidas em [../tecnico/15-dicionario-dados.md](../tecnico/15-dicionario-dados.md):
+
+| Convenção              | Exemplo                              | Regra                                           |
+| ---------------------- | ------------------------------------ | ----------------------------------------------- |
+| **Valores monetários** | `valor_unitario`, `valor_total`      | Prefixo `valor_*` para preços                   |
+| **Custos**             | `custo`, `custo_unitario`            | Prefixo `custo_*` para custos de aquisição      |
+| **Booleanos**          | `is_ativo`, `tem_lote`, `is_estornado` | Prefixos `is_*`, `tem_*`                       |
+| **Status**             | `status venda_status`                | Sempre usar tipos ENUM do PostgreSQL            |
+| **Datas de negócio**   | `data_emissao`, `data_vencimento`    | Prefixo `data_*`                                |
+| **Timestamps audit**   | `created_at`, `updated_at`           | Sufixo `_at` para timestamps automáticos        |
+| **Quantidades**        | `quantidade`, `quantidade_caixas`    | Nome completo, sem abreviações                  |
 
 ---
 

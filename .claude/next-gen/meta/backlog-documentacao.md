@@ -31,6 +31,7 @@
 | 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
 | 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | Pendente |
 | 21  | [Auditoria de Dependências](#21-auditoria-de-dependências)                    | Baixa      | Pendente |
+| 22  | [Estratégia de Validação](#22-estratégia-de-validação)                        | Alta       | Pendente |
 
 ### Ganhos Rápidos
 
@@ -492,6 +493,46 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
+## 22. Estratégia de Validação
+
+**Problema**: Necessidade de validação em múltiplas camadas para garantir integridade de dados.
+
+**Arquivo sugerido**: `tecnico/17-validacao.md`
+
+**Tópicos a documentar**:
+
+### Validação de Request (Entrada)
+- Form Requests com regras de validação
+- Validação de tipos (CPF, CNPJ, CEP, telefone)
+- Sanitização de input (trim, lowercase, máscaras)
+- Validação de arquivos (XML NFe, Excel import)
+
+### Validação de Response (Saída)
+- API Resources com transformação de dados
+- Validação de schema JSON (OpenAPI)
+- Testes de contrato (consumer-driven contracts)
+- Verificação de campos obrigatórios na resposta
+
+### Validação de SQL/Banco
+- Constraints de banco (CHECK, UNIQUE, FK)
+- Triggers para validações complexas
+- Stored procedures para regras críticas
+- Validação em Model (mutators, observers)
+
+### Validação de Regras de Negócio
+- Validação antes de persistir (Service layer)
+- Validação pós-persistência (verificação de integridade)
+- Validação em filas/jobs (antes de processar)
+- Rollback automático em falha de validação
+
+### Monitoramento de Validação
+- Logging de falhas de validação
+- Alertas para padrões suspeitos
+- Dashboard de erros de validação
+- Métricas de qualidade de dados
+
+---
+
 ## Progresso
 
 ### Concluídos
@@ -511,24 +552,25 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 **Alta Prioridade:**
 1. [ ] Item 13 - Documentação de integrações
+2. [ ] Item 22 - Estratégia de validação (request/response/SQL)
 
 **Média Prioridade:**
-2. [ ] Item 4 - Design de API
-3. [ ] Item 5 - Estratégia de testes
-4. [ ] Item 7 - Tratamento de erros e monitoramento
-5. [ ] Item 14 - Plano de treinamento de usuários
-6. [ ] Item 15 - Design System/Guia de UI
-7. [ ] Item 16 - Estratégia de concorrência
-8. [ ] Item 17 - Atalhos de teclado
-9. [ ] Item 18 - Especificações de impressão
+3. [ ] Item 4 - Design de API
+4. [ ] Item 5 - Estratégia de testes
+5. [ ] Item 7 - Tratamento de erros e monitoramento
+6. [ ] Item 14 - Plano de treinamento de usuários
+7. [ ] Item 15 - Design System/Guia de UI
+8. [ ] Item 16 - Estratégia de concorrência
+9. [ ] Item 17 - Atalhos de teclado
+10. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-10. [ ] Item 8 - DevOps/Deployment
-11. [ ] Item 9 - Benchmarks de performance
-12. [ ] Item 10 - Substituição de relatórios
-13. [ ] Item 19 - Dicionário de dados
-14. [ ] Item 20 - Matriz de suporte browser/dispositivo
-15. [ ] Item 21 - Auditoria de dependências
+11. [ ] Item 8 - DevOps/Deployment
+12. [ ] Item 9 - Benchmarks de performance
+13. [ ] Item 10 - Substituição de relatórios
+14. [ ] Item 19 - Dicionário de dados
+15. [ ] Item 20 - Matriz de suporte browser/dispositivo
+16. [ ] Item 21 - Auditoria de dependências
 
 ---
 

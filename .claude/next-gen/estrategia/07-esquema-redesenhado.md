@@ -947,6 +947,285 @@ CREATE INDEX idx_audit_created ON audit_log(created_at);
 CREATE INDEX idx_audit_usuario ON audit_log(usuario_id);
 ```
 
+### 4.8 Constraints e Triggers de Integridade
+
+Todas as regras de negócio críticas são impostas a nível de banco de dados.
+Mesmo com bugs na aplicação, o PostgreSQL impede dados inconsistentes.
+
+#### 4.8.1 CHECK Constraints
+
+```sql
+-- Quantidades sempre positivas
+ALTER TABLE estoques ADD CONSTRAINT chk_estoque_quantidade_positiva
+    CHECK (quantidade_original > 0 AND quantidade_disponivel >= 0);
+
+ALTER TABLE estoque_consumos ADD CONSTRAINT chk_consumo_quantidade_positiva
+    CHECK (quantidade > 0);
+
+ALTER TABLE venda_itens ADD CONSTRAINT chk_venda_item_quantidade_positiva
+    CHECK (quantidade > 0);
+
+-- Disponível não pode exceder original
+ALTER TABLE estoques ADD CONSTRAINT chk_estoque_disponivel_nao_excede_original
+    CHECK (quantidade_disponivel <= quantidade_original);
+
+-- Valores monetários não negativos
+ALTER TABLE venda_itens ADD CONSTRAINT chk_venda_item_valores_positivos
+    CHECK (valor_unitario >= 0 AND valor_total >= 0);
+
+ALTER TABLE estoques ADD CONSTRAINT chk_estoque_custo_positivo
+    CHECK (custo_unitario >= 0);
+```
+
+#### 4.8.2 Trigger: Validar Consumo
+
+```sql
+-- Valida todas as regras antes de permitir o pareamento
+CREATE OR REPLACE FUNCTION fn_validar_consumo()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_qtd_item DECIMAL(15,4);
+    v_qtd_disponivel DECIMAL(15,4);
+    v_status_item venda_item_status;
+    v_produto_item INTEGER;
+    v_produto_estoque INTEGER;
+    v_fornecedor_item INTEGER;
+    v_fornecedor_estoque INTEGER;
+BEGIN
+    -- Buscar dados do venda_item
+    SELECT quantidade, status, produto_id, fornecedor_id
+    INTO v_qtd_item, v_status_item, v_produto_item, v_fornecedor_item
+    FROM venda_itens WHERE id = NEW.venda_item_id;
+
+    -- Buscar dados do estoque
+    SELECT quantidade_disponivel, produto_id, fornecedor_id
+    INTO v_qtd_disponivel, v_produto_estoque, v_fornecedor_estoque
+    FROM estoques WHERE id = NEW.estoque_id;
+
+    -- REGRA 1: Quantidade do consumo deve ser igual à do item
+    IF NEW.quantidade != v_qtd_item THEN
+        RAISE EXCEPTION 'Quantidade do consumo (%) deve ser igual à do item (%)',
+            NEW.quantidade, v_qtd_item;
+    END IF;
+
+    -- REGRA 2: Estoque deve ter quantidade suficiente
+    IF v_qtd_disponivel < NEW.quantidade THEN
+        RAISE EXCEPTION 'Estoque insuficiente: disponível=%, solicitado=%',
+            v_qtd_disponivel, NEW.quantidade;
+    END IF;
+
+    -- REGRA 3: Produto deve ser o mesmo
+    IF v_produto_item != v_produto_estoque THEN
+        RAISE EXCEPTION 'Produto do item (%) diferente do estoque (%)',
+            v_produto_item, v_produto_estoque;
+    END IF;
+
+    -- REGRA 4: Fornecedor deve ser o mesmo
+    IF v_fornecedor_item != v_fornecedor_estoque THEN
+        RAISE EXCEPTION 'Fornecedor do item (%) diferente do estoque (%)',
+            v_fornecedor_item, v_fornecedor_estoque;
+    END IF;
+
+    -- REGRA 5: Item deve estar em status que permite pareamento
+    IF v_status_item NOT IN ('PENDENTE', 'EM_COMPRA', 'CONFIRMADO', 'FATURADO',
+                              'EM_COLETA', 'EM_RECEBIMENTO') THEN
+        RAISE EXCEPTION 'Item com status "%" não pode ser pareado', v_status_item;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_consumo
+    BEFORE INSERT ON estoque_consumos
+    FOR EACH ROW EXECUTE FUNCTION fn_validar_consumo();
+```
+
+#### 4.8.3 Trigger: Atualizar Estoque Automaticamente
+
+```sql
+-- Após consumo/estorno, atualiza quantidade e status automaticamente
+CREATE OR REPLACE FUNCTION fn_atualizar_estoque_apos_consumo()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' AND NOT NEW.is_estornado THEN
+        -- Consumo: diminuir quantidade disponível
+        UPDATE estoques
+        SET quantidade_disponivel = quantidade_disponivel - NEW.quantidade,
+            status = CASE
+                WHEN quantidade_disponivel - NEW.quantidade = 0 THEN 'CONSUMIDO'::estoque_status
+                ELSE status
+            END,
+            updated_at = NOW()
+        WHERE id = NEW.estoque_id;
+
+        -- Atualizar status do venda_item para ESTOQUE
+        UPDATE venda_itens
+        SET status = 'ESTOQUE',
+            updated_at = NOW()
+        WHERE id = NEW.venda_item_id;
+
+    ELSIF TG_OP = 'UPDATE' AND NEW.is_estornado AND NOT OLD.is_estornado THEN
+        -- Estorno: restaurar quantidade
+        UPDATE estoques
+        SET quantidade_disponivel = quantidade_disponivel + OLD.quantidade,
+            status = 'DISPONIVEL'::estoque_status,
+            updated_at = NOW()
+        WHERE id = OLD.estoque_id;
+
+        -- Status do item não é alterado automaticamente no estorno
+        -- (pode ir para DEVOLVIDO, PENDENTE, ou CANCELADO dependendo do caso)
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_atualizar_estoque_apos_consumo
+    AFTER INSERT OR UPDATE ON estoque_consumos
+    FOR EACH ROW EXECUTE FUNCTION fn_atualizar_estoque_apos_consumo();
+```
+
+#### 4.8.4 Trigger: Validar Transições de Status
+
+```sql
+-- Impede transições de status inválidas
+CREATE OR REPLACE FUNCTION fn_validar_transicao_status_venda_item()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_transicoes_validas venda_item_status[];
+BEGIN
+    -- Se status não mudou, permite
+    IF NEW.status = OLD.status THEN
+        RETURN NEW;
+    END IF;
+
+    -- Definir transições válidas para cada status
+    v_transicoes_validas := CASE OLD.status
+        WHEN 'PENDENTE' THEN
+            ARRAY['EM_COMPRA', 'ESTOQUE', 'CANCELADO']::venda_item_status[]
+        WHEN 'EM_COMPRA' THEN
+            ARRAY['CONFIRMADO', 'CANCELADO']::venda_item_status[]
+        WHEN 'CONFIRMADO' THEN
+            ARRAY['FATURADO', 'CANCELADO']::venda_item_status[]
+        WHEN 'FATURADO' THEN
+            ARRAY['EM_COLETA']::venda_item_status[]
+        WHEN 'EM_COLETA' THEN
+            ARRAY['EM_RECEBIMENTO']::venda_item_status[]
+        WHEN 'EM_RECEBIMENTO' THEN
+            ARRAY['ESTOQUE']::venda_item_status[]
+        WHEN 'ESTOQUE' THEN
+            ARRAY['ENTREGA_AGENDADA', 'CANCELADO', 'PENDENTE']::venda_item_status[]
+        WHEN 'ENTREGA_AGENDADA' THEN
+            ARRAY['EM_ENTREGA', 'ESTOQUE']::venda_item_status[]
+        WHEN 'EM_ENTREGA' THEN
+            ARRAY['ENTREGUE', 'ESTOQUE']::venda_item_status[]
+        WHEN 'ENTREGUE' THEN
+            ARRAY['DEVOLVIDO']::venda_item_status[]
+        WHEN 'DEVOLVIDO' THEN
+            ARRAY[]::venda_item_status[]
+        WHEN 'CANCELADO' THEN
+            ARRAY[]::venda_item_status[]
+        ELSE
+            ARRAY[]::venda_item_status[]
+    END;
+
+    -- Verificar se transição é válida
+    IF NOT (NEW.status = ANY(v_transicoes_validas)) THEN
+        RAISE EXCEPTION 'Transição de status inválida: % -> %', OLD.status, NEW.status;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_transicao_status_venda_item
+    BEFORE UPDATE ON venda_itens
+    FOR EACH ROW
+    WHEN (OLD.status IS DISTINCT FROM NEW.status)
+    EXECUTE FUNCTION fn_validar_transicao_status_venda_item();
+```
+
+#### 4.8.5 Trigger: Proteções de Imutabilidade
+
+```sql
+-- Impedir alteração de consumo já estornado
+CREATE OR REPLACE FUNCTION fn_impedir_alteracao_consumo_estornado()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.is_estornado THEN
+        RAISE EXCEPTION 'Não é possível alterar consumo já estornado (id=%)', OLD.id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_alteracao_consumo_estornado
+    BEFORE UPDATE ON estoque_consumos
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_alteracao_consumo_estornado();
+
+
+-- Impedir DELETE em consumos (apenas soft delete via estorno)
+CREATE OR REPLACE FUNCTION fn_impedir_exclusao_consumo()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Exclusão não permitida. Use estorno (is_estornado=true) para reverter.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_exclusao_consumo
+    BEFORE DELETE ON estoque_consumos
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_exclusao_consumo();
+
+
+-- Impedir alteração de campos críticos após pareamento
+CREATE OR REPLACE FUNCTION fn_impedir_alteracao_item_pareado()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Se item está pareado (tem consumo ativo), impedir alteração de campos críticos
+    IF EXISTS (
+        SELECT 1 FROM estoque_consumos
+        WHERE venda_item_id = OLD.id AND NOT is_estornado
+    ) THEN
+        IF NEW.quantidade != OLD.quantidade THEN
+            RAISE EXCEPTION 'Não é possível alterar quantidade de item já pareado';
+        END IF;
+        IF NEW.produto_id != OLD.produto_id THEN
+            RAISE EXCEPTION 'Não é possível alterar produto de item já pareado';
+        END IF;
+        IF NEW.fornecedor_id != OLD.fornecedor_id THEN
+            RAISE EXCEPTION 'Não é possível alterar fornecedor de item já pareado';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_alteracao_item_pareado
+    BEFORE UPDATE ON venda_itens
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_alteracao_item_pareado();
+```
+
+#### 4.8.6 Resumo das Proteções
+
+| Regra | Implementação | Quando Dispara |
+|-------|---------------|----------------|
+| Quantidade consumo = quantidade item | `fn_validar_consumo` | INSERT consumo |
+| Estoque suficiente | `fn_validar_consumo` | INSERT consumo |
+| Mesmo produto | `fn_validar_consumo` | INSERT consumo |
+| Mesmo fornecedor | `fn_validar_consumo` | INSERT consumo |
+| Status permite pareamento | `fn_validar_consumo` | INSERT consumo |
+| Auto-atualizar estoque.quantidade | `fn_atualizar_estoque_apos_consumo` | INSERT/UPDATE consumo |
+| Auto-atualizar estoque.status | `fn_atualizar_estoque_apos_consumo` | INSERT/UPDATE consumo |
+| Auto-atualizar venda_item.status | `fn_atualizar_estoque_apos_consumo` | INSERT consumo |
+| Transições de status válidas | `fn_validar_transicao_status` | UPDATE venda_item |
+| Impedir alterar consumo estornado | `fn_impedir_alteracao_consumo_estornado` | UPDATE consumo |
+| Impedir DELETE em consumo | `fn_impedir_exclusao_consumo` | DELETE consumo |
+| Impedir alterar item pareado | `fn_impedir_alteracao_item_pareado` | UPDATE venda_item |
+| 1:1 venda_item ↔ consumo | UNIQUE INDEX parcial | INSERT consumo |
+| 1:1 estoque ↔ consumo | UNIQUE INDEX parcial | INSERT consumo |
+| Quantidades positivas | CHECK constraint | INSERT/UPDATE |
+
 ---
 
 ## 5. Máquinas de Estado de Status

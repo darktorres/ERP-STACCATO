@@ -484,26 +484,620 @@ WHERE ci.id = :compra_item_id;
 
 ---
 
-## Comparação: Prós e Contras
+## Comparação Detalhada: 3-Entidades vs 2-Entidades
 
-### Prós do Modelo 2-Entidades
+### Visão Geral da Estrutura
 
-| Aspecto | Benefício |
-|---------|-----------|
-| **Simplicidade** | Menos tabelas, menos JOINs |
-| **Modelo mental** | "compra_item é o que temos" |
-| **Splits unificados** | Mesmo padrão parent_id para tudo |
-| **Ciclo de vida natural** | PENDENTE → RECEBIDO é intuitivo |
-| **Menos código** | Menos models, menos migrations |
+#### Modelo 3-Entidades (Atual)
 
-### Contras do Modelo 2-Entidades
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ venda_itens │     │compra_itens │     │  estoques   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ id          │     │ id          │     │ id          │
+│ venda_id    │     │ compra_id   │     │ compra_item │
+│ produto_id  │     │ venda_item  │     │ nfe_item_id │
+│ quantidade  │     │ produto_id  │     │ produto_id  │
+│ valor_*     │     │ quantidade  │     │ quantidade  │
+│ status      │     │ valor_*     │     │ custo_*     │
+│ parent_id   │     │ status      │     │ lote        │
+└──────┬──────┘     │ parent_id   │     │ bloco_id    │
+       │            └──────┬──────┘     │ status      │
+       │                   │            └──────┬──────┘
+       │                   │                   │
+       │            ┌──────┴───────────────────┘
+       │            │
+       ▼            ▼
+┌─────────────────────────┐
+│   estoque_consumos      │
+├─────────────────────────┤
+│ venda_item_id           │
+│ estoque_id              │
+│ quantidade              │
+│ is_estornado            │
+└─────────────────────────┘
 
-| Aspecto | Desvantagem |
-|---------|-------------|
-| **Tabela "gorda"** | compra_itens tem muitas colunas |
-| **Conceito sobrecarregado** | Mesma entidade = pedido E inventário |
-| **Casos especiais** | Devoluções não são realmente "compras" |
-| **Naming** | `compra_item` nem sempre é uma compra |
+Tabelas: 4
+Relacionamentos: 5
+```
+
+#### Modelo 2-Entidades (Proposto)
+
+```
+┌─────────────┐                    ┌─────────────────────┐
+│ venda_itens │                    │    compra_itens     │
+├─────────────┤                    │  (order+inventory)  │
+│ id          │                    ├─────────────────────┤
+│ venda_id    │                    │ id                  │
+│ produto_id  │                    │ compra_id           │
+│ quantidade  │                    │ venda_item_origem   │
+│ valor_*     │                    │ produto_id          │
+│ status      │                    │ quantidade          │
+│ parent_id   │                    │ quantidade_alocada  │
+└──────┬──────┘                    │ valor_* / custo_*   │
+       │                           │ nfe_item_id         │
+       │                           │ lote, bloco_id      │
+       │                           │ status, tipo        │
+       │                           │ parent_id           │
+       │                           └──────────┬──────────┘
+       │                                      │
+       │            ┌─────────────────────────┘
+       │            │
+       ▼            ▼
+┌─────────────────────────┐
+│      alocacoes          │
+├─────────────────────────┤
+│ venda_item_id           │
+│ compra_item_id          │
+│ quantidade              │
+│ is_estornado            │
+└─────────────────────────┘
+
+Tabelas: 3
+Relacionamentos: 3
+```
+
+---
+
+### Comparação de Tabelas
+
+| Aspecto | 3-Entidades | 2-Entidades |
+|---------|-------------|-------------|
+| **Total de tabelas** | 4 | 3 |
+| **Tabelas principais** | venda_itens, compra_itens, estoques | venda_itens, compra_itens |
+| **Tabela de link** | estoque_consumos | alocacoes |
+| **Colunas em compra_itens** | ~15 | ~25 |
+| **Colunas em estoques** | ~15 | N/A (merged) |
+
+---
+
+### Comparação de Relacionamentos
+
+#### 3-Entidades
+
+| De | Para | Cardinalidade | Propósito |
+|----|------|---------------|-----------|
+| compra_itens | venda_itens | N:1 | "compramos para esta venda" |
+| estoques | compra_itens | N:1 | "veio desta compra" |
+| estoques | nfe_itens | N:1 | "documento fiscal" |
+| estoque_consumos | venda_itens | 1:1 | "alocado para esta venda" |
+| estoque_consumos | estoques | 1:1 | "consumindo deste estoque" |
+
+#### 2-Entidades
+
+| De | Para | Cardinalidade | Propósito |
+|----|------|---------------|-----------|
+| compra_itens | venda_itens | N:1 | "compramos para esta venda" (origem) |
+| compra_itens | nfe_itens | N:1 | "documento fiscal" |
+| alocacoes | venda_itens | 1:1 | "alocado para esta venda" |
+| alocacoes | compra_itens | 1:1 | "consumindo deste item" |
+
+---
+
+### Comparação de Queries
+
+#### Query 1: Listar Inventário Disponível
+
+**3-Entidades:**
+```sql
+SELECT
+    e.id,
+    e.produto_id,
+    p.descricao,
+    e.quantidade_disponivel,
+    e.lote,
+    e.custo_unitario,
+    e.data_entrada
+FROM estoques e
+JOIN produtos p ON p.id = e.produto_id
+WHERE e.status = 'DISPONIVEL'
+  AND e.quantidade_disponivel > 0
+  AND e.loja_id = :loja_id
+ORDER BY e.data_entrada;
+```
+**JOINs: 1** | **Complexidade: Baixa**
+
+**2-Entidades:**
+```sql
+SELECT
+    ci.id,
+    ci.produto_id,
+    p.descricao,
+    (ci.quantidade - ci.quantidade_alocada) as disponivel,
+    ci.lote,
+    ci.custo_unitario,
+    ci.data_entrada
+FROM compra_itens ci
+JOIN produtos p ON p.id = ci.produto_id
+WHERE ci.status = 'RECEBIDO'
+  AND ci.quantidade > ci.quantidade_alocada
+  AND ci.loja_id = :loja_id
+ORDER BY ci.data_entrada;
+```
+**JOINs: 1** | **Complexidade: Baixa**
+
+**Veredito: Empate** ✓
+
+---
+
+#### Query 2: Ver Itens de Venda com Estoque Alocado
+
+**3-Entidades:**
+```sql
+SELECT
+    vi.id,
+    vi.quantidade,
+    vi.status,
+    e.lote,
+    e.custo_unitario,
+    ec.created_at as data_alocacao
+FROM venda_itens vi
+LEFT JOIN estoque_consumos ec ON ec.venda_item_id = vi.id AND NOT ec.is_estornado
+LEFT JOIN estoques e ON e.id = ec.estoque_id
+WHERE vi.venda_id = :venda_id;
+```
+**JOINs: 2** | **Complexidade: Média**
+
+**2-Entidades:**
+```sql
+SELECT
+    vi.id,
+    vi.quantidade,
+    vi.status,
+    ci.lote,
+    ci.custo_unitario,
+    a.created_at as data_alocacao
+FROM venda_itens vi
+LEFT JOIN alocacoes a ON a.venda_item_id = vi.id AND NOT a.is_estornado
+LEFT JOIN compra_itens ci ON ci.id = a.compra_item_id
+WHERE vi.venda_id = :venda_id;
+```
+**JOINs: 2** | **Complexidade: Média**
+
+**Veredito: Empate** ✓
+
+---
+
+#### Query 3: Rastrear Origem do Estoque (de qual compra veio)
+
+**3-Entidades:**
+```sql
+SELECT
+    e.id as estoque_id,
+    e.lote,
+    ci.id as compra_item_id,
+    c.id as compra_id,
+    c.data_emissao as data_compra,
+    f.razao_social as fornecedor
+FROM estoques e
+JOIN compra_itens ci ON ci.id = e.compra_item_id
+JOIN compras c ON c.id = ci.compra_id
+JOIN fornecedores f ON f.id = c.fornecedor_id
+WHERE e.id = :estoque_id;
+```
+**JOINs: 3** | **Complexidade: Média**
+
+**2-Entidades:**
+```sql
+SELECT
+    ci.id as compra_item_id,
+    ci.lote,
+    c.id as compra_id,
+    c.data_emissao as data_compra,
+    f.razao_social as fornecedor
+FROM compra_itens ci
+JOIN compras c ON c.id = ci.compra_id
+JOIN fornecedores f ON f.id = c.fornecedor_id
+WHERE ci.id = :compra_item_id;
+```
+**JOINs: 2** | **Complexidade: Baixa**
+
+**Veredito: 2-Entidades melhor** ✓
+
+---
+
+#### Query 4: Relatório de Custo Médio por Produto
+
+**3-Entidades:**
+```sql
+SELECT
+    p.id,
+    p.descricao,
+    SUM(e.quantidade_disponivel) as qtd_total,
+    SUM(e.quantidade_disponivel * e.custo_unitario) /
+        NULLIF(SUM(e.quantidade_disponivel), 0) as custo_medio
+FROM produtos p
+JOIN estoques e ON e.produto_id = p.id
+WHERE e.status = 'DISPONIVEL'
+  AND e.quantidade_disponivel > 0
+GROUP BY p.id, p.descricao;
+```
+**JOINs: 1** | **Complexidade: Média**
+
+**2-Entidades:**
+```sql
+SELECT
+    p.id,
+    p.descricao,
+    SUM(ci.quantidade - ci.quantidade_alocada) as qtd_total,
+    SUM((ci.quantidade - ci.quantidade_alocada) * ci.custo_unitario) /
+        NULLIF(SUM(ci.quantidade - ci.quantidade_alocada), 0) as custo_medio
+FROM produtos p
+JOIN compra_itens ci ON ci.produto_id = p.id
+WHERE ci.status = 'RECEBIDO'
+  AND ci.quantidade > ci.quantidade_alocada
+GROUP BY p.id, p.descricao;
+```
+**JOINs: 1** | **Complexidade: Média** (cálculo quantidade-alocada mais verboso)
+
+**Veredito: 3-Entidades levemente melhor** (quantidade_disponivel é mais direto)
+
+---
+
+#### Query 5: Trilha de Auditoria - Para Quem Compramos vs Para Quem Foi
+
+**3-Entidades:**
+```sql
+SELECT
+    e.id as estoque_id,
+    -- Origem (para quem compramos)
+    ci.venda_item_id as venda_origem_id,
+    v_origem.id as venda_origem,
+    c_origem.nome_razao as cliente_origem,
+    -- Destino (para quem foi)
+    ec.venda_item_id as venda_destino_id,
+    v_dest.id as venda_destino,
+    c_dest.nome_razao as cliente_destino
+FROM estoques e
+JOIN compra_itens ci ON ci.id = e.compra_item_id
+LEFT JOIN venda_itens vi_origem ON vi_origem.id = ci.venda_item_id
+LEFT JOIN vendas v_origem ON v_origem.id = vi_origem.venda_id
+LEFT JOIN clientes c_origem ON c_origem.id = v_origem.cliente_id
+LEFT JOIN estoque_consumos ec ON ec.estoque_id = e.id AND NOT ec.is_estornado
+LEFT JOIN venda_itens vi_dest ON vi_dest.id = ec.venda_item_id
+LEFT JOIN vendas v_dest ON v_dest.id = vi_dest.venda_id
+LEFT JOIN clientes c_dest ON c_dest.id = v_dest.cliente_id
+WHERE e.id = :estoque_id;
+```
+**JOINs: 8** | **Complexidade: Alta**
+
+**2-Entidades:**
+```sql
+SELECT
+    ci.id as compra_item_id,
+    -- Origem (para quem compramos)
+    ci.venda_item_origem_id,
+    v_origem.id as venda_origem,
+    c_origem.nome_razao as cliente_origem,
+    -- Destino (para quem foi)
+    a.venda_item_id as venda_destino_id,
+    v_dest.id as venda_destino,
+    c_dest.nome_razao as cliente_destino
+FROM compra_itens ci
+LEFT JOIN venda_itens vi_origem ON vi_origem.id = ci.venda_item_origem_id
+LEFT JOIN vendas v_origem ON v_origem.id = vi_origem.venda_id
+LEFT JOIN clientes c_origem ON c_origem.id = v_origem.cliente_id
+LEFT JOIN alocacoes a ON a.compra_item_id = ci.id AND NOT a.is_estornado
+LEFT JOIN venda_itens vi_dest ON vi_dest.id = a.venda_item_id
+LEFT JOIN vendas v_dest ON v_dest.id = vi_dest.venda_id
+LEFT JOIN clientes c_dest ON c_dest.id = v_dest.cliente_id
+WHERE ci.id = :compra_item_id;
+```
+**JOINs: 7** | **Complexidade: Alta** (mas 1 JOIN a menos)
+
+**Veredito: 2-Entidades levemente melhor**
+
+---
+
+### Comparação de Código Laravel
+
+#### Models
+
+**3-Entidades:**
+```php
+// 4 Models
+class VendaItem extends Model { ... }
+class CompraItem extends Model { ... }
+class Estoque extends Model { ... }
+class EstoqueConsumo extends Model { ... }
+```
+
+**2-Entidades:**
+```php
+// 3 Models
+class VendaItem extends Model { ... }
+class CompraItem extends Model { ... }  // mais métodos
+class Alocacao extends Model { ... }
+```
+
+**Veredito: 2-Entidades tem menos models**, mas CompraItem é maior
+
+---
+
+#### Operação: Receber NFe e Criar Estoque
+
+**3-Entidades:**
+```php
+// NfeService.php
+public function importarNfe(Nfe $nfe): void
+{
+    foreach ($nfe->itens as $nfeItem) {
+        // Encontrar compra_item correspondente
+        $compraItem = $this->matchCompraItem($nfeItem);
+
+        // Criar estoque separado
+        $estoque = Estoque::create([
+            'compra_item_id' => $compraItem->id,
+            'nfe_item_id' => $nfeItem->id,
+            'produto_id' => $nfeItem->produto_id,
+            'quantidade_original' => $nfeItem->quantidade,
+            'quantidade_disponivel' => $nfeItem->quantidade,
+            'custo_unitario' => $nfeItem->valor_unitario,
+            'lote' => $nfeItem->lote,
+            'data_entrada' => now(),
+            'status' => 'DISPONIVEL',
+        ]);
+
+        // Atualizar status do compra_item
+        $compraItem->update(['status' => 'RECEBIDO']);
+    }
+}
+```
+
+**2-Entidades:**
+```php
+// NfeService.php
+public function importarNfe(Nfe $nfe): void
+{
+    foreach ($nfe->itens as $nfeItem) {
+        // Encontrar compra_item correspondente
+        $compraItem = $this->matchCompraItem($nfeItem);
+
+        // Atualizar compra_item com dados de inventário
+        $compraItem->update([
+            'nfe_item_id' => $nfeItem->id,
+            'custo_unitario' => $nfeItem->valor_unitario,
+            'lote' => $nfeItem->lote,
+            'data_entrada' => now(),
+            'status' => 'RECEBIDO',
+        ]);
+    }
+}
+```
+
+**Veredito: 2-Entidades mais simples** (update vs create)
+
+---
+
+#### Operação: Alocar Estoque para Venda
+
+**3-Entidades:**
+```php
+// AlocacaoService.php
+public function alocar(VendaItem $vendaItem, Estoque $estoque): EstoqueConsumo
+{
+    // Validações...
+
+    $consumo = EstoqueConsumo::create([
+        'venda_item_id' => $vendaItem->id,
+        'estoque_id' => $estoque->id,
+        'quantidade' => $vendaItem->quantidade,
+        'custo_unitario' => $estoque->custo_unitario,
+    ]);
+
+    // Trigger atualiza estoque.quantidade_disponivel
+    // Trigger atualiza venda_item.status
+
+    return $consumo;
+}
+```
+
+**2-Entidades:**
+```php
+// AlocacaoService.php
+public function alocar(VendaItem $vendaItem, CompraItem $compraItem): Alocacao
+{
+    // Validações...
+
+    $alocacao = Alocacao::create([
+        'venda_item_id' => $vendaItem->id,
+        'compra_item_id' => $compraItem->id,
+        'quantidade' => $vendaItem->quantidade,
+        'custo_unitario' => $compraItem->custo_unitario,
+    ]);
+
+    // Trigger atualiza compra_item.quantidade_alocada
+    // Trigger atualiza venda_item.status
+
+    return $alocacao;
+}
+```
+
+**Veredito: Empate** (código praticamente idêntico)
+
+---
+
+### Comparação de Splits
+
+#### Cenário: NFe chega com quantidade parcial
+
+**3-Entidades:**
+```
+1. Split venda_item (100 → 60 + 40)
+2. Split compra_item (100 → 60 + 40)
+3. Criar estoque para parte recebida (60)
+4. Criar estoque_consumo ligando venda_item(60) ↔ estoque(60)
+
+Operações: 4 INSERTs + 2 UPDATEs
+Tabelas afetadas: 4
+```
+
+**2-Entidades:**
+```
+1. Split venda_item (100 → 60 + 40)
+2. Split compra_item (100 → 60 + 40)
+3. Atualizar compra_item(60) com dados de inventário
+4. Criar alocacao ligando venda_item(60) ↔ compra_item(60)
+
+Operações: 3 INSERTs + 2 UPDATEs
+Tabelas afetadas: 3
+```
+
+**Veredito: 2-Entidades mais simples** (1 INSERT a menos)
+
+---
+
+### Comparação de Integridade de Dados
+
+| Constraint | 3-Entidades | 2-Entidades |
+|------------|-------------|-------------|
+| FK venda → compra | ✓ compra_itens.venda_item_id | ✓ compra_itens.venda_item_origem_id |
+| FK compra → estoque | ✓ estoques.compra_item_id | N/A (merged) |
+| FK estoque → NFe | ✓ estoques.nfe_item_id | ✓ compra_itens.nfe_item_id |
+| 1:1 venda ↔ consumo | ✓ UNIQUE INDEX | ✓ UNIQUE INDEX |
+| 1:1 estoque ↔ consumo | ✓ UNIQUE INDEX | ✓ UNIQUE INDEX (compra_item) |
+| Quantidade positiva | ✓ CHECK | ✓ CHECK |
+| Status válido | ✓ ENUM | ✓ ENUM |
+| Transições de status | ✓ TRIGGER | ✓ TRIGGER |
+
+**Veredito: Empate** (mesma cobertura de integridade)
+
+---
+
+### Comparação de Performance
+
+| Operação | 3-Entidades | 2-Entidades | Vantagem |
+|----------|-------------|-------------|----------|
+| **Listar inventário** | 1 tabela scan | 1 tabela scan + filtro | 3-Ent (índice mais simples) |
+| **Buscar por lote** | estoques.lote | compra_itens.lote | Empate |
+| **Relatório de custo** | SUM simples | SUM com subtração | 3-Ent (marginalmente) |
+| **Alocar estoque** | INSERT + UPDATE | INSERT + UPDATE | Empate |
+| **Receber NFe** | INSERT estoque | UPDATE compra | 2-Ent (menos I/O) |
+| **Trilha de auditoria** | 8 JOINs | 7 JOINs | 2-Ent (marginalmente) |
+
+**Veredito geral: Empate** com pequenas vantagens para cada lado
+
+---
+
+### Comparação de Manutenibilidade
+
+| Aspecto | 3-Entidades | 2-Entidades |
+|---------|-------------|-------------|
+| **Entender o modelo** | Mais conceitos, mais claro cada um | Menos conceitos, cada um faz mais |
+| **Adicionar campo de inventário** | Alterar estoques | Alterar compra_itens |
+| **Adicionar campo de compra** | Alterar compra_itens | Alterar compra_itens |
+| **Novo tipo de entrada** | Criar estoque sem compra | compra_item com tipo diferente |
+| **Debug de alocação** | estoque_consumos + estoques | alocacoes + compra_itens |
+| **Onboarding de dev** | Mais tabelas para aprender | Menos tabelas, mais estados |
+
+---
+
+### Comparação de Casos Especiais
+
+#### Devolução de Cliente
+
+**3-Entidades:**
+```
+1. Criar compra_item (tipo=DEVOLUCAO)? Ou não?
+2. Criar estoque (origem=DEVOLUCAO)
+3. estoque.compra_item_id = NULL ou criar compra fictícia?
+```
+**Problema:** estoque sem compra é caso especial
+
+**2-Entidades:**
+```
+1. Criar compra_item (tipo=DEVOLUCAO)
+2. Já é inventário quando status=RECEBIDO
+```
+**Problema:** "compra" que não é compra (naming)
+
+---
+
+#### Inventário Inicial (Migração)
+
+**3-Entidades:**
+```
+1. Criar estoques diretamente
+2. compra_item_id = NULL
+3. nfe_item_id = NULL
+```
+**Problema:** estoque órfão (sem proveniência)
+
+**2-Entidades:**
+```
+1. Criar compra_itens (tipo=INVENTARIO)
+2. compra_id = NULL
+3. status = RECEBIDO
+```
+**Problema:** "compra" sem compra (naming)
+
+---
+
+#### Transferência Entre Lojas
+
+**3-Entidades:**
+```
+Loja A (saída):
+1. Consumir estoque (motivo=TRANSFERENCIA)
+
+Loja B (entrada):
+2. Criar novo estoque (loja_id=B, transferencia_origem_id=...)
+```
+
+**2-Entidades:**
+```
+Loja A (saída):
+1. Alocar compra_item (motivo=TRANSFERENCIA) - ou criar alocação especial?
+
+Loja B (entrada):
+2. Criar novo compra_item (tipo=TRANSFERENCIA, loja_id=B)
+```
+
+**Veredito: Ambos precisam de tratamento especial**
+
+---
+
+### Resumo da Comparação
+
+| Critério | 3-Entidades | 2-Entidades | Vencedor |
+|----------|-------------|-------------|----------|
+| **Número de tabelas** | 4 | 3 | 2-Ent |
+| **Número de models** | 4 | 3 | 2-Ent |
+| **Clareza conceitual** | Alta | Média | 3-Ent |
+| **Queries simples** | Empate | Empate | Empate |
+| **Queries complexas** | 8 JOINs | 7 JOINs | 2-Ent |
+| **Código de recebimento** | INSERT | UPDATE | 2-Ent |
+| **Código de alocação** | Similar | Similar | Empate |
+| **Splits** | 4 tabelas | 3 tabelas | 2-Ent |
+| **Performance** | Empate | Empate | Empate |
+| **Integridade** | Empate | Empate | Empate |
+| **Casos especiais** | Nulls | Tipos | Empate |
+| **Naming** | Natural | Forçado | 3-Ent |
+
+**Conclusão preliminar:**
+- **2-Entidades** ganha em simplicidade de estrutura
+- **3-Entidades** ganha em clareza conceitual
+- Em funcionalidade e integridade, são equivalentes
 
 ---
 

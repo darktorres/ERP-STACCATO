@@ -16,8 +16,7 @@
 | Ver design do banco             | [tecnico/02-banco-dados.md](./tecnico/02-banco-dados.md)                               |
 | Entender fluxos de negócio      | [negocios/](#fluxos-de-negócio)                                                        |
 | Verificar fases da migração     | [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md)                   |
-| Ver decisões em aberto          | [estrategia/02-decisoes.md](./estrategia/02-decisoes.md)                               |
-| Ver rastreador de progresso     | [meta/rastreador.md](./meta/rastreador.md)                                             |
+| Ver decisões de arquitetura     | [estrategia/02-decisoes.md](./estrategia/02-decisoes.md)                               |
 
 ---
 
@@ -101,9 +100,6 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │       ├── nfe.md                    # Módulo NFe
 │       ├── relatorios.md             # Módulo de Relatórios
 │       └── vendas.md                 # Módulo de Vendas
-│
-└── meta/                             # Meta-documentação
-    └── rastreador.md                 # Rastreador de progresso
 ```
 
 ---
@@ -273,14 +269,6 @@ Pontos problemáticos e oportunidades de melhoria:
 | [09](./estrategia/09-migracao-dados.md) | Migração de Dados | ETL, validação, rollback |
 | [10](./estrategia/10-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
 | [11](./estrategia/11-treinamento.md) | Treinamento | Plano de capacitação e rollout |
-
----
-
-## Meta-Documentação
-
-| Doc | Descrição |
-|-----|-----------|
-| [rastreador.md](./meta/rastreador.md) | Rastreador de progresso |
 
 ---
 

@@ -28,9 +28,9 @@
 | 16  | [Estratégia de Concorrência](#16-estratégia-de-concorrência)                  | Média      | ✅ Feito |
 | 17  | [Atalhos de Teclado](#17-atalhos-de-teclado)                                  | Média      | ✅ Feito |
 | 18  | [Especificações de Impressão](#18-especificações-de-impressão)                | Média      | ✅ Feito |
-| 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | Pendente |
-| 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | Pendente |
-| 21  | [Auditoria de Dependências](#21-auditoria-de-dependências)                    | Baixa      | Pendente |
+| 19  | [Dicionário de Dados](#19-dicionário-de-dados)                                | Baixa      | ✅ Feito |
+| 20  | [Matriz de Suporte Browser/Dispositivo](#20-matriz-de-suporte-browserdispositivo) | Baixa  | ✅ Feito |
+| 21  | [Auditoria de Dependências](#21-auditoria-de-dependências)                    | Baixa      | ✅ Feito |
 | 22  | [Estratégia de Validação](#22-estratégia-de-validação)                        | Alta       | ✅ Feito |
 
 ### Ganhos Rápidos
@@ -443,57 +443,54 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 19. Dicionário de Dados
+## 19. Dicionário de Dados ✅
 
-**Problema**: Sem documentação centralizada de termos e campos do banco.
+**Arquivo**: [`tecnico/15-dicionario-dados.md`](../tecnico/15-dicionario-dados.md)
 
-**Arquivo sugerido**: `tecnico/14-dicionario-dados.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Glossário de termos de negócio (RT, L1, L2, galpão, bloco, etc.)
-- Significado de cada coluna das tabelas principais
-- Valores possíveis de enums (status, tipos)
-- Unidades de medida
-- Convenções de nomenclatura
-- Campos legados vs novos
-- Campos calculados vs armazenados
-
----
-
-## 20. Matriz de Suporte Browser/Dispositivo
-
-**Problema**: Sem definição de quais browsers/dispositivos serão suportados.
-
-**Arquivo sugerido**: `tecnico/15-compatibilidade.md`
-
-**Tópicos a documentar**:
-
-- Browsers suportados (Chrome, Firefox, Edge, Safari - versões mínimas)
-- Dispositivos (Desktop, Tablet, Mobile)
-- Resoluções mínimas
-- Funcionalidades que requerem desktop (impressão, certificado digital)
-- Testes de compatibilidade (BrowserStack, manual)
-- Polyfills necessários
-- Progressive enhancement vs graceful degradation
+- ✅ Glossário de termos de negócio (40+ termos)
+- ✅ Enumerações (status de orçamento, venda, NFe, parcela, entrega)
+- ✅ Unidades de medida e conversões
+- ✅ Convenções de nomenclatura (DB, PHP, TypeScript)
+- ✅ Tabelas principais documentadas (clientes, produtos, vendas, estoques, nfe)
+- ✅ Campos calculados vs armazenados
+- ✅ Campos legados vs novos
+- ✅ Relacionamentos principais
 
 ---
 
-## 21. Auditoria de Dependências
+## 20. Matriz de Suporte Browser/Dispositivo ✅
 
-**Problema**: Sem inventário de pacotes e suas licenças/riscos.
+**Arquivo**: [`tecnico/16-compatibilidade.md`](../tecnico/16-compatibilidade.md)
 
-**Arquivo sugerido**: `tecnico/16-dependencias.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
+- ✅ Browsers suportados (Chrome 100+, Edge 100+, Firefox 100+, Safari 15+)
+- ✅ Dispositivos (Desktop, Tablet, Mobile com limitações)
+- ✅ Funcionalidades por plataforma (matriz completa)
+- ✅ APIs Web necessárias e suporte
+- ✅ Breakpoints e layouts responsivos
+- ✅ Polyfills e fallbacks CSS
+- ✅ Progressive enhancement (3 níveis)
+- ✅ Testes de compatibilidade (checklist)
 
-- **Composer packages**: Lista completa com versões e licenças
-- **NPM packages**: Lista completa com versões e licenças
-- Pacotes críticos (sem alternativa fácil)
-- Pacotes com vulnerabilidades conhecidas
-- Estratégia de atualização (Dependabot, manual)
-- Licenças problemáticas (GPL, copyleft)
-- Alternativas para pacotes abandonados
+---
+
+## 21. Auditoria de Dependências ✅
+
+**Arquivo**: [`tecnico/17-dependencias.md`](../tecnico/17-dependencias.md)
+
+**Tópicos documentados**:
+
+- ✅ Dependências Composer (produção e dev)
+- ✅ Dependências NPM (produção e dev)
+- ✅ Análise de licenças (MIT, BSD, LGPL)
+- ✅ Análise de riscos (pacotes críticos)
+- ✅ Estratégia de atualização (Dependabot config)
+- ✅ Auditoria de segurança (CI workflow)
+- ✅ Análise de tamanho de bundle
+- ✅ Checklist de revisão de dependências
 
 ---
 
@@ -539,13 +536,13 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 8  | DevOps - Docker, CI/CD, ambientes, backup, rollback      |
 | 2025-12-28 | Item 9  | Performance - metas, cache Redis, queries, índices       |
 | 2025-12-28 | Item 10 | Relatórios - já documentado em modulos/relatorios.md     |
+| 2025-12-28 | Item 19 | Dicionário - glossário, enums, convenções, tabelas       |
+| 2025-12-28 | Item 20 | Compatibilidade - browsers, dispositivos, APIs, polyfills|
+| 2025-12-28 | Item 21 | Dependências - Composer, NPM, licenças, Dependabot       |
 
 ### Próximos
 
-**Baixa Prioridade:**
-1. [ ] Item 19 - Dicionário de dados
-2. [ ] Item 20 - Matriz de suporte browser/dispositivo
-3. [ ] Item 21 - Auditoria de dependências
+**Backlog Completo!** Todos os 22 itens foram documentados.
 
 ---
 

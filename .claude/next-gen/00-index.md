@@ -66,7 +66,9 @@ Rewriting the existing C++ Qt desktop ERP application as a modern web applicatio
 │
 ├── strategy/                   # Migration strategy
 │   ├── 01-migration-plan.md    # Strangler fig phases
-│   └── 02-decisions.md         # Architecture Decision Records
+│   ├── 02-decisions.md         # Architecture Decision Records
+│   ├── 03-improvements.md      # Pain points & improvement options
+│   └── 04-l1l2-simplification.md # Deep dive on table flattening
 │
 └── meta/
     └── tracker.md              # Documentation progress tracker
@@ -154,6 +156,23 @@ ADR format decision log:
 - ADR-003: Frontend framework (Open)
 - ADR-004: NFe integration (Open)
 - ADR-005: Migration strategy (Open)
+
+### [03 - Flow & Schema Improvements](./strategy/03-improvements.md)
+Pain points and improvement opportunities:
+- Two-level tables (L1/L2) simplification options
+- FIFO stock consumption fix
+- Supplier reference normalization
+- Returns flow completion
+- Status handling redesign
+- Produto table split
+
+### [04 - L1/L2 Simplification Deep Dive](./strategy/04-l1l2-simplification.md)
+Detailed analysis of flattening the two-level table architecture:
+- Current architecture analysis (idRelacionado pattern)
+- Option A: Single table with self-reference (recommended)
+- Option B: Keep L2 only, derive L1 via materialized view
+- Option C: Event sourcing (overkill for this case)
+- Migration strategy
 
 ---
 

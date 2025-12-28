@@ -2,7 +2,7 @@
 
 > Status: **Rascunho**
 > Última atualização: 2025-12-27
-> Foco: Auditoria, dados temporais, busca, views materializadas pg_ivm
+> Foco: Auditoria, dados temporais, busca, views materializadas, tarefas agendadas
 
 ---
 
@@ -12,6 +12,7 @@
 2. [Dados Temporais / Consultas Point-in-Time](#2-dados-temporais--consultas-point-in-time)
 3. [Arquitetura de Busca](#3-arquitetura-de-busca)
 4. [Views Materializadas](#4-views-materializadas)
+5. [Tarefas Agendadas (Servidor)](#5-tarefas-agendadas-servidor)
 
 ---
 
@@ -492,6 +493,280 @@ BEGIN
     WHERE id = log_id;
 END;
 $$ LANGUAGE plpgsql;
+```
+
+---
+
+## 5. Tarefas Agendadas (Servidor)
+
+### Problema Atual
+
+No sistema legado, tarefas de manutenção rodam **na primeira conexão do usuário** ao invés de no servidor:
+
+```cpp
+// application.cpp - HACK atual
+void Application::runSqlJobs() {
+  if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
+    query.exec("CALL invalidar_produtos_expirados()");
+    query.exec("CALL invalidar_orcamentos_expirados()");
+    query.exec("CALL invalidar_staccatoOff()");
+    query.exec("UPDATE maintenance SET lastInvalidated = :today");
+  }
+}
+```
+
+**Problemas**:
+- Se ninguém logar no dia, as tarefas não rodam
+- Depende de alguém usar o app desktop
+- Primeiro usuário do dia tem delay no login
+- Não é confiável para operações críticas
+
+### Solução: Laravel Scheduler
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      SERVIDOR LINUX                         │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                 CRON (a cada minuto)                 │   │
+│  │                         │                            │   │
+│  │                         ▼                            │   │
+│  │          php artisan schedule:run                    │   │
+│  │                         │                            │   │
+│  │    ┌────────────────────┼────────────────────┐      │   │
+│  │    ▼                    ▼                    ▼      │   │
+│  │ 00:00              00:00                 00:00      │   │
+│  │ Expirar            Expirar               Outras     │   │
+│  │ Orçamentos         Produtos              Tarefas    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Tarefas a Migrar
+
+| Tarefa Atual | Stored Procedure | Novo Job Laravel | Horário |
+|--------------|------------------|------------------|---------|
+| Expirar orçamentos | `invalidar_orcamentos_expirados()` | `ExpirarOrcamentosJob` | 00:01 |
+| Expirar produtos | `invalidar_produtos_expirados()` | `ExpirarProdutosJob` | 00:02 |
+| Staccato Off | `invalidar_staccatoOff()` | `InvalidarStaccatoOffJob` | 00:03 |
+| Download NFe | Widget timer | `ConsultarDFeJob` | */5 min |
+| Auto-confirmar NFe | - | `AutoConfirmarNFeAntigasJob` | 06:00 |
+| Refresh MVs | - | `RefreshMaterializedViewsJob` | */15 min |
+
+### Implementação Laravel
+
+#### Jobs de Expiração
+
+```php
+// app/Jobs/ExpirarOrcamentosJob.php
+namespace App\Jobs;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class ExpirarOrcamentosJob implements ShouldQueue
+{
+    use Queueable;
+
+    public function handle(): void
+    {
+        $affected = DB::update("
+            UPDATE orcamentos
+            SET status = 'EXPIRADO'
+            WHERE status = 'ATIVO'
+              AND data_emissao + (validade || ' days')::interval < CURRENT_DATE
+        ");
+
+        Log::info("ExpirarOrcamentosJob: {$affected} orçamentos expirados");
+    }
+}
+
+// app/Jobs/ExpirarProdutosJob.php
+class ExpirarProdutosJob implements ShouldQueue
+{
+    use Queueable;
+
+    public function handle(): void
+    {
+        $affected = DB::update("
+            UPDATE produto_precos
+            SET ativo = false
+            WHERE ativo = true
+              AND validade_ate IS NOT NULL
+              AND validade_ate < CURRENT_DATE
+        ");
+
+        Log::info("ExpirarProdutosJob: {$affected} preços expirados");
+    }
+}
+```
+
+#### Scheduler
+
+```php
+// app/Console/Kernel.php
+namespace App\Console;
+
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
+class Kernel extends ConsoleKernel
+{
+    protected function schedule(Schedule $schedule): void
+    {
+        // ==========================================
+        // MEIA-NOITE - Tarefas de expiração
+        // ==========================================
+
+        $schedule->job(new ExpirarOrcamentosJob)
+            ->dailyAt('00:01')
+            ->onOneServer()
+            ->withoutOverlapping();
+
+        $schedule->job(new ExpirarProdutosJob)
+            ->dailyAt('00:02')
+            ->onOneServer()
+            ->withoutOverlapping();
+
+        $schedule->job(new InvalidarStaccatoOffJob)
+            ->dailyAt('00:03')
+            ->onOneServer()
+            ->withoutOverlapping();
+
+        // ==========================================
+        // NFe - Download e manifestação
+        // ==========================================
+
+        $schedule->job(new ConsultarDFeJob)
+            ->everyFiveMinutes()
+            ->onOneServer()
+            ->withoutOverlapping();
+
+        $schedule->job(new AutoConfirmarNFeAntigasJob)
+            ->dailyAt('06:00')
+            ->onOneServer();
+
+        $schedule->job(new RetentarNFeRejeitadasJob)
+            ->everyThirtyMinutes()
+            ->onOneServer();
+
+        // ==========================================
+        // MANUTENÇÃO - Views e limpeza
+        // ==========================================
+
+        $schedule->job(new RefreshMaterializedViewsJob)
+            ->everyFifteenMinutes()
+            ->onOneServer();
+
+        $schedule->job(new LimparLogsAntigosJob)
+            ->dailyAt('03:00')
+            ->onOneServer();
+
+        // ==========================================
+        // BACKUP - Opcional se não usar backup externo
+        // ==========================================
+
+        $schedule->command('backup:run --only-db')
+            ->dailyAt('02:00')
+            ->onOneServer();
+    }
+}
+```
+
+#### Configuração do Cron
+
+```bash
+# /etc/cron.d/laravel-scheduler
+* * * * * www-data cd /var/www/erp && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Ou com systemd timer:
+
+```ini
+# /etc/systemd/system/laravel-scheduler.timer
+[Unit]
+Description=Laravel Scheduler
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+```
+
+```ini
+# /etc/systemd/system/laravel-scheduler.service
+[Unit]
+Description=Laravel Scheduler Run
+
+[Service]
+Type=oneshot
+User=www-data
+WorkingDirectory=/var/www/erp
+ExecStart=/usr/bin/php artisan schedule:run
+```
+
+### Migração do Sistema Legado
+
+| Fase | Ação |
+|------|------|
+| 1 | Implementar Jobs no Laravel |
+| 2 | Configurar cron no servidor |
+| 3 | Testar em paralelo (ambos rodando) |
+| 4 | Remover `runSqlJobs()` do C++ |
+| 5 | Remover tabela `maintenance` |
+
+### Monitoramento
+
+```php
+// Usar Laravel Telescope ou log custom
+// app/Jobs/ExpirarOrcamentosJob.php
+
+public function handle(): void
+{
+    $start = microtime(true);
+
+    $affected = DB::update(...);
+
+    $duration = round((microtime(true) - $start) * 1000);
+
+    // Log estruturado
+    Log::channel('scheduler')->info('Job completed', [
+        'job' => 'ExpirarOrcamentosJob',
+        'affected' => $affected,
+        'duration_ms' => $duration,
+    ]);
+
+    // Ou salvar em tabela
+    SchedulerLog::create([
+        'job_name' => 'ExpirarOrcamentosJob',
+        'started_at' => now()->subMilliseconds($duration),
+        'finished_at' => now(),
+        'duration_ms' => $duration,
+        'affected_rows' => $affected,
+        'status' => 'completed',
+    ]);
+}
+```
+
+### Alertas
+
+```php
+// app/Jobs/ExpirarOrcamentosJob.php
+
+public function failed(\Throwable $exception): void
+{
+    // Notificar administrador
+    Notification::route('mail', config('app.admin_email'))
+        ->notify(new SchedulerJobFailed('ExpirarOrcamentosJob', $exception));
+
+    // Ou usar serviço de monitoramento
+    // Sentry::captureException($exception);
+}
 ```
 
 ---

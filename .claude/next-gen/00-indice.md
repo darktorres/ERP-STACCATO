@@ -1,8 +1,8 @@
 # ERP Staccato - Documentação da Migração Web
 
 > **Status**: Fase de Planejamento
-> **Última atualização**: 2025-12-27
-> **Stack Alvo**: Laravel 11 + PostgreSQL 16 + Inertia/Vue (A definir)
+> **Última atualização**: 2025-12-28
+> **Stack Alvo**: Laravel 11 + PostgreSQL 16 + Inertia/Vue
 
 ---
 
@@ -49,79 +49,129 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 
 ```text
 .claude/next-gen/
-├── 00-indice.md                   # Este arquivo - navegação principal
+├── 00-indice.md                      # Este arquivo - navegação principal
 │
-├── tecnico/                       # Arquitetura técnica
-│   ├── 01-arquitetura.md          # Estrutura Laravel, padrões, serviços
-│   ├── 02-banco-dados.md          # Redesign do schema PostgreSQL
-│   ├── 03-frontend.md             # Avaliação de framework frontend
-│   ├── 04-infraestrutura.md       # Auditoria, dados temporais, busca
-│   └── modulos/                   # Specs de implementação por módulo
-│       ├── _indice.md             # Lista de prioridade dos módulos
-│       ├── compras.md             # Implementação do módulo de Compras em Laravel
-│       └── nfe.md                 # Opções de integração NFe
-│
-├── negocios/                      # Documentação de lógica de negócio
-│   ├── 01-visao-geral-fluxos.md   # Diagramas de fluxo de alto nível
-│   ├── 02-fluxos-estoque.md       # Criação, consumo e devolução de estoque
-│   ├── 03-fluxos-entrega-nfe.md   # Entrega, NFe, CNAB, Comissão
-│   └── 04-fluxos-cadastros.md     # Dados mestres, Orçamento, Galpão, Permissões
-│
-├── estrategia/                    # Estratégia de migração
-│   ├── 00-comparativo-legado-novo.md  # Comparativo consolidado
-│   ├── 01-plano-migracao.md       # Fases do padrão Strangler Fig
-│   ├── 02-decisoes.md             # Registros de Decisão de Arquitetura
-│   ├── 03-melhorias.md            # Pontos problemáticos e opções de melhoria
-│   ├── 04-simplificacao-l1l2.md   # Análise profunda de achatamento de tabelas
-│   ├── 05-correcao-fifo.md        # Correção do consumo de estoque FIFO
+├── estrategia/                       # Estratégia de migração
+│   ├── 00-comparativo-legado-novo.md # Comparativo consolidado legado vs novo
+│   ├── 01-plano-migracao.md          # Fases do padrão Strangler Fig
+│   ├── 02-decisoes.md                # Registros de Decisão de Arquitetura (ADR)
+│   ├── 03-melhorias.md               # Pontos problemáticos e opções de melhoria
+│   ├── 04-simplificacao-l1l2.md      # Análise de achatamento de tabelas L1/L2
+│   ├── 05-correcao-fifo.md           # Correção do consumo de estoque FIFO
 │   ├── 06-normalizacao-fornecedor.md # FK para refs de fornecedor
-│   ├── 07-esquema-redesenhado.md  # Schema completamente redesenhado
-│   └── 08-design-greenfield.md    # Design de fluxo greenfield
+│   ├── 07-esquema-redesenhado.md     # Schema completamente redesenhado
+│   ├── 08-design-greenfield.md       # Design de fluxo greenfield
+│   ├── 09-migracao-dados.md          # Estratégia de migração de dados
+│   ├── 10-paridade-funcionalidades.md# Checklist de paridade funcional
+│   └── 11-treinamento.md             # Plano de treinamento e rollout
 │
-└── meta/
-    ├── rastreador.md              # Rastreador de progresso da documentação
-    └── backlog-documentacao.md    # Backlog de melhorias pendentes
+├── negocios/                         # Documentação de lógica de negócio
+│   ├── 01-visao-geral-fluxos.md      # Diagramas de fluxo de alto nível
+│   ├── 02-fluxos-estoque.md          # Criação, consumo e devolução de estoque
+│   ├── 03-fluxos-entrega-nfe.md      # Entrega, NFe, CNAB, Comissão
+│   ├── 04-fluxos-cadastros.md        # Dados mestres, Orçamento, Galpão, Permissões
+│   └── 05-regras-negocio.md          # Regras de negócio detalhadas
+│
+├── tecnico/                          # Arquitetura técnica
+│   ├── 01-arquitetura.md             # Estrutura Laravel, padrões, serviços
+│   ├── 02-banco-dados.md             # Redesign do schema PostgreSQL
+│   ├── 03-frontend.md                # Avaliação de framework frontend
+│   ├── 04-infraestrutura.md          # Auditoria, dados temporais, busca, performance
+│   ├── 05-seguranca.md               # Autenticação, autorização, proteções
+│   ├── 06-api.md                     # Design de API REST, versionamento
+│   ├── 07-testes.md                  # Estratégia de testes (unit, integration, E2E)
+│   ├── 08-erros-monitoramento.md     # Tratamento de erros, logging, Sentry
+│   ├── 09-integracoes.md             # Integrações externas (ACBr, CNAB, etc)
+│   ├── 10-design-system.md           # Design system, componentes, temas
+│   ├── 11-concorrencia.md            # Locks, transações, race conditions
+│   ├── 12-atalhos-teclado.md         # Atalhos de teclado e acessibilidade
+│   ├── 13-impressao.md               # PDF, Excel, etiquetas, DANFE
+│   ├── 14-devops.md                  # Docker, CI/CD, deploy, monitoramento
+│   ├── 15-dicionario-dados.md        # Glossário de termos, enums, convenções
+│   ├── 16-compatibilidade.md         # Matriz de suporte browser/dispositivo
+│   ├── 17-validacao.md               # Estratégia de validação multicamada
+│   ├── 18-dependencias.md            # Auditoria de dependências PHP/NPM
+│   └── modulos/                      # Specs de implementação por módulo
+│       ├── _indice.md                # Lista de prioridade dos módulos
+│       ├── cadastros.md              # Módulo de Cadastros (CRUD base)
+│       ├── compras.md                # Módulo de Compras
+│       ├── estoque.md                # Módulo de Estoque
+│       ├── financeiro.md             # Módulo Financeiro
+│       ├── logistica.md              # Módulo de Logística
+│       ├── nfe.md                    # Módulo NFe
+│       ├── relatorios.md             # Módulo de Relatórios
+│       └── vendas.md                 # Módulo de Vendas
+│
+└── meta/                             # Meta-documentação
+    ├── backlog-documentacao.md       # Backlog de melhorias pendentes
+    ├── rastreador.md                 # Rastreador de progresso
+    └── reorganizacao-docs.md         # Tracking de reorganização
 ```
 
 ---
 
 ## Documentação Técnica
 
-### [01 - Arquitetura Laravel](./tecnico/01-arquitetura.md)
+### Arquitetura Base
 
-- Estrutura de diretórios proposta
-- Padrão de camada de serviço
-- Enums PHP 8.1+ para status
-- Workflows orientados a eventos
-- Validação com Form Request
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [01](./tecnico/01-arquitetura.md) | Arquitetura Laravel | Estrutura de diretórios, service layer, enums, eventos |
+| [02](./tecnico/02-banco-dados.md) | Schema do Banco | PostgreSQL, normalização, ENUMs, auditoria, FTS |
+| [03](./tecnico/03-frontend.md) | Framework Frontend | Livewire vs Inertia+Vue vs SPA |
+| [04](./tecnico/04-infraestrutura.md) | Infraestrutura | Auditoria, temporal, busca, cache, performance |
 
-### [02 - Schema do Banco de Dados](./tecnico/02-banco-dados.md)
+### Segurança e API
 
-- Justificativa da migração para PostgreSQL
-- Normalização do schema (corrigindo nomes de fornecedor desnormalizados)
-- Tipos ENUM para campos de status
-- Trilha de auditoria com triggers
-- Busca full-text com tsvector
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [05](./tecnico/05-seguranca.md) | Segurança | Autenticação, RBAC, proteções OWASP |
+| [06](./tecnico/06-api.md) | Design de API | REST, versionamento, rate limiting |
+| [17](./tecnico/17-validacao.md) | Validação | Validação multicamada (request, business, DB) |
 
-### [03 - Framework Frontend](./tecnico/03-frontend.md)
+### Qualidade e Operações
 
-- Livewire vs Inertia+Vue vs SPA Completo
-- Recomendação: Inertia + Vue
-- Componentes de exemplo
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [07](./tecnico/07-testes.md) | Testes | Unit, integration, E2E, coverage |
+| [08](./tecnico/08-erros-monitoramento.md) | Erros e Monitoramento | Exception handling, logging, Sentry |
+| [14](./tecnico/14-devops.md) | DevOps | Docker, CI/CD, deploy, observabilidade |
 
-### [04 - Infraestrutura](./tecnico/04-infraestrutura.md)
+### Integrações e Funcionalidades
 
-- Arquitetura de trilha de auditoria
-- Dados temporais (consultas point-in-time)
-- Arquitetura de busca (PostgreSQL FTS vs Elasticsearch)
-- Views materializadas para dashboards
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [09](./tecnico/09-integracoes.md) | Integrações | ACBr, CNAB, CEP, SMTP, Google Maps |
+| [11](./tecnico/11-concorrencia.md) | Concorrência | Locks otimistas/pessimistas, transações |
+| [13](./tecnico/13-impressao.md) | Impressão | PDF, Excel, etiquetas térmicas, DANFE |
 
-### [modulos/ - Specs de Implementação](./tecnico/modulos/_indice.md)
+### UI/UX
 
-Padrões de implementação Laravel módulo a módulo:
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [10](./tecnico/10-design-system.md) | Design System | Componentes, cores, tipografia, temas |
+| [12](./tecnico/12-atalhos-teclado.md) | Atalhos de Teclado | Keyboard shortcuts, command palette |
+| [16](./tecnico/16-compatibilidade.md) | Compatibilidade | Browsers, dispositivos, breakpoints |
 
-- [compras.md](./tecnico/modulos/compras.md) - Exemplos de serviço/controller do módulo de Compras
-- [nfe.md](./tecnico/modulos/nfe.md) - Opções de integração NFe e interface de serviço
+### Referência
+
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [15](./tecnico/15-dicionario-dados.md) | Dicionário de Dados | Glossário, enums, convenções de nomes |
+| [18](./tecnico/18-dependencias.md) | Dependências | Auditoria Composer/NPM, licenças, riscos |
+
+### [Módulos - Specs de Implementação](./tecnico/modulos/_indice.md)
+
+| Módulo | Descrição | Complexidade |
+|--------|-----------|--------------|
+| [cadastros.md](./tecnico/modulos/cadastros.md) | Cliente, Fornecedor, Produto, Transportadora | Baixa |
+| [compras.md](./tecnico/modulos/compras.md) | Pedidos de compra, recebimento | Média |
+| [estoque.md](./tecnico/modulos/estoque.md) | Controle de estoque, FIFO, consumo | Média |
+| [financeiro.md](./tecnico/modulos/financeiro.md) | Contas a pagar/receber, CNAB | Média |
+| [vendas.md](./tecnico/modulos/vendas.md) | Orçamento, venda, faturamento | Alta |
+| [nfe.md](./tecnico/modulos/nfe.md) | Emissão/recebimento de NFe | Alta |
+| [logistica.md](./tecnico/modulos/logistica.md) | Entregas, agendamento | Média |
+| [relatorios.md](./tecnico/modulos/relatorios.md) | Relatórios e dashboards | Média |
 
 ---
 
@@ -160,6 +210,13 @@ Análise profunda do gerenciamento de inventário:
 - Galpão (blocos de armazém)
 - Permissões de usuário (RBAC + PBAC)
 
+### [05 - Regras de Negócio Detalhadas](./negocios/05-regras-negocio.md)
+
+- Precificação (sistema de 3 níveis de desconto)
+- Cálculos de impostos
+- Validações de CPF/CNPJ
+- Regras de status e transições
+
 ---
 
 ## Documentação de Estratégia
@@ -176,7 +233,7 @@ Visão consolidada das diferenças entre sistemas:
 ### [01 - Plano de Migração](./estrategia/01-plano-migracao.md)
 
 - Padrão Strangler Fig (recomendado)
-- 8 fases em 18 meses
+- 8 fases
 - Estratégias de mitigação de risco
 - Requisitos de equipe
 
@@ -187,7 +244,7 @@ Log de decisões no formato ADR:
 - ADR-001: Backend Laravel (Aceito)
 - ADR-002: Banco de dados PostgreSQL (Aceito)
 - ADR-003: Framework frontend (Em aberto)
-- ADR-004: Integração NFe (Em aberto)
+- ADR-004: Integração NFe (Aceito - ACBrMonitorConsole)
 - ADR-005: Estratégia de migração (Em aberto)
 
 ### [03 - Melhorias de Fluxo e Schema](./estrategia/03-melhorias.md)
@@ -201,57 +258,33 @@ Pontos problemáticos e oportunidades de melhoria:
 - Redesign do tratamento de status
 - Divisão da tabela Produto
 
-### [04 - Análise Profunda da Simplificação L1/L2](./estrategia/04-simplificacao-l1l2.md)
+### Análises Profundas
 
-Análise detalhada do achatamento da arquitetura de tabelas de dois níveis:
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [04](./estrategia/04-simplificacao-l1l2.md) | Simplificação L1/L2 | Opções de achatamento de tabelas |
+| [05](./estrategia/05-correcao-fifo.md) | Correção FIFO | Consumo correto First-In-First-Out |
+| [06](./estrategia/06-normalizacao-fornecedor.md) | Normalização Fornecedor | FK em vez de VARCHAR |
+| [07](./estrategia/07-esquema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correções |
+| [08](./estrategia/08-design-greenfield.md) | Design Greenfield | Reimaginação completa do sistema |
 
-- Análise da arquitetura atual (padrão idRelacionado)
-- Opção A: Tabela única com auto-referência (recomendada)
-- Opção B: Manter apenas L2, derivar L1 via view materializada
-- Opção C: Event sourcing (exagero para este caso)
-- Estratégia de migração
+### Execução da Migração
 
-### [05 - Correção do Consumo de Estoque FIFO](./estrategia/05-correcao-fifo.md)
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [09](./estrategia/09-migracao-dados.md) | Migração de Dados | ETL, validação, rollback |
+| [10](./estrategia/10-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
+| [11](./estrategia/11-treinamento.md) | Treinamento | Plano de capacitação e rollout |
 
-Corrigir consumo de estoque para seguir corretamente First-In-First-Out:
+---
 
-- Causa raiz: `produto.idEstoque` aponta para UM estoque (sem FIFO)
-- Solução: Seleção FIFO dinâmica com `ORDER BY data_entrada`
-- Implementação de função PostgreSQL + serviço Laravel
-- Casos extremos: consumo concorrente, FEFO, lote específico
-- Estratégia de migração
+## Meta-Documentação
 
-### [06 - Normalização de Referência de Fornecedor](./estrategia/06-normalizacao-fornecedor.md)
-
-Substituir nomes de fornecedor desnormalizados por referências FK adequadas:
-
-- Problema: `fornecedor` VARCHAR armazenado em 9 tabelas (~85 refs no código)
-- Solução: Usar `fornecedor_id` FK em todo lugar
-- Migração: Popular FK a partir de nomes, tratar variações, remover colunas antigas
-- Casos especiais: snapshots históricos, verificações de strings mágicas
-
-### [07 - Schema Redesenhado](./estrategia/07-esquema-redesenhado.md)
-
-Schema completamente redesenhado abordando todos os pontos problemáticos identificados:
-
-- Princípios de design (tabela única de item, FIFO por padrão, FKs normalizadas)
-- Schema PostgreSQL completo com ENUMs
-- Modelo de entidade e diagrama de fluxo pedido-até-entrega
-- Máquinas de estado de status com regras de transição
-- Arquitetura orientada a eventos
-- Caminho de migração em 5 fases
-
-### [08 - Design Greenfield](./estrategia/08-design-greenfield.md)
-
-Reimaginação completa dos fluxos de negócio como se construindo do zero:
-
-- **Modelo de Fulfillment**: Itens não dividem - são atendidos em partes
-- **Contextos Delimitados**: Vendas, Inventário, Compras, Entrega, Fiscal, Financeiro
-- **Event Sourcing**: Estado derivado de eventos, trilha de auditoria completa
-- **Reserva → Consumo**: Reivindicação de estoque em duas etapas com FIFO
-- **Máquinas de Estado**: Transições explícitas com guards
-- **Estratégia de Testes**: Testes unitários, de máquina de estado, integração, orientados a eventos
-- **Recursos Avançados**: Entrega parcial, backorders, rastreamento de preço
+| Doc | Descrição |
+|-----|-----------|
+| [backlog-documentacao.md](./meta/backlog-documentacao.md) | Backlog de melhorias pendentes |
+| [rastreador.md](./meta/rastreador.md) | Rastreador de progresso |
+| [reorganizacao-docs.md](./meta/reorganizacao-docs.md) | Tracking de reorganização |
 
 ---
 
@@ -271,3 +304,4 @@ Reimaginação completa dos fluxos de negócio como se construindo do zero:
 2. **Planejando implementação?** Veja [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md)
 3. **Trabalhando em um fluxo específico?** Veja o documento relevante em negocios/
 4. **Tomando decisões técnicas?** Consulte tecnico/ e estrategia/02-decisoes.md
+5. **Implementando um módulo?** Veja tecnico/modulos/ para specs detalhadas

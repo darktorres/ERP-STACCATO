@@ -1,6 +1,7 @@
 # Especificações de Migração de Módulos
 
 > Esta pasta contém especificações detalhadas de migração para cada módulo de negócio.
+> Última atualização: 2025-12-28
 
 ---
 
@@ -15,23 +16,22 @@
 | 5          | Vendas     | Alta         | Cadastros, Estoque |
 | 6          | NFe        | Alta         | Vendas, Compras    |
 | 7          | Logistica  | Média        | Vendas             |
-| 8          | Galpao     | Baixa        | Estoque            |
-| 9          | RH         | Baixa        | Cadastros          |
-| 10         | Relatorios | Média        | Todos              |
+| 8          | Relatorios | Média        | Todos              |
 
 ---
 
 ## Arquivos dos Módulos
 
-| Arquivo                          | Módulo                 | Status   |
-| -------------------------------- | ---------------------- | -------- |
-| [compras.md](./compras.md)       | Gestão de Compras      | Rascunho |
-| [estoque.md](./estoque.md)       | Gestão de Estoque      | Rascunho |
-| [financeiro.md](./financeiro.md) | Gestão Financeira      | Rascunho |
-| [nfe.md](./nfe.md)               | Nota Fiscal Eletrônica | Rascunho |
-| [vendas.md](./vendas.md)         | Gestão de Vendas       | Pendente |
-| [logistica.md](./logistica.md)   | Logística              | Pendente |
-| [galpao.md](./galpao.md)         | Galpão                 | Pendente |
+| Arquivo                            | Módulo                 | Status   |
+| ---------------------------------- | ---------------------- | -------- |
+| [cadastros.md](./cadastros.md)     | Cadastros (CRUD base)  | Rascunho |
+| [compras.md](./compras.md)         | Gestão de Compras      | Rascunho |
+| [estoque.md](./estoque.md)         | Gestão de Estoque      | Rascunho |
+| [financeiro.md](./financeiro.md)   | Gestão Financeira      | Rascunho |
+| [vendas.md](./vendas.md)           | Gestão de Vendas       | Rascunho |
+| [nfe.md](./nfe.md)                 | Nota Fiscal Eletrônica | Rascunho |
+| [logistica.md](./logistica.md)     | Logística e Entregas   | Rascunho |
+| [relatorios.md](./relatorios.md)   | Relatórios e Dashboards| Rascunho |
 
 ---
 
@@ -58,6 +58,12 @@
 ### Fase 4: Módulos de Suporte
 
 1. **Logistica** - Calendário de entregas e agendamento
-2. **Galpao** - Gestão de blocos do galpão
-3. **RH** - Folha de pagamento e funcionários
-4. **Relatorios** - Relatórios (pode ser feito incrementalmente)
+2. **Relatorios** - Relatórios e dashboards (pode ser feito incrementalmente)
+
+---
+
+## Documentos Relacionados
+
+- [../01-arquitetura.md](../01-arquitetura.md) - Arquitetura geral Laravel
+- [../../negocios/01-visao-geral-fluxos.md](../../negocios/01-visao-geral-fluxos.md) - Fluxos de negócio
+- [../../estrategia/01-plano-migracao.md](../../estrategia/01-plano-migracao.md) - Plano de migração

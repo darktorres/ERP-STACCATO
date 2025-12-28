@@ -2,7 +2,7 @@
 
 > Status: **Rascunho**
 > Última atualização: 2025-12-27
-> Foco: Auditoria, dados temporais, busca, views materializadas, tarefas agendadas
+> Foco: Auditoria, dados temporais, busca, views materializadas, tarefas agendadas, performance
 
 ---
 
@@ -13,6 +13,7 @@
 3. [Arquitetura de Busca](#3-arquitetura-de-busca)
 4. [Views Materializadas](#4-views-materializadas)
 5. [Tarefas Agendadas (Servidor)](#5-tarefas-agendadas-servidor)
+6. [Benchmarks de Performance](#6-benchmarks-de-performance)
 
 ---
 
@@ -775,6 +776,402 @@ public function failed(\Throwable $exception): void
     // Sentry::captureException($exception);
 }
 ```
+
+---
+
+## 6. Benchmarks de Performance
+
+### Metas de Tempo de Resposta
+
+| Categoria | Operação | Meta | P99 |
+|-----------|----------|------|-----|
+| **Páginas** | Listagem (index) | < 200ms | < 500ms |
+| | Detalhes (show) | < 150ms | < 300ms |
+| | Formulário (create/edit) | < 100ms | < 200ms |
+| **API** | GET simples | < 50ms | < 100ms |
+| | GET com relacionamentos | < 100ms | < 200ms |
+| | POST/PUT | < 150ms | < 300ms |
+| | Busca (search) | < 200ms | < 400ms |
+| **Relatórios** | Pequeno (< 1k linhas) | < 500ms | < 1s |
+| | Médio (1k-10k linhas) | < 2s | < 5s |
+| | Grande (> 10k linhas) | < 10s | < 30s |
+| **Jobs** | NFe emissão | < 5s | < 10s |
+| | CNAB geração | < 3s | < 8s |
+| | PDF geração | < 2s | < 5s |
+
+### Baseline do Sistema Atual (C++)
+
+Métricas observadas no sistema desktop:
+
+| Operação | Tempo Atual | Observação |
+|----------|-------------|------------|
+| Login | 2-5s | Inclui conexão MySQL remota |
+| Abrir lista de orçamentos | 1-3s | Carrega todos sem paginação |
+| Criar orçamento | 0.5-1s | Resposta rápida (local) |
+| Emitir NFe | 5-15s | Depende do ACBr/SEFAZ |
+| Gerar PDF orçamento | 1-3s | LimeReport local |
+| Busca de produtos | 0.5-2s | LIKE com wildcard |
+| Consulta estoque | 0.3-1s | View não otimizada |
+
+### Estratégia de Cache (Redis)
+
+#### Camadas de Cache
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Estratégia de Cache                       │
+├──────────────┬──────────────┬──────────────┬───────────────┤
+│   Browser    │   Laravel    │    Redis     │   Database    │
+│   Cache      │   Cache      │   Cache      │   Indexes     │
+├──────────────┼──────────────┼──────────────┼───────────────┤
+│ Assets       │ Config       │ Sessions     │ Primary Keys  │
+│ API (ETag)   │ Routes       │ Queries      │ Foreign Keys  │
+│ Static       │ Views        │ Objects      │ Composite     │
+│              │ Events       │ Locks        │ Full-text     │
+└──────────────┴──────────────┴──────────────┴───────────────┘
+```
+
+#### Configuração Redis
+
+```php
+// config/cache.php
+return [
+    'default' => env('CACHE_STORE', 'redis'),
+
+    'stores' => [
+        'redis' => [
+            'driver' => 'redis',
+            'connection' => 'cache',
+            'lock_connection' => 'default',
+        ],
+
+        // Cache separado para queries pesadas
+        'queries' => [
+            'driver' => 'redis',
+            'connection' => 'cache',
+            'prefix' => 'query:',
+        ],
+    ],
+
+    'prefix' => env('CACHE_PREFIX', 'staccato'),
+];
+```
+
+#### Padrões de Cache
+
+```php
+// Cache de configurações (longa duração)
+Cache::remember('config:formas_pagamento', 3600, function () {
+    return FormaPagamento::where('ativo', true)->get();
+});
+
+// Cache de dados do usuário (sessão)
+Cache::tags(['user', "user:{$userId}"])->remember(
+    "user:{$userId}:permissions",
+    1800,
+    fn() => $user->getAllPermissions()
+);
+
+// Cache de queries pesadas (curta duração)
+Cache::store('queries')->remember(
+    "estoque:produto:{$produtoId}",
+    60,
+    fn() => Estoque::where('produto_id', $produtoId)
+        ->where('quantidade_disponivel', '>', 0)
+        ->sum('quantidade_disponivel')
+);
+
+// Invalidação por tags
+Cache::tags(['user', "user:{$userId}"])->flush();
+```
+
+#### TTL por Tipo de Dado
+
+| Tipo | TTL | Motivo |
+|------|-----|--------|
+| Configurações sistema | 1 hora | Raramente mudam |
+| Permissões usuário | 30 min | Pode mudar, mas não frequente |
+| Dados de sessão | 2 horas | Padrão Laravel |
+| Consultas de estoque | 1 min | Muda frequentemente |
+| Resultados de busca | 5 min | Balanço entre atualização e performance |
+| Views materializadas | 0 (pg_ivm) | Atualizadas automaticamente |
+
+### Otimização de Queries
+
+#### Problema Comum: N+1
+
+```php
+// ❌ Ruim - N+1 queries
+$vendas = Venda::all();
+foreach ($vendas as $venda) {
+    echo $venda->cliente->nome;  // Query adicional por venda
+    echo $venda->vendedor->nome; // Outra query
+}
+
+// ✅ Bom - Eager loading
+$vendas = Venda::with(['cliente', 'vendedor'])->get();
+foreach ($vendas as $venda) {
+    echo $venda->cliente->nome;  // Já carregado
+    echo $venda->vendedor->nome; // Já carregado
+}
+```
+
+#### Eager Loading Global
+
+```php
+// app/Models/Venda.php
+class Venda extends Model
+{
+    // Sempre carregar esses relacionamentos
+    protected $with = ['cliente', 'loja'];
+
+    // Contagens sempre incluídas
+    protected $withCount = ['itens'];
+}
+```
+
+#### Lazy Loading Prevention
+
+```php
+// app/Providers/AppServiceProvider.php
+public function boot(): void
+{
+    // Prevenir lazy loading em não-produção
+    Model::preventLazyLoading(!app()->isProduction());
+
+    // Logar queries lentas
+    Model::handleLazyLoadingViolationUsing(function ($model, $relation) {
+        Log::warning("Lazy loading detected: {$model}::{$relation}");
+    });
+}
+```
+
+#### Query Optimization com Spatie
+
+```php
+// Usando spatie/laravel-query-builder
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+
+$vendas = QueryBuilder::for(Venda::class)
+    ->allowedFilters([
+        AllowedFilter::exact('status'),
+        AllowedFilter::scope('data_entre'),
+        AllowedFilter::exact('loja_id'),
+    ])
+    ->allowedIncludes(['cliente', 'itens', 'pagamentos'])
+    ->allowedSorts(['created_at', 'total', 'status'])
+    ->defaultSort('-created_at')
+    ->paginate(25);
+```
+
+### Índices de Banco de Dados
+
+#### Índices Críticos
+
+```sql
+-- Vendas - consultas frequentes
+CREATE INDEX idx_vendas_status ON vendas(status);
+CREATE INDEX idx_vendas_loja_data ON vendas(loja_id, created_at DESC);
+CREATE INDEX idx_vendas_cliente ON vendas(cliente_id);
+CREATE INDEX idx_vendas_vendedor ON vendas(vendedor_id);
+
+-- Estoque - consumo FIFO
+CREATE INDEX idx_estoque_produto_fifo ON estoques(
+    produto_id,
+    quantidade_disponivel,
+    data_entrada ASC
+) WHERE quantidade_disponivel > 0;
+
+-- Produtos - busca
+CREATE INDEX idx_produtos_search ON produtos USING GIN(search_vector);
+CREATE INDEX idx_produtos_fornecedor ON produtos(fornecedor_id);
+CREATE INDEX idx_produtos_codigo ON produtos(cod_comercial);
+
+-- Financeiro - vencimentos
+CREATE INDEX idx_parcelas_vencimento ON venda_parcelas(
+    data_vencimento
+) WHERE status = 'PENDENTE';
+
+-- NFe - consultas por chave
+CREATE UNIQUE INDEX idx_nfe_chave ON nfe(chave_acesso);
+CREATE INDEX idx_nfe_status ON nfe(status);
+```
+
+#### Partial Indexes
+
+```sql
+-- Apenas orçamentos ativos (90% das consultas)
+CREATE INDEX idx_orcamentos_ativos ON orcamentos(id, cliente_id, vendedor_id)
+WHERE status = 'ATIVO';
+
+-- Apenas estoque disponível
+CREATE INDEX idx_estoque_disponivel ON estoques(produto_id, loja_id)
+WHERE quantidade_disponivel > 0;
+
+-- NFe pendentes de autorização
+CREATE INDEX idx_nfe_pendentes ON nfe(id, created_at)
+WHERE status IN ('PENDENTE', 'PROCESSANDO');
+```
+
+### Monitoramento de Performance
+
+#### Laravel Debugbar (Desenvolvimento)
+
+```php
+// composer require barryvdh/laravel-debugbar --dev
+// config/debugbar.php
+return [
+    'enabled' => env('DEBUGBAR_ENABLED', false),
+    'collectors' => [
+        'queries' => true,
+        'time' => true,
+        'memory' => true,
+        'models' => true,
+        'cache' => true,
+    ],
+];
+```
+
+#### Laravel Telescope (Staging)
+
+```php
+// config/telescope.php
+return [
+    'enabled' => env('TELESCOPE_ENABLED', false),
+
+    'watchers' => [
+        QueryWatcher::class => [
+            'slow' => 100, // Log queries > 100ms
+        ],
+        RequestWatcher::class => [
+            'slow' => 500, // Log requests > 500ms
+        ],
+        CacheWatcher::class => true,
+        JobWatcher::class => true,
+    ],
+];
+```
+
+#### Laravel Pulse (Produção)
+
+```php
+// config/pulse.php
+return [
+    'recorders' => [
+        SlowQueries::class => [
+            'threshold' => 100, // ms
+        ],
+        SlowRequests::class => [
+            'threshold' => 500, // ms
+        ],
+        Exceptions::class => true,
+        Queues::class => true,
+        CacheInteractions::class => true,
+    ],
+];
+```
+
+#### Métricas Customizadas
+
+```php
+// app/Http/Middleware/MeasurePerformance.php
+class MeasurePerformance
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $start = microtime(true);
+
+        $response = $next($request);
+
+        $duration = (microtime(true) - $start) * 1000;
+
+        // Log requests lentos
+        if ($duration > 500) {
+            Log::channel('performance')->warning('Slow request', [
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'duration_ms' => round($duration, 2),
+                'user_id' => auth()->id(),
+            ]);
+        }
+
+        // Header para debugging
+        $response->headers->set('X-Response-Time', round($duration, 2) . 'ms');
+
+        return $response;
+    }
+}
+```
+
+### Otimizações de Frontend
+
+#### Code Splitting
+
+```typescript
+// Lazy load rotas pesadas
+const routes = [
+    {
+        path: '/relatorios',
+        component: () => import('./pages/Relatorios.vue'), // Lazy
+    },
+    {
+        path: '/dashboard',
+        component: Dashboard, // Eager (sempre usado)
+    },
+];
+```
+
+#### Asset Optimization
+
+```javascript
+// vite.config.js
+export default defineConfig({
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor': ['vue', 'axios', '@inertiajs/vue3'],
+                    'primevue': ['primevue'],
+                    'charts': ['chart.js', 'vue-chartjs'],
+                },
+            },
+        },
+    },
+});
+```
+
+#### HTTP Caching
+
+```php
+// app/Http/Controllers/Api/ProdutoController.php
+public function show(Produto $produto)
+{
+    return response()
+        ->json(new ProdutoResource($produto))
+        ->header('Cache-Control', 'private, max-age=60')
+        ->setEtag(md5($produto->updated_at));
+}
+```
+
+### Checklist de Performance
+
+#### Antes do Deploy
+
+- [ ] Queries analisadas com EXPLAIN ANALYZE
+- [ ] Índices criados para queries frequentes
+- [ ] N+1 queries eliminadas
+- [ ] Cache configurado corretamente
+- [ ] Assets minificados e versionados
+- [ ] Lazy loading para rotas pesadas
+
+#### Em Produção
+
+- [ ] Monitoramento ativo (Pulse/Sentry)
+- [ ] Alertas para requests > 1s
+- [ ] Log de queries lentas habilitado
+- [ ] Métricas de cache hit rate
+- [ ] Análise periódica de slow queries
 
 ---
 

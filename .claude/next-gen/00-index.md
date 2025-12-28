@@ -68,7 +68,8 @@ Rewriting the existing C++ Qt desktop ERP application as a modern web applicatio
 │   ├── 01-migration-plan.md    # Strangler fig phases
 │   ├── 02-decisions.md         # Architecture Decision Records
 │   ├── 03-improvements.md      # Pain points & improvement options
-│   └── 04-l1l2-simplification.md # Deep dive on table flattening
+│   ├── 04-l1l2-simplification.md # Deep dive on table flattening
+│   └── 05-fifo-fix.md          # FIFO stock consumption fix
 │
 └── meta/
     └── tracker.md              # Documentation progress tracker
@@ -172,6 +173,14 @@ Detailed analysis of flattening the two-level table architecture:
 - Option A: Single table with self-reference (recommended)
 - Option B: Keep L2 only, derive L1 via materialized view
 - Option C: Event sourcing (overkill for this case)
+- Migration strategy
+
+### [05 - FIFO Stock Consumption Fix](./strategy/05-fifo-fix.md)
+Fix stock consumption to properly follow First-In-First-Out:
+- Root cause: `produto.idEstoque` points to ONE stock (no FIFO)
+- Solution: Dynamic FIFO selection with `ORDER BY data_entrada`
+- PostgreSQL function + Laravel service implementation
+- Edge cases: concurrent consumption, FEFO, specific lot
 - Migration strategy
 
 ---

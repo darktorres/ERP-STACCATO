@@ -12,7 +12,7 @@
 | --- | ----------------------------------------------------------------------------- | ---------- | -------- |
 | 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | ✅ Feito |
 | 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | ✅ Feito |
-| 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | Pendente |
+| 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | ✅ Feito |
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | Pendente |
@@ -142,21 +142,21 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 3. Arquitetura de Segurança
+## 3. Arquitetura de Segurança ✅
 
-**Problema**: Sistema atual tem vulnerabilidades de SQL injection.
+**Arquivo**: [`tecnico/05-seguranca.md`](../tecnico/05-seguranca.md)
 
-**Arquivo sugerido**: `tecnico/05-seguranca.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Autenticação (Laravel Sanctum vs Passport)
-- Autorização (Policies, Gates) - migração do RBAC+PBAC atual
-- Validação de entrada (Form Requests)
-- Proteção CSRF/XSS
-- Auditoria de segurança
-- Gerenciamento de sessão
-- LGPD compliance
+- ✅ Autenticação (Laravel Sanctum + Fortify)
+- ✅ Autorização (Spatie Permission + Policies + Gates)
+- ✅ Validação de entrada (Form Requests, CPF/CNPJ)
+- ✅ Proteção CSRF/XSS/SQL Injection
+- ✅ Auditoria de segurança (spatie/activitylog)
+- ✅ Gerenciamento de sessão
+- ✅ LGPD compliance (exportação, anonimização)
+- ✅ Migração de senhas SHA → bcrypt
+- ✅ Rate limiting para login
 
 ---
 
@@ -294,13 +294,14 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item B | Corrigidos links quebrados em 8 arquivos                |
 | 2025-12-28 | Item 1 | Criadas specs de todos os 6 módulos faltantes           |
 | 2025-12-28 | Item 2 | Fechados todos os ADRs (003, 005, 006)                  |
+| 2025-12-28 | Item 3 | Arquitetura de segurança completa                       |
 
 ### Próximos
 
-1. [ ] Item 3 - Arquitetura de segurança
-2. [ ] Item 6 - Scripts de migração de dados
-3. [ ] Item 4 - Design de API
-4. [ ] Item 5 - Estratégia de testes
+1. [ ] Item 6 - Scripts de migração de dados
+2. [ ] Item 4 - Design de API
+3. [ ] Item 5 - Estratégia de testes
+4. [ ] Item 7 - Tratamento de erros e monitoramento
 
 ---
 

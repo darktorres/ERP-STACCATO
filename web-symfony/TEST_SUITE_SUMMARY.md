@@ -11,7 +11,7 @@ Comprehensive end-to-end (E2E) test suite for the Staccato ERP Symfony web appli
 
 ## Test Organization
 
-```
+```text
 tests/
 └── e2e/
     ├── README.md              # Detailed test documentation
@@ -25,7 +25,7 @@ tests/
 
 **File**: `playwright.config.js`
 
-- Base URL: http://localhost:8000
+- Base URL: <http://localhost:8000>
 - Browser: Chromium
 - Screenshot on failure: Yes
 - Trace on first retry: Yes
@@ -39,6 +39,7 @@ tests/
 **File**: `tests/e2e/auth.spec.js`
 
 Tests for login page functionality:
+
 - Display login form with correct elements
 - Show error for empty credentials
 - Show error for invalid credentials
@@ -53,6 +54,7 @@ Tests for login page functionality:
 **File**: `tests/e2e/quotations.spec.js`
 
 Tests for quotations list page:
+
 - Page structure (sidebar, navbar, content)
 - Filter elements (store, month, vendor, supplier, status, semaforo)
 - AJAX functionality (filter, clear, update)
@@ -66,6 +68,7 @@ Tests for quotations list page:
 **File**: `tests/e2e/api.spec.js`
 
 Tests for API endpoints:
+
 - Endpoint availability (/orcamentos/lojas, /orcamentos/vendedores, etc.)
 - Response format validation
 - Data structure verification
@@ -110,6 +113,7 @@ Before running tests, ensure:
 ### Green Tests (No Setup Required)
 
 These tests pass immediately without database configuration:
+
 - Login page structure and form validation
 - Filter UI elements and layout
 - API endpoint response codes
@@ -122,6 +126,7 @@ Run without setup: `npm test`
 ### Yellow Tests (Need Login)
 
 These require valid database credentials:
+
 - Successful login flow
 - AJAX filter application
 - Table data updates
@@ -129,6 +134,7 @@ These require valid database credentials:
 - Session persistence
 
 To enable:
+
 1. Set up test user in database
 2. Remove test.skip() from tests
 3. Run npm test
@@ -159,6 +165,7 @@ npm test
 ```
 
 Features in CI mode:
+
 - Retries failed tests 2 times
 - Single worker (serial execution)
 - Full artifacts collection
@@ -166,17 +173,17 @@ Features in CI mode:
 
 ## Test Coverage
 
-| Feature | Tests | Status |
-|---|---|---|
-| Login Page | 8 | Complete |
-| Quotations Page | 22 | Complete |
-| API Endpoints | 15 | Complete |
-| Responsive Design | 2 | Complete |
-| Security | 3 | Complete |
-| Navigation | 3 | Complete |
-| Forms | 2 | Complete |
+| Feature           | Tests | Status   |
+| ----------------- | ----- | -------- |
+| Login Page        | 8     | Complete |
+| Quotations Page   | 22    | Complete |
+| API Endpoints     | 15    | Complete |
+| Responsive Design | 2     | Complete |
+| Security          | 3     | Complete |
+| Navigation        | 3     | Complete |
+| Forms             | 2     | Complete |
 
-**Total: 52 tests implemented**
+Total: 52 tests implemented
 
 ## Quick Commands
 
@@ -208,16 +215,19 @@ npx playwright test auth.spec.js
 ## Troubleshooting
 
 ### Tests Timeout
+
 - Check PHP server: `php bin/console server:run --port=8000`
 - Increase timeout in playwright.config.js
 - Check database connectivity
 
 ### Database Connection Fails
+
 - Verify DATABASE_URL in .env
 - Check MySQL is running
 - Ensure staccato database exists
 
 ### AJAX Tests Fail
+
 - Check server is fully started
 - Verify API endpoints exist: `php bin/console debug:router`
 - Look for JS errors in browser console

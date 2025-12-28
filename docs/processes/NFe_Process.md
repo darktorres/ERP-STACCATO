@@ -10,7 +10,7 @@ The ERP Staccato NFe system provides comprehensive Brazilian electronic invoice 
 
 1. **TabNFe** - Main NFe interface with three tabs:
    - `WidgetNfeEntrada` - Incoming invoices
-   - `WidgetNfeSaida` - Outgoing invoices  
+   - `WidgetNfeSaida` - Outgoing invoices
    - `WidgetNfeDistribuicao` - DFe distribution
 
 2. **CadastrarNFe** - NFe creation and management dialog
@@ -21,6 +21,7 @@ The ERP Staccato NFe system provides comprehensive Brazilian electronic invoice 
 ### Database Schema
 
 #### Main NFe Table
+
 ```sql
 CREATE TABLE `nfe` (
   `idNFe` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -50,6 +51,7 @@ CREATE TABLE `nfe` (
 ```
 
 #### NFe Follow-up Table
+
 ```sql
 CREATE TABLE `nfe_has_followup` (
   `idFollowup` INT(11) NOT NULL AUTO_INCREMENT,
@@ -68,6 +70,7 @@ CREATE TABLE `nfe_has_followup` (
 ## NFe Types and Workflow
 
 ### NFe Types (CadastrarNFe::Tipo)
+
 - **Entrada** - Incoming invoices from suppliers
 - **Saida** - Outgoing invoices to customers
 - **Futura** - Future invoices (pre-authorization)
@@ -118,6 +121,7 @@ void CadastrarNFe::calculaIcms() {
 ```
 
 **ICMS Rules:**
+
 - Base de Cálculo (vBC): Product value + IPI + freight
 - Aliquota (pICMS): State-dependent rate (7%, 12%, 18%, etc.)
 - Valor ICMS (vICMS): vBC × pICMS ÷ 100
@@ -135,6 +139,7 @@ void CadastrarNFe::calculaSt() {
 ```
 
 **ICMS-ST Rules:**
+
 - MVA (Margem de Valor Agregado): Product-specific markup
 - vBCST = (vBC + vIPI) × (1 + pMVAST/100)
 - vICMSST = vBCST × pICMSST / 100 - vICMS
@@ -152,6 +157,7 @@ void CadastrarNFe::calculaPis() {
 ```
 
 **PIS Rules:**
+
 - Standard rate: 1.65% (cumulative) or 0.65% (non-cumulative)
 - Base: Product value
 - CST determines calculation method
@@ -169,6 +175,7 @@ void CadastrarNFe::calculaCofins() {
 ```
 
 **COFINS Rules:**
+
 - Standard rate: 7.6% (cumulative) or 3.0% (non-cumulative)
 - Base: Product value
 - CST determines calculation method
@@ -183,7 +190,7 @@ void CadastrarNFe::updateTotais() {
   double totalPis = 0;
   double totalCofins = 0;
   double baseIcms = 0;
-  
+
   for (int row = 0; row < modelProduto.rowCount(); ++row) {
     totalProdutos += modelProduto.data(row, "total").toDouble();
     totalIcms += modelProduto.data(row, "vICMS").toDouble();
@@ -192,10 +199,10 @@ void CadastrarNFe::updateTotais() {
     totalCofins += modelProduto.data(row, "vCOFINS").toDouble();
     baseIcms += modelProduto.data(row, "vBC").toDouble();
   }
-  
+
   double valorFrete = ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() : 0;
   double valorNota = totalProdutos + totalIpi + valorFrete;
-  
+
   ui->doubleSpinBoxValorProdutos->setValue(totalProdutos);
   ui->doubleSpinBoxValorICMS->setValue(totalIcms);
   ui->doubleSpinBoxValorIPI->setValue(totalIpi);
@@ -216,9 +223,9 @@ The NFe XML is generated through a series of specialized write functions:
 QString CadastrarNFe::montarXML() {
   QString nfe;
   QTextStream stream(&nfe);
-  
+
   stream << R"(NFE.CriarNFe(")";
-  
+
   writeIdentificacao(stream);    // Identification data
   writeEmitente(stream);         // Emitter data
   writeDestinatario(stream);     // Recipient data
@@ -228,9 +235,9 @@ QString CadastrarNFe::montarXML() {
   writePagamento(stream);        // Payment
   writeVolume(stream);           // Volumes
   writeComplemento(stream);      // Additional info
-  
+
   stream << R"(",1))"; // return xml
-  
+
   return nfe;
 }
 ```
@@ -269,11 +276,11 @@ void CadastrarNFe::criarChaveAcesso() {
   chave += ui->lineEditNumero->text().rightJustified(9, '0'); // Number (9 digits)
   chave += "1";                                             // Emission type (1 digit)
   chave += ui->lineEditCodigo->text().rightJustified(8, '0'); // Random code (8 digits)
-  
+
   // Calculate verification digit
   calculaDigitoVerificador();
   chave += QString::number(digitoVerificador);
-  
+
   chaveAcesso = chave;
 }
 
@@ -281,11 +288,11 @@ void CadastrarNFe::calculaDigitoVerificador() {
   // Module 11 algorithm for verification digit
   QString sequence = "4329876543298765432987654329876543298765432";
   int sum = 0;
-  
+
   for (int i = 0; i < 43; ++i) {
     sum += chaveAcesso.mid(i, 1).toInt() * sequence.mid(i, 1).toInt();
   }
-  
+
   int remainder = sum % 11;
   digitoVerificador = (remainder < 2) ? 0 : 11 - remainder;
 }
@@ -319,27 +326,27 @@ QString ACBr::enviarComando(const QString &comando, const QString &labelText) {
   recebido = false;
   enviado = false;
   resposta.clear();
-  
+
   // Connect to ACBr Monitor
-  if (not conectado) { 
-    socket.connectToHost(servidor, porta.toUShort()); 
+  if (not conectado) {
+    socket.connectToHost(servidor, porta.toUShort());
   }
-  
+
   // Wait for ready state
   while (not pronto) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(10);
   }
-  
+
   // Send command
   socket.write(comando.toUtf8() + "\r\n.\r\n");
-  
+
   // Wait for response
   while (not recebido and conectado) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(10);
   }
-  
+
   return resposta;
 }
 ```
@@ -366,26 +373,26 @@ graph TD
 ### Response Processing
 
 ```cpp
-void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, 
+void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath,
                                      const int idNFe, ACBr &acbr) {
   if (resposta.contains("Erro Interno", Qt::CaseInsensitive)) {
     removerNota(idNFe);
     manterAberto = true;
     throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
   }
-  
-  if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or 
+
+  if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or
       resposta.contains("Uso Denegado", Qt::CaseInsensitive)) {
     return carregarArquivo(acbr, filePath);
   }
-  
+
   if (resposta.contains("Duplicidade de NF-e", Qt::CaseInsensitive)) {
     // Handle duplicate NFe
     QString chaveExistente = extractChaveFromResponse(resposta);
     updateDuplicateStatus(idNFe, chaveExistente);
     return;
   }
-  
+
   // Log error and remove invalid NFe
   removerNota(idNFe);
   throw RuntimeException("SEFAZ: " + resposta);
@@ -417,57 +424,57 @@ graph TD
 ```cpp
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
-  
-  if (selection.isEmpty()) { 
-    throw RuntimeError("Nenhuma linha selecionada!", this); 
+
+  if (selection.isEmpty()) {
+    throw RuntimeError("Nenhuma linha selecionada!", this);
   }
-  
+
   const int row = selection.first().row();
   const QString status = model.data(row, "status").toString();
-  
+
   // Validation rules
   if (status != "AUTORIZADA") {
     throw RuntimeError("Apenas NF-es autorizadas podem ser canceladas!", this);
   }
-  
+
   // Check 24-hour rule
   const QDateTime emissao = model.data(row, "dataHoraEmissao").toDateTime();
   if (emissao.secsTo(QDateTime::currentDateTime()) > 86400) { // 24 hours
     throw RuntimeError("NF-e pode ser cancelada apenas dentro de 24 horas!", this);
   }
-  
+
   // Request justification
   bool ok;
-  QString justificativa = QInputDialog::getText(this, "Cancelamento", 
+  QString justificativa = QInputDialog::getText(this, "Cancelamento",
                                                "Justificativa (mín. 15 caracteres):",
                                                QLineEdit::Normal, "", &ok);
-  
+
   if (not ok or justificativa.length() < 15) {
     throw RuntimeError("Justificativa deve ter pelo menos 15 caracteres!", this);
   }
-  
+
   // Send cancellation to SEFAZ
   ACBr acbr;
   const int idNFe = model.data(row, "idNFe").toInt();
   const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
-  
+
   QString comando = QString("NFE.CancelarNFe(%1, %2, %3)")
                     .arg(chaveAcesso)
                     .arg(justificativa)
                     .arg("1"); // Protocol number
-  
+
   QString resposta = acbr.enviarComando(comando, "Cancelando NF-e...");
-  
+
   if (resposta.contains("Cancelamento registrado", Qt::CaseInsensitive)) {
     // Update database
     SqlQuery queryCancel;
     queryCancel.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE idNFe = :idNFe");
     queryCancel.bindValue(":idNFe", idNFe);
     queryCancel.exec();
-    
+
     // Update related records
     updateRelatedRecords(idNFe);
-    
+
     qApp->enqueueInformation("NF-e cancelada com sucesso!");
     updateTables();
   } else {
@@ -483,10 +490,10 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 ```cpp
 void WidgetNFeDistribuicao::buscarNSU() {
   const QString idLoja = ui->itemBoxLoja->getId().toString();
-  
+
   SqlQuery queryLoja;
   queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja);
-  
+
   if (queryLoja.first()) {
     maximoNSU = queryLoja.value("maximoNSU").toInt();
     ultimoNSU = queryLoja.value("ultimoNSU").toInt();
@@ -500,10 +507,10 @@ void WidgetNFeDistribuicao::buscarNSU() {
 ```cpp
 void WidgetNFeDistribuicao::downloadAutomatico() {
   if (not User::getSetting("User/monitorarNFe").toBool()) { return; }
-  
+
   timer.stop();
   qApp->setSilent(true);
-  
+
   try {
     consultarSefaz();
   } catch (std::exception &) {
@@ -511,7 +518,7 @@ void WidgetNFeDistribuicao::downloadAutomatico() {
     timer.start(tempoTimer);
     throw;
   }
-  
+
   qApp->setSilent(false);
   timer.start(tempoTimer);
 }
@@ -544,31 +551,31 @@ graph TD
 void ACBrLib::gerarDanfe(const int idNFe) {
   // Load ACBr library
   HMODULE nHandler = LoadLibraryW(L"ACBrNFe32.dll");
-  
+
   // Initialize library
-  NFE_Inicializar method_inicializar = 
+  NFE_Inicializar method_inicializar =
     reinterpret_cast<NFE_Inicializar>(GetProcAddress(nHandler, "NFE_Inicializar"));
   int ret = method_inicializar("", "");
   check_result(nHandler, ret);
-  
+
   // Load XML
-  NFE_CarregarXML method_carregar_xml = 
+  NFE_CarregarXML method_carregar_xml =
     reinterpret_cast<NFE_CarregarXML>(GetProcAddress(nHandler, "NFE_CarregarXML"));
   ret = method_carregar_xml(fileContent.toUtf8());
   check_result(nHandler, ret);
-  
+
   // Generate PDF
-  NFE_ImprimirPDF method_imprimir_pdf = 
+  NFE_ImprimirPDF method_imprimir_pdf =
     reinterpret_cast<NFE_ImprimirPDF>(GetProcAddress(nHandler, "NFE_ImprimirPDF"));
   ret = method_imprimir_pdf();
   check_result(nHandler, ret);
-  
+
   // Clean up
-  NFE_Finalizar method_finalizar = 
+  NFE_Finalizar method_finalizar =
     reinterpret_cast<NFE_Finalizar>(GetProcAddress(nHandler, "NFE_Finalizar"));
   method_finalizar();
   FreeLibrary(nHandler);
-  
+
   // Open generated PDF
   const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
   const QString filePath = QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf";
@@ -584,7 +591,7 @@ void ACBrLib::gerarDanfe(const int idNFe) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
   query.exec();
-  
+
   if (query.first()) {
     auto *viewer = new XML_Viewer(query.value("xml").toString(), nullptr);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -598,17 +605,17 @@ void ACBrLib::gerarDanfe(const int idNFe) {
 ### Automatic Email Sending
 
 ```cpp
-void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, 
+void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia,
                        const QString &assunto, const QString &filePath) {
   const QString respostaEmail = enviarComando(
-    "NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')", 
+    "NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "')",
     "Enviando e-mail..."
   );
-  
+
   if (not respostaEmail.contains("OK: E-mail enviado com sucesso!", Qt::CaseInsensitive)) {
     throw RuntimeException(respostaEmail);
   }
-  
+
   qApp->enqueueInformation(respostaEmail);
 }
 ```
@@ -626,7 +633,7 @@ void ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia,
 
 ```cpp
 // Link NFe with sales products
-UPDATE venda_has_produto2 SET 
+UPDATE venda_has_produto2 SET
   idNFeSaida = :idNFe,
   status = 'ENTREGA AGEND.'
 WHERE idVendaProduto2 IN (:items);
@@ -636,10 +643,10 @@ WHERE idVendaProduto2 IN (:items);
 
 ```cpp
 // Update inventory with NFe reference
-UPDATE estoque SET 
+UPDATE estoque SET
   idNFe = :idNFe,
   status = 'CONFIRMADO'
-WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_consumo 
+WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_consumo
                    WHERE idVendaProduto2 IN (:items));
 ```
 
@@ -657,10 +664,12 @@ INSERT INTO conta_a_pagar_has_pagamento (
 ## Digital Certificate Management
 
 ### Certificate Types
+
 - **A1**: Software certificate (stored in file/database)
 - **A3**: Hardware certificate (stored in token/card)
 
 ### Certificate Configuration
+
 Certificates are configured through the ACBr Monitor settings and must be properly installed and accessible to the ACBr service.
 
 ## Error Handling and Retry Mechanisms
@@ -697,12 +706,14 @@ while (retryCount < maxRetries) {
 ## Compliance Requirements
 
 ### Brazilian NFe Standards
+
 - **NT 2016.002**: Technical note for NFe 4.00
 - **Manual de Orientação**: SEFAZ implementation guide
 - **Schemas XSD**: XML validation schemas
 - **Certificate ICP-Brasil**: Digital signature requirements
 
 ### Validation Rules
+
 - Maximum 24 hours for cancellation
 - Minimum 15 characters for cancellation justification
 - Proper CFOP (Código Fiscal de Operações) for each operation
@@ -712,16 +723,19 @@ while (retryCount < maxRetries) {
 ## Performance Considerations
 
 ### Database Optimization
+
 - Indexed columns: `chaveAcesso`, `numeroNFe`, `status`, `nsu`
 - Partitioning by date for large volumes
 - Regular cleanup of old temporary records
 
 ### Network Optimization
+
 - Connection pooling for ACBr communication
 - Retry logic with exponential backoff
 - Timeout configurations for SEFAZ calls
 
 ### Memory Management
+
 - Stream processing for large XML files
 - Proper resource cleanup in ACBr library calls
 - Connection management for TCP sockets
@@ -729,12 +743,14 @@ while (retryCount < maxRetries) {
 ## Monitoring and Logging
 
 ### System Monitoring
+
 - NFe processing status dashboard
 - SEFAZ communication health checks
 - Certificate expiration alerts
 - Queue depth monitoring
 
 ### Audit Trail
+
 - Complete NFe lifecycle logging
 - User action tracking
 - Error occurrence patterns

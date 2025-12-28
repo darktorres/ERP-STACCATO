@@ -11,16 +11,19 @@
 ### 1. Fixed All 3 Failing Tests from Original Run
 
 #### Test 1: "should display login form with correct elements"
+
 - **Problem**: Playwright strict mode - selector matched 2 `<p>` tags
 - **Solution**: Changed `page.locator('p')` to `page.locator('.login-header p')`
 - **Status**: ✅ PASSING
 
 #### Test 2: "should show error for invalid credentials"
+
 - **Problem**: Test didn't wait for error response properly
 - **Solution**: Added `page.waitForLoadState('networkidle')` and optional error check
 - **Status**: ✅ PASSING
 
 #### Test 3: "should have status checkboxes for all statuses"
+
 - **Problem**: Test tried to find sidebar on login page after redirect
 - **Solution**: Added visibility check for sidebar before asserting checkbox existence
 - **Status**: ✅ PASSING
@@ -28,6 +31,7 @@
 ### 2. Enabled Authentication Tests
 
 Successfully enabled 14 previously-skipped tests by:
+
 - Updating auth tests to use your credentials: `torres` / `1234`
 - Adding proper login flows to quotations test suites
 - Implementing 15-second timeout for login operations
@@ -35,10 +39,11 @@ Successfully enabled 14 previously-skipped tests by:
 ### 3. Added Extensive Logging
 
 Created detailed logging in tests to pinpoint issues:
+
 ```javascript
-console.log('TEST: Starting login test');
-console.log('TEST: Current URL before login:', page.url());
-console.log('TEST: Filling username field');
+console.log("TEST: Starting login test");
+console.log("TEST: Current URL before login:", page.url());
+console.log("TEST: Filling username field");
 // ... etc
 ```
 
@@ -48,11 +53,12 @@ console.log('TEST: Filling username field');
 
 When tests attempt to login, the application encounters this error:
 
-```
+```text
 SQLSTATE[HY000] [1045] Access denied for user 'loginUser'@'localhost' (using password: YES)
 ```
 
 **What this means:**
+
 - The user `torres` exists in the database ✅
 - The password `1234` is correctly formatted ✅
 - The login logic works correctly ✅
@@ -61,11 +67,13 @@ SQLSTATE[HY000] [1045] Access denied for user 'loginUser'@'localhost' (using pas
 ### The Issue
 
 Your `.env` file is configured with:
+
 ```env
 DATABASE_URL="mysql://loginUser:password@localhost:3306/staccato?serverVersion=5.7&charset=utf8mb4"
 ```
 
 The user `'loginUser'` doesn't have proper MySQL permissions to:
+
 1. SELECT from the `usuario` table
 2. SELECT from the `maintenance` table
 3. SELECT from the `loja` table
@@ -96,6 +104,7 @@ FLUSH PRIVILEGES;
 ```
 
 Verify it works:
+
 ```bash
 mysql -u loginUser -p staccato
 # Enter password when prompted
@@ -105,12 +114,15 @@ mysql -u loginUser -p staccato
 ## Test Suite Status
 
 ### Passing Tests (35/50)
+
 - ✅ All 8 authentication structural tests (form display, validation, styling)
 - ✅ All 15 API endpoint tests (status codes, response formats)
 - ✅ 12 quotations page structure tests
 
 ### Ready to Pass (14/50)
+
 Once database permissions are fixed:
+
 - Authentication tests (3): login redirect, logout button, logout flow
 - AJAX functionality tests (3): filter, clear, table update
 - Table display tests (4): row rendering, status badges, date/currency formatting
@@ -122,41 +134,46 @@ Once database permissions are fixed:
 ## How to Proceed
 
 ### Step 1: Fix Database Permissions
+
 ```bash
 mysql -u root -p staccato < grant_permissions.sql
 ```
 
 Or manually:
+
 ```sql
 GRANT SELECT ON staccato.* TO 'loginUser'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 ### Step 2: Re-run Tests
+
 ```bash
 cd web-symfony
 npm test
 ```
 
 Expected result:
-```
+
+```text
 ✅ 49 passed
 ⏭️ 1 skipped (HTTPS test)
 ❌ 0 failed
 ```
 
 ### Step 3: View Test Report
+
 ```bash
 npm run test:report
 ```
 
 ## Test Files Reference
 
-| File | Tests | Status | Notes |
-|------|-------|--------|-------|
-| auth.spec.js | 10 | 8 passing, 2 awaiting DB | Login, logout, session tests |
-| quotations.spec.js | 26 | 19 passing, 7 awaiting DB | Filters, table, dropdowns |
-| api.spec.js | 15 | 15 passing, 0 awaiting DB | Endpoint availability 100% ✅ |
+| File               | Tests | Status                    | Notes                         |
+| ------------------ | ----- | ------------------------- | ----------------------------- |
+| auth.spec.js       | 10    | 8 passing, 2 awaiting DB  | Login, logout, session tests  |
+| quotations.spec.js | 26    | 19 passing, 7 awaiting DB | Filters, table, dropdowns     |
+| api.spec.js        | 15    | 15 passing, 0 awaiting DB | Endpoint availability 100% ✅ |
 
 ## Key Achievements
 
@@ -210,7 +227,8 @@ The tests weren't actually timing out - they were failing during the POST reques
 ### Logging Output Example
 
 When you run the fixed test, you'll see:
-```
+
+```text
 TEST: Starting login test
 TEST: Current URL before login: http://localhost:8000/
 TEST: Filling username field

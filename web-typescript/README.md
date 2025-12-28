@@ -10,7 +10,7 @@ Web migration of the C++ ERP Staccato application.
 
 ## Project Structure
 
-```
+```text
 web/
 ├── packages/
 │   ├── backend/          # NestJS backend
@@ -84,9 +84,11 @@ npm run dev:frontend # http://localhost:5173
 ## Migration Status
 
 ### Completed
+
 - [x] Login Dialog (basic)
 
 ### Pending
+
 - [ ] Main Window
 - [ ] Compras module
 - [ ] Estoque module

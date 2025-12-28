@@ -27,6 +27,7 @@ The logistics system is organized around the following key modules:
 #### Core Tables
 
 **veiculo_has_produto** - Central logistics tracking table
+
 ```sql
 - id (int) - Primary key
 - idEvento (int) - Event grouping ID for logistics operations
@@ -42,6 +43,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **transportadora_has_veiculo** - Vehicle management
+
 ```sql
 - idVeiculo (int) - Primary key
 - idTransportadora (int) - Transportation company ID
@@ -52,6 +54,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **cliente_has_endereco** - Customer addresses with logistics data
+
 ```sql
 - idEndereco (int) - Primary key
 - idCliente (int) - Customer ID
@@ -69,6 +72,7 @@ The logistics system is organized around the following key modules:
 #### Key Views
 
 **view_calendario_entrega** - Delivery calendar view
+
 ```sql
 - Aggregates delivery data by date and vehicle
 - Shows weight, transportation company, and delivery details
@@ -76,6 +80,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **view_calendario_carga** - Cargo/load view
+
 ```sql
 - Shows detailed cargo information for deliveries
 - Includes NFe data, customer info, and delivery status
@@ -83,6 +88,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **view_calendario_produto** - Product delivery view
+
 ```sql
 - Product-level delivery tracking
 - Includes stock information, quantities, and delivery details
@@ -90,6 +96,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **view_entrega_pendente** - Pending deliveries
+
 ```sql
 - Lists all deliveries awaiting scheduling or execution
 - Includes customer data, deadlines, and financial status
@@ -97,6 +104,7 @@ The logistics system is organized around the following key modules:
 ```
 
 **view_agendar_entrega** - Delivery scheduling view
+
 ```sql
 - Products ready for delivery scheduling
 - Includes stock status, financial clearance, and delivery requirements
@@ -167,13 +175,14 @@ graph TD
 **Purpose**: Main container for all logistics operations
 **Location**: `src/tablogistica.cpp`
 
-#### Key Methods:
+#### Key Methods
+
 ```cpp
 void TabLogistica::updateTables() -> void
 // Updates all logistics widgets based on current tab
 // Manages lazy loading of logistics components
 
-void TabLogistica::resetTables() -> void  
+void TabLogistica::resetTables() -> void
 // Resets all logistics table models
 // Used for data refresh operations
 
@@ -182,10 +191,11 @@ void TabLogistica::on_tabWidgetLogistica_currentChanged() -> void
 // Optimizes performance by updating only active tabs
 ```
 
-#### Tab Structure:
+#### Tab Structure
+
 - **Agendar Coleta**: Collection scheduling
 - **Coleta**: Active collections
-- **Recebimento**: Receiving operations  
+- **Recebimento**: Receiving operations
 - **Agendar Entrega**: Delivery scheduling
 - **Entregas**: Active deliveries
 - **Caminhões**: Vehicle management
@@ -199,7 +209,7 @@ void TabLogistica::on_tabWidgetLogistica_currentChanged() -> void
 **Purpose**: Manages delivery scheduling and planning
 **Location**: `src/widgetlogisticaagendarentrega.cpp`
 
-#### Key Methods:
+#### Key Methods - WidgetLogisticaAgendarEntrega
 
 ```cpp
 void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) -> void
@@ -207,7 +217,7 @@ void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
 // Validates stock availability and financial clearance
 // Updates vehicle load calculations
 
-void WidgetLogisticaAgendarEntrega::processRows() -> void  
+void WidgetLogisticaAgendarEntrega::processRows() -> void
 // Processes scheduled deliveries
 // Updates database status and creates logistics events
 // Generates event IDs for tracking
@@ -228,7 +238,8 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() -> void
 // Updates real-time capacity indicators
 ```
 
-#### Business Logic:
+#### Business Logic
+
 - **Financial Validation**: Checks payment status before allowing delivery scheduling
 - **Stock Verification**: Validates product availability in warehouse
 - **Capacity Planning**: Manages vehicle load optimization
@@ -240,7 +251,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() -> void
 **Purpose**: Manages active deliveries and execution
 **Location**: `src/widgetlogisticaentregas.cpp`
 
-#### Key Methods:
+#### Key Methods - WidgetLogisticaEntregas
 
 ```cpp
 void WidgetLogisticaEntregas::confirmarEntrega(QDate dataRealEnt, QString entregou, QString recebeu) -> void
@@ -274,7 +285,8 @@ void WidgetLogisticaEntregas::processarConsultaNFe(int idNFe, QString xml) -> vo
 // Enables delivery execution after NFe authorization
 ```
 
-#### Features:
+#### Features
+
 - **NFe Integration**: Complete Brazilian tax document management
 - **Delivery Confirmation**: Photo capture and signature collection
 - **Real-time Tracking**: Status updates throughout delivery process
@@ -286,7 +298,7 @@ void WidgetLogisticaEntregas::processarConsultaNFe(int idNFe, QString xml) -> vo
 **Purpose**: Freight calculation and route optimization
 **Location**: `src/calculofrete.cpp`
 
-#### Key Methods:
+#### Key Methods - CalculoFrete
 
 ```cpp
 void CalculoFrete::qualp() -> void
@@ -310,7 +322,7 @@ double CalculoFrete::getDistancia() -> double
 // Supports route optimization
 ```
 
-#### Freight Calculation Algorithm:
+#### Freight Calculation Algorithm
 
 ```mermaid
 graph TD
@@ -329,7 +341,8 @@ graph TD
     K --> L[Final Freight Price * 1.2 margin]
 ```
 
-#### Cost Components:
+#### Cost Components
+
 1. **Southern Transport**: R$220/ton for products from southern suppliers
 2. **Vehicle Costs**: Driver and helper daily rates
 3. **Route Costs**: Fuel, tolls, and distance via QualP API
@@ -341,7 +354,7 @@ graph TD
 **Purpose**: Vehicle and transportation management
 **Location**: `src/widgetlogisticacaminhao.cpp`
 
-#### Key Methods:
+#### Key Methods - WidgetLogisticaCaminhao
 
 ```cpp
 void WidgetLogisticaCaminhao::setupTables() -> void
@@ -361,15 +374,17 @@ void WidgetLogisticaCaminhao::on_table_selectionChanged() -> void
 
 **Purpose**: Schedules collections from suppliers
 **Key Features**:
+
 - Supplier-based filtering and planning
 - Vehicle capacity management
 - Collection date optimization
 - Direct receipt processing for immediate availability
 
-#### WidgetLogisticaColeta  
+#### WidgetLogisticaColeta
 
 **Purpose**: Manages active collections
 **Key Features**:
+
 - Collection status tracking
 - Supplier coordination
 - Receiving date planning
@@ -382,7 +397,8 @@ void WidgetLogisticaCaminhao::on_table_selectionChanged() -> void
 **Purpose**: Visual calendar planning for all logistics operations
 **Location**: `src/widgetlogisticacalendario.cpp`
 
-#### Key Features:
+#### Key Features
+
 - **Weekly View**: Shows 7-day logistics planning
 - **Vehicle Filtering**: Filter by transportation company and vehicle
 - **Load Visualization**: Shows morning/afternoon schedules
@@ -406,12 +422,14 @@ void WidgetLogisticaCalendario::listarVeiculos() -> void
 ### Vehicle Types and Capacity
 
 **Large Truck (Caminhão Grande)**:
+
 - Capacity: 4,300 kg (configurable)
 - Driver cost: R$ variable per day
-- Helper cost: R$ variable per day  
+- Helper cost: R$ variable per day
 - Fuel consumption: configurable km/L
 
 **Small Truck (Caminhão Pequeno)**:
+
 - Capacity: 2,000 kg (configurable)
 - Lower operating costs
 - Single driver operation
@@ -447,12 +465,14 @@ The system integrates with QualP API for Brazilian route optimization:
 ### NFe (Nota Fiscal Eletrônica) Integration
 
 **Electronic Invoice Requirements**:
+
 - Mandatory for all deliveries
 - Real-time tax authority validation
 - Electronic signature and authentication
 - Delivery authorization dependent on NFe approval
 
 **NFe Types in Logistics**:
+
 - **NFe Saída**: Standard outbound invoice
 - **NFe Futura**: Future dated invoice for advanced planning
 - **NFe Após Futura**: Invoice generated after future invoice
@@ -460,6 +480,7 @@ The system integrates with QualP API for Brazilian route optimization:
 ### Delivery Documentation
 
 **Required Documents**:
+
 1. **Delivery Protocol**: Excel-based delivery confirmation
 2. **Delivery Checklist**: Driver verification document
 3. **NFe DANFE**: Printed tax document
@@ -469,6 +490,7 @@ The system integrates with QualP API for Brazilian route optimization:
 ### Geographic Coverage
 
 **Service Areas**:
+
 - Full coverage within operational states
 - Excluded cities list (cidadesSemQualp) for special handling
 - Route optimization for Brazilian road network
@@ -489,10 +511,10 @@ stateDiagram-v2
     ENTREGA_AGEND --> EM_ENTREGA: NFe Authorized
     EM_ENTREGA --> ENTREGUE: Delivery Confirmed
     ENTREGUE --> [*]
-    
+
     ESTOQUE --> REPO_ENTREGA: Reposition Required
     REPO_ENTREGA --> ENTREGA_AGEND: Ready for Delivery
-    
+
     CANCELADO --> [*]
     DEVOLVIDO --> [*]
 ```
@@ -503,12 +525,12 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> ENTREGA_AGEND: Delivery Scheduled
     [*] --> EM_COLETA: Collection Scheduled
-    
+
     ENTREGA_AGEND --> EM_ENTREGA: NFe Authorized
     EM_ENTREGA --> ENTREGUE: Delivery Confirmed
-    
+
     EM_COLETA --> COLETADO: Collection Confirmed
-    
+
     ENTREGUE --> FINALIZADO: Process Complete
     COLETADO --> FINALIZADO: Process Complete
     FINALIZADO --> [*]
@@ -519,29 +541,33 @@ stateDiagram-v2
 ### Sales Module Integration
 
 **Data Flow**:
+
 - Sales orders trigger logistics planning
 - Financial status controls delivery authorization
 - Product availability drives collection scheduling
 - Customer addresses determine delivery zones
 
 **Key Integration Points**:
+
 ```cpp
 // Update sales status based on logistics operations
 Sql::updateVendaStatus(const QStringList &idVendas) -> void
 
-// Link sales products to logistics events  
+// Link sales products to logistics events
 venda_has_produto2.idVendaProduto2 -> veiculo_has_produto.idVendaProduto2
 ```
 
 ### Inventory Module Integration
 
 **Stock Management**:
+
 - Real-time stock allocation for deliveries
 - Collection planning based on stock requirements
 - Warehouse location tracking (CD vs Store)
 - Quality control integration
 
 **Key Integration Points**:
+
 ```cpp
 // Stock consumption tracking
 estoque_has_consumo -> veiculo_has_produto
@@ -553,12 +579,14 @@ estoque.idBloco -> galpao.idBloco
 ### Financial Module Integration
 
 **Financial Controls**:
+
 - Payment verification before delivery scheduling
 - Freight cost calculation and approval
 - Transportation cost tracking
 - GARE tax payment scheduling
 
 **Financial Status Types**:
+
 - **PENDENTE**: Payment pending
 - **CONFERIDO**: Payment verified but not authorized
 - **LIBERADO**: Authorized for delivery
@@ -593,12 +621,14 @@ estoque.idBloco -> galpao.idBloco
 
 **Purpose**: Brazilian route calculation and optimization
 **Features**:
+
 - Real-time distance calculation
 - Toll cost estimation
 - Fuel consumption calculation
 - Multi-stop route optimization
 
 **API Configuration**:
+
 ```sql
 -- Stored in loja table
 apiQualp: API endpoint URL with parameters
@@ -612,6 +642,7 @@ consumoCaminhaoGrande: Large truck fuel consumption
 
 **Purpose**: Navigation and route visualization
 **Features**:
+
 - Turn-by-turn navigation for drivers
 - Real-time traffic information
 - Route alternatives
@@ -668,6 +699,7 @@ consumoCaminhaoGrande: Large truck fuel consumption
 ### System Parameters
 
 **Vehicle Configuration** (stored in loja table):
+
 ```sql
 capacidadeCaminhaoGrande: Large truck capacity (kg)
 capacidadeCaminhaoPequeno: Small truck capacity (kg)
@@ -683,6 +715,7 @@ cidadesSemQualp: Excluded cities for route calculation
 ```
 
 **QualP Integration**:
+
 ```sql
 apiQualp: QualP API endpoint with parameter placeholders
 cabecalhosQualp: HTTP headers for API authentication
@@ -692,6 +725,7 @@ eixosCaminhaoGrande: Vehicle axle configuration for QualP
 ### User Permissions
 
 **Logistics Roles**:
+
 - **Logistics Manager**: Full access to all logistics operations
 - **Logistics Operator**: Delivery and collection scheduling
 - **Driver**: Delivery confirmation and status updates
@@ -728,6 +762,7 @@ The ERP Staccato logistics system provides comprehensive management of the compl
 The system's modular architecture, robust error handling, and extensive integration capabilities make it suitable for businesses of various sizes while maintaining the flexibility to adapt to changing business requirements and regulatory demands.
 
 Key strengths include:
+
 - Complete Brazilian compliance (NFe, tax requirements)
 - Advanced route optimization with QualP integration
 - Comprehensive vehicle and capacity management

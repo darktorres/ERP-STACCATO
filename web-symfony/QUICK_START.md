@@ -37,22 +37,23 @@ npm run test:report
 
 ## Default Routes
 
-| URL | Purpose |
-|-----|---------|
-| `http://localhost:8000/` | Login page |
+| URL                                | Purpose                     |
+| ---------------------------------- | --------------------------- |
+| `http://localhost:8000/`           | Login page                  |
 | `http://localhost:8000/orcamentos` | Quotations (requires login) |
-| `http://localhost:8000/logout` | Logout |
+| `http://localhost:8000/logout`     | Logout                      |
 
 ## Test Credentials
 
 For testing (requires database setup):
 
-```
+```text
 Username: testuser
 Password: senha
 ```
 
 Create test user:
+
 ```sql
 INSERT INTO usuario (user, password, nome, tipo, idLoja, desativado)
 VALUES ('testuser', SHA_PASSWORD('senha'), 'Test User', 'GERENTE LOJA', 1, FALSE);
@@ -61,12 +62,14 @@ VALUES ('testuser', SHA_PASSWORD('senha'), 'Test User', 'GERENTE LOJA', 1, FALSE
 ## Features
 
 ### Login Page
+
 - Username and password fields
 - Remember username option
 - Error message display
 - Form validation
 
 ### Quotations Page
+
 - Filtered list table
 - 8 different filters
 - AJAX dynamic updates
@@ -95,11 +98,13 @@ npm run test:report
 ## Troubleshooting
 
 ### Port 8000 in use
+
 ```bash
 php bin/console server:run --port=8001
 ```
 
 ### Database not found
+
 ```bash
 # Create database
 mysql -u root -p
@@ -107,6 +112,7 @@ CREATE DATABASE staccato;
 ```
 
 ### Tests failing
+
 ```bash
 # Run in debug mode
 npm run test:debug
@@ -142,7 +148,7 @@ JWT_SECRET=StaccatoERP2024!@#SymfonyWebAPISecretKey
 
 - [ ] Dependencies installed (Composer + NPM)
 - [ ] .env configured with database credentials
-- [ ] Server running on http://localhost:8000
+- [ ] Server running on <http://localhost:8000>
 - [ ] Login page loads and displays
 - [ ] All 52 tests passing
 - [ ] Can login with valid credentials

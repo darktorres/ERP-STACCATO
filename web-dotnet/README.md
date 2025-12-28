@@ -11,7 +11,7 @@ This is a proof-of-concept implementation of the ERP Staccato web stack using .N
 
 ## Project Structure
 
-```
+```text
 web-dotnet/
 ├── src/
 │   ├── Shared/                    # Shared types and contracts
@@ -33,6 +33,7 @@ web-dotnet/
 ## Getting Started
 
 ### Prerequisites
+
 - .NET 9 SDK or later
 - Visual Studio 2022 / VS Code with C# extensions
 - MariaDB/MySQL database (shared with C++ application)
@@ -40,6 +41,7 @@ web-dotnet/
 ### Running the Application
 
 #### Backend (ASP.NET Core)
+
 ```bash
 cd src/Backend
 dotnet restore
@@ -48,6 +50,7 @@ dotnet run
 ```
 
 #### Frontend (Blazor WebAssembly)
+
 ```bash
 cd src/Frontend
 dotnet restore
@@ -58,6 +61,7 @@ dotnet run
 ## Features (POC)
 
 ### Implemented
+
 - [ ] Authentication (JWT)
 - [ ] Orcamento (Budget) List with Filtering
 - [ ] Role-based Access Control
@@ -65,6 +69,7 @@ dotnet run
 - [ ] Dark theme UI
 
 ### Planned
+
 - [ ] Create/Edit Orcamento
 - [ ] Followup Management
 - [ ] Excel Export
@@ -74,6 +79,7 @@ dotnet run
 ## Development Notes
 
 This POC mirrors the functionality of the TypeScript implementation:
+
 - Same database models and views
 - Equivalent filter logic
 - Compatible authentication
@@ -81,14 +87,14 @@ This POC mirrors the functionality of the TypeScript implementation:
 
 ## Comparison with TypeScript Version
 
-| Feature | TypeScript | .NET | Status |
-|---------|-----------|------|--------|
-| Backend Framework | NestJS | ASP.NET Core | ✓ |
-| Frontend Framework | React | Blazor WASM | ✓ |
-| State Management | Zustand | Cascading Parameters | ✓ |
-| API Communication | tRPC | REST | ✓ |
-| Database Access | Prisma | EF Core | ✓ |
-| ORM Pattern | Schema-first | Code-first | ✓ |
+| Feature            | TypeScript   | .NET                 | Status |
+| ------------------ | ------------ | -------------------- | ------ |
+| Backend Framework  | NestJS       | ASP.NET Core         | ✓      |
+| Frontend Framework | React        | Blazor WASM          | ✓      |
+| State Management   | Zustand      | Cascading Parameters | ✓      |
+| API Communication  | tRPC         | REST                 | ✓      |
+| Database Access    | Prisma       | EF Core              | ✓      |
+| ORM Pattern        | Schema-first | Code-first           | ✓      |
 
 ## Next Steps
 

@@ -19,7 +19,7 @@
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | ✅ Feito |
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | ✅ Feito |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | ✅ Feito |
-| 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
+| 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | ✅ Feito |
 | 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | ✅ Feito |
 | 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | ✅ Feito |
@@ -283,19 +283,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 10. Substituição de Relatórios
+## 10. Substituição de Relatórios ✅
 
-**Problema**: Sistema usa LimeReport, precisa de estratégia de substituição.
+**Arquivo**: [`tecnico/modulos/relatorios.md`](../tecnico/modulos/relatorios.md)
 
-**Arquivo sugerido**: `tecnico/modulos/relatorios.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Inventário de relatórios LimeReport existentes
-- Classificação (crítico vs nice-to-have)
-- Escolha de biblioteca (DomPDF, Laravel Excel, Browsershot)
-- Templates de relatório
-- Exportação (PDF, Excel, CSV)
+- ✅ Inventário de relatórios LimeReport (5 templates)
+- ✅ Inventário de modelos Excel (3 templates)
+- ✅ Classificação por tipo (vendas, compras, estoque, financeiro, fiscal)
+- ✅ Escolha de biblioteca (DomPDF, Laravel Excel, Browsershot, Snappy)
+- ✅ Arquitetura de relatórios com ReportInterface
+- ✅ Exportação PDF, Excel, CSV
+- ✅ Exemplos completos de implementação
+- ✅ Estratégia de migração em 4 fases
 
 ---
 
@@ -537,14 +538,14 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 18 | Impressão - DomPDF, Laravel Excel, ACBr REST, templates |
 | 2025-12-28 | Item 8  | DevOps - Docker, CI/CD, ambientes, backup, rollback      |
 | 2025-12-28 | Item 9  | Performance - metas, cache Redis, queries, índices       |
+| 2025-12-28 | Item 10 | Relatórios - já documentado em modulos/relatorios.md     |
 
 ### Próximos
 
 **Baixa Prioridade:**
-1. [ ] Item 10 - Substituição de relatórios
-2. [ ] Item 19 - Dicionário de dados
-3. [ ] Item 20 - Matriz de suporte browser/dispositivo
-4. [ ] Item 21 - Auditoria de dependências
+1. [ ] Item 19 - Dicionário de dados
+2. [ ] Item 20 - Matriz de suporte browser/dispositivo
+3. [ ] Item 21 - Auditoria de dependências
 
 ---
 

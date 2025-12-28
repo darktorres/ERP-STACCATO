@@ -11,7 +11,7 @@
 | #   | Item                                                                          | Prioridade | Status   |
 | --- | ----------------------------------------------------------------------------- | ---------- | -------- |
 | 1   | [Specs de Módulos Faltantes](#1-specs-de-módulos-faltantes)                   | Alta       | ✅ Feito |
-| 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | Pendente |
+| 2   | [ADRs em Aberto](#2-adrs-em-aberto)                                           | Alta       | ✅ Feito |
 | 3   | [Arquitetura de Segurança](#3-arquitetura-de-segurança)                       | Alta       | Pendente |
 | 4   | [Design de API](#4-design-de-api)                                             | Média      | Pendente |
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | Pendente |
@@ -114,15 +114,31 @@
 
 **Arquivo**: `estrategia/02-decisoes.md`
 
-| ADR     | Decisão                | Status         | Ação                             |
+| ADR     | Decisão                | Status         | Decisão Final                    |
 | ------- | ---------------------- | -------------- | -------------------------------- |
-| ADR-003 | Framework Frontend     | Em Aberto      | Decidir: Livewire vs Inertia+Vue |
+| ADR-003 | Framework Frontend     | ✅ **Fechado** | Inertia + Vue 3                  |
 | ADR-004 | Integração NFe         | ✅ **Fechado** | ACBrMonitorConsole ou sped-nfe   |
-| ADR-005 | Estratégia de Migração | Em Aberto      | Confirmar Strangler Fig          |
+| ADR-005 | Estratégia de Migração | ✅ **Fechado** | Strangler Fig                    |
+| ADR-006 | Multi-tenancy          | ✅ **Fechado** | BD Único com loja_id             |
+
+### ~~ADR-003: Framework Frontend~~ ✅ Fechado
+
+Fechado em 2025-12-28. Decisão: **Inertia + Vue 3** com TypeScript, Tailwind CSS e PrimeVue.
+Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-003-seleção-de-framework-frontend)
 
 ### ~~ADR-004: Integração NFe~~ ✅ Fechado
 
 Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-004-abordagem-de-integração-nfe)
+
+### ~~ADR-005: Estratégia de Migração~~ ✅ Fechado
+
+Fechado em 2025-12-28. Decisão: **Strangler Fig Pattern** com banco de dados compartilhado.
+Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-005-estratégia-de-migração)
+
+### ~~ADR-006: Multi-tenancy~~ ✅ Fechado
+
+Fechado em 2025-12-28. Decisão: **BD Único com coluna loja_id** (padrão atual).
+Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-de-multi-tenancy)
 
 ---
 
@@ -277,13 +293,14 @@ Fechado em 2025-12-28. Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes
 | 2025-12-28 | Item A | Fechado ADR-004: NFe via ACBrMonitorConsole ou sped-nfe |
 | 2025-12-28 | Item B | Corrigidos links quebrados em 8 arquivos                |
 | 2025-12-28 | Item 1 | Criadas specs de todos os 6 módulos faltantes           |
+| 2025-12-28 | Item 2 | Fechados todos os ADRs (003, 005, 006)                  |
 
 ### Próximos
 
-1. [ ] Item 2 - Fechar ADRs em aberto (ADR-003, ADR-005)
-2. [ ] Item 3 - Arquitetura de segurança
-3. [ ] Item 6 - Scripts de migração de dados
-4. [ ] Item 4 - Design de API
+1. [ ] Item 3 - Arquitetura de segurança
+2. [ ] Item 6 - Scripts de migração de dados
+3. [ ] Item 4 - Design de API
+4. [ ] Item 5 - Estratégia de testes
 
 ---
 

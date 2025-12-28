@@ -526,7 +526,7 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 
 ## Documentos Relacionados
 
-- [business/02-stock-flows.md](../business/02-stock-flows.md) - Análise de fluxo de estoque atual
-- [business/01-flows-overview.md](../business/01-flows-overview.md) - Documentação completa de fluxos
-- [technical/02-database.md](../technical/02-database.md) - Proposta de schema de banco de dados
-- [technical/04-infrastructure.md](../technical/04-infrastructure.md) - Arquitetura de auditoria/temporal
+- [negocios/02-fluxos-estoque.md](../negocios/02-fluxos-estoque.md) - Análise de fluxo de estoque atual
+- [negocios/01-visao-geral-fluxos.md](../negocios/01-visao-geral-fluxos.md) - Documentação completa de fluxos
+- [tecnico/02-banco-dados.md](../tecnico/02-banco-dados.md) - Proposta de schema de banco de dados
+- [tecnico/04-infraestrutura.md](../tecnico/04-infraestrutura.md) - Arquitetura de auditoria/temporal

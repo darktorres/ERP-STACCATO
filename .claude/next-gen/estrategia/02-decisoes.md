@@ -12,7 +12,7 @@
 | ADR-001 | Usar Laravel como framework backend | **Aceito** | 2025-12-27 |
 | ADR-002 | Usar PostgreSQL como banco de dados | **Aceito** | 2025-12-27 |
 | ADR-003 | Seleção de framework frontend | **Em Aberto** | - |
-| ADR-004 | Abordagem de integração NFe | **Em Aberto** | - |
+| ADR-004 | Abordagem de integração NFe | **Aceito** | 2025-12-28 |
 | ADR-005 | Estratégia de migração | **Em Aberto** | - |
 | ADR-006 | Abordagem de multi-tenancy | **Em Aberto** | - |
 
@@ -92,7 +92,7 @@ Necessidade de escolher abordagem frontend. Opções:
 
 ### Análise de Opções
 
-Ver análise detalhada em [03-frontend.md](./03-frontend.md)
+Ver análise detalhada em [../tecnico/03-frontend.md](../tecnico/03-frontend.md)
 
 | Critério | Livewire | Inertia+Vue | Inertia+React | SPA Completo |
 |----------|----------|-------------|---------------|--------------|
@@ -115,31 +115,48 @@ _A ser preenchido após decisão_
 ## ADR-004: Abordagem de Integração NFe
 
 ### Status
-**Em Aberto** - Decisão necessária
+**Aceito** - 2025-12-28
 
 ### Contexto
 Necessidade de integrar com sistema de nota fiscal eletrônica brasileiro (NFe).
-Implementação atual usa ACBrLib (DLL Windows).
+Implementação atual usa ACBrMonitorPlus (Windows GUI) em máquina de usuário.
+Servidor de produção é Linux headless (sem interface gráfica).
 
-### Opções
+### Opções Avaliadas
 
 | Opção | Prós | Contras |
 |-------|------|---------|
-| **Manter ACBr** (via API) | Funciona, gratuito | Requer Windows, deploy complexo |
-| **Provedor SaaS** (Focus, Enotas) | Simples, gerenciado | Custo mensal, vendor lock-in |
-| **PHP Nativo** (sped-nfe) | Controle total, gratuito | Mais trabalho de dev, manutenção |
-
-Ver análise detalhada em [04-modules/nfe.md](./04-modules/nfe.md)
-
-### Recomendação
-**Começar com SaaS** (Focus NFe ou Enotas), abstrair atrás de interface.
-Considerar PHP nativo depois se o volume justificar.
+| **ACBrMonitorConsole** | Funciona em Linux headless, gratuito, comunicação TCP | Requer instalação/manutenção do ACBr |
+| **sped-nfe (PHP)** | 100% PHP nativo, sem dependências externas | Mais trabalho de dev, manutenção de XMLs |
+| ~~**ACBrLib**~~ | - | **Descartado**: Requer GUI (FortesReport) |
+| ~~**SaaS**~~ | - | **Fora de escopo**: Custo mensal, vendor lock-in |
 
 ### Decisão
-_Pendente análise de custos e input da equipe_
+**Opção 1 (Recomendada): ACBrMonitorConsole**
+- Executar ACBrMonitorConsole no servidor Linux
+- Comunicação via socket TCP (porta 3434)
+- Implementar `AcbrNfeService` em Laravel como wrapper
+
+**Opção 2 (Alternativa): sped-nfe**
+- Biblioteca PHP nativa (nfephp-org/sped-nfe)
+- Controle total sobre XMLs e assinaturas
+- Usar se quiser eliminar dependência do ACBr
+
+### Justificativa
+1. **ACBrLib não funciona em Linux headless** - FortesReport requer X server
+2. **ACBrMonitorConsole funciona em modo texto** - Solução comprovada da comunidade ACBr
+3. **SaaS fora de escopo** - Decisão do cliente de não usar serviços pagos
+4. **Interface abstrata** - Permite trocar implementação sem afetar código de negócio
 
 ### Consequências
-_A ser preenchido após decisão_
+- Servidor precisa ter ACBrMonitorConsole instalado e configurado
+- Certificado digital A1 configurado no servidor
+- Serviço systemd para manter ACBrMonitorConsole rodando
+- Comunicação via socket TCP entre Laravel e ACBr
+
+### Referências
+- Análise detalhada: [tecnico/modulos/nfe.md](../tecnico/modulos/nfe.md)
+- Fórum ACBr sobre Linux: https://www.projetoacbr.com.br/forum/
 
 ---
 
@@ -159,7 +176,7 @@ Necessidade de decidir como fazer a transição do desktop C++ para web Laravel.
 | Strangler Fig | 12-18 meses | Médio | Médio |
 | Execução Paralela | 18-24 meses | Baixo | Alto |
 
-Ver análise detalhada em [05-migration-plan.md](./05-migration-plan.md)
+Ver análise detalhada em [01-plano-migracao.md](./01-plano-migracao.md)
 
 ### Recomendação
 **Strangler Fig** - Migração incremental com banco de dados compartilhado.

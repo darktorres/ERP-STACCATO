@@ -1143,8 +1143,8 @@ flowchart TB
 
 ## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Pontos de dor que isso aborda
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Detalhes L1/L2
-- [05-fifo-fix.md](./05-fifo-fix.md) - Implementação FIFO
-- [06-supplier-normalization.md](./06-supplier-normalization.md) - Normalização FK
-- [../business/](../business/) - Documentação de fluxos atuais
+- [03-melhorias.md](./03-melhorias.md) - Pontos de dor que isso aborda
+- [04-simplificacao-l1l2.md](./04-simplificacao-l1l2.md) - Detalhes L1/L2
+- [05-correcao-fifo.md](./05-correcao-fifo.md) - Implementação FIFO
+- [06-normalizacao-fornecedor.md](./06-normalizacao-fornecedor.md) - Normalização FK
+- [../negocios/](../negocios/) - Documentação de fluxos atuais

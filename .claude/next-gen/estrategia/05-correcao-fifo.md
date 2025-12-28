@@ -600,6 +600,6 @@ ALTER TABLE produto DROP COLUMN idEstoque;
 
 ## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Lista completa de melhorias
-- [../business/02-stock-flows.md](../business/02-stock-flows.md) - Análise de fluxo de estoque
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Achatamento de tabelas (afeta consumo)
+- [03-melhorias.md](./03-melhorias.md) - Lista completa de melhorias
+- [../negocios/02-fluxos-estoque.md](../negocios/02-fluxos-estoque.md) - Análise de fluxo de estoque
+- [04-simplificacao-l1l2.md](./04-simplificacao-l1l2.md) - Achatamento de tabelas (afeta consumo)

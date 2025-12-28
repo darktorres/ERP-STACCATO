@@ -528,6 +528,6 @@ $item = VendaItem::create([
 
 ## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Lista completa de melhorias
-- [04-l1l2-simplification.md](./04-l1l2-simplification.md) - Achatamento de tabelas (inclui fornecedor_id)
-- [../business/04-cadastros-flows.md](../business/04-cadastros-flows.md) - Fluxo de cadastro de fornecedor
+- [03-melhorias.md](./03-melhorias.md) - Lista completa de melhorias
+- [04-simplificacao-l1l2.md](./04-simplificacao-l1l2.md) - Achatamento de tabelas (inclui fornecedor_id)
+- [../negocios/04-fluxos-cadastros.md](../negocios/04-fluxos-cadastros.md) - Fluxo de cadastro de fornecedor

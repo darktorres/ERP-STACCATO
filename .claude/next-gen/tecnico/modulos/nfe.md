@@ -1038,3 +1038,12 @@ public function test_emitir_nfe_sucesso()
     $this->assertEquals(NfeStatus::AUTORIZADA, $nfe->fresh()->status);
 }
 ```
+
+---
+
+## Documentos Relacionados
+
+- [../09-integracoes.md](../09-integracoes.md) - Detalhes de protocolo ACBr e outras integrações
+- [../../negocios/03-fluxos-entrega-nfe.md](../../negocios/03-fluxos-entrega-nfe.md) - Fluxos de negócio NFe
+- [../05-seguranca.md](../05-seguranca.md) - Certificados digitais e segurança
+- [../07-testes.md](../07-testes.md) - Estratégia de testes

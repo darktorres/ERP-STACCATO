@@ -113,11 +113,11 @@ Mesma estrutura desatualizada do índice principal.
 - [x] Atualizar `meta/rastreador.md` com estrutura completa
 - [x] Corrigir `tecnico/modulos/_indice.md` (remover galpao, adicionar cadastros/relatorios)
 
-### Prioridade 1 (Importante)
+### Prioridade 1 (Importante) ✅ COMPLETO
 
-- [ ] Adicionar cross-references entre documentos relacionados:
-  - [ ] `02-banco-dados.md` ↔ `07-esquema-redesenhado.md`
-  - [ ] `09-integracoes.md` ↔ `modulos/nfe.md`
+- [x] Adicionar cross-references entre documentos relacionados:
+  - [x] `02-banco-dados.md` ↔ `07-esquema-redesenhado.md`
+  - [x] `09-integracoes.md` ↔ `modulos/nfe.md`
 
 ### Prioridade 2 (Decisão)
 
@@ -198,4 +198,4 @@ Mesma estrutura desatualizada do índice principal.
 - [x] Identificados problemas de organização
 - [x] Criado este documento de tracking
 - [x] Executar correções P0 ✅
-- [ ] Executar correções P1
+- [x] Executar correções P1 ✅

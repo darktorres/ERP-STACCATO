@@ -1148,6 +1148,7 @@ flowchart TB
 
 ## Documentos Relacionados
 
+- [../tecnico/02-banco-dados.md](../tecnico/02-banco-dados.md) - Princípios de banco de dados e problemas atuais
 - [03-melhorias.md](./03-melhorias.md) - Pontos de dor que isso aborda
 - [04-simplificacao-l1l2.md](./04-simplificacao-l1l2.md) - Detalhes L1/L2
 - [05-correcao-fifo.md](./05-correcao-fifo.md) - Implementação FIFO

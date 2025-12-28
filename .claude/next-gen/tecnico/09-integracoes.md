@@ -984,6 +984,7 @@ Log::channel('integrations')->info('Requisição externa', [
 
 ## Documentos Relacionados
 
-- [../tecnico/modulos/nfe.md](./modulos/nfe.md) - Spec do módulo NFe
-- [../tecnico/modulos/financeiro.md](./modulos/financeiro.md) - Spec do módulo Financeiro
-- [05-seguranca.md](./05-seguranca.md) - Segurança (certificados)
+- [modulos/nfe.md](./modulos/nfe.md) - Especificação completa do módulo NFe (emissão, consulta, cancelamento)
+- [modulos/financeiro.md](./modulos/financeiro.md) - Spec do módulo Financeiro (CNAB)
+- [05-seguranca.md](./05-seguranca.md) - Segurança (certificados digitais)
+- [../negocios/03-fluxos-entrega-nfe.md](../negocios/03-fluxos-entrega-nfe.md) - Fluxos de negócio relacionados

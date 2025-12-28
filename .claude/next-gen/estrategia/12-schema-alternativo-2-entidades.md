@@ -1190,6 +1190,285 @@ Isso valida a abordagem do **modelo 3-entidades**. Nenhum deles funde "item do p
 
 ---
 
+## Separação de Dados NFe (Nova Discussão)
+
+### Problema Atual
+
+O schema legado mistura dados de inventário com dados fiscais da NFe:
+
+**Tabela `estoque` (~70 colunas)** - armazena dados do XML da NFe do fornecedor:
+```
+Campos de inventário: quant, restante, lote, local, idBloco...
+Campos da NFe:        ncm, cest, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS,
+                      cstIPI, vIPI, cstPIS, vPIS, cstCOFINS, vCOFINS, valorGare...
+```
+
+**Tabela `estoque_has_consumo` (~50 colunas)** - duplica os campos para NFe de saída:
+```
+Campos de consumo: idEstoque, idVendaProduto2, quant...
+Campos da NFe:     ncm, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS... (repetidos!)
+```
+
+### Problemas
+
+1. **Duplicação de estrutura**: Mesmos ~30 campos NFe em duas tabelas
+2. **Mistura de responsabilidades**: Tabela de estoque não deveria armazenar detalhes fiscais
+3. **Difícil manutenção**: Mudança na legislação = alterar múltiplas tabelas
+4. **Não normalizado**: Dados da NFe pertencem à NFe, não ao estoque
+
+---
+
+### Opção A: Tabela nfe_itens Centralizada
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
+│    nfes     │────<│  nfe_itens  │     │      estoques       │
+│  (header)   │     │ (detalhes)  │<────│ nfe_entrada_item_id │
+└─────────────┘     └─────────────┘     └─────────────────────┘
+                           │
+                           │
+┌─────────────────────┐    │
+│  estoque_consumos   │────┘
+│ nfe_saida_item_id   │
+└─────────────────────┘
+```
+
+**nfe_itens** contém todos os campos fiscais:
+```sql
+CREATE TABLE nfe_itens (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfes(id),
+
+    -- Identificação
+    numero_item INTEGER NOT NULL,
+    produto_id INTEGER REFERENCES produtos(id),
+
+    -- Quantidades e valores
+    quantidade DECIMAL(15,4) NOT NULL,
+    valor_unitario DECIMAL(15,4),
+    valor_total DECIMAL(15,2),
+
+    -- Códigos fiscais
+    ncm VARCHAR(10),
+    cest VARCHAR(10),
+    cfop VARCHAR(5) NOT NULL,
+
+    -- ICMS
+    cst_icms VARCHAR(3),
+    origem VARCHAR(1),
+    modalidade_bc VARCHAR(1),
+    valor_bc DECIMAL(15,2),
+    aliquota_icms DECIMAL(5,2),
+    valor_icms DECIMAL(15,2),
+    -- ICMS-ST
+    modalidade_bc_st VARCHAR(1),
+    mva_st DECIMAL(5,2),
+    valor_bc_st DECIMAL(15,2),
+    aliquota_icms_st DECIMAL(5,2),
+    valor_icms_st DECIMAL(15,2),
+
+    -- IPI
+    cst_ipi VARCHAR(2),
+    valor_bc_ipi DECIMAL(15,2),
+    aliquota_ipi DECIMAL(5,2),
+    valor_ipi DECIMAL(15,2),
+
+    -- PIS
+    cst_pis VARCHAR(2),
+    valor_bc_pis DECIMAL(15,2),
+    aliquota_pis DECIMAL(5,2),
+    valor_pis DECIMAL(15,2),
+
+    -- COFINS
+    cst_cofins VARCHAR(2),
+    valor_bc_cofins DECIMAL(15,2),
+    aliquota_cofins DECIMAL(5,2),
+    valor_cofins DECIMAL(15,2),
+
+    -- Outros
+    valor_frete DECIMAL(15,2),
+    valor_seguro DECIMAL(15,2),
+    valor_desconto DECIMAL(15,2),
+    valor_outros DECIMAL(15,2),
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**estoques** fica limpo:
+```sql
+CREATE TABLE estoques (
+    id SERIAL PRIMARY KEY,
+    compra_item_id INTEGER REFERENCES compra_itens(id),
+    nfe_item_id INTEGER REFERENCES nfe_itens(id),  -- ← apenas FK
+
+    -- Apenas dados de inventário
+    produto_id INTEGER NOT NULL REFERENCES produtos(id),
+    quantidade DECIMAL(15,4) NOT NULL,
+    quantidade_disponivel DECIMAL(15,4) NOT NULL,
+    custo_unitario DECIMAL(15,4),
+    lote VARCHAR(50),
+    bloco_id INTEGER REFERENCES galpao_blocos(id),
+    data_entrada TIMESTAMP,
+    status estoque_status NOT NULL
+);
+```
+
+**estoque_consumos** também fica limpo:
+```sql
+CREATE TABLE estoque_consumos (
+    id SERIAL PRIMARY KEY,
+    venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id),
+    estoque_id INTEGER NOT NULL REFERENCES estoques(id),
+    nfe_item_id INTEGER REFERENCES nfe_itens(id),  -- ← FK para NFe de saída
+
+    quantidade DECIMAL(15,4) NOT NULL,
+    custo_unitario DECIMAL(15,4),
+    -- sem campos fiscais duplicados!
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Vantagens:**
+- ✅ NFe normalizada em um único lugar
+- ✅ Tabelas de estoque focadas em inventário
+- ✅ Fácil manutenção fiscal
+- ✅ Consultas fiscais em uma tabela só
+
+**Desvantagens:**
+- ⚠️ JOIN adicional para dados fiscais
+- ⚠️ Precisa existir nfe_item antes de criar estoque
+
+---
+
+### Opção B: nfe_itens com Tipo (Entrada/Saída)
+
+Mesma estrutura, mas com ENUM para distinguir:
+
+```sql
+CREATE TYPE nfe_tipo AS ENUM ('ENTRADA', 'SAIDA');
+
+CREATE TABLE nfe_itens (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfes(id),
+    tipo nfe_tipo NOT NULL,
+    -- ... campos fiscais
+);
+
+-- Estoque referencia item de entrada
+CREATE INDEX idx_nfe_itens_entrada ON nfe_itens(id) WHERE tipo = 'ENTRADA';
+
+-- Consumo referencia item de saída
+CREATE INDEX idx_nfe_itens_saida ON nfe_itens(id) WHERE tipo = 'SAIDA';
+```
+
+---
+
+### Opção C: Armazenar XML Raw + Campos Essenciais
+
+```sql
+CREATE TABLE nfes (
+    id SERIAL PRIMARY KEY,
+    -- Header
+    numero INTEGER NOT NULL,
+    serie INTEGER,
+    chave_acesso CHAR(44) UNIQUE,
+    tipo nfe_tipo NOT NULL,
+
+    -- XML completo (para consultas e reprocessamento)
+    xml_original TEXT NOT NULL,
+    xml_protocolo TEXT,
+
+    -- Campos essenciais parseados (para queries)
+    emitente_cnpj VARCHAR(14),
+    destinatario_cnpj VARCHAR(14),
+    valor_total DECIMAL(15,2),
+    data_emissao TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE nfe_itens (
+    -- Campos essenciais parseados do XML
+    -- Se precisar de campo específico, parseia do XML sob demanda
+);
+```
+
+**Vantagens:**
+- ✅ XML original sempre disponível
+- ✅ Pode re-parsear se mudar legislação
+- ✅ Flexibilidade máxima
+
+**Desvantagens:**
+- ⚠️ Precisa parsear XML para algumas consultas
+- ⚠️ XML pode ser grande (storage)
+
+---
+
+### Opção D: JSONB para Campos Fiscais
+
+PostgreSQL permite JSONB para dados semi-estruturados:
+
+```sql
+CREATE TABLE nfe_itens (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfes(id),
+
+    -- Campos fixos
+    numero_item INTEGER NOT NULL,
+    produto_id INTEGER REFERENCES produtos(id),
+    quantidade DECIMAL(15,4) NOT NULL,
+    valor_unitario DECIMAL(15,4),
+    valor_total DECIMAL(15,2),
+    cfop VARCHAR(5) NOT NULL,
+
+    -- Impostos em JSONB (flexível)
+    impostos JSONB NOT NULL DEFAULT '{}'
+    -- Exemplo: {"icms": {"cst": "00", "bc": 100, "aliq": 18, "valor": 18}, "ipi": {...}}
+);
+
+-- Índices para consultas comuns
+CREATE INDEX idx_nfe_itens_icms_cst ON nfe_itens((impostos->'icms'->>'cst'));
+CREATE INDEX idx_nfe_itens_cfop ON nfe_itens(cfop);
+```
+
+**Vantagens:**
+- ✅ Flexível para mudanças na legislação
+- ✅ Não precisa alterar schema para novos campos
+- ✅ PostgreSQL tem excelente suporte JSONB
+
+**Desvantagens:**
+- ⚠️ Menos type-safety
+- ⚠️ Validação precisa ser na aplicação
+- ⚠️ Queries JSONB podem ser mais lentas
+
+---
+
+### Comparação das Opções NFe
+
+| Critério | A: Colunas | B: Com Tipo | C: XML Raw | D: JSONB |
+|----------|------------|-------------|------------|----------|
+| **Normalização** | ✅ Alta | ✅ Alta | ✅ Alta | ✅ Alta |
+| **Type-safety** | ✅ Total | ✅ Total | ⚠️ Parcial | ⚠️ Parcial |
+| **Flexibilidade** | ⚠️ Baixa | ⚠️ Baixa | ✅ Alta | ✅ Alta |
+| **Performance queries** | ✅ Ótima | ✅ Ótima | ⚠️ Parse | ✅ Boa |
+| **Manutenção schema** | ⚠️ Migrations | ⚠️ Migrations | ✅ Mínima | ✅ Mínima |
+| **Storage** | ✅ Eficiente | ✅ Eficiente | ⚠️ Grande | ✅ Eficiente |
+
+### Recomendação
+
+**Opção A (Colunas tradicionais)** para projeto inicial:
+- Estrutura clara e type-safe
+- Validação no banco
+- Performance previsível
+
+Considerar **migrar para D (JSONB)** no futuro se:
+- Legislação mudar frequentemente
+- Precisar de flexibilidade para novos impostos (IBS/CBS da reforma tributária)
+
+---
+
 ## Questões em Aberto
 
 1. **Nomenclatura**: Renomear `compra_itens` para algo mais genérico?

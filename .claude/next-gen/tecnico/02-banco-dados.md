@@ -517,3 +517,13 @@ SELECT * FROM produtos
 WHERE search_vector @@ plainto_tsquery('portuguese', 'mesa escritorio')
 ORDER BY ts_rank(search_vector, plainto_tsquery('portuguese', 'mesa escritorio')) DESC;
 ```
+
+---
+
+## Documentos Relacionados
+
+- [../estrategia/07-esquema-redesenhado.md](../estrategia/07-esquema-redesenhado.md) - Schema completo redesenhado com todas as correções
+- [../estrategia/04-simplificacao-l1l2.md](../estrategia/04-simplificacao-l1l2.md) - Detalhes da simplificação L1/L2
+- [../estrategia/05-correcao-fifo.md](../estrategia/05-correcao-fifo.md) - Implementação FIFO
+- [../estrategia/06-normalizacao-fornecedor.md](../estrategia/06-normalizacao-fornecedor.md) - Normalização de FK fornecedor
+- [04-infraestrutura.md](./04-infraestrutura.md) - Auditoria, busca full-text, cache

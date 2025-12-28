@@ -808,5 +808,5 @@ flowchart TB
 
 ## Documentos Relacionados
 
-- [02-database.md](./02-database.md) - Design do schema principal
-- [../business/02-stock-flows.md](../business/02-stock-flows.md) - Regras de integridade de dados de estoque
+- [02-banco-dados.md](./02-banco-dados.md) - Design do schema principal
+- [../negocios/02-fluxos-estoque.md](../negocios/02-fluxos-estoque.md) - Regras de integridade de dados de estoque

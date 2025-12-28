@@ -42,7 +42,8 @@ Reorganizado em 2025-12-27 em pastas categóricas:
 │   ├── 07-esquema-redesenhado.md
 │   └── 08-design-greenfield.md
 └── meta/
-    └── rastreador.md                 # Este arquivo
+    ├── rastreador.md                 # Este arquivo
+    └── backlog-documentacao.md       # Backlog de melhorias pendentes
 ```
 
 ---
@@ -109,6 +110,12 @@ Reorganizado em 2025-12-27 em pastas categóricas:
 
 - [x] Traduzidos nomes de pastas e arquivos para português
 - [x] Criado documento comparativo consolidado (00-comparativo-legado-novo.md)
+- [x] Atualizado módulo NFe: ACBrMonitorConsole, sped-nfe, removido SaaS
+- [x] Adicionado módulo DFe (download de NFe) para servidor
+- [x] Adicionada seção de tarefas agendadas em infraestrutura
+- [x] Criado backlog de documentação (meta/backlog-documentacao.md)
+- [x] Fechado ADR-004: Integração NFe (ACBrMonitorConsole ou sped-nfe)
+- [x] Corrigidos links quebrados em 8 arquivos (nomes antigos em inglês)
 
 ### 2025-12-27
 

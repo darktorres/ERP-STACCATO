@@ -372,7 +372,7 @@ flowchart TB
 
 ## Próximos Passos
 
-1. **Decidir sobre framework frontend** → Ver [03-frontend.md](./03-frontend.md)
-2. **Decidir sobre estratégia NFe** → Ver [04-modules/nfe.md](./04-modules/nfe.md)
+1. **Decidir sobre framework frontend** → Ver [../tecnico/03-frontend.md](../tecnico/03-frontend.md)
+2. **Decidir sobre estratégia NFe** → Ver [../tecnico/modulos/nfe.md](../tecnico/modulos/nfe.md)
 3. **Configurar ambiente de desenvolvimento**
 4. **Iniciar Fase 0**

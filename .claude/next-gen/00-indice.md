@@ -17,6 +17,7 @@
 | Entender fluxos de negócio | [negocios/](#fluxos-de-negócio) |
 | Verificar fases da migração | [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md) |
 | Ver decisões em aberto | [estrategia/02-decisoes.md](./estrategia/02-decisoes.md) |
+| **Ver backlog de documentação** | [meta/backlog-documentacao.md](./meta/backlog-documentacao.md) |
 
 ---
 
@@ -77,7 +78,8 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │   └── 08-design-greenfield.md    # Design de fluxo greenfield
 │
 └── meta/
-    └── rastreador.md              # Rastreador de progresso da documentação
+    ├── rastreador.md              # Rastreador de progresso da documentação
+    └── backlog-documentacao.md    # Backlog de melhorias pendentes
 ```
 
 ---

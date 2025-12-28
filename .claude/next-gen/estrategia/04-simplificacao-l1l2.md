@@ -729,6 +729,6 @@ DROP TABLE venda_has_produto;
 
 ## Documentos Relacionados
 
-- [03-improvements.md](./03-improvements.md) - Lista completa de melhorias
-- [../technical/02-database.md](../technical/02-database.md) - Schema de banco de dados
-- [../business/02-stock-flows.md](../business/02-stock-flows.md) - Fluxo de estoque (usa tabelas L2)
+- [03-melhorias.md](./03-melhorias.md) - Lista completa de melhorias
+- [../tecnico/02-banco-dados.md](../tecnico/02-banco-dados.md) - Schema de banco de dados
+- [../negocios/02-fluxos-estoque.md](../negocios/02-fluxos-estoque.md) - Fluxo de estoque (usa tabelas L2)

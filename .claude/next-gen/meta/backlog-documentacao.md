@@ -20,7 +20,7 @@
 | 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
-| 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | Pendente |
+| 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
 | 12  | [Regras de Negócio Detalhadas](#12-regras-de-negócio-detalhadas)              | Alta       | Pendente |
 | 13  | [Documentação de Integrações](#13-documentação-de-integrações)                | Alta       | Pendente |
 | 14  | [Plano de Treinamento de Usuários](#14-plano-de-treinamento-de-usuários)      | Média      | Pendente |
@@ -289,20 +289,18 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 11. Checklist de Paridade de Funcionalidades
+## 11. Checklist de Paridade de Funcionalidades ✅
 
-**Problema**: Risco de perder funcionalidades na migração sem mapeamento explícito.
+**Arquivo**: [`estrategia/10-paridade-funcionalidades.md`](../estrategia/10-paridade-funcionalidades.md)
 
-**Arquivo sugerido**: `estrategia/10-paridade-funcionalidades.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Inventário completo de funcionalidades do C++ (por módulo)
-- Mapeamento C++ → Laravel para cada funcionalidade
-- Status de implementação (Não iniciado / Em progresso / Completo / Descartado)
-- Funcionalidades a serem removidas intencionalmente (com justificativa)
-- Funcionalidades novas (não existem no C++)
-- Critérios de aceitação para cada funcionalidade crítica
+- ✅ Inventário completo de 152 funcionalidades do C++ (por módulo)
+- ✅ Mapeamento C++ → Laravel para cada funcionalidade
+- ✅ Status de implementação (⬜/🔄/✅/❌)
+- ✅ Funcionalidades novas (8 itens que não existem no C++)
+- ✅ Critérios de aceitação por módulo
+- ✅ Processo de validação
 
 ---
 
@@ -506,31 +504,31 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 2 | Fechados todos os ADRs (003, 005, 006)                  |
 | 2025-12-28 | Item 3 | Arquitetura de segurança completa                       |
 | 2025-12-28 | Item 6 | Scripts de migração de dados                            |
+| 2025-12-28 | Item 11 | Checklist de paridade - 152 funcionalidades mapeadas   |
 
 ### Próximos
 
 **Alta Prioridade:**
-1. [ ] Item 11 - Checklist de paridade de funcionalidades
-2. [ ] Item 12 - Regras de negócio detalhadas
-3. [ ] Item 13 - Documentação de integrações
+1. [ ] Item 12 - Regras de negócio detalhadas
+2. [ ] Item 13 - Documentação de integrações
 
 **Média Prioridade:**
-4. [ ] Item 4 - Design de API
-5. [ ] Item 5 - Estratégia de testes
-6. [ ] Item 7 - Tratamento de erros e monitoramento
-7. [ ] Item 14 - Plano de treinamento de usuários
-8. [ ] Item 15 - Design System/Guia de UI
-9. [ ] Item 16 - Estratégia de concorrência
-10. [ ] Item 17 - Atalhos de teclado
-11. [ ] Item 18 - Especificações de impressão
+3. [ ] Item 4 - Design de API
+4. [ ] Item 5 - Estratégia de testes
+5. [ ] Item 7 - Tratamento de erros e monitoramento
+6. [ ] Item 14 - Plano de treinamento de usuários
+7. [ ] Item 15 - Design System/Guia de UI
+8. [ ] Item 16 - Estratégia de concorrência
+9. [ ] Item 17 - Atalhos de teclado
+10. [ ] Item 18 - Especificações de impressão
 
 **Baixa Prioridade:**
-12. [ ] Item 8 - DevOps/Deployment
-13. [ ] Item 9 - Benchmarks de performance
-14. [ ] Item 10 - Substituição de relatórios
-15. [ ] Item 19 - Dicionário de dados
-16. [ ] Item 20 - Matriz de suporte browser/dispositivo
-17. [ ] Item 21 - Auditoria de dependências
+11. [ ] Item 8 - DevOps/Deployment
+12. [ ] Item 9 - Benchmarks de performance
+13. [ ] Item 10 - Substituição de relatórios
+14. [ ] Item 19 - Dicionário de dados
+15. [ ] Item 20 - Matriz de suporte browser/dispositivo
+16. [ ] Item 21 - Auditoria de dependências
 
 ---
 

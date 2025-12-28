@@ -17,7 +17,7 @@
 | 5   | [Estratégia de Testes](#5-estratégia-de-testes)                               | Média      | ✅ Feito |
 | 6   | [Scripts de Migração de Dados](#6-scripts-de-migração-de-dados)               | Média      | ✅ Feito |
 | 7   | [Tratamento de Erros e Monitoramento](#7-tratamento-de-erros-e-monitoramento) | Média      | ✅ Feito |
-| 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | Pendente |
+| 8   | [DevOps/Deployment](#8-devopsdeployment)                                      | Baixa      | ✅ Feito |
 | 9   | [Benchmarks de Performance](#9-benchmarks-de-performance)                     | Baixa      | Pendente |
 | 10  | [Substituição de Relatórios](#10-substituição-de-relatórios)                  | Baixa      | Pendente |
 | 11  | [Checklist de Paridade de Funcionalidades](#11-checklist-de-paridade-de-funcionalidades) | Alta | ✅ Feito |
@@ -249,19 +249,20 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 
 ---
 
-## 8. DevOps/Deployment
+## 8. DevOps/Deployment ✅
 
-**Problema**: Sem documentação de infraestrutura de deploy.
+**Arquivo**: [`tecnico/14-devops.md`](../tecnico/14-devops.md)
 
-**Arquivo sugerido**: `tecnico/08-devops.md`
+**Tópicos documentados**:
 
-**Tópicos a documentar**:
-
-- Configuração Docker
-- Pipeline CI/CD (GitHub Actions?)
-- Configuração de ambientes (dev, staging, prod)
-- Backup/restore
-- Scaling
+- ✅ Dockerfile multi-stage (build, composer, production)
+- ✅ docker-compose.yml (produção e desenvolvimento)
+- ✅ Configurações PHP-FPM e Nginx otimizadas
+- ✅ Pipeline CI/CD completo (GitHub Actions)
+- ✅ Gerenciamento de ambientes (local, staging, prod)
+- ✅ Scripts de deploy, backup e healthcheck
+- ✅ Monitoramento com Sentry e health checks
+- ✅ Procedimentos de rollback e recovery
 
 ---
 
@@ -533,16 +534,16 @@ Ver [estrategia/02-decisoes.md](../estrategia/02-decisoes.md#adr-006-abordagem-d
 | 2025-12-28 | Item 16 | Concorrência - locks, queues, race conditions          |
 | 2025-12-28 | Item 17 | Atalhos - mapeamento, Command Palette, acessibilidade  |
 | 2025-12-28 | Item 18 | Impressão - DomPDF, Laravel Excel, ACBr REST, templates |
+| 2025-12-28 | Item 8  | DevOps - Docker, CI/CD, ambientes, backup, rollback      |
 
 ### Próximos
 
 **Baixa Prioridade:**
-1. [ ] Item 8 - DevOps/Deployment
-2. [ ] Item 9 - Benchmarks de performance
-3. [ ] Item 10 - Substituição de relatórios
-4. [ ] Item 19 - Dicionário de dados
-5. [ ] Item 20 - Matriz de suporte browser/dispositivo
-6. [ ] Item 21 - Auditoria de dependências
+1. [ ] Item 9 - Benchmarks de performance
+2. [ ] Item 10 - Substituição de relatórios
+3. [ ] Item 19 - Dicionário de dados
+4. [ ] Item 20 - Matriz de suporte browser/dispositivo
+5. [ ] Item 21 - Auditoria de dependências
 
 ---
 

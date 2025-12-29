@@ -17,6 +17,7 @@
 | ADR-006 | Abordagem de multi-tenancy          | **Aceito**    | 2025-12-28 |
 | ADR-007 | Swoole / Laravel Octane             | **Adiado**    | 2025-12-28 |
 | ADR-008 | Seleção manual de estoque (1:1)     | **Aceito**    | 2025-12-28 |
+| ADR-009 | JSONB para dados fiscais de NFe     | **Aceito**    | 2025-12-28 |
 
 ---
 
@@ -607,6 +608,122 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 - Sugestão de estoque (ordenado por data de entrada)
 - Atalhos de teclado para pareamento rápido
 - Validação impedindo parear com quantidade insuficiente
+
+---
+
+## ADR-009: JSONB para Dados Fiscais de NFe
+
+### Status - ADR-009
+
+**Aceito** - 2025-12-28
+
+### Contexto - ADR-009
+
+O sistema atual armazena dados fiscais da NFe em colunas específicas:
+- Tabela `estoque` tem ~30 colunas para dados da NFe de entrada
+- Tabela `estoque_has_consumo` duplica essas ~30 colunas para NFe de saída
+
+Problemas:
+1. Duplicação de estrutura em múltiplas tabelas
+2. Mistura de responsabilidades (estoque ≠ dados fiscais)
+3. Campos opcionais (ICMS-ST, IPI) ocupam espaço mesmo quando NULL
+4. Reforma tributária (2026-2033) adicionará IBS/CBS, exigindo novas colunas
+5. Campos desconhecidos/opcionais do XML são perdidos
+
+### Opções Avaliadas - ADR-009
+
+| Opção | Descrição | Prós | Contras |
+|-------|-----------|------|---------|
+| **Colunas tradicionais** | Uma coluna por campo fiscal | Type-safe, validação DB | Migrations constantes, campos opcionais NULL |
+| **JSONB puro** | Todo item em um campo JSONB | Flexível, preserva tudo | Menos type-safety |
+| **Híbrido** | Colunas frequentes + JSONB impostos | Balanço | Mais complexo |
+| **XML raw apenas** | Não parsear, manter só XML | Simples | Lento para queries |
+
+### Decisão - ADR-009
+
+Usar **JSONB puro** para dados fiscais em `nfe_itens`, mantendo XML raw em `nfes`.
+
+```sql
+CREATE TABLE nfe_itens (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfes(id),
+    numero_item INTEGER NOT NULL,
+    produto_id INTEGER REFERENCES produtos(id),
+
+    -- TODOS os dados do item em JSONB
+    dados JSONB NOT NULL,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
+```
+
+### Justificativa - ADR-009
+
+1. **Acesso raro**: Dados fiscais detalhados são consultados ocasionalmente (relatórios, SPED).
+   Performance de JSONB é aceitável para uso esporádico.
+
+2. **Campos desconhecidos preservados**: SEFAZ pode adicionar campos opcionais a qualquer momento.
+   Com colunas, campos novos seriam perdidos. JSONB preserva tudo automaticamente.
+
+3. **Reforma tributária**: IBS/CBS (2026-2033) mudarão completamente a estrutura de impostos.
+   Com JSONB, novos impostos são apenas novas chaves - zero migrations.
+
+4. **Campos opcionais**: ICMS-ST, IPI, FCP só existem em alguns casos.
+   Em JSONB, campo só existe quando presente no XML (sem colunas NULL).
+
+5. **XML raw como backup**: XML original sempre disponível para:
+   - Auditoria fiscal
+   - Reprocessamento se necessário
+   - Validação de integridade
+
+6. **PostgreSQL JSONB maduro**: Índices GIN, operadores nativos, suporte em Laravel.
+
+### Estrutura do JSONB - ADR-009
+
+```json
+{
+  "cfop": "5102",
+  "ncm": "69072100",
+  "descricao": "PORCELANATO 60X60",
+  "quantidade": 100.0,
+  "valor_unitario": 45.00,
+  "valor_total": 4500.00,
+
+  "icms": {
+    "cst": "00",
+    "origem": "0",
+    "valor_bc": 4500.00,
+    "aliquota": 18.00,
+    "valor": 810.00
+  },
+
+  "icms_st": { ... },  // só quando existe
+  "ipi": { ... },      // só quando existe
+  "pis": { ... },
+  "cofins": { ... }
+}
+```
+
+### Consequências - ADR-009
+
+**Positivas:**
+- Zero migrations para novos campos fiscais
+- Reforma tributária não quebra o schema
+- Campos opcionais não ocupam espaço
+- XML raw sempre disponível para auditoria
+- Tabelas de estoque ficam limpas (apenas dados de inventário)
+
+**Negativas:**
+- Validação de campos fiscais na aplicação (não no DB)
+- Queries JSONB ligeiramente mais lentas que colunas
+- Menos type-safety (compensado por DTOs no Laravel)
+
+**Mitigações:**
+- Form Requests no Laravel validam estrutura do JSONB
+- Índices GIN para queries frequentes
+- Accessors no Model para acesso tipado
 
 ---
 

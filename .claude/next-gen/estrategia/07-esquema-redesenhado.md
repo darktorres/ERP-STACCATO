@@ -775,6 +775,14 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 
 ### 4.5 Tabelas de NFe
 
+**Decisão de Design:** Armazenar XML raw + JSONB parseado.
+- XML raw é mantido para auditoria e reprocessamento
+- JSONB para acesso rápido sem parsing
+- Campos desconhecidos/opcionais preservados automaticamente
+- Flexível para reforma tributária (IBS/CBS)
+
+Ver ADR-009 em [02-decisoes.md](./02-decisoes.md) para justificativa completa.
+
 ```sql
 -- NFes (Cabeçalho)
 CREATE TABLE nfes (
@@ -794,7 +802,7 @@ CREATE TABLE nfes (
     emitente_id INTEGER,  -- FK para fornecedor ou loja
     destinatario_id INTEGER,  -- FK para cliente ou fornecedor
 
-    -- Totais
+    -- Totais (parseados para queries frequentes)
     valor_produtos DECIMAL(15,2),
     valor_frete DECIMAL(15,2),
     valor_total DECIMAL(15,2),
@@ -803,9 +811,9 @@ CREATE TABLE nfes (
     status nfe_status DEFAULT 'RASCUNHO',
     protocolo VARCHAR(50),
 
-    -- XML
-    xml_envio TEXT,
-    xml_retorno TEXT,
+    -- XML RAW (fonte da verdade para auditoria)
+    xml_original TEXT,      -- XML enviado/recebido original
+    xml_protocolo TEXT,     -- XML com protocolo de autorização
 
     -- Datas
     data_emissao TIMESTAMP,
@@ -819,37 +827,164 @@ CREATE TABLE nfes (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- NFe Itens
+-- NFe Itens - JSONB para máxima flexibilidade
+-- Campos fiscais mudam frequentemente (reforma tributária IBS/CBS 2026-2033)
+-- JSONB preserva campos desconhecidos/opcionais automaticamente
 CREATE TABLE nfe_itens (
     id SERIAL PRIMARY KEY,
     nfe_id INTEGER NOT NULL REFERENCES nfes(id) ON DELETE CASCADE,
 
+    -- Campos mínimos para JOINs e queries frequentes
     numero_item INTEGER NOT NULL,
-
-    -- Produto
     produto_id INTEGER REFERENCES produtos(id),
-    codigo VARCHAR(100),
-    descricao VARCHAR(500),
-    ncm VARCHAR(10),
-    cfop VARCHAR(4),
 
-    -- Quantidades
-    quantidade DECIMAL(15,4) NOT NULL,
-    unidade VARCHAR(10),
+    -- TODOS os dados do item em JSONB (parseado do XML)
+    dados JSONB NOT NULL,
 
-    -- Valores
-    valor_unitario DECIMAL(15,4),
-    valor_total DECIMAL(15,2),
-
-    -- Impostos (JSONB para flexibilidade)
-    impostos JSONB,
-
-    -- Links
+    -- Links para rastreabilidade
     venda_item_id INTEGER REFERENCES venda_itens(id),
     compra_item_id INTEGER REFERENCES compra_itens(id),
 
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT uk_nfe_item UNIQUE (nfe_id, numero_item)
 );
+
+-- Índice GIN para queries no JSONB
+CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
+
+-- Índices específicos para campos frequentemente consultados (adicionar conforme necessário)
+-- CREATE INDEX idx_nfe_itens_cfop ON nfe_itens ((dados->>'cfop'));
+-- CREATE INDEX idx_nfe_itens_ncm ON nfe_itens ((dados->>'ncm'));
+```
+
+**Estrutura do JSONB `dados`:**
+
+```json
+{
+  "cfop": "5102",
+  "ncm": "69072100",
+  "cest": "1000100",
+  "descricao": "PORCELANATO POLIDO 60X60",
+  "codigo": "POR-60X60-POL",
+  "quantidade": 100.0000,
+  "unidade": "M2",
+  "valor_unitario": 45.0000,
+  "valor_total": 4500.00,
+  "valor_desconto": 0.00,
+  "valor_frete": 150.00,
+
+  "icms": {
+    "cst": "00",
+    "origem": "0",
+    "modalidade_bc": "3",
+    "valor_bc": 4650.00,
+    "aliquota": 18.00,
+    "valor": 837.00
+  },
+
+  "icms_st": {
+    "modalidade_bc": "4",
+    "mva": 40.00,
+    "valor_bc": 6510.00,
+    "aliquota": 18.00,
+    "valor": 334.80
+  },
+
+  "ipi": {
+    "cst": "50",
+    "valor_bc": 4500.00,
+    "aliquota": 5.00,
+    "valor": 225.00
+  },
+
+  "pis": {
+    "cst": "01",
+    "valor_bc": 4500.00,
+    "aliquota": 1.65,
+    "valor": 74.25
+  },
+
+  "cofins": {
+    "cst": "01",
+    "valor_bc": 4500.00,
+    "aliquota": 7.60,
+    "valor": 342.00
+  }
+}
+```
+
+**Queries de exemplo:**
+
+```sql
+-- Buscar por CFOP
+SELECT * FROM nfe_itens WHERE dados->>'cfop' = '5102';
+
+-- Soma de ICMS-ST (só itens que têm)
+SELECT SUM((dados->'icms_st'->>'valor')::DECIMAL)
+FROM nfe_itens
+WHERE dados ? 'icms_st';
+
+-- Itens com IPI > 0
+SELECT * FROM nfe_itens
+WHERE (dados->'ipi'->>'valor')::DECIMAL > 0;
+
+-- Total de impostos por NFe
+SELECT
+    nfe_id,
+    SUM((dados->'icms'->>'valor')::DECIMAL) as total_icms,
+    SUM((dados->'ipi'->>'valor')::DECIMAL) as total_ipi,
+    SUM((dados->'pis'->>'valor')::DECIMAL) as total_pis,
+    SUM((dados->'cofins'->>'valor')::DECIMAL) as total_cofins
+FROM nfe_itens
+GROUP BY nfe_id;
+```
+
+**Laravel Model:**
+
+```php
+class NfeItem extends Model
+{
+    protected $casts = [
+        'dados' => 'array',
+    ];
+
+    // Accessors para conveniência
+    public function getCfopAttribute(): ?string
+    {
+        return $this->dados['cfop'] ?? null;
+    }
+
+    public function getNcmAttribute(): ?string
+    {
+        return $this->dados['ncm'] ?? null;
+    }
+
+    public function getQuantidadeAttribute(): ?float
+    {
+        return $this->dados['quantidade'] ?? null;
+    }
+
+    public function getValorTotalAttribute(): ?float
+    {
+        return $this->dados['valor_total'] ?? null;
+    }
+
+    public function getIcmsAttribute(): ?array
+    {
+        return $this->dados['icms'] ?? null;
+    }
+
+    public function hasIcmsSt(): bool
+    {
+        return isset($this->dados['icms_st']);
+    }
+
+    public function hasIpi(): bool
+    {
+        return isset($this->dados['ipi']);
+    }
+}
 ```
 
 ### 4.6 Tabelas Financeiras

@@ -11,7 +11,7 @@ Este documento define a estratégia de migração do sistema de impressão e ger
 
 ### Arquitetura Atual (C++)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     Sistema de Impressão                     │
 ├─────────────────┬─────────────────┬─────────────────────────┤
@@ -28,7 +28,7 @@ Este documento define a estratégia de migração do sistema de impressão e ger
 
 ### Arquitetura Nova (Laravel)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     Sistema de Impressão                     │
 ├─────────────────┬─────────────────┬─────────────────────────┤
@@ -120,7 +120,7 @@ Este documento define a estratégia de migração do sistema de impressão e ger
 
 ## Estrutura de Arquivos
 
-```
+```text
 app/
 ├── Exports/                          # Laravel Excel exports
 │   ├── Vendas/

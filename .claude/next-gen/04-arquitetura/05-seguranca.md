@@ -37,6 +37,7 @@ O sistema C++ atual apresenta vulnerabilidades críticas que **devem ser elimina
 **Decisão**: Usar **Laravel Sanctum** com **Fortify** para UI.
 
 **Justificativa**:
+
 1. Sistema é SPA interno (Inertia + Vue), não precisa OAuth2
 2. Sanctum é mais simples e performático
 3. Fortify adiciona 2FA e recuperação de senha
@@ -220,7 +221,7 @@ Usar **spatie/laravel-permission** para roles/permissions + **Policies** do Lara
 composer require spatie/laravel-permission
 ```
 
-### Implementação
+### Implementação Spatie Permissions
 
 #### Enums de Tipo
 

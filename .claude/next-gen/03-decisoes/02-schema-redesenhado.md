@@ -776,6 +776,7 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 ### 4.5 Tabelas de NFe
 
 **Decisão de Design:** Armazenar XML raw + JSONB parseado.
+
 - XML raw é mantido para auditoria e reprocessamento
 - JSONB para acesso rápido sem parsing
 - Campos desconhecidos/opcionais preservados automaticamente
@@ -1765,7 +1766,7 @@ flowchart TB
 
 **Novo relacionamento:**
 
-```
+```text
 estoques.nfe_item_id → nfe_itens (NFe entrada, dados fiscais do fornecedor)
 nfe_itens.venda_item_id → venda_itens (NFe saída, dados fiscais para cliente)
 ```

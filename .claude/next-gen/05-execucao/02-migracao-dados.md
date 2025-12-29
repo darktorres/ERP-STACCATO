@@ -567,7 +567,7 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 1: Dados Mestres (sem dependências)
 
-```
+```text
 1. lojas
 2. fornecedores + endereços
 3. clientes + endereços
@@ -580,7 +580,7 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 2: Produtos
 
-```
+```text
 1. produtos (core)
 2. produto_precos
 3. produto_tributos
@@ -589,7 +589,7 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 3: Orçamentos e Vendas
 
-```
+```text
 1. orcamentos
 2. orcamento_itens
 3. vendas
@@ -598,21 +598,21 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 4: Compras
 
-```
+```text
 1. compras
 2. compra_itens (merge L1/L2)
 ```
 
 ### Fase 5: NFe
 
-```
+```text
 1. nfes
 2. nfe_itens
 ```
 
 ### Fase 6: Estoque
 
-```
+```text
 1. blocos
 2. estoques (com fornecedor_id)
 3. estoque_consumos (com fornecedor_id)
@@ -620,7 +620,7 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 7: Financeiro
 
-```
+```text
 1. contas_receber
 2. conta_receber_pagamentos
 3. contas_pagar
@@ -629,7 +629,7 @@ psql staccato_novo < sql/functions.sql
 
 ### Fase 8: Logística
 
-```
+```text
 1. eventos_logistica (criados de idEvento)
 2. evento_logistica_itens
 3. confirmacoes_entrega

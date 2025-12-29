@@ -8,7 +8,7 @@
 
 ## Ordem de Leitura Recomendada
 
-```
+```text
 01-contexto  ->  02-analise  ->  03-decisoes  ->  04-arquitetura  ->  05-execucao
  (o que e)      (problemas)     (escolhas)      (como construir)    (como migrar)
 ```

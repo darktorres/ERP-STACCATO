@@ -24,7 +24,7 @@ Este documento define a estratégia de tratamento de erros, logging e monitorame
 
 ### Estrutura de Classes
 
-```
+```text
 Exception
 ├── BusinessException (422)
 │   ├── ValidationException
@@ -333,7 +333,7 @@ class Handler extends ExceptionHandler
 
 ## Logging
 
-### Configuração
+### Configuração de Logging
 
 ```php
 // config/logging.php

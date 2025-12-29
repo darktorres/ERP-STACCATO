@@ -32,7 +32,7 @@
 
 ## 2. Visão Geral do Schema
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           DADOS MESTRES                                  │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -112,7 +112,7 @@
 ├─────────────────────────────────────────────────────────────────────────┤
 │  audit_log (trigger automático em todas as tabelas)                     │
 └─────────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 ---
 
@@ -258,7 +258,7 @@ CREATE TYPE forma_pagamento AS ENUM (
     'CHEQUE',
     'OUTROS'
 );
-```
+```text
 
 ### 3.2 Dados Mestres
 
@@ -613,7 +613,7 @@ CREATE TABLE produto_tributos (
 
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-```
+```text
 
 ### 3.3 Fluxo Comercial
 
@@ -875,7 +875,7 @@ CREATE TABLE compra_itens (
 
 CREATE INDEX idx_compra_itens_compra ON compra_itens(compra_id);
 CREATE INDEX idx_compra_itens_venda_item ON compra_itens(venda_item_id) WHERE venda_item_id IS NOT NULL;
-```
+```text
 
 ### 3.4 NFe
 
@@ -978,7 +978,7 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
 
 COMMENT ON TABLE nfe_itens IS 'Itens da NFe com dados fiscais em JSONB para flexibilidade (reforma tributária IBS/CBS)';
 COMMENT ON COLUMN nfe_itens.dados IS 'Contém: cfop, ncm, cest, quantidade, valores, icms{}, ipi{}, pis{}, cofins{}, icms_st{}, etc';
-```
+```text
 
 ### 3.5 Inventário
 
@@ -1150,7 +1150,7 @@ JOIN produtos p ON p.id = el.produto_id
 JOIN fornecedores f ON f.id = el.fornecedor_id
 WHERE el.quantidade_disponivel > 0
   AND el.status = 'DISPONIVEL';
-```
+```text
 
 ### 3.6 Logística
 
@@ -1218,7 +1218,7 @@ CREATE TABLE entrega_itens (
 );
 
 CREATE INDEX idx_entrega_itens_entrega ON entrega_itens(entrega_id);
-```
+```text
 
 ### 3.7 Financeiro
 
@@ -1386,7 +1386,7 @@ CREATE TABLE retornos_cnab (
 
     processed_by INTEGER REFERENCES usuarios(id)
 );
-```
+```text
 
 ### 3.8 Auditoria
 
@@ -1485,7 +1485,7 @@ CREATE TRIGGER audit_alocacoes AFTER INSERT OR UPDATE OR DELETE ON alocacoes
 
 CREATE TRIGGER audit_nfes AFTER INSERT OR UPDATE OR DELETE ON nfes
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger();
-```
+```text
 
 ---
 
@@ -1552,7 +1552,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_validar_alocacao
     BEFORE INSERT ON alocacoes
     FOR EACH ROW EXECUTE FUNCTION fn_validar_alocacao();
-```
+```text
 
 ### 4.2 Atualizar Estoque Após Alocação
 
@@ -1603,7 +1603,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_apos_alocacao
     AFTER INSERT OR UPDATE ON alocacoes
     FOR EACH ROW EXECUTE FUNCTION fn_apos_alocacao();
-```
+```text
 
 ### 4.3 Validar Transições de Status
 
@@ -1644,7 +1644,7 @@ CREATE TRIGGER trg_validar_transicao_venda_item
     FOR EACH ROW
     WHEN (OLD.status IS DISTINCT FROM NEW.status)
     EXECUTE FUNCTION fn_validar_transicao_venda_item();
-```
+```text
 
 ---
 

@@ -1248,32 +1248,38 @@ class ValidationMetricsController extends Controller
 ## Checklist de Implementação
 
 ### Request
+
 - [ ] Form Requests para todos os endpoints
 - [ ] Validadores brasileiros (CPF, CNPJ, CEP, telefone)
 - [ ] Sanitização automática de inputs
 - [ ] Validação de arquivos (XML NFe, Excel)
 
 ### Regras de Negócio
+
 - [ ] Validators no service layer
 - [ ] Value Objects para tipos complexos
 - [ ] Validação antes E depois de persistir
 
 ### Banco de Dados
+
 - [ ] Constraints CHECK em todas as tabelas
 - [ ] Triggers para validações complexas
 - [ ] Model validation com traits
 
 ### Response
+
 - [ ] API Resources com estrutura consistente
 - [ ] Schema validation em ambiente dev/test
 - [ ] Contract tests
 
 ### Jobs/Filas
+
 - [ ] Validação de pré-condições
 - [ ] Validação de resultado
 - [ ] Tratamento de erros não-recuperáveis
 
 ### Monitoramento
+
 - [ ] Logging de falhas de validação
 - [ ] Métricas por rota
 - [ ] Dashboard para administradores

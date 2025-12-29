@@ -11,7 +11,7 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 
 ### Arquitetura Atual (C++)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Desktop (C++ Qt)                          │
 ├─────────────────────────────────────────────────────────────┤
@@ -30,7 +30,7 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 
 ### Arquitetura Nova (Laravel)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Web (Laravel + Inertia)                   │
 ├─────────────────────────────────────────────────────────────┤
@@ -74,12 +74,14 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 ### Requisitos de Servidor
 
 **Mínimo (Produção Inicial):**
+
 - 4 vCPUs
 - 8 GB RAM
 - 100 GB SSD
 - Rede: 1 Gbps
 
 **Recomendado (Produção Escalada):**
+
 - 8 vCPUs
 - 16 GB RAM
 - 200 GB SSD NVMe
@@ -91,7 +93,7 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 
 ### Estrutura de Arquivos
 
-```
+```text
 docker/
 ├── Dockerfile                 # Multi-stage build
 ├── Dockerfile.dev             # Desenvolvimento
@@ -544,7 +546,7 @@ allow_url_include = Off
 disable_functions = exec,passthru,shell_exec,system,proc_open,popen
 ```
 
-### www.conf (PHP-FPM)
+### <www.conf> (PHP-FPM)
 
 ```ini
 [www]
@@ -1106,7 +1108,7 @@ jobs:
 
 ### Estrutura de Ambientes
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     Ambientes                                │
 ├──────────────┬──────────────┬──────────────┬───────────────┤

@@ -301,7 +301,7 @@ return [
 
 ### Estrutura do Arquivo
 
-```
+```text
 ┌─────────────────────────────────────┐
 │ Header de Arquivo (Registro 0)      │
 ├─────────────────────────────────────┤
@@ -318,7 +318,7 @@ return [
 └─────────────────────────────────────┘
 ```
 
-### Implementação Laravel
+### Implementação CNAB
 
 ```php
 // app/Services/Integrations/CnabService.php
@@ -622,7 +622,7 @@ flowchart TD
 
 **Arquivos C++**: `smtp.cpp`, `smtp.h`
 
-### Configuração
+### Configuração SMTP
 
 ```php
 // config/mail.php (Laravel padrão)
@@ -675,7 +675,7 @@ class NfeEmail extends Mailable
 
 **Arquivos C++**: `cadastrocliente.cpp`, `application.cpp`
 
-### Configuração
+### Configuração Google Maps
 
 ```php
 // config/services.php
@@ -735,7 +735,7 @@ class GeocodingService
 
 **Arquivos C++**: `calculofrete.cpp`
 
-### Configuração
+### Configuração QualP
 
 ```php
 // config/services.php
@@ -745,7 +745,7 @@ class GeocodingService
 ],
 ```
 
-### Implementação
+### Implementação QualP
 
 ```php
 // app/Services/Integrations/QualpFreteService.php
@@ -783,7 +783,7 @@ class QualpFreteService
 | A1 | Arquivo (.pfx/.p12) | Disco do servidor |
 | A3 | Token/Smartcard | Hardware (apenas Windows) |
 
-### Configuração
+### Configuração Certificado Digital
 
 ```php
 // config/certificado.php

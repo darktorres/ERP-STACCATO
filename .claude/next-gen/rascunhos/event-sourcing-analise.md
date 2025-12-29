@@ -10,7 +10,7 @@
 
 Em vez de armazenar o estado atual, armazena-se todos os eventos que levaram ao estado atual:
 
-```
+```text
 CRUD Tradicional:
 ┌─────────────────┐
 │ produtos        │
@@ -36,7 +36,7 @@ Event Sourcing:
 
 ## Arquitetura Proposta (Se Fosse Adotado)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     EVENT STORE                              │
 │  ┌─────────────────────────────────────────────────────┐    │
@@ -281,7 +281,7 @@ class ProdutoProjector {
 
 ## Abordagem Híbrida (Se Fosse Implementar)
 
-```
+```text
 ┌────────────────────────────────────────────────────────────┐
 │                                                            │
 │   Event Sourcing              CRUD + Audit Log            │
@@ -395,7 +395,7 @@ EstoqueAggregate::retrieve($estoqueId)
 
 ### Abordagem Adotada
 
-```
+```text
 Fase 1 (v1): CRUD + Audit Log para tudo
 Fase 2:      Identificar pain points específicos
 Fase 3:      Migrar entidades críticas para ES se necessário

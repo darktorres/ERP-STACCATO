@@ -914,7 +914,7 @@ module.exports = {
 
 ### Estrutura de Componentes
 
-```
+```text
 resources/js/Components/
 ├── Base/
 │   ├── Button.vue

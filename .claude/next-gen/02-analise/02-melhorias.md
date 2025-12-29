@@ -198,6 +198,7 @@ if (status == "PEND. APROV.") ...
 **Problema**: Muitos usuários têm senhas fracas como `1234`, `senha`, `123456`.
 
 **Riscos**:
+
 - Acesso não autorizado ao sistema
 - Comprometimento de dados sensíveis (financeiro, clientes)
 - Sem política de senha mínima no sistema atual
@@ -211,6 +212,7 @@ if (status == "PEND. APROV.") ...
 **Problema**: Não é possível reordenar os itens dentro de um orçamento ou venda.
 
 **Impacto**:
+
 - Itens ficam na ordem em que foram adicionados
 - Cliente pode querer ver itens agrupados por cômodo/ambiente
 - Dificulta organização lógica do orçamento para apresentação

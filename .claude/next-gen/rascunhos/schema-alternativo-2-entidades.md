@@ -9,11 +9,13 @@
 ## Motivação
 
 O modelo atual tem 3 entidades principais para o fluxo de mercadorias:
+
 - `venda_itens` - o que o cliente quer
 - `compra_itens` - o que compramos do fornecedor
 - `estoques` - o inventário físico
 
 A proposta é **unificar compra_itens + estoques** em uma única entidade, onde:
+
 - `compra_item` com status=PENDENTE é um pedido de compra
 - `compra_item` com status=RECEBIDO é inventário (estoque)
 
@@ -23,20 +25,20 @@ A proposta é **unificar compra_itens + estoques** em uma única entidade, onde:
 
 ### Modelo Atual (3 Entidades)
 
-```
+```text
 venda_itens ──────> compra_itens ──────> estoques
               "buy for"          "receives"
 
                     estoque_consumos
                     (fulfillment link)
-```
+```text
 
 ### Modelo Proposto (2 Entidades)
 
-```
+```text
 venda_itens <────── alocacoes ──────> compra_itens
                 (fulfillment)     (order + inventory)
-```
+```text
 
 ---
 
@@ -45,6 +47,7 @@ venda_itens <────── alocacoes ──────> compra_itens
 > "Um `compra_item` em status RECEBIDO **É** o inventário"
 
 O `compra_item` evolui através de estados:
+
 - `PENDENTE` → é um pedido de compra
 - `CONFIRMADO` → fornecedor confirmou
 - `FATURADO` → NFe recebida
@@ -56,7 +59,7 @@ O `compra_item` evolui através de estados:
 
 ### Cenário 1: Fluxo Normal (compra 100, recebe 100)
 
-```
+```text
 ANTES DA NFe:
 ┌─────────────────┐         ┌─────────────────┐
 │ venda_item      │         │ compra_item     │
@@ -76,11 +79,11 @@ DEPOIS DA NFe (100un):
          │    │             └─────────────────────────┘
          │    │ alocacao (1:1)
          └────┴─────────────────────────────────────────
-```
+```text
 
 ### Cenário 2: Entrega Parcial (compra 100, recebe 60)
 
-```
+```text
 ANTES DA NFe:
   venda_item (id=1, qty=100)
   compra_item (id=1, qty=100, venda_origem_id=1, status=PENDENTE)
@@ -99,11 +102,11 @@ DEPOIS DA NFe com 60un:
   alocacao: venda_item=1 ↔ compra_item=1 (60un recebidos)
 
   venda_item=2 aguarda compra_item=2 ser recebido
-```
+```text
 
 ### Cenário 3: Atendimento com Estoque Existente
 
-```
+```text
 ESTOQUE EXISTENTE (reposição):
   compra_item (id=50, qty=150, venda_origem_id=NULL, status=RECEBIDO)
   ↑ comprado para reposição, não para cliente específico
@@ -116,11 +119,11 @@ CLIENTE PEDE 100un:
     compra_item (id=51, qty=50, parent_id=50)  -- sobra
 
   alocacao: venda_item=1 ↔ compra_item=50
-```
+```text
 
 ### Cenário 4: Cancelamento e Reatribuição
 
-```
+```text
 SITUAÇÃO INICIAL:
   venda_item_A (id=1, qty=100)
   compra_item (id=1, venda_origem_id=1, status=RECEBIDO)
@@ -137,11 +140,11 @@ NOVO CLIENTE B:
 TRILHA DE AUDITORIA:
   - compra_item.venda_origem_id = 1 (compramos para A)
   - alocacao.venda_item_id = 2 (foi para B)
-```
+```text
 
 ### Cenário 5: Atendimento Misto (60 do estoque + 40 nova compra)
 
-```
+```text
 ESTOQUE EXISTENTE:
   compra_item (id=50, qty=60, status=RECEBIDO)
 
@@ -161,7 +164,7 @@ CLIENTE PEDE 100un:
   Quando NFe chegar:
     compra_item (id=100, status=RECEBIDO)
     alocacao: venda_item=2 ↔ compra_item=100
-```
+```text
 
 ---
 
@@ -190,7 +193,7 @@ CREATE TYPE compra_item_tipo AS ENUM (
     'TRANSFERENCIA',      -- Transferência entre lojas
     'INVENTARIO'          -- Inventário inicial / contagem
 );
-```
+```text
 
 ### Tabela compra_itens (unificada)
 
@@ -247,7 +250,7 @@ CREATE INDEX idx_compra_itens_disponivel
 CREATE UNIQUE INDEX idx_compra_itens_venda_origem_unique
     ON compra_itens(venda_item_origem_id)
     WHERE venda_item_origem_id IS NOT NULL;
-```
+```text
 
 ### Tabela alocacoes (link de fulfillment)
 
@@ -285,7 +288,7 @@ CREATE UNIQUE INDEX idx_alocacoes_venda_item_ativo
 CREATE UNIQUE INDEX idx_alocacoes_compra_item_ativo
     ON alocacoes(compra_item_id)
     WHERE NOT is_estornado;
-```
+```text
 
 ---
 
@@ -353,7 +356,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_validar_alocacao
     BEFORE INSERT ON alocacoes
     FOR EACH ROW EXECUTE FUNCTION fn_validar_alocacao();
-```
+```text
 
 ### Atualizar Quantidades Automaticamente
 
@@ -394,7 +397,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_atualizar_apos_alocacao
     AFTER INSERT OR UPDATE ON alocacoes
     FOR EACH ROW EXECUTE FUNCTION fn_atualizar_apos_alocacao();
-```
+```text
 
 ---
 
@@ -423,7 +426,7 @@ WHERE ci.status = 'RECEBIDO'
   AND ci.quantidade > ci.quantidade_alocada
   AND ci.loja_id = :loja_id
 ORDER BY ci.data_entrada;  -- FIFO suggestion
-```
+```text
 
 ### Listar Itens de Venda com Alocação
 
@@ -443,7 +446,7 @@ LEFT JOIN alocacoes a ON a.venda_item_id = vi.id AND NOT a.is_estornado
 LEFT JOIN compra_itens ci ON ci.id = a.compra_item_id
 WHERE vi.venda_id = :venda_id
 ORDER BY vi.id;
-```
+```text
 
 ### Trilha de Auditoria Completa
 
@@ -480,7 +483,7 @@ LEFT JOIN venda_itens vi_dest ON vi_dest.id = a.venda_item_id
 LEFT JOIN vendas v_dest ON v_dest.id = vi_dest.venda_id
 LEFT JOIN clientes c_dest ON c_dest.id = v_dest.cliente_id
 WHERE ci.id = :compra_item_id;
-```
+```text
 
 ---
 
@@ -490,7 +493,7 @@ WHERE ci.id = :compra_item_id;
 
 #### Modelo 3-Entidades (Atual)
 
-```
+```text
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │ venda_itens │     │compra_itens │     │  estoques   │
 ├─────────────┤     ├─────────────┤     ├─────────────┤
@@ -519,11 +522,11 @@ WHERE ci.id = :compra_item_id;
 
 Tabelas: 4
 Relacionamentos: 5
-```
+```text
 
 #### Modelo 2-Entidades (Proposto)
 
-```
+```text
 ┌─────────────┐                    ┌─────────────────────┐
 │ venda_itens │                    │    compra_itens     │
 ├─────────────┤                    │  (order+inventory)  │
@@ -555,7 +558,7 @@ Relacionamentos: 5
 
 Tabelas: 3
 Relacionamentos: 3
-```
+```text
 
 ---
 
@@ -599,6 +602,7 @@ Relacionamentos: 3
 #### Query 1: Listar Inventário Disponível
 
 **3-Entidades:**
+
 ```sql
 SELECT
     e.id,
@@ -614,10 +618,12 @@ WHERE e.status = 'DISPONIVEL'
   AND e.quantidade_disponivel > 0
   AND e.loja_id = :loja_id
 ORDER BY e.data_entrada;
-```
+```text
+
 **JOINs: 1** | **Complexidade: Baixa**
 
 **2-Entidades:**
+
 ```sql
 SELECT
     ci.id,
@@ -633,7 +639,8 @@ WHERE ci.status = 'RECEBIDO'
   AND ci.quantidade > ci.quantidade_alocada
   AND ci.loja_id = :loja_id
 ORDER BY ci.data_entrada;
-```
+```text
+
 **JOINs: 1** | **Complexidade: Baixa**
 
 **Veredito: Empate** ✓
@@ -643,6 +650,7 @@ ORDER BY ci.data_entrada;
 #### Query 2: Ver Itens de Venda com Estoque Alocado
 
 **3-Entidades:**
+
 ```sql
 SELECT
     vi.id,
@@ -655,10 +663,12 @@ FROM venda_itens vi
 LEFT JOIN estoque_consumos ec ON ec.venda_item_id = vi.id AND NOT ec.is_estornado
 LEFT JOIN estoques e ON e.id = ec.estoque_id
 WHERE vi.venda_id = :venda_id;
-```
+```text
+
 **JOINs: 2** | **Complexidade: Média**
 
 **2-Entidades:**
+
 ```sql
 SELECT
     vi.id,
@@ -671,7 +681,8 @@ FROM venda_itens vi
 LEFT JOIN alocacoes a ON a.venda_item_id = vi.id AND NOT a.is_estornado
 LEFT JOIN compra_itens ci ON ci.id = a.compra_item_id
 WHERE vi.venda_id = :venda_id;
-```
+```text
+
 **JOINs: 2** | **Complexidade: Média**
 
 **Veredito: Empate** ✓
@@ -681,6 +692,7 @@ WHERE vi.venda_id = :venda_id;
 #### Query 3: Rastrear Origem do Estoque (de qual compra veio)
 
 **3-Entidades:**
+
 ```sql
 SELECT
     e.id as estoque_id,
@@ -694,10 +706,12 @@ JOIN compra_itens ci ON ci.id = e.compra_item_id
 JOIN compras c ON c.id = ci.compra_id
 JOIN fornecedores f ON f.id = c.fornecedor_id
 WHERE e.id = :estoque_id;
-```
+```text
+
 **JOINs: 3** | **Complexidade: Média**
 
 **2-Entidades:**
+
 ```sql
 SELECT
     ci.id as compra_item_id,
@@ -709,7 +723,8 @@ FROM compra_itens ci
 JOIN compras c ON c.id = ci.compra_id
 JOIN fornecedores f ON f.id = c.fornecedor_id
 WHERE ci.id = :compra_item_id;
-```
+```text
+
 **JOINs: 2** | **Complexidade: Baixa**
 
 **Veredito: 2-Entidades melhor** ✓
@@ -719,6 +734,7 @@ WHERE ci.id = :compra_item_id;
 #### Query 4: Relatório de Custo Médio por Produto
 
 **3-Entidades:**
+
 ```sql
 SELECT
     p.id,
@@ -731,10 +747,12 @@ JOIN estoques e ON e.produto_id = p.id
 WHERE e.status = 'DISPONIVEL'
   AND e.quantidade_disponivel > 0
 GROUP BY p.id, p.descricao;
-```
+```text
+
 **JOINs: 1** | **Complexidade: Média**
 
 **2-Entidades:**
+
 ```sql
 SELECT
     p.id,
@@ -747,7 +765,8 @@ JOIN compra_itens ci ON ci.produto_id = p.id
 WHERE ci.status = 'RECEBIDO'
   AND ci.quantidade > ci.quantidade_alocada
 GROUP BY p.id, p.descricao;
-```
+```text
+
 **JOINs: 1** | **Complexidade: Média** (cálculo quantidade-alocada mais verboso)
 
 **Veredito: 3-Entidades levemente melhor** (quantidade_disponivel é mais direto)
@@ -757,6 +776,7 @@ GROUP BY p.id, p.descricao;
 #### Query 5: Trilha de Auditoria - Para Quem Compramos vs Para Quem Foi
 
 **3-Entidades:**
+
 ```sql
 SELECT
     e.id as estoque_id,
@@ -778,10 +798,12 @@ LEFT JOIN venda_itens vi_dest ON vi_dest.id = ec.venda_item_id
 LEFT JOIN vendas v_dest ON v_dest.id = vi_dest.venda_id
 LEFT JOIN clientes c_dest ON c_dest.id = v_dest.cliente_id
 WHERE e.id = :estoque_id;
-```
+```text
+
 **JOINs: 8** | **Complexidade: Alta**
 
 **2-Entidades:**
+
 ```sql
 SELECT
     ci.id as compra_item_id,
@@ -802,7 +824,8 @@ LEFT JOIN venda_itens vi_dest ON vi_dest.id = a.venda_item_id
 LEFT JOIN vendas v_dest ON v_dest.id = vi_dest.venda_id
 LEFT JOIN clientes c_dest ON c_dest.id = v_dest.cliente_id
 WHERE ci.id = :compra_item_id;
-```
+```text
+
 **JOINs: 7** | **Complexidade: Alta** (mas 1 JOIN a menos)
 
 **Veredito: 2-Entidades levemente melhor**
@@ -814,21 +837,23 @@ WHERE ci.id = :compra_item_id;
 #### Models
 
 **3-Entidades:**
+
 ```php
 // 4 Models
 class VendaItem extends Model { ... }
 class CompraItem extends Model { ... }
 class Estoque extends Model { ... }
 class EstoqueConsumo extends Model { ... }
-```
+```text
 
 **2-Entidades:**
+
 ```php
 // 3 Models
 class VendaItem extends Model { ... }
 class CompraItem extends Model { ... }  // mais métodos
 class Alocacao extends Model { ... }
-```
+```text
 
 **Veredito: 2-Entidades tem menos models**, mas CompraItem é maior
 
@@ -837,6 +862,7 @@ class Alocacao extends Model { ... }
 #### Operação: Receber NFe e Criar Estoque
 
 **3-Entidades:**
+
 ```php
 // NfeService.php
 public function importarNfe(Nfe $nfe): void
@@ -862,9 +888,10 @@ public function importarNfe(Nfe $nfe): void
         $compraItem->update(['status' => 'RECEBIDO']);
     }
 }
-```
+```text
 
 **2-Entidades:**
+
 ```php
 // NfeService.php
 public function importarNfe(Nfe $nfe): void
@@ -883,7 +910,7 @@ public function importarNfe(Nfe $nfe): void
         ]);
     }
 }
-```
+```text
 
 **Veredito: 2-Entidades mais simples** (update vs create)
 
@@ -892,6 +919,7 @@ public function importarNfe(Nfe $nfe): void
 #### Operação: Alocar Estoque para Venda
 
 **3-Entidades:**
+
 ```php
 // AlocacaoService.php
 public function alocar(VendaItem $vendaItem, Estoque $estoque): EstoqueConsumo
@@ -910,9 +938,10 @@ public function alocar(VendaItem $vendaItem, Estoque $estoque): EstoqueConsumo
 
     return $consumo;
 }
-```
+```text
 
 **2-Entidades:**
+
 ```php
 // AlocacaoService.php
 public function alocar(VendaItem $vendaItem, CompraItem $compraItem): Alocacao
@@ -931,7 +960,7 @@ public function alocar(VendaItem $vendaItem, CompraItem $compraItem): Alocacao
 
     return $alocacao;
 }
-```
+```text
 
 **Veredito: Empate** (código praticamente idêntico)
 
@@ -942,7 +971,8 @@ public function alocar(VendaItem $vendaItem, CompraItem $compraItem): Alocacao
 #### Cenário: NFe chega com quantidade parcial
 
 **3-Entidades:**
-```
+
+```text
 1. Split venda_item (100 → 60 + 40)
 2. Split compra_item (100 → 60 + 40)
 3. Criar estoque para parte recebida (60)
@@ -950,10 +980,11 @@ public function alocar(VendaItem $vendaItem, CompraItem $compraItem): Alocacao
 
 Operações: 4 INSERTs + 2 UPDATEs
 Tabelas afetadas: 4
-```
+```text
 
 **2-Entidades:**
-```
+
+```text
 1. Split venda_item (100 → 60 + 40)
 2. Split compra_item (100 → 60 + 40)
 3. Atualizar compra_item(60) com dados de inventário
@@ -961,7 +992,7 @@ Tabelas afetadas: 4
 
 Operações: 3 INSERTs + 2 UPDATEs
 Tabelas afetadas: 3
-```
+```text
 
 **Veredito: 2-Entidades mais simples** (1 INSERT a menos)
 
@@ -1017,18 +1048,22 @@ Tabelas afetadas: 3
 #### Devolução de Cliente
 
 **3-Entidades:**
-```
+
+```text
 1. Criar compra_item (tipo=DEVOLUCAO)? Ou não?
 2. Criar estoque (origem=DEVOLUCAO)
 3. estoque.compra_item_id = NULL ou criar compra fictícia?
-```
+```text
+
 **Problema:** estoque sem compra é caso especial
 
 **2-Entidades:**
-```
+
+```text
 1. Criar compra_item (tipo=DEVOLUCAO)
 2. Já é inventário quando status=RECEBIDO
-```
+```text
+
 **Problema:** "compra" que não é compra (naming)
 
 ---
@@ -1036,19 +1071,23 @@ Tabelas afetadas: 3
 #### Inventário Inicial (Migração)
 
 **3-Entidades:**
-```
+
+```text
 1. Criar estoques diretamente
 2. compra_item_id = NULL
 3. nfe_item_id = NULL
-```
+```text
+
 **Problema:** estoque órfão (sem proveniência)
 
 **2-Entidades:**
-```
+
+```text
 1. Criar compra_itens (tipo=INVENTARIO)
 2. compra_id = NULL
 3. status = RECEBIDO
-```
+```text
+
 **Problema:** "compra" sem compra (naming)
 
 ---
@@ -1056,22 +1095,24 @@ Tabelas afetadas: 3
 #### Transferência Entre Lojas
 
 **3-Entidades:**
-```
+
+```text
 Loja A (saída):
 1. Consumir estoque (motivo=TRANSFERENCIA)
 
 Loja B (entrada):
 2. Criar novo estoque (loja_id=B, transferencia_origem_id=...)
-```
+```text
 
 **2-Entidades:**
-```
+
+```text
 Loja A (saída):
 1. Alocar compra_item (motivo=TRANSFERENCIA) - ou criar alocação especial?
 
 Loja B (entrada):
 2. Criar novo compra_item (tipo=TRANSFERENCIA, loja_id=B)
-```
+```text
 
 **Veredito: Ambos precisam de tratamento especial**
 
@@ -1095,6 +1136,7 @@ Loja B (entrada):
 | **Naming** | Natural | Forçado | 3-Ent |
 
 **Conclusão preliminar:**
+
 - **2-Entidades** ganha em simplicidade de estrutura
 - **3-Entidades** ganha em clareza conceitual
 - Em funcionalidade e integridade, são equivalentes
@@ -1120,10 +1162,10 @@ Quando mercadoria é recebida, SAP cria um **Material Document** (MKPF/MSEG) que
 
 Odoo usa um sistema **double-entry estilo contabilidade**:
 
-```
+```text
 purchase.order.line  →  stock.picking  →  stock.move  →  stock.quant
     (o que comprar)      (doc transfer)   (movimento)    (inventário)
-```
+```text
 
 **Insight chave**: `stock.quant` representa estado atual do inventário. Diferente de versões antigas onde qty_available era calculado de todo histórico de stock.move (O(n)), quants só representam estoque atualmente disponível (O(log n)).
 
@@ -1147,11 +1189,11 @@ Usa abordagem Stock Ledger Entry onde inventário é a soma de todas as moviment
 
 Todos os grandes ERPs têm um **documento de movimento/transação** entre pedido e inventário:
 
-```
+```text
 SAP:       Purchase Order → Material Document → Stock
 Odoo:      Purchase Order → Stock Picking/Move → Stock Quant
 ERPNext:   Purchase Order → Stock Entry → Stock Ledger
-```
+```text
 
 Isso valida a abordagem do **modelo 3-entidades**. Nenhum deles funde "item do pedido" com "item de inventário" diretamente.
 
@@ -1197,17 +1239,19 @@ Isso valida a abordagem do **modelo 3-entidades**. Nenhum deles funde "item do p
 O schema legado mistura dados de inventário com dados fiscais da NFe:
 
 **Tabela `estoque` (~70 colunas)** - armazena dados do XML da NFe do fornecedor:
-```
+
+```text
 Campos de inventário: quant, restante, lote, local, idBloco...
 Campos da NFe:        ncm, cest, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS,
                       cstIPI, vIPI, cstPIS, vPIS, cstCOFINS, vCOFINS, valorGare...
-```
+```text
 
 **Tabela `estoque_has_consumo` (~50 colunas)** - duplica os campos para NFe de saída:
-```
+
+```text
 Campos de consumo: idEstoque, idVendaProduto2, quant...
 Campos da NFe:     ncm, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS... (repetidos!)
-```
+```text
 
 ### Problemas
 
@@ -1220,7 +1264,7 @@ Campos da NFe:     ncm, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS... (repetidos
 
 ### Opção A: Tabela nfe_itens Centralizada
 
-```
+```text
 ┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
 │    nfes     │────<│  nfe_itens  │     │      estoques       │
 │  (header)   │     │ (detalhes)  │<────│ nfe_entrada_item_id │
@@ -1231,9 +1275,10 @@ Campos da NFe:     ncm, cfop, tipoICMS, cstICMS, vBC, pICMS, vICMS... (repetidos
 │  estoque_consumos   │────┘
 │ nfe_saida_item_id   │
 └─────────────────────┘
-```
+```text
 
 **nfe_itens** contém todos os campos fiscais:
+
 ```sql
 CREATE TABLE nfe_itens (
     id SERIAL PRIMARY KEY,
@@ -1293,9 +1338,10 @@ CREATE TABLE nfe_itens (
 
     created_at TIMESTAMP DEFAULT NOW()
 );
-```
+```text
 
 **estoques** fica limpo:
+
 ```sql
 CREATE TABLE estoques (
     id SERIAL PRIMARY KEY,
@@ -1312,9 +1358,10 @@ CREATE TABLE estoques (
     data_entrada TIMESTAMP,
     status estoque_status NOT NULL
 );
-```
+```text
 
 **estoque_consumos** também fica limpo:
+
 ```sql
 CREATE TABLE estoque_consumos (
     id SERIAL PRIMARY KEY,
@@ -1328,15 +1375,17 @@ CREATE TABLE estoque_consumos (
 
     created_at TIMESTAMP DEFAULT NOW()
 );
-```
+```text
 
 **Vantagens:**
+
 - ✅ NFe normalizada em um único lugar
 - ✅ Tabelas de estoque focadas em inventário
 - ✅ Fácil manutenção fiscal
 - ✅ Consultas fiscais em uma tabela só
 
 **Desvantagens:**
+
 - ⚠️ JOIN adicional para dados fiscais
 - ⚠️ Precisa existir nfe_item antes de criar estoque
 
@@ -1361,7 +1410,7 @@ CREATE INDEX idx_nfe_itens_entrada ON nfe_itens(id) WHERE tipo = 'ENTRADA';
 
 -- Consumo referencia item de saída
 CREATE INDEX idx_nfe_itens_saida ON nfe_itens(id) WHERE tipo = 'SAIDA';
-```
+```text
 
 ---
 
@@ -1393,14 +1442,16 @@ CREATE TABLE nfe_itens (
     -- Campos essenciais parseados do XML
     -- Se precisar de campo específico, parseia do XML sob demanda
 );
-```
+```text
 
 **Vantagens:**
+
 - ✅ XML original sempre disponível
 - ✅ Pode re-parsear se mudar legislação
 - ✅ Flexibilidade máxima
 
 **Desvantagens:**
+
 - ⚠️ Precisa parsear XML para algumas consultas
 - ⚠️ XML pode ser grande (storage)
 
@@ -1431,14 +1482,16 @@ CREATE TABLE nfe_itens (
 -- Índices para consultas comuns
 CREATE INDEX idx_nfe_itens_icms_cst ON nfe_itens((impostos->'icms'->>'cst'));
 CREATE INDEX idx_nfe_itens_cfop ON nfe_itens(cfop);
-```
+```text
 
 **Vantagens:**
+
 - ✅ Flexível para mudanças na legislação
 - ✅ Não precisa alterar schema para novos campos
 - ✅ PostgreSQL tem excelente suporte JSONB
 
 **Desvantagens:**
+
 - ⚠️ Menos type-safety
 - ⚠️ Validação precisa ser na aplicação
 - ⚠️ Queries JSONB podem ser mais lentas
@@ -1490,7 +1543,7 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
 
 -- Índices específicos só se necessário (após profiling)
 -- CREATE INDEX idx_nfe_itens_cfop ON nfe_itens ((dados->>'cfop'));
-```
+```text
 
 **Estrutura do JSONB `dados`:**
 
@@ -1549,7 +1602,7 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
     "qualquer_campo_novo": "preservado automaticamente"
   }
 }
-```
+```text
 
 **Parser XML → JSONB:**
 
@@ -1592,7 +1645,7 @@ class NfeXmlParser
         return $dados;
     }
 }
-```
+```text
 
 **Vantagens desta abordagem:**
 
@@ -1618,7 +1671,7 @@ WHERE dados ? 'icms_st';
 -- Listar itens com IPI > 0
 SELECT * FROM nfe_itens
 WHERE (dados->'ipi'->>'valor')::DECIMAL > 0;
-```
+```text
 
 **Laravel Model:**
 
@@ -1645,7 +1698,7 @@ class NfeItem extends Model
         return isset($this->dados['icms_st']);
     }
 }
-```
+```text
 
 ---
 

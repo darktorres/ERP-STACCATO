@@ -601,7 +601,7 @@ public function update(UpdateOrcamentoRequest $request, Orcamento $orcamento): R
 
 ### Cenário 1: Venda Simultânea do Mesmo Produto
 
-```
+```text
 Usuário A                    Usuário B
     |                            |
     |-- Verifica estoque: 5      |
@@ -616,7 +616,7 @@ Usuário A                    Usuário B
 
 ### Cenário 2: Edição Simultânea de Cliente
 
-```
+```text
 Usuário A                    Usuário B
     |                            |
     |-- Abre cliente (v1)        |
@@ -631,10 +631,10 @@ Usuário A                    Usuário B
 
 **Solução:** Optimistic locking com `updated_at`.
 
-### Cenário 3: Devolução Simultânea
+### Cenario 3: Devolucao Simultanea
 
-```
-Usuário A                    Usuário B
+```text
+Usuario A                    Usuario B
     |                            |
     |-- Inicia devolução         |
     |   venda #123               |-- Inicia devolução

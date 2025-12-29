@@ -534,6 +534,304 @@ ORDER BY ts_rank(search_vector, plainto_tsquery('portuguese', 'mesa escritorio')
 
 ---
 
+## Extensões PostgreSQL Recomendadas
+
+### Extensões Essenciais
+
+#### pg_trgm - Busca Fuzzy (Alta Prioridade)
+
+Lida com erros de digitação na busca de produtos:
+
+```sql
+CREATE EXTENSION pg_trgm;
+
+-- Índice para busca fuzzy
+CREATE INDEX idx_produtos_nome_trgm
+    ON produtos USING gin (descricao gin_trgm_ops);
+
+-- Encontra produtos mesmo com typos
+SELECT descricao, similarity(descricao, 'porcelanatu') as sim
+FROM produtos
+WHERE descricao % 'porcelanatu'  -- typo de "porcelanato"
+ORDER BY sim DESC;
+
+-- Combinado com full-text para melhores resultados
+SELECT * FROM produtos
+WHERE search_vector @@ to_tsquery('porcelanato')  -- exato
+   OR descricao % 'porcelanatu';                   -- fuzzy
+```
+
+**Caso de uso**: Usuário digita "meza escritorio" → encontra "mesa escritório"
+
+---
+
+#### unaccent - Busca Sem Acentos (Alta Prioridade)
+
+Crítico para português:
+
+```sql
+CREATE EXTENSION unaccent;
+
+-- Wrapper imutável para índices
+CREATE OR REPLACE FUNCTION imm_unaccent(text) RETURNS text AS $$
+    SELECT unaccent($1)
+$$ LANGUAGE sql IMMUTABLE;
+
+-- Índice
+CREATE INDEX idx_produtos_unaccent
+    ON produtos (imm_unaccent(descricao));
+
+-- Busca ignorando acentos
+SELECT * FROM produtos
+WHERE imm_unaccent(descricao) ILIKE imm_unaccent('%porcelanato%');
+```
+
+**Caso de uso**: Busca "ceramica" encontra "cerâmica"
+
+---
+
+#### pg_stat_statements - Monitoramento de Performance (Alta Prioridade)
+
+Essencial para otimização:
+
+```sql
+CREATE EXTENSION pg_stat_statements;
+
+-- Encontrar queries mais lentas
+SELECT
+    round(total_exec_time::numeric, 2) as total_ms,
+    calls,
+    round(mean_exec_time::numeric, 2) as avg_ms,
+    query
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 20;
+
+-- Encontrar queries mais chamadas
+SELECT query, calls, mean_exec_time
+FROM pg_stat_statements
+ORDER BY calls DESC
+LIMIT 20;
+```
+
+**Caso de uso**: Identificar queries que precisam de otimização
+
+---
+
+#### pgcrypto - Criptografia (Alta Prioridade)
+
+Para dados sensíveis (conformidade LGPD):
+
+```sql
+CREATE EXTENSION pgcrypto;
+
+-- Criptografar dados sensíveis
+UPDATE clientes
+SET cpf_encrypted = pgp_sym_encrypt(cpf, current_setting('app.encryption_key'));
+
+-- Hash de senhas (se não usar Laravel)
+UPDATE usuarios
+SET password_hash = crypt('senha123', gen_salt('bf'));
+
+-- Verificar senha
+SELECT * FROM usuarios
+WHERE password_hash = crypt('senha123', password_hash);
+```
+
+**Caso de uso**: Criptografar CPF/CNPJ em repouso para LGPD
+
+---
+
+### Extensões Recomendadas
+
+#### uuid-ossp - UUIDs (Média Prioridade)
+
+Para IDs públicos:
+
+```sql
+CREATE EXTENSION "uuid-ossp";
+
+-- Usar UUIDs para recursos públicos (API, URLs)
+CREATE TABLE vendas (
+    id SERIAL PRIMARY KEY,              -- interno
+    uuid UUID DEFAULT uuid_generate_v4(), -- público
+    ...
+);
+
+CREATE UNIQUE INDEX idx_vendas_uuid ON vendas(uuid);
+
+-- API usa UUID: /api/vendas/550e8400-e29b-41d4-a716-446655440000
+-- Interno usa integer para JOINs (mais rápido)
+```
+
+**Caso de uso**: Esconder IDs sequenciais de clientes (segurança)
+
+---
+
+#### pg_cron - Jobs Agendados (Média Prioridade)
+
+Executar jobs diretamente no PostgreSQL:
+
+```sql
+CREATE EXTENSION pg_cron;
+
+-- Expirar orçamentos antigos diariamente à meia-noite
+SELECT cron.schedule('expire-orcamentos', '0 0 * * *', $$
+    UPDATE orcamentos
+    SET status = 'EXPIRADO'
+    WHERE status = 'ATIVO'
+      AND data_emissao + (validade || ' days')::interval < CURRENT_DATE
+$$);
+
+-- Refresh de views materializadas a cada 15 minutos
+SELECT cron.schedule('refresh-mv', '*/15 * * * *', $$
+    REFRESH MATERIALIZED VIEW CONCURRENTLY mv_produto_estoque
+$$);
+
+-- Listar jobs agendados
+SELECT * FROM cron.job;
+```
+
+**Caso de uso**: Backup ao Laravel scheduler - executar jobs críticos no BD
+
+---
+
+#### ltree - Dados Hierárquicos (Média Prioridade)
+
+Para árvores de categorias ou organogramas:
+
+```sql
+CREATE EXTENSION ltree;
+
+CREATE TABLE categorias (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100),
+    path ltree  -- ex: 'revestimentos.pisos.porcelanato'
+);
+
+CREATE INDEX idx_categorias_path ON categorias USING gist(path);
+
+-- Encontrar todas as subcategorias
+SELECT * FROM categorias
+WHERE path <@ 'revestimentos.pisos';
+
+-- Encontrar ancestrais
+SELECT * FROM categorias
+WHERE path @> 'revestimentos.pisos.porcelanato';
+```
+
+**Caso de uso**: Categorias de produtos, hierarquia organizacional
+
+---
+
+### Extensões Opcionais
+
+#### tablefunc - Tabelas Pivot (Baixa Prioridade)
+
+Para relatórios com crosstab:
+
+```sql
+CREATE EXTENSION tablefunc;
+
+-- Pivot de vendas por mês
+SELECT * FROM crosstab(
+    'SELECT produto_id,
+            to_char(created_at, ''YYYY-MM'') as mes,
+            SUM(quantidade)
+     FROM venda_itens
+     GROUP BY 1, 2
+     ORDER BY 1, 2'
+) AS ct(produto_id int, "2024-01" numeric, "2024-02" numeric);
+```
+
+**Caso de uso**: Relatórios mensais de vendas, análise comparativa
+
+---
+
+#### PostGIS - Geolocalização (Baixa Prioridade)
+
+Para roteamento de entregas:
+
+```sql
+CREATE EXTENSION postgis;
+
+ALTER TABLE clientes ADD COLUMN localizacao GEOGRAPHY(POINT);
+
+-- Encontrar clientes em raio de 50km do depósito
+SELECT nome, ST_Distance(localizacao, deposito_loc) as distancia
+FROM clientes
+WHERE ST_DWithin(localizacao, deposito_loc, 50000);
+
+-- Otimizar rotas de entrega
+SELECT * FROM clientes
+ORDER BY localizacao <-> ST_MakePoint(-46.6339, -23.5507);
+```
+
+**Caso de uso**: Planejamento de zonas de entrega, otimização de rotas
+
+---
+
+#### pg_partman - Particionamento de Tabelas (Baixa Prioridade)
+
+Para tabelas grandes (audit_log, eventos):
+
+```sql
+-- Particionar audit_log por mês
+CREATE TABLE audit_log (
+    id BIGSERIAL,
+    created_at TIMESTAMPTZ NOT NULL,
+    ...
+) PARTITION BY RANGE (created_at);
+
+-- Auto-criar partições
+SELECT partman.create_parent(
+    p_parent_table := 'public.audit_log',
+    p_control := 'created_at',
+    p_interval := '1 month',
+    p_premake := 3  -- criar 3 meses à frente
+);
+```
+
+**Caso de uso**: Manter audit_log performante conforme cresce
+
+---
+
+### Resumo de Extensões
+
+| Extensão | Caso de Uso | Prioridade | Complexidade |
+|----------|-------------|------------|--------------|
+| **pg_trgm** | Busca fuzzy de produtos | Alta | Baixa |
+| **unaccent** | Acentos em português | Alta | Baixa |
+| **pg_stat_statements** | Monitoramento de performance | Alta | Baixa |
+| **pgcrypto** | Criptografar CPF/CNPJ (LGPD) | Alta | Média |
+| **uuid-ossp** | IDs públicos | Média | Baixa |
+| **pg_cron** | Backup de jobs agendados | Média | Baixa |
+| **ltree** | Hierarquia de categorias | Média | Média |
+| **tablefunc** | Relatórios pivot | Baixa | Média |
+| **PostGIS** | Roteamento de entregas | Baixa | Alta |
+| **pg_partman** | Particionamento de tabelas grandes | Baixa | Média |
+
+---
+
+### Script de Setup Inicial
+
+```sql
+-- Extensões essenciais para o ERP
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_ivm;
+
+-- Opcional baseado em necessidade
+-- CREATE EXTENSION IF NOT EXISTS ltree;
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS postgis;
+```
+
+---
+
 ## Documentos Relacionados
 
 - [../estrategia/07-esquema-redesenhado.md](../estrategia/07-esquema-redesenhado.md) - Schema completo redesenhado com todas as correções

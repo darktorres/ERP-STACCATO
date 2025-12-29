@@ -176,6 +176,7 @@ void dividirEntrega(int idVendaProduto2, double quantQuebrada) {
 ### Documentos de Entrega
 
 Gerados a partir de modelos Excel:
+
 - `espelho_entrega.xlsx` → Comprovante de entrega
 - `modelo_checklist.xlsx` → Checklist de verificação física
 
@@ -730,7 +731,7 @@ Route::middleware(['auth'])->prefix('logistica')->name('logistica.')->group(func
 - Data e horário previsto
 - Observações
 
-### Confirmação de Entrega
+### Confirmação de Entrega (Formulário)
 
 - Data/hora real
 - Nome do entregador

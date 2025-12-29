@@ -332,6 +332,7 @@ Este documento mapeia todas as funcionalidades do sistema C++ atual para o novo 
 ## Critérios de Aceitação por Módulo
 
 ### Orçamentos
+
 - [ ] Usuário pode criar orçamento com todos os campos do C++
 - [ ] Cálculo de frete automático produz mesmos valores
 - [ ] Descontos calculados corretamente nos 3 níveis
@@ -339,35 +340,41 @@ Este documento mapeia todas as funcionalidades do sistema C++ atual para o novo 
 - [ ] Exportação PDF tem mesmo layout
 
 ### Vendas
+
 - [ ] Fluxo completo orçamento → venda → entrega funciona
 - [ ] Cancelamento estorna estoque e financeiro
 - [ ] Devoluções parciais funcionam
 - [ ] Comissões calculadas corretamente
 
 ### Compras
+
 - [ ] Geração automática de pedidos funciona
 - [ ] Fluxo pendente → confirmado → faturado → recebido
 - [ ] Associação com NFe de entrada
 - [ ] Consumos rastreados corretamente
 
 ### Estoque
+
 - [ ] FIFO funciona corretamente (correção do bug)
 - [ ] Níveis de estoque em tempo real
 - [ ] Movimentações auditadas
 
 ### Financeiro
+
 - [ ] CNAB 240 Itaú gera arquivo válido
 - [ ] Retorno CNAB processa baixas automaticamente
 - [ ] Fluxo de caixa mostra projeção correta
 - [ ] GARE processa impostos corretamente
 
 ### NFe
+
 - [ ] Emissão via ACBr/sped-nfe funciona
 - [ ] Cancelamento dentro do prazo
 - [ ] Importação de XML com matching de produtos
 - [ ] DANFE imprime corretamente
 
 ### Logística
+
 - [ ] Agendamento de coletas e entregas
 - [ ] Calendário visual funciona
 - [ ] Confirmação com comprovante
@@ -378,6 +385,7 @@ Este documento mapeia todas as funcionalidades do sistema C++ atual para o novo 
 ## Processo de Validação
 
 ### Por Funcionalidade
+
 1. Implementar no Laravel
 2. Testar com dados reais (cópia do banco de produção)
 3. Comparar resultado com sistema C++
@@ -385,6 +393,7 @@ Este documento mapeia todas as funcionalidades do sistema C++ atual para o novo 
 5. Marcar como ✅
 
 ### Testes de Regressão
+
 - Executar suite de testes automatizados
 - Comparar relatórios gerados
 - Validar cálculos financeiros

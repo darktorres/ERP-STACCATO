@@ -40,12 +40,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Administrador / Diretor
 
 **Responsabilidades:**
+
 - Gerenciamento completo do sistema
 - Configuração de usuários e permissões
 - Cadastros mestres (lojas, NCMs, transportadoras)
 - Monitoramento geral
 
 **Funcionalidades principais:**
+
 - Dashboard administrativo
 - Gestão de usuários
 - Cadastro de produtos, fornecedores, lojas
@@ -57,12 +59,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Gerente de Loja
 
 **Responsabilidades:**
+
 - Supervisão de vendas da loja
 - Aprovação de descontos
 - Acompanhamento financeiro
 - Gestão de equipe
 
 **Funcionalidades principais:**
+
 - Visão de vendas (filtrado por loja)
 - Aprovação de orçamentos
 - Ajuste de frete
@@ -74,12 +78,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Gerente Financeiro
 
 **Responsabilidades:**
+
 - Contas a pagar e receber
 - Conciliação bancária
 - Fluxo de caixa
 - Comissões
 
 **Funcionalidades principais:**
+
 - Módulo Financeiro completo
 - Geração de CNAB
 - Processamento de retornos
@@ -90,12 +96,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Vendedor / Vendedor Especial
 
 **Responsabilidades:**
+
 - Criação de orçamentos
 - Conversão em vendas
 - Atendimento ao cliente
 - Acompanhamento de pedidos
 
 **Funcionalidades principais:**
+
 - Criar/editar orçamentos
 - Calcular frete
 - Aplicar descontos (dentro do limite)
@@ -107,12 +115,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Administrativo
 
 **Responsabilidades:**
+
 - Cadastro de produtos
 - Cadastro de fornecedores
 - Precificação
 - Importação de tabelas
 
 **Funcionalidades principais:**
+
 - Cadastros mestres
 - Importação de produtos
 - Gestão de preços de estoque
@@ -123,12 +133,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Operacional
 
 **Responsabilidades:**
+
 - Logística de entregas
 - Recebimento de mercadorias
 - Organização de galpão
 - Expedição
 
 **Funcionalidades principais:**
+
 - Agendamento de entregas
 - Agendamento de coletas
 - Calendário de logística
@@ -192,6 +204,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 1: Introdução ao Sistema Web (1 hora)
 
 **Conteúdo:**
+
 1. Visão geral da mudança
 2. Acesso ao sistema (URL, login)
 3. Navegação básica
@@ -200,6 +213,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 6. Preferências do usuário
 
 **Prática:**
+
 - Login no sistema
 - Explorar o menu
 - Configurar preferências
@@ -208,6 +222,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 2: Vendas e Orçamentos (2 horas)
 
 **Conteúdo:**
+
 1. Criar novo orçamento
 2. Buscar e selecionar cliente
 3. Adicionar produtos
@@ -218,12 +233,14 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 8. Visualizar histórico
 
 **Prática:**
+
 - Criar orçamento completo
 - Aplicar desconto com autorização
 - Converter em venda
 - Registrar pagamento
 
 **Exercícios:**
+
 1. Criar orçamento para cliente pessoa física
 2. Criar orçamento para cliente pessoa jurídica com ST
 3. Converter orçamento existente
@@ -232,6 +249,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 3: Estoque e Galpão (1.5 horas)
 
 **Conteúdo:**
+
 1. Consultar estoque
 2. Entender posições (lotes)
 3. Filtrar por produto/fornecedor
@@ -240,6 +258,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 6. Movimentação de estoque
 
 **Prática:**
+
 - Consultar disponibilidade
 - Localizar produto no galpão
 - Entender consumo FIFO
@@ -247,6 +266,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 4: Logística (1.5 horas)
 
 **Conteúdo:**
+
 1. Dashboard de logística
 2. Agendar entrega
 3. Agendar coleta
@@ -256,6 +276,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 7. Receber mercadorias
 
 **Prática:**
+
 - Agendar entrega para venda
 - Visualizar rota no mapa
 - Confirmar entrega com foto
@@ -263,6 +284,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 5: Financeiro (2 horas)
 
 **Conteúdo:**
+
 1. Contas a receber
 2. Contas a pagar
 3. Baixar pagamentos
@@ -272,6 +294,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 7. Comissões
 
 **Prática:**
+
 - Baixar conta a receber
 - Gerar arquivo CNAB
 - Processar retorno bancário
@@ -279,6 +302,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 6: Nota Fiscal Eletrônica (1.5 horas)
 
 **Conteúdo:**
+
 1. Emitir NF-e de saída
 2. Consultar NF-e
 3. Cancelar NF-e
@@ -287,6 +311,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 6. Manifestação
 
 **Prática:**
+
 - Emitir NF-e para venda
 - Enviar por email
 - Download DANFE/XML
@@ -294,6 +319,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 7: Relatórios (1 hora)
 
 **Conteúdo:**
+
 1. Tipos de relatórios
 2. Filtros e parâmetros
 3. Visualização
@@ -301,6 +327,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 5. Agendamento de relatórios
 
 **Prática:**
+
 - Gerar relatório de vendas
 - Exportar para Excel
 - Imprimir relatório
@@ -308,6 +335,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 #### Módulo 8: Administração (2 horas) - Apenas Admins
 
 **Conteúdo:**
+
 1. Gestão de usuários
 2. Permissões e papéis
 3. Cadastro de lojas
@@ -318,6 +346,7 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 8. Logs e auditoria
 
 **Prática:**
+
 - Criar novo usuário
 - Configurar permissões
 - Cadastrar transportadora
@@ -550,7 +579,7 @@ gantt
 
 ### Escalação
 
-```
+```text
 Usuário → Helpdesk (N1)
          ↓ Não resolvido em 30 min
     Usuário-chave (N2)
@@ -567,6 +596,7 @@ Usuário → Helpdesk (N1)
 ### Seleção
 
 Critérios para seleção de usuários-chave:
+
 - Experiência com sistema atual (> 2 anos)
 - Facilidade com tecnologia
 - Boa comunicação
@@ -607,7 +637,8 @@ Critérios para seleção de usuários-chave:
 ### Templates
 
 **Email de Anúncio:**
-```
+
+```text
 Assunto: Novo Sistema ERP - Modernização do Staccato
 
 Prezados,
@@ -645,7 +676,7 @@ Atenciosamente,
 - [ ] Cronograma comunicado
 - [ ] Salas/recursos reservados
 
-### Durante Treinamento
+### Durante Treinamento (Checklist)
 
 - [ ] Lista de presença
 - [ ] Exercícios práticos realizados

@@ -121,26 +121,30 @@ Dados temporais rastreiam **quando** algo era verdadeiro, não apenas **o que** 
 
 ### Problemas Atuais
 
-**1. Histórico de Preços Perdido**
-```
+#### 1. Histórico de Preços Perdido
+
+```text
 Atual: Preço armazenado uma vez, se mudar, antigo é perdido.
 Problema: Relatórios mostram preço atual, não preço histórico da venda.
 ```
 
-**2. Níveis de Estoque ao Longo do Tempo**
-```
+#### 2. Níveis de Estoque ao Longo do Tempo
+
+```text
 Atual: Apenas `quantidade_disponivel` atual armazenada.
 Problema: Não consegue responder perguntas point-in-time para auditoria de fim de ano.
 ```
 
-**3. Limite de Crédito do Cliente**
-```
+#### 3. Limite de Crédito do Cliente
+
+```text
 Atual: Apenas valor atual.
 Problema: "Quem mudou o limite de crédito e quando?" - Impossível responder.
 ```
 
-**4. Histórico de Status**
-```
+#### 4. Histórico de Status
+
+```text
 Atual: Apenas status atual armazenado.
 Problema: Não consegue medir eficiência do processo.
 ```
@@ -1037,7 +1041,7 @@ Métricas observadas no sistema desktop:
 
 #### Camadas de Cache
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Estratégia de Cache                       │
 ├──────────────┬──────────────┬──────────────┬───────────────┤

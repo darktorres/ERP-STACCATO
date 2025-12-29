@@ -21,7 +21,7 @@ Este documento define a estratégia de testes para o ERP Staccato em Laravel, es
 
 ### Pirâmide de Testes
 
-```
+```text
          ▲
         /E2E\         (5%)  Cypress/Playwright
        /─────\
@@ -36,7 +36,7 @@ Este documento define a estratégia de testes para o ERP Staccato em Laravel, es
 
 ## Estrutura de Diretórios
 
-```
+```text
 tests/
 ├── Unit/
 │   ├── Actions/           # Actions isolados

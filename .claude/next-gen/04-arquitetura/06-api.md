@@ -26,7 +26,7 @@ Este documento define a arquitetura e padrões para a API REST do ERP Staccato e
 
 ### Padrão de Endpoints
 
-```
+```text
 https://{host}/api/v1/{recurso}
 https://{host}/api/v1/{recurso}/{id}
 https://{host}/api/v1/{recurso}/{id}/{sub-recurso}
@@ -471,7 +471,7 @@ class ClienteResource extends JsonResource
 
 ### Query Parameters
 
-```
+```text
 GET /api/v1/clientes?page=2&per_page=50&sort=-created_at&filter[cidade]=São Paulo&include=enderecos
 ```
 
@@ -520,7 +520,7 @@ public function index(): AnonymousResourceCollection
 
 ### Filtros Avançados
 
-```
+```bash
 # Filtro por intervalo de datas
 GET /api/v1/vendas?filter[data_venda][gte]=2025-01-01&filter[data_venda][lte]=2025-01-31
 

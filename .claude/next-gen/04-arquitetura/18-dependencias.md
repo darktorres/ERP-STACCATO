@@ -59,7 +59,7 @@ Este documento lista todas as dependências do ERP Staccato Laravel, incluindo v
 
 ## Dependências NPM
 
-### Produção
+### NPM - Produção
 
 | Pacote | Versão | Licença | Criticidade | Descrição |
 |--------|--------|---------|-------------|-----------|
@@ -76,7 +76,7 @@ Este documento lista todas as dependências do ERP Staccato Laravel, incluindo v
 | `date-fns` | ^4.0 | MIT | Média | Date utilities |
 | `zod` | ^3.23 | MIT | Alta | Schema validation |
 
-### Desenvolvimento
+### NPM - Desenvolvimento
 
 | Pacote | Versão | Licença | Descrição |
 |--------|--------|---------|-----------|
@@ -109,11 +109,13 @@ Este documento lista todas as dependências do ERP Staccato Laravel, incluindo v
 #### LGPL-3.0 (sped-nfe, sped-common)
 
 **Implicações:**
+
 - Código do pacote pode ser modificado
 - Modificações devem ser disponibilizadas sob LGPL
 - **Não afeta** código do ERP Staccato (uso como biblioteca)
 
 **Mitigação:**
+
 - Usar como dependência externa (OK)
 - Não modificar código fonte
 - Se modificar, criar fork público
@@ -142,6 +144,7 @@ npm audit
 ```
 
 **Política:**
+
 - Vulnerabilidades críticas: Corrigir em 24h
 - Vulnerabilidades altas: Corrigir em 1 semana
 - Vulnerabilidades médias: Próximo sprint
@@ -193,7 +196,7 @@ updates:
 
 ### Processo de Atualização
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                   Processo de Atualização                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -231,6 +234,7 @@ updates:
 | Todos ativos | < 6 meses | OK | - |
 
 **Critérios de Abandono:**
+
 - Sem commits há 12+ meses
 - Issues críticos sem resposta
 - Vulnerabilidades não corrigidas

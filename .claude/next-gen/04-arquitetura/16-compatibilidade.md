@@ -90,6 +90,7 @@ Este documento define os browsers e dispositivos suportados pelo ERP Staccato We
 | Notificações push | ✅ | ✅ | ✅ |
 
 **Legenda:**
+
 - ✅ Totalmente suportado
 - ⚠️ Funcionalidade limitada
 - ❌ Não disponível
@@ -306,7 +307,7 @@ export default {
 
 ### Níveis de Experiência
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     Nível de Experiência                     │
 ├─────────────────────────────────────────────────────────────┤

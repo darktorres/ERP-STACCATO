@@ -147,17 +147,20 @@ Usar **Inertia.js + Vue 3** como stack frontend.
 ### Consequências - ADR-003
 
 **Positivas:**
+
 - UX fluida estilo SPA para usuários acostumados ao desktop Qt
 - Componentização facilita reutilização entre módulos
 - TypeScript previne erros em tempo de desenvolvimento
 - PrimeVue oferece componentes enterprise-ready (DataTable com edição inline)
 
 **Negativas:**
+
 - Equipe precisará aprender Vue 3 e TypeScript
 - Build step necessário (Vite)
 - Bundle inicial maior que Livewire puro
 
 **Mitigações:**
+
 - Treinamento inicial em Vue 3 Composition API
 - Documentação de padrões de código Vue
 - Lazy loading de rotas para reduzir bundle inicial
@@ -302,17 +305,20 @@ flowchart LR
 ### Consequências - ADR-005
 
 **Positivas:**
+
 - Risco controlado com entregas incrementais
 - Usuários podem usar web antes da migração completa
 - Feedback antecipado permite ajustes
 - Equipe ganha experiência gradualmente
 
 **Negativas:**
+
 - Complexidade temporária de manter dois sistemas
 - Mudanças de schema afetam ambos os sistemas
 - Período de transição mais longo
 
 **Mitigações:**
+
 - Documentação clara de quais módulos estão em qual sistema
 - Feature flags para controlar acesso gradual
 - Testes de regressão extensivos no legado
@@ -383,17 +389,20 @@ trait BelongsToLoja
 ### Consequências - ADR-006
 
 **Positivas:**
+
 - Zero esforço de migração de dados
 - Queries simples e performáticas
 - Administradores veem todas as lojas facilmente
 - Backup/restore simplificado (único banco)
 
 **Negativas:**
+
 - Menor isolamento de dados entre lojas
 - Risco de query sem filtro de loja vazar dados
 - Índices compostos necessários para performance
 
 **Mitigações:**
+
 - Global Scope automático por loja
 - Testes para garantir filtro de loja em todas as queries
 - Code review focado em segurança multi-tenant
@@ -432,7 +441,7 @@ Para funcionalidades real-time, usar **Laravel Reverb** (WebSockets oficiais do 
 
 ### Justificativa - ADR-007
 
-#### Por que NÃO usar Swoole na v1:
+#### Por que NÃO usar Swoole na v1
 
 1. **Escala não justifica** - ERP interno com ~10-50 usuários simultâneos, PHP-FPM é suficiente
 2. **Complexidade operacional** - Processos long-running requerem:
@@ -448,7 +457,7 @@ Para funcionalidades real-time, usar **Laravel Reverb** (WebSockets oficiais do 
 5. **Debug mais difícil** - Stack traces e debugging em processos long-running são mais complexos
 6. **Premature optimization** - Otimizar antes de medir é desperdício
 
-#### Alternativas mais simples para real-time:
+#### Alternativas mais simples para real-time
 
 | Necessidade               | Solução Simples              |
 | ------------------------- | ---------------------------- |
@@ -470,7 +479,7 @@ Reavaliar Swoole/Octane se:
 
 Antes de reconsiderar, medir:
 
-```
+```text
 - Tempo médio de resposta (P50, P95, P99)
 - Requests por segundo
 - Uso de memória PHP-FPM
@@ -483,17 +492,20 @@ Se P95 > 500ms ou requests/segundo insuficiente, então avaliar Octane.
 ### Consequências - ADR-007
 
 **Positivas:**
+
 - Simplicidade operacional (deploy tradicional)
 - Menor curva de aprendizado para equipe
 - Debugging familiar
 - Compatibilidade garantida com todos os pacotes Laravel
 
 **Negativas:**
+
 - Performance menor que poderia ter com Swoole
 - WebSockets requerem serviço separado (Reverb)
 - Cold start em cada request
 
 **Mitigações:**
+
 - Usar cache agressivamente (Redis)
 - Otimizar queries com eager loading
 - Usar filas para operações pesadas
@@ -580,7 +592,7 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 
 ### Fluxo de Uso - ADR-008
 
-```
+```text
 1. venda_item criado (status=PENDENTE)
 2. NFe de entrada chega → cria registro em estoques
 3. Usuário abre tela de "Parear"
@@ -593,17 +605,20 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 ### Consequências - ADR-008
 
 **Positivas:**
+
 - Controle total sobre qual lote vai para qual cliente
 - Consistência visual garantida (mesmo tom/calibre)
 - Rastreabilidade clara (1 item = 1 estoque)
 - Histórico de pareamentos e estornos
 
 **Negativas:**
+
 - Requer ação manual do operador
 - Mais cliques que FIFO automático
 - Operador precisa entender o processo
 
 **Mitigações:**
+
 - Interface intuitiva mostrando estoques com lote/tom/quantidade
 - Sugestão de estoque (ordenado por data de entrada)
 - Atalhos de teclado para pareamento rápido
@@ -620,10 +635,12 @@ CREATE UNIQUE INDEX idx_consumos_estoque_ativo
 ### Contexto - ADR-009
 
 O sistema atual armazena dados fiscais da NFe em colunas específicas:
+
 - Tabela `estoque` tem ~30 colunas para dados da NFe de entrada
 - Tabela `estoque_has_consumo` duplica essas ~30 colunas para NFe de saída
 
 Problemas:
+
 1. Duplicação de estrutura em múltiplas tabelas
 2. Mistura de responsabilidades (estoque ≠ dados fiscais)
 3. Campos opcionais (ICMS-ST, IPI) ocupam espaço mesmo quando NULL
@@ -709,6 +726,7 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
 ### Consequências - ADR-009
 
 **Positivas:**
+
 - Zero migrations para novos campos fiscais
 - Reforma tributária não quebra o schema
 - Campos opcionais não ocupam espaço
@@ -716,11 +734,13 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
 - Tabelas de estoque ficam limpas (apenas dados de inventário)
 
 **Negativas:**
+
 - Validação de campos fiscais na aplicação (não no DB)
 - Queries JSONB ligeiramente mais lentas que colunas
 - Menos type-safety (compensado por DTOs no Laravel)
 
 **Mitigações:**
+
 - Form Requests no Laravel validam estrutura do JSONB
 - Índices GIN para queries frequentes
 - Accessors no Model para acesso tipado

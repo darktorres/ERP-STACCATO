@@ -614,7 +614,7 @@ CREATE INDEX vendas_idx ON vendas(cliente_id);  -- usar idx_vendas_...
 
 ## Relacionamentos Principais
 
-```
+```text
 clientes
 ├── enderecos (1:N)
 ├── profissionais (N:M via cliente_profissional)

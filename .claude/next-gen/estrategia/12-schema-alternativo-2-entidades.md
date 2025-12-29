@@ -1456,16 +1456,196 @@ CREATE INDEX idx_nfe_itens_cfop ON nfe_itens(cfop);
 | **Manutenção schema** | ⚠️ Migrations | ⚠️ Migrations | ✅ Mínima | ✅ Mínima |
 | **Storage** | ✅ Eficiente | ✅ Eficiente | ⚠️ Grande | ✅ Eficiente |
 
-### Recomendação
+### Decisão: JSONB Puro
 
-**Opção A (Colunas tradicionais)** para projeto inicial:
-- Estrutura clara e type-safe
-- Validação no banco
-- Performance previsível
+**Escolha: JSONB** pelos seguintes motivos:
 
-Considerar **migrar para D (JSONB)** no futuro se:
-- Legislação mudar frequentemente
-- Precisar de flexibilidade para novos impostos (IBS/CBS da reforma tributária)
+1. **Acesso raro**: Dados fiscais não são consultados frequentemente
+2. **Campos desconhecidos**: XML pode ter campos opcionais que não conhecemos
+3. **Reforma tributária**: IBS/CBS vão mudar estrutura de impostos (2026-2033)
+4. **Preservação total**: Nenhum campo do XML é perdido
+5. **Zero migrations**: Novos campos não requerem alteração de schema
+
+**Schema final:**
+
+```sql
+CREATE TABLE nfe_itens (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfes(id),
+
+    -- Campos mínimos para JOINs e queries frequentes
+    numero_item INTEGER NOT NULL,
+    produto_id INTEGER REFERENCES produtos(id),
+
+    -- TODO o resto em JSONB (parseado do XML)
+    dados JSONB NOT NULL,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT uk_nfe_item UNIQUE (nfe_id, numero_item)
+);
+
+-- Índice GIN para queries no JSONB
+CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
+
+-- Índices específicos só se necessário (após profiling)
+-- CREATE INDEX idx_nfe_itens_cfop ON nfe_itens ((dados->>'cfop'));
+```
+
+**Estrutura do JSONB `dados`:**
+
+```json
+{
+  "cfop": "5102",
+  "ncm": "69072100",
+  "cest": "1000100",
+  "descricao": "PORCELANATO POLIDO 60X60",
+  "quantidade": 100.0000,
+  "unidade": "M2",
+  "valor_unitario": 45.0000,
+  "valor_total": 4500.00,
+  "valor_desconto": 0.00,
+  "valor_frete": 150.00,
+
+  "icms": {
+    "cst": "00",
+    "origem": "0",
+    "modalidade_bc": "3",
+    "valor_bc": 4650.00,
+    "aliquota": 18.00,
+    "valor": 837.00
+  },
+
+  "icms_st": {
+    "modalidade_bc": "4",
+    "mva": 40.00,
+    "valor_bc": 6510.00,
+    "aliquota": 18.00,
+    "valor": 334.80
+  },
+
+  "ipi": {
+    "cst": "50",
+    "valor_bc": 4500.00,
+    "aliquota": 5.00,
+    "valor": 225.00
+  },
+
+  "pis": {
+    "cst": "01",
+    "valor_bc": 4500.00,
+    "aliquota": 1.65,
+    "valor": 74.25
+  },
+
+  "cofins": {
+    "cst": "01",
+    "valor_bc": 4500.00,
+    "aliquota": 7.60,
+    "valor": 342.00
+  },
+
+  "_campos_extras": {
+    "qualquer_campo_novo": "preservado automaticamente"
+  }
+}
+```
+
+**Parser XML → JSONB:**
+
+```php
+class NfeXmlParser
+{
+    public function parseItem(SimpleXMLElement $det): array
+    {
+        $prod = $det->prod;
+        $imposto = $det->imposto;
+
+        // Converte TODO o XML do item para array associativo
+        // Campos desconhecidos são preservados automaticamente
+        $dados = [
+            'cfop' => (string) $prod->CFOP,
+            'ncm' => (string) $prod->NCM,
+            'descricao' => (string) $prod->xProd,
+            'quantidade' => (float) $prod->qCom,
+            'unidade' => (string) $prod->uCom,
+            'valor_unitario' => (float) $prod->vUnCom,
+            'valor_total' => (float) $prod->vProd,
+            // ... campos conhecidos
+        ];
+
+        // Impostos - estrutura flexível
+        if ($icms = $imposto->ICMS) {
+            $dados['icms'] = $this->parseIcms($icms);
+        }
+        if ($ipi = $imposto->IPI) {
+            $dados['ipi'] = $this->parseIpi($ipi);
+        }
+        // ... outros impostos
+
+        // Preservar campos não mapeados
+        $dados['_raw'] = json_decode(
+            json_encode(simplexml_load_string($det->asXML())),
+            true
+        );
+
+        return $dados;
+    }
+}
+```
+
+**Vantagens desta abordagem:**
+
+| Benefício | Descrição |
+|-----------|-----------|
+| **Preservação total** | Nenhum campo do XML é perdido, mesmo desconhecidos |
+| **Reforma tributária** | IBS/CBS entram sem migration |
+| **Campos opcionais** | ICMS-ST, IPI, etc. só existem quando presentes |
+| **Debugging** | `_raw` preserva XML original em formato acessível |
+| **Queries ocasionais** | `dados->>'cfop'` funciona quando necessário |
+
+**Queries de exemplo:**
+
+```sql
+-- Buscar por CFOP
+SELECT * FROM nfe_itens WHERE dados->>'cfop' = '5102';
+
+-- Soma de ICMS-ST (só itens que têm)
+SELECT SUM((dados->'icms_st'->>'valor')::DECIMAL)
+FROM nfe_itens
+WHERE dados ? 'icms_st';
+
+-- Listar itens com IPI > 0
+SELECT * FROM nfe_itens
+WHERE (dados->'ipi'->>'valor')::DECIMAL > 0;
+```
+
+**Laravel Model:**
+
+```php
+class NfeItem extends Model
+{
+    protected $casts = [
+        'dados' => 'array',
+    ];
+
+    // Accessors para conveniência
+    public function getCfopAttribute(): ?string
+    {
+        return $this->dados['cfop'] ?? null;
+    }
+
+    public function getValorIcmsAttribute(): ?float
+    {
+        return $this->dados['icms']['valor'] ?? null;
+    }
+
+    public function hasIcmsSt(): bool
+    {
+        return isset($this->dados['icms_st']);
+    }
+}
+```
 
 ---
 

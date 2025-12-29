@@ -832,6 +832,503 @@ CREATE EXTENSION IF NOT EXISTS pg_ivm;
 
 ---
 
+## Recursos Nativos do PostgreSQL
+
+### Tipos de Dados Avançados
+
+#### Arrays
+
+```sql
+-- Armazenar múltiplos valores em uma coluna
+CREATE TABLE produtos (
+    id SERIAL PRIMARY KEY,
+    descricao VARCHAR(500),
+    tags TEXT[],                    -- array de tags
+    imagens VARCHAR(255)[],         -- array de URLs de imagem
+    cores_disponiveis VARCHAR(50)[] -- cores disponíveis
+);
+
+-- Insert
+INSERT INTO produtos (descricao, tags, cores_disponiveis)
+VALUES ('Porcelanato 60x60', ARRAY['piso', 'interno', 'polido'], ARRAY['branco', 'bege', 'cinza']);
+
+-- Query: encontrar produtos com tag específica
+SELECT * FROM produtos WHERE 'polido' = ANY(tags);
+
+-- Query: encontrar produtos com TODAS estas tags
+SELECT * FROM produtos WHERE tags @> ARRAY['piso', 'interno'];
+
+-- Índice para queries de array
+CREATE INDEX idx_produtos_tags ON produtos USING GIN(tags);
+```
+
+**Caso de uso**: Tags de produto, cores disponíveis, telefones múltiplos
+
+---
+
+#### Range Types
+
+```sql
+-- Ranges de data para vigência de preços
+CREATE TABLE produto_precos (
+    id SERIAL PRIMARY KEY,
+    produto_id INTEGER,
+    valor_venda DECIMAL(15,2),
+    vigencia DATERANGE NOT NULL,  -- [inicio, fim)
+
+    -- Prevenir períodos de preço sobrepostos
+    EXCLUDE USING gist (produto_id WITH =, vigencia WITH &&)
+);
+
+-- Insert preço válido de 1 Jan a 31 Mar
+INSERT INTO produto_precos (produto_id, valor_venda, vigencia)
+VALUES (1, 45.00, '[2025-01-01, 2025-04-01)');
+
+-- Encontrar preço válido em data específica
+SELECT * FROM produto_precos
+WHERE produto_id = 1 AND vigencia @> '2025-02-15'::date;
+
+-- Timestamp ranges para reservas
+CREATE TABLE agendamentos (
+    id SERIAL PRIMARY KEY,
+    recurso_id INTEGER,
+    periodo TSTZRANGE,
+
+    -- Sem reserva dupla
+    EXCLUDE USING gist (recurso_id WITH =, periodo WITH &&)
+);
+```
+
+**Caso de uso**: Vigência de preços, agendamentos, reservas
+
+---
+
+#### INTERVAL
+
+```sql
+-- Cálculos de expiração
+SELECT
+    id,
+    data_emissao,
+    data_emissao + (validade || ' days')::INTERVAL as data_expiracao
+FROM orcamentos;
+
+-- Encontrar orçamentos expirando nos próximos 7 dias
+SELECT * FROM orcamentos
+WHERE status = 'ATIVO'
+  AND data_emissao + (validade || ' days')::INTERVAL
+      BETWEEN NOW() AND NOW() + INTERVAL '7 days';
+
+-- Cálculo de idade
+SELECT
+    nome,
+    data_nascimento,
+    AGE(data_nascimento) as idade
+FROM clientes;
+```
+
+---
+
+### Colunas Geradas (Computed)
+
+```sql
+CREATE TABLE venda_itens (
+    id SERIAL PRIMARY KEY,
+    quantidade DECIMAL(15,4) NOT NULL,
+    valor_unitario DECIMAL(15,4) NOT NULL,
+    desconto_percentual DECIMAL(5,2) DEFAULT 0,
+
+    -- Colunas computadas (stored = persistido em disco)
+    valor_desconto DECIMAL(15,2)
+        GENERATED ALWAYS AS (quantidade * valor_unitario * desconto_percentual / 100) STORED,
+    valor_total DECIMAL(15,2)
+        GENERATED ALWAYS AS (quantidade * valor_unitario * (1 - desconto_percentual/100)) STORED
+);
+
+-- Não precisa calcular na aplicação - sempre correto
+INSERT INTO venda_itens (quantidade, valor_unitario, desconto_percentual)
+VALUES (10, 45.00, 5);
+
+SELECT * FROM venda_itens;
+-- valor_desconto = 22.50, valor_total = 427.50 (auto-calculado)
+```
+
+**Caso de uso**: Totais de linha, cálculos fiscais, margens
+
+---
+
+### Window Functions
+
+```sql
+-- Totais acumulados
+SELECT
+    id,
+    data,
+    valor,
+    SUM(valor) OVER (ORDER BY data) as saldo_acumulado
+FROM movimentacoes
+WHERE conta_id = 1;
+
+-- Ranking de produtos por vendas
+SELECT
+    produto_id,
+    SUM(quantidade) as total_vendido,
+    RANK() OVER (ORDER BY SUM(quantidade) DESC) as ranking
+FROM venda_itens
+GROUP BY produto_id;
+
+-- Valores anteriores/próximos (para comparações)
+SELECT
+    mes,
+    vendas,
+    LAG(vendas) OVER (ORDER BY mes) as vendas_mes_anterior,
+    vendas - LAG(vendas) OVER (ORDER BY mes) as variacao
+FROM vendas_mensais;
+
+-- Partição por categoria
+SELECT
+    categoria,
+    produto,
+    vendas,
+    vendas * 100.0 / SUM(vendas) OVER (PARTITION BY categoria) as percentual_categoria
+FROM produtos_vendas;
+```
+
+**Caso de uso**: Relatórios comparativos, rankings, saldos acumulados
+
+---
+
+### UPSERT (ON CONFLICT)
+
+```sql
+-- Insert ou update em um statement
+INSERT INTO produto_precos (produto_id, custo, valor_venda)
+VALUES (123, 30.00, 45.00)
+ON CONFLICT (produto_id)
+DO UPDATE SET
+    custo = EXCLUDED.custo,
+    valor_venda = EXCLUDED.valor_venda,
+    updated_at = NOW();
+
+-- Insert ou ignorar
+INSERT INTO importacao_log (chave_nfe, status)
+VALUES ('12345678901234567890123456789012345678901234', 'PROCESSADO')
+ON CONFLICT (chave_nfe) DO NOTHING;
+
+-- Update condicional
+INSERT INTO estoque_diario (produto_id, data, quantidade)
+VALUES (1, CURRENT_DATE, 100)
+ON CONFLICT (produto_id, data)
+DO UPDATE SET quantidade = estoque_diario.quantidade + EXCLUDED.quantidade;
+```
+
+**Caso de uso**: Sync de dados, idempotência, contadores
+
+---
+
+### RETURNING Clause
+
+```sql
+-- Obter ID inserido sem query separada
+INSERT INTO vendas (cliente_id, vendedor_id, status)
+VALUES (1, 2, 'ORCAMENTO')
+RETURNING id, created_at;
+
+-- Obter todas as linhas afetadas após update
+UPDATE venda_itens
+SET status = 'CANCELADO'
+WHERE venda_id = 123
+RETURNING id, produto_id, quantidade;
+
+-- Encadear com CTE
+WITH inserted AS (
+    INSERT INTO vendas (cliente_id, total)
+    VALUES (1, 1000.00)
+    RETURNING id
+)
+INSERT INTO venda_parcelas (venda_id, valor, vencimento)
+SELECT id, 500.00, CURRENT_DATE + n * 30
+FROM inserted, generate_series(1, 2) as n;
+```
+
+**Caso de uso**: Evitar round-trips, operações atômicas
+
+---
+
+### CTEs (Common Table Expressions)
+
+```sql
+-- CTE recursivo para árvore de categorias
+WITH RECURSIVE categoria_tree AS (
+    -- Base: categorias de topo
+    SELECT id, nome, parent_id, 0 as nivel, nome::text as path
+    FROM categorias
+    WHERE parent_id IS NULL
+
+    UNION ALL
+
+    -- Recursivo: filhos
+    SELECT c.id, c.nome, c.parent_id, ct.nivel + 1, ct.path || ' > ' || c.nome
+    FROM categorias c
+    JOIN categoria_tree ct ON c.parent_id = ct.id
+)
+SELECT * FROM categoria_tree ORDER BY path;
+
+-- Múltiplos CTEs para relatórios complexos
+WITH
+vendas_mes AS (
+    SELECT produto_id, SUM(quantidade) as qtd
+    FROM venda_itens
+    WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
+    GROUP BY produto_id
+),
+estoque_atual AS (
+    SELECT produto_id, SUM(quantidade_disponivel) as qtd
+    FROM estoques
+    GROUP BY produto_id
+)
+SELECT
+    p.descricao,
+    COALESCE(v.qtd, 0) as vendas_mes,
+    COALESCE(e.qtd, 0) as estoque,
+    COALESCE(e.qtd, 0) / NULLIF(COALESCE(v.qtd, 1), 0) as meses_estoque
+FROM produtos p
+LEFT JOIN vendas_mes v ON p.id = v.produto_id
+LEFT JOIN estoque_atual e ON p.id = e.produto_id;
+```
+
+**Caso de uso**: Hierarquias, relatórios complexos, legibilidade
+
+---
+
+### Row-Level Security (RLS)
+
+```sql
+-- Habilitar RLS na tabela
+ALTER TABLE vendas ENABLE ROW LEVEL SECURITY;
+
+-- Policy: usuários só veem vendas da sua loja
+CREATE POLICY vendas_loja_policy ON vendas
+    FOR ALL
+    USING (loja_id = current_setting('app.current_loja_id')::integer);
+
+-- Policy: admins veem tudo
+CREATE POLICY vendas_admin_policy ON vendas
+    FOR ALL
+    TO admin_role
+    USING (true);
+
+-- Setar contexto na aplicação
+SET app.current_loja_id = '1';
+SELECT * FROM vendas;  -- Só vê loja_id = 1
+```
+
+**Caso de uso**: Multi-tenancy, segurança por loja
+
+---
+
+### LISTEN/NOTIFY (Real-time)
+
+```sql
+-- Na aplicação: escutar eventos
+LISTEN new_order;
+
+-- Trigger para notificar em novos pedidos
+CREATE OR REPLACE FUNCTION notify_new_order() RETURNS trigger AS $$
+BEGIN
+    PERFORM pg_notify('new_order', json_build_object(
+        'id', NEW.id,
+        'cliente_id', NEW.cliente_id,
+        'total', NEW.total
+    )::text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER vendas_notify
+    AFTER INSERT ON vendas
+    FOR EACH ROW EXECUTE FUNCTION notify_new_order();
+```
+
+**Integração Laravel:**
+
+```php
+// Usando Laravel com pg_notify
+DB::listen('new_order', function ($notification) {
+    $data = json_decode($notification->payload);
+    broadcast(new NewOrderEvent($data));
+});
+```
+
+**Caso de uso**: Updates real-time, trigger de websockets
+
+---
+
+### Partial Indexes
+
+```sql
+-- Indexar apenas registros ativos (menor, mais rápido)
+CREATE INDEX idx_orcamentos_ativos
+    ON orcamentos(cliente_id, created_at)
+    WHERE status = 'ATIVO';
+
+-- Indexar apenas estoque disponível
+CREATE INDEX idx_estoque_disponivel
+    ON estoques(produto_id, loja_id)
+    WHERE quantidade_disponivel > 0;
+
+-- Indexar apenas NFe pendentes
+CREATE INDEX idx_nfe_pendentes
+    ON nfes(created_at)
+    WHERE status IN ('PENDENTE', 'PROCESSANDO');
+
+-- 90% das queries usam esses índices parciais
+-- Muito menores que índices de tabela inteira
+```
+
+**Caso de uso**: Performance em queries frequentes
+
+---
+
+### DISTINCT ON
+
+```sql
+-- Obter último preço por produto (específico do PostgreSQL)
+SELECT DISTINCT ON (produto_id)
+    produto_id,
+    valor_venda,
+    created_at
+FROM produto_precos
+ORDER BY produto_id, created_at DESC;
+
+-- Obter primeiro pedido por cliente
+SELECT DISTINCT ON (cliente_id)
+    cliente_id,
+    id as primeira_venda_id,
+    total,
+    created_at
+FROM vendas
+ORDER BY cliente_id, created_at ASC;
+```
+
+**Caso de uso**: Primeiro/último por grupo sem subquery
+
+---
+
+### FILTER Clause
+
+```sql
+-- Agregados condicionais em uma query
+SELECT
+    COUNT(*) as total,
+    COUNT(*) FILTER (WHERE status = 'ATIVO') as ativos,
+    COUNT(*) FILTER (WHERE status = 'CANCELADO') as cancelados,
+    SUM(total) FILTER (WHERE status = 'CONCLUIDO') as valor_concluido,
+    AVG(total) FILTER (WHERE created_at >= CURRENT_DATE - 30) as media_30_dias
+FROM vendas;
+
+-- Pivot-like sem crosstab
+SELECT
+    produto_id,
+    SUM(quantidade) FILTER (WHERE EXTRACT(MONTH FROM created_at) = 1) as jan,
+    SUM(quantidade) FILTER (WHERE EXTRACT(MONTH FROM created_at) = 2) as fev,
+    SUM(quantidade) FILTER (WHERE EXTRACT(MONTH FROM created_at) = 3) as mar
+FROM venda_itens
+WHERE EXTRACT(YEAR FROM created_at) = 2025
+GROUP BY produto_id;
+```
+
+**Caso de uso**: Dashboards, relatórios pivot simples
+
+---
+
+### Particionamento de Tabelas (Nativo)
+
+```sql
+-- Particionar por range (data)
+CREATE TABLE audit_log (
+    id BIGSERIAL,
+    created_at TIMESTAMPTZ NOT NULL,
+    table_name VARCHAR(100),
+    action VARCHAR(20),
+    old_data JSONB,
+    new_data JSONB
+) PARTITION BY RANGE (created_at);
+
+-- Criar partições
+CREATE TABLE audit_log_2025_01 PARTITION OF audit_log
+    FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
+CREATE TABLE audit_log_2025_02 PARTITION OF audit_log
+    FOR VALUES FROM ('2025-02-01') TO ('2025-03-01');
+
+-- Particionar por lista (loja)
+CREATE TABLE vendas (
+    id SERIAL,
+    loja_id INTEGER NOT NULL,
+    ...
+) PARTITION BY LIST (loja_id);
+
+CREATE TABLE vendas_loja_1 PARTITION OF vendas FOR VALUES IN (1);
+CREATE TABLE vendas_loja_2 PARTITION OF vendas FOR VALUES IN (2);
+```
+
+**Caso de uso**: Tabelas grandes, arquivamento, multi-tenancy
+
+---
+
+### Advisory Locks
+
+```sql
+-- Prevenir processamento concorrente do mesmo pedido
+SELECT pg_advisory_lock(hashtext('process_order_' || order_id::text));
+
+-- Fazer trabalho...
+
+SELECT pg_advisory_unlock(hashtext('process_order_' || order_id::text));
+
+-- Try lock (não bloqueante)
+SELECT pg_try_advisory_lock(12345);
+
+-- Session-level vs transaction-level
+SELECT pg_advisory_xact_lock(12345);  -- Liberado em commit/rollback
+```
+
+**Integração Laravel:**
+
+```php
+DB::select("SELECT pg_advisory_lock(?)", [crc32("nfe_emit_{$nfeId}")]);
+try {
+    // Processar NFe
+} finally {
+    DB::select("SELECT pg_advisory_unlock(?)", [crc32("nfe_emit_{$nfeId}")]);
+}
+```
+
+**Caso de uso**: Prevenir processamento duplicado, rate limiting
+
+---
+
+### Resumo de Recursos Nativos
+
+| Recurso | Caso de Uso | Complexidade |
+|---------|-------------|--------------|
+| **Arrays** | Tags, múltiplos valores | Baixa |
+| **Range Types** | Vigência de preços, agendamentos | Média |
+| **Generated Columns** | Totais calculados, margens | Baixa |
+| **Window Functions** | Rankings, saldos, comparativos | Média |
+| **UPSERT** | Sync, idempotência | Baixa |
+| **RETURNING** | Evitar round-trips | Baixa |
+| **CTEs** | Hierarquias, queries complexas | Média |
+| **Row-Level Security** | Multi-tenancy por loja | Média |
+| **LISTEN/NOTIFY** | Real-time updates | Média |
+| **Partial Indexes** | Performance em queries frequentes | Baixa |
+| **DISTINCT ON** | Primeiro/último por grupo | Baixa |
+| **FILTER** | Agregados condicionais | Baixa |
+| **Partitioning** | Tabelas grandes | Alta |
+| **Advisory Locks** | Concorrência, duplicatas | Média |
+
+---
+
 ## Documentos Relacionados
 
 - [../estrategia/07-esquema-redesenhado.md](../estrategia/07-esquema-redesenhado.md) - Schema completo redesenhado com todas as correções

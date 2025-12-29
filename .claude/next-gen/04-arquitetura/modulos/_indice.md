@@ -65,5 +65,5 @@
 ## Documentos Relacionados
 
 - [../01-arquitetura.md](../01-arquitetura.md) - Arquitetura geral Laravel
-- [../../negocios/01-visao-geral-fluxos.md](../../negocios/01-visao-geral-fluxos.md) - Fluxos de negócio
-- [../../estrategia/01-plano-migracao.md](../../estrategia/01-plano-migracao.md) - Plano de migração
+- [../../01-contexto/01-visao-geral-fluxos.md](../../01-contexto/01-visao-geral-fluxos.md) - Fluxos de negocio
+- [../../05-execucao/01-plano-migracao.md](../../05-execucao/01-plano-migracao.md) - Plano de migracao

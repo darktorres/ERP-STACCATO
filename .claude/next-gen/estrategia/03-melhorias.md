@@ -193,7 +193,20 @@ if (status == "PEND. APROV.") ...
 
 ---
 
-### 1.8 Complexidade de Tabelas de Junção
+### 1.8 Senhas Fracas
+
+**Problema**: Muitos usuários têm senhas fracas como `1234`, `senha`, `123456`.
+
+**Riscos**:
+- Acesso não autorizado ao sistema
+- Comprometimento de dados sensíveis (financeiro, clientes)
+- Sem política de senha mínima no sistema atual
+
+**Evidência**: Senhas comuns encontradas em produção incluem variações de `1234`, nomes próprios, e palavras simples.
+
+---
+
+### 1.9 Complexidade de Tabelas de Junção
 
 **Problema**: Múltiplas tabelas de junção com propósitos sobrepostos.
 
@@ -463,6 +476,134 @@ enum VendaItemStatus: string
 
 ---
 
+### 2.7 Implementar Regras de Senha
+
+**Requisitos Mínimos**:
+
+| Regra | Requisito |
+|-------|-----------|
+| Tamanho mínimo | 8 caracteres |
+| Maiúscula | Pelo menos 1 |
+| Minúscula | Pelo menos 1 |
+| Número | Pelo menos 1 |
+| Especial | Opcional |
+| Senhas comuns | Bloqueadas |
+
+**Lista de Senhas Bloqueadas**:
+
+```php
+$blockedPasswords = [
+    '12345678', '123456789', '1234567890',
+    'password', 'senha', 'senha123',
+    'qwerty', 'qwertyui', 'qwerty123',
+    'admin', 'admin123', 'administrator',
+    'staccato', 'staccato123',  // nome da empresa
+];
+```
+
+**Implementação Laravel**:
+
+```php
+// app/Rules/StrongPassword.php
+class StrongPassword implements ValidationRule
+{
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (strlen($value) < 8) {
+            $fail('A senha deve ter no mínimo 8 caracteres.');
+            return;
+        }
+
+        if (!preg_match('/[A-Z]/', $value)) {
+            $fail('A senha deve conter pelo menos uma letra maiúscula.');
+            return;
+        }
+
+        if (!preg_match('/[a-z]/', $value)) {
+            $fail('A senha deve conter pelo menos uma letra minúscula.');
+            return;
+        }
+
+        if (!preg_match('/[0-9]/', $value)) {
+            $fail('A senha deve conter pelo menos um número.');
+            return;
+        }
+
+        if ($this->isCommonPassword($value)) {
+            $fail('Esta senha é muito comum. Escolha uma senha mais forte.');
+            return;
+        }
+    }
+}
+```
+
+**Validação com Laravel Password**:
+
+```php
+use Illuminate\Validation\Rules\Password;
+
+$request->validate([
+    'password' => [
+        'required',
+        'confirmed',
+        Password::min(8)
+            ->mixedCase()
+            ->numbers()
+            ->uncompromised(),  // verifica no HaveIBeenPwned
+    ],
+]);
+```
+
+**Migração de Usuários Existentes**:
+
+```php
+// Forçar troca de senha no próximo login
+Schema::table('usuarios', function (Blueprint $table) {
+    $table->boolean('must_change_password')->default(false);
+    $table->timestamp('password_changed_at')->nullable();
+});
+```
+
+**Middleware para Forçar Troca**:
+
+```php
+class EnsurePasswordChanged
+{
+    public function handle(Request $request, Closure $next)
+    {
+        if (auth()->user()->must_change_password) {
+            return redirect()->route('password.change')
+                ->with('warning', 'Você precisa alterar sua senha.');
+        }
+        return $next($request);
+    }
+}
+```
+
+**Feedback Visual (Vue)**:
+
+```vue
+<template>
+  <div class="password-strength">
+    <div class="bar" :style="{ width: strength + '%' }"></div>
+    <span>{{ strengthText }}</span>
+  </div>
+</template>
+
+<script setup>
+const strength = computed(() => {
+  let score = 0;
+  if (password.length >= 8) score += 25;
+  if (/[A-Z]/.test(password)) score += 25;
+  if (/[a-z]/.test(password)) score += 25;
+  if (/[0-9]/.test(password)) score += 25;
+  return score;
+});
+</script>
+```
+
+---
+
 ## 3. Novas Capacidades
 
 A migração habilita funcionalidades não possíveis no sistema atual:
@@ -513,10 +654,11 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 | 2   | Normalizar refs de fornecedor   | Médio   | Média        | **Alta**   |
 | 3   | Redesenhar tratamento de status | Baixo   | Baixa        | **Alta**   |
 | 4   | Adicionar trilha de auditoria   | Alto    | Média        | **Alta**   |
-| 5   | Corrigir fluxo de devoluções    | Médio   | Média        | **Média**  |
-| 6   | Dividir tabela produto          | Médio   | Média        | **Média**  |
-| 7   | Simplificar tabelas L1/L2       | Alto    | Alta         | **Média**  |
-| 8   | Adicionar queries temporais     | Médio   | Alta         | **Baixa**  |
+| 5   | **Regras de senha**             | Alto    | Baixa        | **Alta**   |
+| 6   | Corrigir fluxo de devoluções    | Médio   | Média        | **Média**  |
+| 7   | Dividir tabela produto          | Médio   | Média        | **Média**  |
+| 8   | Simplificar tabelas L1/L2       | Alto    | Alta         | **Média**  |
+| 9   | Adicionar queries temporais     | Médio   | Alta         | **Baixa**  |
 
 ### Ordem Recomendada
 
@@ -525,6 +667,7 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 - Correção FIFO
 - ENUMs de status
 - Normalização FK de fornecedor
+- Regras de senha (segurança)
 
 **Fase 2 - Fundação** (durante migração):
 

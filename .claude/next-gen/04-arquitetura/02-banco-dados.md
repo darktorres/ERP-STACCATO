@@ -798,18 +798,18 @@ SELECT partman.create_parent(
 
 ### Resumo de Extensões
 
-| Extensão | Caso de Uso | Prioridade | Complexidade |
-|----------|-------------|------------|--------------|
-| **pg_trgm** | Busca fuzzy de produtos | Alta | Baixa |
-| **unaccent** | Acentos em português | Alta | Baixa |
-| **pg_stat_statements** | Monitoramento de performance | Alta | Baixa |
-| **pgcrypto** | Criptografar CPF/CNPJ (LGPD) | Alta | Média |
-| **uuid-ossp** | IDs públicos | Média | Baixa |
-| **pg_cron** | Backup de jobs agendados | Média | Baixa |
-| **ltree** | Hierarquia de categorias | Média | Média |
-| **tablefunc** | Relatórios pivot | Baixa | Média |
-| **PostGIS** | Roteamento de entregas | Baixa | Alta |
-| **pg_partman** | Particionamento de tabelas grandes | Baixa | Média |
+| Extensão               | Caso de Uso                        | Prioridade | Complexidade |
+| ---------------------- | ---------------------------------- | ---------- | ------------ |
+| **pg_trgm**            | Busca fuzzy de produtos            | Alta       | Baixa        |
+| **unaccent**           | Acentos em português               | Alta       | Baixa        |
+| **pg_stat_statements** | Monitoramento de performance       | Alta       | Baixa        |
+| **pgcrypto**           | Criptografar CPF/CNPJ (LGPD)       | Alta       | Média        |
+| **uuid-ossp**          | IDs públicos                       | Média      | Baixa        |
+| **pg_cron**            | Backup de jobs agendados           | Média      | Baixa        |
+| **ltree**              | Hierarquia de categorias           | Média      | Média        |
+| **tablefunc**          | Relatórios pivot                   | Baixa      | Média        |
+| **PostGIS**            | Roteamento de entregas             | Baixa      | Alta         |
+| **pg_partman**         | Particionamento de tabelas grandes | Baixa      | Média        |
 
 ---
 
@@ -1310,22 +1310,22 @@ try {
 
 ### Resumo de Recursos Nativos
 
-| Recurso | Caso de Uso | Complexidade |
-|---------|-------------|--------------|
-| **Arrays** | Tags, múltiplos valores | Baixa |
-| **Range Types** | Vigência de preços, agendamentos | Média |
-| **Generated Columns** | Totais calculados, margens | Baixa |
-| **Window Functions** | Rankings, saldos, comparativos | Média |
-| **UPSERT** | Sync, idempotência | Baixa |
-| **RETURNING** | Evitar round-trips | Baixa |
-| **CTEs** | Hierarquias, queries complexas | Média |
-| **Row-Level Security** | Multi-tenancy por loja | Média |
-| **LISTEN/NOTIFY** | Real-time updates | Média |
-| **Partial Indexes** | Performance em queries frequentes | Baixa |
-| **DISTINCT ON** | Primeiro/último por grupo | Baixa |
-| **FILTER** | Agregados condicionais | Baixa |
-| **Partitioning** | Tabelas grandes | Alta |
-| **Advisory Locks** | Concorrência, duplicatas | Média |
+| Recurso                | Caso de Uso                       | Complexidade |
+| ---------------------- | --------------------------------- | ------------ |
+| **Arrays**             | Tags, múltiplos valores           | Baixa        |
+| **Range Types**        | Vigência de preços, agendamentos  | Média        |
+| **Generated Columns**  | Totais calculados, margens        | Baixa        |
+| **Window Functions**   | Rankings, saldos, comparativos    | Média        |
+| **UPSERT**             | Sync, idempotência                | Baixa        |
+| **RETURNING**          | Evitar round-trips                | Baixa        |
+| **CTEs**               | Hierarquias, queries complexas    | Média        |
+| **Row-Level Security** | Multi-tenancy por loja            | Média        |
+| **LISTEN/NOTIFY**      | Real-time updates                 | Média        |
+| **Partial Indexes**    | Performance em queries frequentes | Baixa        |
+| **DISTINCT ON**        | Primeiro/último por grupo         | Baixa        |
+| **FILTER**             | Agregados condicionais            | Baixa        |
+| **Partitioning**       | Tabelas grandes                   | Alta         |
+| **Advisory Locks**     | Concorrência, duplicatas          | Média        |
 
 ---
 

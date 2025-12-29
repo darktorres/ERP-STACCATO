@@ -7,17 +7,17 @@
 
 ## Log de Decisões
 
-| ID      | Decisão                             | Status        | Data       |
-| ------- | ----------------------------------- | ------------- | ---------- |
-| ADR-001 | Usar Laravel como framework backend | **Aceito**    | 2025-12-27 |
-| ADR-002 | Usar PostgreSQL como banco de dados | **Aceito**    | 2025-12-27 |
-| ADR-003 | Seleção de framework frontend       | **Aceito**    | 2025-12-28 |
-| ADR-004 | Abordagem de integração NFe         | **Aceito**    | 2025-12-28 |
-| ADR-005 | Estratégia de migração              | **Aceito**    | 2025-12-28 |
-| ADR-006 | Abordagem de multi-tenancy          | **Aceito**    | 2025-12-28 |
-| ADR-007 | Swoole / Laravel Octane             | **Adiado**    | 2025-12-28 |
-| ADR-008 | Seleção manual de estoque (1:1)     | **Aceito**    | 2025-12-28 |
-| ADR-009 | JSONB para dados fiscais de NFe     | **Aceito**    | 2025-12-28 |
+| ID      | Decisão                             | Status     | Data       |
+| ------- | ----------------------------------- | ---------- | ---------- |
+| ADR-001 | Usar Laravel como framework backend | **Aceito** | 2025-12-27 |
+| ADR-002 | Usar PostgreSQL como banco de dados | **Aceito** | 2025-12-27 |
+| ADR-003 | Seleção de framework frontend       | **Aceito** | 2025-12-28 |
+| ADR-004 | Abordagem de integração NFe         | **Aceito** | 2025-12-28 |
+| ADR-005 | Estratégia de migração              | **Aceito** | 2025-12-28 |
+| ADR-006 | Abordagem de multi-tenancy          | **Aceito** | 2025-12-28 |
+| ADR-007 | Swoole / Laravel Octane             | **Adiado** | 2025-12-28 |
+| ADR-008 | Seleção manual de estoque (1:1)     | **Aceito** | 2025-12-28 |
+| ADR-009 | JSONB para dados fiscais de NFe     | **Aceito** | 2025-12-28 |
 
 ---
 
@@ -134,15 +134,15 @@ Usar **Inertia.js + Vue 3** como stack frontend.
 
 ### Stack Definida - ADR-003
 
-| Componente   | Tecnologia       | Propósito                        |
-| ------------ | ---------------- | -------------------------------- |
-| Framework    | Inertia.js       | Integração Laravel ↔ Vue         |
-| Frontend     | Vue 3            | Composition API, reatividade     |
-| Tipagem      | TypeScript       | Segurança de tipos               |
-| CSS          | Tailwind CSS     | Utility-first, produtividade     |
-| Componentes  | PrimeVue         | Tabelas, formulários, diálogos   |
-| Utilitários  | VueUse           | Composables reutilizáveis        |
-| Build        | Vite             | Build rápido, HMR                |
+| Componente  | Tecnologia   | Propósito                      |
+| ----------- | ------------ | ------------------------------ |
+| Framework   | Inertia.js   | Integração Laravel ↔ Vue       |
+| Frontend    | Vue 3        | Composition API, reatividade   |
+| Tipagem     | TypeScript   | Segurança de tipos             |
+| CSS         | Tailwind CSS | Utility-first, produtividade   |
+| Componentes | PrimeVue     | Tabelas, formulários, diálogos |
+| Utilitários | VueUse       | Composables reutilizáveis      |
+| Build       | Vite         | Build rápido, HMR              |
 
 ### Consequências - ADR-003
 
@@ -290,17 +290,17 @@ flowchart LR
     F0 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7 --> F8
 ```
 
-| Fase | Módulo     | Duração   | Dependências          |
-| ---- | ---------- | --------- | --------------------- |
-| 0    | Fundação   | Mês 1-2   | -                     |
-| 1    | Cadastros  | Mês 2-4   | Fase 0                |
-| 2    | Compras    | Mês 4-6   | Fase 1                |
-| 3    | Estoque    | Mês 6-8   | Fase 2                |
-| 4    | Financeiro | Mês 8-10  | Fase 2, 5 (parcial)   |
-| 5    | Vendas     | Mês 10-13 | Fase 1, 3             |
-| 6    | NFe        | Mês 13-15 | Fase 2, 5             |
-| 7    | Logística  | Mês 15-16 | Fase 5                |
-| 8    | Relatórios | Mês 16-18 | Todas                 |
+| Fase | Módulo     | Duração   | Dependências        |
+| ---- | ---------- | --------- | ------------------- |
+| 0    | Fundação   | Mês 1-2   | -                   |
+| 1    | Cadastros  | Mês 2-4   | Fase 0              |
+| 2    | Compras    | Mês 4-6   | Fase 1              |
+| 3    | Estoque    | Mês 6-8   | Fase 2              |
+| 4    | Financeiro | Mês 8-10  | Fase 2, 5 (parcial) |
+| 5    | Vendas     | Mês 10-13 | Fase 1, 3           |
+| 6    | NFe        | Mês 13-15 | Fase 2, 5           |
+| 7    | Logística  | Mês 15-16 | Fase 5              |
+| 8    | Relatórios | Mês 16-18 | Todas               |
 
 ### Consequências - ADR-005
 
@@ -426,12 +426,12 @@ Questão: Devemos usar Swoole/Octane para melhor performance?
 
 ### Opções Avaliadas - ADR-007
 
-| Opção              | Performance | Complexidade | Real-time     |
-| ------------------ | ----------- | ------------ | ------------- |
-| **PHP-FPM**        | Baseline    | Baixa        | Polling/SSE   |
-| **Swoole/Octane**  | 10-100x     | Alta         | WebSocket     |
-| **FrankenPHP**     | 2-4x        | Média        | WebSocket     |
-| **RoadRunner**     | 5-10x       | Média        | WebSocket     |
+| Opção             | Performance | Complexidade | Real-time   |
+| ----------------- | ----------- | ------------ | ----------- |
+| **PHP-FPM**       | Baseline    | Baixa        | Polling/SSE |
+| **Swoole/Octane** | 10-100x     | Alta         | WebSocket   |
+| **FrankenPHP**    | 2-4x        | Média        | WebSocket   |
+| **RoadRunner**    | 5-10x       | Média        | WebSocket   |
 
 ### Decisão - ADR-007
 
@@ -459,12 +459,12 @@ Para funcionalidades real-time, usar **Laravel Reverb** (WebSockets oficiais do 
 
 #### Alternativas mais simples para real-time
 
-| Necessidade               | Solução Simples              |
-| ------------------------- | ---------------------------- |
-| Atualização de estoque    | Laravel Reverb ou polling    |
-| Status de NFe             | Polling (SEFAZ é lento)      |
-| Notificações              | Server-Sent Events (SSE)     |
-| Dashboard em tempo real   | Polling com intervalo curto  |
+| Necessidade             | Solução Simples             |
+| ----------------------- | --------------------------- |
+| Atualização de estoque  | Laravel Reverb ou polling   |
+| Status de NFe           | Polling (SEFAZ é lento)     |
+| Notificações            | Server-Sent Events (SSE)    |
+| Dashboard em tempo real | Polling com intervalo curto |
 
 ### Quando Reconsiderar - ADR-007
 
@@ -528,11 +528,11 @@ Questão: Como vincular `venda_itens` a `estoques` no novo sistema?
 
 ### Opções Avaliadas - ADR-008
 
-| Opção                      | Descrição                                      | Prós                     | Contras                          |
-| -------------------------- | ---------------------------------------------- | ------------------------ | -------------------------------- |
-| **FIFO Automático**        | Sistema seleciona estoque mais antigo          | Menos trabalho manual    | Ignora variação de lote          |
-| **Seleção Manual 1:1**     | Usuário escolhe qual estoque usar              | Controle total           | Mais cliques                     |
-| **Seleção Manual 1:N**     | Um item pode consumir de múltiplos estoques    | Flexível                 | Complexidade, rastreio difícil   |
+| Opção                  | Descrição                                   | Prós                  | Contras                        |
+| ---------------------- | ------------------------------------------- | --------------------- | ------------------------------ |
+| **FIFO Automático**    | Sistema seleciona estoque mais antigo       | Menos trabalho manual | Ignora variação de lote        |
+| **Seleção Manual 1:1** | Usuário escolhe qual estoque usar           | Controle total        | Mais cliques                   |
+| **Seleção Manual 1:N** | Um item pode consumir de múltiplos estoques | Flexível              | Complexidade, rastreio difícil |
 
 ### Decisão - ADR-008
 
@@ -649,12 +649,12 @@ Problemas:
 
 ### Opções Avaliadas - ADR-009
 
-| Opção | Descrição | Prós | Contras |
-|-------|-----------|------|---------|
-| **Colunas tradicionais** | Uma coluna por campo fiscal | Type-safe, validação DB | Migrations constantes, campos opcionais NULL |
-| **JSONB puro** | Todo item em um campo JSONB | Flexível, preserva tudo | Menos type-safety |
-| **Híbrido** | Colunas frequentes + JSONB impostos | Balanço | Mais complexo |
-| **XML raw apenas** | Não parsear, manter só XML | Simples | Lento para queries |
+| Opção                    | Descrição                           | Prós                    | Contras                                      |
+| ------------------------ | ----------------------------------- | ----------------------- | -------------------------------------------- |
+| **Colunas tradicionais** | Uma coluna por campo fiscal         | Type-safe, validação DB | Migrations constantes, campos opcionais NULL |
+| **JSONB puro**           | Todo item em um campo JSONB         | Flexível, preserva tudo | Menos type-safety                            |
+| **Híbrido**              | Colunas frequentes + JSONB impostos | Balanço                 | Mais complexo                                |
+| **XML raw apenas**       | Não parsear, manter só XML          | Simples                 | Lento para queries                           |
 
 ### Decisão - ADR-009
 

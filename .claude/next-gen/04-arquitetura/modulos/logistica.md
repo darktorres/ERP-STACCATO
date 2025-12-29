@@ -39,18 +39,18 @@ flowchart LR
 
 ### Classes
 
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `TabLogistica` | `tablogistica.cpp` | Container principal da aba |
-| `WidgetLogisticaAgendarColeta` | `widgetlogisticaagendarcoleta.cpp` | Agendar coleta no fornecedor |
-| `WidgetLogisticaColeta` | `widgetlogisticacoleta.cpp` | Lista de coletas |
-| `WidgetLogisticaRecebimento` | `widgetlogisticarecebimento.cpp` | Recebimento no armazém |
-| `WidgetLogisticaAgendarEntrega` | `widgetlogisticaagendarentrega.cpp` | Agendar entrega ao cliente |
-| `WidgetLogisticaEntregas` | `widgetlogisticaentregas.cpp` | Lista de entregas |
-| `WidgetLogisticaEntregues` | `widgetlogisticaentregues.cpp` | Entregas confirmadas |
-| `WidgetLogisticaCaminhao` | `widgetlogisticacaminhao.cpp` | Visão por veículo |
-| `WidgetLogisticaCalendario` | `widgetlogisticacalendario.cpp` | Calendário de entregas |
-| `WidgetLogisticaRepresentacao` | `widgetlogisticarepresentacao.cpp` | Vendas de representação |
+| Classe                          | Arquivo                             | Finalidade                   |
+| ------------------------------- | ----------------------------------- | ---------------------------- |
+| `TabLogistica`                  | `tablogistica.cpp`                  | Container principal da aba   |
+| `WidgetLogisticaAgendarColeta`  | `widgetlogisticaagendarcoleta.cpp`  | Agendar coleta no fornecedor |
+| `WidgetLogisticaColeta`         | `widgetlogisticacoleta.cpp`         | Lista de coletas             |
+| `WidgetLogisticaRecebimento`    | `widgetlogisticarecebimento.cpp`    | Recebimento no armazém       |
+| `WidgetLogisticaAgendarEntrega` | `widgetlogisticaagendarentrega.cpp` | Agendar entrega ao cliente   |
+| `WidgetLogisticaEntregas`       | `widgetlogisticaentregas.cpp`       | Lista de entregas            |
+| `WidgetLogisticaEntregues`      | `widgetlogisticaentregues.cpp`      | Entregas confirmadas         |
+| `WidgetLogisticaCaminhao`       | `widgetlogisticacaminhao.cpp`       | Visão por veículo            |
+| `WidgetLogisticaCalendario`     | `widgetlogisticacalendario.cpp`     | Calendário de entregas       |
+| `WidgetLogisticaRepresentacao`  | `widgetlogisticarepresentacao.cpp`  | Vendas de representação      |
 
 ### Tabelas do Banco de Dados
 
@@ -756,14 +756,14 @@ Route::middleware(['auth'])->prefix('logistica')->name('logistica.')->group(func
 
 ## Eventos
 
-| Evento | Dispara |
-|--------|---------|
-| `EntregaAgendada` | Notificar cliente, gerar documentos |
-| `EntregaConfirmada` | Atualizar venda, disparar faturamento |
-| `ColetaAgendada` | Notificar motorista |
-| `ColetaConfirmada` | Atualizar compra |
-| `ItemQuebradoRegistrado` | Gerar crédito, notificar |
-| `VendaEntregue` | Atualizar status da venda |
+| Evento                   | Dispara                               |
+| ------------------------ | ------------------------------------- |
+| `EntregaAgendada`        | Notificar cliente, gerar documentos   |
+| `EntregaConfirmada`      | Atualizar venda, disparar faturamento |
+| `ColetaAgendada`         | Notificar motorista                   |
+| `ColetaConfirmada`       | Atualizar compra                      |
+| `ItemQuebradoRegistrado` | Gerar crédito, notificar              |
+| `VendaEntregue`          | Atualizar status da venda             |
 
 ---
 

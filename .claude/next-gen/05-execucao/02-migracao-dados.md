@@ -24,71 +24,71 @@ Este documento detalha o processo de migração de dados do MySQL legado para o 
 
 ### 1.1 Dados Mestres (Fase 1)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `loja` | `lojas` | Renomear colunas |
-| `usuario` | `usuarios` | Hash de senha, permissões |
-| `usuario_has_permissao` | `permissions` (Spatie) | Converter flags → roles |
-| `fornecedor` | `fornecedores` | Renomear colunas |
-| `fornecedor_has_endereco` | `fornecedor_enderecos` | Renomear colunas |
-| `cliente` | `clientes` | Renomear colunas |
-| `cliente_has_endereco` | `cliente_enderecos` | Renomear colunas |
-| `transportadora` | `transportadoras` | Renomear colunas |
-| `transportadora_has_veiculo` | `veiculos` | Renomear colunas |
-| `profissional` | `profissionais` | Renomear colunas |
-| `ncm` | `ncms` | Direto |
+| Tabela MySQL                 | Tabela PostgreSQL      | Transformação             |
+| ---------------------------- | ---------------------- | ------------------------- |
+| `loja`                       | `lojas`                | Renomear colunas          |
+| `usuario`                    | `usuarios`             | Hash de senha, permissões |
+| `usuario_has_permissao`      | `permissions` (Spatie) | Converter flags → roles   |
+| `fornecedor`                 | `fornecedores`         | Renomear colunas          |
+| `fornecedor_has_endereco`    | `fornecedor_enderecos` | Renomear colunas          |
+| `cliente`                    | `clientes`             | Renomear colunas          |
+| `cliente_has_endereco`       | `cliente_enderecos`    | Renomear colunas          |
+| `transportadora`             | `transportadoras`      | Renomear colunas          |
+| `transportadora_has_veiculo` | `veiculos`             | Renomear colunas          |
+| `profissional`               | `profissionais`        | Renomear colunas          |
+| `ncm`                        | `ncms`                 | Direto                    |
 
 ### 1.2 Produtos (Fase 2)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `produto` (100 cols) | `produtos` | Extrair core |
-| `produto` | `produto_precos` | Extrair preços |
-| `produto` | `produto_tributos` | Extrair impostos |
-| - | `produto_atributos` | JSONB flexível |
+| Tabela MySQL         | Tabela PostgreSQL   | Transformação    |
+| -------------------- | ------------------- | ---------------- |
+| `produto` (100 cols) | `produtos`          | Extrair core     |
+| `produto`            | `produto_precos`    | Extrair preços   |
+| `produto`            | `produto_tributos`  | Extrair impostos |
+| -                    | `produto_atributos` | JSONB flexível   |
 
 ### 1.3 Transações (Fase 3)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `orcamento` | `orcamentos` | Renomear colunas |
-| `orcamento_has_produto` | `orcamento_itens` | Normalizar fornecedor |
-| `venda` | `vendas` | Renomear colunas |
-| `venda_has_produto` + `venda_has_produto2` | `venda_itens` | **Merge L1/L2** |
-| `pedido_fornecedor` | `compras` | Renomear colunas |
-| `pedido_fornecedor_has_produto` + `pedido_fornecedor_has_produto2` | `compra_itens` | **Merge L1/L2** |
+| Tabela MySQL                                                       | Tabela PostgreSQL | Transformação         |
+| ------------------------------------------------------------------ | ----------------- | --------------------- |
+| `orcamento`                                                        | `orcamentos`      | Renomear colunas      |
+| `orcamento_has_produto`                                            | `orcamento_itens` | Normalizar fornecedor |
+| `venda`                                                            | `vendas`          | Renomear colunas      |
+| `venda_has_produto` + `venda_has_produto2`                         | `venda_itens`     | **Merge L1/L2**       |
+| `pedido_fornecedor`                                                | `compras`         | Renomear colunas      |
+| `pedido_fornecedor_has_produto` + `pedido_fornecedor_has_produto2` | `compra_itens`    | **Merge L1/L2**       |
 
 ### 1.4 Estoque (Fase 4)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `estoque` | `estoques` | Normalizar fornecedor |
+| Tabela MySQL          | Tabela PostgreSQL  | Transformação         |
+| --------------------- | ------------------ | --------------------- |
+| `estoque`             | `estoques`         | Normalizar fornecedor |
 | `estoque_has_consumo` | `estoque_consumos` | Normalizar fornecedor |
-| `bloco` | `blocos` | Renomear colunas |
+| `bloco`               | `blocos`           | Renomear colunas      |
 
 ### 1.5 NFe (Fase 5)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `nfe` | `nfes` | Renomear colunas |
-| `nfe_has_produto` | `nfe_itens` | Normalizar fornecedor |
+| Tabela MySQL      | Tabela PostgreSQL | Transformação         |
+| ----------------- | ----------------- | --------------------- |
+| `nfe`             | `nfes`            | Renomear colunas      |
+| `nfe_has_produto` | `nfe_itens`       | Normalizar fornecedor |
 
 ### 1.6 Financeiro (Fase 6)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `conta_a_receber` | `contas_receber` | Renomear colunas |
-| `conta_a_receber_has_pagamento` | `conta_receber_pagamentos` | Renomear |
-| `conta_a_pagar` | `contas_pagar` | Renomear colunas |
-| `conta_a_pagar_has_pagamento` | `conta_pagar_pagamentos` | Renomear |
+| Tabela MySQL                    | Tabela PostgreSQL          | Transformação    |
+| ------------------------------- | -------------------------- | ---------------- |
+| `conta_a_receber`               | `contas_receber`           | Renomear colunas |
+| `conta_a_receber_has_pagamento` | `conta_receber_pagamentos` | Renomear         |
+| `conta_a_pagar`                 | `contas_pagar`             | Renomear colunas |
+| `conta_a_pagar_has_pagamento`   | `conta_pagar_pagamentos`   | Renomear         |
 
 ### 1.7 Logística (Fase 7)
 
-| Tabela MySQL | Tabela PostgreSQL | Transformação |
-|--------------|-------------------|---------------|
-| `veiculo_has_produto` | `evento_logistica_itens` | Reestruturar |
-| - | `eventos_logistica` | Criar de `idEvento` |
-| - | `confirmacoes_entrega` | Extrair campos |
+| Tabela MySQL          | Tabela PostgreSQL        | Transformação       |
+| --------------------- | ------------------------ | ------------------- |
+| `veiculo_has_produto` | `evento_logistica_itens` | Reestruturar        |
+| -                     | `eventos_logistica`      | Criar de `idEvento` |
+| -                     | `confirmacoes_entrega`   | Extrair campos      |
 
 ---
 

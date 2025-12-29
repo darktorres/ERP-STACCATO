@@ -553,7 +553,7 @@ public function reordenar(Request $request, Orcamento $orcamento)
 </template>
 
 <script setup>
-import draggable from 'vuedraggable';
+import draggable from "vuedraggable";
 
 const itens = ref([]);
 
@@ -584,7 +584,12 @@ async function onReorder() {
   <tr v-for="(item, index) in itens" :key="item.id">
     <td>
       <button @click="moverParaCima(index)" :disabled="index === 0">↑</button>
-      <button @click="moverParaBaixo(index)" :disabled="index === itens.length - 1">↓</button>
+      <button
+        @click="moverParaBaixo(index)"
+        :disabled="index === itens.length - 1"
+      >
+        ↓
+      </button>
     </td>
     <!-- resto das colunas -->
   </tr>
@@ -597,14 +602,14 @@ async function onReorder() {
 
 **Requisitos Mínimos**:
 
-| Regra | Requisito |
-|-------|-----------|
+| Regra          | Requisito    |
+| -------------- | ------------ |
 | Tamanho mínimo | 8 caracteres |
-| Maiúscula | Pelo menos 1 |
-| Minúscula | Pelo menos 1 |
-| Número | Pelo menos 1 |
-| Especial | Opcional |
-| Senhas comuns | Bloqueadas |
+| Maiúscula      | Pelo menos 1 |
+| Minúscula      | Pelo menos 1 |
+| Número         | Pelo menos 1 |
+| Especial       | Opcional     |
+| Senhas comuns  | Bloqueadas   |
 
 **Lista de Senhas Bloqueadas**:
 

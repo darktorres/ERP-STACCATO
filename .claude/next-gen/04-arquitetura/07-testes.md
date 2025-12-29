@@ -11,13 +11,13 @@ Este documento define a estratégia de testes para o ERP Staccato em Laravel, es
 
 ### Objetivos
 
-| Objetivo | Meta |
-|----------|------|
-| Cobertura de código | ≥ 80% em Services/Actions |
-| Cobertura crítica | 100% em regras de negócio |
-| Tempo de execução (unit) | < 30 segundos |
-| Tempo de execução (full) | < 10 minutos |
-| Flaky tests | 0% tolerância |
+| Objetivo                 | Meta                      |
+| ------------------------ | ------------------------- |
+| Cobertura de código      | ≥ 80% em Services/Actions |
+| Cobertura crítica        | 100% em regras de negócio |
+| Tempo de execução (unit) | < 30 segundos             |
+| Tempo de execução (full) | < 10 minutos              |
+| Flaky tests              | 0% tolerância             |
 
 ### Pirâmide de Testes
 
@@ -72,30 +72,30 @@ tests/
 
 ### Stack Principal
 
-| Ferramenta | Uso | Versão |
-|------------|-----|--------|
-| PHPUnit | Unit/Feature tests | 11.x |
-| Pest | Sintaxe alternativa | 3.x |
-| Cypress | E2E browser tests | 13.x |
-| Laravel Dusk | Browser tests Laravel | 8.x |
-| Mockery | Mocking framework | 1.6.x |
-| Faker | Geração de dados | 1.23.x |
+| Ferramenta   | Uso                   | Versão |
+| ------------ | --------------------- | ------ |
+| PHPUnit      | Unit/Feature tests    | 11.x   |
+| Pest         | Sintaxe alternativa   | 3.x    |
+| Cypress      | E2E browser tests     | 13.x   |
+| Laravel Dusk | Browser tests Laravel | 8.x    |
+| Mockery      | Mocking framework     | 1.6.x  |
+| Faker        | Geração de dados      | 1.23.x |
 
 ### Pacotes Auxiliares
 
 ```json
 {
-    "require-dev": {
-        "phpunit/phpunit": "^11.0",
-        "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0",
-        "mockery/mockery": "^1.6",
-        "fakerphp/faker": "^1.23",
-        "laravel/dusk": "^8.0",
-        "spatie/laravel-ray": "^1.35",
-        "nunomaduro/collision": "^8.0",
-        "larastan/larastan": "^2.9"
-    }
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "pestphp/pest": "^3.0",
+    "pestphp/pest-plugin-laravel": "^3.0",
+    "mockery/mockery": "^1.6",
+    "fakerphp/faker": "^1.23",
+    "laravel/dusk": "^8.0",
+    "spatie/laravel-ray": "^1.35",
+    "nunomaduro/collision": "^8.0",
+    "larastan/larastan": "^2.9"
+  }
 }
 ```
 
@@ -678,22 +678,22 @@ class Cnab240Test extends TestCase
 
 ```javascript
 // cypress.config.js
-const { defineConfig } = require('cypress');
+const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:8000',
+    baseUrl: "http://localhost:8000",
     viewportWidth: 1280,
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
     defaultCommandTimeout: 10000,
     env: {
-      apiUrl: 'http://localhost:8000/api/v1',
+      apiUrl: "http://localhost:8000/api/v1",
     },
     setupNodeEvents(on, config) {
       // Seed database before tests
-      on('task', {
+      on("task", {
         seedDatabase() {
           // Run artisan migrate:fresh --seed
         },
@@ -710,39 +710,39 @@ module.exports = defineConfig({
 
 ```javascript
 // cypress/e2e/auth/login.cy.js
-describe('Login', () => {
+describe("Login", () => {
   beforeEach(() => {
-    cy.task('seedDatabase');
-    cy.visit('/login');
+    cy.task("seedDatabase");
+    cy.visit("/login");
   });
 
-  it('faz login com credenciais válidas', () => {
-    cy.get('[data-testid="email"]').type('admin@staccato.com.br');
-    cy.get('[data-testid="password"]').type('senha123');
+  it("faz login com credenciais válidas", () => {
+    cy.get('[data-testid="email"]').type("admin@staccato.com.br");
+    cy.get('[data-testid="password"]').type("senha123");
     cy.get('[data-testid="submit"]').click();
 
-    cy.url().should('include', '/dashboard');
-    cy.contains('Bem-vindo').should('be.visible');
+    cy.url().should("include", "/dashboard");
+    cy.contains("Bem-vindo").should("be.visible");
   });
 
-  it('mostra erro com credenciais inválidas', () => {
-    cy.get('[data-testid="email"]').type('admin@staccato.com.br');
-    cy.get('[data-testid="password"]').type('senhaerrada');
+  it("mostra erro com credenciais inválidas", () => {
+    cy.get('[data-testid="email"]').type("admin@staccato.com.br");
+    cy.get('[data-testid="password"]').type("senhaerrada");
     cy.get('[data-testid="submit"]').click();
 
-    cy.contains('Credenciais inválidas').should('be.visible');
-    cy.url().should('include', '/login');
+    cy.contains("Credenciais inválidas").should("be.visible");
+    cy.url().should("include", "/login");
   });
 
-  it('bloqueia após 5 tentativas', () => {
+  it("bloqueia após 5 tentativas", () => {
     for (let i = 0; i < 5; i++) {
-      cy.get('[data-testid="email"]').clear().type('admin@staccato.com.br');
-      cy.get('[data-testid="password"]').clear().type('senhaerrada');
+      cy.get('[data-testid="email"]').clear().type("admin@staccato.com.br");
+      cy.get('[data-testid="password"]').clear().type("senhaerrada");
       cy.get('[data-testid="submit"]').click();
     }
 
-    cy.contains('Muitas tentativas').should('be.visible');
-    cy.get('[data-testid="submit"]').should('be.disabled');
+    cy.contains("Muitas tentativas").should("be.visible");
+    cy.get('[data-testid="submit"]').should("be.disabled");
   });
 });
 ```
@@ -751,72 +751,72 @@ describe('Login', () => {
 
 ```javascript
 // cypress/e2e/vendas/criar-orcamento.cy.js
-describe('Criar Orçamento', () => {
+describe("Criar Orçamento", () => {
   beforeEach(() => {
-    cy.task('seedDatabase');
-    cy.login('vendedor@staccato.com.br', 'senha123');
-    cy.visit('/orcamentos/novo');
+    cy.task("seedDatabase");
+    cy.login("vendedor@staccato.com.br", "senha123");
+    cy.visit("/orcamentos/novo");
   });
 
-  it('cria orçamento completo', () => {
+  it("cria orçamento completo", () => {
     // Selecionar cliente
     cy.get('[data-testid="cliente-select"]').click();
-    cy.get('[data-testid="cliente-search"]').type('João');
-    cy.contains('João Silva').click();
+    cy.get('[data-testid="cliente-search"]').type("João");
+    cy.contains("João Silva").click();
 
     // Adicionar produto
     cy.get('[data-testid="adicionar-produto"]').click();
-    cy.get('[data-testid="produto-search"]').type('Mesa');
-    cy.contains('Mesa Escritório').click();
-    cy.get('[data-testid="quantidade"]').clear().type('2');
+    cy.get('[data-testid="produto-search"]').type("Mesa");
+    cy.contains("Mesa Escritório").click();
+    cy.get('[data-testid="quantidade"]').clear().type("2");
     cy.get('[data-testid="confirmar-item"]').click();
 
     // Verificar totais
-    cy.get('[data-testid="subtotal"]').should('contain', 'R$ 1.000,00');
+    cy.get('[data-testid="subtotal"]').should("contain", "R$ 1.000,00");
 
     // Salvar orçamento
     cy.get('[data-testid="salvar"]').click();
 
     // Verificar sucesso
-    cy.contains('Orçamento criado').should('be.visible');
-    cy.url().should('match', /\/orcamentos\/\d+/);
+    cy.contains("Orçamento criado").should("be.visible");
+    cy.url().should("match", /\/orcamentos\/\d+/);
   });
 
-  it('aplica desconto com autorização', () => {
+  it("aplica desconto com autorização", () => {
     // Setup orçamento
     cy.criarOrcamentoBase();
 
     // Tentar desconto acima do limite
-    cy.get('[data-testid="desconto-input"]').type('20');
+    cy.get('[data-testid="desconto-input"]').type("20");
     cy.get('[data-testid="aplicar-desconto"]').click();
 
     // Modal de autorização
-    cy.get('[data-testid="modal-autorizacao"]').should('be.visible');
-    cy.get('[data-testid="autorizador-user"]').type('gerente');
-    cy.get('[data-testid="autorizador-pass"]').type('senha123');
+    cy.get('[data-testid="modal-autorizacao"]').should("be.visible");
+    cy.get('[data-testid="autorizador-user"]').type("gerente");
+    cy.get('[data-testid="autorizador-pass"]').type("senha123");
     cy.get('[data-testid="confirmar-autorizacao"]').click();
 
     // Desconto aplicado
-    cy.get('[data-testid="desconto-aplicado"]').should('contain', '20%');
+    cy.get('[data-testid="desconto-aplicado"]').should("contain", "20%");
   });
 });
 
 // cypress/support/commands.js
-Cypress.Commands.add('login', (email, password) => {
+Cypress.Commands.add("login", (email, password) => {
   cy.session([email, password], () => {
-    cy.visit('/login');
+    cy.visit("/login");
     cy.get('[data-testid="email"]').type(email);
     cy.get('[data-testid="password"]').type(password);
     cy.get('[data-testid="submit"]').click();
-    cy.url().should('include', '/dashboard');
+    cy.url().should("include", "/dashboard");
   });
 });
 
-Cypress.Commands.add('criarOrcamentoBase', () => {
+Cypress.Commands.add("criarOrcamentoBase", () => {
   cy.get('[data-testid="cliente-select"]').click();
-  cy.contains('João Silva').click();
+  cy.contains("João Silva").click();
   cy.get('[data-testid="adicionar-produto"]').click();
-  cy.contains('Mesa Escritório').click();
+  cy.contains("Mesa Escritório").click();
   cy.get('[data-testid="confirmar-item"]').click();
 });
 ```
@@ -1140,7 +1140,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: mbstring, mysql, redis
           coverage: xdebug
 
@@ -1174,7 +1174,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
 
       - name: Install dependencies
         run: |
@@ -1190,7 +1190,7 @@ jobs:
       - name: Run Cypress
         uses: cypress-io/github-action@v6
         with:
-          wait-on: 'http://localhost:8000'
+          wait-on: "http://localhost:8000"
           config-file: cypress.config.js
 
       - name: Upload screenshots
@@ -1209,7 +1209,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
 
       - name: Install dependencies
         run: composer install
@@ -1279,15 +1279,15 @@ jobs:
 
 ### Cobertura Mínima por Módulo
 
-| Módulo | Cobertura Mínima | Crítico |
-|--------|------------------|---------|
-| Services | 90% | Sim |
-| Actions | 85% | Sim |
-| Models | 75% | Não |
-| Controllers | 70% | Não |
-| Jobs | 85% | Sim |
-| Rules | 100% | Sim |
-| ValueObjects | 100% | Sim |
+| Módulo       | Cobertura Mínima | Crítico |
+| ------------ | ---------------- | ------- |
+| Services     | 90%              | Sim     |
+| Actions      | 85%              | Sim     |
+| Models       | 75%              | Não     |
+| Controllers  | 70%              | Não     |
+| Jobs         | 85%              | Sim     |
+| Rules        | 100%             | Sim     |
+| ValueObjects | 100%             | Sim     |
 
 ---
 

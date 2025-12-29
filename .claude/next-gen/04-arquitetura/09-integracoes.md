@@ -12,14 +12,14 @@ Este documento detalha todas as integrações externas do sistema, incluindo pro
 
 ### Resumo de Integrações
 
-| Integração | Protocolo | Porta | Uso |
-|------------|-----------|-------|-----|
-| ACBrMonitor | TCP Socket | 3434 | NFe (emissão, consulta, cancelamento) |
-| CNAB 240 | Arquivo | - | Pagamentos bancários (Itaú) |
-| CEP | Local DB | - | Busca de endereços |
-| SMTP | TLS/SSL | 465 | Envio de emails |
-| Google Maps | HTTPS | 443 | Geocodificação |
-| QualP | HTTPS | 443 | Cálculo de frete |
+| Integração  | Protocolo  | Porta | Uso                                   |
+| ----------- | ---------- | ----- | ------------------------------------- |
+| ACBrMonitor | TCP Socket | 3434  | NFe (emissão, consulta, cancelamento) |
+| CNAB 240    | Arquivo    | -     | Pagamentos bancários (Itaú)           |
+| CEP         | Local DB   | -     | Busca de endereços                    |
+| SMTP        | TLS/SSL    | 465   | Envio de emails                       |
+| Google Maps | HTTPS      | 443   | Geocodificação                        |
+| QualP       | HTTPS      | 443   | Cálculo de frete                      |
 
 ---
 
@@ -40,26 +40,26 @@ return [
 
 ### Protocolo de Comunicação
 
-| Aspecto | Valor |
-|---------|-------|
-| Servidor | localhost (127.0.0.1) |
-| Porta | 3434 (configurável) |
-| Protocolo | TCP Socket |
-| Formato comando | `COMANDO(params)\r\n.\r\n` |
-| Terminador resposta | `\x03` (ETX) |
+| Aspecto              | Valor                           |
+| -------------------- | ------------------------------- |
+| Servidor             | localhost (127.0.0.1)           |
+| Porta                | 3434 (configurável)             |
+| Protocolo            | TCP Socket                      |
+| Formato comando      | `COMANDO(params)\r\n.\r\n`      |
+| Terminador resposta  | `\x03` (ETX)                    |
 | Mensagem boas-vindas | `"Esperando por comandos.\x03"` |
-| Padrão sucesso | `"OK: <dados>"` |
+| Padrão sucesso       | `"OK: <dados>"`                 |
 
 ### Comandos Utilizados
 
-| Comando | Descrição |
-|---------|-----------|
-| `NFE.SaveToFile(path, xml)` | Salva XML em arquivo |
-| `NFE.LoadFromFile(path)` | Carrega NFe de arquivo |
-| `NFE.ConsultarNFe(path)` | Consulta status na SEFAZ |
-| `NFE.EnviarEmail(email, path, 1, subject)` | Envia NFe por email |
-| `NFE.Cancelar(chave, justificativa)` | Cancela NFe |
-| `NFE.Inutilizar(cnpj, just, ano, modelo, serie, numIni, numFin)` | Inutiliza numeração |
+| Comando                                                          | Descrição                |
+| ---------------------------------------------------------------- | ------------------------ |
+| `NFE.SaveToFile(path, xml)`                                      | Salva XML em arquivo     |
+| `NFE.LoadFromFile(path)`                                         | Carrega NFe de arquivo   |
+| `NFE.ConsultarNFe(path)`                                         | Consulta status na SEFAZ |
+| `NFE.EnviarEmail(email, path, 1, subject)`                       | Envia NFe por email      |
+| `NFE.Cancelar(chave, justificativa)`                             | Cancela NFe              |
+| `NFE.Inutilizar(cnpj, just, ano, modelo, serie, numIni, numFin)` | Inutiliza numeração      |
 
 ### Implementação Laravel
 
@@ -260,12 +260,12 @@ class AcbrExceptionHandler
 
 ### Mensagens de Erro Conhecidas
 
-| Mensagem | Causa | Ação |
-|----------|-------|------|
-| `"Can't connect"` | ACBr não está rodando | Verificar serviço ACBrMonitor |
-| `"Erro ao criar a chave do CSP"` | Certificado desconectado | Reconectar leitor de certificado |
-| `"Erro relacionado ao Canal Seguro"` | Problema SSL/TLS | Verificar certificado digital |
-| `"Timeout"` | SEFAZ lenta/offline | Retry com backoff |
+| Mensagem                             | Causa                    | Ação                             |
+| ------------------------------------ | ------------------------ | -------------------------------- |
+| `"Can't connect"`                    | ACBr não está rodando    | Verificar serviço ACBrMonitor    |
+| `"Erro ao criar a chave do CSP"`     | Certificado desconectado | Reconectar leitor de certificado |
+| `"Erro relacionado ao Canal Seguro"` | Problema SSL/TLS         | Verificar certificado digital    |
+| `"Timeout"`                          | SEFAZ lenta/offline      | Retry com backoff                |
 
 ---
 
@@ -293,11 +293,11 @@ return [
 
 ### Tipos de Operação
 
-| Tipo | Código | Descrição |
-|------|--------|-----------|
-| GARE | 05 | Guia de Arrecadação Estadual (impostos) |
-| Fornecedor | 20 | Pagamento a fornecedores |
-| Salário | 30 | Pagamento de folha |
+| Tipo       | Código | Descrição                               |
+| ---------- | ------ | --------------------------------------- |
+| GARE       | 05     | Guia de Arrecadação Estadual (impostos) |
+| Fornecedor | 20     | Pagamento a fornecedores                |
+| Salário    | 30     | Pagamento de folha                      |
 
 ### Estrutura do Arquivo
 
@@ -459,14 +459,14 @@ class CnabService
 
 ### Códigos de Ocorrência (Retorno)
 
-| Código | Descrição | Ação |
-|--------|-----------|------|
-| `00` | PAGAMENTO EFETUADO | Marcar como pago |
-| `AE` | DATA DE PAGAMENTO ALTERADA | Atualizar data |
-| `BD` | PAGAMENTO AGENDADO | Manter pendente |
-| `CE` | PAGAMENTO CANCELADO | Marcar cancelado |
-| `HA` | LOTE NAO ACEITO | Reprocessar |
-| `HB` | INSCRICAO DA EMPRESA INVALIDA | Corrigir cadastro |
+| Código | Descrição                     | Ação              |
+| ------ | ----------------------------- | ----------------- |
+| `00`   | PAGAMENTO EFETUADO            | Marcar como pago  |
+| `AE`   | DATA DE PAGAMENTO ALTERADA    | Atualizar data    |
+| `BD`   | PAGAMENTO AGENDADO            | Manter pendente   |
+| `CE`   | PAGAMENTO CANCELADO           | Marcar cancelado  |
+| `HA`   | LOTE NAO ACEITO               | Reprocessar       |
+| `HB`   | INSCRICAO DA EMPRESA INVALIDA | Corrigir cadastro |
 
 ---
 
@@ -778,10 +778,10 @@ class QualpFreteService
 
 ### Tipos Suportados
 
-| Tipo | Descrição | Armazenamento |
-|------|-----------|---------------|
-| A1 | Arquivo (.pfx/.p12) | Disco do servidor |
-| A3 | Token/Smartcard | Hardware (apenas Windows) |
+| Tipo | Descrição           | Armazenamento             |
+| ---- | ------------------- | ------------------------- |
+| A1   | Arquivo (.pfx/.p12) | Disco do servidor         |
+| A3   | Token/Smartcard     | Hardware (apenas Windows) |
 
 ### Configuração Certificado Digital
 

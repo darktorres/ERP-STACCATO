@@ -18,11 +18,11 @@ Este documento centraliza todas as regras de negócio extraídas do sistema C++ 
 
 ### Estrutura de Descontos
 
-| Nível | Campo | Descrição | Aplicação |
-|-------|-------|-----------|-----------|
-| 1 | `desconto` | Desconto % por item | Linha do produto |
-| 2 | `descUnitario` | Preço unitário com desconto | Calculado |
-| 3 | `descGlobal` | Desconto % global | Total do pedido |
+| Nível | Campo          | Descrição                   | Aplicação        |
+| ----- | -------------- | --------------------------- | ---------------- |
+| 1     | `desconto`     | Desconto % por item         | Linha do produto |
+| 2     | `descUnitario` | Preço unitário com desconto | Calculado        |
+| 3     | `descGlobal`   | Desconto % global           | Total do pedido  |
 
 ### Fórmula de Cálculo
 
@@ -61,15 +61,15 @@ class PrecoService
 
 ### Campos do Banco
 
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `prcUnitario` | DECIMAL(10,2) | Preço unitário antes de desconto |
-| `parcial` | DECIMAL(10,2) | Subtotal (preço × quantidade) |
-| `desconto` | DECIMAL(5,2) | % desconto do item |
+| Campo          | Tipo          | Descrição                         |
+| -------------- | ------------- | --------------------------------- |
+| `prcUnitario`  | DECIMAL(10,2) | Preço unitário antes de desconto  |
+| `parcial`      | DECIMAL(10,2) | Subtotal (preço × quantidade)     |
+| `desconto`     | DECIMAL(5,2)  | % desconto do item                |
 | `descUnitario` | DECIMAL(10,2) | Preço unitário após desconto item |
-| `parcialDesc` | DECIMAL(10,2) | Subtotal após desconto item |
-| `descGlobal` | DECIMAL(5,2) | % desconto global |
-| `total` | DECIMAL(10,2) | Valor final |
+| `parcialDesc`  | DECIMAL(10,2) | Subtotal após desconto item       |
+| `descGlobal`   | DECIMAL(5,2)  | % desconto global                 |
+| `total`        | DECIMAL(10,2) | Valor final                       |
 
 ---
 
@@ -104,12 +104,12 @@ class FreteService
 
 **Constantes:**
 
-| Constante | Valor | Descrição |
-|-----------|-------|-----------|
-| Capacidade caminhão grande | 4.300 kg | Carga máxima |
-| Capacidade caminhão pequeno | 2.000 kg | Carga máxima |
-| Custo transporte Sul | R$ 220/ton | Por tonelada |
-| Markup final | 20% | Aplicado ao total |
+| Constante                   | Valor      | Descrição         |
+| --------------------------- | ---------- | ----------------- |
+| Capacidade caminhão grande  | 4.300 kg   | Carga máxima      |
+| Capacidade caminhão pequeno | 2.000 kg   | Carga máxima      |
+| Custo transporte Sul        | R$ 220/ton | Por tonelada      |
+| Markup final                | 20%        | Aplicado ao total |
 
 ```php
 class FreteService
@@ -259,10 +259,10 @@ class ComissaoRtService
 
 ### Calendário de Pagamento
 
-| Período da Venda | Data de Pagamento |
-|------------------|-------------------|
-| Dia 01-15 | Dia 30 do mesmo mês |
-| Dia 16-31 | Dia 15 do mês seguinte |
+| Período da Venda | Data de Pagamento      |
+| ---------------- | ---------------------- |
+| Dia 01-15        | Dia 30 do mesmo mês    |
+| Dia 16-31        | Dia 15 do mês seguinte |
 
 ---
 
@@ -332,20 +332,20 @@ flowchart LR
 
 ### Campos de Impostos Rastreados
 
-| Campo | Descrição | Tipo |
-|-------|-----------|------|
-| `vBC` | Base de cálculo ICMS | DECIMAL(15,2) |
-| `pICMS` | Alíquota ICMS % | DECIMAL(5,2) |
-| `vICMS` | Valor ICMS | DECIMAL(15,2) |
-| `vBCST` | Base de cálculo ST | DECIMAL(15,2) |
-| `pICMSST` | Alíquota ST % | DECIMAL(5,2) |
-| `vICMSST` | Valor ST | DECIMAL(15,2) |
-| `vBCPIS` | Base de cálculo PIS | DECIMAL(15,2) |
-| `pPIS` | Alíquota PIS % | DECIMAL(5,2) |
-| `vPIS` | Valor PIS | DECIMAL(15,2) |
+| Campo       | Descrição              | Tipo          |
+| ----------- | ---------------------- | ------------- |
+| `vBC`       | Base de cálculo ICMS   | DECIMAL(15,2) |
+| `pICMS`     | Alíquota ICMS %        | DECIMAL(5,2)  |
+| `vICMS`     | Valor ICMS             | DECIMAL(15,2) |
+| `vBCST`     | Base de cálculo ST     | DECIMAL(15,2) |
+| `pICMSST`   | Alíquota ST %          | DECIMAL(5,2)  |
+| `vICMSST`   | Valor ST               | DECIMAL(15,2) |
+| `vBCPIS`    | Base de cálculo PIS    | DECIMAL(15,2) |
+| `pPIS`      | Alíquota PIS %         | DECIMAL(5,2)  |
+| `vPIS`      | Valor PIS              | DECIMAL(15,2) |
 | `vBCCOFINS` | Base de cálculo COFINS | DECIMAL(15,2) |
-| `pCOFINS` | Alíquota COFINS % | DECIMAL(5,2) |
-| `vCOFINS` | Valor COFINS | DECIMAL(15,2) |
+| `pCOFINS`   | Alíquota COFINS %      | DECIMAL(5,2)  |
+| `vCOFINS`   | Valor COFINS           | DECIMAL(15,2) |
 
 ### Alocação Proporcional em Consumos
 
@@ -447,22 +447,22 @@ class DevolucaoService
 
 ### Tabela de Janela de Devolução
 
-| Período | Permitido |
-|---------|-----------|
-| Mesmo mês da venda | ✅ Sempre |
-| Mês seguinte, dia 1 (seg-sex) | ✅ |
-| Mês seguinte, dia 1-2 (sábado) | ✅ |
-| Mês seguinte, dia 1 (domingo) | ✅ |
-| Mês seguinte, após prazo | ❌ (precisa Admin) |
-| 2+ meses após | ❌ (precisa Admin) |
+| Período                        | Permitido          |
+| ------------------------------ | ------------------ |
+| Mesmo mês da venda             | ✅ Sempre          |
+| Mês seguinte, dia 1 (seg-sex)  | ✅                 |
+| Mês seguinte, dia 1-2 (sábado) | ✅                 |
+| Mês seguinte, dia 1 (domingo)  | ✅                 |
+| Mês seguinte, após prazo       | ❌ (precisa Admin) |
+| 2+ meses após                  | ❌ (precisa Admin) |
 
 ### Status de Itens em Devolução
 
-| Status | Descrição |
-|--------|-----------|
-| `PENDENTE DEV.` | Aguardando processamento |
-| `DEV. FORN.` | Devolvido ao fornecedor |
-| `DEV. EST.` | Devolvido ao estoque (adiciona saldo) |
+| Status          | Descrição                             |
+| --------------- | ------------------------------------- |
+| `PENDENTE DEV.` | Aguardando processamento              |
+| `DEV. FORN.`    | Devolvido ao fornecedor               |
+| `DEV. EST.`     | Devolvido ao estoque (adiciona saldo) |
 
 ### Cálculo de Crédito na Devolução
 
@@ -486,16 +486,16 @@ class DevolucaoService
 
 ### Permissões por Tipo de Usuário
 
-| Tipo | Admin | Administrativo | Gerente | Vendedor |
-|------|-------|----------------|---------|----------|
-| `ADMINISTRADOR` | ✅ | ✅ | ❌ | ❌ |
-| `DIRETOR` | ✅ | ✅ | ❌ | ❌ |
-| `ADMINISTRATIVO` | ❌ | ✅ | ❌ | ❌ |
-| `GERENTE_LOJA` | ❌ | ❌ | ✅ | ❌ |
-| `GERENTE_DEPARTAMENTO` | ❌ | ❌ | ✅ | ❌ |
-| `GERENTE_FINANCEIRO` | ❌ | ❌ | ✅ | ❌ |
-| `VENDEDOR` | ❌ | ❌ | ❌ | ✅ |
-| `VENDEDOR_ESPECIAL` | ❌ | ❌ | ❌ | ✅ |
+| Tipo                   | Admin | Administrativo | Gerente | Vendedor |
+| ---------------------- | ----- | -------------- | ------- | -------- |
+| `ADMINISTRADOR`        | ✅    | ✅             | ❌      | ❌       |
+| `DIRETOR`              | ✅    | ✅             | ❌      | ❌       |
+| `ADMINISTRATIVO`       | ❌    | ✅             | ❌      | ❌       |
+| `GERENTE_LOJA`         | ❌    | ❌             | ✅      | ❌       |
+| `GERENTE_DEPARTAMENTO` | ❌    | ❌             | ✅      | ❌       |
+| `GERENTE_FINANCEIRO`   | ❌    | ❌             | ✅      | ❌       |
+| `VENDEDOR`             | ❌    | ❌             | ❌      | ✅       |
+| `VENDEDOR_ESPECIAL`    | ❌    | ❌             | ❌      | ✅       |
 
 ### Fluxo de Autorização de Frete
 
@@ -597,10 +597,10 @@ class ConsumoService
 
 ### Status de Consumo
 
-| Status | Descrição |
-|--------|-----------|
-| `CONSUMO` | Consumo normal de venda |
-| `AJUSTE` | Ajuste de quantidade (admin) |
+| Status    | Descrição                    |
+| --------- | ---------------------------- |
+| `CONSUMO` | Consumo normal de venda      |
+| `AJUSTE`  | Ajuste de quantidade (admin) |
 
 ### Divisão de Compra (Split)
 

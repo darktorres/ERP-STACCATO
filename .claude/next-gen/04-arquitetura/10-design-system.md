@@ -11,13 +11,13 @@ Este documento define o Design System do ERP Staccato, estabelecendo padrões vi
 
 ### Stack de UI
 
-| Tecnologia | Uso |
-|------------|-----|
-| Vue 3 | Framework frontend |
-| Tailwind CSS | Utility-first CSS |
-| PrimeVue | Biblioteca de componentes |
-| Heroicons | Iconografia |
-| Headless UI | Componentes acessíveis |
+| Tecnologia   | Uso                       |
+| ------------ | ------------------------- |
+| Vue 3        | Framework frontend        |
+| Tailwind CSS | Utility-first CSS         |
+| PrimeVue     | Biblioteca de componentes |
+| Heroicons    | Iconografia               |
+| Headless UI  | Componentes acessíveis    |
 
 ---
 
@@ -32,7 +32,7 @@ Este documento define o Design System do ERP Staccato, estabelecendo padrões vi
 --color-primary-200: #bfdbfe;
 --color-primary-300: #93c5fd;
 --color-primary-400: #60a5fa;
---color-primary-500: #3b82f6;  /* Principal */
+--color-primary-500: #3b82f6; /* Principal */
 --color-primary-600: #2563eb;
 --color-primary-700: #1d4ed8;
 --color-primary-800: #1e40af;
@@ -83,10 +83,10 @@ Este documento define o Design System do ERP Staccato, estabelecendo padrões vi
 
 ```css
 /* Status de Venda */
---color-venda-pendente: #f59e0b;    /* Amarelo */
---color-venda-confirmada: #3b82f6;  /* Azul */
---color-venda-entregue: #22c55e;    /* Verde */
---color-venda-cancelada: #ef4444;   /* Vermelho */
+--color-venda-pendente: #f59e0b; /* Amarelo */
+--color-venda-confirmada: #3b82f6; /* Azul */
+--color-venda-entregue: #22c55e; /* Verde */
+--color-venda-cancelada: #ef4444; /* Vermelho */
 
 /* Status Financeiro */
 --color-pago: #22c55e;
@@ -110,23 +110,23 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
         },
         // Cores de status de negócio
         venda: {
-          pendente: '#f59e0b',
-          confirmada: '#3b82f6',
-          entregue: '#22c55e',
-          cancelada: '#ef4444',
+          pendente: "#f59e0b",
+          confirmada: "#3b82f6",
+          entregue: "#22c55e",
+          cancelada: "#ef4444",
         },
       },
     },
@@ -142,23 +142,24 @@ module.exports = {
 
 ```css
 /* Fonte principal */
---font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+--font-sans:
+  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
 /* Fonte mono (para códigos, IDs) */
---font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+--font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
 ```
 
 ### Escala Tipográfica
 
-| Nome | Tamanho | Peso | Uso |
-|------|---------|------|-----|
-| `text-xs` | 12px | 400 | Labels, badges |
-| `text-sm` | 14px | 400 | Texto secundário, tabelas |
-| `text-base` | 16px | 400 | Texto padrão |
-| `text-lg` | 18px | 500 | Subtítulos |
-| `text-xl` | 20px | 600 | Títulos de seção |
-| `text-2xl` | 24px | 700 | Títulos de página |
-| `text-3xl` | 30px | 700 | Títulos principais |
+| Nome        | Tamanho | Peso | Uso                       |
+| ----------- | ------- | ---- | ------------------------- |
+| `text-xs`   | 12px    | 400  | Labels, badges            |
+| `text-sm`   | 14px    | 400  | Texto secundário, tabelas |
+| `text-base` | 16px    | 400  | Texto padrão              |
+| `text-lg`   | 18px    | 500  | Subtítulos                |
+| `text-xl`   | 20px    | 600  | Títulos de seção          |
+| `text-2xl`  | 24px    | 700  | Títulos de página         |
+| `text-3xl`  | 30px    | 700  | Títulos principais        |
 
 ### Hierarquia de Títulos
 
@@ -224,7 +225,8 @@ module.exports = {
 
 ```vue
 <!-- Botão Primário -->
-<button class="
+<button
+  class="
   px-4 py-2
   bg-primary-600 hover:bg-primary-700
   text-white font-medium
@@ -232,12 +234,14 @@ module.exports = {
   transition-colors
   focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
   disabled:opacity-50 disabled:cursor-not-allowed
-">
+"
+>
   Salvar
 </button>
 
 <!-- Botão Secundário -->
-<button class="
+<button
+  class="
   px-4 py-2
   bg-white hover:bg-gray-50
   text-gray-700 font-medium
@@ -245,30 +249,35 @@ module.exports = {
   rounded-lg
   transition-colors
   focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-">
+"
+>
   Cancelar
 </button>
 
 <!-- Botão de Perigo -->
-<button class="
+<button
+  class="
   px-4 py-2
   bg-red-600 hover:bg-red-700
   text-white font-medium
   rounded-lg
   transition-colors
   focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-">
+"
+>
   Excluir
 </button>
 
 <!-- Botão Ghost -->
-<button class="
+<button
+  class="
   px-4 py-2
   text-primary-600 hover:text-primary-700 hover:bg-primary-50
   font-medium
   rounded-lg
   transition-colors
-">
+"
+>
   Cancelar
 </button>
 ```
@@ -328,28 +337,29 @@ module.exports = {
   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
     <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
   </div>
-  <input
-    type="text"
-    class="
+<input
+  type="text"
+  class="
       w-full pl-10 pr-3 py-2
       border border-gray-300 rounded-lg
       focus:outline-none focus:ring-2 focus:ring-primary-500
     "
-    placeholder="Buscar..."
-  />
-</div>
+  placeholder="Buscar..."
+/>
 ```
 
 ### Selects
 
 ```vue
 <!-- Select Nativo Estilizado -->
-<select class="
+<select
+  class="
   w-full px-3 py-2
   border border-gray-300 rounded-lg
   text-gray-900 bg-white
   focus:outline-none focus:ring-2 focus:ring-primary-500
-">
+"
+>
   <option value="">Selecione...</option>
   <option value="1">Opção 1</option>
   <option value="2">Opção 2</option>
@@ -503,11 +513,13 @@ module.exports = {
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="
+            <DialogPanel
+              class="
               w-full max-w-md
               bg-white rounded-xl shadow-xl
               transform transition-all
-            ">
+            "
+            >
               <!-- Header -->
               <div class="px-6 py-4 border-b border-gray-200">
                 <DialogTitle class="text-lg font-semibold text-gray-900">
@@ -517,19 +529,13 @@ module.exports = {
 
               <!-- Content -->
               <div class="px-6 py-4">
-                <p class="text-gray-600">
-                  Tem certeza que deseja continuar?
-                </p>
+                <p class="text-gray-600">Tem certeza que deseja continuar?</p>
               </div>
 
               <!-- Footer -->
               <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
-                <button @click="close" class="btn-secondary">
-                  Cancelar
-                </button>
-                <button @click="confirm" class="btn-primary">
-                  Confirmar
-                </button>
+                <button @click="close" class="btn-secondary">Cancelar</button>
+                <button @click="confirm" class="btn-primary">Confirmar</button>
               </div>
             </DialogPanel>
           </TransitionChild>
@@ -584,19 +590,21 @@ module.exports = {
 ```vue
 <script setup>
 const statusConfig = {
-  pendente: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pendente' },
-  confirmada: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Confirmada' },
-  entregue: { bg: 'bg-green-100', text: 'text-green-800', label: 'Entregue' },
-  cancelada: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelada' },
+  pendente: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pendente" },
+  confirmada: { bg: "bg-blue-100", text: "text-blue-800", label: "Confirmada" },
+  entregue: { bg: "bg-green-100", text: "text-green-800", label: "Entregue" },
+  cancelada: { bg: "bg-red-100", text: "text-red-800", label: "Cancelada" },
 };
 </script>
 
 <template>
-  <span :class="[
-    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-    statusConfig[status].bg,
-    statusConfig[status].text,
-  ]">
+  <span
+    :class="[
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+      statusConfig[status].bg,
+      statusConfig[status].text,
+    ]"
+  >
     {{ statusConfig[status].label }}
   </span>
 </template>
@@ -610,24 +618,36 @@ const statusConfig = {
 
 ```css
 /* Default */
-.btn { @apply transition-colors; }
+.btn {
+  @apply transition-colors;
+}
 
 /* Hover */
-.btn:hover { @apply bg-primary-700; }
+.btn:hover {
+  @apply bg-primary-700;
+}
 
 /* Focus */
-.btn:focus { @apply outline-none ring-2 ring-primary-500 ring-offset-2; }
+.btn:focus {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
 
 /* Active */
-.btn:active { @apply bg-primary-800; }
+.btn:active {
+  @apply bg-primary-800;
+}
 
 /* Disabled */
-.btn:disabled { @apply opacity-50 cursor-not-allowed; }
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
 
 /* Loading */
-.btn-loading { @apply relative pointer-events-none; }
+.btn-loading {
+  @apply relative pointer-events-none;
+}
 .btn-loading::after {
-  content: '';
+  content: "";
   @apply absolute inset-0 flex items-center justify-center;
   /* Spinner animation */
 }
@@ -637,32 +657,48 @@ const statusConfig = {
 
 ```css
 /* Default */
-.input { @apply border-gray-300; }
+.input {
+  @apply border-gray-300;
+}
 
 /* Focus */
-.input:focus { @apply border-primary-500 ring-2 ring-primary-500; }
+.input:focus {
+  @apply border-primary-500 ring-2 ring-primary-500;
+}
 
 /* Error */
-.input-error { @apply border-red-500 focus:border-red-500 focus:ring-red-500; }
+.input-error {
+  @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+}
 
 /* Disabled */
-.input:disabled { @apply bg-gray-100 cursor-not-allowed; }
+.input:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
 
 /* Read-only */
-.input:read-only { @apply bg-gray-50; }
+.input:read-only {
+  @apply bg-gray-50;
+}
 ```
 
 ### Estados de Linha de Tabela
 
 ```css
 /* Hover */
-tr:hover { @apply bg-gray-50; }
+tr:hover {
+  @apply bg-gray-50;
+}
 
 /* Selected */
-tr.selected { @apply bg-primary-50; }
+tr.selected {
+  @apply bg-primary-50;
+}
 
 /* Striped */
-tbody tr:nth-child(even) { @apply bg-gray-50; }
+tbody tr:nth-child(even) {
+  @apply bg-gray-50;
+}
 ```
 
 ---
@@ -705,7 +741,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   EllipsisVerticalIcon,
-} from '@heroicons/vue/24/outline';
+} from "@heroicons/vue/24/outline";
 </script>
 ```
 
@@ -749,11 +785,11 @@ import {
 module.exports = {
   theme: {
     screens: {
-      'sm': '640px',   // Mobile landscape
-      'md': '768px',   // Tablet
-      'lg': '1024px',  // Desktop
-      'xl': '1280px',  // Large desktop
-      '2xl': '1536px', // Extra large
+      sm: "640px", // Mobile landscape
+      md: "768px", // Tablet
+      lg: "1024px", // Desktop
+      xl: "1280px", // Large desktop
+      "2xl": "1536px", // Extra large
     },
   },
 };
@@ -763,7 +799,9 @@ module.exports = {
 
 ```vue
 <!-- Grid responsivo -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+<div
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+>
   <!-- Items -->
 </div>
 
@@ -800,13 +838,13 @@ module.exports = {
 
 ### Requisitos WCAG 2.1 AA
 
-| Critério | Requisito | Implementação |
-|----------|-----------|---------------|
-| Contraste | 4.5:1 texto, 3:1 UI | Verificar com DevTools |
-| Foco visível | Todos interativos | `focus:ring-2` |
-| Labels | Todos inputs | `<label for="">` |
-| Tamanho clicável | Mínimo 44x44px | `min-h-[44px] min-w-[44px]` |
-| Skip links | Navegação principal | Link no topo |
+| Critério         | Requisito           | Implementação               |
+| ---------------- | ------------------- | --------------------------- |
+| Contraste        | 4.5:1 texto, 3:1 UI | Verificar com DevTools      |
+| Foco visível     | Todos interativos   | `focus:ring-2`              |
+| Labels           | Todos inputs        | `<label for="">`            |
+| Tamanho clicável | Mínimo 44x44px      | `min-h-[44px] min-w-[44px]` |
+| Skip links       | Navegação principal | Link no topo                |
 
 ### Padrões de Acessibilidade
 
@@ -815,29 +853,18 @@ module.exports = {
 <label for="email" class="block text-sm font-medium text-gray-700">
   Email
 </label>
-<input
-  id="email"
-  type="email"
-  aria-describedby="email-hint"
-  class="..."
-/>
+<input id="email" type="email" aria-describedby="email-hint" class="..." />
 <p id="email-hint" class="text-sm text-gray-500">
   Usaremos para enviar notificações.
 </p>
 
 <!-- Botão com aria-label -->
-<button
-  aria-label="Fechar modal"
-  class="p-2 hover:bg-gray-100 rounded"
->
+<button aria-label="Fechar modal" class="p-2 hover:bg-gray-100 rounded">
   <XMarkIcon class="h-5 w-5" />
 </button>
 
 <!-- Estado de loading -->
-<button
-  :aria-busy="isLoading"
-  :disabled="isLoading"
->
+<button :aria-busy="isLoading" :disabled="isLoading">
   <span v-if="isLoading">Salvando...</span>
   <span v-else>Salvar</span>
 </button>
@@ -893,17 +920,19 @@ module.exports = {
 ```javascript
 // tailwind.config.js
 module.exports = {
-  darkMode: 'class', // ou 'media'
+  darkMode: "class", // ou 'media'
 };
 ```
 
 ```vue
 <!-- Componente com suporte a dark mode -->
-<div class="
+<div
+  class="
   bg-white dark:bg-gray-800
   text-gray-900 dark:text-white
   border-gray-200 dark:border-gray-700
-">
+"
+>
   Conteúdo
 </div>
 ```
@@ -952,29 +981,29 @@ resources/js/Components/
 defineProps({
   variant: {
     type: String,
-    default: 'primary',
-    validator: (v) => ['primary', 'secondary', 'danger', 'ghost'].includes(v),
+    default: "primary",
+    validator: (v) => ["primary", "secondary", "danger", "ghost"].includes(v),
   },
   size: {
     type: String,
-    default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v),
+    default: "md",
+    validator: (v) => ["sm", "md", "lg"].includes(v),
   },
   loading: Boolean,
   disabled: Boolean,
 });
 
 const variantClasses = {
-  primary: 'bg-primary-600 hover:bg-primary-700 text-white',
-  secondary: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300',
-  danger: 'bg-red-600 hover:bg-red-700 text-white',
-  ghost: 'text-primary-600 hover:bg-primary-50',
+  primary: "bg-primary-600 hover:bg-primary-700 text-white",
+  secondary: "bg-white hover:bg-gray-50 text-gray-700 border border-gray-300",
+  danger: "bg-red-600 hover:bg-red-700 text-white",
+  ghost: "text-primary-600 hover:bg-primary-50",
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-4 py-2 text-base",
+  lg: "px-6 py-3 text-lg",
 };
 </script>
 
@@ -998,8 +1027,11 @@ const sizeClasses = {
     >
       <circle
         class="opacity-25"
-        cx="12" cy="12" r="10"
-        stroke="currentColor" stroke-width="4"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
       />
       <path
         class="opacity-75"

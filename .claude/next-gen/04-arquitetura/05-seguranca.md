@@ -14,13 +14,13 @@ Este documento define a arquitetura de segurança para o novo sistema Laravel, a
 
 O sistema C++ atual apresenta vulnerabilidades críticas que **devem ser eliminadas** na migração:
 
-| Vulnerabilidade | Localização | Severidade | Correção Laravel |
-|-----------------|-------------|------------|------------------|
-| **SQL Injection** | `user.cpp:33` - concatenação de `permissao` | Crítica | Eloquent ORM |
-| **SQL Injection** | `user.cpp:76` - concatenação de `user` | Crítica | Query Builder |
-| **Senha em texto** | `logindialog.cpp:111` - salva senha em settings | Alta | Nunca armazenar |
-| **Hash fraco** | `SHA_PASSWORD()` no MySQL | Média | bcrypt/Argon2 |
-| **Sem rate limit** | Login sem proteção | Média | Laravel Throttle |
+| Vulnerabilidade    | Localização                                     | Severidade | Correção Laravel |
+| ------------------ | ----------------------------------------------- | ---------- | ---------------- |
+| **SQL Injection**  | `user.cpp:33` - concatenação de `permissao`     | Crítica    | Eloquent ORM     |
+| **SQL Injection**  | `user.cpp:76` - concatenação de `user`          | Crítica    | Query Builder    |
+| **Senha em texto** | `logindialog.cpp:111` - salva senha em settings | Alta       | Nunca armazenar  |
+| **Hash fraco**     | `SHA_PASSWORD()` no MySQL                       | Média      | bcrypt/Argon2    |
+| **Sem rate limit** | Login sem proteção                              | Média      | Laravel Throttle |
 
 ---
 
@@ -28,11 +28,11 @@ O sistema C++ atual apresenta vulnerabilidades críticas que **devem ser elimina
 
 ### Decisão: Laravel Sanctum
 
-| Opção | Uso Recomendado | Complexidade |
-|-------|-----------------|--------------|
-| **Sanctum** | SPA + API simples | Baixa |
-| Passport | OAuth2 completo, apps terceiros | Alta |
-| Fortify | UI pronta, 2FA | Média |
+| Opção       | Uso Recomendado                 | Complexidade |
+| ----------- | ------------------------------- | ------------ |
+| **Sanctum** | SPA + API simples               | Baixa        |
+| Passport    | OAuth2 completo, apps terceiros | Alta         |
+| Fortify     | UI pronta, 2FA                  | Média        |
 
 **Decisão**: Usar **Laravel Sanctum** com **Fortify** para UI.
 

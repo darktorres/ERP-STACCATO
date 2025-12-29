@@ -11,12 +11,12 @@ Este documento define a estratégia de tratamento de erros, logging e monitorame
 
 ### Objetivos
 
-| Objetivo | Meta |
-|----------|------|
-| Uptime | 99.9% |
+| Objetivo                     | Meta         |
+| ---------------------------- | ------------ |
+| Uptime                       | 99.9%        |
 | MTTR (Mean Time to Recovery) | < 15 minutos |
-| Alertas críticos | < 5 minutos |
-| Retenção de logs | 90 dias |
+| Alertas críticos             | < 5 minutos  |
+| Retenção de logs             | 90 dias      |
 
 ---
 

@@ -57,15 +57,15 @@ flowchart TB
 
 ### Classes
 
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `TabFinanceiro` | `tabfinanceiro.cpp` | Container principal da aba |
-| `Contas` | `contas.cpp` | Diálogo unificado Pagar/Receber |
-| `WidgetFinanceiroContas` | `widgetfinanceirocontas.cpp` | Lista de contas |
-| `WidgetFinanceiroFluxoCaixa` | `widgetfinanceirofluxocaixa.cpp` | Fluxo de caixa |
-| `WidgetFinanceiroCompra` | `widgetfinanceirocompra.cpp` | Contas de compra |
-| `InputDialogFinanceiro` | `inputdialogfinanceiro.cpp` | Entrada de dados |
-| `FinanceiroProxyModel` | `financeiroproxymodel.cpp` | Filtros |
+| Classe                       | Arquivo                          | Finalidade                      |
+| ---------------------------- | -------------------------------- | ------------------------------- |
+| `TabFinanceiro`              | `tabfinanceiro.cpp`              | Container principal da aba      |
+| `Contas`                     | `contas.cpp`                     | Diálogo unificado Pagar/Receber |
+| `WidgetFinanceiroContas`     | `widgetfinanceirocontas.cpp`     | Lista de contas                 |
+| `WidgetFinanceiroFluxoCaixa` | `widgetfinanceirofluxocaixa.cpp` | Fluxo de caixa                  |
+| `WidgetFinanceiroCompra`     | `widgetfinanceirocompra.cpp`     | Contas de compra                |
+| `InputDialogFinanceiro`      | `inputdialogfinanceiro.cpp`      | Entrada de dados                |
+| `FinanceiroProxyModel`       | `financeiroproxymodel.cpp`       | Filtros                         |
 
 ### Tabelas do Banco de Dados
 
@@ -904,15 +904,15 @@ Route::middleware(['auth'])->prefix('financeiro')->name('financeiro.')->group(fu
 
 ## Eventos
 
-| Evento | Dispara |
-|--------|---------|
+| Evento               | Dispara              |
+| -------------------- | -------------------- |
 | `ContaReceberCriada` | Notificar financeiro |
-| `ContaRecebida` | Atualizar saldo, log |
-| `ContaPagarCriada` | Notificar financeiro |
-| `ContaPaga` | Atualizar saldo, log |
-| `ContaVencida` | Alerta para cobrança |
-| `CnabGerado` | Log de remessa |
-| `RetornoProcessado` | Notificar baixas |
+| `ContaRecebida`      | Atualizar saldo, log |
+| `ContaPagarCriada`   | Notificar financeiro |
+| `ContaPaga`          | Atualizar saldo, log |
+| `ContaVencida`       | Alerta para cobrança |
+| `CnabGerado`         | Log de remessa       |
+| `RetornoProcessado`  | Notificar baixas     |
 
 ---
 

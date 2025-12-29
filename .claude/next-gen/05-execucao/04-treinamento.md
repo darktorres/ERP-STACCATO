@@ -11,12 +11,12 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 
 ### Objetivos
 
-| Objetivo | Meta |
-|----------|------|
-| Adoção | 100% dos usuários treinados antes do go-live |
+| Objetivo     | Meta                                             |
+| ------------ | ------------------------------------------------ |
+| Adoção       | 100% dos usuários treinados antes do go-live     |
 | Proficiência | 80% completando tarefas sem suporte em 2 semanas |
-| Satisfação | NPS ≥ 7 após treinamento |
-| Suporte | Redução de 50% nos tickets após 1 mês |
+| Satisfação   | NPS ≥ 7 após treinamento                         |
+| Suporte      | Redução de 50% nos tickets após 1 mês            |
 
 ---
 
@@ -24,16 +24,16 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 
 ### Matriz de Usuários
 
-| Perfil | Quantidade Est. | Complexidade | Prioridade |
-|--------|-----------------|--------------|------------|
-| Administrador | 2-3 | Alta | Crítica |
-| Gerente de Loja | 3-5 | Alta | Crítica |
-| Gerente Financeiro | 2-3 | Alta | Crítica |
-| Vendedor | 15-25 | Média | Alta |
-| Vendedor Especial | 3-5 | Média | Alta |
-| Administrativo | 5-8 | Média | Alta |
-| Operacional | 8-12 | Média | Alta |
-| Assistente Administrativo | 3-5 | Baixa | Média |
+| Perfil                    | Quantidade Est. | Complexidade | Prioridade |
+| ------------------------- | --------------- | ------------ | ---------- |
+| Administrador             | 2-3             | Alta         | Crítica    |
+| Gerente de Loja           | 3-5             | Alta         | Crítica    |
+| Gerente Financeiro        | 2-3             | Alta         | Crítica    |
+| Vendedor                  | 15-25           | Média        | Alta       |
+| Vendedor Especial         | 3-5             | Média        | Alta       |
+| Administrativo            | 5-8             | Média        | Alta       |
+| Operacional               | 8-12            | Média        | Alta       |
+| Assistente Administrativo | 3-5             | Baixa        | Média      |
 
 ### Detalhamento por Perfil
 
@@ -157,43 +157,43 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 
 #### Menu Principal
 
-| Antigo (Desktop) | Novo (Web) | Observações |
-|------------------|------------|-------------|
-| Menu Arquivo > Cadastrar Cliente | Cadastros > Clientes > Novo | Atalho: Ctrl+Shift+C |
-| Menu Arquivo > Cadastrar Fornecedor | Cadastros > Fornecedores > Novo | Apenas admin |
-| Menu Arquivo > Criar Orçamento | Vendas > Orçamentos > Novo | Atalho: Ctrl+N |
-| Menu Gerenciar > Lojas | Configurações > Lojas | Apenas admin |
-| Menu Gerenciar > Usuários | Configurações > Usuários | Apenas admin |
-| Menu Ferramentas > Calculadora | Atalho do navegador | Usar calc do SO |
-| Menu Ferramentas > Configurações | Menu usuário > Preferências | Canto superior direito |
+| Antigo (Desktop)                    | Novo (Web)                      | Observações            |
+| ----------------------------------- | ------------------------------- | ---------------------- |
+| Menu Arquivo > Cadastrar Cliente    | Cadastros > Clientes > Novo     | Atalho: Ctrl+Shift+C   |
+| Menu Arquivo > Cadastrar Fornecedor | Cadastros > Fornecedores > Novo | Apenas admin           |
+| Menu Arquivo > Criar Orçamento      | Vendas > Orçamentos > Novo      | Atalho: Ctrl+N         |
+| Menu Gerenciar > Lojas              | Configurações > Lojas           | Apenas admin           |
+| Menu Gerenciar > Usuários           | Configurações > Usuários        | Apenas admin           |
+| Menu Ferramentas > Calculadora      | Atalho do navegador             | Usar calc do SO        |
+| Menu Ferramentas > Configurações    | Menu usuário > Preferências     | Canto superior direito |
 
 #### Navegação por Abas
 
-| Aba Desktop | Seção Web | Rota |
-|-------------|-----------|------|
-| Orçamentos | Vendas > Orçamentos | `/orcamentos` |
-| Vendas | Vendas > Vendas | `/vendas` |
-| Compras | Compras > Pedidos | `/compras` |
-| Logística | Logística > Dashboard | `/logistica` |
-| NF-e | Fiscal > Notas Fiscais | `/nfe` |
-| Estoque | Estoque > Posições | `/estoque` |
-| Galpão | Estoque > Galpão | `/galpao` |
-| Financeiro | Financeiro > Dashboard | `/financeiro` |
-| Relatórios | Relatórios | `/relatorios` |
-| Gráficos | Dashboard > Analytics | `/dashboard/analytics` |
+| Aba Desktop | Seção Web              | Rota                   |
+| ----------- | ---------------------- | ---------------------- |
+| Orçamentos  | Vendas > Orçamentos    | `/orcamentos`          |
+| Vendas      | Vendas > Vendas        | `/vendas`              |
+| Compras     | Compras > Pedidos      | `/compras`             |
+| Logística   | Logística > Dashboard  | `/logistica`           |
+| NF-e        | Fiscal > Notas Fiscais | `/nfe`                 |
+| Estoque     | Estoque > Posições     | `/estoque`             |
+| Galpão      | Estoque > Galpão       | `/galpao`              |
+| Financeiro  | Financeiro > Dashboard | `/financeiro`          |
+| Relatórios  | Relatórios             | `/relatorios`          |
+| Gráficos    | Dashboard > Analytics  | `/dashboard/analytics` |
 
 #### Ações Comuns
 
-| Ação | Desktop | Web |
-|------|---------|-----|
-| Criar orçamento | Duplo clique em branco na tabela | Botão "+ Novo Orçamento" |
-| Abrir registro | Duplo clique na linha | Clique na linha ou ícone 👁️ |
-| Editar registro | Duplo clique para abrir | Botão "Editar" ou ícone ✏️ |
-| Excluir registro | Botão Excluir no dialog | Menu ações > Excluir |
-| Filtrar dados | ComboBox acima da tabela | Barra de filtros expansível |
-| Ordenar coluna | Clique no cabeçalho | Clique no cabeçalho (mesmo) |
-| Exportar Excel | Botão Excel no dialog | Menu Exportar > Excel |
-| Imprimir | Botão Imprimir | Menu Exportar > PDF / Ctrl+P |
+| Ação             | Desktop                          | Web                          |
+| ---------------- | -------------------------------- | ---------------------------- |
+| Criar orçamento  | Duplo clique em branco na tabela | Botão "+ Novo Orçamento"     |
+| Abrir registro   | Duplo clique na linha            | Clique na linha ou ícone 👁️  |
+| Editar registro  | Duplo clique para abrir          | Botão "Editar" ou ícone ✏️   |
+| Excluir registro | Botão Excluir no dialog          | Menu ações > Excluir         |
+| Filtrar dados    | ComboBox acima da tabela         | Barra de filtros expansível  |
+| Ordenar coluna   | Clique no cabeçalho              | Clique no cabeçalho (mesmo)  |
+| Exportar Excel   | Botão Excel no dialog            | Menu Exportar > Excel        |
+| Imprimir         | Botão Imprimir                   | Menu Exportar > PDF / Ctrl+P |
 
 ---
 
@@ -357,40 +357,40 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 
 ### Fase 1: Preparação (2 semanas antes)
 
-| Semana | Atividade |
-|--------|-----------|
-| S-2 | Preparar materiais de treinamento |
-| S-2 | Configurar ambiente de treinamento |
-| S-2 | Criar usuários de teste |
-| S-1 | Validar materiais com stakeholders |
-| S-1 | Agendar sessões de treinamento |
-| S-1 | Comunicar cronograma aos usuários |
+| Semana | Atividade                          |
+| ------ | ---------------------------------- |
+| S-2    | Preparar materiais de treinamento  |
+| S-2    | Configurar ambiente de treinamento |
+| S-2    | Criar usuários de teste            |
+| S-1    | Validar materiais com stakeholders |
+| S-1    | Agendar sessões de treinamento     |
+| S-1    | Comunicar cronograma aos usuários  |
 
 ### Fase 2: Treinamento Piloto (1 semana)
 
-| Dia | Grupo | Módulos |
-|-----|-------|---------|
-| D1 | Administradores | 1, 8 (completo) |
-| D2 | Administradores | 2-7 (visão geral) |
-| D3 | Gerentes | 1, 2, 5 |
-| D4 | Gerentes | 3, 4, 6, 7 |
-| D5 | Feedback e ajustes | - |
+| Dia | Grupo              | Módulos           |
+| --- | ------------------ | ----------------- |
+| D1  | Administradores    | 1, 8 (completo)   |
+| D2  | Administradores    | 2-7 (visão geral) |
+| D3  | Gerentes           | 1, 2, 5           |
+| D4  | Gerentes           | 3, 4, 6, 7        |
+| D5  | Feedback e ajustes | -                 |
 
 ### Fase 3: Treinamento Geral (2 semanas)
 
-| Semana | Seg | Ter | Qua | Qui | Sex |
-|--------|-----|-----|-----|-----|-----|
-| S1 | Vendedores T1 | Vendedores T2 | Administrativo | Operacional T1 | Operacional T2 |
-| S2 | Reforço | Reforço | Assistentes | Suporte | Go-live prep |
+| Semana | Seg           | Ter           | Qua            | Qui            | Sex            |
+| ------ | ------------- | ------------- | -------------- | -------------- | -------------- |
+| S1     | Vendedores T1 | Vendedores T2 | Administrativo | Operacional T1 | Operacional T2 |
+| S2     | Reforço       | Reforço       | Assistentes    | Suporte        | Go-live prep   |
 
 ### Fase 4: Go-live e Suporte (2 semanas)
 
-| Dia | Atividade |
-|-----|-----------|
-| D1 | Go-live com suporte presencial |
-| D2-D5 | Suporte intensivo |
-| S2 | Suporte reduzido |
-| S2-Fim | Documentar dúvidas frequentes |
+| Dia    | Atividade                      |
+| ------ | ------------------------------ |
+| D1     | Go-live com suporte presencial |
+| D2-D5  | Suporte intensivo              |
+| S2     | Suporte reduzido               |
+| S2-Fim | Documentar dúvidas frequentes  |
 
 ---
 
@@ -398,27 +398,27 @@ Este documento define a estratégia de treinamento para a migração do ERP Stac
 
 ### Documentação
 
-| Material | Formato | Público |
-|----------|---------|---------|
-| Manual do Usuário | PDF/Web | Todos |
-| Guia Rápido | PDF (2 páginas) | Todos |
-| FAQ de Transição | Web | Todos |
-| Manual do Administrador | PDF/Web | Admins |
-| Checklist de Migração | PDF | Gestores |
+| Material                | Formato         | Público  |
+| ----------------------- | --------------- | -------- |
+| Manual do Usuário       | PDF/Web         | Todos    |
+| Guia Rápido             | PDF (2 páginas) | Todos    |
+| FAQ de Transição        | Web             | Todos    |
+| Manual do Administrador | PDF/Web         | Admins   |
+| Checklist de Migração   | PDF             | Gestores |
 
 ### Vídeos
 
-| Vídeo | Duração | Público |
-|-------|---------|---------|
-| Introdução ao novo sistema | 5 min | Todos |
-| Tour pela interface | 10 min | Todos |
-| Criando um orçamento | 8 min | Vendas |
-| Convertendo em venda | 5 min | Vendas |
-| Processando pagamentos | 6 min | Vendas/Financeiro |
-| Emitindo NF-e | 7 min | Vendas/Admin |
-| Agendando entrega | 5 min | Operacional |
-| Gestão de estoque | 8 min | Operacional |
-| Administração de usuários | 10 min | Admins |
+| Vídeo                      | Duração | Público           |
+| -------------------------- | ------- | ----------------- |
+| Introdução ao novo sistema | 5 min   | Todos             |
+| Tour pela interface        | 10 min  | Todos             |
+| Criando um orçamento       | 8 min   | Vendas            |
+| Convertendo em venda       | 5 min   | Vendas            |
+| Processando pagamentos     | 6 min   | Vendas/Financeiro |
+| Emitindo NF-e              | 7 min   | Vendas/Admin      |
+| Agendando entrega          | 5 min   | Operacional       |
+| Gestão de estoque          | 8 min   | Operacional       |
+| Administração de usuários  | 10 min  | Admins            |
 
 ### Ambiente de Prática
 
@@ -508,22 +508,22 @@ gantt
 
 ### Critérios de Avanço
 
-| Fase | Critérios para Próxima Fase |
-|------|----------------------------|
-| Piloto → Geral | 0 bugs críticos, NPS ≥ 6 |
-| Treinamento → Rollout | 90% usuários treinados |
-| Módulo N → Módulo N+1 | < 5 tickets/dia, 0 bugs bloqueantes |
-| Rollout → Estabilização | Todos módulos em produção |
-| Estabilização → Fim | < 2 tickets/dia por 5 dias consecutivos |
+| Fase                    | Critérios para Próxima Fase             |
+| ----------------------- | --------------------------------------- |
+| Piloto → Geral          | 0 bugs críticos, NPS ≥ 6                |
+| Treinamento → Rollout   | 90% usuários treinados                  |
+| Módulo N → Módulo N+1   | < 5 tickets/dia, 0 bugs bloqueantes     |
+| Rollout → Estabilização | Todos módulos em produção               |
+| Estabilização → Fim     | < 2 tickets/dia por 5 dias consecutivos |
 
 ### Plano de Contingência
 
-| Cenário | Ação |
-|---------|------|
-| Bug crítico em módulo | Rollback do módulo, manter antigo |
+| Cenário                 | Ação                               |
+| ----------------------- | ---------------------------------- |
+| Bug crítico em módulo   | Rollback do módulo, manter antigo  |
 | Resistência de usuários | Treinamento adicional, suporte 1:1 |
-| Performance degradada | Escalar infraestrutura, investigar |
-| Integração SEFAZ falha | Manter NFe no sistema antigo |
+| Performance degradada   | Escalar infraestrutura, investigar |
+| Integração SEFAZ falha  | Manter NFe no sistema antigo       |
 
 ---
 
@@ -531,30 +531,30 @@ gantt
 
 ### Durante Treinamento
 
-| Métrica | Meta | Medição |
-|---------|------|---------|
-| Participação | 100% | Lista de presença |
-| Conclusão de exercícios | 90% | Checklist |
+| Métrica                 | Meta  | Medição               |
+| ----------------------- | ----- | --------------------- |
+| Participação            | 100%  | Lista de presença     |
+| Conclusão de exercícios | 90%   | Checklist             |
 | Avaliação de satisfação | ≥ 4/5 | Formulário pós-treino |
 
 ### Pós Go-live
 
-| Métrica | Meta | Medição |
-|---------|------|---------|
-| Tickets de suporte/dia | < 10 (S1), < 5 (S2) | Helpdesk |
-| Tempo médio de resolução | < 2 horas | Helpdesk |
-| NPS do sistema | ≥ 7 | Pesquisa mensal |
-| Tarefas sem suporte | 80% | Observação |
-| Erros de usuário | < 5% | Logs |
+| Métrica                  | Meta                | Medição         |
+| ------------------------ | ------------------- | --------------- |
+| Tickets de suporte/dia   | < 10 (S1), < 5 (S2) | Helpdesk        |
+| Tempo médio de resolução | < 2 horas           | Helpdesk        |
+| NPS do sistema           | ≥ 7                 | Pesquisa mensal |
+| Tarefas sem suporte      | 80%                 | Observação      |
+| Erros de usuário         | < 5%                | Logs            |
 
 ### Indicadores de Problema
 
-| Indicador | Ação |
-|-----------|------|
-| Tickets > 20/dia | Reunião de crise, suporte adicional |
-| Mesmo usuário 3+ tickets | Treinamento 1:1 |
-| Mesma dúvida 5+ vezes | Atualizar FAQ/documentação |
-| NPS < 5 | Investigar, plano de ação |
+| Indicador                | Ação                                |
+| ------------------------ | ----------------------------------- |
+| Tickets > 20/dia         | Reunião de crise, suporte adicional |
+| Mesmo usuário 3+ tickets | Treinamento 1:1                     |
+| Mesma dúvida 5+ vezes    | Atualizar FAQ/documentação          |
+| NPS < 5                  | Investigar, plano de ação           |
 
 ---
 
@@ -562,20 +562,20 @@ gantt
 
 ### Estrutura
 
-| Nível | Responsável | Escopo |
-|-------|-------------|--------|
-| N1 | Helpdesk interno | Dúvidas básicas, reset senha |
-| N2 | Usuários-chave treinados | Dúvidas funcionais |
-| N3 | Equipe de desenvolvimento | Bugs, problemas técnicos |
+| Nível | Responsável               | Escopo                       |
+| ----- | ------------------------- | ---------------------------- |
+| N1    | Helpdesk interno          | Dúvidas básicas, reset senha |
+| N2    | Usuários-chave treinados  | Dúvidas funcionais           |
+| N3    | Equipe de desenvolvimento | Bugs, problemas técnicos     |
 
 ### Canais de Suporte
 
-| Canal | Horário | SLA |
-|-------|---------|-----|
-| Chat interno | 8h-18h | 15 min (primeira resposta) |
-| Email suporte@staccato | 24/7 | 4 horas |
-| Telefone | 8h-18h | Imediato |
-| WhatsApp grupo | 8h-18h | 30 min |
+| Canal                  | Horário | SLA                        |
+| ---------------------- | ------- | -------------------------- |
+| Chat interno           | 8h-18h  | 15 min (primeira resposta) |
+| Email suporte@staccato | 24/7    | 4 horas                    |
+| Telefone               | 8h-18h  | Imediato                   |
+| WhatsApp grupo         | 8h-18h  | 30 min                     |
 
 ### Escalação
 
@@ -623,16 +623,16 @@ Critérios para seleção de usuários-chave:
 
 ### Cronograma de Comunicações
 
-| Quando | O Quê | Canal | Responsável |
-|--------|-------|-------|-------------|
-| S-4 | Anúncio da mudança | Email + reunião | Direção |
-| S-3 | Detalhes do cronograma | Email | RH/TI |
-| S-2 | Convite para treinamento | Email | RH |
-| S-1 | Lembrete de treinamento | Email + WhatsApp | RH |
-| D-1 | Instruções de acesso | Email | TI |
-| D0 | Go-live | Email + WhatsApp | Direção |
-| S+1 | Primeira pesquisa | Email | RH |
-| S+4 | Pesquisa de satisfação | Email | RH |
+| Quando | O Quê                    | Canal            | Responsável |
+| ------ | ------------------------ | ---------------- | ----------- |
+| S-4    | Anúncio da mudança       | Email + reunião  | Direção     |
+| S-3    | Detalhes do cronograma   | Email            | RH/TI       |
+| S-2    | Convite para treinamento | Email            | RH          |
+| S-1    | Lembrete de treinamento  | Email + WhatsApp | RH          |
+| D-1    | Instruções de acesso     | Email            | TI          |
+| D0     | Go-live                  | Email + WhatsApp | Direção     |
+| S+1    | Primeira pesquisa        | Email            | RH          |
+| S+4    | Pesquisa de satisfação   | Email            | RH          |
 
 ### Templates
 

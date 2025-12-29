@@ -10,29 +10,29 @@
 
 ### 1.1 Lições da Indústria
 
-| ERP | Modelo | Insight Chave |
-|-----|--------|---------------|
-| **SAP MM** | PO → Material Document → Stock | Documento de movimento entre pedido e estoque |
-| **Odoo** | purchase.order → stock.picking → stock.move → stock.quant | `quant` = estado atual O(log n), não calcula de histórico |
-| **ERPNext** | Stock Ledger Entry | Toda movimentação é um registro |
+| ERP         | Modelo                                                    | Insight Chave                                             |
+| ----------- | --------------------------------------------------------- | --------------------------------------------------------- |
+| **SAP MM**  | PO → Material Document → Stock                            | Documento de movimento entre pedido e estoque             |
+| **Odoo**    | purchase.order → stock.picking → stock.move → stock.quant | `quant` = estado atual O(log n), não calcula de histórico |
+| **ERPNext** | Stock Ledger Entry                                        | Toda movimentação é um registro                           |
 
 **Conclusão**: Nenhum ERP maduro funde "pedido" com "inventário". Sempre há camada de movimentação.
 
 ### 1.2 Decisões Adotadas
 
-| Decisão | Escolha | Justificativa |
-|---------|---------|---------------|
-| Modelo de entidades | **3 entidades** | Validado pela indústria |
-| Dados fiscais NFe | **JSONB** | Flexibilidade para reforma tributária |
-| Status | **ENUMs PostgreSQL** | Type-safety, transições validadas |
-| Auditoria | **CRUD + audit_log** | Event Sourcing rejeitado para v1 |
-| Consumo estoque | **Seleção manual 1:1** | Variação de lote (tom/calibre) |
+| Decisão             | Escolha                | Justificativa                         |
+| ------------------- | ---------------------- | ------------------------------------- |
+| Modelo de entidades | **3 entidades**        | Validado pela indústria               |
+| Dados fiscais NFe   | **JSONB**              | Flexibilidade para reforma tributária |
+| Status              | **ENUMs PostgreSQL**   | Type-safety, transições validadas     |
+| Auditoria           | **CRUD + audit_log**   | Event Sourcing rejeitado para v1      |
+| Consumo estoque     | **Seleção manual 1:1** | Variação de lote (tom/calibre)        |
 
 ---
 
 ## 2. Visão Geral do Schema
 
-```text
+````text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           DADOS MESTRES                                  │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -1682,3 +1682,4 @@ CREATE TRIGGER trg_validar_transicao_venda_item
 - [03-melhorias.md](./03-melhorias.md) - Pontos de dor
 - [07-esquema-redesenhado.md](./07-esquema-redesenhado.md) - Schema anterior (referência)
 - [../brainstorming/schema-alternativo-2-entidades.md](../brainstorming/schema-alternativo-2-entidades.md) - Análise 2 vs 3 entidades
+````

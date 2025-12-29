@@ -11,13 +11,13 @@ Este documento define a estratégia de tratamento de concorrência para o ERP St
 
 ### Problemas Identificados no Sistema Atual (C++)
 
-| Problema | Impacto | Prioridade |
-|----------|---------|------------|
-| Estoque sem locking | Overallocation possível | Crítica |
-| Crédito com read-modify-write | Lost updates | Alta |
-| Sem optimistic locking | Sobrescrita silenciosa | Alta |
-| ID reservation não atômico | Colisão de IDs | Média |
-| estoque_has_consumo não único | Dados duplicados | Média |
+| Problema                      | Impacto                 | Prioridade |
+| ----------------------------- | ----------------------- | ---------- |
+| Estoque sem locking           | Overallocation possível | Crítica    |
+| Crédito com read-modify-write | Lost updates            | Alta       |
+| Sem optimistic locking        | Sobrescrita silenciosa  | Alta       |
+| ID reservation não atômico    | Colisão de IDs          | Média      |
+| estoque_has_consumo não único | Dados duplicados        | Média      |
 
 ---
 
@@ -116,8 +116,8 @@ public function update(UpdateClienteRequest $request, Cliente $cliente): Cliente
 
 ```vue
 <script setup>
-import { ref } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref } from "vue";
+import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
   cliente: Object,
@@ -131,7 +131,7 @@ const form = ref({
 const submit = () => {
   router.put(`/api/v1/clientes/${props.cliente.id}`, form.value, {
     onError: (errors) => {
-      if (errors.code === 'STALE_MODEL') {
+      if (errors.code === "STALE_MODEL") {
         // Mostrar modal de conflito
         showConflictModal(errors.current_data);
       }
@@ -666,11 +666,11 @@ Usuario A                    Usuario B
 ],
 ```
 
-| Level | Uso | Trade-off |
-|-------|-----|-----------|
-| READ COMMITTED | Padrão | Boa performance, phantom reads possíveis |
-| REPEATABLE READ | Relatórios | Mais locks, dados consistentes na transação |
-| SERIALIZABLE | Crítico (NFe) | Máxima consistência, menor throughput |
+| Level           | Uso           | Trade-off                                   |
+| --------------- | ------------- | ------------------------------------------- |
+| READ COMMITTED  | Padrão        | Boa performance, phantom reads possíveis    |
+| REPEATABLE READ | Relatórios    | Mais locks, dados consistentes na transação |
+| SERIALIZABLE    | Crítico (NFe) | Máxima consistência, menor throughput       |
 
 ### Timeout de Lock
 
@@ -769,12 +769,12 @@ $metrics = [
 
 ### Alertas
 
-| Métrica | Threshold | Ação |
-|---------|-----------|------|
-| Deadlocks/hora | > 10 | Investigar queries |
-| Lock timeout/hora | > 50 | Verificar transações longas |
-| Conflitos optimistic/hora | > 100 | Verificar fluxo de trabalho |
-| Fila de jobs > 1000 | Crítico | Escalar workers |
+| Métrica                   | Threshold | Ação                        |
+| ------------------------- | --------- | --------------------------- |
+| Deadlocks/hora            | > 10      | Investigar queries          |
+| Lock timeout/hora         | > 50      | Verificar transações longas |
+| Conflitos optimistic/hora | > 100     | Verificar fluxo de trabalho |
+| Fila de jobs > 1000       | Crítico   | Escalar workers             |
 
 ---
 

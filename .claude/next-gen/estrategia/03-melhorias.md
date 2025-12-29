@@ -206,7 +206,20 @@ if (status == "PEND. APROV.") ...
 
 ---
 
-### 1.9 Complexidade de Tabelas de Junção
+### 1.9 Impossível Reordenar Itens de Orçamento/Venda
+
+**Problema**: Não é possível reordenar os itens dentro de um orçamento ou venda.
+
+**Impacto**:
+- Itens ficam na ordem em que foram adicionados
+- Cliente pode querer ver itens agrupados por cômodo/ambiente
+- Dificulta organização lógica do orçamento para apresentação
+
+**Causa**: Não existe coluna de ordenação nas tabelas de itens.
+
+---
+
+### 1.10 Complexidade de Tabelas de Junção
 
 **Problema**: Múltiplas tabelas de junção com propósitos sobrepostos.
 
@@ -476,7 +489,109 @@ enum VendaItemStatus: string
 
 ---
 
-### 2.7 Implementar Regras de Senha
+### 2.7 Reordenação de Itens em Orçamento/Venda
+
+**Schema**:
+
+```sql
+ALTER TABLE orcamento_itens ADD COLUMN posicao INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE venda_itens ADD COLUMN posicao INTEGER NOT NULL DEFAULT 0;
+
+-- Índice para ordenação eficiente
+CREATE INDEX idx_orcamento_itens_posicao ON orcamento_itens(orcamento_id, posicao);
+CREATE INDEX idx_venda_itens_posicao ON venda_itens(venda_id, posicao);
+```
+
+**API Endpoint**:
+
+```php
+// routes/api.php
+Route::patch('orcamentos/{orcamento}/itens/reordenar', [OrcamentoItemController::class, 'reordenar']);
+
+// OrcamentoItemController.php
+public function reordenar(Request $request, Orcamento $orcamento)
+{
+    $validated = $request->validate([
+        'itens' => 'required|array',
+        'itens.*.id' => 'required|exists:orcamento_itens,id',
+        'itens.*.posicao' => 'required|integer|min:0',
+    ]);
+
+    DB::transaction(function () use ($validated, $orcamento) {
+        foreach ($validated['itens'] as $item) {
+            OrcamentoItem::where('id', $item['id'])
+                ->where('orcamento_id', $orcamento->id)
+                ->update(['posicao' => $item['posicao']]);
+        }
+    });
+
+    return response()->json(['success' => true]);
+}
+```
+
+**Frontend (Vue + Sortable.js)**:
+
+```vue
+<template>
+  <draggable
+    v-model="itens"
+    item-key="id"
+    handle=".drag-handle"
+    @end="onReorder"
+  >
+    <template #item="{ element }">
+      <tr>
+        <td class="drag-handle cursor-move">⠿</td>
+        <td>{{ element.produto.descricao }}</td>
+        <td>{{ element.quantidade }}</td>
+        <td>{{ element.valor_unitario }}</td>
+      </tr>
+    </template>
+  </draggable>
+</template>
+
+<script setup>
+import draggable from 'vuedraggable';
+
+const itens = ref([]);
+
+async function onReorder() {
+  const payload = itens.value.map((item, index) => ({
+    id: item.id,
+    posicao: index,
+  }));
+
+  await api.patch(`/orcamentos/${orcamentoId}/itens/reordenar`, {
+    itens: payload,
+  });
+}
+</script>
+
+<style>
+.drag-handle {
+  cursor: move;
+  user-select: none;
+}
+</style>
+```
+
+**Alternativa: Botões Simples**:
+
+```vue
+<template>
+  <tr v-for="(item, index) in itens" :key="item.id">
+    <td>
+      <button @click="moverParaCima(index)" :disabled="index === 0">↑</button>
+      <button @click="moverParaBaixo(index)" :disabled="index === itens.length - 1">↓</button>
+    </td>
+    <!-- resto das colunas -->
+  </tr>
+</template>
+```
+
+---
+
+### 2.8 Implementar Regras de Senha
 
 **Requisitos Mínimos**:
 
@@ -655,10 +770,11 @@ A migração habilita funcionalidades não possíveis no sistema atual:
 | 3   | Redesenhar tratamento de status | Baixo   | Baixa        | **Alta**   |
 | 4   | Adicionar trilha de auditoria   | Alto    | Média        | **Alta**   |
 | 5   | **Regras de senha**             | Alto    | Baixa        | **Alta**   |
-| 6   | Corrigir fluxo de devoluções    | Médio   | Média        | **Média**  |
-| 7   | Dividir tabela produto          | Médio   | Média        | **Média**  |
-| 8   | Simplificar tabelas L1/L2       | Alto    | Alta         | **Média**  |
-| 9   | Adicionar queries temporais     | Médio   | Alta         | **Baixa**  |
+| 6   | Reordenar itens orçamento/venda | Médio   | Baixa        | **Média**  |
+| 7   | Corrigir fluxo de devoluções    | Médio   | Média        | **Média**  |
+| 8   | Dividir tabela produto          | Médio   | Média        | **Média**  |
+| 9   | Simplificar tabelas L1/L2       | Alto    | Alta         | **Média**  |
+| 10  | Adicionar queries temporais     | Médio   | Alta         | **Baixa**  |
 
 ### Ordem Recomendada
 

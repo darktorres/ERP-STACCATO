@@ -1,294 +1,246 @@
-# ERP Staccato - Documentação da Migração Web
+# ERP Staccato - Documentacao da Migracao Web
 
 > **Status**: Fase de Planejamento
-> **Última atualização**: 2025-12-28
+> **Ultima atualizacao**: 2025-12-29
 > **Stack Alvo**: Laravel 11 + PostgreSQL 16 + Inertia/Vue
 
 ---
 
-## Links Rápidos
+## Ordem de Leitura Recomendada
 
-| Precisa...                      | Vá para                                                                                |
-| ------------------------------- | -------------------------------------------------------------------------------------- |
-| Entender o projeto              | [Visão Geral](#visão-geral-do-projeto)                                                 |
-| **Comparar legado vs novo**     | [estrategia/00-comparativo-legado-novo.md](./estrategia/00-comparativo-legado-novo.md) |
-| Ver arquitetura Laravel         | [tecnico/01-arquitetura.md](./tecnico/01-arquitetura.md)                               |
-| Ver design do banco             | [tecnico/02-banco-dados.md](./tecnico/02-banco-dados.md)                               |
-| Entender fluxos de negócio      | [negocios/](#fluxos-de-negócio)                                                        |
-| Verificar fases da migração     | [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md)                   |
-| Ver decisões de arquitetura     | [estrategia/02-decisoes.md](./estrategia/02-decisoes.md)                               |
-
----
-
-## Visão Geral do Projeto
-
-Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação web moderna.
-
-### Objetivos
-
-1. Corrigir problemas arquiteturais no código legado
-2. Melhorar manutenibilidade e testabilidade
-3. Habilitar acesso multi-dispositivo (baseado em navegador)
-4. Modernizar a stack tecnológica
-
-### Escala do Sistema Atual
-
-| Métrica              | Quantidade |
-| -------------------- | ---------- |
-| Arquivos Fonte C++   | 142        |
-| Arquivos Header      | 141        |
-| Formulários UI (.ui) | 87         |
-| Linhas de Código     | ~50.000    |
-| Tabelas no Banco     | 209        |
-| Módulos Principais   | 7          |
-
----
-
-## Estrutura da Documentação
-
-```text
-.claude/next-gen/
-├── 00-indice.md                      # Este arquivo - navegação principal
-│
-├── estrategia/                       # Estratégia de migração
-│   ├── 00-comparativo-legado-novo.md # Comparativo consolidado legado vs novo
-│   ├── 01-plano-migracao.md          # Fases do padrão Strangler Fig
-│   ├── 02-decisoes.md                # Registros de Decisão de Arquitetura (ADR)
-│   ├── 03-melhorias.md               # Pontos problemáticos e opções de melhoria
-│   ├── 04-simplificacao-l1l2.md      # Análise de achatamento de tabelas L1/L2
-│   ├── 05-correcao-fifo.md           # Correção do consumo de estoque FIFO
-│   ├── 06-normalizacao-fornecedor.md # FK para refs de fornecedor
-│   ├── 07-esquema-redesenhado.md     # Schema completamente redesenhado
-│   ├── 08-design-greenfield.md       # Design de fluxo greenfield
-│   ├── 09-migracao-dados.md          # Estratégia de migração de dados
-│   ├── 10-paridade-funcionalidades.md# Checklist de paridade funcional
-│   ├── 11-treinamento.md             # Plano de treinamento e rollout
-│   └── 12-event-sourcing-analise.md  # Análise de Event Sourcing (não adotado)
-│
-├── brainstorming/                    # Ideias e rascunhos exploratórios
-│   └── schema-alternativo-2-entidades.md  # Brainstorm de schema alternativo
-│
-├── negocios/                         # Documentação de lógica de negócio
-│   ├── 01-visao-geral-fluxos.md      # Diagramas de fluxo de alto nível
-│   ├── 02-fluxos-estoque.md          # Criação, consumo e devolução de estoque
-│   ├── 03-fluxos-entrega-nfe.md      # Entrega, NFe, CNAB, Comissão
-│   ├── 04-fluxos-cadastros.md        # Dados mestres, Orçamento, Galpão, Permissões
-│   └── 05-regras-negocio.md          # Regras de negócio detalhadas
-│
-├── tecnico/                          # Arquitetura técnica
-│   ├── 01-arquitetura.md             # Estrutura Laravel, padrões, serviços
-│   ├── 02-banco-dados.md             # Redesign do schema PostgreSQL
-│   ├── 03-frontend.md                # Avaliação de framework frontend
-│   ├── 04-infraestrutura.md          # Auditoria, dados temporais, busca, performance
-│   ├── 05-seguranca.md               # Autenticação, autorização, proteções
-│   ├── 06-api.md                     # Design de API REST, versionamento
-│   ├── 07-testes.md                  # Estratégia de testes (unit, integration, E2E)
-│   ├── 08-erros-monitoramento.md     # Tratamento de erros, logging, Sentry
-│   ├── 09-integracoes.md             # Integrações externas (ACBr, CNAB, etc)
-│   ├── 10-design-system.md           # Design system, componentes, temas
-│   ├── 11-concorrencia.md            # Locks, transações, race conditions
-│   ├── 12-atalhos-teclado.md         # Atalhos de teclado e acessibilidade
-│   ├── 13-impressao.md               # PDF, Excel, etiquetas, DANFE
-│   ├── 14-devops.md                  # Docker, CI/CD, deploy, monitoramento
-│   ├── 15-dicionario-dados.md        # Glossário de termos, enums, convenções
-│   ├── 16-compatibilidade.md         # Matriz de suporte browser/dispositivo
-│   ├── 17-validacao.md               # Estratégia de validação multicamada
-│   ├── 18-dependencias.md            # Auditoria de dependências PHP/NPM
-│   └── modulos/                      # Specs de implementação por módulo
-│       ├── _indice.md                # Lista de prioridade dos módulos
-│       ├── cadastros.md              # Módulo de Cadastros (CRUD base)
-│       ├── compras.md                # Módulo de Compras
-│       ├── estoque.md                # Módulo de Estoque
-│       ├── financeiro.md             # Módulo Financeiro
-│       ├── logistica.md              # Módulo de Logística
-│       ├── nfe.md                    # Módulo NFe
-│       ├── relatorios.md             # Módulo de Relatórios
-│       └── vendas.md                 # Módulo de Vendas
+```
+01-contexto  ->  02-analise  ->  03-decisoes  ->  04-arquitetura  ->  05-execucao
+ (o que e)      (problemas)     (escolhas)      (como construir)    (como migrar)
 ```
 
 ---
 
-## Documentação Técnica
+## Links Rapidos
 
-### Arquitetura Base
+| Precisa...                      | Va para                                                      |
+| ------------------------------- | ------------------------------------------------------------ |
+| Entender o projeto              | [Visao Geral](#visao-geral-do-projeto)                       |
+| Entender fluxos de negocio      | [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md) |
+| Comparar legado vs novo         | [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md) |
+| Ver decisoes de arquitetura     | [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)           |
+| Ver arquitetura Laravel         | [04-arquitetura/01-arquitetura.md](./04-arquitetura/01-arquitetura.md) |
+| Ver design do banco             | [04-arquitetura/02-banco-dados.md](./04-arquitetura/02-banco-dados.md) |
+| Verificar fases da migracao     | [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md) |
 
-| Doc | Título | Descrição |
+---
+
+## Visao Geral do Projeto
+
+Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web moderna.
+
+### Objetivos
+
+1. Corrigir problemas arquiteturais no codigo legado
+2. Melhorar manutenibilidade e testabilidade
+3. Habilitar acesso multi-dispositivo (baseado em navegador)
+4. Modernizar a stack tecnologica
+
+### Escala do Sistema Atual
+
+| Metrica              | Quantidade |
+| -------------------- | ---------- |
+| Arquivos Fonte C++   | 142        |
+| Arquivos Header      | 141        |
+| Formularios UI (.ui) | 87         |
+| Linhas de Codigo     | ~50.000    |
+| Tabelas no Banco     | 209        |
+| Modulos Principais   | 7          |
+
+---
+
+## Estrutura da Documentacao
+
+```text
+.claude/next-gen/
+├── 00-indice.md                          # Este arquivo - navegacao principal
+│
+├── 01-contexto/                          # FASE 1: Entender o sistema
+│   ├── 01-visao-geral-fluxos.md          # Diagramas de fluxo de alto nivel
+│   ├── 02-fluxos-estoque.md              # Criacao, consumo e devolucao de estoque
+│   ├── 03-fluxos-entrega-nfe.md          # Entrega, NFe, CNAB, Comissao
+│   ├── 04-fluxos-cadastros.md            # Dados mestres, Orcamento, Galpao, Permissoes
+│   └── 05-regras-negocio.md              # Regras de negocio detalhadas
+│
+├── 02-analise/                           # FASE 2: Problemas e oportunidades
+│   ├── 01-comparativo-legado-novo.md     # Comparativo consolidado legado vs novo
+│   ├── 02-melhorias.md                   # Pontos problematicos e opcoes de melhoria
+│   ├── 03-simplificacao-l1l2.md          # Analise de achatamento de tabelas L1/L2
+│   ├── 04-correcao-fifo.md               # Correcao do consumo de estoque FIFO
+│   └── 05-normalizacao-fornecedor.md     # FK para refs de fornecedor
+│
+├── 03-decisoes/                          # FASE 3: O que escolhemos
+│   ├── 01-adrs.md                        # Registros de Decisao de Arquitetura
+│   ├── 02-schema-redesenhado.md          # Schema completo redesenhado
+│   └── 03-design-greenfield.md           # Design de fluxo greenfield
+│
+├── 04-arquitetura/                       # FASE 4: Como construir
+│   ├── 01-arquitetura.md                 # Estrutura Laravel, padroes, servicos
+│   ├── 02-banco-dados.md                 # Redesign do schema PostgreSQL
+│   ├── 03-frontend.md                    # Avaliacao de framework frontend
+│   ├── 04-infraestrutura.md              # Auditoria, dados temporais, busca, performance
+│   ├── 05-seguranca.md                   # Autenticacao, autorizacao, protecoes
+│   ├── 06-api.md                         # Design de API REST, versionamento
+│   ├── 07-testes.md                      # Estrategia de testes (unit, integration, E2E)
+│   ├── 08-erros-monitoramento.md         # Tratamento de erros, logging, Sentry
+│   ├── 09-integracoes.md                 # Integracoes externas (ACBr, CNAB, etc)
+│   ├── 10-design-system.md               # Design system, componentes, temas
+│   ├── 11-concorrencia.md                # Locks, transacoes, race conditions
+│   ├── 12-atalhos-teclado.md             # Atalhos de teclado e acessibilidade
+│   ├── 13-impressao.md                   # PDF, Excel, etiquetas, DANFE
+│   ├── 14-devops.md                      # Docker, CI/CD, deploy, monitoramento
+│   ├── 15-dicionario-dados.md            # Glossario de termos, enums, convencoes
+│   ├── 16-compatibilidade.md             # Matriz de suporte browser/dispositivo
+│   ├── 17-validacao.md                   # Estrategia de validacao multicamada
+│   ├── 18-dependencias.md                # Auditoria de dependencias PHP/NPM
+│   └── modulos/                          # Specs de implementacao por modulo
+│       ├── _indice.md                    # Lista de prioridade dos modulos
+│       ├── cadastros.md                  # Modulo de Cadastros (CRUD base)
+│       ├── compras.md                    # Modulo de Compras
+│       ├── estoque.md                    # Modulo de Estoque
+│       ├── financeiro.md                 # Modulo Financeiro
+│       ├── logistica.md                  # Modulo de Logistica
+│       ├── nfe.md                        # Modulo NFe
+│       ├── relatorios.md                 # Modulo de Relatorios
+│       └── vendas.md                     # Modulo de Vendas
+│
+├── 05-execucao/                          # FASE 5: Como migrar
+│   ├── 01-plano-migracao.md              # Fases do padrao Strangler Fig
+│   ├── 02-migracao-dados.md              # Estrategia de migracao de dados
+│   ├── 03-paridade-funcionalidades.md    # Checklist de paridade funcional
+│   └── 04-treinamento.md                 # Plano de treinamento e rollout
+│
+└── rascunhos/                            # Ideias e rascunhos exploratorios
+    ├── schema-alternativo-2-entidades.md # Brainstorm de schema alternativo
+    ├── schema-proposto.md                # Schema proposto (em desenvolvimento)
+    └── event-sourcing-analise.md         # Analise de Event Sourcing (nao adotado)
+```
+
+---
+
+## 01 - Contexto (Entender o Sistema)
+
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [01](./tecnico/01-arquitetura.md) | Arquitetura Laravel | Estrutura de diretórios, service layer, enums, eventos |
-| [02](./tecnico/02-banco-dados.md) | Schema do Banco | PostgreSQL, normalização, ENUMs, auditoria, FTS |
-| [03](./tecnico/03-frontend.md) | Framework Frontend | Livewire vs Inertia+Vue vs SPA |
-| [04](./tecnico/04-infraestrutura.md) | Infraestrutura | Auditoria, temporal, busca, cache, performance |
+| [01](./01-contexto/01-visao-geral-fluxos.md) | Visao Geral dos Fluxos | Diagramas de alto nivel, arquitetura L1/L2, maquinas de estado |
+| [02](./01-contexto/02-fluxos-estoque.md) | Fluxos de Estoque | Criacao, consumo FIFO, devolucoes, algoritmo Parear |
+| [03](./01-contexto/03-fluxos-entrega-nfe.md) | Entrega, NFe, Financeiro | Agendamento, emissao NFe, CNAB 240, comissao |
+| [04](./01-contexto/04-fluxos-cadastros.md) | Cadastros e Outros | Dados mestres, orcamento, galpao, permissoes |
+| [05](./01-contexto/05-regras-negocio.md) | Regras de Negocio | Precificacao, impostos, validacoes, transicoes de status |
 
-### Segurança e API
+---
 
-| Doc | Título | Descrição |
+## 02 - Analise (Problemas e Oportunidades)
+
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [05](./tecnico/05-seguranca.md) | Segurança | Autenticação, RBAC, proteções OWASP |
-| [06](./tecnico/06-api.md) | Design de API | REST, versionamento, rate limiting |
-| [17](./tecnico/17-validacao.md) | Validação | Validação multicamada (request, business, DB) |
+| [01](./02-analise/01-comparativo-legado-novo.md) | Comparativo Legado vs Novo | Arquitetura, schema, seguranca, auditoria |
+| [02](./02-analise/02-melhorias.md) | Melhorias Propostas | Pontos problematicos e opcoes de correcao |
+| [03](./02-analise/03-simplificacao-l1l2.md) | Simplificacao L1/L2 | Opcoes de achatamento de tabelas |
+| [04](./02-analise/04-correcao-fifo.md) | Correcao FIFO | Consumo correto First-In-First-Out |
+| [05](./02-analise/05-normalizacao-fornecedor.md) | Normalizacao Fornecedor | FK em vez de VARCHAR |
 
-### Qualidade e Operações
+---
 
-| Doc | Título | Descrição |
+## 03 - Decisoes (O Que Escolhemos)
+
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [07](./tecnico/07-testes.md) | Testes | Unit, integration, E2E, coverage |
-| [08](./tecnico/08-erros-monitoramento.md) | Erros e Monitoramento | Exception handling, logging, Sentry |
-| [14](./tecnico/14-devops.md) | DevOps | Docker, CI/CD, deploy, observabilidade |
+| [01](./03-decisoes/01-adrs.md) | ADRs | Laravel, PostgreSQL, frontend, NFe, migracao |
+| [02](./03-decisoes/02-schema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correcoes |
+| [03](./03-decisoes/03-design-greenfield.md) | Design Greenfield | Reimaginacao completa do sistema |
 
-### Integrações e Funcionalidades
+---
 
-| Doc | Título | Descrição |
+## 04 - Arquitetura (Como Construir)
+
+### Base
+
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [09](./tecnico/09-integracoes.md) | Integrações | ACBr, CNAB, CEP, SMTP, Google Maps |
-| [11](./tecnico/11-concorrencia.md) | Concorrência | Locks otimistas/pessimistas, transações |
-| [13](./tecnico/13-impressao.md) | Impressão | PDF, Excel, etiquetas térmicas, DANFE |
+| [01](./04-arquitetura/01-arquitetura.md) | Arquitetura Laravel | Estrutura de diretorios, service layer, enums, eventos |
+| [02](./04-arquitetura/02-banco-dados.md) | Schema do Banco | PostgreSQL, normalizacao, ENUMs, auditoria, FTS |
+| [03](./04-arquitetura/03-frontend.md) | Framework Frontend | Livewire vs Inertia+Vue vs SPA |
+| [04](./04-arquitetura/04-infraestrutura.md) | Infraestrutura | Auditoria, temporal, busca, cache, performance |
+
+### Seguranca e API
+
+| Doc | Titulo | Descricao |
+|-----|--------|-----------|
+| [05](./04-arquitetura/05-seguranca.md) | Seguranca | Autenticacao, RBAC, protecoes OWASP |
+| [06](./04-arquitetura/06-api.md) | Design de API | REST, versionamento, rate limiting |
+| [17](./04-arquitetura/17-validacao.md) | Validacao | Validacao multicamada (request, business, DB) |
+
+### Qualidade e Operacoes
+
+| Doc | Titulo | Descricao |
+|-----|--------|-----------|
+| [07](./04-arquitetura/07-testes.md) | Testes | Unit, integration, E2E, coverage |
+| [08](./04-arquitetura/08-erros-monitoramento.md) | Erros e Monitoramento | Exception handling, logging, Sentry |
+| [14](./04-arquitetura/14-devops.md) | DevOps | Docker, CI/CD, deploy, observabilidade |
+
+### Integracoes e Funcionalidades
+
+| Doc | Titulo | Descricao |
+|-----|--------|-----------|
+| [09](./04-arquitetura/09-integracoes.md) | Integracoes | ACBr, CNAB, CEP, SMTP, Google Maps |
+| [11](./04-arquitetura/11-concorrencia.md) | Concorrencia | Locks otimistas/pessimistas, transacoes |
+| [13](./04-arquitetura/13-impressao.md) | Impressao | PDF, Excel, etiquetas termicas, DANFE |
 
 ### UI/UX
 
-| Doc | Título | Descrição |
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [10](./tecnico/10-design-system.md) | Design System | Componentes, cores, tipografia, temas |
-| [12](./tecnico/12-atalhos-teclado.md) | Atalhos de Teclado | Keyboard shortcuts, command palette |
-| [16](./tecnico/16-compatibilidade.md) | Compatibilidade | Browsers, dispositivos, breakpoints |
+| [10](./04-arquitetura/10-design-system.md) | Design System | Componentes, cores, tipografia, temas |
+| [12](./04-arquitetura/12-atalhos-teclado.md) | Atalhos de Teclado | Keyboard shortcuts, command palette |
+| [16](./04-arquitetura/16-compatibilidade.md) | Compatibilidade | Browsers, dispositivos, breakpoints |
 
-### Referência
+### Referencia
 
-| Doc | Título | Descrição |
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [15](./tecnico/15-dicionario-dados.md) | Dicionário de Dados | Glossário, enums, convenções de nomes |
-| [18](./tecnico/18-dependencias.md) | Dependências | Auditoria Composer/NPM, licenças, riscos |
+| [15](./04-arquitetura/15-dicionario-dados.md) | Dicionario de Dados | Glossario, enums, convencoes de nomes |
+| [18](./04-arquitetura/18-dependencias.md) | Dependencias | Auditoria Composer/NPM, licencas, riscos |
 
-### [Módulos - Specs de Implementação](./tecnico/modulos/_indice.md)
+### [Modulos - Specs de Implementacao](./04-arquitetura/modulos/_indice.md)
 
-| Módulo | Descrição | Complexidade |
+| Modulo | Descricao | Complexidade |
 |--------|-----------|--------------|
-| [cadastros.md](./tecnico/modulos/cadastros.md) | Cliente, Fornecedor, Produto, Transportadora | Baixa |
-| [compras.md](./tecnico/modulos/compras.md) | Pedidos de compra, recebimento | Média |
-| [estoque.md](./tecnico/modulos/estoque.md) | Controle de estoque, FIFO, consumo | Média |
-| [financeiro.md](./tecnico/modulos/financeiro.md) | Contas a pagar/receber, CNAB | Média |
-| [vendas.md](./tecnico/modulos/vendas.md) | Orçamento, venda, faturamento | Alta |
-| [nfe.md](./tecnico/modulos/nfe.md) | Emissão/recebimento de NFe | Alta |
-| [logistica.md](./tecnico/modulos/logistica.md) | Entregas, agendamento | Média |
-| [relatorios.md](./tecnico/modulos/relatorios.md) | Relatórios e dashboards | Média |
+| [cadastros.md](./04-arquitetura/modulos/cadastros.md) | Cliente, Fornecedor, Produto, Transportadora | Baixa |
+| [compras.md](./04-arquitetura/modulos/compras.md) | Pedidos de compra, recebimento | Media |
+| [estoque.md](./04-arquitetura/modulos/estoque.md) | Controle de estoque, FIFO, consumo | Media |
+| [financeiro.md](./04-arquitetura/modulos/financeiro.md) | Contas a pagar/receber, CNAB | Media |
+| [vendas.md](./04-arquitetura/modulos/vendas.md) | Orcamento, venda, faturamento | Alta |
+| [nfe.md](./04-arquitetura/modulos/nfe.md) | Emissao/recebimento de NFe | Alta |
+| [logistica.md](./04-arquitetura/modulos/logistica.md) | Entregas, agendamento | Media |
+| [relatorios.md](./04-arquitetura/modulos/relatorios.md) | Relatorios e dashboards | Media |
 
 ---
 
-## Fluxos de Negócio
+## 05 - Execucao (Como Migrar)
 
-### [01 - Visão Geral dos Fluxos](./negocios/01-visao-geral-fluxos.md)
-
-Visão de alto nível de todos os processos de negócio:
-
-- Arquitetura de tabelas de dois níveis (L1/L2)
-- Máquinas de estado de status
-- Regras de integridade de dados
-- Problemas conhecidos
-
-### [02 - Fluxos de Estoque](./negocios/02-fluxos-estoque.md)
-
-Análise profunda do gerenciamento de inventário:
-
-- Cadeia de relacionamento 1:N:N
-- Criação de estoque a partir de importação de NFe
-- Algoritmo de Parear (matching)
-- Lógica de consumo (problemas FIFO)
-- Fluxo de devoluções e bugs
-
-### [03 - Fluxos de Entrega, NFe e Financeiro](./negocios/03-fluxos-entrega-nfe.md)
-
-- Agendamento e confirmação de entrega
-- Emissão de NFe (integração ACBr)
-- Geração de arquivo bancário CNAB 240
-- Cálculo de comissão (RT)
-
-### [04 - Cadastros e Outros Fluxos](./negocios/04-fluxos-cadastros.md)
-
-- Fornecedor, Cliente, Produto, Transportadora
-- Orçamento (sistema de desconto em três níveis)
-- Galpão (blocos de armazém)
-- Permissões de usuário (RBAC + PBAC)
-
-### [05 - Regras de Negócio Detalhadas](./negocios/05-regras-negocio.md)
-
-- Precificação (sistema de 3 níveis de desconto)
-- Cálculos de impostos
-- Validações de CPF/CNPJ
-- Regras de status e transições
+| Doc | Titulo | Descricao |
+|-----|--------|-----------|
+| [01](./05-execucao/01-plano-migracao.md) | Plano de Migracao | Padrao Strangler Fig, 8 fases, riscos |
+| [02](./05-execucao/02-migracao-dados.md) | Migracao de Dados | ETL, validacao, rollback |
+| [03](./05-execucao/03-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
+| [04](./05-execucao/04-treinamento.md) | Treinamento | Plano de capacitacao e rollout |
 
 ---
 
-## Documentação de Estratégia
+## Rascunhos
 
-### [00 - Comparativo Legado vs Novo](./estrategia/00-comparativo-legado-novo.md)
+Documentos exploratorios com ideias em desenvolvimento:
 
-Visão consolidada das diferenças entre sistemas:
-
-- Arquitetura de código (Widgets vs Service Layer)
-- Schema de banco (L1/L2 vs tabela única, FIFO, ENUMs)
-- Segurança (SQL injection vs Eloquent)
-- Auditoria e rastreabilidade
-
-### [01 - Plano de Migração](./estrategia/01-plano-migracao.md)
-
-- Padrão Strangler Fig (recomendado)
-- 8 fases
-- Estratégias de mitigação de risco
-- Requisitos de equipe
-
-### [02 - Decisões de Arquitetura](./estrategia/02-decisoes.md)
-
-Log de decisões no formato ADR:
-
-- ADR-001: Backend Laravel (Aceito)
-- ADR-002: Banco de dados PostgreSQL (Aceito)
-- ADR-003: Framework frontend (Em aberto)
-- ADR-004: Integração NFe (Aceito - ACBrMonitorConsole)
-- ADR-005: Estratégia de migração (Em aberto)
-
-### [03 - Melhorias de Fluxo e Schema](./estrategia/03-melhorias.md)
-
-Pontos problemáticos e oportunidades de melhoria:
-
-- Opções de simplificação de tabelas de dois níveis (L1/L2)
-- Correção do consumo de estoque FIFO
-- Normalização de referência de fornecedor
-- Completar fluxo de devoluções
-- Redesign do tratamento de status
-- Divisão da tabela Produto
-
-### Análises Profundas
-
-| Doc | Título | Descrição |
+| Doc | Titulo | Descricao |
 |-----|--------|-----------|
-| [04](./estrategia/04-simplificacao-l1l2.md) | Simplificação L1/L2 | Opções de achatamento de tabelas |
-| [05](./estrategia/05-correcao-fifo.md) | Correção FIFO | Consumo correto First-In-First-Out |
-| [06](./estrategia/06-normalizacao-fornecedor.md) | Normalização Fornecedor | FK em vez de VARCHAR |
-| [07](./estrategia/07-esquema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correções |
-| [08](./estrategia/08-design-greenfield.md) | Design Greenfield | Reimaginação completa do sistema |
-
-### Execução da Migração
-
-| Doc | Título | Descrição |
-|-----|--------|-----------|
-| [09](./estrategia/09-migracao-dados.md) | Migração de Dados | ETL, validação, rollback |
-| [10](./estrategia/10-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
-| [11](./estrategia/11-treinamento.md) | Treinamento | Plano de capacitação e rollout |
-
-### Análises Complementares
-
-| Doc | Título | Descrição |
-|-----|--------|-----------|
-| [12](./estrategia/12-event-sourcing-analise.md) | Event Sourcing | Análise e motivos para não adoção |
-
----
-
-## Brainstorming
-
-Documentos exploratórios com ideias em desenvolvimento:
-
-| Doc | Título | Descrição |
-|-----|--------|-----------|
-| [schema-alternativo](./brainstorming/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades |
+| [schema-alternativo](./rascunhos/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades |
+| [schema-proposto](./rascunhos/schema-proposto.md) | Schema Proposto | Schema baseado em pesquisa de ERPs (em desenvolvimento) |
+| [event-sourcing](./rascunhos/event-sourcing-analise.md) | Event Sourcing | Analise e motivos para nao adocao |
 
 ---
 
@@ -297,15 +249,15 @@ Documentos exploratórios com ideias em desenvolvimento:
 | Status        | Significado                       |
 | ------------- | --------------------------------- |
 | **Completo**  | Totalmente documentado, revisado  |
-| **Rascunho**  | Conteúdo inicial, precisa revisão |
-| **Em aberto** | Decisão pendente                  |
+| **Rascunho**  | Conteudo inicial, precisa revisao |
+| **Em aberto** | Decisao pendente                  |
 
 ---
 
-## Como Usar Esta Documentação
+## Como Usar Esta Documentacao
 
-1. **Novo no projeto?** Comece com este índice, depois leia [negocios/01-visao-geral-fluxos.md](./negocios/01-visao-geral-fluxos.md)
-2. **Planejando implementação?** Veja [estrategia/01-plano-migracao.md](./estrategia/01-plano-migracao.md)
-3. **Trabalhando em um fluxo específico?** Veja o documento relevante em negocios/
-4. **Tomando decisões técnicas?** Consulte tecnico/ e estrategia/02-decisoes.md
-5. **Implementando um módulo?** Veja tecnico/modulos/ para specs detalhadas
+1. **Novo no projeto?** Comece com [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md)
+2. **Entendendo problemas?** Veja [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md)
+3. **Tomando decisoes?** Consulte [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)
+4. **Implementando?** Veja [04-arquitetura/](./04-arquitetura/) e [04-arquitetura/modulos/](./04-arquitetura/modulos/)
+5. **Planejando migracao?** Veja [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md)

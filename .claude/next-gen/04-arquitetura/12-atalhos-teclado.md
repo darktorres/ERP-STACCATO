@@ -18,15 +18,15 @@ Este documento define os atalhos de teclado para o ERP Staccato web, mapeando fu
 
 ### Conflitos com Navegador
 
-| Atalho | Navegador | Solução |
-|--------|-----------|---------|
-| Ctrl+S | Salvar página | Capturar e prevenir default |
-| Ctrl+P | Imprimir | Capturar para impressão customizada |
-| Ctrl+F | Buscar na página | Usar para busca do sistema |
-| Ctrl+N | Nova janela | Usar Alt+N ou capturar |
-| Ctrl+W | Fechar aba | Não usar |
-| Ctrl+T | Nova aba | Não usar |
-| F5 | Recarregar | Manter comportamento padrão |
+| Atalho | Navegador        | Solução                             |
+| ------ | ---------------- | ----------------------------------- |
+| Ctrl+S | Salvar página    | Capturar e prevenir default         |
+| Ctrl+P | Imprimir         | Capturar para impressão customizada |
+| Ctrl+F | Buscar na página | Usar para busca do sistema          |
+| Ctrl+N | Nova janela      | Usar Alt+N ou capturar              |
+| Ctrl+W | Fechar aba       | Não usar                            |
+| Ctrl+T | Nova aba         | Não usar                            |
+| F5     | Recarregar       | Manter comportamento padrão         |
 
 ---
 
@@ -34,40 +34,40 @@ Este documento define os atalhos de teclado para o ERP Staccato web, mapeando fu
 
 ### Atalhos Globais
 
-| Ação | Desktop (C++) | Web | Observação |
-|------|---------------|-----|------------|
-| Fechar/Sair | Ctrl+Q | Ctrl+Q | Logout ou fechar modal |
-| Novo Orçamento | Ctrl+N | Alt+N | Evita conflito com browser |
-| Salvar | Ctrl+S | Ctrl+S | Previne default do browser |
-| Buscar | - | Ctrl+K | Busca global (command palette) |
-| Ajuda/Atalhos | - | ? | Mostrar lista de atalhos |
-| Navegar abas | - | Ctrl+1-9 | Ir para aba N |
+| Ação           | Desktop (C++) | Web      | Observação                     |
+| -------------- | ------------- | -------- | ------------------------------ |
+| Fechar/Sair    | Ctrl+Q        | Ctrl+Q   | Logout ou fechar modal         |
+| Novo Orçamento | Ctrl+N        | Alt+N    | Evita conflito com browser     |
+| Salvar         | Ctrl+S        | Ctrl+S   | Previne default do browser     |
+| Buscar         | -             | Ctrl+K   | Busca global (command palette) |
+| Ajuda/Atalhos  | -             | ?        | Mostrar lista de atalhos       |
+| Navegar abas   | -             | Ctrl+1-9 | Ir para aba N                  |
 
 ### Atalhos em Formulários
 
-| Ação | Desktop | Web | Contexto |
-|------|---------|-----|----------|
-| Salvar | Ctrl+S | Ctrl+S | Qualquer formulário |
-| Cancelar | Esc | Esc | Fechar modal/formulário |
-| Próximo campo | Tab | Tab | Navegação padrão |
-| Campo anterior | Shift+Tab | Shift+Tab | Navegação padrão |
-| Confirmar | Enter | Enter | Em campos simples |
-| Abrir seletor | Space/Enter | Space/Enter | Em dropdowns |
+| Ação           | Desktop     | Web         | Contexto                |
+| -------------- | ----------- | ----------- | ----------------------- |
+| Salvar         | Ctrl+S      | Ctrl+S      | Qualquer formulário     |
+| Cancelar       | Esc         | Esc         | Fechar modal/formulário |
+| Próximo campo  | Tab         | Tab         | Navegação padrão        |
+| Campo anterior | Shift+Tab   | Shift+Tab   | Navegação padrão        |
+| Confirmar      | Enter       | Enter       | Em campos simples       |
+| Abrir seletor  | Space/Enter | Space/Enter | Em dropdowns            |
 
 ### Atalhos em Tabelas
 
-| Ação | Desktop | Web | Observação |
-|------|---------|-----|------------|
-| Copiar seleção | Ctrl+C | Ctrl+C | Copia células selecionadas |
-| Abrir registro | Duplo clique | Enter | Na linha selecionada |
-| Editar registro | Duplo clique | E | Na linha selecionada |
-| Excluir registro | - | Delete | Com confirmação |
-| Selecionar todas | Ctrl+A | Ctrl+A | Seleciona todas as linhas |
-| Navegar | Setas | Setas | Entre linhas/colunas |
-| Primeira linha | Home | Home | Vai para o início |
-| Última linha | End | End | Vai para o fim |
-| Página anterior | Page Up | Page Up | Paginação |
-| Próxima página | Page Down | Page Down | Paginação |
+| Ação             | Desktop      | Web       | Observação                 |
+| ---------------- | ------------ | --------- | -------------------------- |
+| Copiar seleção   | Ctrl+C       | Ctrl+C    | Copia células selecionadas |
+| Abrir registro   | Duplo clique | Enter     | Na linha selecionada       |
+| Editar registro  | Duplo clique | E         | Na linha selecionada       |
+| Excluir registro | -            | Delete    | Com confirmação            |
+| Selecionar todas | Ctrl+A       | Ctrl+A    | Seleciona todas as linhas  |
+| Navegar          | Setas        | Setas     | Entre linhas/colunas       |
+| Primeira linha   | Home         | Home      | Vai para o início          |
+| Última linha     | End          | End       | Vai para o fim             |
+| Página anterior  | Page Up      | Page Up   | Paginação                  |
+| Próxima página   | Page Down    | Page Down | Paginação                  |
 
 ---
 
@@ -77,7 +77,7 @@ Este documento define os atalhos de teclado para o ERP Staccato web, mapeando fu
 
 ```typescript
 // composables/useKeyboardShortcuts.ts
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted } from "vue";
 
 interface Shortcut {
   key: string;
@@ -108,11 +108,11 @@ export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
   };
 
   onMounted(() => {
-    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener("keydown", handleKeydown);
   });
 
   onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown);
+    document.removeEventListener("keydown", handleKeydown);
   });
 
   return { shortcuts };
@@ -123,37 +123,39 @@ export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
 
 ```vue
 <script setup>
-import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
-import { router } from '@inertiajs/vue3';
+import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
+import { router } from "@inertiajs/vue3";
 
-const form = ref({ /* ... */ });
+const form = ref({
+  /* ... */
+});
 
 useKeyboardShortcuts([
   {
-    key: 's',
+    key: "s",
     ctrl: true,
     handler: () => salvar(),
-    description: 'Salvar',
+    description: "Salvar",
   },
   {
-    key: 'Escape',
+    key: "Escape",
     handler: () => cancelar(),
-    description: 'Cancelar',
+    description: "Cancelar",
   },
   {
-    key: 'n',
+    key: "n",
     alt: true,
-    handler: () => router.visit('/orcamentos/novo'),
-    description: 'Novo Orçamento',
+    handler: () => router.visit("/orcamentos/novo"),
+    description: "Novo Orçamento",
   },
 ]);
 
 const salvar = () => {
-  form.value.post('/api/v1/orcamentos');
+  form.value.post("/api/v1/orcamentos");
 };
 
 const cancelar = () => {
-  router.visit('/orcamentos');
+  router.visit("/orcamentos");
 };
 </script>
 ```
@@ -281,86 +283,86 @@ onUnmounted(() => {
 
 ### Navegação Global
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `?` | Mostrar atalhos | Global |
-| `Ctrl+K` | Busca global (Command Palette) | Global |
-| `Ctrl+1` | Ir para Orçamentos | Global |
-| `Ctrl+2` | Ir para Vendas | Global |
-| `Ctrl+3` | Ir para Compras | Global |
-| `Ctrl+4` | Ir para Logística | Global |
-| `Ctrl+5` | Ir para NFe | Global |
-| `Ctrl+6` | Ir para Estoque | Global |
-| `Ctrl+7` | Ir para Financeiro | Global |
-| `Ctrl+8` | Ir para Relatórios | Global |
-| `G` `H` | Ir para Home/Dashboard | Global (sequência) |
-| `G` `C` | Ir para Clientes | Global (sequência) |
-| `G` `P` | Ir para Produtos | Global (sequência) |
+| Atalho   | Ação                           | Contexto           |
+| -------- | ------------------------------ | ------------------ |
+| `?`      | Mostrar atalhos                | Global             |
+| `Ctrl+K` | Busca global (Command Palette) | Global             |
+| `Ctrl+1` | Ir para Orçamentos             | Global             |
+| `Ctrl+2` | Ir para Vendas                 | Global             |
+| `Ctrl+3` | Ir para Compras                | Global             |
+| `Ctrl+4` | Ir para Logística              | Global             |
+| `Ctrl+5` | Ir para NFe                    | Global             |
+| `Ctrl+6` | Ir para Estoque                | Global             |
+| `Ctrl+7` | Ir para Financeiro             | Global             |
+| `Ctrl+8` | Ir para Relatórios             | Global             |
+| `G` `H`  | Ir para Home/Dashboard         | Global (sequência) |
+| `G` `C`  | Ir para Clientes               | Global (sequência) |
+| `G` `P`  | Ir para Produtos               | Global (sequência) |
 
 ### Ações Comuns
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `Ctrl+S` | Salvar | Formulários |
-| `Esc` | Cancelar/Fechar | Modais, formulários |
-| `Alt+N` | Novo registro | Listagens |
-| `E` | Editar selecionado | Listagens |
-| `Delete` | Excluir selecionado | Listagens |
-| `Ctrl+P` | Imprimir/Exportar PDF | Visualização |
-| `Ctrl+E` | Exportar Excel | Listagens |
+| Atalho   | Ação                  | Contexto            |
+| -------- | --------------------- | ------------------- |
+| `Ctrl+S` | Salvar                | Formulários         |
+| `Esc`    | Cancelar/Fechar       | Modais, formulários |
+| `Alt+N`  | Novo registro         | Listagens           |
+| `E`      | Editar selecionado    | Listagens           |
+| `Delete` | Excluir selecionado   | Listagens           |
+| `Ctrl+P` | Imprimir/Exportar PDF | Visualização        |
+| `Ctrl+E` | Exportar Excel        | Listagens           |
 
 ### Orçamentos
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `Alt+N` | Novo orçamento | Lista de orçamentos |
-| `Alt+I` | Adicionar item | Edição de orçamento |
-| `Alt+C` | Buscar cliente | Edição de orçamento |
-| `Alt+F` | Calcular frete | Edição de orçamento |
-| `Alt+V` | Converter em venda | Visualização |
-| `Ctrl+D` | Duplicar orçamento | Visualização |
+| Atalho   | Ação               | Contexto            |
+| -------- | ------------------ | ------------------- |
+| `Alt+N`  | Novo orçamento     | Lista de orçamentos |
+| `Alt+I`  | Adicionar item     | Edição de orçamento |
+| `Alt+C`  | Buscar cliente     | Edição de orçamento |
+| `Alt+F`  | Calcular frete     | Edição de orçamento |
+| `Alt+V`  | Converter em venda | Visualização        |
+| `Ctrl+D` | Duplicar orçamento | Visualização        |
 
 ### Vendas
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
+| Atalho  | Ação                | Contexto        |
+| ------- | ------------------- | --------------- |
 | `Alt+P` | Adicionar pagamento | Edição de venda |
-| `Alt+E` | Agendar entrega | Edição de venda |
-| `Alt+N` | Emitir NFe | Visualização |
-| `Alt+X` | Cancelar venda | Visualização |
+| `Alt+E` | Agendar entrega     | Edição de venda |
+| `Alt+N` | Emitir NFe          | Visualização    |
+| `Alt+X` | Cancelar venda      | Visualização    |
 
 ### Estoque
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `Alt+R` | Reservar | Seleção de lote |
+| Atalho  | Ação            | Contexto        |
+| ------- | --------------- | --------------- |
+| `Alt+R` | Reservar        | Seleção de lote |
 | `Alt+L` | Liberar reserva | Seleção de lote |
-| `Alt+M` | Movimentar | Seleção de lote |
+| `Alt+M` | Movimentar      | Seleção de lote |
 
 ### Tabelas
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `↑` `↓` | Navegar linhas | Tabela com foco |
-| `←` `→` | Navegar colunas | Tabela com foco |
-| `Enter` | Abrir registro | Linha selecionada |
-| `Space` | Selecionar/Desselecionar | Linha com checkbox |
-| `Ctrl+A` | Selecionar todos | Tabela com foco |
-| `Ctrl+C` | Copiar seleção | Células selecionadas |
-| `Home` | Primeira linha | Tabela com foco |
-| `End` | Última linha | Tabela com foco |
-| `Page Up` | Página anterior | Tabela paginada |
-| `Page Down` | Próxima página | Tabela paginada |
+| Atalho      | Ação                     | Contexto             |
+| ----------- | ------------------------ | -------------------- |
+| `↑` `↓`     | Navegar linhas           | Tabela com foco      |
+| `←` `→`     | Navegar colunas          | Tabela com foco      |
+| `Enter`     | Abrir registro           | Linha selecionada    |
+| `Space`     | Selecionar/Desselecionar | Linha com checkbox   |
+| `Ctrl+A`    | Selecionar todos         | Tabela com foco      |
+| `Ctrl+C`    | Copiar seleção           | Células selecionadas |
+| `Home`      | Primeira linha           | Tabela com foco      |
+| `End`       | Última linha             | Tabela com foco      |
+| `Page Up`   | Página anterior          | Tabela paginada      |
+| `Page Down` | Próxima página           | Tabela paginada      |
 
 ### Formulários
 
-| Atalho | Ação | Contexto |
-|--------|------|----------|
-| `Tab` | Próximo campo | Formulário |
-| `Shift+Tab` | Campo anterior | Formulário |
-| `Enter` | Submeter (em inputs) | Formulário simples |
-| `Ctrl+Enter` | Submeter (em textareas) | Formulário |
-| `Esc` | Cancelar edição | Formulário |
+| Atalho       | Ação                    | Contexto           |
+| ------------ | ----------------------- | ------------------ |
+| `Tab`        | Próximo campo           | Formulário         |
+| `Shift+Tab`  | Campo anterior          | Formulário         |
+| `Enter`      | Submeter (em inputs)    | Formulário simples |
+| `Ctrl+Enter` | Submeter (em textareas) | Formulário         |
+| `Esc`        | Cancelar edição         | Formulário         |
 
 ---
 
@@ -470,7 +472,9 @@ const executeCommand = (command) => {
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+            <DialogPanel
+              class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden"
+            >
               <!-- Input de busca -->
               <div class="flex items-center px-4 border-b">
                 <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
@@ -493,23 +497,35 @@ const executeCommand = (command) => {
                   @click="executeCommand(command)"
                   :class="[
                     'flex items-center px-4 py-2 cursor-pointer',
-                    index === selectedIndex ? 'bg-primary-50 text-primary-900' : 'text-gray-700 hover:bg-gray-50'
+                    index === selectedIndex
+                      ? 'bg-primary-50 text-primary-900'
+                      : 'text-gray-700 hover:bg-gray-50',
                   ]"
                 >
-                  <component :is="getIcon(command.icon)" class="h-5 w-5 mr-3 text-gray-400" />
+                  <component
+                    :is="getIcon(command.icon)"
+                    class="h-5 w-5 mr-3 text-gray-400"
+                  />
                   <span>{{ command.name }}</span>
                 </div>
 
-                <div v-if="filteredCommands.length === 0" class="px-4 py-8 text-center text-gray-500">
+                <div
+                  v-if="filteredCommands.length === 0"
+                  class="px-4 py-8 text-center text-gray-500"
+                >
                   Nenhum comando encontrado
                 </div>
               </div>
 
               <!-- Footer -->
-              <div class="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 flex items-center justify-between">
+              <div
+                class="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 flex items-center justify-between"
+              >
                 <span>
                   <kbd class="px-1.5 py-0.5 bg-white rounded border">↑</kbd>
-                  <kbd class="px-1.5 py-0.5 bg-white rounded border ml-1">↓</kbd>
+                  <kbd class="px-1.5 py-0.5 bg-white rounded border ml-1"
+                    >↓</kbd
+                  >
                   para navegar
                 </span>
                 <span>
@@ -537,7 +553,7 @@ const executeCommand = (command) => {
 <style>
 /* Focus ring customizado */
 *:focus-visible {
-  outline: 2px solid theme('colors.primary.500');
+  outline: 2px solid theme("colors.primary.500");
   outline-offset: 2px;
 }
 
@@ -549,9 +565,7 @@ const executeCommand = (command) => {
 </style>
 
 <template>
-  <a href="#main-content" class="skip-link">
-    Pular para conteúdo principal
-  </a>
+  <a href="#main-content" class="skip-link"> Pular para conteúdo principal </a>
 
   <nav><!-- ... --></nav>
 
@@ -585,11 +599,7 @@ const executeCommand = (command) => {
 ### ARIA para Atalhos
 
 ```vue
-<button
-  @click="salvar"
-  aria-keyshortcuts="Control+S"
-  title="Salvar (Ctrl+S)"
->
+<button @click="salvar" aria-keyshortcuts="Control+S" title="Salvar (Ctrl+S)">
   Salvar
 </button>
 
@@ -627,13 +637,19 @@ const executeCommand = (command) => {
     <MenuButton>Arquivo</MenuButton>
     <MenuItems>
       <MenuItem v-slot="{ active }">
-        <button :class="{ 'bg-primary-50': active }" class="flex justify-between w-full px-4 py-2">
+        <button
+          :class="{ 'bg-primary-50': active }"
+          class="flex justify-between w-full px-4 py-2"
+        >
           <span>Novo Orçamento</span>
           <kbd class="text-gray-400">Alt+N</kbd>
         </button>
       </MenuItem>
       <MenuItem v-slot="{ active }">
-        <button :class="{ 'bg-primary-50': active }" class="flex justify-between w-full px-4 py-2">
+        <button
+          :class="{ 'bg-primary-50': active }"
+          class="flex justify-between w-full px-4 py-2"
+        >
           <span>Salvar</span>
           <kbd class="text-gray-400">Ctrl+S</kbd>
         </button>
@@ -651,9 +667,9 @@ const executeCommand = (command) => {
 
 ```typescript
 // stores/shortcuts.ts
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 
-export const useShortcutsStore = defineStore('shortcuts', {
+export const useShortcutsStore = defineStore("shortcuts", {
   state: () => ({
     enabled: true,
     customMappings: {} as Record<string, string>,

@@ -17,15 +17,15 @@
 
 ## Links Rapidos
 
-| Precisa...                      | Va para                                                      |
-| ------------------------------- | ------------------------------------------------------------ |
-| Entender o projeto              | [Visao Geral](#visao-geral-do-projeto)                       |
-| Entender fluxos de negocio      | [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md) |
-| Comparar legado vs novo         | [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md) |
-| Ver decisoes de arquitetura     | [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)           |
-| Ver arquitetura Laravel         | [04-arquitetura/01-arquitetura.md](./04-arquitetura/01-arquitetura.md) |
-| Ver design do banco             | [04-arquitetura/02-banco-dados.md](./04-arquitetura/02-banco-dados.md) |
-| Verificar fases da migracao     | [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md) |
+| Precisa...                  | Va para                                                                                |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| Entender o projeto          | [Visao Geral](#visao-geral-do-projeto)                                                 |
+| Entender fluxos de negocio  | [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md)         |
+| Comparar legado vs novo     | [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md) |
+| Ver decisoes de arquitetura | [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)                                     |
+| Ver arquitetura Laravel     | [04-arquitetura/01-arquitetura.md](./04-arquitetura/01-arquitetura.md)                 |
+| Ver design do banco         | [04-arquitetura/02-banco-dados.md](./04-arquitetura/02-banco-dados.md)                 |
+| Verificar fases da migracao | [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md)                 |
 
 ---
 
@@ -124,35 +124,35 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 ## 01 - Contexto (Entender o Sistema)
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [01](./01-contexto/01-visao-geral-fluxos.md) | Visao Geral dos Fluxos | Diagramas de alto nivel, arquitetura L1/L2, maquinas de estado |
-| [02](./01-contexto/02-fluxos-estoque.md) | Fluxos de Estoque | Criacao, consumo FIFO, devolucoes, algoritmo Parear |
-| [03](./01-contexto/03-fluxos-entrega-nfe.md) | Entrega, NFe, Financeiro | Agendamento, emissao NFe, CNAB 240, comissao |
-| [04](./01-contexto/04-fluxos-cadastros.md) | Cadastros e Outros | Dados mestres, orcamento, galpao, permissoes |
-| [05](./01-contexto/05-regras-negocio.md) | Regras de Negocio | Precificacao, impostos, validacoes, transicoes de status |
+| Doc                                          | Titulo                   | Descricao                                                      |
+| -------------------------------------------- | ------------------------ | -------------------------------------------------------------- |
+| [01](./01-contexto/01-visao-geral-fluxos.md) | Visao Geral dos Fluxos   | Diagramas de alto nivel, arquitetura L1/L2, maquinas de estado |
+| [02](./01-contexto/02-fluxos-estoque.md)     | Fluxos de Estoque        | Criacao, consumo FIFO, devolucoes, algoritmo Parear            |
+| [03](./01-contexto/03-fluxos-entrega-nfe.md) | Entrega, NFe, Financeiro | Agendamento, emissao NFe, CNAB 240, comissao                   |
+| [04](./01-contexto/04-fluxos-cadastros.md)   | Cadastros e Outros       | Dados mestres, orcamento, galpao, permissoes                   |
+| [05](./01-contexto/05-regras-negocio.md)     | Regras de Negocio        | Precificacao, impostos, validacoes, transicoes de status       |
 
 ---
 
 ## 02 - Analise (Problemas e Oportunidades)
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
+| Doc                                              | Titulo                     | Descricao                                 |
+| ------------------------------------------------ | -------------------------- | ----------------------------------------- |
 | [01](./02-analise/01-comparativo-legado-novo.md) | Comparativo Legado vs Novo | Arquitetura, schema, seguranca, auditoria |
-| [02](./02-analise/02-melhorias.md) | Melhorias Propostas | Pontos problematicos e opcoes de correcao |
-| [03](./02-analise/03-simplificacao-l1l2.md) | Simplificacao L1/L2 | Opcoes de achatamento de tabelas |
-| [04](./02-analise/04-correcao-fifo.md) | Correcao FIFO | Consumo correto First-In-First-Out |
-| [05](./02-analise/05-normalizacao-fornecedor.md) | Normalizacao Fornecedor | FK em vez de VARCHAR |
+| [02](./02-analise/02-melhorias.md)               | Melhorias Propostas        | Pontos problematicos e opcoes de correcao |
+| [03](./02-analise/03-simplificacao-l1l2.md)      | Simplificacao L1/L2        | Opcoes de achatamento de tabelas          |
+| [04](./02-analise/04-correcao-fifo.md)           | Correcao FIFO              | Consumo correto First-In-First-Out        |
+| [05](./02-analise/05-normalizacao-fornecedor.md) | Normalizacao Fornecedor    | FK em vez de VARCHAR                      |
 
 ---
 
 ## 03 - Decisoes (O Que Escolhemos)
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [01](./03-decisoes/01-adrs.md) | ADRs | Laravel, PostgreSQL, frontend, NFe, migracao |
-| [02](./03-decisoes/02-schema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correcoes |
-| [03](./03-decisoes/03-design-greenfield.md) | Design Greenfield | Reimaginacao completa do sistema |
+| Doc                                          | Titulo             | Descricao                                    |
+| -------------------------------------------- | ------------------ | -------------------------------------------- |
+| [01](./03-decisoes/01-adrs.md)               | ADRs               | Laravel, PostgreSQL, frontend, NFe, migracao |
+| [02](./03-decisoes/02-schema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correcoes       |
+| [03](./03-decisoes/03-design-greenfield.md)  | Design Greenfield  | Reimaginacao completa do sistema             |
 
 ---
 
@@ -160,75 +160,75 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 ### Base
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [01](./04-arquitetura/01-arquitetura.md) | Arquitetura Laravel | Estrutura de diretorios, service layer, enums, eventos |
-| [02](./04-arquitetura/02-banco-dados.md) | Schema do Banco | PostgreSQL, normalizacao, ENUMs, auditoria, FTS |
-| [03](./04-arquitetura/03-frontend.md) | Framework Frontend | Livewire vs Inertia+Vue vs SPA |
-| [04](./04-arquitetura/04-infraestrutura.md) | Infraestrutura | Auditoria, temporal, busca, cache, performance |
+| Doc                                         | Titulo              | Descricao                                              |
+| ------------------------------------------- | ------------------- | ------------------------------------------------------ |
+| [01](./04-arquitetura/01-arquitetura.md)    | Arquitetura Laravel | Estrutura de diretorios, service layer, enums, eventos |
+| [02](./04-arquitetura/02-banco-dados.md)    | Schema do Banco     | PostgreSQL, normalizacao, ENUMs, auditoria, FTS        |
+| [03](./04-arquitetura/03-frontend.md)       | Framework Frontend  | Livewire vs Inertia+Vue vs SPA                         |
+| [04](./04-arquitetura/04-infraestrutura.md) | Infraestrutura      | Auditoria, temporal, busca, cache, performance         |
 
 ### Seguranca e API
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [05](./04-arquitetura/05-seguranca.md) | Seguranca | Autenticacao, RBAC, protecoes OWASP |
-| [06](./04-arquitetura/06-api.md) | Design de API | REST, versionamento, rate limiting |
-| [17](./04-arquitetura/17-validacao.md) | Validacao | Validacao multicamada (request, business, DB) |
+| Doc                                    | Titulo        | Descricao                                     |
+| -------------------------------------- | ------------- | --------------------------------------------- |
+| [05](./04-arquitetura/05-seguranca.md) | Seguranca     | Autenticacao, RBAC, protecoes OWASP           |
+| [06](./04-arquitetura/06-api.md)       | Design de API | REST, versionamento, rate limiting            |
+| [17](./04-arquitetura/17-validacao.md) | Validacao     | Validacao multicamada (request, business, DB) |
 
 ### Qualidade e Operacoes
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [07](./04-arquitetura/07-testes.md) | Testes | Unit, integration, E2E, coverage |
-| [08](./04-arquitetura/08-erros-monitoramento.md) | Erros e Monitoramento | Exception handling, logging, Sentry |
-| [14](./04-arquitetura/14-devops.md) | DevOps | Docker, CI/CD, deploy, observabilidade |
+| Doc                                              | Titulo                | Descricao                              |
+| ------------------------------------------------ | --------------------- | -------------------------------------- |
+| [07](./04-arquitetura/07-testes.md)              | Testes                | Unit, integration, E2E, coverage       |
+| [08](./04-arquitetura/08-erros-monitoramento.md) | Erros e Monitoramento | Exception handling, logging, Sentry    |
+| [14](./04-arquitetura/14-devops.md)              | DevOps                | Docker, CI/CD, deploy, observabilidade |
 
 ### Integracoes e Funcionalidades
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [09](./04-arquitetura/09-integracoes.md) | Integracoes | ACBr, CNAB, CEP, SMTP, Google Maps |
+| Doc                                       | Titulo       | Descricao                               |
+| ----------------------------------------- | ------------ | --------------------------------------- |
+| [09](./04-arquitetura/09-integracoes.md)  | Integracoes  | ACBr, CNAB, CEP, SMTP, Google Maps      |
 | [11](./04-arquitetura/11-concorrencia.md) | Concorrencia | Locks otimistas/pessimistas, transacoes |
-| [13](./04-arquitetura/13-impressao.md) | Impressao | PDF, Excel, etiquetas termicas, DANFE |
+| [13](./04-arquitetura/13-impressao.md)    | Impressao    | PDF, Excel, etiquetas termicas, DANFE   |
 
 ### UI/UX
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [10](./04-arquitetura/10-design-system.md) | Design System | Componentes, cores, tipografia, temas |
-| [12](./04-arquitetura/12-atalhos-teclado.md) | Atalhos de Teclado | Keyboard shortcuts, command palette |
-| [16](./04-arquitetura/16-compatibilidade.md) | Compatibilidade | Browsers, dispositivos, breakpoints |
+| Doc                                          | Titulo             | Descricao                             |
+| -------------------------------------------- | ------------------ | ------------------------------------- |
+| [10](./04-arquitetura/10-design-system.md)   | Design System      | Componentes, cores, tipografia, temas |
+| [12](./04-arquitetura/12-atalhos-teclado.md) | Atalhos de Teclado | Keyboard shortcuts, command palette   |
+| [16](./04-arquitetura/16-compatibilidade.md) | Compatibilidade    | Browsers, dispositivos, breakpoints   |
 
 ### Referencia
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [15](./04-arquitetura/15-dicionario-dados.md) | Dicionario de Dados | Glossario, enums, convencoes de nomes |
-| [18](./04-arquitetura/18-dependencias.md) | Dependencias | Auditoria Composer/NPM, licencas, riscos |
+| Doc                                           | Titulo              | Descricao                                |
+| --------------------------------------------- | ------------------- | ---------------------------------------- |
+| [15](./04-arquitetura/15-dicionario-dados.md) | Dicionario de Dados | Glossario, enums, convencoes de nomes    |
+| [18](./04-arquitetura/18-dependencias.md)     | Dependencias        | Auditoria Composer/NPM, licencas, riscos |
 
 ### [Modulos - Specs de Implementacao](./04-arquitetura/modulos/_indice.md)
 
-| Modulo | Descricao | Complexidade |
-|--------|-----------|--------------|
-| [cadastros.md](./04-arquitetura/modulos/cadastros.md) | Cliente, Fornecedor, Produto, Transportadora | Baixa |
-| [compras.md](./04-arquitetura/modulos/compras.md) | Pedidos de compra, recebimento | Media |
-| [estoque.md](./04-arquitetura/modulos/estoque.md) | Controle de estoque, FIFO, consumo | Media |
-| [financeiro.md](./04-arquitetura/modulos/financeiro.md) | Contas a pagar/receber, CNAB | Media |
-| [vendas.md](./04-arquitetura/modulos/vendas.md) | Orcamento, venda, faturamento | Alta |
-| [nfe.md](./04-arquitetura/modulos/nfe.md) | Emissao/recebimento de NFe | Alta |
-| [logistica.md](./04-arquitetura/modulos/logistica.md) | Entregas, agendamento | Media |
-| [relatorios.md](./04-arquitetura/modulos/relatorios.md) | Relatorios e dashboards | Media |
+| Modulo                                                  | Descricao                                    | Complexidade |
+| ------------------------------------------------------- | -------------------------------------------- | ------------ |
+| [cadastros.md](./04-arquitetura/modulos/cadastros.md)   | Cliente, Fornecedor, Produto, Transportadora | Baixa        |
+| [compras.md](./04-arquitetura/modulos/compras.md)       | Pedidos de compra, recebimento               | Media        |
+| [estoque.md](./04-arquitetura/modulos/estoque.md)       | Controle de estoque, FIFO, consumo           | Media        |
+| [financeiro.md](./04-arquitetura/modulos/financeiro.md) | Contas a pagar/receber, CNAB                 | Media        |
+| [vendas.md](./04-arquitetura/modulos/vendas.md)         | Orcamento, venda, faturamento                | Alta         |
+| [nfe.md](./04-arquitetura/modulos/nfe.md)               | Emissao/recebimento de NFe                   | Alta         |
+| [logistica.md](./04-arquitetura/modulos/logistica.md)   | Entregas, agendamento                        | Media        |
+| [relatorios.md](./04-arquitetura/modulos/relatorios.md) | Relatorios e dashboards                      | Media        |
 
 ---
 
 ## 05 - Execucao (Como Migrar)
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [01](./05-execucao/01-plano-migracao.md) | Plano de Migracao | Padrao Strangler Fig, 8 fases, riscos |
-| [02](./05-execucao/02-migracao-dados.md) | Migracao de Dados | ETL, validacao, rollback |
-| [03](./05-execucao/03-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
-| [04](./05-execucao/04-treinamento.md) | Treinamento | Plano de capacitacao e rollout |
+| Doc                                                | Titulo             | Descricao                             |
+| -------------------------------------------------- | ------------------ | ------------------------------------- |
+| [01](./05-execucao/01-plano-migracao.md)           | Plano de Migracao  | Padrao Strangler Fig, 8 fases, riscos |
+| [02](./05-execucao/02-migracao-dados.md)           | Migracao de Dados  | ETL, validacao, rollback              |
+| [03](./05-execucao/03-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features                 |
+| [04](./05-execucao/04-treinamento.md)              | Treinamento        | Plano de capacitacao e rollout        |
 
 ---
 
@@ -236,11 +236,11 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 Documentos exploratorios com ideias em desenvolvimento:
 
-| Doc | Titulo | Descricao |
-|-----|--------|-----------|
-| [schema-alternativo](./rascunhos/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades |
-| [schema-proposto](./rascunhos/schema-proposto.md) | Schema Proposto | Schema baseado em pesquisa de ERPs (em desenvolvimento) |
-| [event-sourcing](./rascunhos/event-sourcing-analise.md) | Event Sourcing | Analise e motivos para nao adocao |
+| Doc                                                                 | Titulo             | Descricao                                               |
+| ------------------------------------------------------------------- | ------------------ | ------------------------------------------------------- |
+| [schema-alternativo](./rascunhos/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades                    |
+| [schema-proposto](./rascunhos/schema-proposto.md)                   | Schema Proposto    | Schema baseado em pesquisa de ERPs (em desenvolvimento) |
+| [event-sourcing](./rascunhos/event-sourcing-analise.md)             | Event Sourcing     | Analise e motivos para nao adocao                       |
 
 ---
 

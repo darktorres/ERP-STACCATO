@@ -25,7 +25,7 @@ A proposta é **unificar compra_itens + estoques** em uma única entidade, onde:
 
 ### Modelo Atual (3 Entidades)
 
-```text
+````text
 venda_itens ──────> compra_itens ──────> estoques
               "buy for"          "receives"
 
@@ -1737,3 +1737,4 @@ class NfeItem extends Model
 
 - [07-esquema-redesenhado.md](./07-esquema-redesenhado.md) - Schema atual (3 entidades)
 - [02-decisoes.md](./02-decisoes.md) - ADRs do projeto
+````

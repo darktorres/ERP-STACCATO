@@ -26,15 +26,15 @@ flowchart LR
 
 ### Classes
 
-| Classe               | Arquivo                  | Finalidade                      |
-| -------------------- | ------------------------ | ------------------------------- |
-| `Orcamento`          | `orcamento.cpp`          | Diálogo de criação de orçamento |
-| `Venda`              | `venda.cpp`              | Diálogo de venda                |
-| `WidgetOrcamento`    | `widgetorcamento.cpp`    | Widget de listagem de orçamentos|
-| `WidgetVenda`        | `widgetvenda.cpp`        | Widget de listagem de vendas    |
-| `BaixaOrcamento`     | `baixaorcamento.cpp`     | Fechamento/baixa de orçamento   |
-| `OrcamentoProxyModel`| `orcamentoproxymodel.cpp`| Filtros de orçamento            |
-| `VendaProxyModel`    | `vendaproxymodel.cpp`    | Filtros de venda                |
+| Classe                | Arquivo                   | Finalidade                       |
+| --------------------- | ------------------------- | -------------------------------- |
+| `Orcamento`           | `orcamento.cpp`           | Diálogo de criação de orçamento  |
+| `Venda`               | `venda.cpp`               | Diálogo de venda                 |
+| `WidgetOrcamento`     | `widgetorcamento.cpp`     | Widget de listagem de orçamentos |
+| `WidgetVenda`         | `widgetvenda.cpp`         | Widget de listagem de vendas     |
+| `BaixaOrcamento`      | `baixaorcamento.cpp`      | Fechamento/baixa de orçamento    |
+| `OrcamentoProxyModel` | `orcamentoproxymodel.cpp` | Filtros de orçamento             |
+| `VendaProxyModel`     | `vendaproxymodel.cpp`     | Filtros de venda                 |
 
 ### Tabelas do Banco de Dados
 
@@ -966,13 +966,13 @@ Route::middleware(['auth'])->group(function () {
 
 ## Eventos
 
-| Evento             | Dispara                                                |
-| ------------------ | ------------------------------------------------------ |
-| `OrcamentoCriado`  | Notificar vendedor, log de auditoria                   |
-| `VendaCriada`      | Gerar contas a receber, notificar logística            |
-| `VendaCancelada`   | Reverter financeiro, reativar orçamento, notificar     |
-| `VendaEntregue`    | Atualizar status, disparar faturamento se automático   |
-| `ItemStatusChanged`| Atualizar status da venda pai, notificar interessados  |
+| Evento              | Dispara                                               |
+| ------------------- | ----------------------------------------------------- |
+| `OrcamentoCriado`   | Notificar vendedor, log de auditoria                  |
+| `VendaCriada`       | Gerar contas a receber, notificar logística           |
+| `VendaCancelada`    | Reverter financeiro, reativar orçamento, notificar    |
+| `VendaEntregue`     | Atualizar status, disparar faturamento se automático  |
+| `ItemStatusChanged` | Atualizar status da venda pai, notificar interessados |
 
 ---
 

@@ -49,31 +49,31 @@ Este documento define a estratégia de migração do sistema de impressão e ger
 
 ### Documentos PDF (LimeReport → DomPDF)
 
-| Documento | Template Atual | Novo Template | Prioridade |
-|-----------|----------------|---------------|------------|
-| Orçamento | `orcamento.lrxml` | `pdf.orcamento` | Crítica |
-| Venda | `venda.lrxml` | `pdf.venda` | Crítica |
-| Etiqueta Pallet | `pallet.lrxml` | `pdf.etiqueta-pallet` | Alta |
-| Relatório NFe | `relatorio_nfe.lrxml` | `pdf.relatorio-nfe` | Média |
-| Mapa Galpão | `galpao.lrxml` | `pdf.mapa-galpao` | Baixa |
+| Documento       | Template Atual        | Novo Template         | Prioridade |
+| --------------- | --------------------- | --------------------- | ---------- |
+| Orçamento       | `orcamento.lrxml`     | `pdf.orcamento`       | Crítica    |
+| Venda           | `venda.lrxml`         | `pdf.venda`           | Crítica    |
+| Etiqueta Pallet | `pallet.lrxml`        | `pdf.etiqueta-pallet` | Alta       |
+| Relatório NFe   | `relatorio_nfe.lrxml` | `pdf.relatorio-nfe`   | Média      |
+| Mapa Galpão     | `galpao.lrxml`        | `pdf.mapa-galpao`     | Baixa      |
 
 ### Documentos Excel (QtXlsx → Laravel Excel)
 
-| Documento | Template Atual | Nova Classe | Prioridade |
-|-----------|----------------|-------------|------------|
-| Pedido Venda | `pedido.xlsx` | `VendaExport` | Crítica |
-| Pedido Compra | `compras.xlsx` | `CompraExport` | Alta |
-| Protocolo Entrega | `espelho_entrega.xlsx` | `ProtocoloEntregaExport` | Alta |
-| Checklist Entrega | `modelo_checklist.xlsx` | `ChecklistEntregaExport` | Alta |
-| Relatório Vendas | `relatorio.xlsx` | `RelatorioVendasExport` | Média |
-| Relatório Contábil | `relatorio_contabil.xlsx` | `RelatorioContabilExport` | Média |
+| Documento          | Template Atual            | Nova Classe               | Prioridade |
+| ------------------ | ------------------------- | ------------------------- | ---------- |
+| Pedido Venda       | `pedido.xlsx`             | `VendaExport`             | Crítica    |
+| Pedido Compra      | `compras.xlsx`            | `CompraExport`            | Alta       |
+| Protocolo Entrega  | `espelho_entrega.xlsx`    | `ProtocoloEntregaExport`  | Alta       |
+| Checklist Entrega  | `modelo_checklist.xlsx`   | `ChecklistEntregaExport`  | Alta       |
+| Relatório Vendas   | `relatorio.xlsx`          | `RelatorioVendasExport`   | Média      |
+| Relatório Contábil | `relatorio_contabil.xlsx` | `RelatorioContabilExport` | Média      |
 
 ### Documentos Fiscais (ACBr)
 
-| Documento | Geração | Estratégia |
-|-----------|---------|------------|
-| DANFE | ACBrNFe32.dll | ACBr REST API |
-| CC-e (Carta Correção) | ACBrNFe32.dll | ACBr REST API |
+| Documento              | Geração       | Estratégia    |
+| ---------------------- | ------------- | ------------- |
+| DANFE                  | ACBrNFe32.dll | ACBr REST API |
+| CC-e (Carta Correção)  | ACBrNFe32.dll | ACBr REST API |
 | Manifesto Destinatário | ACBrNFe32.dll | ACBr REST API |
 
 ---
@@ -94,14 +94,14 @@ Este documento define a estratégia de migração do sistema de impressão e ger
 
 **Escolha de Biblioteca:**
 
-| Característica | DomPDF | TCPDF |
-|----------------|--------|-------|
-| Performance | Rápido | Moderado |
-| CSS Support | Excelente | Limitado |
-| Unicode/UTF-8 | Excelente | Excelente |
-| Tabelas Complexas | Bom | Excelente |
-| Gráficos | Não | Sim |
-| Uso Recomendado | Documentos simples | Relatórios complexos |
+| Característica    | DomPDF             | TCPDF                |
+| ----------------- | ------------------ | -------------------- |
+| Performance       | Rápido             | Moderado             |
+| CSS Support       | Excelente          | Limitado             |
+| Unicode/UTF-8     | Excelente          | Excelente            |
+| Tabelas Complexas | Bom                | Excelente            |
+| Gráficos          | Não                | Sim                  |
+| Uso Recomendado   | Documentos simples | Relatórios complexos |
 
 **Decisão:** DomPDF como padrão, TCPDF para relatórios com gráficos ou tabelas muito complexas.
 
@@ -1239,13 +1239,13 @@ return response()->json(['message' => 'Documento será gerado em breve']);
 
 ### Tamanhos Suportados
 
-| Tipo | Tamanho | Uso |
-|------|---------|-----|
-| A4 Portrait | 210 x 297 mm | Relatórios, protocolos |
-| A4 Landscape | 297 x 210 mm | Orçamentos, vendas, pedidos |
-| A5 | 148 x 210 mm | Etiquetas pequenas |
-| Custom Label | 100 x 150 mm | Etiquetas de pallet |
-| Thermal 80mm | 80 x contínuo | Cupons (futuro) |
+| Tipo         | Tamanho       | Uso                         |
+| ------------ | ------------- | --------------------------- |
+| A4 Portrait  | 210 x 297 mm  | Relatórios, protocolos      |
+| A4 Landscape | 297 x 210 mm  | Orçamentos, vendas, pedidos |
+| A5           | 148 x 210 mm  | Etiquetas pequenas          |
+| Custom Label | 100 x 150 mm  | Etiquetas de pallet         |
+| Thermal 80mm | 80 x contínuo | Cupons (futuro)             |
 
 ### Margens Padrão
 
@@ -1271,87 +1271,90 @@ return [
 
 ```typescript
 // composables/useDocumentos.ts
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref } from "vue";
+import axios from "axios";
 
 export function useDocumentos() {
-    const loading = ref(false)
-    const error = ref<string | null>(null)
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
-    async function downloadPdf(tipo: string, id: number) {
-        loading.value = true
-        error.value = null
+  async function downloadPdf(tipo: string, id: number) {
+    loading.value = true;
+    error.value = null;
 
-        try {
-            const response = await axios.get(`/api/documentos/${tipo}/${id}/pdf`, {
-                responseType: 'blob',
-            })
+    try {
+      const response = await axios.get(`/api/documentos/${tipo}/${id}/pdf`, {
+        responseType: "blob",
+      });
 
-            const url = window.URL.createObjectURL(response.data)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = `${tipo}-${id}.pdf`
-            link.click()
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${tipo}-${id}.pdf`;
+      link.click();
 
-            window.URL.revokeObjectURL(url)
-        } catch (e) {
-            error.value = 'Erro ao gerar documento'
-            throw e
-        } finally {
-            loading.value = false
-        }
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      error.value = "Erro ao gerar documento";
+      throw e;
+    } finally {
+      loading.value = false;
     }
+  }
 
-    async function previewPdf(tipo: string, id: number) {
-        loading.value = true
-        error.value = null
+  async function previewPdf(tipo: string, id: number) {
+    loading.value = true;
+    error.value = null;
 
-        try {
-            const response = await axios.get(`/api/documentos/${tipo}/${id}/preview`, {
-                responseType: 'blob',
-            })
+    try {
+      const response = await axios.get(
+        `/api/documentos/${tipo}/${id}/preview`,
+        {
+          responseType: "blob",
+        },
+      );
 
-            const url = window.URL.createObjectURL(response.data)
-            window.open(url, '_blank')
-        } catch (e) {
-            error.value = 'Erro ao visualizar documento'
-            throw e
-        } finally {
-            loading.value = false
-        }
+      const url = window.URL.createObjectURL(response.data);
+      window.open(url, "_blank");
+    } catch (e) {
+      error.value = "Erro ao visualizar documento";
+      throw e;
+    } finally {
+      loading.value = false;
     }
+  }
 
-    async function downloadExcel(tipo: string, id: number) {
-        loading.value = true
-        error.value = null
+  async function downloadExcel(tipo: string, id: number) {
+    loading.value = true;
+    error.value = null;
 
-        try {
-            const response = await axios.get(`/api/documentos/${tipo}/${id}/excel`, {
-                responseType: 'blob',
-            })
+    try {
+      const response = await axios.get(`/api/documentos/${tipo}/${id}/excel`, {
+        responseType: "blob",
+      });
 
-            const url = window.URL.createObjectURL(response.data)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = `${tipo}-${id}.xlsx`
-            link.click()
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${tipo}-${id}.xlsx`;
+      link.click();
 
-            window.URL.revokeObjectURL(url)
-        } catch (e) {
-            error.value = 'Erro ao gerar planilha'
-            throw e
-        } finally {
-            loading.value = false
-        }
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      error.value = "Erro ao gerar planilha";
+      throw e;
+    } finally {
+      loading.value = false;
     }
+  }
 
-    return {
-        loading,
-        error,
-        downloadPdf,
-        previewPdf,
-        downloadExcel,
-    }
+  return {
+    loading,
+    error,
+    downloadPdf,
+    previewPdf,
+    downloadExcel,
+  };
 }
 ```
 
@@ -1360,52 +1363,52 @@ export function useDocumentos() {
 ```vue
 <!-- components/DocumentActions.vue -->
 <template>
-    <div class="flex gap-2">
-        <Button
-            icon="pi pi-file-pdf"
-            label="PDF"
-            severity="danger"
-            :loading="loading"
-            @click="handlePdf"
-        />
-        <Button
-            icon="pi pi-file-excel"
-            label="Excel"
-            severity="success"
-            :loading="loading"
-            @click="handleExcel"
-        />
-        <Button
-            icon="pi pi-eye"
-            label="Visualizar"
-            outlined
-            :loading="loading"
-            @click="handlePreview"
-        />
-    </div>
+  <div class="flex gap-2">
+    <Button
+      icon="pi pi-file-pdf"
+      label="PDF"
+      severity="danger"
+      :loading="loading"
+      @click="handlePdf"
+    />
+    <Button
+      icon="pi pi-file-excel"
+      label="Excel"
+      severity="success"
+      :loading="loading"
+      @click="handleExcel"
+    />
+    <Button
+      icon="pi pi-eye"
+      label="Visualizar"
+      outlined
+      :loading="loading"
+      @click="handlePreview"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useDocumentos } from '@/composables/useDocumentos'
-import Button from 'primevue/button'
+import { useDocumentos } from "@/composables/useDocumentos";
+import Button from "primevue/button";
 
 const props = defineProps<{
-    tipo: 'orcamentos' | 'vendas' | 'compras'
-    id: number
-}>()
+  tipo: "orcamentos" | "vendas" | "compras";
+  id: number;
+}>();
 
-const { loading, downloadPdf, downloadExcel, previewPdf } = useDocumentos()
+const { loading, downloadPdf, downloadExcel, previewPdf } = useDocumentos();
 
 function handlePdf() {
-    downloadPdf(props.tipo, props.id)
+  downloadPdf(props.tipo, props.id);
 }
 
 function handleExcel() {
-    downloadExcel(props.tipo, props.id)
+  downloadExcel(props.tipo, props.id);
 }
 
 function handlePreview() {
-    previewPdf(props.tipo, props.id)
+  previewPdf(props.tipo, props.id);
 }
 </script>
 ```
@@ -1416,17 +1419,17 @@ function handlePreview() {
 
 ### Checklist de Conversão
 
-| Template Original | Template Novo | Status |
-|-------------------|---------------|--------|
-| `orcamento.lrxml` | `pdf/orcamento.blade.php` | Pendente |
-| `venda.lrxml` | `pdf/venda.blade.php` | Pendente |
-| `pallet.lrxml` | `pdf/etiqueta-pallet.blade.php` | Pendente |
-| `relatorio_nfe.lrxml` | `pdf/relatorio-nfe.blade.php` | Pendente |
-| `galpao.lrxml` | `pdf/mapa-galpao.blade.php` | Pendente |
-| `pedido.xlsx` | `VendaExport.php` | Pendente |
-| `compras.xlsx` | `CompraExport.php` | Pendente |
-| `espelho_entrega.xlsx` | `ProtocoloEntregaExport.php` | Pendente |
-| `modelo_checklist.xlsx` | `ChecklistExport.php` | Pendente |
+| Template Original       | Template Novo                   | Status   |
+| ----------------------- | ------------------------------- | -------- |
+| `orcamento.lrxml`       | `pdf/orcamento.blade.php`       | Pendente |
+| `venda.lrxml`           | `pdf/venda.blade.php`           | Pendente |
+| `pallet.lrxml`          | `pdf/etiqueta-pallet.blade.php` | Pendente |
+| `relatorio_nfe.lrxml`   | `pdf/relatorio-nfe.blade.php`   | Pendente |
+| `galpao.lrxml`          | `pdf/mapa-galpao.blade.php`     | Pendente |
+| `pedido.xlsx`           | `VendaExport.php`               | Pendente |
+| `compras.xlsx`          | `CompraExport.php`              | Pendente |
+| `espelho_entrega.xlsx`  | `ProtocoloEntregaExport.php`    | Pendente |
+| `modelo_checklist.xlsx` | `ChecklistExport.php`           | Pendente |
 
 ### Processo de Conversão
 

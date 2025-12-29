@@ -427,15 +427,15 @@ Frontend completamente separado (React/Vue) com Laravel apenas como API.
 
 ### Stack Definida
 
-| Componente   | Tecnologia       | Propósito                        |
-| ------------ | ---------------- | -------------------------------- |
-| Framework    | Inertia.js       | Integração Laravel ↔ Vue         |
-| Frontend     | Vue 3            | Composition API, reatividade     |
-| Tipagem      | TypeScript       | Segurança de tipos               |
-| CSS          | Tailwind CSS     | Utility-first, produtividade     |
-| Componentes  | PrimeVue         | Tabelas, formulários, diálogos   |
-| Utilitários  | VueUse           | Composables reutilizáveis        |
-| Build        | Vite             | Build rápido, HMR                |
+| Componente  | Tecnologia   | Propósito                      |
+| ----------- | ------------ | ------------------------------ |
+| Framework   | Inertia.js   | Integração Laravel ↔ Vue       |
+| Frontend    | Vue 3        | Composition API, reatividade   |
+| Tipagem     | TypeScript   | Segurança de tipos             |
+| CSS         | Tailwind CSS | Utility-first, produtividade   |
+| Componentes | PrimeVue     | Tabelas, formulários, diálogos |
+| Utilitários | VueUse       | Composables reutilizáveis      |
+| Build       | Vite         | Build rápido, HMR              |
 
 ---
 

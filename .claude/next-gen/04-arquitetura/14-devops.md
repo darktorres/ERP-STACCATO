@@ -58,18 +58,18 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 
 ### Componentes Principais
 
-| Componente | Tecnologia | Versão |
-|------------|------------|--------|
-| Web Server | Nginx | 1.25+ |
-| PHP Runtime | PHP-FPM | 8.3+ |
-| Framework | Laravel | 12.x |
-| Database | PostgreSQL | 16+ |
-| Cache/Queue | Redis | 7+ |
-| Container | Docker | 24+ |
-| Orquestração | Docker Compose | 2.20+ |
-| CI/CD | GitHub Actions | - |
-| SSL | Let's Encrypt | - |
-| Monitoramento | Sentry + Laravel Pulse | - |
+| Componente    | Tecnologia             | Versão |
+| ------------- | ---------------------- | ------ |
+| Web Server    | Nginx                  | 1.25+  |
+| PHP Runtime   | PHP-FPM                | 8.3+   |
+| Framework     | Laravel                | 12.x   |
+| Database      | PostgreSQL             | 16+    |
+| Cache/Queue   | Redis                  | 7+     |
+| Container     | Docker                 | 24+    |
+| Orquestração  | Docker Compose         | 2.20+  |
+| CI/CD         | GitHub Actions         | -      |
+| SSL           | Let's Encrypt          | -      |
+| Monitoramento | Sentry + Laravel Pulse | -      |
 
 ### Requisitos de Servidor
 
@@ -268,7 +268,7 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 ### docker-compose.yml (Produção)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -425,7 +425,7 @@ networks:
 ### docker-compose.dev.yml (Desenvolvimento)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -435,7 +435,7 @@ services:
     container_name: staccato_dev
     ports:
       - "8000:80"
-      - "5173:5173"  # Vite HMR
+      - "5173:5173" # Vite HMR
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -794,8 +794,8 @@ on:
     types: [published]
 
 env:
-  PHP_VERSION: '8.3'
-  NODE_VERSION: '20'
+  PHP_VERSION: "8.3"
+  NODE_VERSION: "20"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -856,7 +856,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install NPM dependencies
         run: npm ci
@@ -943,7 +943,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: |
@@ -961,7 +961,7 @@ jobs:
       - name: Run Cypress
         uses: cypress-io/github-action@v6
         with:
-          wait-on: 'http://localhost:8000'
+          wait-on: "http://localhost:8000"
           wait-on-timeout: 120
 
   # ==========================================
@@ -1218,15 +1218,15 @@ FEATURE_CNAB_ENABLED=true
 
 ### Variáveis por Ambiente
 
-| Variável | Local | Staging | Production |
-|----------|-------|---------|------------|
-| `APP_ENV` | local | staging | production |
-| `APP_DEBUG` | true | false | false |
-| `LOG_LEVEL` | debug | info | warning |
-| `CACHE_STORE` | array | redis | redis |
-| `SESSION_DRIVER` | file | redis | redis |
-| `QUEUE_CONNECTION` | sync | redis | redis |
-| `MAIL_MAILER` | log | smtp | smtp |
+| Variável           | Local | Staging | Production |
+| ------------------ | ----- | ------- | ---------- |
+| `APP_ENV`          | local | staging | production |
+| `APP_DEBUG`        | true  | false   | false      |
+| `LOG_LEVEL`        | debug | info    | warning    |
+| `CACHE_STORE`      | array | redis   | redis      |
+| `SESSION_DRIVER`   | file  | redis   | redis      |
+| `QUEUE_CONNECTION` | sync  | redis   | redis      |
+| `MAIL_MAILER`      | log   | smtp    | smtp       |
 
 ---
 

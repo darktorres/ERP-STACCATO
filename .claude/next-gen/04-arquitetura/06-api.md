@@ -11,14 +11,14 @@ Este documento define a arquitetura e padrões para a API REST do ERP Staccato e
 
 ### Decisões Principais
 
-| Aspecto | Decisão | Justificativa |
-|---------|---------|---------------|
-| Estilo | REST | Simplicidade, cacheabilidade, amplo suporte |
-| Formato | JSON | Padrão da indústria, suporte nativo Laravel |
-| Especificação | OpenAPI 3.1 | Documentação auto-gerada, tipagem forte |
-| Versionamento | URL path (`/api/v1/`) | Explícito, fácil migração |
-| Autenticação | Laravel Sanctum | SPA + API tokens em um só pacote |
-| Rate Limiting | Laravel nativo | 60 req/min padrão, ajustável por rota |
+| Aspecto       | Decisão               | Justificativa                               |
+| ------------- | --------------------- | ------------------------------------------- |
+| Estilo        | REST                  | Simplicidade, cacheabilidade, amplo suporte |
+| Formato       | JSON                  | Padrão da indústria, suporte nativo Laravel |
+| Especificação | OpenAPI 3.1           | Documentação auto-gerada, tipagem forte     |
+| Versionamento | URL path (`/api/v1/`) | Explícito, fácil migração                   |
+| Autenticação  | Laravel Sanctum       | SPA + API tokens em um só pacote            |
+| Rate Limiting | Laravel nativo        | 60 req/min padrão, ajustável por rota       |
 
 ---
 
@@ -36,131 +36,131 @@ https://{host}/api/v1/{recurso}/{id}/{sub-recurso}
 
 #### Cadastros
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/clientes` | Listar clientes |
-| POST | `/api/v1/clientes` | Criar cliente |
-| GET | `/api/v1/clientes/{id}` | Obter cliente |
-| PUT | `/api/v1/clientes/{id}` | Atualizar cliente |
-| DELETE | `/api/v1/clientes/{id}` | Excluir cliente |
-| GET | `/api/v1/clientes/{id}/enderecos` | Endereços do cliente |
-| POST | `/api/v1/clientes/{id}/enderecos` | Adicionar endereço |
-| GET | `/api/v1/fornecedores` | Listar fornecedores |
-| POST | `/api/v1/fornecedores` | Criar fornecedor |
-| GET | `/api/v1/fornecedores/{id}` | Obter fornecedor |
-| PUT | `/api/v1/fornecedores/{id}` | Atualizar fornecedor |
-| GET | `/api/v1/produtos` | Listar produtos |
-| POST | `/api/v1/produtos` | Criar produto |
-| GET | `/api/v1/produtos/{id}` | Obter produto |
-| PUT | `/api/v1/produtos/{id}` | Atualizar produto |
-| GET | `/api/v1/transportadoras` | Listar transportadoras |
-| POST | `/api/v1/transportadoras` | Criar transportadora |
-| GET | `/api/v1/usuarios` | Listar usuários |
-| POST | `/api/v1/usuarios` | Criar usuário |
+| Método | Endpoint                          | Descrição              |
+| ------ | --------------------------------- | ---------------------- |
+| GET    | `/api/v1/clientes`                | Listar clientes        |
+| POST   | `/api/v1/clientes`                | Criar cliente          |
+| GET    | `/api/v1/clientes/{id}`           | Obter cliente          |
+| PUT    | `/api/v1/clientes/{id}`           | Atualizar cliente      |
+| DELETE | `/api/v1/clientes/{id}`           | Excluir cliente        |
+| GET    | `/api/v1/clientes/{id}/enderecos` | Endereços do cliente   |
+| POST   | `/api/v1/clientes/{id}/enderecos` | Adicionar endereço     |
+| GET    | `/api/v1/fornecedores`            | Listar fornecedores    |
+| POST   | `/api/v1/fornecedores`            | Criar fornecedor       |
+| GET    | `/api/v1/fornecedores/{id}`       | Obter fornecedor       |
+| PUT    | `/api/v1/fornecedores/{id}`       | Atualizar fornecedor   |
+| GET    | `/api/v1/produtos`                | Listar produtos        |
+| POST   | `/api/v1/produtos`                | Criar produto          |
+| GET    | `/api/v1/produtos/{id}`           | Obter produto          |
+| PUT    | `/api/v1/produtos/{id}`           | Atualizar produto      |
+| GET    | `/api/v1/transportadoras`         | Listar transportadoras |
+| POST   | `/api/v1/transportadoras`         | Criar transportadora   |
+| GET    | `/api/v1/usuarios`                | Listar usuários        |
+| POST   | `/api/v1/usuarios`                | Criar usuário          |
 
 #### Vendas
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/orcamentos` | Listar orçamentos |
-| POST | `/api/v1/orcamentos` | Criar orçamento |
-| GET | `/api/v1/orcamentos/{id}` | Obter orçamento |
-| PUT | `/api/v1/orcamentos/{id}` | Atualizar orçamento |
-| POST | `/api/v1/orcamentos/{id}/converter` | Converter em venda |
-| GET | `/api/v1/orcamentos/{id}/itens` | Itens do orçamento |
-| POST | `/api/v1/orcamentos/{id}/itens` | Adicionar item |
-| PUT | `/api/v1/orcamentos/{id}/itens/{itemId}` | Atualizar item |
-| DELETE | `/api/v1/orcamentos/{id}/itens/{itemId}` | Remover item |
-| GET | `/api/v1/vendas` | Listar vendas |
-| GET | `/api/v1/vendas/{id}` | Obter venda |
-| POST | `/api/v1/vendas/{id}/cancelar` | Cancelar venda |
-| POST | `/api/v1/vendas/{id}/devolver` | Iniciar devolução |
+| Método | Endpoint                                 | Descrição           |
+| ------ | ---------------------------------------- | ------------------- |
+| GET    | `/api/v1/orcamentos`                     | Listar orçamentos   |
+| POST   | `/api/v1/orcamentos`                     | Criar orçamento     |
+| GET    | `/api/v1/orcamentos/{id}`                | Obter orçamento     |
+| PUT    | `/api/v1/orcamentos/{id}`                | Atualizar orçamento |
+| POST   | `/api/v1/orcamentos/{id}/converter`      | Converter em venda  |
+| GET    | `/api/v1/orcamentos/{id}/itens`          | Itens do orçamento  |
+| POST   | `/api/v1/orcamentos/{id}/itens`          | Adicionar item      |
+| PUT    | `/api/v1/orcamentos/{id}/itens/{itemId}` | Atualizar item      |
+| DELETE | `/api/v1/orcamentos/{id}/itens/{itemId}` | Remover item        |
+| GET    | `/api/v1/vendas`                         | Listar vendas       |
+| GET    | `/api/v1/vendas/{id}`                    | Obter venda         |
+| POST   | `/api/v1/vendas/{id}/cancelar`           | Cancelar venda      |
+| POST   | `/api/v1/vendas/{id}/devolver`           | Iniciar devolução   |
 
 #### Compras
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/pedidos-compra` | Listar pedidos |
-| POST | `/api/v1/pedidos-compra` | Criar pedido |
-| GET | `/api/v1/pedidos-compra/{id}` | Obter pedido |
-| PUT | `/api/v1/pedidos-compra/{id}` | Atualizar pedido |
-| POST | `/api/v1/pedidos-compra/{id}/confirmar` | Confirmar pedido |
-| POST | `/api/v1/pedidos-compra/{id}/cancelar` | Cancelar pedido |
-| GET | `/api/v1/pedidos-compra/{id}/itens` | Itens do pedido |
-| POST | `/api/v1/pedidos-compra/importar-nfe` | Importar de NFe XML |
+| Método | Endpoint                                | Descrição           |
+| ------ | --------------------------------------- | ------------------- |
+| GET    | `/api/v1/pedidos-compra`                | Listar pedidos      |
+| POST   | `/api/v1/pedidos-compra`                | Criar pedido        |
+| GET    | `/api/v1/pedidos-compra/{id}`           | Obter pedido        |
+| PUT    | `/api/v1/pedidos-compra/{id}`           | Atualizar pedido    |
+| POST   | `/api/v1/pedidos-compra/{id}/confirmar` | Confirmar pedido    |
+| POST   | `/api/v1/pedidos-compra/{id}/cancelar`  | Cancelar pedido     |
+| GET    | `/api/v1/pedidos-compra/{id}/itens`     | Itens do pedido     |
+| POST   | `/api/v1/pedidos-compra/importar-nfe`   | Importar de NFe XML |
 
 #### Estoque
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/estoque` | Listar posições de estoque |
-| GET | `/api/v1/estoque/produto/{id}` | Estoque por produto |
-| GET | `/api/v1/estoque/lote/{id}` | Detalhes do lote |
-| POST | `/api/v1/estoque/reservar` | Reservar estoque |
-| POST | `/api/v1/estoque/consumir` | Consumir estoque (FIFO) |
-| POST | `/api/v1/estoque/liberar-reserva` | Liberar reserva |
-| GET | `/api/v1/galpao/blocos` | Listar blocos |
-| GET | `/api/v1/galpao/blocos/{id}/produtos` | Produtos no bloco |
-| POST | `/api/v1/galpao/movimentar` | Movimentar entre blocos |
+| Método | Endpoint                              | Descrição                  |
+| ------ | ------------------------------------- | -------------------------- |
+| GET    | `/api/v1/estoque`                     | Listar posições de estoque |
+| GET    | `/api/v1/estoque/produto/{id}`        | Estoque por produto        |
+| GET    | `/api/v1/estoque/lote/{id}`           | Detalhes do lote           |
+| POST   | `/api/v1/estoque/reservar`            | Reservar estoque           |
+| POST   | `/api/v1/estoque/consumir`            | Consumir estoque (FIFO)    |
+| POST   | `/api/v1/estoque/liberar-reserva`     | Liberar reserva            |
+| GET    | `/api/v1/galpao/blocos`               | Listar blocos              |
+| GET    | `/api/v1/galpao/blocos/{id}/produtos` | Produtos no bloco          |
+| POST   | `/api/v1/galpao/movimentar`           | Movimentar entre blocos    |
 
 #### Financeiro
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/contas-pagar` | Listar contas a pagar |
-| POST | `/api/v1/contas-pagar` | Criar conta a pagar |
-| GET | `/api/v1/contas-pagar/{id}` | Obter conta |
-| POST | `/api/v1/contas-pagar/{id}/pagar` | Baixar pagamento |
-| GET | `/api/v1/contas-receber` | Listar contas a receber |
-| POST | `/api/v1/contas-receber` | Criar conta a receber |
-| GET | `/api/v1/contas-receber/{id}` | Obter conta |
-| POST | `/api/v1/contas-receber/{id}/receber` | Baixar recebimento |
-| POST | `/api/v1/cnab/gerar` | Gerar arquivo CNAB |
-| POST | `/api/v1/cnab/processar-retorno` | Processar retorno |
-| GET | `/api/v1/comissoes` | Listar comissões |
-| POST | `/api/v1/comissoes/calcular` | Calcular comissões |
+| Método | Endpoint                              | Descrição               |
+| ------ | ------------------------------------- | ----------------------- |
+| GET    | `/api/v1/contas-pagar`                | Listar contas a pagar   |
+| POST   | `/api/v1/contas-pagar`                | Criar conta a pagar     |
+| GET    | `/api/v1/contas-pagar/{id}`           | Obter conta             |
+| POST   | `/api/v1/contas-pagar/{id}/pagar`     | Baixar pagamento        |
+| GET    | `/api/v1/contas-receber`              | Listar contas a receber |
+| POST   | `/api/v1/contas-receber`              | Criar conta a receber   |
+| GET    | `/api/v1/contas-receber/{id}`         | Obter conta             |
+| POST   | `/api/v1/contas-receber/{id}/receber` | Baixar recebimento      |
+| POST   | `/api/v1/cnab/gerar`                  | Gerar arquivo CNAB      |
+| POST   | `/api/v1/cnab/processar-retorno`      | Processar retorno       |
+| GET    | `/api/v1/comissoes`                   | Listar comissões        |
+| POST   | `/api/v1/comissoes/calcular`          | Calcular comissões      |
 
 #### NFe
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/nfe` | Listar NFe |
-| POST | `/api/v1/nfe` | Criar NFe |
-| GET | `/api/v1/nfe/{id}` | Obter NFe |
-| POST | `/api/v1/nfe/{id}/transmitir` | Transmitir à SEFAZ |
-| POST | `/api/v1/nfe/{id}/cancelar` | Cancelar NFe |
-| GET | `/api/v1/nfe/{id}/xml` | Download XML |
-| GET | `/api/v1/nfe/{id}/danfe` | Download DANFE PDF |
-| POST | `/api/v1/nfe/{id}/email` | Enviar por email |
-| POST | `/api/v1/nfe/{id}/carta-correcao` | Emitir CC-e |
-| GET | `/api/v1/nfe/manifestacao` | NFe para manifestar |
-| POST | `/api/v1/nfe/manifestacao/{chave}` | Manifestar NFe |
+| Método | Endpoint                           | Descrição           |
+| ------ | ---------------------------------- | ------------------- |
+| GET    | `/api/v1/nfe`                      | Listar NFe          |
+| POST   | `/api/v1/nfe`                      | Criar NFe           |
+| GET    | `/api/v1/nfe/{id}`                 | Obter NFe           |
+| POST   | `/api/v1/nfe/{id}/transmitir`      | Transmitir à SEFAZ  |
+| POST   | `/api/v1/nfe/{id}/cancelar`        | Cancelar NFe        |
+| GET    | `/api/v1/nfe/{id}/xml`             | Download XML        |
+| GET    | `/api/v1/nfe/{id}/danfe`           | Download DANFE PDF  |
+| POST   | `/api/v1/nfe/{id}/email`           | Enviar por email    |
+| POST   | `/api/v1/nfe/{id}/carta-correcao`  | Emitir CC-e         |
+| GET    | `/api/v1/nfe/manifestacao`         | NFe para manifestar |
+| POST   | `/api/v1/nfe/manifestacao/{chave}` | Manifestar NFe      |
 
 #### Logística
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/entregas` | Listar entregas |
-| POST | `/api/v1/entregas` | Agendar entrega |
-| GET | `/api/v1/entregas/{id}` | Obter entrega |
-| PUT | `/api/v1/entregas/{id}` | Atualizar entrega |
-| POST | `/api/v1/entregas/{id}/confirmar` | Confirmar entrega |
-| POST | `/api/v1/entregas/{id}/foto` | Upload de foto |
-| GET | `/api/v1/veiculos` | Listar veículos |
-| GET | `/api/v1/rotas` | Listar rotas do dia |
-| POST | `/api/v1/frete/calcular` | Calcular frete |
-| GET | `/api/v1/cep/{cep}` | Buscar endereço por CEP |
-| POST | `/api/v1/geocodificar` | Geocodificar endereço |
+| Método | Endpoint                          | Descrição               |
+| ------ | --------------------------------- | ----------------------- |
+| GET    | `/api/v1/entregas`                | Listar entregas         |
+| POST   | `/api/v1/entregas`                | Agendar entrega         |
+| GET    | `/api/v1/entregas/{id}`           | Obter entrega           |
+| PUT    | `/api/v1/entregas/{id}`           | Atualizar entrega       |
+| POST   | `/api/v1/entregas/{id}/confirmar` | Confirmar entrega       |
+| POST   | `/api/v1/entregas/{id}/foto`      | Upload de foto          |
+| GET    | `/api/v1/veiculos`                | Listar veículos         |
+| GET    | `/api/v1/rotas`                   | Listar rotas do dia     |
+| POST   | `/api/v1/frete/calcular`          | Calcular frete          |
+| GET    | `/api/v1/cep/{cep}`               | Buscar endereço por CEP |
+| POST   | `/api/v1/geocodificar`            | Geocodificar endereço   |
 
 #### Relatórios
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/v1/relatorios/vendas` | Relatório de vendas |
-| GET | `/api/v1/relatorios/estoque` | Relatório de estoque |
-| GET | `/api/v1/relatorios/financeiro` | Relatório financeiro |
-| GET | `/api/v1/relatorios/comissoes` | Relatório de comissões |
-| POST | `/api/v1/relatorios/exportar` | Exportar relatório |
+| Método | Endpoint                        | Descrição              |
+| ------ | ------------------------------- | ---------------------- |
+| GET    | `/api/v1/relatorios/vendas`     | Relatório de vendas    |
+| GET    | `/api/v1/relatorios/estoque`    | Relatório de estoque   |
+| GET    | `/api/v1/relatorios/financeiro` | Relatório financeiro   |
+| GET    | `/api/v1/relatorios/comissoes`  | Relatório de comissões |
+| POST   | `/api/v1/relatorios/exportar`   | Exportar relatório     |
 
 ---
 
@@ -353,30 +353,30 @@ Route::middleware(['auth:sanctum', 'throttle:nfe'])->group(function () {
 
 ```json
 {
-    "data": {
-        "id": 12345,
-        "type": "cliente",
-        "attributes": {
-            "nome": "João Silva",
-            "cpf": "123.456.789-00",
-            "email": "joao@email.com",
-            "telefone": "(11) 99999-9999",
-            "created_at": "2025-01-15T10:30:00-03:00",
-            "updated_at": "2025-01-15T10:30:00-03:00"
-        },
-        "relationships": {
-            "enderecos": {
-                "data": [
-                    {"id": 1, "type": "endereco"},
-                    {"id": 2, "type": "endereco"}
-                ]
-            }
-        }
+  "data": {
+    "id": 12345,
+    "type": "cliente",
+    "attributes": {
+      "nome": "João Silva",
+      "cpf": "123.456.789-00",
+      "email": "joao@email.com",
+      "telefone": "(11) 99999-9999",
+      "created_at": "2025-01-15T10:30:00-03:00",
+      "updated_at": "2025-01-15T10:30:00-03:00"
     },
-    "meta": {
-        "request_id": "req_abc123",
-        "timestamp": "2025-01-15T10:30:00-03:00"
+    "relationships": {
+      "enderecos": {
+        "data": [
+          { "id": 1, "type": "endereco" },
+          { "id": 2, "type": "endereco" }
+        ]
+      }
     }
+  },
+  "meta": {
+    "request_id": "req_abc123",
+    "timestamp": "2025-01-15T10:30:00-03:00"
+  }
 }
 ```
 
@@ -408,26 +408,26 @@ Route::middleware(['auth:sanctum', 'throttle:nfe'])->group(function () {
 
 ```json
 {
-    "error": {
-        "code": "VALIDATION_ERROR",
-        "message": "Os dados fornecidos são inválidos",
-        "details": [
-            {
-                "field": "cpf",
-                "code": "INVALID_CPF",
-                "message": "CPF inválido"
-            },
-            {
-                "field": "email",
-                "code": "ALREADY_EXISTS",
-                "message": "Email já cadastrado"
-            }
-        ]
-    },
-    "meta": {
-        "request_id": "req_abc123",
-        "timestamp": "2025-01-15T10:30:00-03:00"
-    }
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Os dados fornecidos são inválidos",
+    "details": [
+      {
+        "field": "cpf",
+        "code": "INVALID_CPF",
+        "message": "CPF inválido"
+      },
+      {
+        "field": "email",
+        "code": "ALREADY_EXISTS",
+        "message": "Email já cadastrado"
+      }
+    ]
+  },
+  "meta": {
+    "request_id": "req_abc123",
+    "timestamp": "2025-01-15T10:30:00-03:00"
+  }
 }
 ```
 
@@ -475,14 +475,14 @@ class ClienteResource extends JsonResource
 GET /api/v1/clientes?page=2&per_page=50&sort=-created_at&filter[cidade]=São Paulo&include=enderecos
 ```
 
-| Parâmetro | Descrição | Exemplo |
-|-----------|-----------|---------|
-| `page` | Número da página | `page=2` |
-| `per_page` | Itens por página (max 100) | `per_page=50` |
-| `sort` | Ordenação (- para DESC) | `sort=-created_at,nome` |
-| `filter[campo]` | Filtro por campo | `filter[cidade]=SP` |
-| `include` | Relacionamentos | `include=enderecos,vendas` |
-| `fields[tipo]` | Campos específicos | `fields[cliente]=id,nome` |
+| Parâmetro       | Descrição                  | Exemplo                    |
+| --------------- | -------------------------- | -------------------------- |
+| `page`          | Número da página           | `page=2`                   |
+| `per_page`      | Itens por página (max 100) | `per_page=50`              |
+| `sort`          | Ordenação (- para DESC)    | `sort=-created_at,nome`    |
+| `filter[campo]` | Filtro por campo           | `filter[cidade]=SP`        |
+| `include`       | Relacionamentos            | `include=enderecos,vendas` |
+| `fields[tipo]`  | Campos específicos         | `fields[cliente]=id,nome`  |
 
 ### Implementação com Spatie Query Builder
 
@@ -540,36 +540,36 @@ GET /api/v1/clientes?search=joao silva
 
 ### Códigos HTTP
 
-| Código | Significado | Uso |
-|--------|-------------|-----|
-| 200 | OK | Sucesso em GET/PUT/PATCH |
-| 201 | Created | Sucesso em POST |
-| 204 | No Content | Sucesso em DELETE |
-| 400 | Bad Request | Erro de sintaxe na requisição |
-| 401 | Unauthorized | Não autenticado |
-| 403 | Forbidden | Sem permissão |
-| 404 | Not Found | Recurso não encontrado |
-| 409 | Conflict | Conflito de estado (ex: já cancelado) |
-| 422 | Unprocessable Entity | Erro de validação |
-| 429 | Too Many Requests | Rate limit excedido |
-| 500 | Internal Server Error | Erro interno |
-| 503 | Service Unavailable | Serviço indisponível (ACBr, SEFAZ) |
+| Código | Significado           | Uso                                   |
+| ------ | --------------------- | ------------------------------------- |
+| 200    | OK                    | Sucesso em GET/PUT/PATCH              |
+| 201    | Created               | Sucesso em POST                       |
+| 204    | No Content            | Sucesso em DELETE                     |
+| 400    | Bad Request           | Erro de sintaxe na requisição         |
+| 401    | Unauthorized          | Não autenticado                       |
+| 403    | Forbidden             | Sem permissão                         |
+| 404    | Not Found             | Recurso não encontrado                |
+| 409    | Conflict              | Conflito de estado (ex: já cancelado) |
+| 422    | Unprocessable Entity  | Erro de validação                     |
+| 429    | Too Many Requests     | Rate limit excedido                   |
+| 500    | Internal Server Error | Erro interno                          |
+| 503    | Service Unavailable   | Serviço indisponível (ACBr, SEFAZ)    |
 
 ### Códigos de Erro de Negócio
 
-| Código | Descrição |
-|--------|-----------|
-| `VALIDATION_ERROR` | Campos inválidos |
-| `RESOURCE_NOT_FOUND` | Registro não encontrado |
-| `INSUFFICIENT_STOCK` | Estoque insuficiente |
-| `INSUFFICIENT_CREDIT` | Crédito insuficiente |
+| Código                      | Descrição                    |
+| --------------------------- | ---------------------------- |
+| `VALIDATION_ERROR`          | Campos inválidos             |
+| `RESOURCE_NOT_FOUND`        | Registro não encontrado      |
+| `INSUFFICIENT_STOCK`        | Estoque insuficiente         |
+| `INSUFFICIENT_CREDIT`       | Crédito insuficiente         |
 | `INVALID_STATUS_TRANSITION` | Transição de status inválida |
-| `DUPLICATE_ENTRY` | Registro duplicado |
-| `BUSINESS_RULE_VIOLATION` | Regra de negócio violada |
-| `EXTERNAL_SERVICE_ERROR` | Erro em serviço externo |
-| `NFE_REJECTED` | NFe rejeitada pela SEFAZ |
-| `PAYMENT_FAILED` | Falha no pagamento |
-| `AUTHORIZATION_REQUIRED` | Requer autorização superior |
+| `DUPLICATE_ENTRY`           | Registro duplicado           |
+| `BUSINESS_RULE_VIOLATION`   | Regra de negócio violada     |
+| `EXTERNAL_SERVICE_ERROR`    | Erro em serviço externo      |
+| `NFE_REJECTED`              | NFe rejeitada pela SEFAZ     |
+| `PAYMENT_FAILED`            | Falha no pagamento           |
+| `AUTHORIZATION_REQUIRED`    | Requer autorização superior  |
 
 ### Handler de Exceções
 
@@ -636,15 +636,15 @@ protected function renderJsonException(Request $request, Throwable $e): JsonResp
 
 ### Eventos Disponíveis
 
-| Evento | Payload | Trigger |
-|--------|---------|---------|
-| `venda.criada` | Venda completa | Nova venda confirmada |
-| `venda.cancelada` | Venda + motivo | Venda cancelada |
-| `nfe.autorizada` | NFe + chave | NFe autorizada pela SEFAZ |
-| `nfe.rejeitada` | NFe + erros | NFe rejeitada pela SEFAZ |
-| `entrega.confirmada` | Entrega + fotos | Entrega confirmada |
-| `pagamento.recebido` | Conta + valor | Pagamento baixado |
-| `estoque.baixo` | Produto + qtd | Estoque abaixo do mínimo |
+| Evento               | Payload         | Trigger                   |
+| -------------------- | --------------- | ------------------------- |
+| `venda.criada`       | Venda completa  | Nova venda confirmada     |
+| `venda.cancelada`    | Venda + motivo  | Venda cancelada           |
+| `nfe.autorizada`     | NFe + chave     | NFe autorizada pela SEFAZ |
+| `nfe.rejeitada`      | NFe + erros     | NFe rejeitada pela SEFAZ  |
+| `entrega.confirmada` | Entrega + fotos | Entrega confirmada        |
+| `pagamento.recebido` | Conta + valor   | Pagamento baixado         |
+| `estoque.baixo`      | Produto + qtd   | Estoque abaixo do mínimo  |
 
 ### Configuração de Webhook
 
@@ -722,23 +722,23 @@ class DispatchWebhook implements ShouldQueue
 
 ```json
 {
-    "evento": "nfe.autorizada",
-    "data": {
-        "nfe": {
-            "id": 12345,
-            "numero": "000012345",
-            "serie": "1",
-            "chave": "35250112345678000199550010000123451234567890",
-            "status": "autorizada",
-            "protocolo": "135250000123456",
-            "data_autorizacao": "2025-01-15T10:30:00-03:00"
-        },
-        "venda": {
-            "id": 9876,
-            "valor_total": 1500.00
-        }
+  "evento": "nfe.autorizada",
+  "data": {
+    "nfe": {
+      "id": 12345,
+      "numero": "000012345",
+      "serie": "1",
+      "chave": "35250112345678000199550010000123451234567890",
+      "status": "autorizada",
+      "protocolo": "135250000123456",
+      "data_autorizacao": "2025-01-15T10:30:00-03:00"
     },
-    "timestamp": "2025-01-15T10:30:05-03:00"
+    "venda": {
+      "id": 9876,
+      "valor_total": 1500.0
+    }
+  },
+  "timestamp": "2025-01-15T10:30:05-03:00"
 }
 ```
 
@@ -1019,10 +1019,10 @@ class CepService extends BaseIntegration
 
 ### Estratégia de Versionamento
 
-| Versão | Status | Suporte até |
-|--------|--------|-------------|
-| v1 | Ativa | - |
-| v2 | Planejada | - |
+| Versão | Status    | Suporte até |
+| ------ | --------- | ----------- |
+| v1     | Ativa     | -           |
+| v2     | Planejada | -           |
 
 ### Regras de Versionamento
 

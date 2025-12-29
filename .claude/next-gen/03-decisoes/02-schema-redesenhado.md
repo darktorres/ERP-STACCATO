@@ -868,49 +868,49 @@ CREATE INDEX idx_nfe_itens_dados ON nfe_itens USING GIN (dados);
   "cest": "1000100",
   "descricao": "PORCELANATO POLIDO 60X60",
   "codigo": "POR-60X60-POL",
-  "quantidade": 100.0000,
+  "quantidade": 100.0,
   "unidade": "M2",
-  "valor_unitario": 45.0000,
-  "valor_total": 4500.00,
-  "valor_desconto": 0.00,
-  "valor_frete": 150.00,
+  "valor_unitario": 45.0,
+  "valor_total": 4500.0,
+  "valor_desconto": 0.0,
+  "valor_frete": 150.0,
 
   "icms": {
     "cst": "00",
     "origem": "0",
     "modalidade_bc": "3",
-    "valor_bc": 4650.00,
-    "aliquota": 18.00,
-    "valor": 837.00
+    "valor_bc": 4650.0,
+    "aliquota": 18.0,
+    "valor": 837.0
   },
 
   "icms_st": {
     "modalidade_bc": "4",
-    "mva": 40.00,
-    "valor_bc": 6510.00,
-    "aliquota": 18.00,
-    "valor": 334.80
+    "mva": 40.0,
+    "valor_bc": 6510.0,
+    "aliquota": 18.0,
+    "valor": 334.8
   },
 
   "ipi": {
     "cst": "50",
-    "valor_bc": 4500.00,
-    "aliquota": 5.00,
-    "valor": 225.00
+    "valor_bc": 4500.0,
+    "aliquota": 5.0,
+    "valor": 225.0
   },
 
   "pis": {
     "cst": "01",
-    "valor_bc": 4500.00,
+    "valor_bc": 4500.0,
     "aliquota": 1.65,
     "valor": 74.25
   },
 
   "cofins": {
     "cst": "01",
-    "valor_bc": 4500.00,
-    "aliquota": 7.60,
-    "valor": 342.00
+    "valor_bc": 4500.0,
+    "aliquota": 7.6,
+    "valor": 342.0
   }
 }
 ```
@@ -1344,23 +1344,23 @@ CREATE TRIGGER trg_impedir_alteracao_item_pareado
 
 #### 4.8.6 Resumo das Proteções
 
-| Regra | Implementação | Quando Dispara |
-|-------|---------------|----------------|
-| Quantidade consumo = quantidade item | `fn_validar_consumo` | INSERT consumo |
-| Estoque suficiente | `fn_validar_consumo` | INSERT consumo |
-| Mesmo produto | `fn_validar_consumo` | INSERT consumo |
-| Mesmo fornecedor | `fn_validar_consumo` | INSERT consumo |
-| Status permite pareamento | `fn_validar_consumo` | INSERT consumo |
-| Auto-atualizar estoque.quantidade | `fn_atualizar_estoque_apos_consumo` | INSERT/UPDATE consumo |
-| Auto-atualizar estoque.status | `fn_atualizar_estoque_apos_consumo` | INSERT/UPDATE consumo |
-| Auto-atualizar venda_item.status | `fn_atualizar_estoque_apos_consumo` | INSERT consumo |
-| Transições de status válidas | `fn_validar_transicao_status` | UPDATE venda_item |
-| Impedir alterar consumo estornado | `fn_impedir_alteracao_consumo_estornado` | UPDATE consumo |
-| Impedir DELETE em consumo | `fn_impedir_exclusao_consumo` | DELETE consumo |
-| Impedir alterar item pareado | `fn_impedir_alteracao_item_pareado` | UPDATE venda_item |
-| 1:1 venda_item ↔ consumo | UNIQUE INDEX parcial | INSERT consumo |
-| 1:1 estoque ↔ consumo | UNIQUE INDEX parcial | INSERT consumo |
-| Quantidades positivas | CHECK constraint | INSERT/UPDATE |
+| Regra                                | Implementação                            | Quando Dispara        |
+| ------------------------------------ | ---------------------------------------- | --------------------- |
+| Quantidade consumo = quantidade item | `fn_validar_consumo`                     | INSERT consumo        |
+| Estoque suficiente                   | `fn_validar_consumo`                     | INSERT consumo        |
+| Mesmo produto                        | `fn_validar_consumo`                     | INSERT consumo        |
+| Mesmo fornecedor                     | `fn_validar_consumo`                     | INSERT consumo        |
+| Status permite pareamento            | `fn_validar_consumo`                     | INSERT consumo        |
+| Auto-atualizar estoque.quantidade    | `fn_atualizar_estoque_apos_consumo`      | INSERT/UPDATE consumo |
+| Auto-atualizar estoque.status        | `fn_atualizar_estoque_apos_consumo`      | INSERT/UPDATE consumo |
+| Auto-atualizar venda_item.status     | `fn_atualizar_estoque_apos_consumo`      | INSERT consumo        |
+| Transições de status válidas         | `fn_validar_transicao_status`            | UPDATE venda_item     |
+| Impedir alterar consumo estornado    | `fn_impedir_alteracao_consumo_estornado` | UPDATE consumo        |
+| Impedir DELETE em consumo            | `fn_impedir_exclusao_consumo`            | DELETE consumo        |
+| Impedir alterar item pareado         | `fn_impedir_alteracao_item_pareado`      | UPDATE venda_item     |
+| 1:1 venda_item ↔ consumo             | UNIQUE INDEX parcial                     | INSERT consumo        |
+| 1:1 estoque ↔ consumo                | UNIQUE INDEX parcial                     | INSERT consumo        |
+| Quantidades positivas                | CHECK constraint                         | INSERT/UPDATE         |
 
 ---
 
@@ -1447,15 +1447,15 @@ enum VendaItemStatus: string
 
 ### 6.1 Resumo das Mudanças
 
-| Problema               | Atual                     | Novo Design                  |
-| ---------------------- | ------------------------- | ---------------------------- |
-| **Tabelas L1/L2**      | 2 tabelas + idRelacionado | 1 tabela + parent_id/root_id |
-| **Consumo estoque**    | FIFO automático (quebrado)| Seleção manual 1:1           |
-| **Refs de fornecedor** | VARCHAR em 9 tabelas      | fornecedor_id FK             |
-| **Status**             | Strings mágicas           | ENUMs PostgreSQL             |
-| **Tabela produto**     | 100+ colunas              | Dividida em 3 tabelas        |
-| **Auditoria**          | Nenhuma                   | tabela audit_log             |
-| **Devoluções**         | Incompleto                | Fluxo adequado com NFe       |
+| Problema               | Atual                      | Novo Design                  |
+| ---------------------- | -------------------------- | ---------------------------- |
+| **Tabelas L1/L2**      | 2 tabelas + idRelacionado  | 1 tabela + parent_id/root_id |
+| **Consumo estoque**    | FIFO automático (quebrado) | Seleção manual 1:1           |
+| **Refs de fornecedor** | VARCHAR em 9 tabelas       | fornecedor_id FK             |
+| **Status**             | Strings mágicas            | ENUMs PostgreSQL             |
+| **Tabela produto**     | 100+ colunas               | Dividida em 3 tabelas        |
+| **Auditoria**          | Nenhuma                    | tabela audit_log             |
+| **Devoluções**         | Incompleto                 | Fluxo adequado com NFe       |
 
 ### 6.2 Simplificações de Query
 
@@ -1748,21 +1748,21 @@ flowchart TB
 
 **Campos removidos de `estoque`** (~30 colunas fiscais → `nfe_itens.dados`):
 
-| Campo Antigo (estoque) | Novo Local |
-|------------------------|------------|
-| ncm, nve, extipi, cest, cfop | `nfe_itens.dados` |
-| tipoICMS, orig, cstICMS, modBC, vBC, pICMS, vICMS | `nfe_itens.dados.icms` |
-| modBCST, pMVAST, vBCST, pICMSST, vICMSST | `nfe_itens.dados.icms_st` |
-| cEnq, cstIPI, vBCIPI, pIPI, vIPI | `nfe_itens.dados.ipi` |
-| cstPIS, vBCPIS, pPIS, vPIS | `nfe_itens.dados.pis` |
-| cstCOFINS, vBCCOFINS, pCOFINS, vCOFINS | `nfe_itens.dados.cofins` |
-| valorGare | `nfe_itens.dados.gare` |
+| Campo Antigo (estoque)                            | Novo Local                |
+| ------------------------------------------------- | ------------------------- |
+| ncm, nve, extipi, cest, cfop                      | `nfe_itens.dados`         |
+| tipoICMS, orig, cstICMS, modBC, vBC, pICMS, vICMS | `nfe_itens.dados.icms`    |
+| modBCST, pMVAST, vBCST, pICMSST, vICMSST          | `nfe_itens.dados.icms_st` |
+| cEnq, cstIPI, vBCIPI, pIPI, vIPI                  | `nfe_itens.dados.ipi`     |
+| cstPIS, vBCPIS, pPIS, vPIS                        | `nfe_itens.dados.pis`     |
+| cstCOFINS, vBCCOFINS, pCOFINS, vCOFINS            | `nfe_itens.dados.cofins`  |
+| valorGare                                         | `nfe_itens.dados.gare`    |
 
 **Campos removidos de `estoque_has_consumo`** (~30 colunas fiscais → `nfe_itens.dados`):
 
-| Campo Antigo (estoque_has_consumo) | Novo Local |
-|------------------------------------|------------|
-| Mesmos campos acima | `nfe_itens.dados` (NFe de saída) |
+| Campo Antigo (estoque_has_consumo) | Novo Local                       |
+| ---------------------------------- | -------------------------------- |
+| Mesmos campos acima                | `nfe_itens.dados` (NFe de saída) |
 
 **Novo relacionamento:**
 
@@ -1810,15 +1810,15 @@ WHERE ni.nfe_id = es.nfe_entrada_id
 
 Este schema segue as convenções definidas em [../tecnico/15-dicionario-dados.md](../tecnico/15-dicionario-dados.md):
 
-| Convenção              | Exemplo                              | Regra                                           |
-| ---------------------- | ------------------------------------ | ----------------------------------------------- |
-| **Valores monetários** | `valor_unitario`, `valor_total`      | Prefixo `valor_*` para preços                   |
-| **Custos**             | `custo`, `custo_unitario`            | Prefixo `custo_*` para custos de aquisição      |
-| **Booleanos**          | `is_ativo`, `tem_lote`, `is_estornado` | Prefixos `is_*`, `tem_*`                       |
-| **Status**             | `status venda_status`                | Sempre usar tipos ENUM do PostgreSQL            |
-| **Datas de negócio**   | `data_emissao`, `data_vencimento`    | Prefixo `data_*`                                |
-| **Timestamps audit**   | `created_at`, `updated_at`           | Sufixo `_at` para timestamps automáticos        |
-| **Quantidades**        | `quantidade`, `quantidade_caixas`    | Nome completo, sem abreviações                  |
+| Convenção              | Exemplo                                | Regra                                      |
+| ---------------------- | -------------------------------------- | ------------------------------------------ |
+| **Valores monetários** | `valor_unitario`, `valor_total`        | Prefixo `valor_*` para preços              |
+| **Custos**             | `custo`, `custo_unitario`              | Prefixo `custo_*` para custos de aquisição |
+| **Booleanos**          | `is_ativo`, `tem_lote`, `is_estornado` | Prefixos `is_*`, `tem_*`                   |
+| **Status**             | `status venda_status`                  | Sempre usar tipos ENUM do PostgreSQL       |
+| **Datas de negócio**   | `data_emissao`, `data_vencimento`      | Prefixo `data_*`                           |
+| **Timestamps audit**   | `created_at`, `updated_at`             | Sufixo `_at` para timestamps automáticos   |
+| **Quantidades**        | `quantidade`, `quantidade_caixas`      | Nome completo, sem abreviações             |
 
 ---
 

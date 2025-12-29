@@ -15,31 +15,31 @@ Este documento define os browsers e dispositivos suportados pelo ERP Staccato We
 
 ### Desktop (Prioridade Alta)
 
-| Browser | Versão Mínima | Status | Market Share* |
-|---------|---------------|--------|---------------|
-| Google Chrome | 100+ | Suportado | ~65% |
-| Microsoft Edge | 100+ | Suportado | ~15% |
-| Mozilla Firefox | 100+ | Suportado | ~5% |
-| Safari (macOS) | 15+ | Suportado | ~10% |
-| Opera | 90+ | Compatível | ~2% |
+| Browser         | Versão Mínima | Status     | Market Share\* |
+| --------------- | ------------- | ---------- | -------------- |
+| Google Chrome   | 100+          | Suportado  | ~65%           |
+| Microsoft Edge  | 100+          | Suportado  | ~15%           |
+| Mozilla Firefox | 100+          | Suportado  | ~5%            |
+| Safari (macOS)  | 15+           | Suportado  | ~10%           |
+| Opera           | 90+           | Compatível | ~2%            |
 
-*Market share estimado no contexto empresarial brasileiro
+\*Market share estimado no contexto empresarial brasileiro
 
 ### Mobile (Prioridade Média)
 
-| Browser | Versão Mínima | Status | Notas |
-|---------|---------------|--------|-------|
-| Chrome Mobile | 100+ | Suportado | Android |
-| Safari Mobile | 15+ | Suportado | iOS |
-| Samsung Internet | 18+ | Compatível | Android Samsung |
+| Browser          | Versão Mínima | Status     | Notas           |
+| ---------------- | ------------- | ---------- | --------------- |
+| Chrome Mobile    | 100+          | Suportado  | Android         |
+| Safari Mobile    | 15+           | Suportado  | iOS             |
+| Samsung Internet | 18+           | Compatível | Android Samsung |
 
 ### Não Suportados
 
-| Browser | Motivo |
-|---------|--------|
+| Browser           | Motivo                       |
+| ----------------- | ---------------------------- |
 | Internet Explorer | Descontinuado pela Microsoft |
-| Edge Legacy | Descontinuado |
-| Opera Mini | Limitações de JavaScript |
+| Edge Legacy       | Descontinuado                |
+| Opera Mini        | Limitações de JavaScript     |
 
 ---
 
@@ -47,26 +47,26 @@ Este documento define os browsers e dispositivos suportados pelo ERP Staccato We
 
 ### Desktop
 
-| Dispositivo | Resolução Mínima | Status |
-|-------------|------------------|--------|
-| Desktop/Laptop | 1280 x 720 | Suportado |
-| Desktop HD | 1920 x 1080 | Recomendado |
-| Desktop 4K | 3840 x 2160 | Suportado |
+| Dispositivo    | Resolução Mínima | Status      |
+| -------------- | ---------------- | ----------- |
+| Desktop/Laptop | 1280 x 720       | Suportado   |
+| Desktop HD     | 1920 x 1080      | Recomendado |
+| Desktop 4K     | 3840 x 2160      | Suportado   |
 
 ### Tablet
 
-| Dispositivo | Resolução | Status | Limitações |
-|-------------|-----------|--------|------------|
-| iPad (10"+) | 1024 x 768+ | Suportado | Alguns modals podem ser apertados |
-| iPad Pro | 2048 x 1536+ | Suportado | Experiência completa |
-| Android Tablet | 1024 x 768+ | Suportado | Depende do browser |
+| Dispositivo    | Resolução    | Status    | Limitações                        |
+| -------------- | ------------ | --------- | --------------------------------- |
+| iPad (10"+)    | 1024 x 768+  | Suportado | Alguns modals podem ser apertados |
+| iPad Pro       | 2048 x 1536+ | Suportado | Experiência completa              |
+| Android Tablet | 1024 x 768+  | Suportado | Depende do browser                |
 
 ### Mobile
 
-| Dispositivo | Resolução | Status | Limitações |
-|-------------|-----------|--------|------------|
-| iPhone | 375+ | Limitado | Visualização apenas |
-| Android | 360+ | Limitado | Visualização apenas |
+| Dispositivo | Resolução | Status   | Limitações          |
+| ----------- | --------- | -------- | ------------------- |
+| iPhone      | 375+      | Limitado | Visualização apenas |
+| Android     | 360+      | Limitado | Visualização apenas |
 
 ---
 
@@ -74,20 +74,20 @@ Este documento define os browsers e dispositivos suportados pelo ERP Staccato We
 
 ### Matriz de Funcionalidades
 
-| Funcionalidade | Desktop | Tablet | Mobile |
-|----------------|---------|--------|--------|
-| Login/Logout | ✅ | ✅ | ✅ |
-| Dashboard | ✅ | ✅ | ✅ |
-| Listagem de registros | ✅ | ✅ | ✅ |
-| Criar/Editar orçamento | ✅ | ✅ | ❌ |
-| Criar/Editar venda | ✅ | ✅ | ❌ |
-| Emitir NFe | ✅ | ⚠️ | ❌ |
-| Cadastro de clientes | ✅ | ✅ | ⚠️ |
-| Relatórios | ✅ | ✅ | ⚠️ |
-| Impressão | ✅ | ⚠️ | ❌ |
-| Certificado Digital | ✅ | ❌ | ❌ |
-| Atalhos de teclado | ✅ | ❌ | ❌ |
-| Notificações push | ✅ | ✅ | ✅ |
+| Funcionalidade         | Desktop | Tablet | Mobile |
+| ---------------------- | ------- | ------ | ------ |
+| Login/Logout           | ✅      | ✅     | ✅     |
+| Dashboard              | ✅      | ✅     | ✅     |
+| Listagem de registros  | ✅      | ✅     | ✅     |
+| Criar/Editar orçamento | ✅      | ✅     | ❌     |
+| Criar/Editar venda     | ✅      | ✅     | ❌     |
+| Emitir NFe             | ✅      | ⚠️     | ❌     |
+| Cadastro de clientes   | ✅      | ✅     | ⚠️     |
+| Relatórios             | ✅      | ✅     | ⚠️     |
+| Impressão              | ✅      | ⚠️     | ❌     |
+| Certificado Digital    | ✅      | ❌     | ❌     |
+| Atalhos de teclado     | ✅      | ❌     | ❌     |
+| Notificações push      | ✅      | ✅     | ✅     |
 
 **Legenda:**
 
@@ -122,15 +122,15 @@ Este documento define os browsers e dispositivos suportados pelo ERP Staccato We
 ```javascript
 // Recursos ES6+ necessários
 const features = {
-  'Arrow functions': true,
-  'Template literals': true,
-  'Destructuring': true,
-  'Spread operator': true,
-  'Async/await': true,
-  'Optional chaining': true,  // ES2020
-  'Nullish coalescing': true, // ES2020
-  'BigInt': false,            // Não utilizado
-  'Top-level await': false,   // Não utilizado
+  "Arrow functions": true,
+  "Template literals": true,
+  Destructuring: true,
+  "Spread operator": true,
+  "Async/await": true,
+  "Optional chaining": true, // ES2020
+  "Nullish coalescing": true, // ES2020
+  BigInt: false, // Não utilizado
+  "Top-level await": false, // Não utilizado
 };
 ```
 
@@ -159,17 +159,17 @@ const features = {
 
 ### APIs Web
 
-| API | Chrome | Firefox | Safari | Edge | Uso |
-|-----|--------|---------|--------|------|-----|
-| Fetch | ✅ | ✅ | ✅ | ✅ | Requisições HTTP |
-| LocalStorage | ✅ | ✅ | ✅ | ✅ | Preferências |
-| IndexedDB | ✅ | ✅ | ✅ | ✅ | Cache offline |
-| WebSocket | ✅ | ✅ | ✅ | ✅ | Tempo real |
-| Notifications | ✅ | ✅ | ⚠️ | ✅ | Alertas |
-| Clipboard | ✅ | ✅ | ✅ | ✅ | Copiar/Colar |
-| File API | ✅ | ✅ | ✅ | ✅ | Upload |
-| WebUSB | ✅ | ❌ | ❌ | ✅ | Certificado A3 |
-| Web Crypto | ✅ | ✅ | ✅ | ✅ | Criptografia |
+| API           | Chrome | Firefox | Safari | Edge | Uso              |
+| ------------- | ------ | ------- | ------ | ---- | ---------------- |
+| Fetch         | ✅     | ✅      | ✅     | ✅   | Requisições HTTP |
+| LocalStorage  | ✅     | ✅      | ✅     | ✅   | Preferências     |
+| IndexedDB     | ✅     | ✅      | ✅     | ✅   | Cache offline    |
+| WebSocket     | ✅     | ✅      | ✅     | ✅   | Tempo real       |
+| Notifications | ✅     | ✅      | ⚠️     | ✅   | Alertas          |
+| Clipboard     | ✅     | ✅      | ✅     | ✅   | Copiar/Colar     |
+| File API      | ✅     | ✅      | ✅     | ✅   | Upload           |
+| WebUSB        | ✅     | ❌      | ❌     | ✅   | Certificado A3   |
+| Web Crypto    | ✅     | ✅      | ✅     | ✅   | Criptografia     |
 
 ---
 
@@ -182,11 +182,11 @@ const features = {
 module.exports = {
   theme: {
     screens: {
-      'sm': '640px',   // Mobile landscape
-      'md': '768px',   // Tablet portrait
-      'lg': '1024px',  // Tablet landscape / Desktop
-      'xl': '1280px',  // Desktop
-      '2xl': '1536px', // Large desktop
+      sm: "640px", // Mobile landscape
+      md: "768px", // Tablet portrait
+      lg: "1024px", // Tablet landscape / Desktop
+      xl: "1280px", // Desktop
+      "2xl": "1536px", // Large desktop
     },
   },
 };
@@ -194,13 +194,13 @@ module.exports = {
 
 ### Layout por Resolução
 
-| Resolução | Layout | Sidebar | Tabela |
-|-----------|--------|---------|--------|
-| < 640px | Mobile | Oculta | Scroll horizontal |
-| 640-768px | Mobile | Oculta | Cards |
-| 768-1024px | Tablet | Colapsada | Tabela simplificada |
-| 1024-1280px | Desktop | Fixa | Tabela completa |
-| > 1280px | Desktop | Fixa | Tabela + detalhes |
+| Resolução   | Layout  | Sidebar   | Tabela              |
+| ----------- | ------- | --------- | ------------------- |
+| < 640px     | Mobile  | Oculta    | Scroll horizontal   |
+| 640-768px   | Mobile  | Oculta    | Cards               |
+| 768-1024px  | Tablet  | Colapsada | Tabela simplificada |
+| 1024-1280px | Desktop | Fixa      | Tabela completa     |
+| > 1280px    | Desktop | Fixa      | Tabela + detalhes   |
 
 ---
 
@@ -208,13 +208,13 @@ module.exports = {
 
 ### Ferramentas
 
-| Ferramenta | Propósito | Custo |
-|------------|-----------|-------|
-| BrowserStack | Cross-browser testing | Pago |
-| Sauce Labs | Cross-browser testing | Pago |
-| Chrome DevTools | Emulação de dispositivos | Gratuito |
-| Firefox DevTools | Emulação de dispositivos | Gratuito |
-| Safari Web Inspector | Debug iOS/macOS | Gratuito |
+| Ferramenta           | Propósito                | Custo    |
+| -------------------- | ------------------------ | -------- |
+| BrowserStack         | Cross-browser testing    | Pago     |
+| Sauce Labs           | Cross-browser testing    | Pago     |
+| Chrome DevTools      | Emulação de dispositivos | Gratuito |
+| Firefox DevTools     | Emulação de dispositivos | Gratuito |
+| Safari Web Inspector | Debug iOS/macOS          | Gratuito |
 
 ### Checklist de Testes
 
@@ -256,17 +256,17 @@ module.exports = {
 
 ```javascript
 // vite.config.js com @vitejs/plugin-legacy
-import legacy from '@vitejs/plugin-legacy';
+import legacy from "@vitejs/plugin-legacy";
 
 export default {
   plugins: [
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: ["defaults", "not IE 11"],
       polyfills: [
-        'es.promise',
-        'es.array.iterator',
-        'es.object.assign',
-        'es.symbol',
+        "es.promise",
+        "es.array.iterator",
+        "es.object.assign",
+        "es.symbol",
       ],
     }),
   ],
@@ -344,7 +344,7 @@ export function useBrowserCheck() {
     const ua = navigator.userAgent;
 
     // IE não suportado
-    if (ua.includes('MSIE') || ua.includes('Trident/')) {
+    if (ua.includes("MSIE") || ua.includes("Trident/")) {
       return false;
     }
 
@@ -385,12 +385,12 @@ export function useBrowserCheck() {
 
 ### Roadmap de Compatibilidade
 
-| Versão | Mudança | Impacto |
-|--------|---------|---------|
-| 1.0 | Baseline atual | - |
-| 1.1 | PWA com offline | Requer Service Worker |
-| 1.2 | Suporte a impressoras USB | WebUSB expandido |
-| 2.0 | App nativo (Capacitor) | iOS/Android |
+| Versão | Mudança                   | Impacto               |
+| ------ | ------------------------- | --------------------- |
+| 1.0    | Baseline atual            | -                     |
+| 1.1    | PWA com offline           | Requer Service Worker |
+| 1.2    | Suporte a impressoras USB | WebUSB expandido      |
+| 2.0    | App nativo (Capacitor)    | iOS/Android           |
 
 ### Monitoramento
 

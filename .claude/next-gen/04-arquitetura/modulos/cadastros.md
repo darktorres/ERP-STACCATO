@@ -46,18 +46,18 @@ flowchart TB
 
 ### Classes
 
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `CadastroCliente` | `cadastrocliente.cpp` | CRUD de clientes |
-| `CadastroFornecedor` | `cadastrofornecedor.cpp` | CRUD de fornecedores |
-| `CadastroProduto` | `cadastroproduto.cpp` | CRUD de produtos |
+| Classe                   | Arquivo                      | Finalidade              |
+| ------------------------ | ---------------------------- | ----------------------- |
+| `CadastroCliente`        | `cadastrocliente.cpp`        | CRUD de clientes        |
+| `CadastroFornecedor`     | `cadastrofornecedor.cpp`     | CRUD de fornecedores    |
+| `CadastroProduto`        | `cadastroproduto.cpp`        | CRUD de produtos        |
 | `CadastroTransportadora` | `cadastrotransportadora.cpp` | CRUD de transportadoras |
-| `CadastroProfissional` | `cadastroprofissional.cpp` | CRUD de profissionais |
-| `CadastroUsuario` | `cadastrousuario.cpp` | CRUD de usuários |
-| `CadastroLoja` | `cadastroloja.cpp` | CRUD de lojas |
-| `CadastroNCM` | `cadastroncm.cpp` | CRUD de NCM |
-| `CadastroPagamento` | `cadastropagamento.cpp` | Formas de pagamento |
-| `CadastroFuncionario` | `cadastrofuncionario.cpp` | Funcionários |
+| `CadastroProfissional`   | `cadastroprofissional.cpp`   | CRUD de profissionais   |
+| `CadastroUsuario`        | `cadastrousuario.cpp`        | CRUD de usuários        |
+| `CadastroLoja`           | `cadastroloja.cpp`           | CRUD de lojas           |
+| `CadastroNCM`            | `cadastroncm.cpp`            | CRUD de NCM             |
+| `CadastroPagamento`      | `cadastropagamento.cpp`      | Formas de pagamento     |
+| `CadastroFuncionario`    | `cadastrofuncionario.cpp`    | Funcionários            |
 
 ### Tabelas do Banco de Dados
 
@@ -823,13 +823,13 @@ Route::middleware(['auth'])->prefix('cadastros')->name('cadastros.')->group(func
 
 ## Eventos
 
-| Evento | Dispara |
-|--------|---------|
-| `ClienteCriado` | Log de auditoria |
-| `ClienteAtualizado` | Log de auditoria |
-| `CreditoAdicionado` | Notificar financeiro |
-| `ProdutoCriado` | Indexar para busca |
-| `UsuarioCriado` | Enviar email de boas-vindas |
+| Evento              | Dispara                     |
+| ------------------- | --------------------------- |
+| `ClienteCriado`     | Log de auditoria            |
+| `ClienteAtualizado` | Log de auditoria            |
+| `CreditoAdicionado` | Notificar financeiro        |
+| `ProdutoCriado`     | Indexar para busca          |
+| `UsuarioCriado`     | Enviar email de boas-vindas |
 
 ---
 

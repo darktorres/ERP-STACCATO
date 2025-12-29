@@ -138,28 +138,28 @@ CREATE TABLE produtos (
 
 ### Benefícios
 
-| Benefício | Descrição |
-|-----------|-----------|
-| **Audit trail grátis** | Todo histórico já está nos eventos |
-| **Point-in-time** | Pode reconstruir estado em qualquer momento |
-| **Debugging** | "Por que o preço está errado?" → replay eventos |
-| **Múltiplas projeções** | Diferentes views dos mesmos dados |
-| **Compliance** | LGPD, auditoria fiscal facilitados |
-| **Correção de bugs** | Corrigir projeção e re-replay |
-| **Temporal queries** | Grátis - só filtrar eventos por data |
+| Benefício               | Descrição                                       |
+| ----------------------- | ----------------------------------------------- |
+| **Audit trail grátis**  | Todo histórico já está nos eventos              |
+| **Point-in-time**       | Pode reconstruir estado em qualquer momento     |
+| **Debugging**           | "Por que o preço está errado?" → replay eventos |
+| **Múltiplas projeções** | Diferentes views dos mesmos dados               |
+| **Compliance**          | LGPD, auditoria fiscal facilitados              |
+| **Correção de bugs**    | Corrigir projeção e re-replay                   |
+| **Temporal queries**    | Grátis - só filtrar eventos por data            |
 
 ### Problemas
 
-| Problema | Impacto | Severidade |
-|----------|---------|------------|
-| **Complexidade** | Curva de aprendizado significativa | Alta |
-| **Eventual consistency** | Projeções podem estar atrasadas | Média |
-| **Queries cross-aggregate** | JOINs ficam mais difíceis | Alta |
-| **Schema evolution** | Eventos antigos com formato diferente | Média |
-| **Storage** | Eventos nunca deletados | Baixa |
-| **Rebuild time** | Reconstruir projeção de milhões de eventos | Média |
-| **Tooling** | Menos ferramentas prontas que CRUD | Média |
-| **Debugging paradoxo** | ES mal implementado é pior de debugar | Alta |
+| Problema                    | Impacto                                    | Severidade |
+| --------------------------- | ------------------------------------------ | ---------- |
+| **Complexidade**            | Curva de aprendizado significativa         | Alta       |
+| **Eventual consistency**    | Projeções podem estar atrasadas            | Média      |
+| **Queries cross-aggregate** | JOINs ficam mais difíceis                  | Alta       |
+| **Schema evolution**        | Eventos antigos com formato diferente      | Média      |
+| **Storage**                 | Eventos nunca deletados                    | Baixa      |
+| **Rebuild time**            | Reconstruir projeção de milhões de eventos | Média      |
+| **Tooling**                 | Menos ferramentas prontas que CRUD         | Média      |
+| **Debugging paradoxo**      | ES mal implementado é pior de debugar      | Alta       |
 
 ---
 
@@ -259,23 +259,23 @@ class ProdutoProjector {
 
 ### Onde Faria Sentido
 
-| Entidade | Motivo | Eventos Exemplo |
-|----------|--------|-----------------|
-| **Estoque** | Movimentações são naturalmente eventos | EntradaRegistrada, ConsumoRealizado, EstornoFeito |
-| **Vendas** | Ciclo de vida com muitas transições | VendaCriada, ItemAdicionado, StatusAlterado |
-| **Financeiro** | Auditoria crítica, reconciliação | ParcelaCriada, PagamentoRecebido, BaixaRealizada |
-| **NFe** | Histórico de tentativas, status | NFeGerada, EnviadaSefaz, Autorizada, Rejeitada |
+| Entidade       | Motivo                                 | Eventos Exemplo                                   |
+| -------------- | -------------------------------------- | ------------------------------------------------- |
+| **Estoque**    | Movimentações são naturalmente eventos | EntradaRegistrada, ConsumoRealizado, EstornoFeito |
+| **Vendas**     | Ciclo de vida com muitas transições    | VendaCriada, ItemAdicionado, StatusAlterado       |
+| **Financeiro** | Auditoria crítica, reconciliação       | ParcelaCriada, PagamentoRecebido, BaixaRealizada  |
+| **NFe**        | Histórico de tentativas, status        | NFeGerada, EnviadaSefaz, Autorizada, Rejeitada    |
 
 ### Onde é Overkill
 
-| Entidade | Motivo |
-|----------|--------|
-| **Produtos (cadastro)** | CRUD simples, audit log suficiente |
-| **Clientes** | Muda raramente, audit log suficiente |
-| **Fornecedores** | Muda raramente |
-| **Configurações** | Lookup tables |
-| **Usuários** | CRUD simples |
-| **Transportadoras** | Dados mestres simples |
+| Entidade                | Motivo                               |
+| ----------------------- | ------------------------------------ |
+| **Produtos (cadastro)** | CRUD simples, audit log suficiente   |
+| **Clientes**            | Muda raramente, audit log suficiente |
+| **Fornecedores**        | Muda raramente                       |
+| **Configurações**       | Lookup tables                        |
+| **Usuários**            | CRUD simples                         |
+| **Transportadoras**     | Dados mestres simples                |
 
 ---
 
@@ -302,11 +302,11 @@ class ProdutoProjector {
 └────────────────────────────────────────────────────────────┘
 ```
 
-| Camada | Abordagem | Entidades |
-|--------|-----------|-----------|
-| **Core Domain** | Event Sourcing | Estoque, Vendas, Financeiro |
-| **Supporting** | CRUD + Audit | Produtos, Clientes, Fornecedores |
-| **Generic** | CRUD simples | Config, Lookup tables |
+| Camada          | Abordagem      | Entidades                        |
+| --------------- | -------------- | -------------------------------- |
+| **Core Domain** | Event Sourcing | Estoque, Vendas, Financeiro      |
+| **Supporting**  | CRUD + Audit   | Produtos, Clientes, Fornecedores |
+| **Generic**     | CRUD simples   | Config, Lookup tables            |
 
 ---
 
@@ -314,11 +314,11 @@ class ProdutoProjector {
 
 Se fosse implementar no futuro:
 
-| Biblioteca | Descrição | GitHub Stars |
-|------------|-----------|--------------|
-| **spatie/laravel-event-sourcing** | Mais popular, bem documentada | 1.5k+ |
-| **EventSaucePHP** | Mais opinativo, boas práticas | 800+ |
-| **prooph/event-store** | Mais complexo, mais flexível | 500+ |
+| Biblioteca                        | Descrição                     | GitHub Stars |
+| --------------------------------- | ----------------------------- | ------------ |
+| **spatie/laravel-event-sourcing** | Mais popular, bem documentada | 1.5k+        |
+| **EventSaucePHP**                 | Mais opinativo, boas práticas | 800+         |
+| **prooph/event-store**            | Mais complexo, mais flexível  | 500+         |
 
 ### Exemplo com Spatie
 

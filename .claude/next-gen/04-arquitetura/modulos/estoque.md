@@ -59,12 +59,12 @@ SELECT p.idEstoque FROM produto p ...
 
 ### Impacto
 
-| Problema | Impacto |
-|----------|---------|
-| **Valoração incorreta** | CMV calculado errado |
-| **Produtos perecíveis** | Estoque antigo não consumido, expira |
-| **Compliance fiscal** | FIFO é requisito legal brasileiro |
-| **Auditoria** | Não consegue rastrear qual lote foi vendido |
+| Problema                | Impacto                                     |
+| ----------------------- | ------------------------------------------- |
+| **Valoração incorreta** | CMV calculado errado                        |
+| **Produtos perecíveis** | Estoque antigo não consumido, expira        |
+| **Compliance fiscal**   | FIFO é requisito legal brasileiro           |
+| **Auditoria**           | Não consegue rastrear qual lote foi vendido |
 
 ### Solução Proposta
 
@@ -76,16 +76,16 @@ Ver documento detalhado: [estrategia/05-correcao-fifo.md](../../estrategia/05-co
 
 ### Classes
 
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
-| `TabEstoque` | `tabestoque.cpp` | Container principal da aba |
-| `Estoque` | `estoque.cpp` | Lógica de negócio |
-| `EstoqueItem` | `estoqueitem.cpp` | Visualização de item |
-| `WidgetEstoques` | `widgetestoques.cpp` | Lista de estoques |
-| `WidgetEstoqueProduto` | `widgetestoqueproduto.cpp` | Estoque por produto |
-| `EstoqueProxyModel` | `estoqueproxymodel.cpp` | Filtros |
-| `EstoquePrazoProxyModel` | `estoqueprazoproxymodel.cpp` | Filtro por prazo |
-| `PrecoEstoque` | `precoestoque.cpp` | Precificação |
+| Classe                   | Arquivo                      | Finalidade                 |
+| ------------------------ | ---------------------------- | -------------------------- |
+| `TabEstoque`             | `tabestoque.cpp`             | Container principal da aba |
+| `Estoque`                | `estoque.cpp`                | Lógica de negócio          |
+| `EstoqueItem`            | `estoqueitem.cpp`            | Visualização de item       |
+| `WidgetEstoques`         | `widgetestoques.cpp`         | Lista de estoques          |
+| `WidgetEstoqueProduto`   | `widgetestoqueproduto.cpp`   | Estoque por produto        |
+| `EstoqueProxyModel`      | `estoqueproxymodel.cpp`      | Filtros                    |
+| `EstoquePrazoProxyModel` | `estoqueprazoproxymodel.cpp` | Filtro por prazo           |
+| `PrecoEstoque`           | `precoestoque.cpp`           | Precificação               |
 
 ### Tabelas do Banco de Dados
 
@@ -841,14 +841,14 @@ Route::middleware(['auth'])->group(function () {
 
 ## Eventos
 
-| Evento | Dispara |
-|--------|---------|
-| `EstoqueCriado` | Log de auditoria, atualizar dashboard |
-| `EstoqueConsumoCreado` | Atualizar quantidade disponível |
-| `EstoqueConsumoEstornado` | Retornar quantidade, notificar |
-| `EstoqueMovimentado` | Log de movimentação |
-| `EstoqueCancelado` | Reverter vínculos, notificar |
-| `EstoqueAbaixoMinimo` | Alertar compras |
+| Evento                    | Dispara                               |
+| ------------------------- | ------------------------------------- |
+| `EstoqueCriado`           | Log de auditoria, atualizar dashboard |
+| `EstoqueConsumoCreado`    | Atualizar quantidade disponível       |
+| `EstoqueConsumoEstornado` | Retornar quantidade, notificar        |
+| `EstoqueMovimentado`      | Log de movimentação                   |
+| `EstoqueCancelado`        | Reverter vínculos, notificar          |
+| `EstoqueAbaixoMinimo`     | Alertar compras                       |
 
 ---
 

@@ -43,29 +43,29 @@ flowchart LR
 
 ### Classes
 
-| Classe | Arquivo | Finalidade |
-|--------|---------|------------|
+| Classe            | Arquivo               | Finalidade                     |
+| ----------------- | --------------------- | ------------------------------ |
 | `WidgetRelatorio` | `widgetrelatorio.cpp` | Widget principal de relatórios |
-| `Excel` | `excel.cpp` | Geração de arquivos Excel |
-| `PDF` | `pdf.cpp` | Geração de PDFs |
+| `Excel`           | `excel.cpp`           | Geração de arquivos Excel      |
+| `PDF`             | `pdf.cpp`             | Geração de PDFs                |
 
 ### Templates LimeReport
 
-| Template | Arquivo | Propósito |
-|----------|---------|-----------|
-| Orçamento | `orcamento.lrxml` | Impressão de orçamento |
-| Venda | `venda.lrxml` | Impressão de venda |
-| NFe | `relatorio_nfe.lrxml` | Relatório de NFe |
-| Galpão | `galpao.lrxml` | Layout do armazém |
-| Pallet | `pallet.lrxml` | Etiqueta de pallet |
+| Template  | Arquivo               | Propósito              |
+| --------- | --------------------- | ---------------------- |
+| Orçamento | `orcamento.lrxml`     | Impressão de orçamento |
+| Venda     | `venda.lrxml`         | Impressão de venda     |
+| NFe       | `relatorio_nfe.lrxml` | Relatório de NFe       |
+| Galpão    | `galpao.lrxml`        | Layout do armazém      |
+| Pallet    | `pallet.lrxml`        | Etiqueta de pallet     |
 
 ### Modelos Excel
 
-| Modelo | Arquivo | Propósito |
-|--------|---------|-----------|
-| Pedido de Compra | `modelo_compras.xlsx` | Pedido para fornecedor |
-| Espelho de Entrega | `espelho_entrega.xlsx` | Comprovante de entrega |
-| Checklist | `modelo_checklist.xlsx` | Verificação física |
+| Modelo             | Arquivo                 | Propósito              |
+| ------------------ | ----------------------- | ---------------------- |
+| Pedido de Compra   | `modelo_compras.xlsx`   | Pedido para fornecedor |
+| Espelho de Entrega | `espelho_entrega.xlsx`  | Comprovante de entrega |
+| Checklist          | `modelo_checklist.xlsx` | Verificação física     |
 
 ### Relatórios Existentes
 
@@ -111,13 +111,13 @@ flowchart LR
 
 LimeReport não tem equivalente direto em PHP. Opções:
 
-| Biblioteca | Propósito | Complexidade |
-|------------|-----------|--------------|
-| **DomPDF** | PDFs simples | Baixa |
-| **Laravel Excel** | Exportações Excel | Baixa |
-| **Browsershot** | PDFs complexos (via Chrome) | Média |
-| **Snappy** | PDFs via wkhtmltopdf | Média |
-| **Laravel Reports** | Framework de relatórios | Alta |
+| Biblioteca          | Propósito                   | Complexidade |
+| ------------------- | --------------------------- | ------------ |
+| **DomPDF**          | PDFs simples                | Baixa        |
+| **Laravel Excel**   | Exportações Excel           | Baixa        |
+| **Browsershot**     | PDFs complexos (via Chrome) | Média        |
+| **Snappy**          | PDFs via wkhtmltopdf        | Média        |
+| **Laravel Reports** | Framework de relatórios     | Alta         |
 
 ### Arquitetura Proposta
 

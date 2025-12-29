@@ -102,21 +102,21 @@ CREATE TRIGGER audit_vendas
 
 Dados temporais rastreiam **quando** algo era verdadeiro, não apenas **o que** é verdade agora:
 
-| Tipo | Rastreia | Pergunta que Responde |
-|------|----------|----------------------|
-| **System Time** | Quando dado estava no banco | "O que sabíamos em 15 de dezembro?" |
+| Tipo                 | Rastreia                             | Pergunta que Responde                 |
+| -------------------- | ------------------------------------ | ------------------------------------- |
+| **System Time**      | Quando dado estava no banco          | "O que sabíamos em 15 de dezembro?"   |
 | **Application Time** | Quando dado era válido no mundo real | "Qual era o preço em 15 de dezembro?" |
-| **Bi-temporal** | Ambos | Histórico completo + auditoria |
+| **Bi-temporal**      | Ambos                                | Histórico completo + auditoria        |
 
 ### Casos de Uso no ERP
 
-| Consulta      | Exemplo                                                     |
-| ------------- | ----------------------------------------------------------- |
-| Point-in-time | "Qual era o estoque do produto X em 15 de janeiro?"         |
-| Histórico     | "Mostrar todas as alterações de preço do produto X em 2024" |
-| Auditoria     | "Quem alterou este registro e quando?"                      |
-| Rollback      | "Como era esta venda antes da edição?"                      |
-| Relatórios    | "Qual era nosso total de recebíveis em 31 de dezembro?"     |
+| Consulta       | Exemplo                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| Point-in-time  | "Qual era o estoque do produto X em 15 de janeiro?"               |
+| Histórico      | "Mostrar todas as alterações de preço do produto X em 2024"       |
+| Auditoria      | "Quem alterou este registro e quando?"                            |
+| Rollback       | "Como era esta venda antes da edição?"                            |
+| Relatórios     | "Qual era nosso total de recebíveis em 31 de dezembro?"           |
 | Duração status | "Quanto tempo pedido ficou em PENDENTE antes de ir para ESTOQUE?" |
 
 ### Problemas Atuais
@@ -378,13 +378,13 @@ GROUP BY produto_id;
 
 ### Recomendação por Tipo de Dado
 
-| Dado | Abordagem | Motivo |
-|------|-----------|--------|
-| **Preços** | SCD-2 (`valid_from`/`valid_to`) | Consultado frequentemente em relatórios |
-| **Estoque** | Event sourcing + saldo materializado | Precisa histórico completo de movimentos |
-| **Mudanças de status** | Audit log | Já planejado, suficiente |
-| **Cliente/Fornecedor** | Audit log | Raramente precisa point-in-time |
-| **Configurações fiscais** | SCD-2 | Alíquotas mudam anualmente |
+| Dado                      | Abordagem                            | Motivo                                   |
+| ------------------------- | ------------------------------------ | ---------------------------------------- |
+| **Preços**                | SCD-2 (`valid_from`/`valid_to`)      | Consultado frequentemente em relatórios  |
+| **Estoque**               | Event sourcing + saldo materializado | Precisa histórico completo de movimentos |
+| **Mudanças de status**    | Audit log                            | Já planejado, suficiente                 |
+| **Cliente/Fornecedor**    | Audit log                            | Raramente precisa point-in-time          |
+| **Configurações fiscais** | SCD-2                                | Alíquotas mudam anualmente               |
 
 ---
 
@@ -1007,35 +1007,35 @@ public function failed(\Throwable $exception): void
 
 ### Metas de Tempo de Resposta
 
-| Categoria | Operação | Meta | P99 |
-|-----------|----------|------|-----|
-| **Páginas** | Listagem (index) | < 200ms | < 500ms |
-| | Detalhes (show) | < 150ms | < 300ms |
-| | Formulário (create/edit) | < 100ms | < 200ms |
-| **API** | GET simples | < 50ms | < 100ms |
-| | GET com relacionamentos | < 100ms | < 200ms |
-| | POST/PUT | < 150ms | < 300ms |
-| | Busca (search) | < 200ms | < 400ms |
-| **Relatórios** | Pequeno (< 1k linhas) | < 500ms | < 1s |
-| | Médio (1k-10k linhas) | < 2s | < 5s |
-| | Grande (> 10k linhas) | < 10s | < 30s |
-| **Jobs** | NFe emissão | < 5s | < 10s |
-| | CNAB geração | < 3s | < 8s |
-| | PDF geração | < 2s | < 5s |
+| Categoria      | Operação                 | Meta    | P99     |
+| -------------- | ------------------------ | ------- | ------- |
+| **Páginas**    | Listagem (index)         | < 200ms | < 500ms |
+|                | Detalhes (show)          | < 150ms | < 300ms |
+|                | Formulário (create/edit) | < 100ms | < 200ms |
+| **API**        | GET simples              | < 50ms  | < 100ms |
+|                | GET com relacionamentos  | < 100ms | < 200ms |
+|                | POST/PUT                 | < 150ms | < 300ms |
+|                | Busca (search)           | < 200ms | < 400ms |
+| **Relatórios** | Pequeno (< 1k linhas)    | < 500ms | < 1s    |
+|                | Médio (1k-10k linhas)    | < 2s    | < 5s    |
+|                | Grande (> 10k linhas)    | < 10s   | < 30s   |
+| **Jobs**       | NFe emissão              | < 5s    | < 10s   |
+|                | CNAB geração             | < 3s    | < 8s    |
+|                | PDF geração              | < 2s    | < 5s    |
 
 ### Baseline do Sistema Atual (C++)
 
 Métricas observadas no sistema desktop:
 
-| Operação | Tempo Atual | Observação |
-|----------|-------------|------------|
-| Login | 2-5s | Inclui conexão MySQL remota |
-| Abrir lista de orçamentos | 1-3s | Carrega todos sem paginação |
-| Criar orçamento | 0.5-1s | Resposta rápida (local) |
-| Emitir NFe | 5-15s | Depende do ACBr/SEFAZ |
-| Gerar PDF orçamento | 1-3s | LimeReport local |
-| Busca de produtos | 0.5-2s | LIKE com wildcard |
-| Consulta estoque | 0.3-1s | View não otimizada |
+| Operação                  | Tempo Atual | Observação                  |
+| ------------------------- | ----------- | --------------------------- |
+| Login                     | 2-5s        | Inclui conexão MySQL remota |
+| Abrir lista de orçamentos | 1-3s        | Carrega todos sem paginação |
+| Criar orçamento           | 0.5-1s      | Resposta rápida (local)     |
+| Emitir NFe                | 5-15s       | Depende do ACBr/SEFAZ       |
+| Gerar PDF orçamento       | 1-3s        | LimeReport local            |
+| Busca de produtos         | 0.5-2s      | LIKE com wildcard           |
+| Consulta estoque          | 0.3-1s      | View não otimizada          |
 
 ### Estratégia de Cache (Redis)
 
@@ -1111,14 +1111,14 @@ Cache::tags(['user', "user:{$userId}"])->flush();
 
 #### TTL por Tipo de Dado
 
-| Tipo | TTL | Motivo |
-|------|-----|--------|
-| Configurações sistema | 1 hora | Raramente mudam |
-| Permissões usuário | 30 min | Pode mudar, mas não frequente |
-| Dados de sessão | 2 horas | Padrão Laravel |
-| Consultas de estoque | 1 min | Muda frequentemente |
-| Resultados de busca | 5 min | Balanço entre atualização e performance |
-| Views materializadas | 0 (pg_ivm) | Atualizadas automaticamente |
+| Tipo                  | TTL        | Motivo                                  |
+| --------------------- | ---------- | --------------------------------------- |
+| Configurações sistema | 1 hora     | Raramente mudam                         |
+| Permissões usuário    | 30 min     | Pode mudar, mas não frequente           |
+| Dados de sessão       | 2 horas    | Padrão Laravel                          |
+| Consultas de estoque  | 1 min      | Muda frequentemente                     |
+| Resultados de busca   | 5 min      | Balanço entre atualização e performance |
+| Views materializadas  | 0 (pg_ivm) | Atualizadas automaticamente             |
 
 ### Otimização de Queries
 
@@ -1335,14 +1335,14 @@ class MeasurePerformance
 ```typescript
 // Lazy load rotas pesadas
 const routes = [
-    {
-        path: '/relatorios',
-        component: () => import('./pages/Relatorios.vue'), // Lazy
-    },
-    {
-        path: '/dashboard',
-        component: Dashboard, // Eager (sempre usado)
-    },
+  {
+    path: "/relatorios",
+    component: () => import("./pages/Relatorios.vue"), // Lazy
+  },
+  {
+    path: "/dashboard",
+    component: Dashboard, // Eager (sempre usado)
+  },
 ];
 ```
 
@@ -1351,17 +1351,17 @@ const routes = [
 ```javascript
 // vite.config.js
 export default defineConfig({
-    build: {
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    'vendor': ['vue', 'axios', '@inertiajs/vue3'],
-                    'primevue': ['primevue'],
-                    'charts': ['chart.js', 'vue-chartjs'],
-                },
-            },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["vue", "axios", "@inertiajs/vue3"],
+          primevue: ["primevue"],
+          charts: ["chart.js", "vue-chartjs"],
         },
+      },
     },
+  },
 });
 ```
 

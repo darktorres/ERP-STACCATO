@@ -22,16 +22,16 @@
 
 ## Arquivos dos Módulos
 
-| Arquivo                            | Módulo                 | Status   |
-| ---------------------------------- | ---------------------- | -------- |
-| [cadastros.md](./cadastros.md)     | Cadastros (CRUD base)  | Rascunho |
-| [compras.md](./compras.md)         | Gestão de Compras      | Rascunho |
-| [estoque.md](./estoque.md)         | Gestão de Estoque      | Rascunho |
-| [financeiro.md](./financeiro.md)   | Gestão Financeira      | Rascunho |
-| [vendas.md](./vendas.md)           | Gestão de Vendas       | Rascunho |
-| [nfe.md](./nfe.md)                 | Nota Fiscal Eletrônica | Rascunho |
-| [logistica.md](./logistica.md)     | Logística e Entregas   | Rascunho |
-| [relatorios.md](./relatorios.md)   | Relatórios e Dashboards| Rascunho |
+| Arquivo                          | Módulo                  | Status   |
+| -------------------------------- | ----------------------- | -------- |
+| [cadastros.md](./cadastros.md)   | Cadastros (CRUD base)   | Rascunho |
+| [compras.md](./compras.md)       | Gestão de Compras       | Rascunho |
+| [estoque.md](./estoque.md)       | Gestão de Estoque       | Rascunho |
+| [financeiro.md](./financeiro.md) | Gestão Financeira       | Rascunho |
+| [vendas.md](./vendas.md)         | Gestão de Vendas        | Rascunho |
+| [nfe.md](./nfe.md)               | Nota Fiscal Eletrônica  | Rascunho |
+| [logistica.md](./logistica.md)   | Logística e Entregas    | Rascunho |
+| [relatorios.md](./relatorios.md) | Relatórios e Dashboards | Rascunho |
 
 ---
 

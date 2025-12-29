@@ -62,7 +62,11 @@ Reescrevendo a aplicação ERP desktop existente em C++ Qt como uma aplicação 
 │   ├── 08-design-greenfield.md       # Design de fluxo greenfield
 │   ├── 09-migracao-dados.md          # Estratégia de migração de dados
 │   ├── 10-paridade-funcionalidades.md# Checklist de paridade funcional
-│   └── 11-treinamento.md             # Plano de treinamento e rollout
+│   ├── 11-treinamento.md             # Plano de treinamento e rollout
+│   └── 12-event-sourcing-analise.md  # Análise de Event Sourcing (não adotado)
+│
+├── brainstorming/                    # Ideias e rascunhos exploratórios
+│   └── schema-alternativo-2-entidades.md  # Brainstorm de schema alternativo
 │
 ├── negocios/                         # Documentação de lógica de negócio
 │   ├── 01-visao-geral-fluxos.md      # Diagramas de fluxo de alto nível
@@ -269,6 +273,22 @@ Pontos problemáticos e oportunidades de melhoria:
 | [09](./estrategia/09-migracao-dados.md) | Migração de Dados | ETL, validação, rollback |
 | [10](./estrategia/10-paridade-funcionalidades.md) | Paridade Funcional | Checklist de features |
 | [11](./estrategia/11-treinamento.md) | Treinamento | Plano de capacitação e rollout |
+
+### Análises Complementares
+
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [12](./estrategia/12-event-sourcing-analise.md) | Event Sourcing | Análise e motivos para não adoção |
+
+---
+
+## Brainstorming
+
+Documentos exploratórios com ideias em desenvolvimento:
+
+| Doc | Título | Descrição |
+|-----|--------|-----------|
+| [schema-alternativo](./brainstorming/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades |
 
 ---
 

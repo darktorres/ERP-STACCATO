@@ -1737,11 +1737,73 @@ flowchart TB
 | produto                                | produtos + produto_precos + produto_tributos | Dividir                      |
 | venda_has_produto + venda_has_produto2 | venda_itens                                  | Mesclar, adicionar parent_id |
 | pedido_fornecedor_has_produto +\_2     | compras + compra_itens                       | Mesclar                      |
-| estoque                                | estoques                                     | Adicionar data_entrada       |
-| estoque_has_consumo                    | estoque_consumos                             | Limpar                       |
-| nfe                                    | nfes                                         | Adicionar enum tipo          |
+| estoque                                | estoques + nfe_itens                         | **Separar dados fiscais**    |
+| estoque_has_consumo                    | estoque_consumos                             | **Remover campos fiscais**   |
+| nfe                                    | nfes + nfe_itens                             | Adicionar enum tipo + JSONB  |
 | conta_a_receber                        | recebiveis                                   | Renomear                     |
 | conta_a_pagar                          | pagaveis                                     | Renomear                     |
+
+### 8.2.1 Migração de Dados Fiscais NFe
+
+**Campos removidos de `estoque`** (~30 colunas fiscais → `nfe_itens.dados`):
+
+| Campo Antigo (estoque) | Novo Local |
+|------------------------|------------|
+| ncm, nve, extipi, cest, cfop | `nfe_itens.dados` |
+| tipoICMS, orig, cstICMS, modBC, vBC, pICMS, vICMS | `nfe_itens.dados.icms` |
+| modBCST, pMVAST, vBCST, pICMSST, vICMSST | `nfe_itens.dados.icms_st` |
+| cEnq, cstIPI, vBCIPI, pIPI, vIPI | `nfe_itens.dados.ipi` |
+| cstPIS, vBCPIS, pPIS, vPIS | `nfe_itens.dados.pis` |
+| cstCOFINS, vBCCOFINS, pCOFINS, vCOFINS | `nfe_itens.dados.cofins` |
+| valorGare | `nfe_itens.dados.gare` |
+
+**Campos removidos de `estoque_has_consumo`** (~30 colunas fiscais → `nfe_itens.dados`):
+
+| Campo Antigo (estoque_has_consumo) | Novo Local |
+|------------------------------------|------------|
+| Mesmos campos acima | `nfe_itens.dados` (NFe de saída) |
+
+**Novo relacionamento:**
+
+```
+estoques.nfe_item_id → nfe_itens (NFe entrada, dados fiscais do fornecedor)
+nfe_itens.venda_item_id → venda_itens (NFe saída, dados fiscais para cliente)
+```
+
+**Script de migração:**
+
+```sql
+-- 1. Criar nfe_itens a partir de estoque (NFe entrada)
+INSERT INTO nfe_itens (nfe_id, numero_item, produto_id, dados)
+SELECT
+    e.idNFe,
+    ROW_NUMBER() OVER (PARTITION BY e.idNFe ORDER BY e.idEstoque),
+    e.idProduto,
+    jsonb_build_object(
+        'cfop', e.cfop,
+        'ncm', e.ncm,
+        'quantidade', e.quant,
+        'valor_unitario', e.valorUnid,
+        'valor_total', e.valorTotal,
+        'icms', jsonb_build_object(
+            'cst', e.cstICMS,
+            'origem', e.orig,
+            'valor_bc', e.vBC,
+            'aliquota', e.pICMS,
+            'valor', e.vICMS
+        ),
+        -- ... outros impostos
+    )
+FROM estoque e
+WHERE e.idNFe IS NOT NULL;
+
+-- 2. Atualizar estoques com FK para nfe_itens
+UPDATE estoques es
+SET nfe_item_id = ni.id
+FROM nfe_itens ni
+WHERE ni.nfe_id = es.nfe_entrada_id
+  AND ni.produto_id = es.produto_id;
+```
 
 ### 8.3 Convenções de Nomeação Aplicadas
 

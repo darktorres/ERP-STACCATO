@@ -98,7 +98,17 @@ CREATE TRIGGER audit_vendas
 
 ## 2. Dados Temporais / Consultas Point-in-Time
 
-### Casos de Uso
+### O que é Temporal SQL?
+
+Dados temporais rastreiam **quando** algo era verdadeiro, não apenas **o que** é verdade agora:
+
+| Tipo | Rastreia | Pergunta que Responde |
+|------|----------|----------------------|
+| **System Time** | Quando dado estava no banco | "O que sabíamos em 15 de dezembro?" |
+| **Application Time** | Quando dado era válido no mundo real | "Qual era o preço em 15 de dezembro?" |
+| **Bi-temporal** | Ambos | Histórico completo + auditoria |
+
+### Casos de Uso no ERP
 
 | Consulta      | Exemplo                                                     |
 | ------------- | ----------------------------------------------------------- |
@@ -107,6 +117,33 @@ CREATE TRIGGER audit_vendas
 | Auditoria     | "Quem alterou este registro e quando?"                      |
 | Rollback      | "Como era esta venda antes da edição?"                      |
 | Relatórios    | "Qual era nosso total de recebíveis em 31 de dezembro?"     |
+| Duração status | "Quanto tempo pedido ficou em PENDENTE antes de ir para ESTOQUE?" |
+
+### Problemas Atuais
+
+**1. Histórico de Preços Perdido**
+```
+Atual: Preço armazenado uma vez, se mudar, antigo é perdido.
+Problema: Relatórios mostram preço atual, não preço histórico da venda.
+```
+
+**2. Níveis de Estoque ao Longo do Tempo**
+```
+Atual: Apenas `quantidade_disponivel` atual armazenada.
+Problema: Não consegue responder perguntas point-in-time para auditoria de fim de ano.
+```
+
+**3. Limite de Crédito do Cliente**
+```
+Atual: Apenas valor atual.
+Problema: "Quem mudou o limite de crédito e quando?" - Impossível responder.
+```
+
+**4. Histórico de Status**
+```
+Atual: Apenas status atual armazenado.
+Problema: Não consegue medir eficiência do processo.
+```
 
 ### Opção A: Tabelas Temporais com Histórico
 
@@ -192,7 +229,121 @@ SELECT id, cliente_id, status, total, ... FROM vendas_history WHERE id = 123
   AND valid_from <= '2025-01-15' AND valid_to > '2025-01-15';
 ```
 
-### Opção B: Tabelas de Snapshot
+### Opção B: Slowly Changing Dimension Type 2 (SCD-2)
+
+Para dados que mudam periodicamente e precisam de histórico consultável (ex: preços):
+
+```sql
+CREATE TABLE produto_precos (
+    id SERIAL PRIMARY KEY,
+    produto_id INTEGER NOT NULL REFERENCES produtos(id),
+
+    custo DECIMAL(15,4) NOT NULL,
+    valor_venda DECIMAL(15,4) NOT NULL,
+
+    -- Colunas temporais
+    valid_from TIMESTAMP NOT NULL DEFAULT NOW(),
+    valid_to TIMESTAMP,  -- NULL = atualmente válido
+
+    created_by INTEGER REFERENCES usuarios(id)
+);
+
+-- Índice para consultas point-in-time
+CREATE INDEX idx_produto_precos_temporal
+    ON produto_precos(produto_id, valid_from, valid_to);
+```
+
+**Consultar preço em data específica:**
+
+```sql
+SELECT * FROM produto_precos
+WHERE produto_id = :produto_id
+  AND valid_from <= '2024-12-15'
+  AND (valid_to IS NULL OR valid_to > '2024-12-15');
+```
+
+**Consultar preço atual:**
+
+```sql
+SELECT * FROM produto_precos
+WHERE produto_id = :produto_id
+  AND valid_to IS NULL;
+```
+
+**Atualizar preço (fechar antigo, inserir novo):**
+
+```sql
+-- Fechar registro atual
+UPDATE produto_precos
+SET valid_to = NOW()
+WHERE produto_id = :produto_id
+  AND valid_to IS NULL;
+
+-- Inserir novo registro
+INSERT INTO produto_precos (produto_id, custo, valor_venda, valid_from)
+VALUES (:produto_id, :custo, :valor_venda, NOW());
+```
+
+**Prós:** Consultas point-in-time rápidas
+**Contras:** Updates mais complexos, mais armazenamento
+
+---
+
+### Opção C: Event Sourcing (Mais Poderoso)
+
+Armazena eventos, deriva estado atual. Ideal para dados que mudam frequentemente:
+
+```sql
+CREATE TABLE estoque_movimentos (
+    id BIGSERIAL PRIMARY KEY,
+    estoque_id INTEGER NOT NULL REFERENCES estoques(id),
+
+    tipo VARCHAR(30) NOT NULL,  -- ENTRADA, CONSUMO, ESTORNO, AJUSTE
+    quantidade DECIMAL(15,4) NOT NULL,  -- positivo ou negativo
+    saldo_apos DECIMAL(15,4) NOT NULL,  -- saldo corrente
+
+    -- Contexto
+    consumo_id INTEGER REFERENCES estoque_consumos(id),
+    ajuste_motivo VARCHAR(200),
+
+    usuario_id INTEGER REFERENCES usuarios(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_estoque_mov_temporal
+    ON estoque_movimentos(estoque_id, created_at);
+```
+
+**Consultar nível de estoque em qualquer ponto no tempo:**
+
+```sql
+SELECT saldo_apos
+FROM estoque_movimentos
+WHERE estoque_id = :estoque_id
+  AND created_at <= '2024-12-15 23:59:59'
+ORDER BY created_at DESC
+LIMIT 1;
+```
+
+**Histórico completo de um item de estoque:**
+
+```sql
+SELECT
+    tipo,
+    quantidade,
+    saldo_apos,
+    created_at
+FROM estoque_movimentos
+WHERE estoque_id = :estoque_id
+ORDER BY created_at;
+```
+
+**Prós:** Histórico completo, pode replay, ótimo para debugging
+**Contras:** Estado atual precisa ser computado ou cacheado
+
+---
+
+### Opção D: Tabelas de Snapshot
 
 Para necessidades específicas de relatórios, tirar snapshots periódicos:
 
@@ -217,6 +368,75 @@ SELECT
     SUM(quantidade_disponivel * custo_unitario)
 FROM estoques
 GROUP BY produto_id;
+```
+
+---
+
+### Recomendação por Tipo de Dado
+
+| Dado | Abordagem | Motivo |
+|------|-----------|--------|
+| **Preços** | SCD-2 (`valid_from`/`valid_to`) | Consultado frequentemente em relatórios |
+| **Estoque** | Event sourcing + saldo materializado | Precisa histórico completo de movimentos |
+| **Mudanças de status** | Audit log | Já planejado, suficiente |
+| **Cliente/Fornecedor** | Audit log | Raramente precisa point-in-time |
+| **Configurações fiscais** | SCD-2 | Alíquotas mudam anualmente |
+
+---
+
+### Exemplos de Queries para o ERP
+
+**Valoração de inventário de fim de ano:**
+
+```sql
+SELECT
+    p.descricao,
+    e.lote,
+    -- Saldo em 31 de dezembro
+    (SELECT saldo_apos
+     FROM estoque_movimentos
+     WHERE estoque_id = e.id
+       AND created_at <= '2024-12-31 23:59:59'
+     ORDER BY created_at DESC LIMIT 1) as quantidade,
+    e.custo_unitario
+FROM estoques e
+JOIN produtos p ON p.id = e.produto_id
+WHERE e.created_at <= '2024-12-31';
+```
+
+**Preço no momento da venda (já snapshotted):**
+
+```sql
+-- venda_itens.valor_unitario já é snapshot do momento da venda
+SELECT
+    vi.id,
+    vi.quantidade,
+    vi.valor_unitario as preco_na_venda,
+    pp.valor_venda as preco_atual  -- Preço atual para comparação
+FROM venda_itens vi
+JOIN produto_precos pp ON pp.produto_id = vi.produto_id
+    AND pp.valid_to IS NULL;
+```
+
+**Reconstruir estado do cliente em data específica:**
+
+```sql
+-- Usando audit_log para reconstruir
+WITH estado_em_data AS (
+    SELECT
+        new_values
+    FROM audit_log
+    WHERE table_name = 'clientes'
+      AND record_id = :cliente_id
+      AND created_at <= '2024-06-15 23:59:59'
+    ORDER BY created_at DESC
+    LIMIT 1
+)
+SELECT
+    new_values->>'razao_social' as razao_social,
+    (new_values->>'limite_credito')::DECIMAL as limite_credito,
+    new_values->>'status' as status
+FROM estado_em_data;
 ```
 
 ---

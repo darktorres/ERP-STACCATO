@@ -324,6 +324,8 @@ void Application::showMessages() {
   showingMessages = true;
 
   for (auto &exception : exceptionQueue) {
+    if (exception.message.isEmpty()) { continue; }  // Skip empty messages used for flow control
+
     Log::createLog("Exceção", exception.message);
 
     if (exception.message.contains("Access denied for user")) { exception.message = "Login inválido!"; }

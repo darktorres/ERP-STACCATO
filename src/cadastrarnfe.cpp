@@ -399,9 +399,12 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     qApp->enqueueError("Rejeição: IE do destinatário não informada\nFazendo consulta do CNPJ...");
     on_pushButtonConsultarCadastro_clicked();  // Will throw if consultation fails
 
-    // If we get here, consultation succeeded
+    // If we get here, consultation succeeded - remove the rejected NFe so user can retry
+    removerNota(idNFe);
+
     manterAberto = true;
-    throw RuntimeException("Inscrição Estadual atualizada com sucesso!\nClique em 'Enviar NF-e' novamente para reenviar.", this);
+    qApp->enqueueInformation("Inscrição Estadual atualizada com sucesso!\nClique em 'Enviar NF-e' novamente para reenviar.", this);
+    throw RuntimeException("");
   }
 
   if (resposta.contains("xMotivo=Rejeição", Qt::CaseInsensitive)) {

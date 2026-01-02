@@ -1,13 +1,16 @@
 #include "application.h"
 
 #include "QSimpleUpdater.h"
-#include "acbrlib.h"
-#include "estoque.h"
 #include "file.h"
-#include "inputdialogfinanceiro.h"
 #include "log.h"
 #include "user.h"
+
+#ifndef BENCHMARK_BUILD
+#include "acbrlib.h"
+#include "estoque.h"
+#include "inputdialogfinanceiro.h"
 #include "venda.h"
+#endif
 
 #include <QDebug>
 #include <QDir>
@@ -31,12 +34,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
 
   QDir::setCurrent(QCoreApplication::applicationDirPath());
 
+#ifndef BENCHMARK_BUILD
   readSettingsFile();
 
   if (User::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
+#endif
 
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
+#ifdef BENCHMARK_BUILD
+    qCritical() << "Este aplicativo requer o driver QMYSQL!";
+#else
     QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
+#endif
     exit(1);
   }
 }
@@ -170,7 +179,13 @@ void Application::dbReconnect(const bool isSilent) {
 
   if (not isConnected) {
     // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
-    if (not isSilent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
+    if (not isSilent) {
+#ifdef BENCHMARK_BUILD
+      qCritical() << "Erro conectando no banco de dados:" << db.lastError().text();
+#else
+      QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text());
+#endif
+    }
   }
 }
 
@@ -347,25 +362,49 @@ void Application::showMessages() {
       emit setConnectionStatus(false);
     }
 
-    if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
+    if (not silent) {
+#ifdef BENCHMARK_BUILD
+      qCritical() << "Exception:" << exception.message;
+#else
+      QMessageBox::critical(exception.widget, "Erro!", exception.message);
+#endif
+    }
   }
 
   for (const auto &error : std::as_const(errorQueue)) {
     Log::createLog("Erro", error.message);
 
-    if (not silent) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+    if (not silent) {
+#ifdef BENCHMARK_BUILD
+      qCritical() << "Error:" << error.message;
+#else
+      QMessageBox::critical(error.widget, "Erro!", error.message);
+#endif
+    }
   }
 
   for (const auto &warning : std::as_const(warningQueue)) {
     Log::createLog("Aviso", warning.message);
 
-    if (not silent) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+    if (not silent) {
+#ifdef BENCHMARK_BUILD
+      qWarning() << "Warning:" << warning.message;
+#else
+      QMessageBox::warning(warning.widget, "Aviso!", warning.message);
+#endif
+    }
   }
 
   for (const auto &information : std::as_const(informationQueue)) {
     Log::createLog("Informação", information.message);
 
-    if (not silent) { QMessageBox::information(information.widget, "Informação!", information.message); }
+    if (not silent) {
+#ifdef BENCHMARK_BUILD
+      qInfo() << "Info:" << information.message;
+#else
+      QMessageBox::information(information.widget, "Informação!", information.message);
+#endif
+    }
   }
 
   exceptionQueue.clear();
@@ -580,6 +619,7 @@ QString Application::findTag(const QString &texto, const QString &tag) {
   return texto.mid(index + tag.length() + 2).split("\r\n").first();
 }
 
+#ifndef BENCHMARK_BUILD
 void Application::abrirVenda(const QVariant &idVenda) {
   if (not idVenda.isValid() or idVenda.toString().isEmpty()) { return; }
 
@@ -611,3 +651,4 @@ void Application::abrirCompra(const QVariant &ordemCompra) {
   input->setFilter(ordemCompra.toString());
   input->show(); // TODO: porque esse abre em tela cheia se os outros abrem normal?
 }
+#endif

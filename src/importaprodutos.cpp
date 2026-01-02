@@ -52,6 +52,19 @@ void ImportaProdutos::importarTabela() {
   }
 }
 
+void ImportaProdutos::importarTabelaCLI(const QString &filePath, int validadeDias) {
+  file = filePath;
+  validade = validadeDias;
+
+  if (validade != -1) { validadeString = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd"); }
+
+  setWindowTitle(file);
+
+  qApp->startTransaction("ImportaProdutos::importarTabelaCLI");
+
+  processarArquivo();
+}
+
 void ImportaProdutos::verificaSeRepresentacao() {
   SqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
@@ -84,7 +97,9 @@ void ImportaProdutos::processarArquivo() {
   xlsx.selectSheet("BASE");
   verificaTabela(xlsx);
 
+#ifndef BENCHMARK_BUILD
   progressDialog.show();
+#endif
 
   cadastraFornecedores(xlsx);
   verificaSeRepresentacao();
@@ -128,6 +143,10 @@ void ImportaProdutos::processarArquivo() {
 
   if (canceled) { throw std::exception(); }
 
+#ifdef BENCHMARK_BUILD
+  qInfo() << "Produtos importados:" << itensImported << "| Atualizados:" << itensUpdated
+          << "| Não modificados:" << itensNotChanged << "| Descontinuados:" << itensExpired << "| Com erro:" << itensError;
+#else
   setupTables();
 
   ui->tableProdutos->sortByColumn("descontinuado", Qt::AscendingOrder);
@@ -138,6 +157,7 @@ void ImportaProdutos::processarArquivo() {
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
 
   QMessageBox::information(this, "Aviso!", resultado);
+#endif
 }
 
 void ImportaProdutos::setProgressDialog() {

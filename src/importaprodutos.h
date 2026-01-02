@@ -57,6 +57,7 @@ public:
   ~ImportaProdutos();
 
   auto importarTabela() -> void;
+  auto importarTabelaCLI(const QString &filePath, int validadeDias) -> void;
 
 private:
   // attributes

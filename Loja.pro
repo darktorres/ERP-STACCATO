@@ -117,6 +117,8 @@ win32-g++ { # ccache is not compatible with MSVC
 }
 
 linux {
+    LIBS += -lcurl
+
     CCACHE_BIN = $$system(which ccache)
 
     !isEmpty(CCACHE_BIN) {

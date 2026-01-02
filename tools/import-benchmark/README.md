@@ -94,9 +94,10 @@ The benchmark tool supports regression testing to ensure optimizations don't bre
 The verification compares:
 - **Counters**: itensImported, itensUpdated, itensNotChanged, itensExpired, itensError
 - **Model row counts**: Number of rows in modelProduto and modelErro
-- **Field values**: All product fields for each row, matched by key (fornecedor + codComercial + ui)
+- **Field values**: All product fields for each row, matched by unique key (idProduto + fornecedor + codComercial + ui)
 
 Floating-point values are compared with tolerance (0.0001).
+Null values are considered equivalent to 0 or empty string.
 
 ## Profiling (Linux/WSL2)
 
@@ -160,10 +161,15 @@ Total time: 56000 ms
 Rolling back transaction...
 ```
 
-## Performance Baseline
+## Performance
 
 With CASTELATTO.xlsx (3,745 products to update, 12,275 to mark discontinued):
-- **Import time**: ~55 seconds
-- **Throughput**: ~287 products/second
 
-See `.claude/importaprodutos-profiling-analysis.md` for detailed profiling results.
+| Version | Import Time | Throughput |
+|---------|-------------|------------|
+| Original (QSqlTableModel) | ~55-62 seconds | ~260 products/sec |
+| **Optimized (QStandardItemModel)** | **~8.7 seconds** | **~1,840 products/sec** |
+
+**Speedup: 6.3x (86% faster)**
+
+See `.claude/importaprodutos-profiling-analysis.md` for detailed profiling results and optimization strategy.

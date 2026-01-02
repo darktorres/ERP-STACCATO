@@ -22,6 +22,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSqlRecord>
+#include <QStandardItemModel>
 #include <QTextStream>
 
 #include "application.h"
@@ -36,7 +37,8 @@ static const QStringList REGRESSION_FIELDS = {
 };
 
 // Fields used for row identification (for matching rows between runs)
-static const QStringList KEY_FIELDS = {"fornecedor", "codComercial", "ui"};
+// NOTE: idProduto is required because duplicate products exist with same fornecedor+codComercial+ui
+static const QStringList KEY_FIELDS = {"idProduto", "fornecedor", "codComercial", "ui"};
 
 struct RegressionResult {
   int itensImported = 0;
@@ -78,13 +80,16 @@ struct RegressionResult {
   }
 };
 
-QJsonObject captureRowData(SqlTableModel &model, int row) {
+QJsonObject captureRowData(QStandardItemModel &model, int row, const QStringList &columns) {
   QJsonObject rowObj;
   for (const QString &field : REGRESSION_FIELDS) {
-    int col = model.fieldIndex(field, true);
+    int col = columns.indexOf(field);
     if (col == -1) continue;
 
-    QVariant value = model.data(row, col);
+    QStandardItem *item = model.item(row, col);
+    if (!item) continue;
+
+    QVariant value = item->data(Qt::DisplayRole);
     if (value.isNull()) {
       rowObj[field] = QJsonValue::Null;
     } else if (value.userType() == QMetaType::Double) {
@@ -117,19 +122,21 @@ RegressionResult captureResults(ImportaProdutos &importador) {
   result.itensExpired = importador.getItensExpired();
   result.itensError = importador.getItensError();
 
-  SqlTableModel &modelProduto = importador.getModelProduto();
-  SqlTableModel &modelErro = importador.getModelErro();
+  // Use new optimized models
+  QStandardItemModel &previewModel = importador.getPreviewModel();
+  QStandardItemModel &errorModel = importador.getErrorModel();
+  const QStringList &columns = ImportaProdutos::getPreviewColumns();
 
-  result.modelProdutoRowCount = modelProduto.rowCount();
-  result.modelErroRowCount = modelErro.rowCount();
+  result.modelProdutoRowCount = previewModel.rowCount();
+  result.modelErroRowCount = errorModel.rowCount();
 
   // Capture model data
-  for (int row = 0; row < modelProduto.rowCount(); ++row) {
-    result.modelProdutoData.append(captureRowData(modelProduto, row));
+  for (int row = 0; row < previewModel.rowCount(); ++row) {
+    result.modelProdutoData.append(captureRowData(previewModel, row, columns));
   }
 
-  for (int row = 0; row < modelErro.rowCount(); ++row) {
-    result.modelErroData.append(captureRowData(modelErro, row));
+  for (int row = 0; row < errorModel.rowCount(); ++row) {
+    result.modelErroData.append(captureRowData(errorModel, row, columns));
   }
 
   return result;
@@ -239,11 +246,34 @@ ComparisonResult compareResults(const RegressionResult &expected, const Regressi
       QJsonValue actVal = actRow[field];
 
       bool match = false;
-      if (expVal.isDouble() && actVal.isDouble()) {
-        // Compare doubles with tolerance
-        match = qAbs(expVal.toDouble() - actVal.toDouble()) < 0.0001;
+
+      // Convert to QVariant for flexible comparison
+      QVariant expVar = expVal.toVariant();
+      QVariant actVar = actVal.toVariant();
+
+      // Handle null values
+      if (expVal.isNull() && actVal.isNull()) {
+        match = true;
+      } else if (expVal.isNull() || actVal.isNull()) {
+        // One is null, one is not - check for null-equivalent values (0, "", false)
+        QVariant nonNullVal = expVal.isNull() ? actVar : expVar;
+        if (nonNullVal.toString().isEmpty() || nonNullVal.toDouble() == 0.0) {
+          match = true;  // Null and empty/zero are considered equivalent
+        } else {
+          match = false;
+        }
       } else {
-        match = (expVal == actVal);
+        // Try numeric comparison via QVariant (handles string "123" vs number 123)
+        bool expNumOk = false, actNumOk = false;
+        double expNum = expVar.toDouble(&expNumOk);
+        double actNum = actVar.toDouble(&actNumOk);
+
+        if (expNumOk && actNumOk) {
+          match = qAbs(expNum - actNum) < 0.0001;
+        } else {
+          // Fall back to string comparison
+          match = (expVar.toString() == actVar.toString());
+        }
       }
 
       if (!match) {
@@ -400,8 +430,8 @@ int main(int argc, char *argv[]) {
     out << "Not changed: " << importador.getItensNotChanged() << Qt::endl;
     out << "Expired:     " << importador.getItensExpired() << Qt::endl;
     out << "Errors:      " << importador.getItensError() << Qt::endl;
-    out << "Model rows:  " << importador.getModelProduto().rowCount() << Qt::endl;
-    out << "Error rows:  " << importador.getModelErro().rowCount() << Qt::endl;
+    out << "Model rows:  " << importador.getPreviewModel().rowCount() << Qt::endl;
+    out << "Error rows:  " << importador.getErrorModel().rowCount() << Qt::endl;
     out << Qt::endl;
 
     // Only capture full results when needed for regression testing

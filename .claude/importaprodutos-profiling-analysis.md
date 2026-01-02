@@ -167,20 +167,17 @@ With ~3,745 products and ~20+ fields per product, this results in:
 
 ## Optimization Recommendations
 
-### 1. Batch Updates (High Impact)
-Instead of calling `setData()` for each field individually:
+### 1. Batch Updates with QSqlRecord (NO Impact - Tested)
 ```cpp
-// Current: Multiple setData calls per row
-model.setData(row, "field1", value1);
-model.setData(row, "field2", value2);
-// ... 20+ more calls
-
-// Better: Use QSqlRecord for batch update
+// Attempted: Use QSqlRecord for batch update
 QSqlRecord record = model.record(row);
 record.setValue("field1", value1);
 record.setValue("field2", value2);
 model.setRecord(row, record);
 ```
+**Result:** Implemented and tested - SLOWER (54s → 69s). `record(row)` internally calls
+`data()` for ALL columns, and `setRecord()` internally calls `setData()` for each field.
+No actual reduction in Qt model operations.
 
 ### 2. Direct SQL for Bulk Operations (High Impact)
 For large imports, bypass the model entirely:
@@ -210,14 +207,16 @@ for (int i = 0; i < model.columnCount(); i++) {
 **Result:** Implemented and tested - NO measurable improvement. The `fieldIndex()`
 string lookup is not the bottleneck; the Qt model's internal map traversal dominates.
 
-### 4. Disable Sorting During Import (Medium Impact)
+### 4. Disable Proxy During Import (7% Improvement - Tested)
 ```cpp
-// Disable proxy model updates during bulk import
-proxyModel->setDynamicSortFilter(false);
+// Disable proxy model during bulk import
+auto *savedProxy = modelProduto.proxyModel;
+modelProduto.proxyModel = nullptr;
 // ... do import ...
-proxyModel->setDynamicSortFilter(true);
-proxyModel->invalidate();
+modelProduto.proxyModel = savedProxy;  // Restore before UI display
 ```
+**Result:** Implemented and tested - 7% improvement (58s → 54s). Eliminates
+`proxy_to_source()` overhead from QSortFilterProxyModel.
 
 ### 5. Use Transactions Wisely (Low-Medium Impact)
 Already using transactions, but ensure they're not committed too frequently.

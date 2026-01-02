@@ -167,15 +167,20 @@ With ~3,745 products and ~20+ fields per product, this results in:
 
 ## Optimization Results
 
-### Tested Approaches (Incremental)
+### Performance Summary
 
-| Approach | Result | Notes |
-|----------|--------|-------|
-| QSqlRecord Batch | **-27% SLOWER** | `setRecord()` internally calls `setData()` per field |
-| Field Index Cache | **0% (no impact)** | String lookup wasn't the bottleneck |
-| Disable Proxy | **+7% faster** | 58s → 54s, eliminates proxy overhead |
+| Version | Time | Speedup | Key Change |
+|---------|------|---------|------------|
+| Original | 55-62s | 1x | QSqlTableModel |
+| **v1** | 8.7s | 6.3x | QStandardItemModel |
+| **v2** | 2.0s | 28x | Cached field indices |
+| **v3** | **1.9s** | **29x** | Model + string optimizations |
 
-### Final Solution: Bypass QSqlTableModel (5.8x FASTER)
+All versions verified via regression testing (16,020 rows match baseline).
+
+---
+
+### v1: Bypass QSqlTableModel (6.3x faster)
 
 **Architecture Change:**
 ```
@@ -194,28 +199,90 @@ After:  Excel → Compare in memory → QVector<ProductChange> → QStandardItem
 3. **Phase 3 - Preview:** Populate `QStandardItemModel` from change vector (read-only)
 4. **Phase 4 - Save:** Batch prepared statements for INSERT/UPDATE
 
-**Results (Verified via Regression Testing):**
-- **Before:** 55-62 seconds, 80% CPU in Qt map traversal
-- **After (v1):** 8.7 seconds, 11% CPU in DB string conversion (6.3x faster)
-- **After (v2):** 2.0 seconds, 8% CPU in Excel XML parsing (28x faster)
-- **Regression Test:** PASSED - all 16,020 rows match field-by-field
+**Result:** 55s → 8.7s (6.3x faster)
 
-**Optimization v2: Cached Field Indices**
-Added positional SQL field access with cached indices, eliminating 400,000 string lookups per import.
+---
 
-**Profile After v2 Optimization:**
+### v2: Cached Field Indices (28x faster)
+
+**Problem:** Each `query.value("fieldName")` call:
+1. Creates a QSqlRecord copy (triggers QSqlField construction)
+2. Does string comparison to find field index
+3. With 25 fields × 16,000 rows = 400,000 string lookups
+
+**Solution:** Cache field indices before the loop:
+```cpp
+const int iIdProduto = rec.indexOf("idProduto");
+// ... cache all 25 indices once ...
+while (query.next()) {
+    p.idProduto = query.value(iIdProduto).toInt();  // Positional access
+}
+```
+
+**Result:** 8.7s → 2.0s (4.3x faster, 28x total)
+
+---
+
+### v3: Model + String Optimizations (29x faster)
+
+**Optimizations applied:**
+1. **Block signals during bulk insert** - Eliminates `_q_emitItemChanged` overhead
+2. **Pre-allocate model rows** - `setRowCount()` before populating
+3. **Cache `User::getSetting()`** - Called once instead of 16,000+ times
+4. **Use `QHash::constFind()`** - Instead of `contains()` + `operator[]`
+5. **Single-pass `normalizeString()`** - Avoids 3 temporary QStrings per call
+
+**Result:** 2.0s → 1.9s (29x total)
+
+---
+
+## Final Profile (v3)
+
+### Call Graph
+```
+main (97.75%)
+└── processarArquivoOptimized (80.55%)
+    ├── QXlsx::Document (load Excel) ─── 36.5%
+    │   └── loadXmlSheetData ─── 32.7%
+    │       ├── QXmlStreamReader::parse ─── 14%
+    │       ├── CellReference::init ─── 5.4%
+    │       └── CellFormula::loadFromXml ─── 2.7%
+    ├── buildPreviewModels ─── ~25%
+    └── loadExistingProducts ─── ~15%
+```
+
+### Flat Profile (Top Functions)
 | Overhead | Function | Category |
 |----------|----------|----------|
 | 8.16% | `QXmlStreamReaderPrivate::parse` | Excel XML parsing |
-| ~15% | `malloc/free` | Memory allocation |
-| 1.27% | `QMapData::findNode` | Excel cell lookup |
-| 0.90% | `QStandardItem::setData` | Preview model |
-| 0.84% | `QUtf8::convertToUnicode` | String conversion |
+| 5.32% | `malloc` | Memory allocation |
+| 3.91% | `malloc_consolidate` | Memory management |
+| 3.60% | `_int_malloc` | Memory allocation |
+| 3.31% | `_int_free` | Memory deallocation |
+| 2.40% | `unlink_chunk` | Memory management |
+| 1.87% | `cfree` | Memory deallocation |
+| 1.33% | `QArrayData::allocate` | Qt allocation |
+| 0.92% | `QStandardItem::setData` | Preview model |
+| 0.72% | `QUtf8::convertToUnicode` | String conversion |
 
-The Qt model map traversal and SQL field lookup bottlenecks have been **completely eliminated**.
+### Analysis
 
-### 5. Use Transactions Wisely (Low-Medium Impact)
-Already using transactions, but ensure they're not committed too frequently.
+**CPU Distribution:**
+- **Excel parsing: ~36%** - Fundamental I/O, cannot optimize without different library
+- **Memory allocation: ~21%** - Unavoidable overhead for 16,000 products
+- **Model building: ~10%** - Optimized with signal blocking
+- **String operations: ~5%** - Reduced with single-pass normalization
+
+**Bottlenecks Eliminated:**
+- ~~`QMapNodeBase::nextNode()` (80%)~~ → Replaced QSqlTableModel
+- ~~`QSqlField` operations (11%)~~ → Cached field indices
+- ~~`_q_emitItemChanged` signals~~ → Blocked during bulk insert
+- ~~`User::getSetting()` lookups~~ → Cached once
+
+**Remaining Optimization Opportunities (diminishing returns):**
+- Different Excel library (risky, significant effort)
+- Custom memory allocator (complex)
+- Multi-threading (Qt model not thread-safe)
 
 ## Network Considerations (WSL2)
 

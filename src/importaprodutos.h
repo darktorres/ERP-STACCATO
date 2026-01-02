@@ -59,6 +59,17 @@ public:
   auto importarTabela() -> void;
   auto importarTabelaCLI(const QString &filePath, int validadeDias) -> void;
 
+#ifdef BENCHMARK_BUILD
+  // Test accessors for regression testing
+  auto getItensImported() const -> int { return itensImported; }
+  auto getItensUpdated() const -> int { return itensUpdated; }
+  auto getItensNotChanged() const -> int { return itensNotChanged; }
+  auto getItensExpired() const -> int { return itensExpired; }
+  auto getItensError() const -> int { return itensError; }
+  auto getModelProduto() -> SqlTableModel & { return modelProduto; }
+  auto getModelErro() -> SqlTableModel & { return modelErro; }
+#endif
+
 private:
   // attributes
   int itensError = 0;
@@ -69,6 +80,7 @@ private:
   int validade = 0;
   Produto produto;
   QHash<QString, int> hashModel;
+  QHash<QString, int> fieldIdx;  // Cached field indices for performance
   QMap<QString, int> m_fornecedores;
   QProgressDialog progressDialog;
   QString file;
@@ -83,6 +95,7 @@ private:
   // methods
   auto atualizaCamposProduto(const int row) -> void;
   auto atualizaPrecoEstoque() -> void;
+  auto cacheFieldIndices() -> void;
   auto atualizaProduto() -> void;
   auto buscarCadastrarFornecedor() -> int;
   auto cadastraFornecedores(QXlsx::Document &xlsx) -> void;

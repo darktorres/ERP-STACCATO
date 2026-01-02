@@ -416,6 +416,24 @@ void ImportaProdutos::mostraApenasEstesFornecedores() {
   modelProduto.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
 
   modelProduto.select();
+
+  cacheFieldIndices();
+}
+
+void ImportaProdutos::cacheFieldIndices() {
+  // Cache all field indices used in atualizaCamposProduto, insereEmOk, insereEmErro
+  const QStringList fields = {
+      "atualizarTabelaPreco", "fornecedor",    "fornecedorUpd",    "descricao",       "descricaoUpd",    "un",
+      "unUpd",                "colecao",       "colecaoUpd",       "m2cx",            "m2cxUpd",         "pccx",
+      "pccxUpd",              "kgcx",          "kgcxUpd",          "formComercial",   "formComercialUpd", "codComercial",
+      "codComercialUpd",      "codBarras",     "codBarrasUpd",     "ncm",             "ncmUpd",          "qtdPallet",
+      "qtdPalletUpd",         "custo",         "custoUpd",         "precoVenda",      "precoVendaUpd",   "ui",
+      "uiUpd",                "un2",           "un2Upd",           "minimo",          "minimoUpd",       "mva",
+      "mvaUpd",               "st",            "stUpd",            "sticms",          "sticmsUpd",       "quantCaixa",
+      "quantCaixaUpd",        "markup",        "markupUpd",        "validade",        "validadeUpd",     "descontinuado",
+      "idFornecedor",         "promocao",      "idProdutoRelacionado"};
+
+  for (const QString &field : fields) { fieldIdx[field] = modelProduto.fieldIndex(field, true); }
 }
 
 void ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -545,206 +563,206 @@ void ImportaProdutos::atualizaPrecoEstoque() {
 }
 
 void ImportaProdutos::atualizaCamposProduto(const int row) {
-  modelProduto.setData(row, "atualizarTabelaPreco", true);
+  modelProduto.setData(row, fieldIdx["atualizarTabelaPreco"], true);
 
   const int yellow = static_cast<int>(FieldColors::Yellow);
   const int white = static_cast<int>(FieldColors::White);
 
   bool changed = false;
 
-  // TODO: trocar esses códigos repetidos por um for() dos membros de 'produto'
+  // Use cached field indices for performance (avoids repeated string lookups)
 
-  if (modelProduto.data(row, "fornecedor").toString() != produto.fornecedor) {
-    modelProduto.setData(row, "fornecedor", produto.fornecedor);
-    modelProduto.setData(row, "fornecedorUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["fornecedor"]).toString() != produto.fornecedor) {
+    modelProduto.setData(row, fieldIdx["fornecedor"], produto.fornecedor);
+    modelProduto.setData(row, fieldIdx["fornecedorUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "fornecedorUpd", white);
+    modelProduto.setData(row, fieldIdx["fornecedorUpd"], white);
   }
 
-  if (modelProduto.data(row, "descricao").toString() != produto.descricao) {
-    modelProduto.setData(row, "descricao", produto.descricao);
-    modelProduto.setData(row, "descricaoUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["descricao"]).toString() != produto.descricao) {
+    modelProduto.setData(row, fieldIdx["descricao"], produto.descricao);
+    modelProduto.setData(row, fieldIdx["descricaoUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "descricaoUpd", white);
+    modelProduto.setData(row, fieldIdx["descricaoUpd"], white);
   }
 
-  if (modelProduto.data(row, "un").toString() != produto.un) {
-    modelProduto.setData(row, "un", produto.un);
-    modelProduto.setData(row, "unUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["un"]).toString() != produto.un) {
+    modelProduto.setData(row, fieldIdx["un"], produto.un);
+    modelProduto.setData(row, fieldIdx["unUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "unUpd", white);
+    modelProduto.setData(row, fieldIdx["unUpd"], white);
   }
 
-  if (modelProduto.data(row, "colecao").toString() != produto.colecao) {
-    modelProduto.setData(row, "colecao", produto.colecao);
-    modelProduto.setData(row, "colecaoUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["colecao"]).toString() != produto.colecao) {
+    modelProduto.setData(row, fieldIdx["colecao"], produto.colecao);
+    modelProduto.setData(row, fieldIdx["colecaoUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "colecaoUpd", white);
+    modelProduto.setData(row, fieldIdx["colecaoUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "m2cx").toDouble(), produto.m2cx)) {
-    modelProduto.setData(row, "m2cx", produto.m2cx);
-    modelProduto.setData(row, "m2cxUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["m2cx"]).toDouble(), produto.m2cx)) {
+    modelProduto.setData(row, fieldIdx["m2cx"], produto.m2cx);
+    modelProduto.setData(row, fieldIdx["m2cxUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "m2cxUpd", white);
+    modelProduto.setData(row, fieldIdx["m2cxUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "pccx").toDouble(), produto.pccx)) {
-    modelProduto.setData(row, "pccx", produto.pccx);
-    modelProduto.setData(row, "pccxUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["pccx"]).toDouble(), produto.pccx)) {
+    modelProduto.setData(row, fieldIdx["pccx"], produto.pccx);
+    modelProduto.setData(row, fieldIdx["pccxUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "pccxUpd", white);
+    modelProduto.setData(row, fieldIdx["pccxUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "kgcx").toDouble(), produto.kgcx)) {
-    modelProduto.setData(row, "kgcx", produto.kgcx);
-    modelProduto.setData(row, "kgcxUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["kgcx"]).toDouble(), produto.kgcx)) {
+    modelProduto.setData(row, fieldIdx["kgcx"], produto.kgcx);
+    modelProduto.setData(row, fieldIdx["kgcxUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "kgcxUpd", white);
+    modelProduto.setData(row, fieldIdx["kgcxUpd"], white);
   }
 
-  if (modelProduto.data(row, "formComercial").toString() != produto.formComercial) {
-    modelProduto.setData(row, "formComercial", produto.formComercial);
-    modelProduto.setData(row, "formComercialUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["formComercial"]).toString() != produto.formComercial) {
+    modelProduto.setData(row, fieldIdx["formComercial"], produto.formComercial);
+    modelProduto.setData(row, fieldIdx["formComercialUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "formComercialUpd", white);
+    modelProduto.setData(row, fieldIdx["formComercialUpd"], white);
   }
 
-  if (modelProduto.data(row, "codComercial").toString() != produto.codComercial) {
-    modelProduto.setData(row, "codComercial", produto.codComercial);
-    modelProduto.setData(row, "codComercialUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["codComercial"]).toString() != produto.codComercial) {
+    modelProduto.setData(row, fieldIdx["codComercial"], produto.codComercial);
+    modelProduto.setData(row, fieldIdx["codComercialUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "codComercialUpd", white);
+    modelProduto.setData(row, fieldIdx["codComercialUpd"], white);
   }
 
-  if (modelProduto.data(row, "codBarras").toString() != produto.codBarras) {
-    modelProduto.setData(row, "codBarras", produto.codBarras);
-    modelProduto.setData(row, "codBarrasUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["codBarras"]).toString() != produto.codBarras) {
+    modelProduto.setData(row, fieldIdx["codBarras"], produto.codBarras);
+    modelProduto.setData(row, fieldIdx["codBarrasUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "codBarrasUpd", white);
+    modelProduto.setData(row, fieldIdx["codBarrasUpd"], white);
   }
 
-  if (modelProduto.data(row, "ncm").toString() != produto.ncm) {
-    modelProduto.setData(row, "ncm", produto.ncm);
-    modelProduto.setData(row, "ncmUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["ncm"]).toString() != produto.ncm) {
+    modelProduto.setData(row, fieldIdx["ncm"], produto.ncm);
+    modelProduto.setData(row, fieldIdx["ncmUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "ncmUpd", white);
+    modelProduto.setData(row, fieldIdx["ncmUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "qtdPallet").toDouble(), produto.qtdPallet)) {
-    modelProduto.setData(row, "qtdPallet", produto.qtdPallet);
-    modelProduto.setData(row, "qtdPalletUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["qtdPallet"]).toDouble(), produto.qtdPallet)) {
+    modelProduto.setData(row, fieldIdx["qtdPallet"], produto.qtdPallet);
+    modelProduto.setData(row, fieldIdx["qtdPalletUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "qtdPalletUpd", white);
+    modelProduto.setData(row, fieldIdx["qtdPalletUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "custo").toDouble(), produto.custo)) {
-    modelProduto.setData(row, "custo", produto.custo);
-    modelProduto.setData(row, "custoUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["custo"]).toDouble(), produto.custo)) {
+    modelProduto.setData(row, fieldIdx["custo"], produto.custo);
+    modelProduto.setData(row, fieldIdx["custoUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "custoUpd", white);
+    modelProduto.setData(row, fieldIdx["custoUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "precoVenda").toDouble(), produto.precoVenda)) {
-    modelProduto.setData(row, "precoVenda", produto.precoVenda);
-    modelProduto.setData(row, "precoVendaUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["precoVenda"]).toDouble(), produto.precoVenda)) {
+    modelProduto.setData(row, fieldIdx["precoVenda"], produto.precoVenda);
+    modelProduto.setData(row, fieldIdx["precoVendaUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "precoVendaUpd", white);
+    modelProduto.setData(row, fieldIdx["precoVendaUpd"], white);
   }
 
-  if (modelProduto.data(row, "ui").toString() != produto.ui) {
-    modelProduto.setData(row, "ui", produto.ui);
-    modelProduto.setData(row, "uiUpd", yellow);
+  if (modelProduto.data(row, fieldIdx["ui"]).toString() != produto.ui) {
+    modelProduto.setData(row, fieldIdx["ui"], produto.ui);
+    modelProduto.setData(row, fieldIdx["uiUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "uiUpd", white);
+    modelProduto.setData(row, fieldIdx["uiUpd"], white);
   }
 
-  if (modelProduto.data(row, "un2").toString() != produto.un2) {
-    modelProduto.setData(row, "un2", produto.un2);
-    modelProduto.setData(row, "un2Upd", yellow);
+  if (modelProduto.data(row, fieldIdx["un2"]).toString() != produto.un2) {
+    modelProduto.setData(row, fieldIdx["un2"], produto.un2);
+    modelProduto.setData(row, fieldIdx["un2Upd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "un2Upd", white);
+    modelProduto.setData(row, fieldIdx["un2Upd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "minimo").toDouble(), produto.minimo)) {
-    modelProduto.setData(row, "minimo", produto.minimo);
-    modelProduto.setData(row, "minimoUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["minimo"]).toDouble(), produto.minimo)) {
+    modelProduto.setData(row, fieldIdx["minimo"], produto.minimo);
+    modelProduto.setData(row, fieldIdx["minimoUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "minimoUpd", white);
+    modelProduto.setData(row, fieldIdx["minimoUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "mva").toDouble(), produto.mva)) {
-    modelProduto.setData(row, "mva", produto.mva);
-    modelProduto.setData(row, "mvaUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["mva"]).toDouble(), produto.mva)) {
+    modelProduto.setData(row, fieldIdx["mva"], produto.mva);
+    modelProduto.setData(row, fieldIdx["mvaUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "mvaUpd", white);
+    modelProduto.setData(row, fieldIdx["mvaUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "st").toDouble(), produto.st)) {
-    modelProduto.setData(row, "st", produto.st);
-    modelProduto.setData(row, "stUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["st"]).toDouble(), produto.st)) {
+    modelProduto.setData(row, fieldIdx["st"], produto.st);
+    modelProduto.setData(row, fieldIdx["stUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "stUpd", white);
+    modelProduto.setData(row, fieldIdx["stUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "sticms").toDouble(), produto.sticms)) {
-    modelProduto.setData(row, "sticms", produto.sticms);
-    modelProduto.setData(row, "sticmsUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["sticms"]).toDouble(), produto.sticms)) {
+    modelProduto.setData(row, fieldIdx["sticms"], produto.sticms);
+    modelProduto.setData(row, fieldIdx["sticmsUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "sticmsUpd", white);
+    modelProduto.setData(row, fieldIdx["sticmsUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "quantCaixa").toDouble(), produto.quantCaixa)) {
-    modelProduto.setData(row, "quantCaixa", produto.quantCaixa);
-    modelProduto.setData(row, "quantCaixaUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["quantCaixa"]).toDouble(), produto.quantCaixa)) {
+    modelProduto.setData(row, fieldIdx["quantCaixa"], produto.quantCaixa);
+    modelProduto.setData(row, fieldIdx["quantCaixaUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "quantCaixaUpd", white);
+    modelProduto.setData(row, fieldIdx["quantCaixaUpd"], white);
   }
 
-  if (not qFuzzyCompare(modelProduto.data(row, "markup").toDouble(), produto.markup)) {
-    modelProduto.setData(row, "markup", produto.markup);
-    modelProduto.setData(row, "markupUpd", yellow);
+  if (not qFuzzyCompare(modelProduto.data(row, fieldIdx["markup"]).toDouble(), produto.markup)) {
+    modelProduto.setData(row, fieldIdx["markup"], produto.markup);
+    modelProduto.setData(row, fieldIdx["markupUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "markupUpd", white);
+    modelProduto.setData(row, fieldIdx["markupUpd"], white);
   }
 
-  const QDate dataSalva = modelProduto.data(row, "validade").toDate();
+  const QDate dataSalva = modelProduto.data(row, fieldIdx["validade"]).toDate();
 
   if ((dataSalva.isValid() and dataSalva.toString("yyyy-MM-dd") != validadeString) or (not dataSalva.isValid() and not validadeString.isEmpty())) {
-    modelProduto.setData(row, "validade", (validade == -1) ? QVariant() : validadeString);
-    modelProduto.setData(row, "validadeUpd", yellow);
+    modelProduto.setData(row, fieldIdx["validade"], (validade == -1) ? QVariant() : validadeString);
+    modelProduto.setData(row, fieldIdx["validadeUpd"], yellow);
     changed = true;
   } else {
-    modelProduto.setData(row, "validadeUpd", white);
+    modelProduto.setData(row, fieldIdx["validadeUpd"], white);
   }
 
   changed ? itensUpdated++ : itensNotChanged++;
 }
 
 void ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
-  modelProduto.setData(row, "descontinuado", 0);
+  modelProduto.setData(row, fieldIdx["descontinuado"], 0);
 
   itensExpired--;
 }

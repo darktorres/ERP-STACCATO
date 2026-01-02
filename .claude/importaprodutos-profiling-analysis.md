@@ -165,58 +165,49 @@ With ~3,745 products and ~20+ fields per product, this results in:
 - ~150,000+ map traversals
 - Each traversal is O(log n) but the constant factor is high
 
-## Optimization Recommendations
+## Optimization Results
 
-### 1. Batch Updates with QSqlRecord (NO Impact - Tested)
-```cpp
-// Attempted: Use QSqlRecord for batch update
-QSqlRecord record = model.record(row);
-record.setValue("field1", value1);
-record.setValue("field2", value2);
-model.setRecord(row, record);
+### Tested Approaches (Incremental)
+
+| Approach | Result | Notes |
+|----------|--------|-------|
+| QSqlRecord Batch | **-27% SLOWER** | `setRecord()` internally calls `setData()` per field |
+| Field Index Cache | **0% (no impact)** | String lookup wasn't the bottleneck |
+| Disable Proxy | **+7% faster** | 58s → 54s, eliminates proxy overhead |
+
+### Final Solution: Bypass QSqlTableModel (5.8x FASTER)
+
+**Architecture Change:**
 ```
-**Result:** Implemented and tested - SLOWER (54s → 69s). `record(row)` internally calls
-`data()` for ALL columns, and `setRecord()` internally calls `setData()` for each field.
-No actual reduction in Qt model operations.
+Before: Excel → QSqlTableModel.setData() ×187,000 → Preview → submitAll()
+                           ↓
+              80% CPU in QMapNodeBase::nextNode()
 
-### 2. Direct SQL for Bulk Operations (High Impact)
-For large imports, bypass the model entirely:
-```cpp
-// Use prepared statement with batch execution
-QSqlQuery query;
-query.prepare("UPDATE produto SET field1=?, field2=? WHERE id=?");
-for (const auto& product : products) {
-    query.addBindValue(product.field1);
-    query.addBindValue(product.field2);
-    query.addBindValue(product.id);
-    query.exec();
-}
+After:  Excel → Compare in memory → QVector<ProductChange> → QStandardItemModel → Preview
+                                              ↓
+                                    Batch SQL on save
 ```
 
-### 3. Cache Field Indices (NO Impact - Tested)
-```cpp
-// Current: Lookup field index by name each time
-int idx = model.fieldIndex("fieldName");  // String comparison
+**Implementation:**
+1. **Phase 1 - Load:** Direct SQL query into `QHash<QString, Produto>`
+2. **Phase 2 - Compare:** In-memory comparison, build `QVector<ProductChange>`
+3. **Phase 3 - Preview:** Populate `QStandardItemModel` from change vector (read-only)
+4. **Phase 4 - Save:** Batch prepared statements for INSERT/UPDATE
 
-// Attempted: Cache indices at start
-QHash<QString, int> fieldIndices;
-for (int i = 0; i < model.columnCount(); i++) {
-    fieldIndices[model.headerData(i).toString()] = i;
-}
-```
-**Result:** Implemented and tested - NO measurable improvement. The `fieldIndex()`
-string lookup is not the bottleneck; the Qt model's internal map traversal dominates.
+**Results (Verified via Regression Testing):**
+- **Before:** 55-62 seconds, 80% CPU in Qt map traversal
+- **After:** 8.7 seconds, 11% CPU in DB string conversion
+- **Speedup:** 6.3x (86% faster)
+- **Regression Test:** PASSED - all 16,020 rows match field-by-field
 
-### 4. Disable Proxy During Import (7% Improvement - Tested)
-```cpp
-// Disable proxy model during bulk import
-auto *savedProxy = modelProduto.proxyModel;
-modelProduto.proxyModel = nullptr;
-// ... do import ...
-modelProduto.proxyModel = savedProxy;  // Restore before UI display
-```
-**Result:** Implemented and tested - 7% improvement (58s → 54s). Eliminates
-`proxy_to_source()` overhead from QSortFilterProxyModel.
+**Profile After Optimization:**
+| Overhead | Function | Location |
+|----------|----------|----------|
+| 11% | `QUtf8::convertToUnicode` | DB value conversion |
+| 6% | `malloc` | Memory allocation |
+| ~5% | `loadExistingProducts` | Loading products from DB |
+
+The Qt model map traversal bottleneck has been **completely eliminated**.
 
 ### 5. Use Transactions Wisely (Low-Medium Impact)
 Already using transactions, but ensure they're not committed too frequently.

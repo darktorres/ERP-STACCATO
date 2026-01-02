@@ -302,35 +302,63 @@ void ImportaProdutos::loadExistingProducts() {
   m_allExistingProducts.clear();
   m_allExistingProducts.reserve(query.size() > 0 ? query.size() : 10000);
 
+  // Cache field indices for positional access (avoids string lookup per field per row)
+  const QSqlRecord rec = query.record();
+  const int iIdProduto = rec.indexOf("idProduto");
+  const int iIdFornecedor = rec.indexOf("idFornecedor");
+  const int iFornecedor = rec.indexOf("fornecedor");
+  const int iDescricao = rec.indexOf("descricao");
+  const int iUn = rec.indexOf("un");
+  const int iUn2 = rec.indexOf("un2");
+  const int iColecao = rec.indexOf("colecao");
+  const int iM2cx = rec.indexOf("m2cx");
+  const int iPccx = rec.indexOf("pccx");
+  const int iKgcx = rec.indexOf("kgcx");
+  const int iFormComercial = rec.indexOf("formComercial");
+  const int iCodComercial = rec.indexOf("codComercial");
+  const int iCodBarras = rec.indexOf("codBarras");
+  const int iNcm = rec.indexOf("ncm");
+  const int iQtdPallet = rec.indexOf("qtdPallet");
+  const int iCusto = rec.indexOf("custo");
+  const int iPrecoVenda = rec.indexOf("precoVenda");
+  const int iUi = rec.indexOf("ui");
+  const int iMinimo = rec.indexOf("minimo");
+  const int iMva = rec.indexOf("mva");
+  const int iSt = rec.indexOf("st");
+  const int iSticms = rec.indexOf("sticms");
+  const int iQuantCaixa = rec.indexOf("quantCaixa");
+  const int iMarkup = rec.indexOf("markup");
+  const int iValidade = rec.indexOf("validade");
+
   while (query.next()) {
     Produto p;
-    p.idProduto = query.value("idProduto").toInt();
-    p.idFornecedor = query.value("idFornecedor").toInt();
+    p.idProduto = query.value(iIdProduto).toInt();
+    p.idFornecedor = query.value(iIdFornecedor).toInt();
     // Normalize strings same as parseExcelRow for consistent key matching
-    p.fornecedor = query.value("fornecedor").toString().toUpper().trimmed().left(100);
-    p.descricao = query.value("descricao").toString();
-    p.un = query.value("un").toString();
-    p.un2 = query.value("un2").toString();
-    p.colecao = query.value("colecao").toString();
-    p.m2cx = query.value("m2cx").toDouble();
-    p.pccx = query.value("pccx").toDouble();
-    p.kgcx = query.value("kgcx").toDouble();
-    p.formComercial = query.value("formComercial").toString();
-    p.codComercial = query.value("codComercial").toString().toUpper().trimmed().left(100);
-    p.codBarras = query.value("codBarras").toString();
-    p.ncm = query.value("ncm").toString();
-    p.qtdPallet = query.value("qtdPallet");  // Preserve NULL
-    p.custo = query.value("custo").toDouble();
-    p.precoVenda = query.value("precoVenda").toDouble();
-    p.ui = query.value("ui").toString().toUpper().trimmed().left(45);
+    p.fornecedor = query.value(iFornecedor).toString().toUpper().trimmed().left(100);
+    p.descricao = query.value(iDescricao).toString();
+    p.un = query.value(iUn).toString();
+    p.un2 = query.value(iUn2).toString();
+    p.colecao = query.value(iColecao).toString();
+    p.m2cx = query.value(iM2cx).toDouble();
+    p.pccx = query.value(iPccx).toDouble();
+    p.kgcx = query.value(iKgcx).toDouble();
+    p.formComercial = query.value(iFormComercial).toString();
+    p.codComercial = query.value(iCodComercial).toString().toUpper().trimmed().left(100);
+    p.codBarras = query.value(iCodBarras).toString();
+    p.ncm = query.value(iNcm).toString();
+    p.qtdPallet = query.value(iQtdPallet);  // Preserve NULL
+    p.custo = query.value(iCusto).toDouble();
+    p.precoVenda = query.value(iPrecoVenda).toDouble();
+    p.ui = query.value(iUi).toString().toUpper().trimmed().left(45);
     if (p.ui.isEmpty()) { p.ui = "0"; }
-    p.minimo = query.value("minimo");        // Preserve NULL
-    p.mva = query.value("mva");              // Preserve NULL
-    p.st = query.value("st");                // Preserve NULL
-    p.sticms = query.value("sticms");        // Preserve NULL
-    p.quantCaixa = query.value("quantCaixa").toDouble();
-    p.markup = query.value("markup").toDouble();
-    p.validade = query.value("validade").toDate();
+    p.minimo = query.value(iMinimo);        // Preserve NULL
+    p.mva = query.value(iMva);              // Preserve NULL
+    p.st = query.value(iSt);                // Preserve NULL
+    p.sticms = query.value(iSticms);        // Preserve NULL
+    p.quantCaixa = query.value(iQuantCaixa).toDouble();
+    p.markup = query.value(iMarkup).toDouble();
+    p.validade = query.value(iValidade).toDate();
 
     QString key = makeProductKey(p);
     m_existingProducts[key] = p;

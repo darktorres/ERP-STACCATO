@@ -155,6 +155,8 @@ private:
   // methods - preview model
   auto buildPreviewModels() -> void;
   auto addRowToModel(QStandardItemModel &model, const ProductChange &change) -> void;
+  auto addRowToModelFast(QStandardItemModel &model, int row, const ProductChange &change,
+                         const QBrush &textColor, const QBrush &cyanBrush) -> void;
   auto getFieldColor(FieldStatus status) const -> QBrush;
   auto setupTables() -> void;
   auto setConnections() -> void;

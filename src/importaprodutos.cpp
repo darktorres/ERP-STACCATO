@@ -17,6 +17,37 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+namespace {
+// Optimized string normalization: toUpper + trim + left(maxLen) in single pass
+// Avoids creating 3 temporary QStrings
+QString normalizeString(const QString &input, int maxLen) {
+  if (input.isEmpty()) return input;
+
+  // Find first non-whitespace
+  int start = 0;
+  while (start < input.size() && input[start].isSpace()) ++start;
+
+  // Find last non-whitespace
+  int end = input.size() - 1;
+  while (end > start && input[end].isSpace()) --end;
+
+  // Calculate length (trimmed)
+  int len = end - start + 1;
+  if (len <= 0) return QString();
+
+  // Apply maxLen limit
+  if (len > maxLen) len = maxLen;
+
+  // Build result with uppercase in single allocation
+  QString result;
+  result.reserve(len);
+  for (int i = start; i < start + len; ++i) {
+    result.append(input[i].toUpper());
+  }
+  return result;
+}
+}  // namespace
+
 // Column order for preview model (must match setupTables column visibility)
 const QStringList ImportaProdutos::PREVIEW_COLUMNS = {
     "idProduto",   "idFornecedor",  "fornecedor",    "descricao",   "un",           "un2",        "colecao",       "m2cx",     "pccx",
@@ -334,8 +365,8 @@ void ImportaProdutos::loadExistingProducts() {
     Produto p;
     p.idProduto = query.value(iIdProduto).toInt();
     p.idFornecedor = query.value(iIdFornecedor).toInt();
-    // Normalize strings same as parseExcelRow for consistent key matching
-    p.fornecedor = query.value(iFornecedor).toString().toUpper().trimmed().left(100);
+    // Normalize strings using optimized single-pass function
+    p.fornecedor = normalizeString(query.value(iFornecedor).toString(), 100);
     p.descricao = query.value(iDescricao).toString();
     p.un = query.value(iUn).toString();
     p.un2 = query.value(iUn2).toString();
@@ -344,14 +375,14 @@ void ImportaProdutos::loadExistingProducts() {
     p.pccx = query.value(iPccx).toDouble();
     p.kgcx = query.value(iKgcx).toDouble();
     p.formComercial = query.value(iFormComercial).toString();
-    p.codComercial = query.value(iCodComercial).toString().toUpper().trimmed().left(100);
+    p.codComercial = normalizeString(query.value(iCodComercial).toString(), 100);
     p.codBarras = query.value(iCodBarras).toString();
     p.ncm = query.value(iNcm).toString();
     p.qtdPallet = query.value(iQtdPallet);  // Preserve NULL
     p.custo = query.value(iCusto).toDouble();
     p.precoVenda = query.value(iPrecoVenda).toDouble();
-    p.ui = query.value(iUi).toString().toUpper().trimmed().left(45);
-    if (p.ui.isEmpty()) { p.ui = "0"; }
+    p.ui = normalizeString(query.value(iUi).toString(), 45);
+    if (p.ui.isEmpty()) { p.ui = QStringLiteral("0"); }
     p.minimo = query.value(iMinimo);        // Preserve NULL
     p.mva = query.value(iMva);              // Preserve NULL
     p.st = query.value(iSt);                // Preserve NULL
@@ -623,60 +654,87 @@ QBrush ImportaProdutos::getFieldColor(FieldStatus status) const {
 }
 
 void ImportaProdutos::buildPreviewModels() {
-  // Setup column headers
-  m_previewModel.setColumnCount(PREVIEW_COLUMNS.size());
-  m_errorModel.setColumnCount(PREVIEW_COLUMNS.size());
+  // Cache theme setting once (avoid 16000+ lookups)
+  const QString tema = User::getSetting("User/tema").toString();
+  const QBrush textColor = (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
+  const QBrush cyanBrush(Qt::cyan);
 
-  for (int i = 0; i < PREVIEW_COLUMNS.size(); ++i) {
+  // Setup column headers
+  const int colCount = PREVIEW_COLUMNS.size();
+  m_previewModel.setColumnCount(colCount);
+  m_errorModel.setColumnCount(colCount);
+
+  for (int i = 0; i < colCount; ++i) {
     m_previewModel.setHeaderData(i, Qt::Horizontal, PREVIEW_COLUMNS[i]);
     m_errorModel.setHeaderData(i, Qt::Horizontal, PREVIEW_COLUMNS[i]);
   }
 
-  // Clear and prepare models (addRowToModel will insert rows as needed)
-  m_previewModel.setRowCount(0);
-  m_errorModel.setRowCount(0);
-
   // Build set of processed product IDs for fast lookup
   QSet<int> processedIds;
+  processedIds.reserve(m_productChanges.size());
   for (const ProductChange &change : qAsConst(m_productChanges)) {
     if (change.newData.idProduto > 0) {
       processedIds.insert(change.newData.idProduto);
     }
   }
 
+  // Count discontinued products for pre-allocation
+  int discontinuedCount = 0;
+  for (const Produto &p : qAsConst(m_allExistingProducts)) {
+    if (!processedIds.contains(p.idProduto)) {
+      ++discontinuedCount;
+    }
+  }
+
+  // Pre-allocate rows (avoid incremental resizing)
+  const int previewRowCount = m_productChanges.size() + discontinuedCount;
+  m_previewModel.setRowCount(previewRowCount);
+  m_errorModel.setRowCount(m_errorChanges.size());
+
+  // Block signals during bulk insert (avoid per-cell signal emission)
+  m_previewModel.blockSignals(true);
+  m_errorModel.blockSignals(true);
+
+  int previewRow = 0;
+
   // Add product changes (new, updated, not changed)
   for (const ProductChange &change : qAsConst(m_productChanges)) {
-    addRowToModel(m_previewModel, change);
+    addRowToModelFast(m_previewModel, previewRow++, change, textColor, cyanBrush);
   }
 
   // Add discontinued products (ALL existing products that weren't processed)
-  // Use m_allExistingProducts to include duplicates, matching legacy behavior
   for (const Produto &p : qAsConst(m_allExistingProducts)) {
     if (!processedIds.contains(p.idProduto)) {
       ProductChange discontinued = makeDiscontinuedChange(p);
-      addRowToModel(m_previewModel, discontinued);
+      addRowToModelFast(m_previewModel, previewRow++, discontinued, textColor, cyanBrush);
     }
   }
 
   // Add errors
+  int errorRow = 0;
   for (const ProductChange &change : qAsConst(m_errorChanges)) {
-    addRowToModel(m_errorModel, change);
+    addRowToModelFast(m_errorModel, errorRow++, change, textColor, cyanBrush);
   }
+
+  // Re-enable signals
+  m_previewModel.blockSignals(false);
+  m_errorModel.blockSignals(false);
 }
 
 void ImportaProdutos::addRowToModel(QStandardItemModel &model, const ProductChange &change) {
+  // Legacy version - calls the fast version with default brushes
+  const QString tema = User::getSetting("User/tema").toString();
+  const QBrush textColor = (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
+  const QBrush cyanBrush(Qt::cyan);
   int row = model.rowCount();
   model.insertRow(row);
+  addRowToModelFast(model, row, change, textColor, cyanBrush);
+}
 
+void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, const ProductChange &change,
+                                        const QBrush &textColor, const QBrush &cyanBrush) {
   const Produto &p = change.newData;
-  const QString tema = User::getSetting("User/tema").toString();
-  QBrush textColor = (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
-
-  // Discontinued gets cyan background for entire row
-  QBrush rowBackground;
-  if (change.type == ProductChange::Type::Discontinued) {
-    rowBackground = QBrush(Qt::cyan);
-  }
+  const bool isDiscontinued = (change.type == ProductChange::Type::Discontinued);
 
   auto setCell = [&](int col, const QVariant &value, const QString &fieldName) {
     QStandardItem *item = new QStandardItem();
@@ -684,12 +742,16 @@ void ImportaProdutos::addRowToModel(QStandardItemModel &model, const ProductChan
     item->setData(textColor, Qt::ForegroundRole);
 
     // Set background color
-    if (change.type == ProductChange::Type::Discontinued) {
-      item->setData(rowBackground, Qt::BackgroundRole);
-    } else if (change.fieldStatus.contains(fieldName)) {
-      QBrush bg = getFieldColor(change.fieldStatus[fieldName]);
-      if (bg.style() != Qt::NoBrush) {
-        item->setData(bg, Qt::BackgroundRole);
+    if (isDiscontinued) {
+      item->setData(cyanBrush, Qt::BackgroundRole);
+    } else {
+      // Use find() instead of contains() + operator[] to avoid double lookup
+      auto it = change.fieldStatus.constFind(fieldName);
+      if (it != change.fieldStatus.constEnd()) {
+        QBrush bg = getFieldColor(it.value());
+        if (bg.style() != Qt::NoBrush) {
+          item->setData(bg, Qt::BackgroundRole);
+        }
       }
     }
 
@@ -722,7 +784,7 @@ void ImportaProdutos::addRowToModel(QStandardItemModel &model, const ProductChan
   setCell(col++, p.quantCaixa, "quantCaixa");
   setCell(col++, p.markup, "markup");
   setCell(col++, p.validade, "validade");
-  setCell(col++, (change.type == ProductChange::Type::Discontinued) ? 1 : 0, "descontinuado");
+  setCell(col++, isDiscontinued ? 1 : 0, "descontinuado");
 }
 
 void ImportaProdutos::salvarOptimized() {

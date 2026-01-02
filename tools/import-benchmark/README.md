@@ -165,11 +165,10 @@ Rolling back transaction...
 
 With CASTELATTO.xlsx (3,745 products to update, 12,275 to mark discontinued):
 
-| Version | Import Time | Throughput |
-|---------|-------------|------------|
-| Original (QSqlTableModel) | ~55-62 seconds | ~260 products/sec |
-| **Optimized (QStandardItemModel)** | **~8.7 seconds** | **~1,840 products/sec** |
-
-**Speedup: 6.3x (86% faster)**
+| Version | Import Time | Throughput | Speedup |
+|---------|-------------|------------|---------|
+| Original (QSqlTableModel) | ~55-62 seconds | ~260 products/sec | 1x |
+| Optimized v1 (QStandardItemModel) | ~8.7 seconds | ~1,840 products/sec | 6.3x |
+| **Optimized v2 (cached field indices)** | **~2.0 seconds** | **~8,000 products/sec** | **28x** |
 
 See `.claude/importaprodutos-profiling-analysis.md` for detailed profiling results and optimization strategy.

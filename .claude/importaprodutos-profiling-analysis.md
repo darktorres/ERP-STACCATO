@@ -196,18 +196,23 @@ After:  Excel → Compare in memory → QVector<ProductChange> → QStandardItem
 
 **Results (Verified via Regression Testing):**
 - **Before:** 55-62 seconds, 80% CPU in Qt map traversal
-- **After:** 8.7 seconds, 11% CPU in DB string conversion
-- **Speedup:** 6.3x (86% faster)
+- **After (v1):** 8.7 seconds, 11% CPU in DB string conversion (6.3x faster)
+- **After (v2):** 2.0 seconds, 8% CPU in Excel XML parsing (28x faster)
 - **Regression Test:** PASSED - all 16,020 rows match field-by-field
 
-**Profile After Optimization:**
-| Overhead | Function | Location |
-|----------|----------|----------|
-| 11% | `QUtf8::convertToUnicode` | DB value conversion |
-| 6% | `malloc` | Memory allocation |
-| ~5% | `loadExistingProducts` | Loading products from DB |
+**Optimization v2: Cached Field Indices**
+Added positional SQL field access with cached indices, eliminating 400,000 string lookups per import.
 
-The Qt model map traversal bottleneck has been **completely eliminated**.
+**Profile After v2 Optimization:**
+| Overhead | Function | Category |
+|----------|----------|----------|
+| 8.16% | `QXmlStreamReaderPrivate::parse` | Excel XML parsing |
+| ~15% | `malloc/free` | Memory allocation |
+| 1.27% | `QMapData::findNode` | Excel cell lookup |
+| 0.90% | `QStandardItem::setData` | Preview model |
+| 0.84% | `QUtf8::convertToUnicode` | String conversion |
+
+The Qt model map traversal and SQL field lookup bottlenecks have been **completely eliminated**.
 
 ### 5. Use Transactions Wisely (Low-Medium Impact)
 Already using transactions, but ensure they're not committed too frequently.

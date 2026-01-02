@@ -1,8 +1,19 @@
 # ImportaProdutos Performance Benchmark Tool
 
 A CLI tool to measure and profile the performance of the product import functionality.
+Uses the REAL `importaprodutos.cpp` code with database connection.
 
 ## Building
+
+### Linux (WSL2 recommended for profiling)
+
+```bash
+cd tools/import-benchmark
+qmake import-benchmark.pro
+make -j$(nproc)
+
+# The executable will be at: ./import-benchmark
+```
 
 ### Windows (MSVC)
 
@@ -18,137 +29,141 @@ cd tools\import-benchmark
 
 :: Build
 nmake release
-
-:: The executable will be at: release\import-benchmark.exe
-```
-
-### Linux
-
-```bash
-cd tools/import-benchmark
-qmake import-benchmark.pro
-make
-
-# The executable will be at: ./import-benchmark
 ```
 
 ## Usage
 
-### Generate Test Data
-
-Create a test Excel file with synthetic product data:
+### Basic Benchmark
 
 ```bash
-# Generate file with 1000 products
-import-benchmark --generate 1000 -o test_1000.xlsx
-
-# Generate file with 10000 products
-import-benchmark --generate 10000 -o test_10000.xlsx
-
-# Generate file with 50000 products (stress test)
-import-benchmark --generate 50000 -o test_50000.xlsx
+./import-benchmark <excel-file> --user <db-user> --pass <db-pass> [options]
 ```
 
-### Run Benchmark
+Options:
+- `-H, --host <host>` - Database host (default: localhost)
+- `-u, --user <user>` - Database user (required)
+- `-p, --pass <pass>` - Database password
+- `-d, --validade <days>` - Validade in days (default: 30)
+- `-t, --tipo <tipo>` - Tipo: 0=Normal, 1=Promocao (default: 0)
+- `-n, --dry-run` - Don't commit changes (rollback at end)
+- `-g, --generate-golden <file>` - Generate golden file for regression testing
+- `-V, --verify <file>` - Verify results against golden file
 
-Basic benchmark:
+### Examples
+
+Run benchmark with dry-run (no database changes):
 
 ```bash
-import-benchmark test_1000.xlsx
+./import-benchmark ../../CASTELATTO.xlsx --user torres --pass 1234 --host 172.31.240.1 --dry-run
 ```
 
-Verbose output with phase timings:
+Generate golden file for regression testing:
 
 ```bash
-import-benchmark test_1000.xlsx --verbose
+./import-benchmark ../../CASTELATTO.xlsx --user torres --pass 1234 --host 172.31.240.1 \
+    --dry-run --generate-golden golden-castelatto.json
 ```
 
-Compare baseline vs optimized implementation:
+Verify optimized code against baseline:
 
 ```bash
-import-benchmark test_1000.xlsx --compare
+./import-benchmark ../../CASTELATTO.xlsx --user torres --pass 1234 --host 172.31.240.1 \
+    --verify golden-castelatto.json
 ```
 
-Multiple iterations (takes best result):
+## Regression Testing
+
+The benchmark tool supports regression testing to ensure optimizations don't break functionality.
+
+### Workflow
+
+1. **Generate baseline golden file** (with current/known-good code):
+   ```bash
+   ./import-benchmark data.xlsx --user X --pass Y --dry-run --generate-golden baseline.json
+   ```
+
+2. **Make optimizations** to the code
+
+3. **Verify optimizations** don't change results:
+   ```bash
+   ./import-benchmark data.xlsx --user X --pass Y --verify baseline.json
+   ```
+
+### What's Compared
+
+The verification compares:
+- **Counters**: itensImported, itensUpdated, itensNotChanged, itensExpired, itensError
+- **Model row counts**: Number of rows in modelProduto and modelErro
+- **Field values**: All product fields for each row, matched by key (fornecedor + codComercial + ui)
+
+Floating-point values are compared with tolerance (0.0001).
+
+## Profiling (Linux/WSL2)
+
+### Using perf
 
 ```bash
-import-benchmark test_1000.xlsx --iterations 5 --compare
+cd /tmp  # Use Linux filesystem for perf.data
+
+# Record profile
+perf record -g ./import-benchmark /path/to/data.xlsx \
+    --user torres --pass 1234 --host 172.31.240.1 --dry-run
+
+# View report
+perf report --stdio --no-children
 ```
+
+### Using valgrind/callgrind
+
+```bash
+valgrind --tool=callgrind --callgrind-out-file=/tmp/callgrind.out \
+    ./import-benchmark /path/to/data.xlsx \
+    --user torres --pass 1234 --host 172.31.240.1 --dry-run
+
+# View results
+kcachegrind /tmp/callgrind.out
+```
+
+## WSL2 Network Notes
+
+When running from WSL2, MySQL runs on Windows host:
+- Get host IP: `ip route show default | grep -oP 'via \K\S+'`
+- MySQL needs GRANT for WSL2 subnet: `GRANT ALL ON db.* TO 'user'@'172.31.%'`
 
 ## Output Example
 
 ```
-Benchmarking: test_10000.xlsx
-Iterations: 3
+=== ImportaProdutos CLI Benchmark ===
+File: CASTELATTO.xlsx
+Database: torres@172.31.240.1
+Validade: 30 days
+Tipo: Normal
+Dry run: Yes
 
-Running baseline benchmark...
+Connecting to database...
+Connected in 147 ms
 
-=== BASELINE (Current Implementation) ===
-Total rows:         10001
-Valid products:     10000
-Error products:     0
-Unique suppliers:   5
+Starting import...
+Produtos importados: 0 | Atualizados: 3745 | Não modificados: 0 | Descontinuados: 12275 | Com erro: 0
+Import completed in 55514 ms
 
-Timing breakdown:
-  File open:          234 ms
-  Sheet select:       1 ms
-  Dimension read:     0 ms
-  Header validation:  2 ms
-  Supplier extract:   156 ms
-  Product parsing:    1823 ms
-  Field validation:   12 ms
-  ---
-  TOTAL:              2228 ms
+=== Results ===
+Imported:    0
+Updated:     3745
+Not changed: 0
+Expired:     12275
+Errors:      0
+Model rows:  16020
+Error rows:  0
 
-Throughput: 4488.3 products/second
-
-Running optimized benchmark...
-
-=== OPTIMIZED (With Improvements) ===
-Total rows:         10001
-Valid products:     10000
-Error products:     0
-Unique suppliers:   5
-
-Timing breakdown:
-  File open:          231 ms
-  Sheet select:       1 ms
-  Dimension read:     0 ms
-  Header validation:  2 ms
-  Supplier extract:   89 ms
-  Product parsing:    1456 ms
-  Field validation:   11 ms
-  ---
-  TOTAL:              1790 ms
-
-Throughput: 5586.6 products/second
-
-=== COMPARISON ===
-File open:         234 -> 231 (1.3% improvement)
-Supplier extract:  156 -> 89 (42.9% improvement)
-Product parsing:   1823 -> 1456 (20.1% improvement)
-TOTAL:             2228 -> 1790 (19.7% improvement)
+Total time: 56000 ms
+Rolling back transaction...
 ```
 
-## Measured Bottlenecks
+## Performance Baseline
 
-The benchmark measures the following phases:
+With CASTELATTO.xlsx (3,745 products to update, 12,275 to mark discontinued):
+- **Import time**: ~55 seconds
+- **Throughput**: ~287 products/second
 
-1. **File open** - Time to parse the Excel file into memory
-2. **Sheet select** - Time to locate and select the "BASE" sheet
-3. **Dimension read** - Time to determine row/column count
-4. **Header validation** - Time to verify column headers
-5. **Supplier extraction** - Time to collect unique suppliers (first pass)
-6. **Product parsing** - Time to read and transform product data
-7. **Field validation** - Time to validate product fields
-
-## Optimizations Demonstrated
-
-The `--compare` flag runs both the baseline (mimicking current code) and an
-optimized version that demonstrates:
-
-1. **Static QLocale** - Moving `QLocale` creation outside the loop
-2. **Single cell read** - Avoiding duplicate `readValue()` calls
-3. **QSet for suppliers** - Using `QSet` instead of `QStringList::contains()`
-
-These are the "quick win" optimizations from Phase 1 of the improvement plan.
+See `.claude/importaprodutos-profiling-analysis.md` for detailed profiling results.

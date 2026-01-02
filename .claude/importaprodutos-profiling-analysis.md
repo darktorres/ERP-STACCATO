@@ -87,7 +87,31 @@ heaptrack ./import-benchmark ../../CASTELATTO.xlsx \
 heaptrack_gui heaptrack.import-benchmark.*.gz
 ```
 
-## Profiling Results (2025-01-02)
+### Regression Testing
+```bash
+cd /mnt/c/Users/Torres/Dropbox/Projeto_Staccato/erp-staccato/tools/import-benchmark
+
+# Generate golden file (baseline)
+./import-benchmark ../../CASTELATTO.xlsx \
+    --user torres --pass 1234 --host 172.31.240.1 \
+    --dry-run --generate-golden golden-castelatto.json
+
+# Verify after code changes
+./import-benchmark ../../CASTELATTO.xlsx \
+    --user torres --pass 1234 --host 172.31.240.1 \
+    --verify golden-castelatto.json
+```
+
+### Running Commands from Windows (via WSL)
+```batch
+:: Profile with perf
+wsl -d Ubuntu -- bash -c "cd /tmp && /usr/local/bin/perf record -g -o bench.data /mnt/c/Users/Torres/Dropbox/Projeto_Staccato/erp-staccato/tools/import-benchmark/import-benchmark /mnt/c/Users/Torres/Dropbox/Projeto_Staccato/erp-staccato/CASTELATTO.xlsx --user torres --pass 1234 --host 172.31.240.1 --dry-run"
+
+:: View perf report
+wsl -d Ubuntu -- bash -c "cd /tmp && /usr/local/bin/perf report -i bench.data --stdio --no-children --percent-limit 0.5"
+```
+
+## Profiling Results (2026-01-02)
 
 ### Test Configuration
 - **File:** CASTELATTO.xlsx
@@ -172,17 +196,19 @@ for (const auto& product : products) {
 }
 ```
 
-### 3. Cache Field Indices (Medium Impact)
+### 3. Cache Field Indices (NO Impact - Tested)
 ```cpp
 // Current: Lookup field index by name each time
 int idx = model.fieldIndex("fieldName");  // String comparison
 
-// Better: Cache indices at start
+// Attempted: Cache indices at start
 QHash<QString, int> fieldIndices;
 for (int i = 0; i < model.columnCount(); i++) {
     fieldIndices[model.headerData(i).toString()] = i;
 }
 ```
+**Result:** Implemented and tested - NO measurable improvement. The `fieldIndex()`
+string lookup is not the bottleneck; the Qt model's internal map traversal dominates.
 
 ### 4. Disable Sorting During Import (Medium Impact)
 ```cpp

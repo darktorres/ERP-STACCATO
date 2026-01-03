@@ -807,7 +807,20 @@ void ImportaProdutos::salvarOptimized() {
   if (m_productChanges.isEmpty()) { goto postProcess; }
 
   {
-    constexpr int BATCH_SIZE = 100;
+    // Query server for max_allowed_packet and calculate optimal batch size
+    int batchSize = 100;  // Conservative default
+    {
+      SqlQuery packetQuery;
+      if (packetQuery.exec("SHOW VARIABLES LIKE 'max_allowed_packet'") && packetQuery.next()) {
+        const qint64 maxPacket = packetQuery.value(1).toLongLong();
+        // Estimate ~2KB per row (conservative), use 70% of max_allowed_packet for safety margin
+        constexpr int ESTIMATED_ROW_SIZE = 2048;
+        const int maxRows = static_cast<int>((maxPacket * 0.7) / ESTIMATED_ROW_SIZE);
+        // Clamp between 100 and 10000 rows
+        batchSize = qBound(100, maxRows, 10000);
+      }
+    }
+
     constexpr int INSERT_COLS = 26;  // Number of columns in INSERT for new products
     constexpr int UPDATE_COLS = 27;  // Number of columns in UPDATE (includes idProduto)
 
@@ -837,8 +850,8 @@ void ImportaProdutos::salvarOptimized() {
     if (!newProducts.isEmpty()) {
       const int promocaoInt = static_cast<int>(tipo);
 
-      for (int batchStart = 0; batchStart < newProducts.size(); batchStart += BATCH_SIZE) {
-        const int batchEnd = qMin(batchStart + BATCH_SIZE, newProducts.size());
+      for (int batchStart = 0; batchStart < newProducts.size(); batchStart += batchSize) {
+        const int batchEnd = qMin(batchStart + batchSize, newProducts.size());
         const int batchCount = batchEnd - batchStart;
 
         QString sql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
@@ -907,8 +920,8 @@ void ImportaProdutos::salvarOptimized() {
     // BATCH UPDATE for existing products using INSERT...ON DUPLICATE KEY UPDATE
     // ========================================================================
     if (!updateProducts.isEmpty()) {
-      for (int batchStart = 0; batchStart < updateProducts.size(); batchStart += BATCH_SIZE) {
-        const int batchEnd = qMin(batchStart + BATCH_SIZE, updateProducts.size());
+      for (int batchStart = 0; batchStart < updateProducts.size(); batchStart += batchSize) {
+        const int batchEnd = qMin(batchStart + batchSize, updateProducts.size());
         const int batchCount = batchEnd - batchStart;
 
         QString sql = "INSERT INTO produto (idProduto, idFornecedor, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "

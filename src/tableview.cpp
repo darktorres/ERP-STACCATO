@@ -66,12 +66,15 @@ void TableView::resizeEvent(QResizeEvent *event) {
 void TableView::setStoredSelection(bool newStoredSelection) {
   storedSelection = newStoredSelection;
 
+  auto *mdl = model();
+  if (not mdl) { return; }
+
   if (storedSelection) {
-    connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
-    connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
+    connect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection);
+    connect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection);
   } else {
-    disconnect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
-    disconnect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
+    disconnect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection);
+    disconnect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection);
   }
 }
 
@@ -80,13 +83,25 @@ void TableView::setCopyHeaders(const bool newCopyHeaders) { copyHeaders = newCop
 int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
 
 int TableView::columnIndex(const QString &column, const bool silent) const {
-  int columnIndex = -1;
+  int colIdx = -1;
 
-  if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
+  if (baseModel) {
+    // SQL model: use record() for fast column lookup
+    colIdx = baseModel->record().indexOf(column);
+  } else if (model()) {
+    // Non-SQL model (e.g., QStandardItemModel): search by header data
+    const int cols = model()->columnCount();
+    for (int i = 0; i < cols; ++i) {
+      if (model()->headerData(i, Qt::Horizontal).toString() == column) {
+        colIdx = i;
+        break;
+      }
+    }
+  }
 
-  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { throw RuntimeException("Coluna '" + column + "' não encontrada!"); }
+  if (colIdx == -1 and not silent and column != "created" and column != "lastUpdated") { throw RuntimeException("Coluna '" + column + "' não encontrada!"); }
 
-  return columnIndex;
+  return colIdx;
 }
 
 void TableView::hideColumn(const QString &column) { QTableView::hideColumn(columnIndex(column)); }
@@ -168,27 +183,16 @@ void TableView::setModel(QAbstractItemModel *model) {
     QTableView::setModel(model);
   }
 
+  // Try to cast to QSqlQueryModel for SQL-specific features (column name lookup via record())
+  // For non-SQL models (e.g., QStandardItemModel), baseModel will be nullptr and we use header data
   baseModel = qobject_cast<QSqlQueryModel *>(model);
-
-  if (not baseModel) { throw RuntimeException("TableView model não implementado!", this); }
 
   //---------------------------------------
 
-  // TODO: reativar
-  //  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, [=] {
-  //    setDisabled(true);
-  //    repaint();
-  //  });
-
-  //  connect(baseModel, &QSqlQueryModel::modelReset, this, [=] { setEnabled(true); });
-
-  // TODO: readicionar apos arrumar os bugs
-  //  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, &TableView::storeSelection);
-  //  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::restoreSelection);
-
-  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
-  connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+  // Connect signals using the generic model (works for both SQL and non-SQL models)
+  connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView);
+  connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView);
+  connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView);
   connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView);
 
   //---------------------------------------

@@ -736,14 +736,17 @@ void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, cons
   const Produto &p = change.newData;
   const bool isDiscontinued = (change.type == ProductChange::Type::Discontinued);
 
+  static const QBrush blackBrush(Qt::black);
+
   auto setCell = [&](int col, const QVariant &value, const QString &fieldName) {
     QStandardItem *item = new QStandardItem();
     item->setData(value, Qt::DisplayRole);
-    item->setData(textColor, Qt::ForegroundRole);
 
-    // Set background color
+    // Set background and foreground colors
+    // Rule: colored backgrounds always get black text (like the old proxy model)
     if (isDiscontinued) {
       item->setData(cyanBrush, Qt::BackgroundRole);
+      item->setData(blackBrush, Qt::ForegroundRole);
     } else {
       // Use find() instead of contains() + operator[] to avoid double lookup
       auto it = change.fieldStatus.constFind(fieldName);
@@ -751,7 +754,12 @@ void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, cons
         QBrush bg = getFieldColor(it.value());
         if (bg.style() != Qt::NoBrush) {
           item->setData(bg, Qt::BackgroundRole);
+          item->setData(blackBrush, Qt::ForegroundRole);
+        } else {
+          item->setData(textColor, Qt::ForegroundRole);
         }
+      } else {
+        item->setData(textColor, Qt::ForegroundRole);
       }
     }
 
@@ -788,110 +796,207 @@ void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, cons
 }
 
 void ImportaProdutos::salvarOptimized() {
-  // Batch UPDATE for existing products
-  if (!m_productChanges.isEmpty()) {
-    SqlQuery updateQuery;
-    updateQuery.prepare(
-        "UPDATE produto SET "
-        "atualizarTabelaPreco = TRUE, descontinuado = FALSE, "
-        "fornecedor = :fornecedor, descricao = :descricao, un = :un, un2 = :un2, colecao = :colecao, "
-        "m2cx = :m2cx, pccx = :pccx, kgcx = :kgcx, formComercial = :formComercial, codComercial = :codComercial, "
-        "codBarras = :codBarras, ncm = :ncm, qtdPallet = :qtdPallet, custo = :custo, precoVenda = :precoVenda, "
-        "ui = :ui, minimo = :minimo, mva = :mva, st = :st, sticms = :sticms, quantCaixa = :quantCaixa, "
-        "markup = :markup, validade = :validade "
-        "WHERE idProduto = :idProduto");
+  // ==========================================================================
+  // BATCH SAVE - Uses multi-row INSERT and INSERT...ON DUPLICATE KEY UPDATE
+  // Reduces ~3700 queries to ~40 queries (100 rows per batch)
+  // ==========================================================================
 
-    SqlQuery insertQuery;
-    insertQuery.prepare(
-        "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, un, un2, colecao, "
-        "m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, qtdPallet, custo, precoVenda, "
-        "ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES "
-        "(TRUE, :promocao, :idFornecedor, :fornecedor, :descricao, :un, :un2, :colecao, "
-        ":m2cx, :pccx, :kgcx, :formComercial, :codComercial, :codBarras, :ncm, :qtdPallet, :custo, :precoVenda, "
-        ":ui, :minimo, :mva, :st, :sticms, :quantCaixa, :markup, :validade)");
+  if (m_productChanges.isEmpty()) { goto postProcess; }
+
+  {
+    constexpr int BATCH_SIZE = 100;
+
+    // Separate new products from updates
+    QVector<const ProductChange *> newProducts;
+    QVector<const ProductChange *> updateProducts;
 
     for (const ProductChange &change : qAsConst(m_productChanges)) {
-      const Produto &p = change.newData;
-
       if (change.type == ProductChange::Type::New) {
-        // INSERT new product
-        insertQuery.bindValue(":promocao", static_cast<int>(tipo));
-        insertQuery.bindValue(":idFornecedor", p.idFornecedor);
-        insertQuery.bindValue(":fornecedor", p.fornecedor);
-        insertQuery.bindValue(":descricao", p.descricao);
-        insertQuery.bindValue(":un", p.un);
-        insertQuery.bindValue(":un2", p.un2);
-        insertQuery.bindValue(":colecao", p.colecao);
-        insertQuery.bindValue(":m2cx", p.m2cx);
-        insertQuery.bindValue(":pccx", p.pccx);
-        insertQuery.bindValue(":kgcx", p.kgcx);
-        insertQuery.bindValue(":formComercial", p.formComercial);
-        insertQuery.bindValue(":codComercial", p.codComercial);
-        insertQuery.bindValue(":codBarras", p.codBarras);
-        insertQuery.bindValue(":ncm", p.ncm);
-        insertQuery.bindValue(":qtdPallet", p.qtdPallet);
-        insertQuery.bindValue(":custo", p.custo);
-        insertQuery.bindValue(":precoVenda", p.precoVenda);
-        insertQuery.bindValue(":ui", p.ui);
-        insertQuery.bindValue(":minimo", p.minimo);
-        insertQuery.bindValue(":mva", p.mva);
-        insertQuery.bindValue(":st", p.st);
-        insertQuery.bindValue(":sticms", p.sticms);
-        insertQuery.bindValue(":quantCaixa", p.quantCaixa);
-        insertQuery.bindValue(":markup", p.markup);
-        insertQuery.bindValue(":validade", p.validade.isValid() ? p.validade : QVariant());
-
-        if (not insertQuery.exec()) {
-          throw RuntimeException("Erro inserindo produto: " + insertQuery.lastError().text());
-        }
-
-        // Handle promocao related product linking
-        if (tipo == Tipo::Promocao) {
-          int newId = insertQuery.lastInsertId().toInt();
-          SqlQuery linkQuery;
-          linkQuery.prepare("UPDATE produto SET idProdutoRelacionado = "
-                           "(SELECT idProduto FROM produto p2 WHERE p2.idFornecedor = :idFornecedor "
-                           "AND p2.codComercial = :codComercial AND p2.promocao = FALSE AND p2.estoque = FALSE LIMIT 1) "
-                           "WHERE idProduto = :idProduto");
-          linkQuery.bindValue(":idFornecedor", p.idFornecedor);
-          linkQuery.bindValue(":codComercial", p.codComercial);
-          linkQuery.bindValue(":idProduto", newId);
-          linkQuery.exec();  // Ignore errors - linking is optional
-        }
-
+        newProducts.append(&change);
       } else if (change.type == ProductChange::Type::Updated || change.type == ProductChange::Type::NotChanged) {
-        // UPDATE existing product (both Updated and NotChanged need to be unmarked as discontinued)
-        updateQuery.bindValue(":idProduto", p.idProduto);
-        updateQuery.bindValue(":fornecedor", p.fornecedor);
-        updateQuery.bindValue(":descricao", p.descricao);
-        updateQuery.bindValue(":un", p.un);
-        updateQuery.bindValue(":un2", p.un2);
-        updateQuery.bindValue(":colecao", p.colecao);
-        updateQuery.bindValue(":m2cx", p.m2cx);
-        updateQuery.bindValue(":pccx", p.pccx);
-        updateQuery.bindValue(":kgcx", p.kgcx);
-        updateQuery.bindValue(":formComercial", p.formComercial);
-        updateQuery.bindValue(":codComercial", p.codComercial);
-        updateQuery.bindValue(":codBarras", p.codBarras);
-        updateQuery.bindValue(":ncm", p.ncm);
-        updateQuery.bindValue(":qtdPallet", p.qtdPallet);
-        updateQuery.bindValue(":custo", p.custo);
-        updateQuery.bindValue(":precoVenda", p.precoVenda);
-        updateQuery.bindValue(":ui", p.ui);
-        updateQuery.bindValue(":minimo", p.minimo);
-        updateQuery.bindValue(":mva", p.mva);
-        updateQuery.bindValue(":st", p.st);
-        updateQuery.bindValue(":sticms", p.sticms);
-        updateQuery.bindValue(":quantCaixa", p.quantCaixa);
-        updateQuery.bindValue(":markup", p.markup);
-        updateQuery.bindValue(":validade", p.validade.isValid() ? p.validade : QVariant());
+        updateProducts.append(&change);
+      }
+    }
 
-        if (not updateQuery.exec()) {
-          throw RuntimeException("Erro atualizando produto: " + updateQuery.lastError().text());
+    // Helper to escape string for SQL (basic escaping)
+    auto escapeStr = [](const QString &s) -> QString {
+      QString escaped = s;
+      escaped.replace("\\", "\\\\");
+      escaped.replace("'", "\\'");
+      return escaped;
+    };
+
+    // Helper to format QVariant for SQL
+    auto formatValue = [&escapeStr](const QVariant &v) -> QString {
+      if (v.isNull() || !v.isValid()) return "NULL";
+      switch (v.type()) {
+        case QVariant::Int:
+        case QVariant::LongLong:
+          return QString::number(v.toLongLong());
+        case QVariant::Double:
+          return QString::number(v.toDouble(), 'f', 6);
+        case QVariant::Date:
+          return "'" + v.toDate().toString("yyyy-MM-dd") + "'";
+        case QVariant::String:
+        default:
+          return "'" + escapeStr(v.toString()) + "'";
+      }
+    };
+
+    // ========================================================================
+    // BATCH INSERT for new products
+    // ========================================================================
+    if (!newProducts.isEmpty()) {
+      const int promocaoInt = static_cast<int>(tipo);
+
+      for (int batchStart = 0; batchStart < newProducts.size(); batchStart += BATCH_SIZE) {
+        const int batchEnd = qMin(batchStart + BATCH_SIZE, newProducts.size());
+
+        QString sql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
+                      "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
+                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES ";
+
+        QStringList valueRows;
+        for (int i = batchStart; i < batchEnd; ++i) {
+          const Produto &p = newProducts[i]->newData;
+          QStringList vals;
+          vals << "TRUE"
+               << QString::number(promocaoInt)
+               << QString::number(p.idFornecedor)
+               << formatValue(p.fornecedor)
+               << formatValue(p.descricao)
+               << formatValue(p.un)
+               << formatValue(p.un2)
+               << formatValue(p.colecao)
+               << QString::number(p.m2cx, 'f', 6)
+               << QString::number(p.pccx, 'f', 6)
+               << QString::number(p.kgcx, 'f', 6)
+               << formatValue(p.formComercial)
+               << formatValue(p.codComercial)
+               << formatValue(p.codBarras)
+               << formatValue(p.ncm)
+               << formatValue(p.qtdPallet)
+               << QString::number(p.custo, 'f', 6)
+               << QString::number(p.precoVenda, 'f', 6)
+               << formatValue(p.ui)
+               << formatValue(p.minimo)
+               << formatValue(p.mva)
+               << formatValue(p.st)
+               << formatValue(p.sticms)
+               << QString::number(p.quantCaixa, 'f', 6)
+               << QString::number(p.markup, 'f', 6)
+               << (p.validade.isValid() ? formatValue(p.validade) : "NULL");
+          valueRows << "(" + vals.join(",") + ")";
+        }
+
+        sql += valueRows.join(",");
+
+        SqlQuery query;
+        if (!query.exec(sql)) {
+          throw RuntimeException("Erro inserindo produtos em lote: " + query.lastError().text());
+        }
+      }
+
+      // Link promocao products in bulk (if needed)
+      if (tipo == Tipo::Promocao) {
+        SqlQuery linkQuery;
+        if (!linkQuery.exec(
+            "UPDATE produto p1 "
+            "SET idProdutoRelacionado = ("
+            "  SELECT p2.idProduto FROM produto p2 "
+            "  WHERE p2.idFornecedor = p1.idFornecedor "
+            "  AND p2.codComercial = p1.codComercial "
+            "  AND p2.promocao = FALSE AND p2.estoque = FALSE "
+            "  LIMIT 1"
+            ") "
+            "WHERE p1.promocao = TRUE AND p1.idProdutoRelacionado IS NULL "
+            "AND p1.idFornecedor IN (" + idsFornecedor + ")")) {
+          // Ignore linking errors - optional operation
+        }
+      }
+    }
+
+    // ========================================================================
+    // BATCH UPDATE for existing products using INSERT...ON DUPLICATE KEY UPDATE
+    // ========================================================================
+    if (!updateProducts.isEmpty()) {
+      for (int batchStart = 0; batchStart < updateProducts.size(); batchStart += BATCH_SIZE) {
+        const int batchEnd = qMin(batchStart + BATCH_SIZE, updateProducts.size());
+
+        QString sql = "INSERT INTO produto (idProduto, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "
+                      "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
+                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES ";
+
+        QStringList valueRows;
+        for (int i = batchStart; i < batchEnd; ++i) {
+          const Produto &p = updateProducts[i]->newData;
+          QStringList vals;
+          vals << QString::number(p.idProduto)
+               << "TRUE"
+               << "FALSE"
+               << formatValue(p.fornecedor)
+               << formatValue(p.descricao)
+               << formatValue(p.un)
+               << formatValue(p.un2)
+               << formatValue(p.colecao)
+               << QString::number(p.m2cx, 'f', 6)
+               << QString::number(p.pccx, 'f', 6)
+               << QString::number(p.kgcx, 'f', 6)
+               << formatValue(p.formComercial)
+               << formatValue(p.codComercial)
+               << formatValue(p.codBarras)
+               << formatValue(p.ncm)
+               << formatValue(p.qtdPallet)
+               << QString::number(p.custo, 'f', 6)
+               << QString::number(p.precoVenda, 'f', 6)
+               << formatValue(p.ui)
+               << formatValue(p.minimo)
+               << formatValue(p.mva)
+               << formatValue(p.st)
+               << formatValue(p.sticms)
+               << QString::number(p.quantCaixa, 'f', 6)
+               << QString::number(p.markup, 'f', 6)
+               << (p.validade.isValid() ? formatValue(p.validade) : "NULL");
+          valueRows << "(" + vals.join(",") + ")";
+        }
+
+        sql += valueRows.join(",");
+        sql += " ON DUPLICATE KEY UPDATE "
+               "atualizarTabelaPreco = VALUES(atualizarTabelaPreco), "
+               "descontinuado = VALUES(descontinuado), "
+               "fornecedor = VALUES(fornecedor), "
+               "descricao = VALUES(descricao), "
+               "un = VALUES(un), "
+               "un2 = VALUES(un2), "
+               "colecao = VALUES(colecao), "
+               "m2cx = VALUES(m2cx), "
+               "pccx = VALUES(pccx), "
+               "kgcx = VALUES(kgcx), "
+               "formComercial = VALUES(formComercial), "
+               "codComercial = VALUES(codComercial), "
+               "codBarras = VALUES(codBarras), "
+               "ncm = VALUES(ncm), "
+               "qtdPallet = VALUES(qtdPallet), "
+               "custo = VALUES(custo), "
+               "precoVenda = VALUES(precoVenda), "
+               "ui = VALUES(ui), "
+               "minimo = VALUES(minimo), "
+               "mva = VALUES(mva), "
+               "st = VALUES(st), "
+               "sticms = VALUES(sticms), "
+               "quantCaixa = VALUES(quantCaixa), "
+               "markup = VALUES(markup), "
+               "validade = VALUES(validade)";
+
+        SqlQuery query;
+        if (!query.exec(sql)) {
+          throw RuntimeException("Erro atualizando produtos em lote: " + query.lastError().text());
         }
       }
     }
   }
+
+postProcess:
 
   // Insert price records
   SqlQuery queryPrecos;
@@ -1026,6 +1131,7 @@ void ImportaProdutos::setupTables() {
 
   // Hide columns not needed for display
   ui->tableProdutos->setColumnHidden(colIdx("idProduto"), true);
+  ui->tableProdutos->setColumnHidden(colIdx("idFornecedor"), true);
   ui->tableProdutos->setColumnHidden(colIdx("descontinuado"), true);
   ui->tableProdutos->setColumnHidden(colIdx("quantCaixa"), true);
 
@@ -1053,6 +1159,7 @@ void ImportaProdutos::setupTables() {
 
   // Hide columns not needed for display
   ui->tableErro->setColumnHidden(colIdx("idProduto"), true);
+  ui->tableErro->setColumnHidden(colIdx("idFornecedor"), true);
   ui->tableErro->setColumnHidden(colIdx("descontinuado"), true);
   ui->tableErro->setColumnHidden(colIdx("quantCaixa"), true);
 

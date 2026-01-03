@@ -899,9 +899,7 @@ void ImportaProdutos::salvarOptimized() {
 
       // Link promocao products in bulk (if needed)
       if (tipo == Tipo::Promocao) {
-        SqlQuery linkQuery;
-        if (!linkQuery.exec(
-            "UPDATE produto p1 "
+        QString linkSql = "UPDATE produto p1 "
             "SET idProdutoRelacionado = ("
             "  SELECT p2.idProduto FROM produto p2 "
             "  WHERE p2.idFornecedor = p1.idFornecedor "
@@ -910,9 +908,10 @@ void ImportaProdutos::salvarOptimized() {
             "  LIMIT 1"
             ") "
             "WHERE p1.promocao = TRUE AND p1.idProdutoRelacionado IS NULL "
-            "AND p1.idFornecedor IN (" + idsFornecedor + ")")) {
-          // Ignore linking errors - optional operation
-        }
+            "AND p1.idFornecedor IN (" + idsFornecedor + ")";
+
+        SqlQuery linkQuery;
+        linkQuery.exec(linkSql);  // Ignore errors - optional operation
       }
     }
 
@@ -923,7 +922,7 @@ void ImportaProdutos::salvarOptimized() {
       for (int batchStart = 0; batchStart < updateProducts.size(); batchStart += BATCH_SIZE) {
         const int batchEnd = qMin(batchStart + BATCH_SIZE, updateProducts.size());
 
-        QString sql = "INSERT INTO produto (idProduto, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "
+        QString sql = "INSERT INTO produto (idProduto, idFornecedor, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "
                       "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
                       "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES ";
 
@@ -932,6 +931,7 @@ void ImportaProdutos::salvarOptimized() {
           const Produto &p = updateProducts[i]->newData;
           QStringList vals;
           vals << QString::number(p.idProduto)
+               << QString::number(p.idFornecedor)
                << "TRUE"
                << "FALSE"
                << formatValue(p.fornecedor)

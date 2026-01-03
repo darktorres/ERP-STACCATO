@@ -306,7 +306,8 @@ void ImportaProdutos::processarArquivoOptimized() {
 #else
   setupTables();
 
-  ui->tableProdutos->sortByColumn("descontinuado", Qt::AscendingOrder);
+  // Sort by descontinuado column (use index since header name is now "Desc.")
+  ui->tableProdutos->QTableView::sortByColumn(PREVIEW_COLUMNS.indexOf("descontinuado"), Qt::AscendingOrder);
 
   showMaximized();
 
@@ -661,14 +662,46 @@ void ImportaProdutos::buildPreviewModels() {
   const QBrush textColor = (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
   const QBrush cyanBrush(Qt::cyan);
 
+  // Display names for column headers (matching legacy setupModels)
+  static const QHash<QString, QString> headerNames = {
+      {"idProduto", "ID"},
+      {"idFornecedor", "ID Forn."},
+      {"fornecedor", "Fornecedor"},
+      {"descricao", "Descrição"},
+      {"un", "Un."},
+      {"un2", "Un.2"},
+      {"colecao", "Coleção"},
+      {"m2cx", "M./Cx."},
+      {"pccx", "Pç./Cx."},
+      {"kgcx", "Kg./Cx."},
+      {"formComercial", "Form. Com."},
+      {"codComercial", "Cód. Com."},
+      {"codBarras", "Cód. Barras"},
+      {"ncm", "NCM"},
+      {"qtdPallet", "Qt. Pallet"},
+      {"custo", "Custo"},
+      {"precoVenda", "Preço Venda"},
+      {"ui", "UI"},
+      {"minimo", "Mínimo"},
+      {"mva", "MVA"},
+      {"st", "ST"},
+      {"sticms", "ST ICMS"},
+      {"quantCaixa", "Qt. Cx."},
+      {"markup", "Markup"},
+      {"validade", "Validade"},
+      {"descontinuado", "Desc."},
+  };
+
   // Setup column headers
   const int colCount = PREVIEW_COLUMNS.size();
   m_previewModel.setColumnCount(colCount);
   m_errorModel.setColumnCount(colCount);
 
   for (int i = 0; i < colCount; ++i) {
-    m_previewModel.setHeaderData(i, Qt::Horizontal, PREVIEW_COLUMNS[i]);
-    m_errorModel.setHeaderData(i, Qt::Horizontal, PREVIEW_COLUMNS[i]);
+    const QString &field = PREVIEW_COLUMNS[i];
+    const QString displayName = headerNames.value(field, field);
+    m_previewModel.setHeaderData(i, Qt::Horizontal, displayName);
+    m_errorModel.setHeaderData(i, Qt::Horizontal, displayName);
   }
 
   // Build set of processed product IDs for fast lookup

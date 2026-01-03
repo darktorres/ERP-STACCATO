@@ -4,7 +4,6 @@
 #include "application.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
-#include "importaprodutosproxymodel.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -658,16 +657,6 @@ void ImportaProdutos::buildPreviewModels() {
   // Re-enable signals
   m_previewModel.blockSignals(false);
   m_errorModel.blockSignals(false);
-}
-
-void ImportaProdutos::addRowToModel(QStandardItemModel &model, const ProductChange &change) {
-  // Legacy version - calls the fast version with default brushes
-  const QString tema = User::getSetting("User/tema").toString();
-  const QBrush textColor = (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
-  const QBrush cyanBrush(Qt::cyan);
-  int row = model.rowCount();
-  model.insertRow(row);
-  addRowToModelFast(model, row, change, textColor, cyanBrush);
 }
 
 void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, const ProductChange &change,

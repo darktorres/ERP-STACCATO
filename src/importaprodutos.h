@@ -112,7 +112,7 @@ private:
   Tipo const tipo;
   Ui::ImportaProdutos *ui;
 
-  // New optimized architecture - in-memory processing
+  // In-memory processing architecture
   QVector<ProductChange> m_productChanges;      // All changes for save
   QVector<ProductChange> m_errorChanges;        // Error products
   QHash<QString, Produto> m_existingProducts;   // Loaded from DB (unique keys for lookup)
@@ -147,7 +147,6 @@ private:
 
   // methods - preview model
   auto buildPreviewModels() -> void;
-  auto addRowToModel(QStandardItemModel &model, const ProductChange &change) -> void;
   auto addRowToModelFast(QStandardItemModel &model, int row, const ProductChange &change,
                          const QBrush &textColor, const QBrush &cyanBrush) -> void;
   auto getFieldColor(FieldStatus status) const -> QBrush;

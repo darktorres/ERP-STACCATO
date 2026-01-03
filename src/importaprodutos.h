@@ -1,6 +1,5 @@
 #pragma once
 
-#include "sqltablemodel.h"
 #include "xlsxdocument.h"
 
 #include <QDate>
@@ -86,11 +85,6 @@ public:
   auto getItensExpired() const -> int { return itensExpired; }
   auto getItensError() const -> int { return itensError; }
 
-  // Legacy model accessors (kept for compatibility, return dummy models)
-  auto getModelProduto() -> SqlTableModel & { return modelProduto; }
-  auto getModelErro() -> SqlTableModel & { return modelErro; }
-
-  // New optimized accessors for regression testing
   auto getPreviewModel() -> QStandardItemModel & { return m_previewModel; }
   auto getErrorModel() -> QStandardItemModel & { return m_errorModel; }
   auto getProductChanges() const -> const QVector<ProductChange> & { return m_productChanges; }
@@ -131,7 +125,6 @@ private:
 
   // methods - core flow
   auto processarArquivo() -> void;
-  auto processarArquivoOptimized() -> void;
   auto readFile() -> bool;
   auto readValidade() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
@@ -164,30 +157,10 @@ private:
 
   // methods - save
   auto salvar() -> void;
-  auto salvarOptimized() -> void;
   auto atualizaPrecoEstoque() -> void;
   auto marcaTodosProdutosDescontinuados() -> void;
 
   // methods - UI
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-
-  // Legacy methods (kept for compatibility, will be removed)
-  Produto produto;
-  QHash<QString, int> hashModel;
-  QHash<QString, int> fieldIdx;
-  QVector<int> vectorProdutosImportados;
-  SqlTableModel modelErro;
-  SqlTableModel modelProduto;
-  auto atualizaCamposProduto(const int row) -> void;
-  auto cacheFieldIndices() -> void;
-  auto atualizaProduto() -> void;
-  auto camposForaDoPadrao() -> bool;  // Legacy parameterless version
-  auto insereEmErro() -> void;
-  auto insereEmOk() -> void;
-  auto leituraProduto(QXlsx::Document &xlsx, const int row) -> void;
-  auto marcaProdutoNaoDescontinuado(const int row) -> void;
-  auto mostraApenasEstesFornecedores() -> void;
-  auto pintarCamposForaDoPadrao(const int row) -> void;
-  auto setupModels() -> void;
 };

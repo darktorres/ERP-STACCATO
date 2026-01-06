@@ -747,8 +747,8 @@ void ImportaProdutos::salvar() {
       }
     }
 
-    constexpr int INSERT_COLS = 26;  // Number of columns in INSERT for new products
-    constexpr int UPDATE_COLS = 27;  // Number of columns in UPDATE (includes idProduto)
+    constexpr int INSERT_COLS = 27;  // Number of columns in INSERT for new products
+    constexpr int UPDATE_COLS = 28;  // Number of columns in UPDATE (includes idProduto)
 
     // Separate new products from updates
     QVector<const ProductChange *> newProducts;
@@ -782,7 +782,8 @@ void ImportaProdutos::salvar() {
 
         QString sql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
                       "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
-                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES "
+                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade, "
+                      "representacao) VALUES "
                     + buildPlaceholders(batchCount, INSERT_COLS);
 
         SqlQuery query;
@@ -817,6 +818,7 @@ void ImportaProdutos::salvar() {
           query.addBindValue(p.quantCaixa);                                      // quantCaixa
           query.addBindValue(p.markup);                                          // markup
           query.addBindValue(p.validade.isValid() ? p.validade : QVariant());    // validade
+          query.addBindValue(ui->checkBoxRepresentacao->isChecked());            // representacao
         }
 
         if (!query.exec()) {
@@ -852,7 +854,8 @@ void ImportaProdutos::salvar() {
 
         QString sql = "INSERT INTO produto (idProduto, idFornecedor, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "
                       "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
-                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade) VALUES "
+                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade, "
+                      "representacao) VALUES "
                     + buildPlaceholders(batchCount, UPDATE_COLS)
                     + " ON DUPLICATE KEY UPDATE "
                       "atualizarTabelaPreco = VALUES(atualizarTabelaPreco), "
@@ -879,7 +882,8 @@ void ImportaProdutos::salvar() {
                       "sticms = VALUES(sticms), "
                       "quantCaixa = VALUES(quantCaixa), "
                       "markup = VALUES(markup), "
-                      "validade = VALUES(validade)";
+                      "validade = VALUES(validade), "
+                      "representacao = VALUES(representacao)";
 
         SqlQuery query;
         query.prepare(sql);
@@ -914,6 +918,7 @@ void ImportaProdutos::salvar() {
           query.addBindValue(p.quantCaixa);                                      // quantCaixa
           query.addBindValue(p.markup);                                          // markup
           query.addBindValue(p.validade.isValid() ? p.validade : QVariant());    // validade
+          query.addBindValue(ui->checkBoxRepresentacao->isChecked());            // representacao
         }
 
         if (!query.exec()) {

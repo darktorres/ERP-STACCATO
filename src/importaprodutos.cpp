@@ -725,30 +725,28 @@ void ImportaProdutos::addRowToModelFast(QStandardItemModel &model, int row, cons
 
 void ImportaProdutos::salvar() {
   // ==========================================================================
-  // BATCH SAVE - Uses prepared statements with multi-row INSERT
-  // Reduces ~3700 queries to ~40 queries (100 rows per batch)
-  // Uses bound parameters for SQL injection protection
+  // MULTI-STATEMENT BATCH SAVE
+  // Reduces network RTT by executing multiple statements in single call
+  // Queries are batched based on server's max_allowed_packet
   // ==========================================================================
 
-  if (m_productChanges.isEmpty()) { goto postProcess; }
+  // Process products if any changes exist
+  if (!m_productChanges.isEmpty()) {
+    constexpr int BATCH_SIZE = 100;
 
-  {
-    // Query server for max_allowed_packet and calculate optimal batch size
-    int batchSize = 100;  // Conservative default
+    // Query server for max_allowed_packet
+    qint64 maxAllowedPacket = 16 * 1024 * 1024;  // Default fallback: 16MB
     {
       SqlQuery packetQuery;
       if (packetQuery.exec("SHOW VARIABLES LIKE 'max_allowed_packet'") && packetQuery.next()) {
-        const qint64 maxPacket = packetQuery.value(1).toLongLong();
-        // Estimate ~2KB per row (conservative), use 70% of max_allowed_packet for safety margin
-        constexpr int ESTIMATED_ROW_SIZE = 2048;
-        const int maxRows = static_cast<int>((maxPacket * 0.7) / ESTIMATED_ROW_SIZE);
-        // Clamp between 100 and 10000 rows
-        batchSize = qBound(100, maxRows, 10000);
+        maxAllowedPacket = packetQuery.value(1).toLongLong();
+        qDebug() << "max_allowed_packet from server:" << maxAllowedPacket << "bytes";
       }
     }
 
-    constexpr int INSERT_COLS = 27;  // Number of columns in INSERT for new products
-    constexpr int UPDATE_COLS = 28;  // Number of columns in UPDATE (includes idProduto)
+    // Use 70% of max_allowed_packet for safety margin
+    const qint64 MAX_BATCH_SIZE_BYTES = (maxAllowedPacket * 70) / 100;
+    qDebug() << "Using batch size limit:" << MAX_BATCH_SIZE_BYTES << "bytes (70% of" << maxAllowedPacket << ")";
 
     // Separate new products from updates
     QVector<const ProductChange *> newProducts;
@@ -762,199 +760,174 @@ void ImportaProdutos::salvar() {
       }
     }
 
-    // Helper to build placeholder string for N rows: (?,?,...),(?,?,...),...
-    auto buildPlaceholders = [](int numRows, int numCols) -> QString {
-      QString rowPlaceholder = "(" + QString("?,").repeated(numCols);
-      rowPlaceholder.chop(1);  // Remove trailing comma
-      rowPlaceholder += ")";
-      return QString((rowPlaceholder + ",").repeated(numRows)).chopped(1);
+    // Format value helper
+    auto formatVal = [](const QVariant &v) -> QString {
+      if (!v.isValid() || v.isNull()) return "NULL";
+      if (v.type() == QVariant::String) return "'" + v.toString().replace("'", "''") + "'";
+      if (v.type() == QVariant::Bool) return v.toBool() ? "1" : "0";
+      if (v.type() == QVariant::Date) return "'" + v.toDate().toString("yyyy-MM-dd") + "'";
+      return v.toString();
     };
 
+    QString allQueries;
+
     // ========================================================================
-    // BATCH INSERT for new products (using prepared statement)
+    // BUILD and EXECUTE INSERT queries for new products
     // ========================================================================
     if (!newProducts.isEmpty()) {
       const int promocaoInt = static_cast<int>(tipo);
 
-      for (int batchStart = 0; batchStart < newProducts.size(); batchStart += batchSize) {
-        const int batchEnd = qMin(batchStart + batchSize, newProducts.size());
+      for (int batchStart = 0; batchStart < newProducts.size(); batchStart += BATCH_SIZE) {
+        const int batchEnd = qMin(batchStart + BATCH_SIZE, newProducts.size());
         const int batchCount = batchEnd - batchStart;
 
-        QString sql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
-                      "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
-                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade, "
-                      "representacao) VALUES "
-                    + buildPlaceholders(batchCount, INSERT_COLS);
 
-        SqlQuery query;
-        query.prepare(sql);
+        QString insertSql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
+                            "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
+                            "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade, "
+                            "representacao) VALUES ";
 
-        // Bind values for each row
         for (int i = batchStart; i < batchEnd; ++i) {
           const Produto &p = newProducts[i]->newData;
-          query.addBindValue(true);                                              // atualizarTabelaPreco
-          query.addBindValue(promocaoInt);                                       // promocao
-          query.addBindValue(p.idFornecedor);                                    // idFornecedor
-          query.addBindValue(p.fornecedor);                                      // fornecedor
-          query.addBindValue(p.descricao);                                       // descricao
-          query.addBindValue(p.un);                                              // un
-          query.addBindValue(p.un2.isEmpty() ? QVariant() : p.un2);              // un2
-          query.addBindValue(p.colecao);                                         // colecao
-          query.addBindValue(p.m2cx);                                            // m2cx
-          query.addBindValue(p.pccx);                                            // pccx
-          query.addBindValue(p.kgcx);                                            // kgcx
-          query.addBindValue(p.formComercial);                                   // formComercial
-          query.addBindValue(p.codComercial);                                    // codComercial
-          query.addBindValue(p.codBarras.isEmpty() ? QVariant() : p.codBarras);  // codBarras
-          query.addBindValue(p.ncm.isEmpty() ? QVariant() : p.ncm);              // ncm
-          query.addBindValue(p.qtdPallet);                                       // qtdPallet
-          query.addBindValue(p.custo);                                           // custo
-          query.addBindValue(p.precoVenda);                                      // precoVenda
-          query.addBindValue(p.ui);                                              // ui
-          query.addBindValue(p.minimo);                                          // minimo
-          query.addBindValue(p.mva);                                             // mva
-          query.addBindValue(p.st);                                              // st
-          query.addBindValue(p.sticms);                                          // sticms
-          query.addBindValue(p.quantCaixa);                                      // quantCaixa
-          query.addBindValue(p.markup);                                          // markup
-          query.addBindValue(p.validade.isValid() ? p.validade : QVariant());    // validade
-          query.addBindValue(ui->checkBoxRepresentacao->isChecked());            // representacao
+          if (i > batchStart) insertSql += ",";
+
+          insertSql += "(1," + QString::number(promocaoInt) + "," + QString::number(p.idFornecedor) + ","
+                       + formatVal(p.fornecedor) + "," + formatVal(p.descricao) + "," + formatVal(p.un) + ","
+                       + formatVal(p.un2.isEmpty() ? QVariant() : p.un2) + "," + formatVal(p.colecao) + ","
+                       + QString::number(p.m2cx, 'f', 4) + "," + QString::number(p.pccx, 'f', 4) + ","
+                       + QString::number(p.kgcx, 'f', 4) + "," + formatVal(p.formComercial) + ","
+                       + formatVal(p.codComercial) + "," + formatVal(p.codBarras.isEmpty() ? QVariant() : p.codBarras) + ","
+                       + formatVal(p.ncm.isEmpty() ? QVariant() : p.ncm) + "," + formatVal(p.qtdPallet) + ","
+                       + QString::number(p.custo, 'f', 4) + "," + QString::number(p.precoVenda, 'f', 4) + ","
+                       + formatVal(p.ui) + "," + formatVal(p.minimo) + "," + formatVal(p.mva) + ","
+                       + formatVal(p.st) + "," + formatVal(p.sticms) + "," + QString::number(p.quantCaixa, 'f', 4) + ","
+                       + QString::number(p.markup, 'f', 4) + "," + formatVal(p.validade.isValid() ? p.validade : QVariant()) + ","
+                       + (ui->checkBoxRepresentacao->isChecked() ? "1" : "0") + ")";
         }
 
-        if (!query.exec()) {
-          throw RuntimeException("Erro inserindo produtos em lote: " + query.lastError().text());
+        insertSql += ";";
+
+        // Check if adding this query would exceed max packet size
+        if (!allQueries.isEmpty() && (allQueries.length() + insertSql.length()) > MAX_BATCH_SIZE_BYTES) {
+          // Execute current batch and start new one
+          SqlQuery query;
+          if (!query.exec(allQueries)) {
+            throw RuntimeException("Erro executando batch de produto: " + query.lastError().text());
+          }
+          allQueries.clear();
         }
+
+        allQueries += insertSql;
       }
 
-      // Link promocao products in bulk (if needed)
+      // Link promocao products (if needed)
       if (tipo == Tipo::Promocao) {
-        SqlQuery linkQuery;
-        linkQuery.prepare(
-            "UPDATE produto p1 "
-            "SET idProdutoRelacionado = ("
-            "  SELECT p2.idProduto FROM produto p2 "
-            "  WHERE p2.idFornecedor = p1.idFornecedor "
-            "  AND p2.codComercial = p1.codComercial "
-            "  AND p2.promocao = FALSE AND p2.estoque = FALSE "
-            "  LIMIT 1"
-            ") "
-            "WHERE p1.promocao = TRUE AND p1.idProdutoRelacionado IS NULL "
-            "AND p1.idFornecedor IN (" + idsFornecedor + ")");
-        linkQuery.exec();  // Ignore errors - optional operation
+        QString linkSql = "UPDATE produto p1 SET idProdutoRelacionado = ("
+                          "  SELECT p2.idProduto FROM produto p2 "
+                          "  WHERE p2.idFornecedor = p1.idFornecedor "
+                          "  AND p2.codComercial = p1.codComercial "
+                          "  AND p2.promocao = FALSE AND p2.estoque = FALSE "
+                          "  LIMIT 1) "
+                          "WHERE p1.promocao = TRUE AND p1.idProdutoRelacionado IS NULL "
+                          "AND p1.idFornecedor IN (" + idsFornecedor + ");";
+
+        if (!allQueries.isEmpty() && (allQueries.length() + linkSql.length()) > MAX_BATCH_SIZE_BYTES) {
+          SqlQuery query;
+          if (!query.exec(allQueries)) {
+            throw RuntimeException("Erro executando batch de produto: " + query.lastError().text());
+          }
+          allQueries.clear();
+        }
+
+        allQueries += linkSql;
       }
     }
 
     // ========================================================================
-    // BATCH UPDATE for existing products using INSERT...ON DUPLICATE KEY UPDATE
+    // BUILD and EXECUTE UPDATE queries for existing products
     // ========================================================================
     if (!updateProducts.isEmpty()) {
-      for (int batchStart = 0; batchStart < updateProducts.size(); batchStart += batchSize) {
-        const int batchEnd = qMin(batchStart + batchSize, updateProducts.size());
-        const int batchCount = batchEnd - batchStart;
 
-        QString sql = "INSERT INTO produto (idProduto, idFornecedor, atualizarTabelaPreco, descontinuado, fornecedor, descricao, "
-                      "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "
-                      "qtdPallet, custo, precoVenda, ui, minimo, mva, st, sticms, quantCaixa, markup, validade, "
-                      "representacao) VALUES "
-                    + buildPlaceholders(batchCount, UPDATE_COLS)
-                    + " ON DUPLICATE KEY UPDATE "
-                      "atualizarTabelaPreco = VALUES(atualizarTabelaPreco), "
-                      "descontinuado = VALUES(descontinuado), "
-                      "fornecedor = VALUES(fornecedor), "
-                      "descricao = VALUES(descricao), "
-                      "un = VALUES(un), "
-                      "un2 = VALUES(un2), "
-                      "colecao = VALUES(colecao), "
-                      "m2cx = VALUES(m2cx), "
-                      "pccx = VALUES(pccx), "
-                      "kgcx = VALUES(kgcx), "
-                      "formComercial = VALUES(formComercial), "
-                      "codComercial = VALUES(codComercial), "
-                      "codBarras = VALUES(codBarras), "
-                      "ncm = VALUES(ncm), "
-                      "qtdPallet = VALUES(qtdPallet), "
-                      "custo = VALUES(custo), "
-                      "precoVenda = VALUES(precoVenda), "
-                      "ui = VALUES(ui), "
-                      "minimo = VALUES(minimo), "
-                      "mva = VALUES(mva), "
-                      "st = VALUES(st), "
-                      "sticms = VALUES(sticms), "
-                      "quantCaixa = VALUES(quantCaixa), "
-                      "markup = VALUES(markup), "
-                      "validade = VALUES(validade), "
-                      "representacao = VALUES(representacao)";
+      for (const auto* change : updateProducts) {
+        const Produto &p = change->newData;
 
-        SqlQuery query;
-        query.prepare(sql);
+        QString updateSql = "UPDATE produto SET atualizarTabelaPreco=1,descontinuado=0,"
+                            "fornecedor=" + formatVal(p.fornecedor) + ",descricao=" + formatVal(p.descricao) + ","
+                            "un=" + formatVal(p.un) + ",un2=" + formatVal(p.un2.isEmpty() ? QVariant() : p.un2) + ","
+                            "colecao=" + formatVal(p.colecao) + ",m2cx=" + QString::number(p.m2cx, 'f', 4) + ","
+                            "pccx=" + QString::number(p.pccx, 'f', 4) + ",kgcx=" + QString::number(p.kgcx, 'f', 4) + ","
+                            "formComercial=" + formatVal(p.formComercial) + ",codComercial=" + formatVal(p.codComercial) + ","
+                            "codBarras=" + formatVal(p.codBarras.isEmpty() ? QVariant() : p.codBarras) + ","
+                            "ncm=" + formatVal(p.ncm.isEmpty() ? QVariant() : p.ncm) + ",qtdPallet=" + formatVal(p.qtdPallet) + ","
+                            "custo=" + QString::number(p.custo, 'f', 4) + ",precoVenda=" + QString::number(p.precoVenda, 'f', 4) + ","
+                            "ui=" + formatVal(p.ui) + ",minimo=" + formatVal(p.minimo) + ",mva=" + formatVal(p.mva) + ","
+                            "st=" + formatVal(p.st) + ",sticms=" + formatVal(p.sticms) + ","
+                            "quantCaixa=" + QString::number(p.quantCaixa, 'f', 4) + ","
+                            "markup=" + QString::number(p.markup, 'f', 4) + ",validade=" + formatVal(p.validade.isValid() ? p.validade : QVariant()) + ","
+                            "representacao=" + (ui->checkBoxRepresentacao->isChecked() ? "1" : "0") + " "
+                            "WHERE idProduto=" + QString::number(p.idProduto) + ";";
 
-        // Bind values for each row
-        for (int i = batchStart; i < batchEnd; ++i) {
-          const Produto &p = updateProducts[i]->newData;
-          query.addBindValue(p.idProduto);                                       // idProduto
-          query.addBindValue(p.idFornecedor);                                    // idFornecedor
-          query.addBindValue(true);                                              // atualizarTabelaPreco
-          query.addBindValue(false);                                             // descontinuado
-          query.addBindValue(p.fornecedor);                                      // fornecedor
-          query.addBindValue(p.descricao);                                       // descricao
-          query.addBindValue(p.un);                                              // un
-          query.addBindValue(p.un2.isEmpty() ? QVariant() : p.un2);              // un2
-          query.addBindValue(p.colecao);                                         // colecao
-          query.addBindValue(p.m2cx);                                            // m2cx
-          query.addBindValue(p.pccx);                                            // pccx
-          query.addBindValue(p.kgcx);                                            // kgcx
-          query.addBindValue(p.formComercial);                                   // formComercial
-          query.addBindValue(p.codComercial);                                    // codComercial
-          query.addBindValue(p.codBarras.isEmpty() ? QVariant() : p.codBarras);  // codBarras
-          query.addBindValue(p.ncm.isEmpty() ? QVariant() : p.ncm);              // ncm
-          query.addBindValue(p.qtdPallet);                                       // qtdPallet
-          query.addBindValue(p.custo);                                           // custo
-          query.addBindValue(p.precoVenda);                                      // precoVenda
-          query.addBindValue(p.ui);                                              // ui
-          query.addBindValue(p.minimo);                                          // minimo
-          query.addBindValue(p.mva);                                             // mva
-          query.addBindValue(p.st);                                              // st
-          query.addBindValue(p.sticms);                                          // sticms
-          query.addBindValue(p.quantCaixa);                                      // quantCaixa
-          query.addBindValue(p.markup);                                          // markup
-          query.addBindValue(p.validade.isValid() ? p.validade : QVariant());    // validade
-          query.addBindValue(ui->checkBoxRepresentacao->isChecked());            // representacao
+
+        // Check if adding this query would exceed max packet size
+        if (!allQueries.isEmpty() && (allQueries.length() + updateSql.length()) > MAX_BATCH_SIZE_BYTES) {
+          // Execute current batch and start new one
+          SqlQuery query;
+          if (!query.exec(allQueries)) {
+            throw RuntimeException("Erro executando batch de produto: " + query.lastError().text());
+          }
+          allQueries.clear();
         }
 
-        if (!query.exec()) {
-          throw RuntimeException("Erro atualizando produtos em lote: " + query.lastError().text());
-        }
+        allQueries += updateSql;
+      }
+    }
+
+    // Execute any remaining queries
+    if (!allQueries.isEmpty()) {
+      SqlQuery query;
+      if (!query.exec(allQueries)) {
+        throw RuntimeException("Erro executando batch de produto: " + query.lastError().text());
       }
     }
   }
 
-postProcess:
+  // Execute post-process queries in single multi-statement call
+  {
+    QString postProcessQueries;
 
-  // Insert price records
-  SqlQuery queryPrecos;
-  if (validade != -1) {
-    queryPrecos.prepare(
-        "INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) "
-        "SELECT idProduto, precoVenda, :validadeInicio AS validadeInicio, :validadeFim AS validadeFim "
-        "FROM produto WHERE atualizarTabelaPreco = TRUE");
-    queryPrecos.bindValue(":validadeInicio", qApp->serverDate().toString("yyyy-MM-dd"));
-    queryPrecos.bindValue(":validadeFim", validadeString);
+    if (validade != -1) {
+      QString precSql = "INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) "
+                        "SELECT idProduto, precoVenda, '" + qApp->serverDate().toString("yyyy-MM-dd") + "', "
+                        "'" + validadeString + "' FROM produto WHERE atualizarTabelaPreco = TRUE;";
+      postProcessQueries += precSql;
+    }
 
-    if (not queryPrecos.exec()) {
-      throw RuntimeException("Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text());
+    QString updateFalseSql = "UPDATE produto SET atualizarTabelaPreco = FALSE;";
+    postProcessQueries += updateFalseSql;
+
+    QString callSql = "CALL invalidar_produtos_expirados();";
+    postProcessQueries += callSql;
+
+    QString updatePrecoSql = "UPDATE produto p1, produto p2 SET p2.precoVenda = p1.precoVenda "
+                             "WHERE p1.idFornecedor = p2.idFornecedor AND p1.codComercial = p2.codComercial AND p1.idProduto <> p2.idProduto "
+                             "AND p1.descontinuado = FALSE AND p1.estoque = FALSE AND p1.promocao = FALSE "
+                             "AND p2.estoque = TRUE AND p2.promocao = FALSE;";
+    postProcessQueries += updatePrecoSql;
+
+    QString updateOldPrecoSql = "UPDATE produto p1, produto p2 SET p2.oldPrecoVenda = p1.precoVenda "
+                                "WHERE p1.idFornecedor = p2.idFornecedor AND p1.codComercial = p2.codComercial AND p1.idProduto <> p2.idProduto "
+                                "AND p1.descontinuado = FALSE AND p1.estoque = FALSE AND p1.promocao = FALSE "
+                                "AND p2.estoque = TRUE AND p2.promocao = 2;";
+    postProcessQueries += updateOldPrecoSql;
+
+    // Execute all queries in one multi-statement call
+    if (!postProcessQueries.isEmpty()) {
+      SqlQuery queryPost;
+      if (!queryPost.exec(postProcessQueries)) {
+        throw RuntimeException("Erro em pós-processamento: " + queryPost.lastError().text());
+      }
     }
   }
-
-  if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) {
-    throw RuntimeException("Erro comunicando com banco de dados: " + queryPrecos.lastError().text());
-  }
-
-  SqlQuery queryExpirar;
-  if (not queryExpirar.exec("CALL invalidar_produtos_expirados()")) {
-    throw RuntimeException("Erro executando invalidar_produtos_expirados: " + queryExpirar.lastError().text());
-  }
-
-  atualizaPrecoEstoque();
 }
 
 bool ImportaProdutos::readFile() {

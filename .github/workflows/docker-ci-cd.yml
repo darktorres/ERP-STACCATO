@@ -1,0 +1,222 @@
+name: Docker CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'next-gen/**'
+      - '.github/workflows/docker-ci-cd.yml'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'next-gen/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/staccato-erp
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./next-gen
+          file: ./next-gen/docker/Dockerfile
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: staccato_test
+          POSTGRES_USER: staccato
+          POSTGRES_PASSWORD: staccato
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql,gd,zip,intl,bcmath,redis
+          ini-values: memory_limit=512M,max_execution_time=300
+          tools: composer:2.6
+
+      - name: Install dependencies
+        working-directory: ./next-gen
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Create .env file for testing
+        working-directory: ./next-gen
+        run: |
+          cp .env.example .env.testing
+          echo "APP_ENV=testing" >> .env.testing
+          echo "DB_CONNECTION=pgsql" >> .env.testing
+          echo "DB_HOST=localhost" >> .env.testing
+          echo "DB_PORT=5432" >> .env.testing
+          echo "DB_DATABASE=staccato_test" >> .env.testing
+          echo "DB_USERNAME=staccato" >> .env.testing
+          echo "DB_PASSWORD=staccato" >> .env.testing
+          echo "REDIS_HOST=localhost" >> .env.testing
+          echo "REDIS_PORT=6379" >> .env.testing
+
+      - name: Generate application key
+        working-directory: ./next-gen
+        run: php artisan key:generate --env=testing
+
+      - name: Run database migrations
+        working-directory: ./next-gen
+        run: php artisan migrate --env=testing --force
+
+      - name: Run tests
+        working-directory: ./next-gen
+        run: php artisan test --env=testing --coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./next-gen/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:2.6
+
+      - name: Install dependencies
+        working-directory: ./next-gen
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run PHP Code Sniffer
+        working-directory: ./next-gen
+        run: php vendor/bin/phpcs --standard=PSR12 app routes
+
+      - name: Run PHP Stan
+        working-directory: ./next-gen
+        run: php vendor/bin/phpstan analyse app --level=8
+
+      - name: Run Pint
+        working-directory: ./next-gen
+        run: php vendor/bin/pint --test
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:2.6
+
+      - name: Install dependencies
+        working-directory: ./next-gen
+        run: composer install --no-progress --prefer-dist
+
+      - name: Check for vulnerable dependencies
+        working-directory: ./next-gen
+        run: php vendor/bin/composer-audit
+
+      - name: Run security scanning
+        working-directory: ./next-gen
+        run: php vendor/bin/phpcs --standard=Security app routes
+
+  deploy:
+    needs: [build, test, lint, security]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST "cd /app && docker-compose pull && docker-compose up -d"
+          rm ~/.ssh/deploy_key
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.DEPLOY_HOST }}/health || exit 1

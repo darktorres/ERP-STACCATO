@@ -1,5 +1,18 @@
 # Schema Proposto: ERP Staccato v2
 
+⚠️ **DEPRECATED ARCHIVE** - This document is an older version of the schema.
+
+👉 **Use instead**: [03-decisoes/02-schema-redesenhado.md](../../03-decisoes/02-schema-redesenhado.md)
+
+**Why deprecated?**
+- This file (schema-proposto.md) is the initial proposal
+- The authoritative, more complete version is in 02-schema-redesenhado.md
+- Visual reference with flowcharts: [03-decisoes/02-schema-visual-overview.md](../../03-decisoes/02-schema-visual-overview.md)
+
+**For historical reference only** - see original content below:
+
+---
+
 > **Status**: Proposta
 > **Data**: 2025-12-28
 > **Base**: Pesquisa de ERPs (SAP, Odoo, ERPNext) + decisões arquiteturais

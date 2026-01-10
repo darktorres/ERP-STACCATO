@@ -6,6 +6,23 @@
 
 ---
 
+## Related Documents
+
+**👀 Read First** (to understand the problem):
+- [Root Problem Analysis: 1:N:N Complexity](../../rascunhos/1nn-problem-flowchart.md)
+
+**📊 Visual Companion** (flowcharts & design patterns):
+- [Schema Visual Overview & Architecture](./02-schema-visual-overview.md)
+
+**📚 Evaluation Archive** (design decisions):
+- [2-Entity Alternative (Evaluated - Not Adopted)](../../rascunhos/schema-alternativo-2-entidades.md)
+- [Event Sourcing Pattern (For v2+)](../../rascunhos/event-sourcing-analise.md)
+
+**❌ Deprecated**:
+- [schema-proposto.md (Superseded by this document)](../../rascunhos/schema-proposto.md)
+
+---
+
 ## Escopo deste Documento
 
 Este documento apresenta a **solução completa de redesign**:

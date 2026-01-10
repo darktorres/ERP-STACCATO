@@ -1,4 +1,15 @@
-# 1:N:N Problem & Solution Flowchart
+# Root Problem Analysis: 1:N:N Relationship Complexity
+
+> **Essential Reading**: Read this FIRST to understand why schema redesign was necessary
+> **Referenced from**: [03-decisoes/02-schema-redesenhado.md](../../03-decisoes/02-schema-redesenhado.md)
+> **Type**: Problem visualization + root cause analysis
+
+This document explains the core problem that the new schema solves:
+- Old system structure (L1/L2 tables, FIFO broken, idRelacionado chains)
+- Why M:N allocations are necessary
+- How 3-entity model solves the problem
+
+---
 
 ## The Problem: 1:N:N Relationship Chain
 

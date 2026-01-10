@@ -16,7 +16,9 @@ Este documento foca em **decisões técnicas de banco de dados**:
 - Exemplos de correções propostas
 - Busca full-text e indexação
 
-**Para o schema completo redesenhado**, incluindo ENUMs, máquinas de estado e arquitetura de eventos, veja [estrategia/07-esquema-redesenhado.md](../estrategia/07-esquema-redesenhado.md).
+**Para o schema PostgreSQL completo**, incluindo ENUMs, máquinas de estado e arquitetura de eventos com Event Sourcing, veja:
+- [03-decisoes/02-schema-redesenhado.md](../03-decisoes/02-schema-redesenhado.md) - SQL completo
+- [03-decisoes/02-schema-visual-overview.md](../03-decisoes/02-schema-visual-overview.md) - Visualizações e padrões
 
 ---
 

@@ -1,7 +1,7 @@
 <?php
 /**
- * Next-Gen Schema Web Demo
- * Interactive web app to test the unified venda_itens table
+ * Demo do Novo Schema
+ * Aplicação web interativa para testar a tabela unificada venda_itens
  */
 
 session_start();
@@ -15,7 +15,7 @@ $config = [
     'password' => 'postgres',
 ];
 
-// Database connection
+// Conexão com banco de dados
 function getDb(): PDO {
     global $config;
     static $db = null;
@@ -29,7 +29,7 @@ function getDb(): PDO {
     return $db;
 }
 
-// Initialize database on first run
+// Inicializar banco na primeira execução
 function initDatabase(): void {
     $db = getDb();
     $check = $db->query("SELECT to_regclass('public.venda_itens')")->fetchColumn();
@@ -37,7 +37,7 @@ function initDatabase(): void {
         $schema = file_get_contents(__DIR__ . '/../schema.sql');
         $db->exec($schema);
 
-        // Seed data
+        // Dados iniciais
         $db->exec("INSERT INTO lojas (nome, cnpj) VALUES ('Loja Matriz', '12345678000199')");
         $db->exec("INSERT INTO fornecedores (razao_social, cnpj) VALUES ('Ceramica ABC', '98765432000111')");
         $db->exec("INSERT INTO clientes (nome, cpf_cnpj) VALUES ('João Silva', '12345678901')");
@@ -54,7 +54,7 @@ function initDatabase(): void {
     }
 }
 
-// Handle AJAX actions
+// Processar ações AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
 
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 ");
                 $stmt->execute([$_POST['venda_id'], $_POST['produto_id'], $_POST['quantidade'], $_POST['valor_unitario'], $total]);
                 $result['data'] = $stmt->fetch();
-                $result['message'] = "Item #{$result['data']['id']} adicionado - Single INSERT, sem trigger L2!";
+                $result['message'] = "Item #{$result['data']['id']} adicionado - INSERT único, sem trigger L2!";
                 break;
 
             case 'split_item':
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 $split = $db->query("SELECT * FROM venda_itens WHERE id = $splitId")->fetch();
                 $result['data'] = $split;
-                $result['message'] = "Split criado! ID: $splitId, parent_id: {$split['parent_id']}, root_id: {$split['root_id']}";
+                $result['message'] = "Divisão criada! ID: $splitId, parent_id: {$split['parent_id']}, root_id: {$split['root_id']}";
                 break;
 
             case 'pair_stock':
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $updatedItem = $db->query("SELECT status FROM venda_itens WHERE id = {$_POST['item_id']}")->fetch();
                 $updatedStock = $db->query("SELECT quantidade_disponivel FROM estoques WHERE id = {$_POST['estoque_id']}")->fetch();
 
-                $result['message'] = "Pareamento criado! Item status: {$updatedItem['status']}, Estoque disponível: {$updatedStock['quantidade_disponivel']}";
+                $result['message'] = "Pareamento criado! Status do item: {$updatedItem['status']}, Estoque disponível: {$updatedStock['quantidade_disponivel']}";
                 break;
 
             case 'reverse_consumption':
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     (1, 1, 1, 80, 80, 36.00, 'LOTE-A2', '2025-01-05'),
                     (1, 2, 1, 120, 120, 38.00, 'LOTE-B1', '2025-01-03'),
                     (1, 3, 1, 200, 200, 25.00, 'LOTE-C1', '2025-01-02')");
-                $result['message'] = "Database reset!";
+                $result['message'] = "Banco de dados resetado!";
                 break;
         }
 
@@ -222,12 +222,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
 }
 
-// Initialize on page load
+// Inicializar na carga da página
 try {
     initDatabase();
-    $dbStatus = 'Connected';
+    $dbStatus = 'Conectado';
 } catch (Exception $e) {
-    $dbStatus = 'Error: ' . $e->getMessage();
+    $dbStatus = 'Erro: ' . $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -235,7 +235,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next-Gen Schema Demo</title>
+    <title>Demo do Novo Schema</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; }
@@ -309,73 +309,73 @@ try {
 </head>
 <body>
     <div class="header">
-        <h1>🗄️ Next-Gen Schema Demo</h1>
-        <p>Unified venda_itens table replacing L1/L2 architecture</p>
+        <h1>Demo do Novo Schema</h1>
+        <p>Tabela venda_itens unificada substituindo arquitetura L1/L2</p>
     </div>
 
     <div id="message"></div>
 
     <div class="container">
         <div class="sidebar">
-            <h3>📊 View Data</h3>
+            <h3>Visualizar Dados</h3>
             <button onclick="showVendas()">Vendas</button>
             <button onclick="showEstoques()">Estoques</button>
             <button onclick="showConsumos()">Consumos Ativos</button>
 
             <hr>
-            <h3>⚡ Operations</h3>
+            <h3>Operações</h3>
             <button onclick="showCreateVenda()">+ Nova Venda</button>
-            <button onclick="showAddItem()">+ Add Item</button>
-            <button onclick="showSplit()">✂️ Split Item</button>
-            <button onclick="showPairing()">🔗 Parear Estoque</button>
-            <button onclick="showReversal()">↩️ Estornar</button>
+            <button onclick="showAddItem()">+ Adicionar Item</button>
+            <button onclick="showSplit()">Dividir Item</button>
+            <button onclick="showPairing()">Parear Estoque</button>
+            <button onclick="showReversal()">Estornar</button>
 
             <hr>
-            <h3>📈 Analysis</h3>
-            <button onclick="showAggregated()">View Agregada</button>
-            <button onclick="showHierarchy()">Hierarquia Split</button>
+            <h3>Análise</h3>
+            <button onclick="showAggregated()">Visão Agregada</button>
+            <button onclick="showHierarchy()">Hierarquia de Divisão</button>
 
             <hr>
-            <h3>🔧 Tools</h3>
-            <button onclick="resetDatabase()" class="btn-danger">Reset Database</button>
+            <h3>Ferramentas</h3>
+            <button onclick="resetDatabase()" class="btn-danger">Resetar Banco</button>
         </div>
 
         <div class="main" id="content">
             <div class="card">
-                <h2>Welcome! <span class="badge">DB: <?= $dbStatus ?></span></h2>
+                <h2>Bem-vindo! <span class="badge">BD: <?= $dbStatus ?></span></h2>
 
                 <div class="alert alert-info">
-                    <strong>What this demo shows:</strong><br>
-                    The new unified <code>venda_itens</code> table that replaces the L1/L2 architecture
+                    <strong>O que este demo demonstra:</strong><br>
+                    A nova tabela unificada <code>venda_itens</code> que substitui a arquitetura L1/L2
                     (<code>venda_has_produto</code> + <code>venda_has_produto2</code>).
                 </div>
 
                 <div class="comparison">
                     <div class="old">
-                        <h4>❌ Old (L1/L2)</h4>
+                        <h4>Antigo (L1/L2)</h4>
                         <code>venda_has_produto (L1)
-  ↓ trigger copies to
+  ↓ trigger copia para
 venda_has_produto2 (L2)
-  ↓ idRelacionado chains
-Split tracking is complex</code>
+  ↓ cadeias de idRelacionado
+Rastreamento de divisão complexo</code>
                     </div>
                     <div class="new">
-                        <h4>✅ New (Unified)</h4>
+                        <h4>Novo (Unificado)</h4>
                         <code>venda_itens
-  • parent_id → direct parent
-  • root_id → original item
-  • Simple query:
+  • parent_id → pai direto
+  • root_id → item original
+  • Query simples:
     WHERE id=X OR root_id=X</code>
                     </div>
                 </div>
 
-                <h3 style="margin: 20px 0 10px;">Key Improvements:</h3>
+                <h3 style="margin: 20px 0 10px;">Principais Melhorias:</h3>
                 <ul style="margin-left: 20px; line-height: 2;">
-                    <li><strong>Single table</strong> - No sync issues between L1/L2</li>
-                    <li><strong>ENUM status</strong> - Type-safe, no magic strings</li>
-                    <li><strong>parent_id/root_id</strong> - Clear split hierarchy</li>
-                    <li><strong>1:1 estoque_consumos</strong> - Enforced at DB level</li>
-                    <li><strong>Triggers</strong> - Auto-update stock and status</li>
+                    <li><strong>Tabela única</strong> - Sem problemas de sincronização entre L1/L2</li>
+                    <li><strong>Status ENUM</strong> - Tipagem segura, sem strings mágicas</li>
+                    <li><strong>parent_id/root_id</strong> - Hierarquia de divisão clara</li>
+                    <li><strong>estoque_consumos 1:1</strong> - Garantido no nível do banco</li>
+                    <li><strong>Triggers</strong> - Atualização automática de estoque e status</li>
                 </ul>
             </div>
         </div>
@@ -409,9 +409,9 @@ Split tracking is complex</code>
         async function showVendas() {
             const {data} = await api('get_vendas');
             let html = `<div class="card">
-                <h2>📋 Vendas</h2>
+                <h2>Vendas</h2>
                 <table>
-                    <tr><th>ID</th><th>Cliente</th><th>Status</th><th>Total</th><th>Actions</th></tr>`;
+                    <tr><th>ID</th><th>Cliente</th><th>Status</th><th>Total</th><th>Ações</th></tr>`;
 
             if (data.length === 0) {
                 html += `<tr><td colspan="5" class="empty">Nenhuma venda. Crie uma!</td></tr>`;
@@ -433,14 +433,14 @@ Split tracking is complex</code>
         async function showVendaItems(vendaId) {
             const {data} = await api('get_items', {venda_id: vendaId});
             let html = `<div class="card">
-                <h2>📦 Itens da Venda #${vendaId} <span class="badge">Single Table!</span></h2>
+                <h2>Itens da Venda #${vendaId} <span class="badge">Tabela Única!</span></h2>
                 <div class="alert alert-info">
                     <strong>Nota:</strong> Estes itens estão em UMA única tabela (venda_itens),
                     não mais em L1+L2. Os campos <code>parent_id</code> e <code>root_id</code>
-                    rastreiam splits.
+                    rastreiam divisões.
                 </div>
                 <table>
-                    <tr><th>ID</th><th>Produto</th><th>Qty</th><th>Status</th><th>Parent</th><th>Root</th><th>Split Reason</th></tr>`;
+                    <tr><th>ID</th><th>Produto</th><th>Qtd</th><th>Status</th><th>Parent</th><th>Root</th><th>Motivo Divisão</th></tr>`;
 
             if (data.length === 0) {
                 html += `<tr><td colspan="7" class="empty">Nenhum item</td></tr>`;
@@ -460,7 +460,7 @@ Split tracking is complex</code>
             html += `</table>
                 <p style="margin-top:15px;color:#888;">
                     → <code>parent_id=NULL</code> = item original<br>
-                    → <code>root_id</code> SEMPRE aponta para o original (mesmo em splits cascateados!)
+                    → <code>root_id</code> SEMPRE aponta para o original (mesmo em divisões cascateadas!)
                 </p>
             </div>`;
             document.getElementById('content').innerHTML = html;
@@ -469,7 +469,7 @@ Split tracking is complex</code>
         async function showEstoques() {
             const {data} = await api('get_estoques');
             let html = `<div class="card">
-                <h2>📦 Estoques</h2>
+                <h2>Estoques</h2>
                 <table>
                     <tr><th>ID</th><th>Produto</th><th>Lote</th><th>Original</th><th>Disponível</th><th>Custo</th><th>Status</th></tr>`;
 
@@ -491,13 +491,13 @@ Split tracking is complex</code>
         async function showConsumos() {
             const {data} = await api('get_consumos');
             let html = `<div class="card">
-                <h2>🔗 Consumos Ativos (1:1)</h2>
+                <h2>Consumos Ativos (1:1)</h2>
                 <div class="alert alert-info">
                     Cada <code>venda_item</code> só pode ter UM consumo ativo (constraint 1:1).<br>
                     Cada <code>estoque</code> só pode ser consumido por UM item.
                 </div>
                 <table>
-                    <tr><th>ID</th><th>Item</th><th>Estoque</th><th>Lote</th><th>Qty</th><th>Actions</th></tr>`;
+                    <tr><th>ID</th><th>Item</th><th>Estoque</th><th>Lote</th><th>Qtd</th><th>Ações</th></tr>`;
 
             if (data.length === 0) {
                 html += `<tr><td colspan="6" class="empty">Nenhum consumo ativo</td></tr>`;
@@ -551,7 +551,7 @@ Split tracking is complex</code>
 
             if (vendas.length === 0) {
                 document.getElementById('content').innerHTML = `<div class="card">
-                    <h2>+ Add Item</h2>
+                    <h2>+ Adicionar Item</h2>
                     <div class="alert alert-error">Crie uma venda primeiro!</div>
                 </div>`;
                 return;
@@ -561,9 +561,9 @@ Split tracking is complex</code>
             let prodOpts = produtos.map(p => `<option value="${p.id}">${p.codigo} - ${p.descricao}</option>`).join('');
 
             document.getElementById('content').innerHTML = `<div class="card">
-                <h2>+ Add Item à Venda</h2>
+                <h2>+ Adicionar Item à Venda</h2>
                 <div class="alert alert-info">
-                    <strong>Single INSERT!</strong> Não há mais trigger copiando para L2.
+                    <strong>INSERT único!</strong> Não há mais trigger copiando para L2.
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
@@ -610,21 +610,21 @@ Split tracking is complex</code>
             }
 
             document.getElementById('content').innerHTML = `<div class="card">
-                <h2>✂️ Split Item</h2>
+                <h2>Dividir Item</h2>
                 <div class="alert alert-info">
                     <strong>Simula:</strong> NFe chega com menos quantidade que o pedido.<br>
                     O sistema divide o item em dois: um com a quantidade recebida, outro pendente.
                 </div>
                 <div class="comparison">
                     <div class="old">
-                        <h4>❌ Old: idRelacionado</h4>
+                        <h4>Antigo: idRelacionado</h4>
                         <code>Item 100 (original)
 Item 101 (idRelacionado=100)
 Item 102 (idRelacionado=101)
   → Precisa query recursiva!</code>
                     </div>
                     <div class="new">
-                        <h4>✅ New: parent_id + root_id</h4>
+                        <h4>Novo: parent_id + root_id</h4>
                         <code>Item 1 (parent=NULL, root=NULL)
 Item 2 (parent=1, root=1)
 Item 3 (parent=2, root=1)
@@ -632,22 +632,22 @@ Item 3 (parent=2, root=1)
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Item ID</label>
+                    <label>ID do Item</label>
                     <input type="number" id="split_item_id" placeholder="ID do item para dividir">
                 </div>
                 <div class="form-group">
-                    <label>Quantidade a MANTER (resto vai para split)</label>
+                    <label>Quantidade a MANTER (resto vai para divisão)</label>
                     <input type="number" id="split_quantidade" value="60" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label>Motivo do Split</label>
+                    <label>Motivo da Divisão</label>
                     <select id="split_reason">
-                        <option value="PARTIAL_NFE">PARTIAL_NFE - NFe com menos quantidade</option>
-                        <option value="PARTIAL_DELIVERY">PARTIAL_DELIVERY - Entrega parcial</option>
-                        <option value="BROKEN">BROKEN - Itens quebrados</option>
+                        <option value="PARTIAL_NFE">NFE_PARCIAL - NFe com menos quantidade</option>
+                        <option value="PARTIAL_DELIVERY">ENTREGA_PARCIAL - Entrega parcial</option>
+                        <option value="BROKEN">QUEBRADO - Itens quebrados</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="doSplit()">Executar Split</button>
+                <button class="btn btn-primary" onclick="doSplit()">Executar Divisão</button>
             </div>`;
         }
 
@@ -667,13 +667,13 @@ Item 3 (parent=2, root=1)
 
         async function showPairing() {
             document.getElementById('content').innerHTML = `<div class="card">
-                <h2>🔗 Parear Item com Estoque</h2>
+                <h2>Parear Item com Estoque</h2>
                 <div class="alert alert-info">
                     <strong>Pareamento 1:1:</strong> Cada item só pode ser pareado com UM estoque.<br>
                     Triggers atualizam automaticamente: estoque.quantidade_disponivel e item.status → ESTOQUE
                 </div>
                 <div class="form-group">
-                    <label>Item ID</label>
+                    <label>ID do Item</label>
                     <input type="number" id="pair_item_id" placeholder="ID do item" onchange="loadAvailableStocks()">
                 </div>
                 <div id="stock_options"></div>
@@ -682,10 +682,6 @@ Item 3 (parent=2, root=1)
         }
 
         async function loadAvailableStocks() {
-            const itemId = document.getElementById('pair_item_id').value;
-            // Get item to know product
-            const {data: items} = await api('get_items', {venda_id: 0}); // We need a different approach
-            // For simplicity, let's show all available stocks
             const {data: estoques} = await api('get_estoques');
             const available = estoques.filter(e => parseFloat(e.quantidade_disponivel) > 0);
 
@@ -720,7 +716,7 @@ Item 3 (parent=2, root=1)
             let options = data.map(c => `<option value="${c.id}">Consumo #${c.id} - Item #${c.item_id} ↔ ${c.lote}</option>`).join('');
 
             document.getElementById('content').innerHTML = `<div class="card">
-                <h2>↩️ Estornar Consumo</h2>
+                <h2>Estornar Consumo</h2>
                 <div class="alert alert-info">
                     O estorno marca <code>is_estornado=TRUE</code> (mantém histórico) e restaura o estoque via trigger.
                 </div>
@@ -763,13 +759,13 @@ Item 3 (parent=2, root=1)
         async function showAggregated() {
             const {data} = await api('get_aggregated');
             let html = `<div class="card">
-                <h2>📈 View Agregada <span class="badge">Substitui L1!</span></h2>
+                <h2>Visão Agregada <span class="badge">Substitui L1!</span></h2>
                 <div class="alert alert-info">
-                    Esta VIEW agrega todos os splits de volta para mostrar quantidades por pedido original.<br>
+                    Esta VIEW agrega todas as divisões de volta para mostrar quantidades por pedido original.<br>
                     <strong>Substitui</strong> as queries complexas de L1+L2 JOIN.
                 </div>
                 <table>
-                    <tr><th>Venda</th><th>Produto</th><th>Pedida</th><th>Ativa</th><th>Pendente</th><th>Estoque</th><th>Linhas</th><th>Splits</th></tr>`;
+                    <tr><th>Venda</th><th>Produto</th><th>Pedida</th><th>Ativa</th><th>Pendente</th><th>Estoque</th><th>Linhas</th><th>Divisões</th></tr>`;
 
             if (data.length === 0) {
                 html += `<tr><td colspan="8" class="empty">Sem dados</td></tr>`;
@@ -793,13 +789,13 @@ Item 3 (parent=2, root=1)
 
         async function showHierarchy() {
             document.getElementById('content').innerHTML = `<div class="card">
-                <h2>🌳 Hierarquia de Split</h2>
+                <h2>Hierarquia de Divisão</h2>
                 <div class="alert alert-info">
-                    Digite o ID de um item original para ver toda a árvore de splits.<br>
+                    Digite o ID de um item original para ver toda a árvore de divisões.<br>
                     Query simples: <code>WHERE id = X OR root_id = X</code>
                 </div>
                 <div class="form-group">
-                    <label>Item ID (original)</label>
+                    <label>ID do Item (original)</label>
                     <input type="number" id="hierarchy_item_id" placeholder="ID do item">
                 </div>
                 <button class="btn btn-primary" onclick="showHierarchyFor(document.getElementById('hierarchy_item_id').value)">Ver Hierarquia</button>
@@ -821,8 +817,8 @@ Item 3 (parent=2, root=1)
 
                 html += `<div class="${cls}">
                     <strong>#${i.id}</strong> - ${i.produto_codigo}<br>
-                    Qty: ${parseFloat(i.quantidade).toFixed(2)} | Status: <span class="status ${statusClass(i.status)}">${i.status}</span><br>
-                    <small>parent_id: ${i.parent_id || 'NULL'} | root_id: ${i.root_id || 'NULL'} | reason: ${i.split_reason || '-'}</small>
+                    Qtd: ${parseFloat(i.quantidade).toFixed(2)} | Status: <span class="status ${statusClass(i.status)}">${i.status}</span><br>
+                    <small>parent_id: ${i.parent_id || 'NULL'} | root_id: ${i.root_id || 'NULL'} | motivo: ${i.split_reason || '-'}</small>
                 </div>`;
             }
 
@@ -837,7 +833,7 @@ Item 3 (parent=2, root=1)
         }
 
         async function resetDatabase() {
-            if (!confirm('Resetar database? Todos os dados serão perdidos.')) return;
+            if (!confirm('Resetar banco de dados? Todos os dados serão perdidos.')) return;
             const result = await api('reset_database');
             showMessage(result.message);
             location.reload();

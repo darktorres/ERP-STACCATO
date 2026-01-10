@@ -723,6 +723,146 @@ enum SemaforoOrcamento: string
 }
 ```
 
+## Service Layer Architecture
+
+### Overview
+
+The service layer is organized by **module boundaries** with **event-driven decoupling**:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Presentation Layer (Controllers)                            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│ Application Layer (Services)                                │
+│                                                              │
+│  VendaService (Vendas module owner)                         │
+│  ├── AlocacaoService (Estoque module owner)                 │
+│  ├── FinanceiroParcelaService (Financeiro module owner)     │
+│  └── EntregaService (Logística module owner)                │
+│                                                              │
+│  ⚠️ Direct dependencies create TIGHT COUPLING               │
+│  Solution: Use EVENTS for cross-module communication        │
+│                                                              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ EVENTS
+┌─────────────────────────▼───────────────────────────────────┐
+│ Event Listeners (Decoupled handlers)                        │
+│                                                              │
+│  VendaCriada → Create financial accounts                    │
+│  VendaCriada → Initialize allocation                        │
+│  AlocacaoCriada → Update inventory                          │
+│  EntregueConfirmada → Generate invoice                      │
+│                                                              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│ Domain Models & Database                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Service Boundaries
+
+**Module Owners** (each module owns its service):
+
+| Module     | Service                | Responsibilities |
+| ---------- | ---------------------- | --------------- |
+| Vendas     | VendaService, OrcamentoService | Quote/Sales management, item tracking |
+| Estoque    | EstoqueService, AlocacaoService | Inventory batches, allocation logic, FIFO/FEFO |
+| Financeiro | FinanceiroParcelaService | Accounts receivable/payable, CNAB processing |
+| Logística  | EntregaService | Delivery scheduling, route optimization |
+
+### Avoiding Tight Coupling
+
+**❌ ANTI-PATTERN (DO NOT DO):**
+```php
+class VendaService {
+    public function __construct(
+        private EstoqueService $estoqueService,        // ⚠️ Creates dependency
+        private ContaReceberService $contaReceberService, // ⚠️ Creates dependency
+        private EntregaService $entregaService,        // ⚠️ Creates dependency
+    ) {}
+
+    public function criar($dados) {
+        $venda = Venda::create($dados);
+
+        // ⚠️ Direct calls across modules
+        $this->estoqueService->reservar($venda);
+        $this->contaReceberService->gerar($venda);
+        $this->entregaService->agendar($venda);
+
+        return $venda;
+    }
+}
+```
+
+**✅ SOLUTION (USE EVENTS):**
+```php
+class VendaService {
+    public function criar($dados) {
+        $venda = Venda::create($dados);
+
+        // ✅ Emit event - let other modules subscribe
+        event(new VendaCriada($venda));
+
+        return $venda;
+    }
+}
+
+// In separate module listeners:
+class CriarContasReceberListener {
+    public function handle(VendaCriada $event) {
+        $this->financeiroService->gerar($event->venda);
+    }
+}
+
+class ReservarEstoqueListener {
+    public function handle(VendaCriada $event) {
+        $this->estoqueService->reservar($event->venda);
+    }
+}
+```
+
+### Dependency Direction
+
+Services should **depend inward** toward the domain:
+
+```
+Controllers
+    ↓
+Services (should NOT depend on each other)
+    ↓
+Models / Events
+    ↓
+Database
+```
+
+**✅ GOOD**: Service calls Service in same module or Models
+**⚠️ OK**: Service publishes Event that other modules subscribe to
+**❌ BAD**: Service injects Service from different module
+
+### Cross-Module Communication Pattern
+
+When services need to communicate across module boundaries:
+
+1. **Publisher**: Module A publishes an Event
+2. **Event**: Contains all necessary data for subscribers
+3. **Listeners**: Module B subscribes to event via Listener
+4. **Handler**: Listener calls Module B's service independently
+
+Example flow:
+```
+VendaService::criar()
+    └─> event(new VendaCriada($venda))
+        ├─> Listener 1: CreateFinancialAccountsListener
+        │   └─> FinanceiroParcelaService::gerarDeVenda()
+        ├─> Listener 2: InitializeAllocationListener
+        │   └─> AlocacaoService::inicializar()
+        └─> Listener 3: ScheduleDeliveryListener
+            └─> EntregaService::agendar()
+```
+
 ### Services
 
 ```php
@@ -839,12 +979,13 @@ class OrcamentoService
 }
 
 // app/Services/Vendas/VendaService.php
+// ✅ DECOUPLED SERVICE - No cross-module dependencies
 class VendaService
 {
-    public function __construct(
-        private EstoqueService $estoqueService,
-        private ContaReceberService $contaReceberService,
-    ) {}
+    public function __construct() {
+        // ✅ No injected services from other modules
+        // Cross-module concerns handled via event listeners
+    }
 
     /**
      * Converter orçamento em venda
@@ -905,22 +1046,14 @@ class VendaService
 
     /**
      * Inicializar atendimento/fulfillment
-     * NEW SCHEMA: Allocations (alocacoes) are created separately via AlocacaoService
-     * This method just initializes the venda_item status based on stock availability
+     * ✅ DECOUPLED: No EstoqueService dependency
+     * NEW SCHEMA: Allocations (alocacoes) created via separate listeners/services
+     * This method: Default to INICIADO status, let event listeners check stock
      */
     private function inicializarAtendimento(Venda $venda, VendaItem $vendaItem): void
     {
-        // Verificar se há estoque disponível
-        $estoqueDisponivel = $this->estoqueService->verificarDisponibilidade(
-            $vendaItem->produto_id,
-            $vendaItem->fornecedor_id,
-            $vendaItem->quantidade
-        );
-
-        // Definir status inicial baseado em disponibilidade
-        $status = $estoqueDisponivel >= $vendaItem->quantidade
-            ? VendaItemStatus::ESTOQUE
-            : VendaItemStatus::INICIADO;
+        // ✅ Set default status - availability will be determined by listeners
+        $status = VendaItemStatus::INICIADO;
 
         // Atualizar status do item de venda
         $vendaItem->update([
@@ -931,9 +1064,15 @@ class VendaService
         DB::table('venda_itens_events')->insert([
             'venda_item_id' => $vendaItem->id,
             'event_type' => 'CRIADO',
-            'event_data' => json_encode(['status' => $status->value]),
+            'event_data' => json_encode([
+                'quantidade' => $vendaItem->quantidade,
+                'produto_id' => $vendaItem->produto_id,
+            ]),
             'created_at' => now(),
         ]);
+
+        // ✅ Emit event - let EstoqueService listener check availability
+        event(new VendaItemCriado($vendaItem, $venda));
     }
 
     /**

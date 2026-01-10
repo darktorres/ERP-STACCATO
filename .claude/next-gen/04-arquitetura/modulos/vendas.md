@@ -1619,7 +1619,9 @@ CREATE TABLE desconto_historico (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Adicionar campos ao orçamento para cálculo de margem
+-- =====================================================
+-- Campos de margem para ORÇAMENTOS
+-- =====================================================
 ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
     custo_total DECIMAL(15,2) DEFAULT 0;
 
@@ -1640,7 +1642,32 @@ ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
 ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
     desconto_aprovacao_id BIGINT REFERENCES desconto_aprovacoes(id);
 
--- Trigger para atualizar tier de margem automaticamente
+-- =====================================================
+-- Campos de margem para VENDAS (mesma estrutura)
+-- =====================================================
+ALTER TABLE vendas ADD COLUMN IF NOT EXISTS
+    custo_total DECIMAL(15,2) DEFAULT 0;
+
+ALTER TABLE vendas ADD COLUMN IF NOT EXISTS
+    margem_percentual DECIMAL(5,2) GENERATED ALWAYS AS (
+        CASE
+            WHEN total > 0 THEN ((total - custo_total - frete) / total * 100)
+            ELSE 0
+        END
+    ) STORED;
+
+ALTER TABLE vendas ADD COLUMN IF NOT EXISTS
+    tier_margem VARCHAR(10) DEFAULT 'VERDE';
+
+ALTER TABLE vendas ADD COLUMN IF NOT EXISTS
+    desconto_pendente_aprovacao BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE vendas ADD COLUMN IF NOT EXISTS
+    desconto_aprovacao_id BIGINT REFERENCES desconto_aprovacoes(id);
+
+-- =====================================================
+-- Trigger para atualizar tier de margem (compartilhado)
+-- =====================================================
 CREATE OR REPLACE FUNCTION fn_atualizar_tier_margem()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -1671,8 +1698,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Trigger para orçamentos
 CREATE TRIGGER tr_orcamento_tier_margem
 BEFORE INSERT OR UPDATE OF total, custo_total ON orcamentos
+FOR EACH ROW EXECUTE FUNCTION fn_atualizar_tier_margem();
+
+-- Trigger para vendas
+CREATE TRIGGER tr_venda_tier_margem
+BEFORE INSERT OR UPDATE OF total, custo_total ON vendas
 FOR EACH ROW EXECUTE FUNCTION fn_atualizar_tier_margem();
 ```
 
@@ -1744,6 +1777,28 @@ enum StatusAprovacaoDesconto: string
 }
 ```
 
+### Interface e Trait para Desconto
+
+```php
+// app/Contracts/HasDesconto.php
+interface HasDesconto
+{
+    public function itens(): HasMany;
+    public function getLojaIdAttribute(): int;
+    public function getSubtotalLiquidoAttribute(): float;
+    public function getTotalAttribute(): float;
+    public function getFreteAttribute(): float;
+}
+
+// app/Traits/HasDescontoTrait.php
+trait HasDescontoTrait
+{
+    // Ambos Orcamento e Venda implementam esta interface
+    // Campos comuns: custo_total, margem_percentual, tier_margem,
+    //                desconto_pendente_aprovacao, desconto_aprovacao_id
+}
+```
+
 ### Service de Desconto
 
 ```php
@@ -1755,17 +1810,19 @@ class DescontoService
     ) {}
 
     /**
-     * Calcular margem do orçamento
+     * Calcular margem do documento (orçamento ou venda)
+     *
+     * @param Orcamento|Venda $documento
      */
-    public function calcularMargem(Orcamento $orcamento): array
+    public function calcularMargem(Model $documento): array
     {
         // Custo total dos itens
-        $custoTotal = $orcamento->itens->sum(function ($item) {
+        $custoTotal = $documento->itens->sum(function ($item) {
             return $item->quantidade * $item->produto->custo;
         });
 
         // Preço final (após descontos)
-        $precoFinal = $orcamento->total - $orcamento->frete;
+        $precoFinal = $documento->total - $documento->frete;
 
         // Margem
         $margemReais = $precoFinal - $custoTotal;
@@ -1774,7 +1831,7 @@ class DescontoService
             : 0;
 
         // Determinar tier
-        $config = $this->getMargemConfig($orcamento->loja_id);
+        $config = $this->getMargemConfig($documento->loja_id);
         $tier = $this->determinarTier($margemPercentual, $config);
 
         return [
@@ -1789,16 +1846,18 @@ class DescontoService
 
     /**
      * Simular desconto e retornar impacto na margem
+     *
+     * @param Orcamento|Venda $documento
      */
-    public function simularDesconto(Orcamento $orcamento, float $descontoPercentual): array
+    public function simularDesconto(Model $documento, float $descontoPercentual): array
     {
         // Margem atual
-        $margemAtual = $this->calcularMargem($orcamento);
+        $margemAtual = $this->calcularMargem($documento);
 
         // Calcular novo total com desconto
-        $descontoReais = $orcamento->subtotal_liquido * ($descontoPercentual / 100);
-        $novoTotal = $orcamento->subtotal_liquido - $descontoReais + $orcamento->frete;
-        $novoPrecoFinal = $novoTotal - $orcamento->frete;
+        $descontoReais = $documento->subtotal_liquido * ($descontoPercentual / 100);
+        $novoTotal = $documento->subtotal_liquido - $descontoReais + $documento->frete;
+        $novoPrecoFinal = $novoTotal - $documento->frete;
 
         // Nova margem
         $novaMargemReais = $novoPrecoFinal - $margemAtual['custo_total'];
@@ -1806,7 +1865,7 @@ class DescontoService
             ? ($novaMargemReais / $novoPrecoFinal) * 100
             : 0;
 
-        $config = $this->getMargemConfig($orcamento->loja_id);
+        $config = $this->getMargemConfig($documento->loja_id);
         $novoTier = $this->determinarTier($novaMargemPercentual, $config);
 
         // Verificar limite do usuário
@@ -1815,6 +1874,8 @@ class DescontoService
         $precisaAprovacao = $descontoPercentual > $limite['desconto_maximo'];
 
         return [
+            'tipo_documento' => $documento instanceof Venda ? 'venda' : 'orcamento',
+            'documento_id' => $documento->id,
             'desconto_percentual' => $descontoPercentual,
             'desconto_reais' => round($descontoReais, 2),
             'novo_total' => round($novoTotal, 2),
@@ -1838,13 +1899,15 @@ class DescontoService
 
     /**
      * Aplicar desconto (com verificação de limite)
+     *
+     * @param Orcamento|Venda $documento
      */
     public function aplicarDesconto(
-        Orcamento $orcamento,
+        Model $documento,
         float $descontoPercentual,
         ?string $justificativa = null
     ): array {
-        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+        $simulacao = $this->simularDesconto($documento, $descontoPercentual);
 
         // Verificar se está bloqueado
         if ($simulacao['bloqueado']) {
@@ -1861,22 +1924,25 @@ class DescontoService
                 );
             }
 
-            return $this->solicitarAprovacao($orcamento, $descontoPercentual, $justificativa);
+            return $this->solicitarAprovacao($documento, $descontoPercentual, $justificativa);
         }
 
         // Aplicar direto
-        return $this->aplicarDescontoDireto($orcamento, $descontoPercentual);
+        return $this->aplicarDescontoDireto($documento, $descontoPercentual);
     }
 
     /**
      * Aplicar desconto diretamente (sem aprovação)
+     *
+     * @param Orcamento|Venda $documento
      */
-    private function aplicarDescontoDireto(Orcamento $orcamento, float $descontoPercentual): array
+    private function aplicarDescontoDireto(Model $documento, float $descontoPercentual): array
     {
-        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+        $simulacao = $this->simularDesconto($documento, $descontoPercentual);
+        $isVenda = $documento instanceof Venda;
 
-        DB::transaction(function () use ($orcamento, $descontoPercentual, $simulacao) {
-            $orcamento->update([
+        DB::transaction(function () use ($documento, $descontoPercentual, $simulacao, $isVenda) {
+            $documento->update([
                 'desconto_percentual' => $descontoPercentual,
                 'desconto_reais' => $simulacao['desconto_reais'],
                 'total' => $simulacao['novo_total'],
@@ -1887,7 +1953,8 @@ class DescontoService
 
             // Registrar histórico
             DescontoHistorico::create([
-                'orcamento_id' => $orcamento->id,
+                'orcamento_id' => $isVenda ? null : $documento->id,
+                'venda_id' => $isVenda ? $documento->id : null,
                 'desconto_percentual' => $descontoPercentual,
                 'desconto_reais' => $simulacao['desconto_reais'],
                 'margem_resultante' => $simulacao['margem_nova']['margem_percentual'],
@@ -1905,14 +1972,19 @@ class DescontoService
 
     /**
      * Solicitar aprovação de desconto
+     *
+     * @param Orcamento|Venda $documento
      */
     private function solicitarAprovacao(
-        Orcamento $orcamento,
+        Model $documento,
         float $descontoPercentual,
         string $justificativa
     ): array {
-        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+        $simulacao = $this->simularDesconto($documento, $descontoPercentual);
         $limite = $simulacao['limite_usuario'];
+        $isVenda = $documento instanceof Venda;
+        $tipoDoc = $isVenda ? 'venda' : 'orçamento';
+        $rotaBase = $isVenda ? 'vendas' : 'orcamentos';
 
         // Encontrar aprovador
         $aprovador = $this->encontrarAprovador($limite);
@@ -1922,11 +1994,12 @@ class DescontoService
         }
 
         $aprovacao = DB::transaction(function () use (
-            $orcamento, $descontoPercentual, $justificativa, $simulacao, $limite, $aprovador
+            $documento, $descontoPercentual, $justificativa, $simulacao, $limite, $aprovador, $isVenda, $tipoDoc, $rotaBase
         ) {
             // Criar solicitação
             $aprovacao = DescontoAprovacao::create([
-                'orcamento_id' => $orcamento->id,
+                'orcamento_id' => $isVenda ? null : $documento->id,
+                'venda_id' => $isVenda ? $documento->id : null,
                 'solicitante_id' => auth()->id(),
                 'solicitante_limite' => $limite['desconto_maximo'],
                 'desconto_percentual_solicitado' => $descontoPercentual,
@@ -1939,8 +2012,8 @@ class DescontoService
                 'status' => StatusAprovacaoDesconto::PENDENTE,
             ]);
 
-            // Marcar orçamento como pendente
-            $orcamento->update([
+            // Marcar documento como pendente
+            $documento->update([
                 'desconto_pendente_aprovacao' => true,
                 'desconto_aprovacao_id' => $aprovacao->id,
             ]);
@@ -1950,10 +2023,10 @@ class DescontoService
                 tipo: 'DESCONTO_PENDENTE',
                 titulo: "Desconto de {$descontoPercentual}% aguarda aprovação",
                 mensagem: "O vendedor " . auth()->user()->nome . " solicitou desconto de {$descontoPercentual}% " .
-                         "no orçamento #{$orcamento->id}. Margem resultante: {$simulacao['margem_nova']['margem_percentual']}%",
-                acaoUrl: "/orcamentos/{$orcamento->id}/aprovacao-desconto/{$aprovacao->uuid}",
-                entidadeTipo: 'orcamento',
-                entidadeId: $orcamento->id,
+                         "na {$tipoDoc} #{$documento->id}. Margem resultante: {$simulacao['margem_nova']['margem_percentual']}%",
+                acaoUrl: "/{$rotaBase}/{$documento->id}/aprovacao-desconto/{$aprovacao->uuid}",
+                entidadeTipo: $isVenda ? 'venda' : 'orcamento',
+                entidadeId: $documento->id,
                 usuariosIds: [$aprovador->id],
                 prioridade: $simulacao['margem_nova']['tier'] === 'VERMELHO'
                     ? NotificacaoPrioridade::URGENTE
@@ -1967,11 +2040,23 @@ class DescontoService
 
         return [
             'status' => 'pendente_aprovacao',
+            'tipo_documento' => $isVenda ? 'venda' : 'orcamento',
             'aprovacao' => $aprovacao,
             'aprovador' => $aprovador->only(['id', 'nome']),
             'simulacao' => $simulacao,
             'message' => "Desconto enviado para aprovação de {$aprovador->nome}",
         ];
+    }
+
+    /**
+     * Obter documento (orcamento ou venda) da aprovação
+     */
+    private function getDocumentoFromAprovacao(DescontoAprovacao $aprovacao): Model
+    {
+        if ($aprovacao->venda_id) {
+            return $aprovacao->venda;
+        }
+        return $aprovacao->orcamento;
     }
 
     /**
@@ -1992,8 +2077,13 @@ class DescontoService
         }
 
         $descontoFinal = $descontoAlternativo ?? $aprovacao->desconto_percentual_solicitado;
+        $documento = $this->getDocumentoFromAprovacao($aprovacao);
+        $isVenda = $aprovacao->venda_id !== null;
+        $tipoDoc = $isVenda ? 'venda' : 'orçamento';
+        $rotaBase = $isVenda ? 'vendas' : 'orcamentos';
+        $docId = $isVenda ? $aprovacao->venda_id : $aprovacao->orcamento_id;
 
-        return DB::transaction(function () use ($aprovacao, $descontoFinal, $observacao) {
+        return DB::transaction(function () use ($aprovacao, $descontoFinal, $observacao, $documento, $isVenda, $tipoDoc, $rotaBase, $docId) {
             // Atualizar aprovação
             $aprovacao->update([
                 'status' => StatusAprovacaoDesconto::APROVADO,
@@ -2003,34 +2093,38 @@ class DescontoService
             ]);
 
             // Aplicar desconto
-            $resultado = $this->aplicarDescontoDireto($aprovacao->orcamento, $descontoFinal);
+            $resultado = $this->aplicarDescontoDireto($documento, $descontoFinal);
 
-            // Atualizar orçamento
-            $aprovacao->orcamento->update([
+            // Atualizar documento
+            $documento->update([
                 'desconto_pendente_aprovacao' => false,
             ]);
 
             // Registrar histórico com aprovação
-            DescontoHistorico::where('orcamento_id', $aprovacao->orcamento_id)
-                ->latest()
-                ->first()
-                ?->update(['aprovacao_id' => $aprovacao->id]);
+            $historicoQuery = DescontoHistorico::query();
+            if ($isVenda) {
+                $historicoQuery->where('venda_id', $docId);
+            } else {
+                $historicoQuery->where('orcamento_id', $docId);
+            }
+            $historicoQuery->latest()->first()?->update(['aprovacao_id' => $aprovacao->id]);
 
             // Notificar solicitante
             $this->notificacaoService->criar(
                 tipo: 'DESCONTO_APROVADO',
                 titulo: "Desconto aprovado!",
-                mensagem: "Seu desconto de {$descontoFinal}% no orçamento #{$aprovacao->orcamento_id} foi aprovado.",
-                acaoUrl: "/orcamentos/{$aprovacao->orcamento_id}",
-                entidadeTipo: 'orcamento',
-                entidadeId: $aprovacao->orcamento_id,
+                mensagem: "Seu desconto de {$descontoFinal}% na {$tipoDoc} #{$docId} foi aprovado.",
+                acaoUrl: "/{$rotaBase}/{$docId}",
+                entidadeTipo: $isVenda ? 'venda' : 'orcamento',
+                entidadeId: $docId,
                 usuariosIds: [$aprovacao->solicitante_id],
             );
 
             return [
                 'status' => 'aprovado',
+                'tipo_documento' => $isVenda ? 'venda' : 'orcamento',
                 'aprovacao' => $aprovacao->fresh(),
-                'orcamento' => $resultado['orcamento'],
+                'documento' => $resultado['documento'] ?? $documento->fresh(),
             ];
         });
     }
@@ -2046,15 +2140,21 @@ class DescontoService
             throw new BusinessException('Esta solicitação já foi processada');
         }
 
-        return DB::transaction(function () use ($aprovacao, $motivo) {
+        $documento = $this->getDocumentoFromAprovacao($aprovacao);
+        $isVenda = $aprovacao->venda_id !== null;
+        $tipoDoc = $isVenda ? 'venda' : 'orçamento';
+        $rotaBase = $isVenda ? 'vendas' : 'orcamentos';
+        $docId = $isVenda ? $aprovacao->venda_id : $aprovacao->orcamento_id;
+
+        return DB::transaction(function () use ($aprovacao, $motivo, $documento, $isVenda, $tipoDoc, $rotaBase, $docId) {
             $aprovacao->update([
                 'status' => StatusAprovacaoDesconto::NEGADO,
                 'resposta_observacao' => $motivo,
                 'respondido_em' => now(),
             ]);
 
-            // Limpar flag do orçamento
-            $aprovacao->orcamento->update([
+            // Limpar flag do documento
+            $documento->update([
                 'desconto_pendente_aprovacao' => false,
                 'desconto_aprovacao_id' => null,
             ]);
@@ -2063,16 +2163,17 @@ class DescontoService
             $this->notificacaoService->criar(
                 tipo: 'DESCONTO_NEGADO',
                 titulo: "Desconto negado",
-                mensagem: "Seu desconto de {$aprovacao->desconto_percentual_solicitado}% no orçamento " .
-                         "#{$aprovacao->orcamento_id} foi negado. Motivo: {$motivo}",
-                acaoUrl: "/orcamentos/{$aprovacao->orcamento_id}",
-                entidadeTipo: 'orcamento',
-                entidadeId: $aprovacao->orcamento_id,
+                mensagem: "Seu desconto de {$aprovacao->desconto_percentual_solicitado}% na {$tipoDoc} " .
+                         "#{$docId} foi negado. Motivo: {$motivo}",
+                acaoUrl: "/{$rotaBase}/{$docId}",
+                entidadeTipo: $isVenda ? 'venda' : 'orcamento',
+                entidadeId: $docId,
                 usuariosIds: [$aprovacao->solicitante_id],
             );
 
             return [
                 'status' => 'negado',
+                'tipo_documento' => $isVenda ? 'venda' : 'orcamento',
                 'aprovacao' => $aprovacao->fresh(),
             ];
         });
@@ -2168,16 +2269,32 @@ class DescontoController extends Controller
     ) {}
 
     /**
-     * Simular desconto (preview)
+     * Simular desconto (preview) - Orçamento
      */
-    public function simular(Orcamento $orcamento, Request $request)
+    public function simularOrcamento(Orcamento $orcamento, Request $request)
+    {
+        return $this->simular($orcamento, $request);
+    }
+
+    /**
+     * Simular desconto (preview) - Venda
+     */
+    public function simularVenda(Venda $venda, Request $request)
+    {
+        return $this->simular($venda, $request);
+    }
+
+    /**
+     * Simular desconto genérico
+     */
+    private function simular(Model $documento, Request $request)
     {
         $request->validate([
             'desconto_percentual' => 'required|numeric|min:0|max:100',
         ]);
 
         $simulacao = $this->descontoService->simularDesconto(
-            $orcamento,
+            $documento,
             $request->desconto_percentual
         );
 
@@ -2185,9 +2302,25 @@ class DescontoController extends Controller
     }
 
     /**
-     * Aplicar desconto
+     * Aplicar desconto - Orçamento
      */
-    public function aplicar(Orcamento $orcamento, Request $request)
+    public function aplicarOrcamento(Orcamento $orcamento, Request $request)
+    {
+        return $this->aplicar($orcamento, $request);
+    }
+
+    /**
+     * Aplicar desconto - Venda
+     */
+    public function aplicarVenda(Venda $venda, Request $request)
+    {
+        return $this->aplicar($venda, $request);
+    }
+
+    /**
+     * Aplicar desconto genérico
+     */
+    private function aplicar(Model $documento, Request $request)
     {
         $request->validate([
             'desconto_percentual' => 'required|numeric|min:0|max:100',
@@ -2195,7 +2328,7 @@ class DescontoController extends Controller
         ]);
 
         $resultado = $this->descontoService->aplicarDesconto(
-            $orcamento,
+            $documento,
             $request->desconto_percentual,
             $request->justificativa
         );
@@ -2246,9 +2379,20 @@ class DescontoController extends Controller
     {
         $aprovacoes = DescontoAprovacao::where('aprovador_id', auth()->id())
             ->where('status', StatusAprovacaoDesconto::PENDENTE)
-            ->with(['orcamento.cliente:id,razao_social', 'solicitante:id,nome'])
+            ->with([
+                'orcamento.cliente:id,razao_social',
+                'venda.cliente:id,razao_social',
+                'solicitante:id,nome'
+            ])
             ->orderBy('created_at')
-            ->get();
+            ->get()
+            ->map(function ($aprovacao) {
+                // Adicionar informações unificadas para UI
+                $aprovacao->tipo_documento = $aprovacao->venda_id ? 'venda' : 'orcamento';
+                $aprovacao->documento_id = $aprovacao->venda_id ?? $aprovacao->orcamento_id;
+                $aprovacao->cliente = $aprovacao->venda?->cliente ?? $aprovacao->orcamento?->cliente;
+                return $aprovacao;
+            });
 
         return response()->json($aprovacoes);
     }
@@ -2260,15 +2404,30 @@ class DescontoController extends Controller
 ```php
 // routes/web.php
 Route::middleware(['auth'])->group(function () {
-    // Desconto
+
+    // =====================================================
+    // Desconto em ORÇAMENTOS
+    // =====================================================
     Route::prefix('orcamentos/{orcamento}')->group(function () {
-        Route::post('desconto/simular', [DescontoController::class, 'simular'])
+        Route::post('desconto/simular', [DescontoController::class, 'simularOrcamento'])
             ->name('orcamentos.desconto.simular');
-        Route::post('desconto/aplicar', [DescontoController::class, 'aplicar'])
+        Route::post('desconto/aplicar', [DescontoController::class, 'aplicarOrcamento'])
             ->name('orcamentos.desconto.aplicar');
     });
 
-    // Aprovações
+    // =====================================================
+    // Desconto em VENDAS
+    // =====================================================
+    Route::prefix('vendas/{venda}')->group(function () {
+        Route::post('desconto/simular', [DescontoController::class, 'simularVenda'])
+            ->name('vendas.desconto.simular');
+        Route::post('desconto/aplicar', [DescontoController::class, 'aplicarVenda'])
+            ->name('vendas.desconto.aplicar');
+    });
+
+    // =====================================================
+    // Aprovações (comuns para orcamento e venda)
+    // =====================================================
     Route::prefix('aprovacoes-desconto')->group(function () {
         Route::get('pendentes', [DescontoController::class, 'pendentes'])
             ->name('aprovacoes-desconto.pendentes');
@@ -2406,33 +2565,36 @@ Route::middleware(['auth'])->group(function () {
 ### Tipos de Notificação (Adicionar ao notificacoes.md)
 
 ```sql
--- Notificações de desconto
+-- Notificações de desconto (funcionam para orçamento e venda)
+-- O {tipo_documento} será substituído por "orçamento" ou "venda"
+-- O {rota_base} será substituído por "orcamentos" ou "vendas"
 INSERT INTO notificacao_tipos (codigo, categoria, titulo_template, mensagem_template, acao_tipo, acao_url_template, prioridade_padrao) VALUES
 ('DESCONTO_PENDENTE', 'VENDAS',
  'Desconto de {desconto}% aguarda aprovação',
- '{solicitante} solicitou desconto de {desconto}% no orçamento #{orcamento_id}. Margem resultante: {margem}%',
- 'NAVEGAR', '/orcamentos/{orcamento_id}/aprovacao-desconto/{aprovacao_uuid}', 'ALTA'),
+ '{solicitante} solicitou desconto de {desconto}% na {tipo_documento} #{documento_id}. Margem resultante: {margem}%',
+ 'NAVEGAR', '/{rota_base}/{documento_id}/aprovacao-desconto/{aprovacao_uuid}', 'ALTA'),
 
 ('DESCONTO_APROVADO', 'VENDAS',
  'Desconto aprovado!',
- 'Seu desconto de {desconto}% no orçamento #{orcamento_id} foi aprovado por {aprovador}.',
- 'NAVEGAR', '/orcamentos/{orcamento_id}', 'NORMAL'),
+ 'Seu desconto de {desconto}% na {tipo_documento} #{documento_id} foi aprovado por {aprovador}.',
+ 'NAVEGAR', '/{rota_base}/{documento_id}', 'NORMAL'),
 
 ('DESCONTO_NEGADO', 'VENDAS',
  'Desconto negado',
- 'Seu desconto de {desconto}% no orçamento #{orcamento_id} foi negado. Motivo: {motivo}',
- 'NAVEGAR', '/orcamentos/{orcamento_id}', 'ALTA'),
+ 'Seu desconto de {desconto}% na {tipo_documento} #{documento_id} foi negado. Motivo: {motivo}',
+ 'NAVEGAR', '/{rota_base}/{documento_id}', 'ALTA'),
 
 ('DESCONTO_EXPIRADO', 'VENDAS',
  'Solicitação de desconto expirada',
- 'A solicitação de desconto de {desconto}% no orçamento #{orcamento_id} expirou sem resposta.',
- 'NAVEGAR', '/orcamentos/{orcamento_id}', 'NORMAL');
+ 'A solicitação de desconto de {desconto}% na {tipo_documento} #{documento_id} expirou sem resposta.',
+ 'NAVEGAR', '/{rota_base}/{documento_id}', 'NORMAL');
 ```
 
 ### Resumo do Sistema
 
 | Componente | Descrição |
 |------------|-----------|
+| **Documentos suportados** | Orçamentos e Vendas (mesma lógica, schema compartilhado) |
 | **Limites por perfil** | VENDEDOR: 10%, GERENTE: 20%, DIRETOR: 35% |
 | **Tiers de margem** | 🟢 ≥20%, 🟡 10-20%, 🔴 <10% |
 | **Workflow** | Desconto > limite → Solicitar aprovação → Notificar gerente → Aprovar/Negar |

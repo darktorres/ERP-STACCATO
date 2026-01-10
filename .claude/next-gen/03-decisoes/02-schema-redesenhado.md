@@ -1,25 +1,19 @@
 # Fluxo de Negócio e Schema Redesenhados
 
-> Status: **Brainstorming**
-> Última atualização: 2025-12-28
+> Status: **Revisado**
+> Última atualização: 2025-01-10
 > Propósito: Redesenho holístico abordando todos os pontos de dor identificados
 
 ---
 
 ## Related Documents
 
-**👀 Read First** (to understand the problem):
-- [Root Problem Analysis: 1:N:N Complexity](../../rascunhos/1nn-problem-flowchart.md)
-
 **📊 Visual Companion** (flowcharts & design patterns):
 - [Schema Visual Overview & Architecture](./02-schema-visual-overview.md)
 
-**📚 Evaluation Archive** (design decisions):
-- [2-Entity Alternative (Evaluated - Not Adopted)](../../rascunhos/schema-alternativo-2-entidades.md)
-- [Event Sourcing Pattern (For v2+)](../../rascunhos/event-sourcing-analise.md)
-
-**❌ Deprecated**:
-- [schema-proposto.md (Superseded by this document)](../../rascunhos/schema-proposto.md)
+**📚 Design References**:
+- [Event Sourcing Pattern (For v2+)](../rascunhos/event-sourcing-analise.md)
+- [M:N Allocation Workflow](../rascunhos/alocacao-m2n-workflow.md)
 
 ---
 
@@ -406,6 +400,34 @@ CREATE TYPE consumo_motivo AS ENUM (
     'TRANSFERENCIA',      -- Transferência entre lojas
     'AMOSTRA'             -- Amostra para cliente
 );
+
+-- Status de Item de Entrega (Fix #10)
+CREATE TYPE entrega_item_status AS ENUM (
+    'PENDENTE',           -- Aguardando carregamento
+    'CARREGADO',          -- No veículo
+    'EM_TRANSITO',        -- Saiu para entrega
+    'ENTREGUE',           -- Entregue com sucesso
+    'RECUSADO',           -- Cliente recusou
+    'REENTREGA',          -- Marcado para reentrega
+    'DEVOLVIDO'           -- Devolvido ao estoque
+);
+
+-- ENUMs para Auditoria (Fix #7)
+CREATE TYPE audit_tabela AS ENUM (
+    'vendas', 'venda_itens', 'compras', 'compra_itens',
+    'estoque_lotes', 'alocacoes', 'nfes', 'nfe_itens',
+    'financeiro_parcelas', 'entregas', 'entrega_itens',
+    'clientes', 'fornecedores', 'produtos', 'usuarios'
+);
+
+CREATE TYPE audit_acao AS ENUM (
+    'INSERT', 'UPDATE', 'DELETE', 'SOFT_DELETE', 'RESTORE'
+);
+
+CREATE TYPE audit_modulo AS ENUM (
+    'VENDAS', 'COMPRAS', 'ESTOQUE', 'FINANCEIRO', 'NFE',
+    'LOGISTICA', 'CADASTROS', 'SISTEMA', 'API'
+);
 ```
 
 ### 4.2 Tabelas de Dados Mestres
@@ -645,8 +667,28 @@ CREATE TABLE venda_itens (
 
     -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    -- Constraints de hierarquia de split (Fix #2)
+    CONSTRAINT chk_no_self_parent CHECK (parent_id IS NULL OR parent_id != id),
+    CONSTRAINT chk_no_self_root CHECK (root_id IS NULL OR root_id != id),
+    CONSTRAINT chk_split_reason_values CHECK (
+        parent_id IS NULL
+        OR split_reason IN ('PARTIAL_NFE', 'PARTIAL_DELIVERY', 'RETURN', 'STOCK_SPLIT')
+    ),
+    CONSTRAINT chk_split_requires_root CHECK (
+        (parent_id IS NULL AND root_id IS NULL)  -- Item original
+        OR (parent_id IS NOT NULL AND root_id IS NOT NULL)  -- Split tem ambos
+    )
 );
+
+-- Indexes para venda_itens
+CREATE INDEX idx_venda_itens_venda ON venda_itens(venda_id);
+CREATE INDEX idx_venda_itens_produto ON venda_itens(produto_id);
+CREATE INDEX idx_venda_itens_status ON venda_itens(status);
+CREATE INDEX idx_venda_itens_entrega
+    ON venda_itens(status, data_real_entrega)
+    WHERE data_real_entrega IS NOT NULL;
 
 -- Compras (Cabeçalho)
 CREATE TABLE compras (
@@ -763,6 +805,11 @@ CREATE INDEX idx_estoque_lotes_disponivel
 CREATE INDEX idx_estoque_lotes_status
     ON estoque_lotes(status);
 
+-- Index adicional para queries de disponibilidade por produto/loja
+CREATE INDEX idx_estoque_produto_loja
+    ON estoque_lotes(produto_id, loja_id)
+    WHERE quantidade_disponivel > 0 AND status = 'DISPONIVEL';
+
 -- Alocacoes (M:N entre venda_item e estoque_lote)
 -- Permite múltiplos lotes por item e vice-versa com seleção MANUAL
 CREATE TABLE alocacoes (
@@ -788,7 +835,10 @@ CREATE TABLE alocacoes (
 
     -- Auditoria
     created_at TIMESTAMP DEFAULT NOW(),
-    created_by INTEGER REFERENCES usuarios(id)
+    created_by INTEGER REFERENCES usuarios(id),
+
+    -- Constraints (Fix #1)
+    CONSTRAINT chk_alocacao_quantidade_positiva CHECK (quantidade > 0)
 );
 
 -- INDEXES: Suportar M:N queries rápidas (sem unicidade pois é M:N)
@@ -854,6 +904,14 @@ CREATE TABLE nfes (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Indexes para nfes
+CREATE INDEX idx_nfes_loja ON nfes(loja_id);
+CREATE INDEX idx_nfes_chave ON nfes(chave);
+CREATE INDEX idx_nfes_status ON nfes(status);
+CREATE INDEX idx_nfes_ativas
+    ON nfes(loja_id, data_emissao)
+    WHERE status NOT IN ('CANCELADA', 'REJEITADA', 'INUTILIZADA');
+
 -- NFe Itens - JSONB para máxima flexibilidade
 -- Campos fiscais mudam frequentemente (reforma tributária IBS/CBS 2026-2033)
 -- JSONB preserva campos desconhecidos/opcionais automaticamente
@@ -874,7 +932,21 @@ CREATE TABLE nfe_itens (
 
     created_at TIMESTAMP DEFAULT NOW(),
 
-    CONSTRAINT uk_nfe_item UNIQUE (nfe_id, numero_item)
+    CONSTRAINT uk_nfe_item UNIQUE (nfe_id, numero_item),
+
+    -- Validações JSONB (Fix #5)
+    CONSTRAINT chk_nfe_dados_campos_obrigatorios CHECK (
+        dados ? 'cfop' AND dados ? 'quantidade' AND dados ? 'valor_unitario'
+    ),
+    CONSTRAINT chk_nfe_dados_quantidade_positiva CHECK (
+        (dados->>'quantidade')::numeric > 0
+    ),
+    CONSTRAINT chk_nfe_dados_valor_positivo CHECK (
+        (dados->>'valor_unitario')::numeric >= 0
+    ),
+    CONSTRAINT chk_nfe_dados_cfop_formato CHECK (
+        dados->>'cfop' ~ '^\d{4}$'
+    )
 );
 
 -- Índice GIN para queries no JSONB
@@ -1082,13 +1154,31 @@ CREATE TABLE financeiro_parcelas (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
 
-    -- Constraints
-    CONSTRAINT chk_cliente_receber CHECK (
-        (tipo = 'RECEBER' AND cliente_id IS NOT NULL AND fornecedor_id IS NULL) OR
-        (tipo = 'PAGAR' AND fornecedor_id IS NOT NULL AND cliente_id IS NULL)
+    -- Constraints (Fix #3: validação completa de tipo + referências)
+    CONSTRAINT chk_tipo_referencias CHECK (
+        (
+            tipo = 'RECEBER'
+            AND cliente_id IS NOT NULL
+            AND fornecedor_id IS NULL
+            AND compra_id IS NULL
+            -- venda_id pode ser NULL para recebíveis avulsos (ex: venda de sucata)
+        )
+        OR
+        (
+            tipo = 'PAGAR'
+            AND fornecedor_id IS NOT NULL
+            AND cliente_id IS NULL
+            AND venda_id IS NULL
+            -- compra_id pode ser NULL para pagáveis avulsos (ex: aluguel)
+        )
     ),
     CONSTRAINT chk_valor_positivo CHECK (valor > 0),
-    CONSTRAINT chk_valor_recebido CHECK (valor_recebido_pago >= 0 AND valor_recebido_pago <= valor)
+    CONSTRAINT chk_valor_recebido_limite CHECK (valor_recebido_pago >= 0 AND valor_recebido_pago <= valor),
+    CONSTRAINT chk_datas_logicas CHECK (
+        data_pagamento_recebimento IS NULL
+        OR data_pagamento_recebimento >= data_vencimento - INTERVAL '30 days'
+        -- Permite pagamento até 30 dias antes do vencimento (antecipação)
+    )
 );
 
 -- Create indexes for fast queries
@@ -1101,6 +1191,11 @@ CREATE INDEX idx_financeiro_parcelas_vencimento ON financeiro_parcelas(data_venc
 CREATE INDEX idx_financeiro_parcelas_status ON financeiro_parcelas(status);
 CREATE INDEX idx_financeiro_parcelas_venda ON financeiro_parcelas(venda_id);
 CREATE INDEX idx_financeiro_parcelas_compra ON financeiro_parcelas(compra_id);
+
+-- Index parcial para dashboard financeiro (parcelas pendentes)
+CREATE INDEX idx_parcelas_pendentes
+    ON financeiro_parcelas(loja_id, status, data_vencimento)
+    WHERE status NOT IN ('PAGO', 'RECEBIDO', 'CANCELADO');
 
 -- Clarity Views for backward compatibility
 CREATE VIEW parcelas_receber AS
@@ -1140,14 +1235,14 @@ WHERE tipo = 'PAGAR';
 ### 4.7 Tabela de Auditoria
 
 ```sql
--- Log de Auditoria
+-- Log de Auditoria (Fix #7: ENUMs + campos adicionais)
 CREATE TABLE audit_log (
     id BIGSERIAL PRIMARY KEY,
 
-    -- O que mudou
-    tabela VARCHAR(100) NOT NULL,
+    -- O que mudou (usando ENUMs para consistência)
+    tabela audit_tabela NOT NULL,
     registro_id INTEGER NOT NULL,
-    acao VARCHAR(20) NOT NULL,  -- INSERT, UPDATE, DELETE
+    acao audit_acao NOT NULL,
 
     -- Mudanças
     dados_antigos JSONB,
@@ -1155,12 +1250,12 @@ CREATE TABLE audit_log (
     campos_alterados TEXT[],
 
     -- Quem e quando
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
     ip_address INET,
 
     -- Contexto
-    transacao_id VARCHAR(100),
-    modulo VARCHAR(50),
+    transacao_id UUID DEFAULT gen_random_uuid(),
+    modulo audit_modulo,
 
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -1338,7 +1433,8 @@ BEGIN
         WHEN 'EM_RECEBIMENTO' THEN
             ARRAY['ESTOQUE']::venda_item_status[]
         WHEN 'ESTOQUE' THEN
-            ARRAY['ENTREGA_AGENDADA', 'CANCELADO', 'PENDENTE']::venda_item_status[]
+            -- Fix #9: Removido PENDENTE, adicionado DEVOLVIDO
+            ARRAY['ENTREGA_AGENDADA', 'CANCELADO', 'DEVOLVIDO']::venda_item_status[]
         WHEN 'ENTREGA_AGENDADA' THEN
             ARRAY['EM_ENTREGA', 'ESTOQUE']::venda_item_status[]
         WHEN 'EM_ENTREGA' THEN
@@ -1429,7 +1525,291 @@ CREATE TRIGGER trg_impedir_alteracao_item_pareado
     FOR EACH ROW EXECUTE FUNCTION fn_impedir_alteracao_item_pareado();
 ```
 
-#### 4.8.6 Resumo das Proteções
+#### 4.8.6 Trigger: Validar Soma de Alocações (Fix #1)
+
+```sql
+-- Valida que soma das alocações não excede quantidade do venda_item
+CREATE OR REPLACE FUNCTION fn_validar_soma_alocacoes()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_quantidade_item DECIMAL(15,4);
+    v_soma_alocada DECIMAL(15,4);
+    v_nova_soma DECIMAL(15,4);
+BEGIN
+    -- Obter quantidade do venda_item
+    SELECT quantidade INTO v_quantidade_item
+    FROM venda_itens
+    WHERE id = NEW.venda_item_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'venda_item_id % não encontrado', NEW.venda_item_id;
+    END IF;
+
+    -- Calcular soma atual das alocações ativas (excluindo a atual se UPDATE)
+    SELECT COALESCE(SUM(quantidade), 0) INTO v_soma_alocada
+    FROM alocacoes
+    WHERE venda_item_id = NEW.venda_item_id
+      AND NOT is_estornado
+      AND id != COALESCE(NEW.id, -1);
+
+    -- Calcular nova soma
+    IF NEW.is_estornado THEN
+        v_nova_soma := v_soma_alocada;
+    ELSE
+        v_nova_soma := v_soma_alocada + NEW.quantidade;
+    END IF;
+
+    -- Validar
+    IF v_nova_soma > v_quantidade_item THEN
+        RAISE EXCEPTION 'Soma das alocações (%) excede quantidade do item (%). venda_item_id=%',
+            v_nova_soma, v_quantidade_item, NEW.venda_item_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_alocacao_insert
+    BEFORE INSERT ON alocacoes
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_validar_soma_alocacoes();
+
+CREATE TRIGGER trg_validar_alocacao_update
+    BEFORE UPDATE ON alocacoes
+    FOR EACH ROW
+    WHEN (OLD.quantidade IS DISTINCT FROM NEW.quantidade
+          OR OLD.is_estornado IS DISTINCT FROM NEW.is_estornado)
+    EXECUTE FUNCTION fn_validar_soma_alocacoes();
+```
+
+#### 4.8.7 Trigger: Validar Hierarquia de Splits (Fix #2)
+
+```sql
+-- Valida que root_id aponta para item raiz real e pertence à mesma venda
+CREATE OR REPLACE FUNCTION fn_validar_split_hierarchy()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_root_parent_id INTEGER;
+    v_root_venda_id INTEGER;
+    v_depth INTEGER;
+BEGIN
+    -- Se não é split, nada a validar
+    IF NEW.parent_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    -- Verificar que root_id aponta para um item raiz (parent_id IS NULL)
+    SELECT parent_id, venda_id INTO v_root_parent_id, v_root_venda_id
+    FROM venda_itens
+    WHERE id = NEW.root_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'root_id % não existe', NEW.root_id;
+    END IF;
+
+    IF v_root_parent_id IS NOT NULL THEN
+        RAISE EXCEPTION 'root_id % não é um item raiz (tem parent_id)', NEW.root_id;
+    END IF;
+
+    -- Verificar que root pertence à mesma venda
+    IF v_root_venda_id != NEW.venda_id THEN
+        RAISE EXCEPTION 'root_id % pertence à venda %, mas item pertence à venda %',
+            NEW.root_id, v_root_venda_id, NEW.venda_id;
+    END IF;
+
+    -- Verificar que parent_id pertence à mesma venda
+    PERFORM 1 FROM venda_itens
+    WHERE id = NEW.parent_id AND venda_id = NEW.venda_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'parent_id % não pertence à mesma venda %', NEW.parent_id, NEW.venda_id;
+    END IF;
+
+    -- Verificar profundidade máxima (evitar chains muito longas)
+    WITH RECURSIVE hierarchy AS (
+        SELECT id, parent_id, 1 as depth
+        FROM venda_itens
+        WHERE id = NEW.parent_id
+
+        UNION ALL
+
+        SELECT vi.id, vi.parent_id, h.depth + 1
+        FROM venda_itens vi
+        INNER JOIN hierarchy h ON vi.id = h.parent_id
+        WHERE h.depth < 10
+    )
+    SELECT MAX(depth) INTO v_depth FROM hierarchy;
+
+    IF COALESCE(v_depth, 0) >= 5 THEN
+        RAISE EXCEPTION 'Profundidade máxima de split (5 níveis) excedida';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_split_hierarchy
+    BEFORE INSERT OR UPDATE ON venda_itens
+    FOR EACH ROW
+    WHEN (NEW.parent_id IS NOT NULL)
+    EXECUTE FUNCTION fn_validar_split_hierarchy();
+```
+
+#### 4.8.8 Triggers: Gerenciamento de Estoque via Alocações
+
+```sql
+-- Reservar estoque quando alocação é criada
+CREATE OR REPLACE FUNCTION fn_reservar_estoque_alocacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Verificar disponibilidade
+    PERFORM 1 FROM estoque_lotes
+    WHERE id = NEW.estoque_lote_id
+      AND quantidade_disponivel >= NEW.quantidade;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Estoque insuficiente no lote %. Quantidade solicitada: %',
+            NEW.estoque_lote_id, NEW.quantidade;
+    END IF;
+
+    -- Reservar
+    UPDATE estoque_lotes
+    SET quantidade_disponivel = quantidade_disponivel - NEW.quantidade,
+        quantidade_reservada = quantidade_reservada + NEW.quantidade,
+        updated_at = NOW()
+    WHERE id = NEW.estoque_lote_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_reservar_estoque_alocacao
+    AFTER INSERT ON alocacoes
+    FOR EACH ROW
+    WHEN (NOT NEW.is_estornado)
+    EXECUTE FUNCTION fn_reservar_estoque_alocacao();
+
+-- Restaurar estoque quando alocação é estornada
+CREATE OR REPLACE FUNCTION fn_restaurar_estoque_apos_estorno()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Apenas quando is_estornado muda de FALSE para TRUE
+    IF NEW.is_estornado AND NOT OLD.is_estornado THEN
+        UPDATE estoque_lotes
+        SET quantidade_disponivel = quantidade_disponivel + OLD.quantidade,
+            quantidade_reservada = quantidade_reservada - OLD.quantidade,
+            updated_at = NOW()
+        WHERE id = OLD.estoque_lote_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_restaurar_estoque_estorno
+    AFTER UPDATE ON alocacoes
+    FOR EACH ROW
+    WHEN (NEW.is_estornado AND NOT OLD.is_estornado)
+    EXECUTE FUNCTION fn_restaurar_estoque_apos_estorno();
+```
+
+#### 4.8.9 Trigger: Validar Consistência estoque_lotes (Fix #4)
+
+```sql
+-- Valida que produto_id/fornecedor_id são consistentes com nfe_item/compra_item
+CREATE OR REPLACE FUNCTION fn_validar_estoque_lotes_consistencia()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_produto_nfe INTEGER;
+    v_produto_compra INTEGER;
+BEGIN
+    -- Se tem nfe_item_id, validar que produto_id bate
+    IF NEW.nfe_item_id IS NOT NULL THEN
+        SELECT ni.produto_id INTO v_produto_nfe
+        FROM nfe_itens ni
+        WHERE ni.id = NEW.nfe_item_id;
+
+        IF v_produto_nfe IS NOT NULL AND v_produto_nfe != NEW.produto_id THEN
+            RAISE EXCEPTION 'produto_id (%) diverge do nfe_item.produto_id (%)',
+                NEW.produto_id, v_produto_nfe;
+        END IF;
+    END IF;
+
+    -- Se tem compra_item_id, validar que produto_id bate
+    IF NEW.compra_item_id IS NOT NULL THEN
+        SELECT ci.produto_id INTO v_produto_compra
+        FROM compra_itens ci
+        WHERE ci.id = NEW.compra_item_id;
+
+        IF v_produto_compra IS NOT NULL AND v_produto_compra != NEW.produto_id THEN
+            RAISE EXCEPTION 'produto_id (%) diverge do compra_item.produto_id (%)',
+                NEW.produto_id, v_produto_compra;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_estoque_lotes_consistencia
+    BEFORE INSERT OR UPDATE ON estoque_lotes
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_validar_estoque_lotes_consistencia();
+```
+
+#### 4.8.10 Triggers: Impedir Hard Deletes (Fix #6)
+
+```sql
+-- Impedir DELETE em vendas
+CREATE OR REPLACE FUNCTION fn_impedir_delete_vendas()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'DELETE não permitido em vendas. Use cancelamento (status=CANCELADA).';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_delete_vendas
+    BEFORE DELETE ON vendas
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_delete_vendas();
+
+-- Impedir DELETE em compras
+CREATE OR REPLACE FUNCTION fn_impedir_delete_compras()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'DELETE não permitido em compras. Use cancelamento (status=CANCELADA).';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_delete_compras
+    BEFORE DELETE ON compras
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_delete_compras();
+
+-- Impedir DELETE em estoque_lotes
+CREATE OR REPLACE FUNCTION fn_impedir_delete_estoque_lotes()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'DELETE não permitido em estoque_lotes. Use status=BLOQUEADO.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_delete_estoque_lotes
+    BEFORE DELETE ON estoque_lotes
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_delete_estoque_lotes();
+
+-- Impedir DELETE em nfes (compliance fiscal)
+CREATE OR REPLACE FUNCTION fn_impedir_delete_nfes()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'DELETE não permitido em nfes. NFes são imutáveis. Use cancelamento/inutilização.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_delete_nfes
+    BEFORE DELETE ON nfes
+    FOR EACH ROW EXECUTE FUNCTION fn_impedir_delete_nfes();
+```
+
+#### 4.8.11 Resumo das Proteções
 
 | Regra                                | Implementação                            | Quando Dispara        |
 | ------------------------------------ | ---------------------------------------- | --------------------- |
@@ -1448,6 +1828,17 @@ CREATE TRIGGER trg_impedir_alteracao_item_pareado
 | 1:1 venda_item ↔ consumo             | UNIQUE INDEX parcial                     | INSERT consumo        |
 | 1:1 estoque ↔ consumo                | UNIQUE INDEX parcial                     | INSERT consumo        |
 | Quantidades positivas                | CHECK constraint                         | INSERT/UPDATE         |
+| **Soma alocações ≤ qtd item (Fix #1)** | `fn_validar_soma_alocacoes`            | INSERT/UPDATE alocação |
+| **Hierarquia split válida (Fix #2)** | `fn_validar_split_hierarchy`             | INSERT/UPDATE venda_item |
+| **Reservar estoque em alocação**     | `fn_reservar_estoque_alocacao`           | INSERT alocação       |
+| **Restaurar estoque em estorno**     | `fn_restaurar_estoque_apos_estorno`      | UPDATE alocação       |
+| **Refs financeiro válidas (Fix #3)** | `chk_tipo_referencias`                   | INSERT/UPDATE parcela |
+| **Consistência estoque_lotes (Fix #4)** | `fn_validar_estoque_lotes_consistencia` | INSERT/UPDATE estoque_lotes |
+| **JSONB válido em nfe_itens (Fix #5)** | `chk_nfe_dados_*`                       | INSERT/UPDATE nfe_itens |
+| **Impedir DELETE vendas (Fix #6)**   | `fn_impedir_delete_vendas`               | DELETE vendas         |
+| **Impedir DELETE compras (Fix #6)**  | `fn_impedir_delete_compras`              | DELETE compras        |
+| **Impedir DELETE estoque (Fix #6)**  | `fn_impedir_delete_estoque_lotes`        | DELETE estoque_lotes  |
+| **Impedir DELETE nfes (Fix #6)**     | `fn_impedir_delete_nfes`                 | DELETE nfes           |
 
 ---
 
@@ -1472,6 +1863,7 @@ stateDiagram-v2
 
     ESTOQUE --> ENTREGA_AGENDADA : Agendar entrega
     ESTOQUE --> CANCELADO : Cancelar
+    ESTOQUE --> DEVOLVIDO : Devolução (Fix #9)
 
     ENTREGA_AGENDADA --> EM_ENTREGA : Saiu para entrega
     ENTREGA_AGENDADA --> ESTOQUE : Desagendar
@@ -1512,7 +1904,7 @@ enum VendaItemStatus: string
             self::FATURADO => [self::EM_COLETA],
             self::EM_COLETA => [self::EM_RECEBIMENTO],
             self::EM_RECEBIMENTO => [self::ESTOQUE],
-            self::ESTOQUE => [self::ENTREGA_AGENDADA, self::CANCELADO],
+            self::ESTOQUE => [self::ENTREGA_AGENDADA, self::CANCELADO, self::DEVOLVIDO], // Fix #9: + DEVOLVIDO, -PENDENTE
             self::ENTREGA_AGENDADA => [self::EM_ENTREGA, self::ESTOQUE],
             self::EM_ENTREGA => [self::ENTREGUE, self::ESTOQUE],
             self::ENTREGUE => [self::DEVOLVIDO],

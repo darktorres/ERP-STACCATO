@@ -384,6 +384,241 @@ class VendaItem extends Model
 }
 ```
 
+### Event Sourcing (Append-Only Audit Trail)
+
+This module uses Event Sourcing with append-only events tables for complete audit trail and state reconstruction of sales transactions.
+
+#### Event Tables
+
+```sql
+-- Append-only events table for venda_itens state changes
+CREATE TABLE venda_itens_events (
+    id BIGSERIAL PRIMARY KEY,
+    venda_item_id BIGINT NOT NULL,
+    event_type VARCHAR(50) NOT NULL,               -- CRIADO, ALOCADO, ENTREGUE, CANCELADO, etc.
+    event_data JSONB NOT NULL,                     -- Complete event payload
+    usuario_id BIGINT,
+    ip_address INET,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Immutability constraint
+CREATE TRIGGER fn_prevent_mutation_venda_itens_events
+BEFORE UPDATE OR DELETE ON venda_itens_events
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- Index for query performance
+CREATE INDEX idx_venda_itens_events_item_tipo
+ON venda_itens_events (venda_item_id, event_type, created_at);
+
+-- Append-only events table for allocation changes
+CREATE TABLE alocacoes_events (
+    id BIGSERIAL PRIMARY KEY,
+    alocacao_id BIGINT NOT NULL,
+    event_type VARCHAR(50) NOT NULL,               -- CRIADA, REVERTIDA, CANCELADA
+    event_data JSONB NOT NULL,
+    usuario_id BIGINT,
+    ip_address INET,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER fn_prevent_mutation_alocacoes_events
+BEFORE UPDATE OR DELETE ON alocacoes_events
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+CREATE INDEX idx_alocacoes_events_alocacao_tipo
+ON alocacoes_events (alocacao_id, event_type, created_at);
+```
+
+#### Event Types
+
+```php
+// app/Enums/VendaItemEventType.php
+enum VendaItemEventType: string
+{
+    case CRIADO = 'CRIADO';                        // Item added to venda
+    case VALOR_ALTERADO = 'VALOR_ALTERADO';        // Unit price or quantity changed
+    case DESCONTO_APLICADO = 'DESCONTO_APLICADO';
+    case ORIGEM_ALTERADA = 'ORIGEM_ALTERADA';      // Origem changed (COMPRA → ESTOQUE)
+    case ALOCADO = 'ALOCADO';                      // Fully allocated
+    case PARCIALMENTE_ALOCADO = 'PARCIALMENTE_ALOCADO';
+    case ENTREGUE = 'ENTREGUE';
+    case CANCELADO = 'CANCELADO';
+    case DEVOLVIDO = 'DEVOLVIDO';
+}
+
+// app/Enums/AlocacaoEventType.php
+enum AlocacaoEventType: string
+{
+    case CRIADA = 'CRIADA';                        // Allocation created
+    case REVERTIDA = 'REVERTIDA';                  // Allocation reversed (breakage/return)
+    case CANCELADA = 'CANCELADA';                  // Allocation canceled
+}
+```
+
+#### Event Recording in Services
+
+```php
+// app/Services/Vendas/VendaService.php
+class VendaService
+{
+    public function adicionarItem(Venda $venda, array $itemData): VendaItem
+    {
+        return DB::transaction(function () use ($venda, $itemData) {
+            $item = $venda->itens()->create($itemData);
+
+            // Record CRIADO event
+            DB::table('venda_itens_events')->insert([
+                'venda_item_id' => $item->id,
+                'event_type' => VendaItemEventType::CRIADO->value,
+                'event_data' => json_encode([
+                    'produto_id' => $item->produto_id,
+                    'quantidade' => $item->quantidade,
+                    'valor_unitario' => $item->valor_unitario,
+                    'origem' => $item->origem,
+                    'status' => $item->status,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            event(new VendaItemAdicionado($item));
+
+            return $item;
+        });
+    }
+
+    public function cancelarItem(VendaItem $item, string $motivo): void
+    {
+        DB::transaction(function () use ($item, $motivo) {
+            // Record allocation reversals first
+            $item->alocacoes()
+                ->where('status', AlocacaoStatus::ATIVO)
+                ->update(['status' => AlocacaoStatus::REVERTIDA]);
+
+            foreach ($item->alocacoes as $alocacao) {
+                DB::table('alocacoes_events')->insert([
+                    'alocacao_id' => $alocacao->id,
+                    'event_type' => AlocacaoEventType::REVERTIDA->value,
+                    'event_data' => json_encode([
+                        'motivo' => 'Item cancelado: ' . $motivo,
+                        'quantidade_revertida' => $alocacao->quantidade,
+                    ]),
+                    'usuario_id' => auth()->id(),
+                    'ip_address' => request()->ip(),
+                    'created_at' => now(),
+                ]);
+            }
+
+            // Then record item cancellation
+            DB::table('venda_itens_events')->insert([
+                'venda_item_id' => $item->id,
+                'event_type' => VendaItemEventType::CANCELADO->value,
+                'event_data' => json_encode([
+                    'motivo' => $motivo,
+                    'quantidade_cancelada' => $item->quantidade,
+                    'alocacoes_revertidas' => $item->alocacoes()->count(),
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            $item->update(['status' => VendaItemStatus::CANCELADO]);
+
+            event(new VendaItemCancelado($item));
+        });
+    }
+}
+
+// app/Services/Estoque/AlocacaoService.php
+class AlocacaoService
+{
+    public function alocar(int $vendaItemId, int $estoqueId, float $quantidade): Alocacao
+    {
+        return DB::transaction(function () use ($vendaItemId, $estoqueId, $quantidade) {
+            $alocacao = Alocacao::create([
+                'venda_item_id' => $vendaItemId,
+                'estoque_id' => $estoqueId,
+                'quantidade' => $quantidade,
+                'status' => AlocacaoStatus::ATIVO,
+            ]);
+
+            // Record CRIADA event
+            DB::table('alocacoes_events')->insert([
+                'alocacao_id' => $alocacao->id,
+                'event_type' => AlocacaoEventType::CRIADA->value,
+                'event_data' => json_encode([
+                    'venda_item_id' => $vendaItemId,
+                    'estoque_id' => $estoqueId,
+                    'quantidade' => $quantidade,
+                    'custo_unitario' => $alocacao->estoque->custo_unitario,
+                    'valor_total' => $quantidade * $alocacao->estoque->custo_unitario,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            // Update venda_item allocation status
+            DB::table('venda_itens_events')->insert([
+                'venda_item_id' => $vendaItemId,
+                'event_type' => VendaItemEventType::ALOCADO->value,
+                'event_data' => json_encode([
+                    'alocacao_id' => $alocacao->id,
+                    'quantidade_alocada' => $quantidade,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            event(new AlocacaoCriada($alocacao));
+
+            return $alocacao;
+        });
+    }
+}
+```
+
+#### Audit Trail Queries
+
+```php
+// Get complete history of a venda_item
+$historia = DB::table('venda_itens_events')
+    ->where('venda_item_id', $itemId)
+    ->orderBy('created_at')
+    ->get();
+
+// Get all allocation events for an item
+$alocacoes_historia = DB::table('alocacoes_events')
+    ->whereIn('alocacao_id', function ($query) use ($itemId) {
+        $query->select('id')->from('alocacoes')
+            ->where('venda_item_id', $itemId);
+    })
+    ->orderBy('created_at')
+    ->get();
+
+// Reconstruct state at specific timestamp
+$estado_em_data = DB::table('venda_itens_events')
+    ->where('venda_item_id', $itemId)
+    ->where('created_at', '<=', $data)
+    ->orderBy('created_at', 'desc')
+    ->first();
+```
+
+#### Key Benefits
+
+- **Complete Audit Trail**: Every change is recorded with user, timestamp, and IP
+- **Immutable History**: Cannot modify or delete events (fn_prevent_mutation enforced)
+- **State Reconstruction**: Can replay events to see state at any point in time
+- **Compliance**: Meets regulatory requirements for transaction audit logs
+- **Debugging**: Trace exact sequence of allocation and delivery events
+- **Analytics**: Query event log for insights (e.g., most frequently canceled items)
+
+---
+
 ### Enums
 
 ```php

@@ -342,6 +342,257 @@ class Alocacao extends Model
 }
 ```
 
+### Event Sourcing (Append-Only Movements Log)
+
+This module uses Event Sourcing to maintain immutable log of all inventory movements and allocations for complete audit trail and cost tracking.
+
+#### Event Tables
+
+```sql
+-- Append-only movements log for estoque_lotes (inventory receiving/adjustments)
+CREATE TABLE estoque_movimentacoes (
+    id BIGSERIAL PRIMARY KEY,
+    estoque_id BIGINT NOT NULL,
+    event_type VARCHAR(50) NOT NULL,               -- RECEBIDO, AJUSTE, QUEBRA, TRANSFERENCIA, etc.
+    event_data JSONB NOT NULL,                     -- Complete movement payload
+    usuario_id BIGINT,
+    ip_address INET,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Immutability constraint
+CREATE TRIGGER fn_prevent_mutation_estoque_movimentacoes
+BEFORE UPDATE OR DELETE ON estoque_movimentacoes
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- Index for query performance
+CREATE INDEX idx_estoque_movimentacoes_lote_tipo
+ON estoque_movimentacoes (estoque_id, event_type, created_at);
+
+-- Append-only log for allocation events
+CREATE TABLE alocacoes_eventos (
+    id BIGSERIAL PRIMARY KEY,
+    alocacao_id BIGINT NOT NULL,
+    event_type VARCHAR(50) NOT NULL,               -- CRIADA, REVERTIDA, CANCELADA
+    event_data JSONB NOT NULL,
+    usuario_id BIGINT,
+    ip_address INET,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER fn_prevent_mutation_alocacoes_eventos
+BEFORE UPDATE OR DELETE ON alocacoes_eventos
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+CREATE INDEX idx_alocacoes_eventos_alocacao_tipo
+ON alocacoes_eventos (alocacao_id, event_type, created_at);
+```
+
+#### Event Types
+
+```php
+// app/Enums/EstoqueEventType.php
+enum EstoqueEventType: string
+{
+    case RECEBIDO = 'RECEBIDO';                    // Stock received from NFe/purchase
+    case AJUSTE_ENTRADA = 'AJUSTE_ENTRADA';        // Inventory adjustment (increase)
+    case AJUSTE_SAIDA = 'AJUSTE_SAIDA';            // Inventory adjustment (decrease)
+    case QUEBRA = 'QUEBRA';                        // Breakage/loss recorded
+    case TRANSFERENCIA = 'TRANSFERENCIA';          // Transfer to another location
+    case DEVOLUCAO = 'DEVOLUCAO';                  // Return from customer
+}
+
+// app/Enums/AllocationEventType.php (same as VendaItem)
+enum AllocationEventType: string
+{
+    case CRIADA = 'CRIADA';
+    case REVERTIDA = 'REVERTIDA';
+    case CANCELADA = 'CANCELADA';
+}
+```
+
+#### Event Recording
+
+```php
+// app/Services/Estoque/EstoqueService.php
+class EstoqueService
+{
+    /**
+     * Record incoming stock from NFe with RECEBIDO event
+     */
+    public function darEntrada(array $dados): Estoque
+    {
+        return DB::transaction(function () use ($dados) {
+            $estoque = Estoque::create([
+                'loja_id' => $dados['loja_id'],
+                'nfe_id' => $dados['nfe_id'],
+                'produto_id' => $dados['produto_id'],
+                'fornecedor_id' => $dados['fornecedor_id'],
+                'quantidade' => $dados['quantidade'],
+                'quantidade_disponivel' => $dados['quantidade'],
+                'custo_unitario' => $dados['custo_unitario'],
+            ]);
+
+            // Record RECEBIDO event in append-only log
+            DB::table('estoque_movimentacoes')->insert([
+                'estoque_id' => $estoque->id,
+                'event_type' => EstoqueEventType::RECEBIDO->value,
+                'event_data' => json_encode([
+                    'nfe_id' => $dados['nfe_id'],
+                    'produto_id' => $dados['produto_id'],
+                    'quantidade' => $dados['quantidade'],
+                    'custo_unitario' => $dados['custo_unitario'],
+                    'lote' => $dados['lote'] ?? null,
+                    'data_validade' => $dados['data_validade'] ?? null,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            event(new EstoqueCriado($estoque));
+
+            return $estoque;
+        });
+    }
+
+    /**
+     * Adjust inventory with audit trail
+     */
+    public function ajustar(
+        Estoque $estoque,
+        float $novaQuantidade,
+        string $motivo
+    ): void {
+        DB::transaction(function () use ($estoque, $novaQuantidade, $motivo) {
+            $diferenca = $novaQuantidade - $estoque->quantidade_disponivel;
+            $eventType = $diferenca > 0
+                ? EstoqueEventType::AJUSTE_ENTRADA
+                : EstoqueEventType::AJUSTE_SAIDA;
+
+            // Record adjustment event
+            DB::table('estoque_movimentacoes')->insert([
+                'estoque_id' => $estoque->id,
+                'event_type' => $eventType->value,
+                'event_data' => json_encode([
+                    'quantidade_anterior' => $estoque->quantidade_disponivel,
+                    'quantidade_nova' => $novaQuantidade,
+                    'diferenca' => $diferenca,
+                    'motivo' => $motivo,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            $estoque->update([
+                'quantidade_disponivel' => $novaQuantidade,
+            ]);
+
+            event(new EstoqueAjustado($estoque, $diferenca));
+        });
+    }
+
+    /**
+     * Register breakage/loss with complete audit trail
+     */
+    public function registrarQuebra(
+        Estoque $estoque,
+        float $quantidade,
+        string $motivo
+    ): void {
+        DB::transaction(function () use ($estoque, $quantidade, $motivo) {
+            DB::table('estoque_movimentacoes')->insert([
+                'estoque_id' => $estoque->id,
+                'event_type' => EstoqueEventType::QUEBRA->value,
+                'event_data' => json_encode([
+                    'quantidade_antes' => $estoque->quantidade_disponivel,
+                    'quantidade_quebrada' => $quantidade,
+                    'quantidade_apos' => max(0, $estoque->quantidade_disponivel - $quantidade),
+                    'motivo' => $motivo,
+                    'valor_perdido' => $quantidade * $estoque->custo_unitario,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            $estoque->decrement('quantidade_disponivel', $quantidade);
+
+            event(new QuebrasRegistrada($estoque, $quantidade));
+        });
+    }
+}
+
+// app/Services/Estoque/AlocacaoService.php
+class AlocacaoService
+{
+    public function desfazerAlocacao(Alocacao $alocacao, string $motivo = null): void
+    {
+        DB::transaction(function () use ($alocacao, $motivo) {
+            // Record allocation reversal event
+            DB::table('alocacoes_eventos')->insert([
+                'alocacao_id' => $alocacao->id,
+                'event_type' => AllocationEventType::REVERTIDA->value,
+                'event_data' => json_encode([
+                    'venda_item_id' => $alocacao->venda_item_id,
+                    'estoque_id' => $alocacao->estoque_id,
+                    'quantidade_revertida' => $alocacao->quantidade,
+                    'motivo' => $motivo,
+                    'custo_impactado' => $alocacao->quantidade * $alocacao->estoque->custo_unitario,
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            $alocacao->update([
+                'status' => AlocacaoStatus::REVERTIDA,
+            ]);
+
+            event(new AlocacaoRevertida($alocacao));
+        });
+    }
+}
+```
+
+#### Cost Tracking from Events
+
+```php
+// Reconstruct cost of inventory at specific date
+$movimentos = DB::table('estoque_movimentacoes')
+    ->where('estoque_id', $estoqueId)
+    ->where('created_at', '<=', $data)
+    ->orderBy('created_at')
+    ->get();
+
+$custoPorData = collect($movimentos)
+    ->reduce(function ($carry, $movimento) use ($estoque) {
+        $dados = json_decode($movimento->event_data, true);
+
+        return match ($movimento->event_type) {
+            EstoqueEventType::RECEBIDO->value => $dados['quantidade'] * $dados['custo_unitario'],
+            EstoqueEventType::QUEBRA->value => $carry - $dados['valor_perdido'],
+            EstoqueEventType::AJUSTE_ENTRADA->value =>
+                $carry + ($dados['diferenca'] * $estoque->custo_unitario),
+            EstoqueEventType::AJUSTE_SAIDA->value =>
+                $carry - (abs($dados['diferenca']) * $estoque->custo_unitario),
+            default => $carry,
+        };
+    }, 0);
+```
+
+#### Key Benefits
+
+- **Immutable Movement Log**: Cannot modify or delete movements (compliance requirement)
+- **Cost Tracking**: Complete history of cost changes for inventory valuation
+- **Audit Trail**: Full trace of who adjusted, when, and why
+- **Debugging**: Reconstruct inventory state at any point in time
+- **Compliance**: Meet regulatory requirements for physical inventory audits
+- **Analytics**: Query movements for insights on common breakages, supplier quality, etc.
+
+---
+
 ### Enums
 
 ```php

@@ -71,15 +71,17 @@ flowchart TB
 
     NFe -->|"Cria Estoque"| Inventory
 
-    subgraph Inventory["📦 INVENTÁRIO<br/>(Criado de NFe ENTRADA)"]
+    subgraph Inventory["📦 INVENTÁRIO<br/>(Event Sourced)"]
         direction TB
 
-        subgraph StockModel["Estado Atual (stock.quant pattern)"]
-            Lotes["estoque_lotes<br/>(quantidade_disponível,<br/>quantidade_reservada,<br/>data_entrada FIFO)<br/>← criado de nfe_item_id"]
+        subgraph Events["Events (Append-Only)"]
+            LotesEvents["estoque_lotes_events<br/>(todas mudanças como eventos)<br/>Imutável: fn_prevent_mutation()"]
+            AlocationEvents["alocacoes_events<br/>(histórico de alocações)"]
         end
 
-        subgraph StockLog["Log Histórico (stock.move pattern)"]
-            Movimentacoes["estoque_movimentacoes<br/>(ENTRADA_COMPRA,<br/>SAIDA_VENDA, etc)"]
+        subgraph Views["Materialized Views<br/>(Current State via pg_ivm)"]
+            Lotes["estoque_lotes (view)<br/>(quantidade_disponível,<br/>quantidade_reservada)<br/>← reconstructed from events"]
+            Alocacoes["alocacoes (view)<br/>(venda_item ↔ lote)"]
         end
 
         subgraph Location["Localização no Galpão"]
@@ -88,13 +90,13 @@ flowchart TB
             Blocos -.-> Localizacoes
         end
 
-        subgraph Allocation["Alocação 1:1<br/>(venda_item consome estoque)"]
-            Alocacoes["alocacoes<br/>(venda_item ↔ lote)"]
+        subgraph StockLog["Log Histórico (Imutável)"]
+            Movimentacoes["estoque_movimentacoes_events<br/>(ENTRADA_COMPRA, SAIDA_VENDA, etc)<br/>Append-only audit trail"]
         end
 
-        StockModel --> Allocation
-        StockLog --> Allocation
-        Lotes --> Location
+        Events --> Views
+        Views --> Location
+        Movimentacoes -.->|"auditoria"| Events
     end
 
     Sales -->|"origem=ESTOQUE:<br/>aloca estoque existente"| Allocation
@@ -146,9 +148,14 @@ flowchart TB
 
     Financial --> Audit
 
-    subgraph Audit["🔍 AUDITORIA"]
-        direction LR
+    subgraph Audit["🔍 AUDITORIA (Event Sourced)"]
+        direction TB
         AuditLog["audit_log<br/>(INSERT/UPDATE/DELETE<br/>com dados_antigos/novos)"]
+        EventLog["*_events tables<br/>(Todas: imutável append-only)<br/>vendas_events, estoque_lotes_events,<br/>alocacoes_events, entrega_itens_events"]
+        IntegridadeLog["integridade_log<br/>(Verificações periódicas)<br/>Imutável: fn_prevent_mutation()"]
+
+        AuditLog --> EventLog
+        EventLog --> IntegridadeLog
     end
 ```
 
@@ -169,8 +176,143 @@ flowchart TB
 
         P4["4️⃣ CONSUMO MANUAL INTELIGENTE<br/>alocacoes (venda_item ↔ lote)<br/>➜ Usuário escolhe lote para qualidade<br/>➜ FIFO sugerido via view (não imposto)"]
 
-        P5["5️⃣ AUDITORIA COMPLETA<br/>audit_log com triggers automáticos<br/>➜ Quem mudou o quê, quando e por quê<br/>➜ Reversão completa de dados"]
+        P5["5️⃣ AUDITORIA EVENT-SOURCED<br/>Event Sourcing + pg_ivm<br/>➜ Histórico COMPLETO de tudo<br/>➜ Views em tempo real (sem cron)<br/>➜ Imutável (fn_prevent_mutation)"]
     end
+```
+
+---
+
+## Event Sourcing Architecture: Complete Audit Trail
+
+```mermaid
+flowchart TB
+    subgraph Overview["🔄 EVENT SOURCING PATTERN"]
+        direction TB
+
+        AppInsert["🔵 APLICAÇÃO<br/>INSERT INTO vendas_events<br/>(tipo, dados_novo, usuario_id)"]
+
+        Event["📝 EVENTO (Imutável)<br/>vendas_events<br/>event_id, entidade_id, tipo,<br/>dados_anterior, dados_novo,<br/>mudancas_totais,<br/>usuario_id, changed_at"]
+
+        Trigger["⚡ PG_IVM DETECTS<br/>Nova linha em vendas_events"]
+
+        View["🎯 VIEW UPDATED (Incremental)<br/>Materialized View: vendas<br/>SELECT DISTINCT ON (entidade_id)<br/>estado atual a partir eventos"]
+
+        Query["✅ APP QUERIES<br/>SELECT * FROM vendas<br/>Sem saber de events"]
+
+        AppInsert --> Event
+        Event --> Trigger
+        Trigger --> View
+        View --> Query
+    end
+
+    Overview --> Levels
+
+    subgraph Levels["📊 3 NÍVEIS DE ARTEFATOS"]
+        direction TB
+
+        L1["NÍVEL 1: Events (Append-Only)<br/>`*_events` tables<br/>• Imutáveis (fn_prevent_mutation)<br/>• Completo histórico<br/>• Rastreável (usuario_id, motivo)<br/>Exemplos: vendas_events, estoque_lotes_events,<br/>alocacoes_events, entrega_itens_events"]
+
+        L2["NÍVEL 2: Materialized Views (Current State)<br/>`*` tables (original names)<br/>• Agregação dos eventos<br/>• Indexada, fast queries<br/>• pg_ivm atualiza incrementalmente<br/>Exemplos: vendas, estoque_lotes,<br/>alocacoes, entrega_itens"]
+
+        L3["NÍVEL 3: Application (Queries Views)<br/>App not aware of event sourcing<br/>• Queries normal tables<br/>• No version management needed<br/>• Sees current state<br/>Backend code unchanged"]
+
+        L1 --> L2 --> L3
+    end
+
+    Levels --> Benefits
+
+    subgraph Benefits["✨ BENEFÍCIOS"]
+        direction LR
+
+        B1["📜 Auditoria Completa<br/>Cada mudança é evento<br/>imutável"]
+
+        B2["⏰ Recuperação Temporal<br/>Restaurar BD em<br/>data específica"]
+
+        B3["🔐 Compliance<br/>NFe, movimentações<br/>nunca mudam"]
+
+        B4["⚙️ Sem Cron<br/>pg_ivm atualiza<br/>views automaticamente"]
+
+        B5["🚀 Performance<br/>Append-only otimizado<br/>Sem UPDATE locks"]
+
+        B1 --> B2 --> B3 --> B4 --> B5
+    end
+```
+
+---
+
+## Event Sourcing: Vendas Example (Status Transition)
+
+```mermaid
+flowchart TB
+    Start["Usuário: Marcar venda<br/>como CONCLUIDA"] --> Insert["INSERT INTO vendas_events<br/>(entidade_id=5,<br/>tipo='STATUS_ALTERADO',<br/>dados_anterior={'status': 'ABERTA'},<br/>dados_novo={'status': 'CONCLUIDA'},<br/>usuario_id=1,<br/>motivo='Todos entregues')"]
+
+    Insert --> Event["vendas_events table<br/>event_id: 1042<br/>entidade_id: 5<br/>tipo: STATUS_ALTERADO<br/>mudancas_totais: {status: {de: ABERTA, para: CONCLUIDA}}<br/>changed_at: 2025-01-10 14:30:00 BRT"]
+
+    Event --> Immutable["🔒 IMUTÁVEL<br/>fn_prevent_mutation trigger<br/>UPDATE: ERROR<br/>DELETE: ERROR"]
+
+    Event --> PgIVM["pg_ivm: Detecta novo evento"]
+
+    PgIVM --> View["Materialized View: vendas<br/>SELECT DISTINCT ON (v.entidade_id)<br/>v.entidade_id as id,<br/>(v.dados_novo ->> 'numero') as numero,<br/>(v.dados_novo ->> 'status')::venda_status as status,<br/>v.changed_at,<br/>v.usuario_id<br/>FROM vendas_events v<br/>ORDER BY v.entidade_id, v.changed_at DESC"]
+
+    View --> Updated["vendas view updated<br/>id: 5<br/>status: CONCLUIDA<br/>changed_at: 2025-01-10 14:30<br/>usuario_id: 1"]
+
+    Updated --> Query["App: SELECT * FROM vendas WHERE id=5;<br/>Retorna status=CONCLUIDA ✅"]
+
+    Query --> Audit["DBA: SELECT FROM vendas_events<br/>WHERE entidade_id=5<br/>Ver histórico COMPLETO"]
+
+    style Immutable fill:#ffcdd2
+    style Updated fill:#c8e6c9
+    style Audit fill:#b3e5fc
+```
+
+---
+
+## Event Sourcing: Estoque Lotes Example (Allocation)
+
+```mermaid
+flowchart TB
+    Start["Alocar estoque para venda_item #100"] --> Step1["1️⃣ INSERT INTO alocacoes<br/>(venda_item_id=100,<br/>lote_id=5,<br/>quantidade=50)"]
+
+    Step1 --> Trigger["2️⃣ Trigger fn_alocacao_criada()"]
+
+    Trigger --> EventInsert["3️⃣ INSERT INTO estoque_lotes_events<br/>entidade_id=5<br/>tipo='QUANTIDADE_ALTERADA'<br/>dados_anterior={<br/>  quantidade_disponivel: 100,<br/>  quantidade_reservada: 0<br/>}<br/>dados_novo={<br/>  quantidade_disponivel: 50,<br/>  quantidade_reservada: 50,<br/>  status: 'RESERVADO'<br/>}"]
+
+    EventInsert --> Event["estoque_lotes_events<br/>event_id: 2099<br/>entidade_id: 5<br/>referencia_tipo: 'alocacao'<br/>referencia_id: 1"]
+
+    Event --> IVM["pg_ivm: Updates materialized view"]
+
+    IVM --> ViewUpdate["estoque_lotes view updated<br/>id: 5<br/>quantidade_disponivel: 50 (era 100)<br/>quantidade_reservada: 50 (era 0)<br/>status: RESERVADO (era DISPONIVEL)"]
+
+    ViewUpdate --> Query["App: SELECT * FROM estoque_lotes<br/>WHERE id=5<br/>Vê estado ATUAL ✅"]
+
+    Query --> Audit["DBA: Query estoque_lotes_events<br/>Ver CADEIA de alocações"]
+
+    style EventInsert fill:#fff9c4
+    style ViewUpdate fill:#c8e6c9
+    style Audit fill:#b3e5fc
+```
+
+---
+
+## Event Sourcing: Immutability Enforcement
+
+```mermaid
+flowchart TB
+    Problem["❌ Tentativa: UPDATE evento"] --> UpdateAttempt["UPDATE estoque_lotes_events<br/>SET quantidade_disponivel = 100<br/>WHERE event_id = 2099"]
+
+    UpdateAttempt --> Trigger["🔒 fn_prevent_mutation()<br/>BEFORE UPDATE trigger"]
+
+    Trigger --> Error["ERROR:<br/>Tabela estoque_lotes_events é imutável<br/>(append-only)<br/>Não é permitido UPDATE no registro 2099"]
+
+    Error --> Solution["✅ SOLUÇÃO:<br/>Se precisa corrigir quantidade<br/>INSERT novo evento com<br/>dados_novo corretos"]
+
+    Solution --> Correct["INSERT INTO estoque_lotes_events<br/>entidade_id=5<br/>tipo='QUANTIDADE_ALTERADA'<br/>dados_anterior={...}<br/>dados_novo={quantidade_disponivel: 100}<br/>motivo='Correção: erro anterior'"]
+
+    Correct --> Result["Resultado no BD:<br/>• Evento original preservado<br/>• Novo evento registrado<br/>• Cadeia completa visível<br/>• Auditoria = rastreável"]
+
+    style Error fill:#ffcdd2
+    style Correct fill:#c8e6c9
+    style Result fill:#b3e5fc
 ```
 
 ---
@@ -972,6 +1114,49 @@ flowchart TB
 
         Audit1 --- Audit2
     end
+```
+
+---
+
+## pg_ivm Setup: Installation & Configuration
+
+```mermaid
+flowchart TB
+    subgraph Step1["PASSO 1: Instalar Extensão"]
+        direction TB
+        Install["# Uma vez (no servidor PostgreSQL)<br/>CREATE EXTENSION pg_ivm;<br/><br/>✅ pg_ivm agora está disponível"]
+    end
+
+    Step1 --> Step2
+
+    subgraph Step2["PASSO 2: Converter Views para Incremental"]
+        direction TB
+        Drop["1️⃣ DROP antigas views<br/>DROP MATERIALIZED VIEW vendas;<br/>DROP MATERIALIZED VIEW estoque_lotes;<br/>DROP MATERIALIZED VIEW alocacoes;"]
+        Create["2️⃣ Recriar como INCREMENTAL<br/>CREATE INCREMENTAL MATERIALIZED VIEW vendas AS<br/>SELECT DISTINCT ON (v.entidade_id)<br/>  v.entidade_id as id,<br/>  (v.dados_novo ->> 'status') as status<br/>FROM vendas_events v<br/>ORDER BY v.entidade_id, v.changed_at DESC;"]
+        Drop --> Create
+    end
+
+    Step2 --> Step3
+
+    subgraph Step3["PASSO 3: Repeat for All Views"]
+        direction LR
+        V1["estoque_lotes"]
+        V2["alocacoes"]
+        V3["entrega_itens"]
+        V4["financeiro_parcelas"]
+        V5["..."]
+        V1 --> V2 --> V3 --> V4 --> V5
+    end
+
+    Step3 --> Complete
+
+    subgraph Complete["✅ PRONTO!"]
+        direction TB
+        Now["pg_ivm cuida de TUDO:<br/>• INSERT em *_events table<br/>  ↓<br/>• pg_ivm detecta mudança<br/>  ↓<br/>• Materialized view atualizada incrementalmente<br/>  ↓<br/>• App queries view (sempre atual)<br/><br/>📌 Sem cron jobs<br/>📌 Sem REFRESH MATERIALIZED VIEW manual<br/>📌 Zero overhead (incremental, não full rebuild)"]
+    end
+
+    style Install fill:#c8e6c9
+    style Complete fill:#81c784
 ```
 
 ---

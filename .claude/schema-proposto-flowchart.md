@@ -43,7 +43,7 @@ flowchart TB
 
         subgraph Sales["Vendas"]
             Venda["vendas"]
-            VendaItem["venda_itens<br/>origem: COMPRA ou ESTOQUE"]
+            VendaItem["venda_itens<br/>(origem: COMPRA ou ESTOQUE)"]
             Venda --> VendaItem
         end
 
@@ -123,7 +123,6 @@ flowchart TB
     MasterData --> CommercialFlow
     CommercialFlow --> NFe
     NFe -->|"Cria Estoque"| Inventory
-    CommercialFlow -->|"origem=ESTOQUE"| Inventory
     Inventory --> Logistics
 
     Sales -->|"Gera<br/>parcelas_receber"| Financial

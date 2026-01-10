@@ -340,28 +340,70 @@ class VendaItem extends Model
         return $this->belongsTo(Fornecedor::class);
     }
 
-    // M:N allocation relationship
+    // === RELATIONSHIPS ===
+
+    // M:N allocation relationship (venda_items ↔ estoque_lotes)
     public function alocacoes(): HasMany
     {
-        return $this->hasMany(Alocacao::class);
+        return $this->hasMany(Alocacao::class, 'venda_item_id');
     }
 
-    public function compraItem(): BelongsTo
+    // Deliveries containing this item (via entrega_itens)
+    public function entregas(): BelongsToMany
     {
-        return $this->belongsTo(CompraItem::class);
+        return $this->belongsToMany(
+            Entrega::class,
+            'entrega_itens',
+            'venda_item_id',
+            'entrega_id'
+        )
+        ->withPivot(['quantidade', 'status']);
     }
 
+    // Link to quotation item (if originated from quote)
     public function orcamentoItem(): BelongsTo
     {
-        return $this->belongsTo(OrcamentoItem::class);
+        return $this->belongsTo(OrcamentoItem::class)->nullable();
     }
 
-    // Calculate total allocated quantity
+    // Link to purchase item (if originated from purchase)
+    // Used when origem = VendaItemOrigem::COMPRA
+    public function compraItem(): BelongsTo
+    {
+        return $this->belongsTo(CompraItem::class)->nullable();
+    }
+
+    // Polymorphic origin: Can be from ORCAMENTO or COMPRA
+    // origem field distinguishes: VendaItemOrigem::ORCAMENTO or VendaItemOrigem::COMPRA
+    // Use getOrigemModel() helper to get the actual source model
+
+    // Event Sourcing: Historical audit trail
+    public function eventos(): HasMany
+    {
+        return $this->hasMany(VendaItemEvento::class, 'venda_item_id');
+    }
+
+    // === HELPERS & CALCULATIONS ===
+
+    /**
+     * Get the source model based on origem field
+     * Returns either OrcamentoItem or CompraItem model
+     */
+    public function getOrigemModel()
+    {
+        return match ($this->origem) {
+            VendaItemOrigem::ORCAMENTO => $this->orcamentoItem,
+            VendaItemOrigem::COMPRA => $this->compraItem,
+            default => null,
+        };
+    }
+
+    // Calculate total allocated quantity from ATIVO allocations
     public function quantidadeAlocada(): float
     {
         return $this->alocacoes()
-            ->where('status', 'ATIVO')
-            ->sum('quantidade');
+            ->where('status', AlocacaoStatus::ATIVO)
+            ->sum('quantidade') ?? 0;
     }
 
     // Calculate remaining unallocated quantity
@@ -374,6 +416,20 @@ class VendaItem extends Model
     public function fullyAllocated(): bool
     {
         return $this->quantidadePendente() == 0;
+    }
+
+    // Calculate total delivered quantity
+    public function quantidadeEntregue(): float
+    {
+        return $this->entregas()
+            ->wherePivot('status', EntregaItemStatus::ENTREGUE)
+            ->sum('entrega_itens.quantidade') ?? 0;
+    }
+
+    // Check if fully delivered
+    public function fullyDelivered(): bool
+    {
+        return $this->quantidadeEntregue() >= $this->quantidade;
     }
 }
 ```

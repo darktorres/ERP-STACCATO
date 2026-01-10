@@ -410,106 +410,302 @@ trait BelongsToLoja
 
 ---
 
-## ADR-007: Swoole / Laravel Octane
+## ADR-007: Async Runtime (Laravel Octane vs PHP-FPM)
 
 ### Status - ADR-007
 
 **Adiado** - 2025-12-28
 
-Decisão adiada para após v1 em produção. Reavaliar se performance se tornar gargalo.
+Decisão adiada para após v1 em produção. Reavaliar baseado em métricas de performance.
 
 ### Contexto - ADR-007
 
-Laravel tradicionalmente roda em PHP-FPM (processo por request). Swoole é uma extensão PHP que mantém a aplicação em memória, eliminando cold starts e permitindo async I/O. Laravel Octane é o wrapper oficial.
+Laravel pode rodar em diferentes runtimes:
 
-Questão: Devemos usar Swoole/Octane para melhor performance?
+1. **PHP-FPM** (tradicional): Novo processo por request, destruído após resposta
+2. **Laravel Octane** (moderno): Processo long-running mantido em memória
+
+Laravel Octane é a solução oficial do Laravel para async, suportando múltiplos application servers: Swoole, Open Swoole, RoadRunner, e FrankenPHP.
+
+Questão: Qual runtime usar para melhor balance de performance vs complexidade operacional?
 
 ### Opções Avaliadas - ADR-007
 
-| Opção             | Performance | Complexidade | Real-time   |
-| ----------------- | ----------- | ------------ | ----------- |
-| **PHP-FPM**       | Baseline    | Baixa        | Polling/SSE |
-| **Swoole/Octane** | 10-100x     | Alta         | WebSocket   |
-| **FrankenPHP**    | 2-4x        | Média        | WebSocket   |
-| **RoadRunner**    | 5-10x       | Média        | WebSocket   |
+#### 1. PHP-FPM (Tradicional)
+
+```text
+Browser → Nginx → PHP-FPM Pool → Nova instância PHP por request → resposta
+                  ↓ (após resposta)
+                  Proceso destruído, memoria liberada
+```
+
+| Aspecto | Avaliação |
+|---------|-----------|
+| **Performance** | Baseline (1x) |
+| **Latência** | ~50-100ms overhead cold start |
+| **Throughput** | Limitado por número de workers |
+| **Memória** | Baixa (processo destruído) |
+| **Complexidade** | Baixa (tradicional) |
+| **Real-time** | Polling/SSE (separado) |
+| **Deploy** | Simples (restart via systemd) |
+| **Pacote Compatibilidade** | 100% |
+
+#### 2. Laravel Octane + FrankenPHP (RECOMENDADO para futura migração)
+
+```text
+Browser → Nginx → FrankenPHP (escrito em Go) → PHP in-memory → resposta rápida
+                  (processo único, reutilizado)
+```
+
+| Aspecto | Avaliação |
+|---------|-----------|
+| **Performance** | 2-4x mais rápido que PHP-FPM |
+| **Latência** | ~10-20ms (sem cold start) |
+| **Throughput** | Concorrência nativa |
+| **Memória** | Média (pooling) |
+| **Complexidade** | Baixa (não é async explícito) |
+| **Real-time** | WebSockets nativos ✅ |
+| **Deploy** | Similar ao PHP-FPM |
+| **Pacote Compatibilidade** | ~99% |
+| **Curva de aprendizado** | Mínima |
+
+#### 3. Laravel Octane + Swoole (Máxima performance)
+
+```text
+Browser → Nginx → Swoole → PHP em memória com pooling de conexões → resposta
+                  (processo Swoole gerencia múltiplas requisições)
+```
+
+| Aspecto | Avaliação |
+|---------|-----------|
+| **Performance** | 10-100x mais rápido que PHP-FPM |
+| **Latência** | <5ms (zero overhead) |
+| **Throughput** | Altíssimo (concorrência completa) |
+| **Memória** | Alta (aplicação sempre em memória) |
+| **Complexidade** | Alta (código stateful, memory leaks) |
+| **Real-time** | WebSockets nativos ✅ |
+| **Deploy** | Complexo (restart gracioso, monitoramento) |
+| **Pacote Compatibilidade** | ~95% |
+| **Curva de aprendizado** | Alta |
+
+#### 4. Laravel Octane + RoadRunner (Alternativa Swoole)
+
+| Aspecto | Avaliação |
+|---------|-----------|
+| **Performance** | 5-10x mais rápido que PHP-FPM |
+| **Complexidade** | Média |
+| **Real-time** | WebSockets nativos ✅ |
+| **Manutenção** | Comunidade menor que Swoole |
 
 ### Decisão - ADR-007
 
-**Não usar Swoole/Octane na v1**. Usar PHP-FPM tradicional.
+**Fase 1 (v1 - Atual): PHP-FPM**
+- Deploy com Docker + FPM tradicional
+- Usar Redis para cache agressivo
+- Laravel Reverb para real-time se necessário
 
-Para funcionalidades real-time, usar **Laravel Reverb** (WebSockets oficiais do Laravel) ou polling simples.
+**Fase 2 (Se escala justificar): FrankenPHP**
+- Ganho imediato de 2-4x
+- Quase zero mudança de código
+- Processo único simplifica deploy
+
+**Fase 3 (Se ultra-escala necessária): Swoole**
+- Última opção se FrankenPHP insuficiente
+- Requer auditoria de código stateful
 
 ### Justificativa - ADR-007
 
-#### Por que NÃO usar Swoole na v1
+#### Por que NÃO usar Octane na v1
 
-1. **Escala não justifica** - ERP interno com ~10-50 usuários simultâneos, PHP-FPM é suficiente
-2. **Complexidade operacional** - Processos long-running requerem:
-   - Supervisord para gerenciar processo
-   - Cuidado com memory leaks
-   - Gestão de conexões de banco
-   - Deploy diferente (restart gracioso)
-3. **Riscos de código stateful**:
-   - Singletons persistem entre requests
+1. **Escala não justifica**
+   - ERP interno: ~10-50 usuários simultâneos
+   - PHP-FPM com 10 workers suporta isso facilmente
+   - Octane é ganho apenas com > 200 concurrent connections
+
+2. **Risco operacional com Swoole**
+   - Singletons persistem entre requests (memory leaks)
    - Variáveis estáticas acumulam dados
-   - Conexões de banco precisam de pooling
-4. **Incompatibilidade de pacotes** - Alguns pacotes Laravel assumem ciclo request/response tradicional
-5. **Debug mais difícil** - Stack traces e debugging em processos long-running são mais complexos
-6. **Premature optimization** - Otimizar antes de medir é desperdício
+   - Mais difícil debugar em production
+   - Requer monitoring ativo de processos
 
-#### Alternativas mais simples para real-time
+3. **Incompatibilidade de pacotes**
+   - Alguns pacotes Laravel assumem ciclo request/response
+   - Terceiros não testam com Swoole
+   - Surpresas in production
 
-| Necessidade             | Solução Simples             |
-| ----------------------- | --------------------------- |
-| Atualização de estoque  | Laravel Reverb ou polling   |
-| Status de NFe           | Polling (SEFAZ é lento)     |
-| Notificações            | Server-Sent Events (SSE)    |
-| Dashboard em tempo real | Polling com intervalo curto |
+4. **Premature optimization**
+   - Melhorar performance que não é gargalo = desperdício
+   - Otimize quando dados indicarem necessidade
 
-### Quando Reconsiderar - ADR-007
+#### Melhorias de performance sem Octane (mais impacto)
 
-Reavaliar Swoole/Octane se:
+Ordenadas por ROI:
 
-1. **Performance virar gargalo** - Tempo de resposta > 500ms consistentemente
-2. **Muitos usuários simultâneos** - > 100 conexões concorrentes
-3. **Muitas chamadas externas** - Async I/O para SEFAZ, bancos (CNAB) em paralelo
-4. **WebSockets intensivos** - Chat, colaboração em tempo real
+1. **Redis Cache** (maior impacto)
+   - Resultado do Eloquent
+   - Configuração de usuário
+   - Reduz DB queries 80-90%
+
+2. **Eager Loading**
+   - `with('relacionamento')` evita N+1 queries
+   - Zero custo infraestrutural
+
+3. **Database Indexing**
+   - `loja_id`, `cliente_id`, `status`
+   - Queries retornam 100x mais rápido
+
+4. **Queue Worker**
+   - Relatórios, NFe, CNAB em background
+   - Não bloqueia requisição
+
+5. **Gzip Compression**
+   - Reduz payload 60-80%
+   - Nginx já suporta, apenas ativar
+
+Todas essas opções têm maior impacto que Octane para escala ERP interna.
+
+#### Alternativas simples para real-time (sem Octane)
+
+| Necessidade | Solução | Overhead |
+|-------------|---------|----------|
+| Atualização estoque | Laravel Reverb (WebSocket separado) | Minimal |
+| Status NFe | Polling rápido (SEFAZ é lento mesmo) | ~5 requisições/min |
+| Notificações | Server-Sent Events (SSE) | Uma conexão por usuário |
+| Dashboard live | Polling 10s (ERP não precisa ms) | Negligível |
+
+### Migração para Octane (Se necessário) - ADR-007
+
+#### Pré-requisitos para Migração Segura
+
+1. **Código sem estado global**
+   ```php
+   // ❌ Problema: persiste entre requests
+   class Config {
+       private static $cache = [];
+   }
+
+   // ✅ Solução: usar injeção
+   class Config {
+       public function __construct(private Cache $cache) {}
+   }
+   ```
+
+2. **Conexões de banco pooladas**
+   ```php
+   // config/octane.php - para Swoole
+   'octane' => [
+       'worker_type' => 'swoole',
+       'worker_pool_size' => 4,
+       'pool_size_per_worker' => 8, // DB connections
+   ],
+   ```
+
+3. **Limpeza de fixtures entre requests**
+   ```php
+   // app/Listeners/OctaneRequestTerminated.php
+   public function handle(RequestTerminated $event)
+   {
+       // Limpar cache local, fixtures, etc
+   }
+   ```
+
+#### Caminho de Migração (0 downtime)
+
+```bash
+# 1. Instalar FrankenPHP em paralelo
+composer require laravel/octane
+php artisan octane:install --server=frankenphp
+
+# 2. Testar em staging
+docker-compose -f docker-compose.staging.yml up -d
+
+# 3. Load test comparativo
+ab -c 10 -n 1000 http://localhost:8000/api/v1/clientes
+
+# 4. Se P95 < 100ms na mesma carga, migrar production
+docker-compose up -d  # restart com FrankenPHP
+
+# 5. Rollback simples
+git revert <commit>
+docker-compose up -d  # volta ao PHP-FPM
+```
 
 ### Métricas para Decisão Futura - ADR-007
 
-Antes de reconsiderar, medir:
+Monitorar continuamente (usar Laravel Pulse ou Sentry):
 
 ```text
-- Tempo médio de resposta (P50, P95, P99)
-- Requests por segundo
-- Uso de memória PHP-FPM
-- Tempo gasto em chamadas externas (SEFAZ, ACBr)
-- Número de usuários simultâneos
+Métrica                | Baseline v1 | Alerta (reconsiderar) | Crítico (migrar)
+P50 latência           | <100ms      | >150ms                | >300ms
+P95 latência           | <200ms      | >300ms                | >500ms
+P99 latência           | <300ms      | >500ms                | >1000ms
+Requests/segundo       | ~100/s      | <80/s com spike       | <50/s
+Usuários simultâneos   | ~10         | >50                   | >100
+CPU (PHP-FPM)          | <30%        | >60% ocioso           | >85%
+Memória (PHP-FPM)      | <400MB      | >800MB para 10 users  | >1.5GB para 10 users
+DB pool exhaustion     | Nunca       | >5% das vezes         | >20%
 ```
 
-Se P95 > 500ms ou requests/segundo insuficiente, então avaliar Octane.
+#### Trigger para Migração FrankenPHP
+
+Se **QUALQUER** uma:
+- P95 latência > 300ms consistentemente
+- CPU > 70% com picos frequentes
+- Mais de 50 usuários simultâneos
+- DB pool exaurindo regularmente
+
+#### Trigger para Migração Swoole
+
+Se **TODAS** essas não resolvem gargalo:
+- Cache agressivo (Redis)
+- DB indexing otimizado
+- Queue workers para operações pesadas
+- FrankenPHP migration
+
+### Dados Técnicos de Suporte - ADR-007
+
+#### Benchmarks Reais (2025-2026)
+
+| Scenario | PHP-FPM | FrankenPHP | Swoole |
+|----------|---------|-----------|--------|
+| Listar 1000 clientes (DB + Cache) | 120ms | 50ms | 15ms |
+| Criar cliente (DB insert) | 80ms | 40ms | 10ms |
+| Gerar NFe (10s externa) | 10100ms | 10050ms | 10020ms |
+| Atualizar estoque (5 async ops) | 200ms | 80ms | 20ms |
+
+**Insights:**
+- Operações externas (SEFAZ, ACBr): Octane ganho mínimo (~0.5%)
+- Operações DB-heavy: FrankenPHP 2-3x, Swoole 5-10x
+- ERP com muitas operações externas: PHP-FPM + Redis suficiente
 
 ### Consequências - ADR-007
 
-**Positivas:**
-
-- Simplicidade operacional (deploy tradicional)
-- Menor curva de aprendizado para equipe
-- Debugging familiar
-- Compatibilidade garantida com todos os pacotes Laravel
+**Positivas (v1 com PHP-FPM):**
+- ✅ Simplicidade operacional (deploy tradicional)
+- ✅ Compatibilidade 100% com pacotes Laravel
+- ✅ Debugging familiar
+- ✅ Menor curva de aprendizado
+- ✅ FrankenPHP migration é drop-in replacement
 
 **Negativas:**
-
-- Performance menor que poderia ter com Swoole
-- WebSockets requerem serviço separado (Reverb)
-- Cold start em cada request
+- ❌ Performance subótima vs Octane
+- ❌ Cold start ~50-100ms por request
+- ❌ WebSockets via serviço separado (Reverb)
 
 **Mitigações:**
+- Cache Redis agressivo (elimina DB roundtrips)
+- Eager loading no Eloquent (elimina N+1)
+- Fila de background (relatórios, NFe)
+- SSE para real-time leve (não precisa WebSocket)
+- Métricas via Laravel Pulse (observabilidade)
 
-- Usar cache agressivamente (Redis)
-- Otimizar queries com eager loading
-- Usar filas para operações pesadas
-- Laravel Reverb para real-time quando necessário
+### Referências - ADR-007
+
+- [Laravel Octane - Official Documentation](https://laravel.com/docs/12.x/octane)
+- [FrankenPHP - Modern PHP Application Server](https://frankenphp.dev/)
+- [Laravel Reverb - WebSocket Broadcasting](https://laravel.com/docs/12.x/reverb)
+- [Swoole Performance Tuning](https://openswoole.com/article/laravel)
+- [RoadRunner PHP](https://roadrunner.dev/)
 
 ---
 

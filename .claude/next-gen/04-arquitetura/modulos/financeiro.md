@@ -406,6 +406,202 @@ class RemessaCnab extends Model
 }
 ```
 
+### Event Sourcing (Append-Only Audit Trail)
+
+This module implements Event Sourcing pattern with pg_ivm (PostgreSQL Incremental Materialized Views) for real-time audit logging and state reconstruction.
+
+#### Event Tables (Append-Only)
+
+```php
+// Database Schema
+CREATE TABLE financeiro_parcelas_events (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL,                    -- Reference to FinanceiroParcela
+    event_type VARCHAR(50) NOT NULL,               -- CRIADA, VALOR_ALTERADO, RECEBIDA, etc.
+    event_data JSONB NOT NULL,                     -- Complete event payload
+    usuario_id BIGINT,                             -- Who triggered the event
+    ip_address INET,                               -- Source IP for audit
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()    -- Immutable timestamp
+);
+
+-- Immutability constraint: No UPDATE/DELETE allowed
+CREATE TRIGGER fn_prevent_mutation_financeiro_events
+BEFORE UPDATE OR DELETE ON financeiro_parcelas_events
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- Append-only index for query performance
+CREATE INDEX idx_financeiro_events_parcela_tipo
+ON financeiro_parcelas_events (parcela_id, event_type, created_at);
+```
+
+#### Event Types
+
+```php
+// app/Enums/FinanceiroEventType.php
+enum FinanceiroEventType: string
+{
+    case CRIADA = 'CRIADA';                        // Parcela created (from venda/compra)
+    case VENCIMENTO_ALTERADO = 'VENCIMENTO_ALTERADO';
+    case VALOR_ALTERADO = 'VALOR_ALTERADO';        // Interest/penalty/discount added
+    case RECEBIDA = 'RECEBIDA';                    // Payment received
+    case PAGA = 'PAGA';                            // Payment made
+    case ATRASADA = 'ATRASADA';                    // Status changed to ATRASADO (automatic)
+    case CANCELADA = 'CANCELADA';                  // Parcel canceled
+    case JUROS_ADICIONADO = 'JUROS_ADICIONADO';
+    case MULTA_ADICIONADA = 'MULTA_ADICIONADA';
+    case DESCONTO_APLICADO = 'DESCONTO_APLICADO';
+    case REMESSA_CNAB_GERADA = 'REMESSA_CNAB_GERADA';
+    case RETORNO_PROCESSADO = 'RETORNO_PROCESSADO';
+}
+```
+
+#### Event Recording Pattern
+
+```php
+// app/Services/Financeiro/FinanceiroParcelaService.php
+class FinanceiroParcelaService
+{
+    /**
+     * Create parcela and record CRIADA event
+     */
+    public function criarParcela(array $dados): FinanceiroParcela
+    {
+        return DB::transaction(function () use ($dados) {
+            $parcela = FinanceiroParcela::create($dados);
+
+            // Record event in append-only table
+            DB::table('financeiro_parcelas_events')->insert([
+                'parcela_id' => $parcela->id,
+                'event_type' => FinanceiroEventType::CRIADA->value,
+                'event_data' => json_encode([
+                    'tipo' => $parcela->tipo,
+                    'cliente_id' => $parcela->cliente_id,
+                    'fornecedor_id' => $parcela->fornecedor_id,
+                    'valor' => $parcela->valor,
+                    'data_vencimento' => $parcela->data_vencimento,
+                    'origem' => 'VENDA',  // or 'COMPRA', 'MANUAL'
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            event(new FinanceiroParcelaCriada($parcela));
+
+            return $parcela;
+        });
+    }
+
+    /**
+     * Record payment and update parcela
+     */
+    public function registrarRecebimento(
+        FinanceiroParcela $parcela,
+        float $valor,
+        string $formaRecebimento,
+        ?string $nossoNumero = null
+    ): void {
+        DB::transaction(function () use ($parcela, $valor, $formaRecebimento, $nossoNumero) {
+            // Record event FIRST (append-only)
+            DB::table('financeiro_parcelas_events')->insert([
+                'parcela_id' => $parcela->id,
+                'event_type' => FinanceiroEventType::RECEBIDA->value,
+                'event_data' => json_encode([
+                    'valor_recebido' => $valor,
+                    'forma_recebimento' => $formaRecebimento,
+                    'nosso_numero' => $nossoNumero,
+                    'saldo_anterior' => $parcela->valorPendente(),
+                    'saldo_novo' => max(0, $parcela->valorPendente() - $valor),
+                ]),
+                'usuario_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+
+            // Then update materialized view (computed from events)
+            $parcela->update([
+                'valor_recebido_pago' => $parcela->valor_recebido_pago + $valor,
+                'data_recebimento_pagamento' => now(),
+                'status' => FinanceiroStatus::RECEBIDO,
+                'forma_pagamento' => $formaRecebimento,
+            ]);
+
+            event(new FinanceiroParcelaRecebida($parcela, $valor));
+        });
+    }
+}
+```
+
+#### Materialized View Maintenance (pg_ivm)
+
+```sql
+-- Create materialized view for fast queries (updated incrementally by pg_ivm)
+CREATE MATERIALIZED VIEW financeiro_parcelas_view AS
+SELECT
+    fp.id,
+    fp.loja_id,
+    fp.tipo,
+    fp.cliente_id,
+    fp.fornecedor_id,
+    fp.valor,
+    fp.valor_recebido_pago,
+    (fp.valor + fp.valor_juros + fp.valor_multa - fp.valor_desconto - fp.valor_recebido_pago) as saldo_pendente,
+    fp.data_vencimento,
+    CASE
+        WHEN fp.status = 'RECEBIDO' THEN 'RECEBIDO'
+        WHEN fp.status = 'PAGO' THEN 'PAGO'
+        WHEN fp.status = 'CANCELADO' THEN 'CANCELADO'
+        WHEN CURDATE() > fp.data_vencimento AND fp.status NOT IN ('RECEBIDO', 'PAGO', 'CANCELADO')
+            THEN 'ATRASADO'
+        ELSE fp.status
+    END as status_atual,
+    fp.created_at,
+    MAX(evt.created_at) as ultima_atualizacao
+FROM financeiro_parcelas fp
+LEFT JOIN financeiro_parcelas_events evt ON evt.parcela_id = fp.id
+GROUP BY fp.id, fp.loja_id, fp.tipo, fp.cliente_id, fp.fornecedor_id,
+         fp.valor, fp.valor_recebido_pago, fp.valor_juros, fp.valor_multa,
+         fp.valor_desconto, fp.data_vencimento, fp.status, fp.created_at;
+
+-- Create IVM trigger to maintain view incrementally
+CREATE TRIGGER refresh_financeiro_parcelas_view_on_event
+AFTER INSERT ON financeiro_parcelas_events
+FOR EACH ROW EXECUTE FUNCTION refresh_ivm_view('financeiro_parcelas_view');
+```
+
+#### Audit Trail Query Example
+
+```php
+// Query the append-only event log for a specific parcel
+$eventos = DB::table('financeiro_parcelas_events')
+    ->where('parcela_id', $parcelaId)
+    ->orderBy('created_at')
+    ->get();
+
+// Reconstruct full history from events
+foreach ($eventos as $evento) {
+    echo sprintf(
+        "[%s] %s: %s (user: %s, ip: %s)\n",
+        $evento->created_at->format('Y-m-d H:i:s'),
+        $evento->event_type,
+        $evento->event_data,
+        $evento->usuario_id ?? 'system',
+        $evento->ip_address ?? 'unknown'
+    );
+}
+```
+
+#### Key Benefits
+
+- **Immutability**: Events cannot be changed or deleted (fn_prevent_mutation trigger)
+- **Audit Trail**: Complete history of all changes with timestamp, user, and IP
+- **State Reconstruction**: Can rebuild any parcel state at any point in time
+- **Real-time Views**: pg_ivm maintains views incrementally without cron jobs
+- **Compliance**: Meets regulatory requirements for financial records
+- **Debugging**: Trace exact sequence of changes and who made them
+
+---
+
 ### Enums
 
 ```php

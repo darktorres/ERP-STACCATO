@@ -74,7 +74,7 @@ flowchart TB
 
         subgraph Views["Materialized Views<br/>(pg_ivm)"]
             Lotes["estoque_lotes"]
-            Alocacoes["alocacoes"]
+            Alocacoes["alocacoes<br/>(venda_item ↔ lote)"]
         end
 
         subgraph Location["Localização no Galpão"]
@@ -121,8 +121,12 @@ flowchart TB
     end
 
     MasterData --> CommercialFlow
-    CommercialFlow --> NFe
+
+    Purchase -->|"Fornecedor envia"| NFe
     NFe -->|"Cria Estoque"| Inventory
+
+    Sales -->|"origem=ESTOQUE:<br/>aloca existente"| Alocacoes
+
     Inventory --> Logistics
 
     Sales -->|"Gera<br/>parcelas_receber"| Financial

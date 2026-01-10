@@ -40,16 +40,20 @@
 
 ## High Priority Issues (Architectural Misalignments)
 
-### 4. ⚠️ Incomplete Alocacao M:N Workflow Documentation
-**Files**: vendas.md, estoque.md, logistica.md
-**Status**: PENDING
-**Details**:
-- While models exist, full workflow not clearly documented
-- Missing: How alocacoes affect venda_item status
-- Missing: Quantity validation rules
-- Missing: FIFO suggestion algorithm
-- Missing: Allocation reversal triggers
-- Fix: Document complete M:N allocation workflow with state machine diagram
+### 4. ✅ Incomplete Alocacao M:N Workflow Documentation
+**File**: `rascunhos/alocacao-m2n-workflow.md`
+**Status**: COMPLETED ✅ (Commit 22509f81)
+**Completed**:
+- Created comprehensive workflow guide with entity relationships
+- State machines: venda_item (CRIADO → PARCIALMENTE_ALOCADO → ALOCADO → ENTREGUE)
+- State machine: alocacao (ATIVO → REVERTIDA | CANCELADA)
+- Step-by-step workflow: create → suggest FIFO/FEFO → allocate → deliver
+- Breakage/return handling with credit generation
+- Typical queries: allocation verification, cost tracking, state reconstruction
+- Validation rules: quantity checks, status validation, availability checks
+- Transaction & lock patterns for concurrency safety
+- Benefits and anti-patterns documented
+- Recommended database indices provided
 
 ### 5. ⚠️ Enum Status Mismatches - Financial
 **File**: `04-arquitetura/modulos/financeiro.md` lines 413-453
@@ -108,14 +112,14 @@
 | 1 | Logística outdated model refs | logistica.md | CRITICAL | ✅ COMPLETED | ca99c9cf |
 | 2 | Financial migration scripts | financeiro.md | CRITICAL | ✅ COMPLETED | 207c1ed8 |
 | 3 | Event Sourcing not documented | financeiro/vendas/estoque | CRITICAL | ✅ COMPLETED | 37ac90c9 |
-| 4 | Alocacao M:N workflow | vendas/estoque/logistica | HIGH | PENDING | - |
+| 4 | Alocacao M:N workflow | alocacao-m2n-workflow.md | HIGH | ✅ COMPLETED | 22509f81 |
 | 5 | Enum status mismatches | financeiro.md | HIGH | PENDING | - |
 | 6 | Table naming estoque | estoque.md | HIGH | PENDING | - |
 | 7 | N1/N2 terminology | Multiple | MEDIUM | PENDING | - |
 | 8 | Service layer coupling | vendas.md | MEDIUM | PENDING | - |
 | 9 | VendaItem relations | vendas.md | MEDIUM | PENDING | - |
 
-**Progress**: 3/9 issues completed (33%) | All critical issues fixed ✅ | 6 remaining issues
+**Progress**: 4/9 issues completed (44%) | All critical + 1 high priority fixed ✅ | 5 remaining issues
 
 ---
 
@@ -130,3 +134,4 @@
 ✅ **logistica.md** (ca99c9cf) - Replaced VendaItemAtendimento with EntregaItem model, updated financial refs
 ✅ **financeiro.md** (207c1ed8) - Rewrote migration scripts to target unified financeiro_parcelas
 ✅ **financeiro.md, vendas.md, estoque.md** (37ac90c9) - Added Event Sourcing sections with complete audit patterns
+✅ **alocacao-m2n-workflow.md** (22509f81) - Complete M:N allocation workflow with state machines, validation, transactions

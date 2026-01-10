@@ -126,10 +126,8 @@ flowchart TB
     CommercialFlow -->|"origem=ESTOQUE"| Inventory
     Inventory --> Logistics
 
-    Sales -->|"Gera<br/>parcelas_receber"| VRec
-    Purchase -->|"Gera<br/>parcelas_pagar"| VPag
-
-    Logistics --> Financial
+    Sales -->|"Gera<br/>parcelas_receber"| Financial
+    Purchase -->|"Gera<br/>parcelas_pagar"| Financial
 ```
 
 ---

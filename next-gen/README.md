@@ -62,15 +62,53 @@ All specifications and architecture documentation are located in:
 └── 06-testes/               # Test specifications
 ```
 
-## Getting Started
+## Quick Start with Docker
+
+### Prerequisites
+
+- Docker (>= 24.0)
+- Docker Compose (>= 2.20)
+- 4GB RAM minimum (8GB recommended)
+
+### Development Setup
+
+```bash
+# Start services
+cd next-gen
+docker-compose -f docker-compose.dev.yml up -d
+
+# Install dependencies (run locally)
+composer install
+npm install
+
+# Setup database
+php artisan migrate
+
+# Build frontend assets
+npm run build
+
+# Application available at http://localhost:8000
+```
+
+### Database Access
+
+```bash
+# PostgreSQL CLI
+docker-compose -f docker-compose.dev.yml exec db psql -U staccato -d staccato_dev
+
+# View emails sent in development
+# Visit http://localhost:8025 (Mailpit UI)
+```
+
+## Local Development (without Docker)
 
 ### Requirements
 
-- PHP 8.2+
+- PHP 8.3+
 - PostgreSQL 15+
-- Redis
+- Redis 7+
 - Composer
-- Node.js 18+ (for frontend assets)
+- Node.js 20+ (for frontend assets)
 
 ### Installation
 
@@ -78,6 +116,14 @@ All specifications and architecture documentation are located in:
 cd next-gen
 composer install
 cp .env.example .env
+
+# Update .env with your database credentials
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_DATABASE=staccato
+# DB_USERNAME=postgres
+# DB_PASSWORD=your_password
+
 php artisan key:generate
 php artisan migrate
 php artisan db:seed
@@ -87,7 +133,10 @@ npm install && npm run build
 ### Development
 
 ```bash
+# Start development server
 php artisan serve
+
+# Watch for frontend changes
 npm run dev
 ```
 
@@ -135,6 +184,8 @@ php artisan test --coverage
 
 ## Related Documentation
 
+- [Docker Setup Guide](./DOCKER.md) - Comprehensive Docker configuration, production deployment, debugging
+- [Docker Test Report](./DOCKER_TEST_REPORT.md) - Infrastructure validation and test results
 - [Architecture Overview](../.claude/next-gen/04-arquitetura/01-arquitetura.md)
 - [Module Specifications](../.claude/next-gen/04-arquitetura/modulos/_indice.md)
 - [Future Expansion](../.claude/next-gen/04-arquitetura/expansao-futura.md)

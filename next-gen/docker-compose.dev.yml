@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: staccato_dev
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    depends_on:
+      - db
+      - redis
+    networks:
+      - staccato_dev
+
+  db:
+    image: postgres:16-alpine
+    container_name: staccato_dev_db
+    environment:
+      - POSTGRES_DB=staccato_dev
+      - POSTGRES_USER=staccato
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - dev_postgres:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - staccato_dev
+
+  redis:
+    image: redis:7-alpine
+    container_name: staccato_dev_redis
+    ports:
+      - "6380:6379"
+    networks:
+      - staccato_dev
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: staccato_mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - staccato_dev
+
+volumes:
+  dev_postgres:
+
+networks:
+  staccato_dev:
+    driver: bridge

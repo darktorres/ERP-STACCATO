@@ -38,7 +38,7 @@ Necessidade de escolher um framework backend para a migração web. Opções con
 
 ### Decisão - ADR-001
 
-Usar **Laravel 11** como framework backend.
+Usar **Laravel 12** como framework backend.
 
 ### Justificativa - ADR-001
 

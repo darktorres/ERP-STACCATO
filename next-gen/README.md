@@ -172,8 +172,8 @@ php artisan test --coverage
 
 ## Tech Stack
 
-- **Backend**: Laravel 11
-- **Database**: PostgreSQL 15
+- **Backend**: Laravel 12
+- **Database**: PostgreSQL 18
 - **Cache**: Redis
 - **Queue**: Redis + Laravel Horizon
 - **Search**: PostgreSQL FTS (or Meilisearch)

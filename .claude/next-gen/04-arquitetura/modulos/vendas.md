@@ -835,9 +835,9 @@ The service layer is organized by **module boundaries** with **event-driven deco
 ```php
 class VendaService {
     public function __construct(
-        private EstoqueService $estoqueService,        // ⚠️ Creates dependency
-        private ContaReceberService $contaReceberService, // ⚠️ Creates dependency
-        private EntregaService $entregaService,        // ⚠️ Creates dependency
+        private EstoqueService $estoqueService,              // ⚠️ Creates dependency
+        private FinanceiroParcelaService $financeiroService, // ⚠️ Creates dependency
+        private EntregaService $entregaService,             // ⚠️ Creates dependency
     ) {}
 
     public function criar($dados) {
@@ -845,7 +845,7 @@ class VendaService {
 
         // ⚠️ Direct calls across modules
         $this->estoqueService->reservar($venda);
-        $this->contaReceberService->gerar($venda);
+        $this->financeiroService->gerarParcelas($venda, FinanceiroTipo::RECEBER);
         $this->entregaService->agendar($venda);
 
         return $venda;
@@ -867,9 +867,11 @@ class VendaService {
 }
 
 // In separate module listeners:
-class CriarContasReceberListener {
+class GerarParcelaRecebidaListener {
+    public function __construct(private FinanceiroParcelaService $financeiroService) {}
+
     public function handle(VendaCriada $event) {
-        $this->financeiroService->gerar($event->venda);
+        $this->financeiroService->gerarParcelas($event->venda, FinanceiroTipo::RECEBER);
     }
 }
 
@@ -1142,9 +1144,9 @@ class VendaService
                 $this->cancelarItemAtendimento($item);
             }
 
-            // Cancelar contas a receber
-            $venda->contasReceber()->update([
-                'status' => ContaReceberStatus::CANCELADO,
+            // Cancelar parcelas a receber
+            $venda->parcelasReceber()->update([
+                'status' => FinanceiroStatus::CANCELADO,
             ]);
 
             // Atualizar venda
@@ -1295,7 +1297,7 @@ class VendaController extends Controller
             'enderecoEntrega',
             'itens.produto',
             'itensAtendimento.compra',
-            'contasReceber',
+            'parcelasReceber',
         ]);
 
         return Inertia::render('Vendas/Show', [

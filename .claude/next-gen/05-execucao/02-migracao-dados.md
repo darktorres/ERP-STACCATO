@@ -73,14 +73,23 @@ Este documento detalha o processo de migração de dados do MySQL legado para o 
 | `nfe`             | `nfes`            | Renomear colunas      |
 | `nfe_has_produto` | `nfe_itens`       | Normalizar fornecedor |
 
-### 1.6 Financeiro (Fase 6)
+### 1.6 Financeiro (Fase 6) - UNIFIED TABLE
 
-| Tabela MySQL                    | Tabela PostgreSQL          | Transformação    |
-| ------------------------------- | -------------------------- | ---------------- |
-| `conta_a_receber`               | `contas_receber`           | Renomear colunas |
-| `conta_a_receber_has_pagamento` | `conta_receber_pagamentos` | Renomear         |
-| `conta_a_pagar`                 | `contas_pagar`             | Renomear colunas |
-| `conta_a_pagar_has_pagamento`   | `conta_pagar_pagamentos`   | Renomear         |
+**NEW APPROACH**: Single table `financeiro_parcelas` with `tipo` discriminator
+
+| Tabela MySQL (Origem)             | Tabela PostgreSQL          | Mapping                      |
+| --------------------------------- | -------------------------- | ----------------------------|
+| `conta_a_receber`                 | `financeiro_parcelas`      | tipo='RECEBER'            |
+| `conta_a_receber_has_pagamento`   | → merged into financeiro_parcelas | via vencimento/pagamento|
+| `conta_a_pagar`                   | `financeiro_parcelas`      | tipo='PAGAR'              |
+| `conta_a_pagar_has_pagamento`     | → merged into financeiro_parcelas | via vencimento/pagamento|
+
+**Clarity Views** (optional):
+- `parcelas_receber`: SELECT * FROM financeiro_parcelas WHERE tipo='RECEBER'
+- `parcelas_pagar`: SELECT * FROM financeiro_parcelas WHERE tipo='PAGAR'
+
+**Event Table** (for auditoria):
+- `financeiro_parcelas_events`: Append-only audit trail with pg_ivm views
 
 ### 1.7 Logística (Fase 7)
 
@@ -423,6 +432,117 @@ SELECT
 FROM produto;
 ```
 
+### 2.6 Unified Financial Table: `conta_a_receber` + `conta_a_pagar` → `financeiro_parcelas`
+
+Consolidate receivables and payables into single unified table with type discriminator.
+
+```sql
+-- Migrar contas a receber (RECEBER)
+INSERT INTO financeiro_parcelas (
+    loja_id,
+    tipo,
+    cliente_id,
+    venda_id,
+    numero_parcela,
+    total_parcelas,
+    forma_pagamento,
+    valor,
+    valor_recebido_pago,
+    data_emissao,
+    data_vencimento,
+    data_pagamento_recebimento,
+    status,
+    nosso_numero,
+    linha_digitavel,
+    created_at,
+    updated_at
+)
+SELECT
+    idLoja,
+    'RECEBER'::financeiro_tipo,
+    idCliente,
+    idVenda,
+    COALESCE(numero_parcela, 1),
+    COALESCE(total_parcelas, 1),
+    CASE tipo_pagamento
+        WHEN 'BOLETO' THEN 'BOLETO'::forma_pagamento
+        WHEN 'CARTAO' THEN 'CARTAO_CREDITO'::forma_pagamento
+        WHEN 'CHEQUE' THEN 'CHEQUE'::forma_pagamento
+        WHEN 'PIX' THEN 'PIX'::forma_pagamento
+        WHEN 'DINHEIRO' THEN 'DINHEIRO'::forma_pagamento
+        ELSE 'OUTROS'::forma_pagamento
+    END,
+    valor,
+    COALESCE(valor_recebido, 0),
+    DATE(data_emissao),
+    data_vencimento,
+    data_recebimento,
+    CASE status
+        WHEN 'PAGO' THEN 'RECEBIDO'::financeiro_status
+        WHEN 'ABERTO' THEN 'PENDENTE'::financeiro_status
+        WHEN 'ATRASADO' THEN 'ATRASADO'::financeiro_status
+        ELSE 'PENDENTE'::financeiro_status
+    END,
+    nosso_numero,
+    linha_digitavel,
+    DATE(created) AT TIME ZONE 'America/Sao_Paulo',
+    CURRENT_TIMESTAMP
+FROM conta_a_receber
+WHERE desativado = 0;
+
+-- Migrar contas a pagar (PAGAR)
+INSERT INTO financeiro_parcelas (
+    loja_id,
+    tipo,
+    fornecedor_id,
+    compra_id,
+    numero_parcela,
+    total_parcelas,
+    forma_pagamento,
+    valor,
+    valor_recebido_pago,
+    data_emissao,
+    data_vencimento,
+    data_pagamento_recebimento,
+    status,
+    created_at,
+    updated_at
+)
+SELECT
+    idLoja,
+    'PAGAR'::financeiro_tipo,
+    idFornecedor,
+    idPedidoFornecedor,
+    COALESCE(numero_parcela, 1),
+    COALESCE(total_parcelas, 1),
+    CASE tipo
+        WHEN 'DUPLICATA' THEN 'BOLETO'::forma_pagamento
+        WHEN 'BOLETO' THEN 'BOLETO'::forma_pagamento
+        WHEN 'CHEQUE' THEN 'CHEQUE'::forma_pagamento
+        WHEN 'PIX' THEN 'PIX'::forma_pagamento
+        WHEN 'TRANSFERENCIA' THEN 'TRANSFERENCIA'::forma_pagamento
+        ELSE 'OUTROS'::forma_pagamento
+    END,
+    valor,
+    COALESCE(valor_pago, 0),
+    DATE(data_emissao),
+    data_vencimento,
+    data_pagamento,
+    CASE status
+        WHEN 'PAGO' THEN 'PAGO'::financeiro_status
+        WHEN 'ABERTO' THEN 'PENDENTE'::financeiro_status
+        WHEN 'ATRASADO' THEN 'ATRASADO'::financeiro_status
+        ELSE 'PENDENTE'::financeiro_status
+    END,
+    DATE(created) AT TIME ZONE 'America/Sao_Paulo',
+    CURRENT_TIMESTAMP
+FROM conta_a_pagar
+WHERE desativado = 0;
+
+-- Constraint validation: ensure RECEBER has cliente_id and PAGAR has fornecedor_id
+-- This is enforced by database constraint chk_cliente_receber on financeiro_parcelas table
+```
+
 ---
 
 ## 3. Scripts de Validação
@@ -456,8 +576,10 @@ UNION ALL SELECT 'consumos', COUNT(*) FROM estoque_has_consumo
 UNION ALL SELECT 'nfes', COUNT(*) FROM nfe
 
 -- Financeiro
-UNION ALL SELECT 'contas_receber', COUNT(*) FROM conta_a_receber
-UNION ALL SELECT 'contas_pagar', COUNT(*) FROM conta_a_pagar;
+UNION ALL SELECT 'financeiro_parcelas_receber', COUNT(*)
+    FROM financeiro_parcelas WHERE tipo = 'RECEBER'
+UNION ALL SELECT 'financeiro_parcelas_pagar', COUNT(*)
+    FROM financeiro_parcelas WHERE tipo = 'PAGAR';
 ```
 
 ### 3.2 Validação de Integridade
@@ -513,20 +635,37 @@ WHERE NOT EXISTS (
 ```sql
 -- validacao_somas.sql
 
--- Comparar somas financeiras
+-- Comparar somas financeiras (Recebíveis)
 SELECT
     'recebiveis_origem' as fonte,
     SUM(valor) as total
 FROM conta_a_receber
-WHERE status != 'CANCELADO'
+WHERE desativado = 0
 
 UNION ALL
 
 SELECT
     'recebiveis_destino',
     SUM(valor)
-FROM contas_receber
-WHERE status != 'CANCELADO';
+FROM financeiro_parcelas
+WHERE tipo = 'RECEBER' AND status != 'CANCELADO'
+
+UNION ALL
+
+-- Comparar somas financeiras (Pagáveis)
+SELECT
+    'pagaveis_origem' as fonte,
+    SUM(valor) as total
+FROM conta_a_pagar
+WHERE desativado = 0
+
+UNION ALL
+
+SELECT
+    'pagaveis_destino',
+    SUM(valor)
+FROM financeiro_parcelas
+WHERE tipo = 'PAGAR' AND status != 'CANCELADO';
 
 -- Comparar quantidades de estoque
 SELECT

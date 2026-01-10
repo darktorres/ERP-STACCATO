@@ -93,9 +93,10 @@ class Compra extends Model
         return $this->hasMany(CompraItem::class);
     }
 
-    public function contasPagar(): HasMany
+    public function parcelasPagar(): HasMany
     {
-        return $this->hasMany(ContaPagar::class);
+        return $this->hasMany(FinanceiroParcela::class, 'compra_id')
+            ->where('tipo', FinanceiroTipo::PAGAR);
     }
 
     public function nfe(): BelongsTo
@@ -183,7 +184,7 @@ enum CompraStatus: string
 class CompraService
 {
     public function __construct(
-        private ContaPagarService $contaPagarService,
+        private FinanceiroParcelaService $financeiroService,
         private EstoqueService $estoqueService,
     ) {}
 
@@ -240,8 +241,8 @@ class CompraService
                 'data_real_compra' => now(),
             ]);
 
-            // Gerar contas a pagar
-            $this->contaPagarService->gerarDeCompra($compra);
+            // Gerar parcelas a pagar
+            $this->financeiroService->gerarParcelas($compra, FinanceiroTipo::PAGAR);
 
             event(new CompraConfirmada($compra));
         });

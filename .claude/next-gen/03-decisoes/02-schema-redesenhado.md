@@ -143,9 +143,12 @@ flowchart TB
     Usuarios --> TransactionFlow
     Clientes --> TransactionFlow
 
-    subgraph Financeiro["FINANCEIRO"]
-        Recebiveis["recebiveis"]
-        Pagaveis["pagaveis"]
+    subgraph Financeiro["FINANCEIRO (Unified)"]
+        FinanceiroParcelas["financeiro_parcelas<br/>(tipo: RECEBER | PAGAR)"]
+        ParcelasReceber["parcelas_receber<br/>(view)"]
+        ParcelasPagar["parcelas_pagar<br/>(view)"]
+        FinanceiroParcelas --> ParcelasReceber
+        FinanceiroParcelas --> ParcelasPagar
     end
 
     TransactionFlow --> Financeiro
@@ -256,9 +259,9 @@ flowchart TB
 
     Step7 --> Step8
 
-    subgraph Step8["8. FINANCEIRO"]
-        F1["recebiveis (da venda)"]
-        F2["pagaveis (da compra)"]
+    subgraph Step8["8. FINANCEIRO (Unified)"]
+        F1["financeiro_parcelas<br/>(tipo='RECEBER' de venda)"]
+        F2["financeiro_parcelas<br/>(tipo='PAGAR' de compra)"]
         F3["Geração CNAB"]
         F4["Conciliação bancária"]
         F1 --> F3
@@ -1008,63 +1011,124 @@ class NfeItem extends Model
 ### 4.6 Tabelas Financeiras
 
 ```sql
--- Recebíveis (Contas a Receber)
-CREATE TABLE recebiveis (
+-- Tipo de parcela financeira
+CREATE TYPE financeiro_tipo AS ENUM (
+    'RECEBER',  -- Contas a receber (de vendas)
+    'PAGAR'     -- Contas a pagar (de compras)
+);
+
+-- Forma de Pagamento
+CREATE TYPE forma_pagamento AS ENUM (
+    'DINHEIRO',
+    'CHEQUE',
+    'BOLETO',
+    'CARTAO_CREDITO',
+    'CARTAO_DEBITO',
+    'PIX',
+    'TRANSFERENCIA',
+    'CREDITO_LOJA',
+    'PROMISSORIA',
+    'OUTROS'
+);
+
+-- Unified Financial Parcelas Table
+-- Single table for both receivables (RECEBER) and payables (PAGAR)
+CREATE TABLE financeiro_parcelas (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    cliente_id INTEGER NOT NULL REFERENCES clientes(id),
-    venda_id INTEGER REFERENCES vendas(id),
 
-    -- Info de pagamento
-    tipo_pagamento VARCHAR(50),  -- BOLETO, CARTAO, PIX, etc.
-    parcela INTEGER DEFAULT 1,
-    total_parcelas INTEGER DEFAULT 1,
+    -- Type discriminator: RECEBER (from sales) or PAGAR (from purchases)
+    tipo financeiro_tipo NOT NULL,
 
-    -- Valores
+    -- Related entities (polymorphic)
+    cliente_id INTEGER REFERENCES clientes(id),      -- NULL for PAGAR
+    fornecedor_id INTEGER REFERENCES fornecedores(id), -- NULL for RECEBER
+    venda_id INTEGER REFERENCES vendas(id),          -- NULL for PAGAR
+    compra_id INTEGER REFERENCES compras(id),        -- NULL for RECEBER
+
+    -- Parcel information
+    numero_parcela INTEGER NOT NULL DEFAULT 1,
+    total_parcelas INTEGER NOT NULL DEFAULT 1,
+
+    -- Payment information
+    forma_pagamento forma_pagamento,
+
+    -- Values
     valor DECIMAL(15,2) NOT NULL,
-    valor_recebido DECIMAL(15,2) DEFAULT 0,
+    valor_recebido_pago DECIMAL(15,2) DEFAULT 0,
 
-    -- Datas
+    -- Key dates
+    data_emissao DATE NOT NULL DEFAULT CURRENT_DATE,
     data_vencimento DATE NOT NULL,
-    data_recebimento DATE,
+    data_pagamento_recebimento DATE,
 
-    -- Status
+    -- Financial status
     status financeiro_status DEFAULT 'PENDENTE',
 
-    -- Banco
+    -- Banking (for boletos, etc)
     nosso_numero VARCHAR(50),
     linha_digitavel VARCHAR(100),
 
+    -- Observações
+    observacoes TEXT,
+
+    -- Timestamps
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    -- Constraints
+    CONSTRAINT chk_cliente_receber CHECK (
+        (tipo = 'RECEBER' AND cliente_id IS NOT NULL AND fornecedor_id IS NULL) OR
+        (tipo = 'PAGAR' AND fornecedor_id IS NOT NULL AND cliente_id IS NULL)
+    ),
+    CONSTRAINT chk_valor_positivo CHECK (valor > 0),
+    CONSTRAINT chk_valor_recebido CHECK (valor_recebido_pago >= 0 AND valor_recebido_pago <= valor)
 );
 
--- Pagáveis (Contas a Pagar)
-CREATE TABLE pagaveis (
-    id SERIAL PRIMARY KEY,
-    loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
-    compra_id INTEGER REFERENCES compras(id),
+-- Create indexes for fast queries
+CREATE INDEX idx_financeiro_parcelas_tipo ON financeiro_parcelas(tipo);
+CREATE INDEX idx_financeiro_parcelas_cliente ON financeiro_parcelas(cliente_id)
+    WHERE tipo = 'RECEBER';
+CREATE INDEX idx_financeiro_parcelas_fornecedor ON financeiro_parcelas(fornecedor_id)
+    WHERE tipo = 'PAGAR';
+CREATE INDEX idx_financeiro_parcelas_vencimento ON financeiro_parcelas(data_vencimento);
+CREATE INDEX idx_financeiro_parcelas_status ON financeiro_parcelas(status);
+CREATE INDEX idx_financeiro_parcelas_venda ON financeiro_parcelas(venda_id);
+CREATE INDEX idx_financeiro_parcelas_compra ON financeiro_parcelas(compra_id);
 
-    -- Info de pagamento
-    tipo VARCHAR(50),  -- DUPLICATA, BOLETO, etc.
-    parcela INTEGER DEFAULT 1,
-    total_parcelas INTEGER DEFAULT 1,
+-- Clarity Views for backward compatibility
+CREATE VIEW parcelas_receber AS
+SELECT * FROM financeiro_parcelas
+WHERE tipo = 'RECEBER';
 
-    -- Valores
-    valor DECIMAL(15,2) NOT NULL,
-    valor_pago DECIMAL(15,2) DEFAULT 0,
+CREATE VIEW parcelas_pagar AS
+SELECT * FROM financeiro_parcelas
+WHERE tipo = 'PAGAR';
 
-    -- Datas
-    data_vencimento DATE NOT NULL,
-    data_pagamento DATE,
+-- Keep old table names as views for backward compatibility during migration
+CREATE VIEW recebiveis AS
+SELECT
+    id, loja_id, cliente_id, venda_id,
+    forma_pagamento::varchar as tipo_pagamento,
+    numero_parcela as parcela, total_parcelas,
+    valor, valor_recebido_pago as valor_recebido,
+    data_vencimento, data_pagamento_recebimento as data_recebimento,
+    status, nosso_numero, linha_digitavel,
+    created_at, updated_at
+FROM financeiro_parcelas
+WHERE tipo = 'RECEBER';
 
-    -- Status
-    status financeiro_status DEFAULT 'PENDENTE',
-
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
+CREATE VIEW pagaveis AS
+SELECT
+    id, loja_id, fornecedor_id, compra_id,
+    forma_pagamento::varchar as tipo,
+    numero_parcela as parcela, total_parcelas,
+    valor, valor_recebido_pago as valor_pago,
+    data_vencimento, data_pagamento_recebimento as data_pagamento,
+    status,
+    created_at, updated_at
+FROM financeiro_parcelas
+WHERE tipo = 'PAGAR';
 ```
 
 ### 4.7 Tabela de Auditoria
@@ -1758,8 +1822,8 @@ flowchart TB
 | estoque                                | estoques + nfe_itens                         | **Separar dados fiscais**    |
 | estoque_has_consumo                    | estoque_consumos                             | **Remover campos fiscais**   |
 | nfe                                    | nfes + nfe_itens                             | Adicionar enum tipo + JSONB  |
-| conta_a_receber                        | recebiveis                                   | Renomear                     |
-| conta_a_pagar                          | pagaveis                                     | Renomear                     |
+| conta_a_receber                        | financeiro_parcelas (tipo='RECEBER')         | Unificar com pagaveis       |
+| conta_a_pagar                          | financeiro_parcelas (tipo='PAGAR')           | Unificar com recebiveis     |
 
 ### 8.2.1 Migração de Dados Fiscais NFe
 

@@ -237,12 +237,18 @@ CREATE TYPE entrega_status AS ENUM (
     'CANCELADA'       -- Cancelada
 );
 
--- Financeiro
+-- Financeiro - Tipo de Obrigação
+CREATE TYPE financeiro_tipo AS ENUM (
+    'RECEBER',        -- Contas a receber (cliente)
+    'PAGAR'           -- Contas a pagar (fornecedor)
+);
+
+-- Financeiro - Status
 CREATE TYPE financeiro_status AS ENUM (
     'PENDENTE',       -- Aguardando
     'AGENDADO',       -- CNAB gerado
-    'PAGO',           -- Pago (contas a pagar)
-    'RECEBIDO',       -- Recebido (contas a receber)
+    'PAGO',           -- Pago (PAGAR)
+    'RECEBIDO',       -- Recebido (RECEBER)
     'ATRASADO',       -- Vencido
     'CANCELADO'       -- Cancelado
 );
@@ -1030,9 +1036,6 @@ CREATE TABLE estoque_lotes (
     lote VARCHAR(50),
     data_validade DATE,
 
-    -- Localização
-    bloco_id INTEGER REFERENCES galpao_blocos(id),
-
     -- Status
     status estoque_lote_status NOT NULL DEFAULT 'DISPONIVEL',
 
@@ -1052,6 +1055,31 @@ CREATE INDEX idx_estoque_lotes_produto ON estoque_lotes(produto_id);
 CREATE INDEX idx_estoque_lotes_disponivel ON estoque_lotes(produto_id, loja_id, data_entrada)
     WHERE quantidade_disponivel > 0 AND status = 'DISPONIVEL';
 CREATE INDEX idx_estoque_lotes_lote ON estoque_lotes(lote) WHERE lote IS NOT NULL;
+
+-- ============================================================================
+-- LOCALIZAÇÕES DE ESTOQUE (Múltiplas localizações por lote - split de paletes)
+-- ============================================================================
+CREATE TABLE estoque_localizacoes (
+    id SERIAL PRIMARY KEY,
+
+    lote_id INTEGER NOT NULL REFERENCES estoque_lotes(id) ON DELETE CASCADE,
+    bloco_id INTEGER NOT NULL REFERENCES galpao_blocos(id),
+
+    -- Quantidade nesta localização específica
+    quantidade DECIMAL(15,4) NOT NULL,
+
+    -- Quando foi movido para esta localização
+    data_entrada TIMESTAMPTZ DEFAULT NOW(),
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    CONSTRAINT chk_localizacao_quantidade CHECK (quantidade > 0),
+    CONSTRAINT uk_lote_bloco UNIQUE (lote_id, bloco_id)
+);
+
+CREATE INDEX idx_estoque_localizacoes_lote ON estoque_localizacoes(lote_id);
+CREATE INDEX idx_estoque_localizacoes_bloco ON estoque_localizacoes(bloco_id);
+CREATE INDEX idx_estoque_localizacoes_data ON estoque_localizacoes(data_entrada);
 
 -- ============================================================================
 -- MOVIMENTAÇÕES DE ESTOQUE (log de tudo - como stock.move do Odoo)
@@ -1224,47 +1252,39 @@ CREATE INDEX idx_entrega_itens_entrega ON entrega_itens(entrega_id);
 
 ```sql
 -- ============================================================================
--- CONTAS A RECEBER
+-- FINANCEIRO (Unified: Contas a Receber & Pagar)
 -- ============================================================================
-CREATE TABLE contas_receber (
+CREATE TABLE financeiro_parcelas (
     id SERIAL PRIMARY KEY,
 
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    cliente_id INTEGER NOT NULL REFERENCES clientes(id),
+
+    -- Tipo de obrigação financeira
+    tipo financeiro_status NOT NULL,  -- RECEBER ou PAGAR
+
+    -- Polimórfico: cliente OU fornecedor (não ambos)
+    cliente_id INTEGER REFERENCES clientes(id),
+    fornecedor_id INTEGER REFERENCES fornecedores(id),
+
+    -- Documentos de origem
     venda_id INTEGER REFERENCES vendas(id),
+    compra_id INTEGER REFERENCES compras(id),
+    nfe_entrada_id INTEGER REFERENCES nfes(id),  -- Para PAGAR
 
-    -- Identificação
-    documento VARCHAR(50),  -- Número do documento
-
-    -- Valor total
-    valor_total DECIMAL(15,2) NOT NULL,
-
-    -- Observações
-    observacoes TEXT,
-
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE parcelas_receber (
-    id SERIAL PRIMARY KEY,
-
-    conta_id INTEGER NOT NULL REFERENCES contas_receber(id) ON DELETE CASCADE,
-
-    -- Parcela
+    -- Identificação da parcela
     numero_parcela SMALLINT NOT NULL DEFAULT 1,
     total_parcelas SMALLINT NOT NULL DEFAULT 1,
 
     -- Valores
     valor DECIMAL(15,2) NOT NULL,
-    valor_recebido DECIMAL(15,2) DEFAULT 0,
+    valor_recebido_pago DECIMAL(15,2) DEFAULT 0,  -- Unificado (recebido ou pago)
     valor_juros DECIMAL(15,2) DEFAULT 0,
     valor_multa DECIMAL(15,2) DEFAULT 0,
     valor_desconto DECIMAL(15,2) DEFAULT 0,
 
     -- Datas
     data_vencimento DATE NOT NULL,
-    data_recebimento DATE,
+    data_recebimento_pagamento DATE,  -- Unificado
 
     -- Forma de pagamento
     forma_pagamento forma_pagamento,
@@ -1272,80 +1292,59 @@ CREATE TABLE parcelas_receber (
     -- Status
     status financeiro_status NOT NULL DEFAULT 'PENDENTE',
 
-    -- CNAB
+    -- CNAB (para ambos RECEBER e PAGAR)
     nosso_numero VARCHAR(50),
     linha_digitavel VARCHAR(100),
     codigo_barras VARCHAR(50),
-    remessa_id INTEGER,  -- FK para remessas_cnab
+    remessa_id INTEGER REFERENCES remessas_cnab(id),
 
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_parcelas_receber_conta ON parcelas_receber(conta_id);
-CREATE INDEX idx_parcelas_receber_vencimento ON parcelas_receber(data_vencimento);
-CREATE INDEX idx_parcelas_receber_status ON parcelas_receber(status);
-
--- ============================================================================
--- CONTAS A PAGAR
--- ============================================================================
-CREATE TABLE contas_pagar (
-    id SERIAL PRIMARY KEY,
-
-    loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    fornecedor_id INTEGER NOT NULL REFERENCES fornecedores(id),
-    compra_id INTEGER REFERENCES compras(id),
-    nfe_entrada_id INTEGER REFERENCES nfes(id),
-
-    -- Identificação
+    -- Documento de origem
     documento VARCHAR(50),
-
-    -- Valor total
-    valor_total DECIMAL(15,2) NOT NULL,
-
-    -- Observações
     observacoes TEXT,
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    -- Constraint: tipo RECEBER → cliente_id NOT NULL
+    -- Constraint: tipo PAGAR → fornecedor_id NOT NULL
+    CONSTRAINT chk_tipo_pessoa CHECK (
+        (tipo = 'RECEBER' AND cliente_id IS NOT NULL AND fornecedor_id IS NULL)
+        OR (tipo = 'PAGAR' AND fornecedor_id IS NOT NULL AND cliente_id IS NULL)
+    )
 );
 
-CREATE TABLE parcelas_pagar (
-    id SERIAL PRIMARY KEY,
-
-    conta_id INTEGER NOT NULL REFERENCES contas_pagar(id) ON DELETE CASCADE,
-
-    -- Parcela
-    numero_parcela SMALLINT NOT NULL DEFAULT 1,
-    total_parcelas SMALLINT NOT NULL DEFAULT 1,
-
-    -- Valores
-    valor DECIMAL(15,2) NOT NULL,
-    valor_pago DECIMAL(15,2) DEFAULT 0,
-    valor_juros DECIMAL(15,2) DEFAULT 0,
-    valor_multa DECIMAL(15,2) DEFAULT 0,
-    valor_desconto DECIMAL(15,2) DEFAULT 0,
-
-    -- Datas
-    data_vencimento DATE NOT NULL,
-    data_pagamento DATE,
-
-    -- Forma de pagamento
-    forma_pagamento forma_pagamento,
-
-    -- Status
-    status financeiro_status NOT NULL DEFAULT 'PENDENTE',
-
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_parcelas_pagar_conta ON parcelas_pagar(conta_id);
-CREATE INDEX idx_parcelas_pagar_vencimento ON parcelas_pagar(data_vencimento);
-CREATE INDEX idx_parcelas_pagar_status ON parcelas_pagar(status);
+CREATE INDEX idx_financeiro_loja_tipo ON financeiro_parcelas(loja_id, tipo);
+CREATE INDEX idx_financeiro_cliente ON financeiro_parcelas(cliente_id) WHERE tipo = 'RECEBER';
+CREATE INDEX idx_financeiro_fornecedor ON financeiro_parcelas(fornecedor_id) WHERE tipo = 'PAGAR';
+CREATE INDEX idx_financeiro_vencimento ON financeiro_parcelas(data_vencimento);
+CREATE INDEX idx_financeiro_status ON financeiro_parcelas(status);
+CREATE INDEX idx_financeiro_remessa ON financeiro_parcelas(remessa_id);
 
 -- ============================================================================
--- CNAB
+-- VIEWS: Para manter clarity (opcional mas recomendado)
+-- ============================================================================
+CREATE VIEW parcelas_receber AS
+SELECT * FROM financeiro_parcelas WHERE tipo = 'RECEBER';
+
+CREATE VIEW parcelas_pagar AS
+SELECT * FROM financeiro_parcelas WHERE tipo = 'PAGAR';
+
+COMMENT ON TABLE financeiro_parcelas IS
+'Unified financial obligations (Contas a Receber e Contas a Pagar).
+Use tipo column to distinguish between RECEBER (cliente) and PAGAR (fornecedor).
+See views parcelas_receber/parcelas_pagar for convenience.';
+
+COMMENT ON COLUMN financeiro_parcelas.tipo IS
+'RECEBER = contas a receber (cliente), PAGAR = contas a pagar (fornecedor)';
+
+COMMENT ON COLUMN financeiro_parcelas.valor_recebido_pago IS
+'Unificado: valor recebido (RECEBER) or valor pago (PAGAR)';
+
+COMMENT ON COLUMN financeiro_parcelas.data_recebimento_pagamento IS
+'Unificado: data do recebimento (RECEBER) or data do pagamento (PAGAR)';
+
+-- ============================================================================
+-- CNAB (Remessas e Retornos)
 -- ============================================================================
 CREATE TABLE remessas_cnab (
     id SERIAL PRIMARY KEY,
@@ -1660,6 +1659,8 @@ CREATE TRIGGER trg_validar_transicao_venda_item
 | **Auditoria** | Nenhuma | audit_log + triggers |
 | **Tabela produto** | 100+ colunas | produtos + produto_precos + produto_tributos |
 | **Devoluções** | Incompleto | Fluxo completo com NFe tipo DEVOLUCAO |
+| **Financeiro** | contas_receber + parcelas_receber + contas_pagar + parcelas_pagar (4 tabelas) | financeiro_parcelas unificado (1 tabela + 2 views) |
+| **Localização Estoque** | Sem suporte a split (1 lote = 1 bloco) | estoque_localizacoes (1 lote pode estar em múltiplos blocos) |
 
 ---
 
@@ -1667,12 +1668,18 @@ CREATE TRIGGER trg_validar_transicao_venda_item
 
 | Métrica | Quantidade |
 |---------|------------|
-| ENUMs | 15 |
-| Tabelas | 32 |
-| Views | 2 |
+| ENUMs | 16 |
+| Tabelas | 30 |
+| Views | 4 |
 | Triggers | 6 |
-| Índices | ~40 |
-| Constraints | ~30 |
+| Índices | ~43 |
+| Constraints | ~32 |
+
+**Nota**:
+- Schema reduzido em 3 tabelas (contas_receber, parcelas_receber, contas_pagar, parcelas_pagar → financeiro_parcelas unificado)
+- Views adicionadas (parcelas_receber, parcelas_pagar) para manter clarity semântica
+- ENUM adicional: financeiro_tipo (RECEBER/PAGAR)
+- Nova tabela: estoque_localizacoes (para split de paletes em múltiplos blocos)
 
 ---
 

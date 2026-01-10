@@ -7,31 +7,33 @@
 
 ## Prioridade dos Módulos
 
-| Prioridade | Módulo     | Complexidade | Dependências       |
-| ---------- | ---------- | ------------ | ------------------ |
-| 1          | Cadastros  | Baixa        | Nenhuma            |
-| 2          | Compras    | Média        | Cadastros          |
-| 3          | Estoque    | Média        | Compras            |
-| 4          | Financeiro | Média        | Compras, Vendas    |
-| 5          | Vendas     | Alta         | Cadastros, Estoque |
-| 6          | NFe        | Alta         | Vendas, Compras    |
-| 7          | Logistica  | Média        | Vendas             |
-| 8          | Relatorios | Média        | Todos              |
+| Prioridade | Módulo       | Complexidade | Dependências       |
+| ---------- | ------------ | ------------ | ------------------ |
+| 1          | Cadastros    | Baixa        | Nenhuma            |
+| 2          | Compras      | Média        | Cadastros          |
+| 3          | Estoque      | Média        | Compras            |
+| 4          | Financeiro   | Média        | Compras, Vendas    |
+| 5          | Vendas       | Alta         | Cadastros, Estoque |
+| 6          | NFe          | Alta         | Vendas, Compras    |
+| 7          | Logistica    | Média        | Vendas             |
+| 8          | Notificações | Média        | Todos              |
+| 9          | Relatorios   | Média        | Todos              |
 
 ---
 
 ## Arquivos dos Módulos
 
-| Arquivo                          | Módulo                  | Status   |
-| -------------------------------- | ----------------------- | -------- |
-| [cadastros.md](./cadastros.md)   | Cadastros (CRUD base)   | Rascunho |
-| [compras.md](./compras.md)       | Gestão de Compras       | Rascunho |
-| [estoque.md](./estoque.md)       | Gestão de Estoque       | Rascunho |
-| [financeiro.md](./financeiro.md) | Gestão Financeira       | Rascunho |
-| [vendas.md](./vendas.md)         | Gestão de Vendas        | Rascunho |
-| [nfe.md](./nfe.md)               | Nota Fiscal Eletrônica  | Rascunho |
-| [logistica.md](./logistica.md)   | Logística e Entregas    | Rascunho |
-| [relatorios.md](./relatorios.md) | Relatórios e Dashboards | Rascunho |
+| Arquivo                              | Módulo                  | Status   |
+| ------------------------------------ | ----------------------- | -------- |
+| [cadastros.md](./cadastros.md)       | Cadastros (CRUD base)   | Rascunho |
+| [compras.md](./compras.md)           | Gestão de Compras       | Rascunho |
+| [estoque.md](./estoque.md)           | Gestão de Estoque       | Rascunho |
+| [financeiro.md](./financeiro.md)     | Gestão Financeira       | Rascunho |
+| [vendas.md](./vendas.md)             | Gestão de Vendas        | Rascunho |
+| [nfe.md](./nfe.md)                   | Nota Fiscal Eletrônica  | Rascunho |
+| [logistica.md](./logistica.md)       | Logística e Entregas    | Rascunho |
+| [notificacoes.md](./notificacoes.md) | Sistema de Notificações | Rascunho |
+| [relatorios.md](./relatorios.md)     | Relatórios e Dashboards | Rascunho |
 
 ---
 
@@ -58,7 +60,8 @@
 ### Fase 4: Módulos de Suporte
 
 1. **Logistica** - Calendário de entregas e agendamento
-2. **Relatorios** - Relatórios e dashboards (pode ser feito incrementalmente)
+2. **Notificações** - Sistema de alertas e notificações em tempo real
+3. **Relatorios** - Relatórios e dashboards (pode ser feito incrementalmente)
 
 ---
 

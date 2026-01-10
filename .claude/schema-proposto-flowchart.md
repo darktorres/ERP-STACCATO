@@ -536,6 +536,210 @@ flowchart TB
 
 ---
 
+## Enforcement: 4-Layer Quantity Integrity
+
+### How the System Prevents Over-Allocation
+
+```mermaid
+flowchart TB
+    User["👤 USER TRIES TO ALLOCATE<br/>INSERT INTO alocacoes<br/>venda_item: 100<br/>lote: 5<br/>quantidade: 50"]
+
+    User --> L1["🛡️ LAYER 1: CHECK Constraints<br/><br/>quantidade > 0 ?<br/>✅ Yes (50 > 0)<br/><br/>→ PASS"]
+
+    L1 --> L2["🛡️ LAYER 2: GENERATED Columns<br/><br/>custo_total = 50 × 10.00<br/>= 500.00 (auto-calc)<br/><br/>→ PASS"]
+
+    L2 --> L3["🛡️ LAYER 3: BEFORE INSERT Trigger<br/>fn_validar_alocacao()"]
+
+    subgraph L3Check["Validation Checks"]
+        Check1["1. SUM(alocacoes ATIVO)<br/>   WHERE venda_item=100<br/>   = 20 current"]
+        Check2["2. New total?<br/>   20 + 50 = 70"]
+        Check3["3. Item quantity?<br/>   100"]
+        Check4["4. 70 ≤ 100? ✅ YES"]
+        Check5["5. Stock available?<br/>   lote 5: 45 avail<br/>   45 ≥ 50? ❌ NO!"]
+
+        Check1 --> Check2 --> Check3 --> Check4 --> Check5
+    end
+
+    L3 --> Reject["❌ TRANSACTION REJECTED<br/><br/>ERROR: Insufficient stock!<br/>Available 45, requested 50"]
+
+    Reject --> Rollback["⏮️ ROLLBACK<br/>Nothing inserted<br/>Database unchanged"]
+
+    Rollback --> App["📱 Application Error<br/>Show user message:<br/>'Not enough inventory'"]
+
+    style User fill:#e3f2fd
+    style L1 fill:#c8e6c9
+    style L2 fill:#c8e6c9
+    style L3 fill:#fff9c4
+    style Reject fill:#ffcdd2
+    style Rollback fill:#ffcdd2
+    style App fill:#ffcdd2
+```
+
+**What Happened?** Trigger caught over-allocation BEFORE it could corrupt the database!
+
+---
+
+### Success Path: Correct Allocation
+
+```mermaid
+flowchart TB
+    User["👤 USER ALLOCATES<br/>INSERT INTO alocacoes<br/>venda_item: 100<br/>lote: 5<br/>quantidade: 30"]
+
+    User --> L1["🛡️ LAYER 1: CHECK Constraints<br/>30 > 0 ? ✅ YES"]
+
+    L1 --> L2["🛡️ LAYER 2: GENERATED<br/>custo_total = 300.00 ✅"]
+
+    L2 --> L3["🛡️ LAYER 3: BEFORE Trigger<br/>SUM = 20<br/>20 + 30 = 50 ≤ 100 ✅<br/>Stock 45 ≥ 30 ✅<br/>All checks PASS"]
+
+    L3 --> INSERT["✅ INSERT SUCCEEDS<br/>Row added: venda_item=100,<br/>lote=5, qtd=30"]
+
+    INSERT --> L4["🛡️ LAYER 4: AFTER Trigger<br/>fn_apos_alocacao()"]
+
+    subgraph L4Auto["Automatic Updates"]
+        Auto1["1. estoque_lotes #5:<br/>   disponível: 45 → 15<br/>   reservado: 0 → 30"]
+        Auto2["2. estoque_movimentacoes:<br/>   INSERT: type=SAIDA_VENDA<br/>   quantidade=-30"]
+        Auto3["3. venda_itens #100:<br/>   Check total alocado<br/>   20 + 30 = 50<br/>   Still < 100<br/>   Status stays PENDENTE"]
+
+        Auto1 --> Auto2 --> Auto3
+    end
+
+    L4 --> Success["✅ TRANSACTION COMPLETE<br/>Database consistent:<br/>disponível + reservado = inicial"]
+
+    Success --> Verify["📊 VERIFICATION<br/>SELECT FROM consistencia_estoque<br/>→ Status: OK"]
+
+    style User fill:#e3f2fd
+    style L1 fill:#c8e6c9
+    style L2 fill:#c8e6c9
+    style L3 fill:#fff9c4
+    style L4 fill:#fff9c4
+    style Success fill:#c8e6c9
+    style Verify fill:#c8e6c9
+```
+
+---
+
+### The Golden Rule Enforcement
+
+```mermaid
+flowchart TB
+    Rule["🏆 GOLDEN RULE<br/><br/>quantidade_disponível + quantidade_reservada<br/>=<br/>quantidade_inicial<br/><br/>ALWAYS. EVERYWHERE."]
+
+    Rule --> Protection["Protected By:"]
+
+    Protection --> P1["✅ CHECK constraint<br/>chk_lote_total"]
+    Protection --> P2["✅ BEFORE INSERT trigger<br/>SUM validation"]
+    Protection --> P3["✅ AFTER INSERT trigger<br/>Auto-update both sides"]
+    Protection --> P4["✅ Nightly verification<br/>verificar_integridade_estoque()"]
+
+    P1 --> Example["EXAMPLE: Lot #5"]
+
+    Example --> Initial["Initial State:<br/>inicial: 100<br/>disponível: 100<br/>reservado: 0<br/>Total: 100 ✅"]
+
+    Initial --> Event1["EVENT: Allocate 30"]
+    Event1 --> After1["After Allocation:<br/>inicial: 100<br/>disponível: 70<br/>reservado: 30<br/>Total: 100 ✅"]
+
+    After1 --> Event2["EVENT: Allocate 20"]
+    Event2 --> After2["After 2nd Allocation:<br/>inicial: 100<br/>disponível: 50<br/>reservado: 50<br/>Total: 100 ✅"]
+
+    After2 --> Event3["EVENT: Estorno 30"]
+    Event3 --> After3["After Reversal:<br/>inicial: 100<br/>disponível: 80<br/>reservado: 20<br/>Total: 100 ✅"]
+
+    After3 --> Statement["RULE MAINTAINED<br/>At every step!<br/>No exceptions!"]
+
+    style Rule fill:#fff176
+    style Statement fill:#fff176
+    style Initial fill:#c8e6c9
+    style After1 fill:#c8e6c9
+    style After2 fill:#c8e6c9
+    style After3 fill:#c8e6c9
+```
+
+---
+
+### Verification Layers: Catching Bugs
+
+```mermaid
+flowchart TB
+    Admin["🔍 DBA MONITORING"]
+
+    Admin --> Query1["Query View: consistencia_estoque"]
+
+    Query1 --> Check1["Check 1:<br/>disponível + reservado = inicial?<br/>All lots: ✅ OK"]
+
+    Check1 --> Query2["Query View: verificacao_alocacoes"]
+
+    Query2 --> Check2["Check 2:<br/>SUM(alocacoes.qtd) ≤ item.qtd?<br/>All items: ✅ OK"]
+
+    Check2 --> Query3["Query View: verificacao_entregas"]
+
+    Query3 --> Check3["Check 3:<br/>SUM(entrega_itens) ≤ alocacao.qtd?<br/>All items: ✅ OK"]
+
+    Check3 --> Nightly["⏰ NIGHTLY JOB<br/>SELECT verificar_integridade_estoque()"]
+
+    Nightly --> NightlyCheck["6 Critical Checks:<br/>1. Over-allocated lots<br/>2. Negative disponível<br/>3. Negative reservado<br/>4. Over-allocated items<br/>5. Delivery > allocation<br/>6. Status mismatches"]
+
+    NightlyCheck --> Result{"Any<br/>Errors?"}
+
+    Result -->|No| AllGood["✅ All Clear<br/>Log: 'All integrity checks passed'"]
+
+    Result -->|Yes| Error["⚠️ ALERT!<br/>Log error details<br/>integridade_log table<br/>Email admin"]
+
+    AllGood --> End["System Healthy"]
+    Error --> End
+
+    style Admin fill:#e3f2fd
+    style AllGood fill:#c8e6c9
+    style Error fill:#ffcdd2
+    style End fill:#c8e6c9
+```
+
+---
+
+### What Enforcement Prevents
+
+```mermaid
+flowchart TB
+    Risks["⚠️ RISKS WITHOUT ENFORCEMENT"]
+
+    Risks --> R1["App Bug:<br/>INSERT without validation<br/>❌ Over-allocate"]
+
+    Risks --> R2["Direct DB Query:<br/>Manual INSERT estoque<br/>❌ Negative quantity"]
+
+    Risks --> R3["Calculation Error:<br/>Manual custo_total<br/>❌ Wrong totals"]
+
+    Risks --> R4["Trigger Failure:<br/>Cascade not updated<br/>❌ Inconsistent state"]
+
+    R1 --> Protection["🛡️ ENFORCEMENT CATCHES IT"]
+    R2 --> Protection
+    R3 --> Protection
+    R4 --> Protection
+
+    Protection --> How["HOW?"]
+
+    How --> L1["Layer 1: CHECK<br/>Rejects negative"]
+
+    How --> L2["Layer 2: GENERATED<br/>Can't override total"]
+
+    How --> L3["Layer 3: Trigger<br/>Validates before insert"]
+
+    How --> L4["Layer 4: Verify<br/>Detects corruption"]
+
+    L1 --> Result["✅ DATABASE ALWAYS<br/>CONSISTENT"]
+    L2 --> Result
+    L3 --> Result
+    L4 --> Result
+
+    style Risks fill:#ffcdd2
+    style R1 fill:#ffcdd2
+    style R2 fill:#ffcdd2
+    style R3 fill:#ffcdd2
+    style R4 fill:#ffcdd2
+    style Protection fill:#fff9c4
+    style Result fill:#c8e6c9
+```
+
+---
+
 ## Status State Machines: Venda vs Compra vs Entrega
 
 ```mermaid

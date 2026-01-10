@@ -89,7 +89,7 @@ evento_logistica
 
 ```mermaid
 stateDiagram-v2
-    ESTOQUE --> ENTREGA_AGEND : Agendar entrega
+    ALOCADO --> ENTREGA_AGEND : Agendar entrega
     ENTREGA_AGEND --> EM_ENTREGA : NFe autorizada
     EM_ENTREGA --> ENTREGUE : Confirmar entrega
 
@@ -121,22 +121,31 @@ stateDiagram-v2
 ```cpp
 // InputDialogConfirmacao
 // Campos obrigatórios:
-// - dataRealEnt: Data da entrega
-// - entregou: Nome do entregador
-// - recebeu: Nome de quem recebeu
+// - data_entrega: Data da entrega
+// - entregador: Nome do entregador
+// - recebedor: Nome de quem recebeu
 // Opcional:
 // - Foto do comprovante de entrega
 
 void confirmarEntrega() {
-    UPDATE venda_has_produto2
+    -- Update entrega_itens to mark as delivered
+    UPDATE entrega_itens
     SET status = 'ENTREGUE',
-        dataRealEnt = :data,
-        entregou = :entregador,
-        recebeu = :recebedor;
+        data_entrega = :data,
+        entregador = :entregador,
+        recebedor = :recebedor;
 
-    UPDATE pedido_fornecedor_has_produto2
+    -- Update venda_itens if all allocation items are delivered
+    UPDATE venda_itens
     SET status = 'ENTREGUE'
-    WHERE idVendaProduto2 = :idVendaProduto2;
+    WHERE id IN (
+        SELECT DISTINCT vi.id FROM venda_itens vi
+        WHERE NOT EXISTS (
+            SELECT 1 FROM entrega_itens ei
+            WHERE ei.venda_item_id = vi.id
+            AND ei.status NOT IN ('ENTREGUE', 'CANCELADO')
+        )
+    );
 }
 ```
 
@@ -144,31 +153,33 @@ void confirmarEntrega() {
 
 ```cpp
 // Quando item chega quebrado na entrega
-void dividirEntrega(int idVendaProduto2, double quantQuebrada) {
-    // 1. Reduzir quantidade na linha original
-    UPDATE venda_has_produto2
-    SET quant = quant - :quantQuebrada
-    WHERE idVendaProduto2 = :id;
+void dividirEntrega(int entrega_item_id, double quantQuebrada) {
+    // 1. Update the entrega_item to reflect actual received quantity
+    -- Record breakage in entrega_item status
+    UPDATE entrega_itens
+    SET quantidade_entregue = quantidade - :quantQuebrada,
+        quantidade_quebrada = :quantQuebrada,
+        status = 'PARCIAL'
+    WHERE id = :entrega_item_id;
 
-    // 2. Criar linha para item quebrado
-    INSERT INTO venda_has_produto2 (
-        idRelacionado = :idOriginal,
-        quant = :quantQuebrada,
-        status = 'QUEBRADO'
-    );
+    // 2. Revert allocation for broken quantity (if needed for replacement)
+    -- This creates a "hole" in allocation that can be re-allocated
+    UPDATE alocacoes
+    SET status = 'REVERTIDA'
+    WHERE venda_item_id = (SELECT venda_item_id FROM entrega_itens WHERE id = :entrega_item_id)
+    LIMIT :quantQuebrada;
 
-    // 3. Opcional: Criar reposição
-    INSERT INTO venda_has_produto2 (
-        idRelacionado = :idOriginal,
-        quant = :quantQuebrada,
-        status = 'REPO. ENTREGA'  -- ou 'REPO. RECEB.'
-    );
-
-    // 4. Gerar crédito para o cliente
-    INSERT INTO conta_a_receber_has_pagamento (
-        valor = -:valorQuebrado,
-        grupo = 'CRÉDITO',
-        observacao = 'Item quebrado na entrega'
+    // 3. Criar crédito para o cliente (via financeiro_parcelas)
+    INSERT INTO financeiro_parcelas (
+        loja_id, tipo, cliente_id,
+        venda_id, numero_parcela, total_parcelas,
+        valor, status,
+        observacao
+    ) VALUES (
+        :loja_id, 'RECEBER', :cliente_id,
+        :venda_id, 1, 1,
+        -:valorQuebrado, 'RECEBIDO',
+        'Crédito por item quebrado na entrega'
     );
 }
 ```
@@ -238,66 +249,46 @@ class EventoLogistica extends Model
         return $this->hasMany(EventoLogisticaItem::class);
     }
 
-    public function vendaItens(): BelongsToMany
+    public function entregaItens(): HasMany
     {
-        return $this->belongsToMany(
-            VendaItemAtendimento::class,
-            'evento_logistica_itens',
-            'evento_id',
-            'venda_item_atendimento_id'
-        );
+        return $this->hasMany(EntregaItem::class);
     }
 }
 
-// app/Models/EventoLogisticaItem.php
-class EventoLogisticaItem extends Model
+// app/Models/EntregaItem.php
+// Represents a single item (venda_item) within a delivery event
+class EntregaItem extends Model
 {
-    protected $table = 'evento_logistica_itens';
+    protected $table = 'entrega_itens';
 
     protected $fillable = [
-        'evento_id', 'venda_item_atendimento_id', 'compra_item_id',
-        'quantidade', 'observacao',
-    ];
-
-    public function evento(): BelongsTo
-    {
-        return $this->belongsTo(EventoLogistica::class);
-    }
-
-    public function vendaItemAtendimento(): BelongsTo
-    {
-        return $this->belongsTo(VendaItemAtendimento::class);
-    }
-
-    public function compraItem(): BelongsTo
-    {
-        return $this->belongsTo(CompraItem::class);
-    }
-}
-
-// app/Models/ConfirmacaoEntrega.php
-class ConfirmacaoEntrega extends Model
-{
-    protected $table = 'confirmacoes_entrega';
-
-    protected $fillable = [
-        'venda_item_atendimento_id', 'evento_id',
-        'data_entrega', 'entregador', 'recebedor',
+        'entrega_id', 'venda_item_id',
+        'quantidade', 'quantidade_entregue', 'quantidade_quebrada',
+        'status', 'data_entrega', 'entregador', 'recebedor',
         'foto_comprovante', 'assinatura', 'observacao',
     ];
 
     protected $casts = [
+        'status' => EntregaItemStatus::class,
         'data_entrega' => 'datetime',
+        'quantidade' => 'decimal:4',
+        'quantidade_entregue' => 'decimal:4',
+        'quantidade_quebrada' => 'decimal:4',
     ];
 
-    public function vendaItemAtendimento(): BelongsTo
+    public function entrega(): BelongsTo
     {
-        return $this->belongsTo(VendaItemAtendimento::class);
+        return $this->belongsTo(EventoLogistica::class, 'entrega_id');
     }
 
-    public function evento(): BelongsTo
+    public function vendaItem(): BelongsTo
     {
-        return $this->belongsTo(EventoLogistica::class);
+        return $this->belongsTo(VendaItem::class);
+    }
+
+    public function venda(): BelongsToThrough
+    {
+        return $this->throughBelongsToMany(VendaItem::class, Venda::class);
     }
 }
 ```
@@ -349,6 +340,41 @@ enum TipoVeiculo: string
     case TERCEIRO = 'TERCEIRO';
     case AGREGADO = 'AGREGADO';
 }
+
+// app/Enums/EntregaItemStatus.php
+enum EntregaItemStatus: string
+{
+    case AGENDADA = 'AGENDADA';
+    case EM_ENTREGA = 'EM_ENTREGA';
+    case ENTREGUE = 'ENTREGUE';
+    case PARCIAL = 'PARCIAL';  // Partially delivered (some broken)
+    case CANCELADA = 'CANCELADA';
+    case DEVOLUCAO = 'DEVOLUCAO';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::AGENDADA => 'Agendada',
+            self::EM_ENTREGA => 'Em Entrega',
+            self::ENTREGUE => 'Entregue',
+            self::PARCIAL => 'Parcial (com quebra)',
+            self::CANCELADA => 'Cancelada',
+            self::DEVOLUCAO => 'Devolução',
+        };
+    }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::AGENDADA => 'blue',
+            self::EM_ENTREGA => 'yellow',
+            self::ENTREGUE => 'green',
+            self::PARCIAL => 'orange',
+            self::CANCELADA => 'red',
+            self::DEVOLUCAO => 'purple',
+        };
+    }
+}
 ```
 
 ### Services
@@ -359,11 +385,11 @@ class EntregaService
 {
     public function __construct(
         private NfeService $nfeService,
-        private EstoqueConsumoService $estoqueService,
+        private AlocacaoService $alocacaoService,
     ) {}
 
     /**
-     * Agendar entrega
+     * Agendar entrega para venda_items (que possuem alocacoes ativas)
      */
     public function agendarEntrega(
         array $vendaItemIds,
@@ -374,7 +400,7 @@ class EntregaService
         return DB::transaction(function () use (
             $vendaItemIds, $veiculoId, $dataPrevista, $observacao
         ) {
-            // Criar evento de logística
+            // Criar evento de logística (delivery event)
             $evento = EventoLogistica::create([
                 'veiculo_id' => $veiculoId,
                 'tipo' => TipoEventoLogistica::ENTREGA,
@@ -383,19 +409,21 @@ class EntregaService
                 'observacao' => $observacao,
             ]);
 
-            // Vincular itens ao evento
+            // Vincular venda_itens ao evento como entrega_itens
             foreach ($vendaItemIds as $itemId) {
-                $item = VendaItemAtendimento::findOrFail($itemId);
+                $vendaItem = VendaItem::lockForUpdate()->findOrFail($itemId);
 
-                $this->validarItemParaEntrega($item);
+                $this->validarItemParaEntrega($vendaItem);
 
-                $evento->itens()->create([
-                    'venda_item_atendimento_id' => $itemId,
-                    'quantidade' => $item->quantidade,
+                // Create entrega_item for this venda_item
+                $evento->entregaItens()->create([
+                    'venda_item_id' => $itemId,
+                    'quantidade' => $vendaItem->quantidade,
+                    'status' => EntregaItemStatus::AGENDADA,
                 ]);
 
-                // Atualizar status do item
-                $item->update([
+                // Atualizar status do venda_item
+                $vendaItem->update([
                     'status' => VendaItemStatus::ENTREGA_AGENDADA,
                     'data_prev_entrega' => $dataPrevista,
                 ]);
@@ -408,127 +436,129 @@ class EntregaService
     }
 
     /**
-     * Confirmar entrega
+     * Confirmar entrega de um entrega_item
      */
     public function confirmarEntrega(
-        VendaItemAtendimento $item,
+        EntregaItem $entregaItem,
         Carbon $dataEntrega,
         string $entregador,
         string $recebedor,
         ?string $fotoPath = null
-    ): ConfirmacaoEntrega {
+    ): EntregaItem {
         return DB::transaction(function () use (
-            $item, $dataEntrega, $entregador, $recebedor, $fotoPath
+            $entregaItem, $dataEntrega, $entregador, $recebedor, $fotoPath
         ) {
-            // Criar confirmação
-            $confirmacao = ConfirmacaoEntrega::create([
-                'venda_item_atendimento_id' => $item->id,
-                'evento_id' => $item->evento_id,
+            // Atualizar entrega_item com dados da confirmação
+            $entregaItem->update([
+                'status' => EntregaItemStatus::ENTREGUE,
                 'data_entrega' => $dataEntrega,
                 'entregador' => $entregador,
                 'recebedor' => $recebedor,
                 'foto_comprovante' => $fotoPath,
+                'quantidade_entregue' => $entregaItem->quantidade,
             ]);
 
-            // Atualizar status do item
-            $item->update([
-                'status' => VendaItemStatus::ENTREGUE,
-                'data_real_entrega' => $dataEntrega,
-            ]);
-
-            // Atualizar item correspondente na compra (se existir)
-            if ($item->compra_item_id) {
-                CompraItem::where('id', $item->compra_item_id)
-                    ->update(['status' => CompraItemStatus::ENTREGUE]);
-            }
+            // Atualizar status do venda_item se todas as suas entrega_items foram entregues
+            $vendaItem = $entregaItem->vendaItem;
+            $this->verificarVendaItemCompleto($vendaItem);
 
             // Verificar se toda a venda foi entregue
-            $this->verificarVendaCompleta($item->venda);
+            $this->verificarVendaCompleta($vendaItem->venda);
 
-            event(new EntregaConfirmada($confirmacao));
+            event(new EntregaConfirmada($entregaItem));
 
-            return $confirmacao;
+            return $entregaItem;
         });
     }
 
     /**
-     * Registrar item quebrado
+     * Registrar item quebrado em uma entrega_item
      */
     public function registrarQuebra(
-        VendaItemAtendimento $item,
+        EntregaItem $entregaItem,
         float $quantidadeQuebrada,
-        bool $criarReposicao = false,
         ?string $motivo = null
     ): void {
-        DB::transaction(function () use ($item, $quantidadeQuebrada, $criarReposicao, $motivo) {
-            // Reduzir quantidade no item original
-            $quantidadeRestante = $item->quantidade - $quantidadeQuebrada;
+        DB::transaction(function () use ($entregaItem, $quantidadeQuebrada, $motivo) {
+            // Record breakage in the entrega_item
+            $quantidadeEntregue = $entregaItem->quantidade - $quantidadeQuebrada;
 
-            if ($quantidadeRestante > 0) {
-                $item->update(['quantidade' => $quantidadeRestante]);
-            }
-
-            // Criar registro de item quebrado
-            $quebrado = VendaItemAtendimento::create([
-                'venda_id' => $item->venda_id,
-                'venda_item_id' => $item->venda_item_id,
-                'produto_id' => $item->produto_id,
-                'quantidade' => $quantidadeQuebrada,
-                'status' => VendaItemStatus::QUEBRADO,
-                'item_relacionado_id' => $item->id,
-                'observacao' => $motivo,
+            $entregaItem->update([
+                'quantidade_quebrada' => $quantidadeQuebrada,
+                'quantidade_entregue' => max(0, $quantidadeEntregue),
+                'status' => EntregaItemStatus::PARCIAL,
             ]);
 
-            // Estornar consumo de estoque do item quebrado
-            $this->estoqueService->estornarParcial($item, $quantidadeQuebrada);
+            // Reverter as alocacoes do item quebrado para que possam ser re-alocadas
+            $vendaItem = $entregaItem->vendaItem;
+            $this->alocacaoService->desfazerAlocacoesParciais(
+                $vendaItem,
+                $quantidadeQuebrada,
+                "Quebra na entrega: {$motivo}"
+            );
 
-            // Criar reposição se solicitado
-            if ($criarReposicao) {
-                VendaItemAtendimento::create([
-                    'venda_id' => $item->venda_id,
-                    'venda_item_id' => $item->venda_item_id,
-                    'produto_id' => $item->produto_id,
-                    'quantidade' => $quantidadeQuebrada,
-                    'status' => VendaItemStatus::REPO_ENTREGA,
-                    'item_relacionado_id' => $item->id,
-                ]);
-            }
-
-            // Gerar crédito para o cliente
-            $valorQuebrado = $quantidadeQuebrada * $item->vendaItem->preco_unitario;
-            ContaReceber::create([
-                'venda_id' => $item->venda_id,
-                'cliente_id' => $item->venda->cliente_id,
-                'valor' => -$valorQuebrado,
-                'status' => ContaReceberStatus::RECEBIDO,
-                'grupo' => ContaGrupo::CREDITO,
-                'observacao' => "Item quebrado na entrega - {$motivo}",
+            // Gerar crédito para o cliente (nota de crédito)
+            $valorQuebrado = $quantidadeQuebrada * $vendaItem->valor_unitario;
+            FinanceiroParcela::create([
+                'loja_id' => $vendaItem->venda->loja_id,
+                'tipo' => FinanceiroTipo::RECEBER,
+                'cliente_id' => $vendaItem->venda->cliente_id,
+                'venda_id' => $vendaItem->venda_id,
+                'numero_parcela' => 1,
+                'total_parcelas' => 1,
+                'valor' => -$valorQuebrado,  // Negative = credit to customer
+                'status' => FinanceiroStatus::RECEBIDO,
+                'observacao' => "Crédito por quebra na entrega: {$motivo}",
             ]);
 
-            event(new ItemQuebradoRegistrado($quebrado));
+            event(new ItemQuebradoRegistrado($entregaItem));
         });
     }
 
-    private function validarItemParaEntrega(VendaItemAtendimento $item): void
+    private function validarItemParaEntrega(VendaItem $vendaItem): void
     {
-        if ($item->status !== VendaItemStatus::ESTOQUE) {
+        if ($vendaItem->status !== VendaItemStatus::ALOCADO) {
             throw new BusinessException(
-                "Item com status {$item->status->label()} não pode ser agendado para entrega"
+                "Item com status {$vendaItem->status->label()} não pode ser agendado para entrega"
             );
+        }
+
+        // Verify that all quantity is allocated
+        if (!$vendaItem->fullyAllocated()) {
+            throw new BusinessException(
+                "Item não possui quantidade total alocada"
+            );
+        }
+    }
+
+    private function verificarVendaItemCompleto(VendaItem $vendaItem): void
+    {
+        // Check if all entrega_itens for this venda_item are delivered or canceled
+        $naoEntregues = EntregaItem::where('venda_item_id', $vendaItem->id)
+            ->whereNotIn('status', [
+                EntregaItemStatus::ENTREGUE,
+                EntregaItemStatus::CANCELADA,
+                EntregaItemStatus::DEVOLUCAO,
+            ])
+            ->exists();
+
+        if (!$naoEntregues) {
+            $vendaItem->update(['status' => VendaItemStatus::ENTREGUE]);
         }
     }
 
     private function verificarVendaCompleta(Venda $venda): void
     {
-        $todosEntregues = $venda->itensAtendimento()
+        // Check if all venda_items in this sale are delivered or canceled
+        $naoEntregues = VendaItem::where('venda_id', $venda->id)
             ->whereNotIn('status', [
                 VendaItemStatus::ENTREGUE,
                 VendaItemStatus::CANCELADO,
                 VendaItemStatus::DEVOLVIDO,
             ])
-            ->doesntExist();
+            ->exists();
 
-        if ($todosEntregues) {
+        if (!$naoEntregues) {
             $venda->update(['status' => VendaStatus::ENTREGUE]);
             event(new VendaEntregue($venda));
         }
@@ -557,7 +587,9 @@ class ColetaService
             foreach ($compraItemIds as $itemId) {
                 $item = CompraItem::findOrFail($itemId);
 
-                $evento->itens()->create([
+                // Create evento_logistica_item for tracking (separate from delivery)
+                EventoLogisticaItem::create([
+                    'evento_id' => $evento->id,
                     'compra_item_id' => $itemId,
                     'quantidade' => $item->quantidade,
                 ]);
@@ -567,15 +599,6 @@ class ColetaService
                     'status' => CompraItemStatus::EM_COLETA,
                     'data_prev_coleta' => $dataPrevista,
                 ]);
-
-                // Atualizar item de venda correspondente
-                if ($item->venda_item_atendimento_id) {
-                    VendaItemAtendimento::where('id', $item->venda_item_atendimento_id)
-                        ->update([
-                            'status' => VendaItemStatus::EM_COLETA,
-                            'data_prev_coleta' => $dataPrevista,
-                        ]);
-                }
             }
 
             return $evento;
@@ -593,22 +616,20 @@ class ColetaService
                 'data_realizada' => $dataColeta,
             ]);
 
+            // Update all compra_items in this event
             foreach ($evento->itens as $eventoItem) {
-                $compraItem = $eventoItem->compraItem;
-
-                $compraItem->update([
-                    'status' => CompraItemStatus::EM_RECEBIMENTO,
-                    'data_real_coleta' => $dataColeta,
-                ]);
-
-                if ($compraItem->venda_item_atendimento_id) {
-                    VendaItemAtendimento::where('id', $compraItem->venda_item_atendimento_id)
-                        ->update([
-                            'status' => VendaItemStatus::EM_RECEBIMENTO,
+                if ($eventoItem->compra_item_id) {
+                    $compraItem = CompraItem::find($eventoItem->compra_item_id);
+                    if ($compraItem) {
+                        $compraItem->update([
+                            'status' => CompraItemStatus::EM_RECEBIMENTO,
                             'data_real_coleta' => $dataColeta,
                         ]);
+                    }
                 }
             }
+
+            event(new ColetaConfirmada($evento));
         });
     }
 }
@@ -628,7 +649,7 @@ class EntregaController extends Controller
     {
         $eventos = EventoLogistica::query()
             ->where('tipo', TipoEventoLogistica::ENTREGA)
-            ->with(['veiculo', 'itens.vendaItemAtendimento.venda.cliente'])
+            ->with(['veiculo', 'entregaItens.vendaItem.venda.cliente'])
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->data, fn($q) => $q->whereDate('data_prevista', $request->data))
             ->when($request->veiculo_id, fn($q) => $q->where('veiculo_id', $request->veiculo_id))
@@ -653,10 +674,10 @@ class EntregaController extends Controller
             ->with('success', 'Entrega agendada com sucesso');
     }
 
-    public function confirmar(VendaItemAtendimento $item, ConfirmarEntregaRequest $request)
+    public function confirmar(EntregaItem $entregaItem, ConfirmarEntregaRequest $request)
     {
         $this->entregaService->confirmarEntrega(
-            $item,
+            $entregaItem,
             Carbon::parse($request->data_entrega),
             $request->entregador,
             $request->recebedor,
@@ -666,12 +687,11 @@ class EntregaController extends Controller
         return back()->with('success', 'Entrega confirmada');
     }
 
-    public function registrarQuebra(VendaItemAtendimento $item, RegistrarQuebraRequest $request)
+    public function registrarQuebra(EntregaItem $entregaItem, RegistrarQuebraRequest $request)
     {
         $this->entregaService->registrarQuebra(
-            $item,
+            $entregaItem,
             $request->quantidade,
-            $request->criar_reposicao,
             $request->motivo
         );
 
@@ -689,9 +709,9 @@ Route::middleware(['auth'])->prefix('logistica')->name('logistica.')->group(func
     Route::get('entregas', [EntregaController::class, 'index'])->name('entregas.index');
     Route::get('entregas/{evento}', [EntregaController::class, 'show'])->name('entregas.show');
     Route::post('entregas/agendar', [EntregaController::class, 'agendar'])->name('entregas.agendar');
-    Route::post('entregas/{item}/confirmar', [EntregaController::class, 'confirmar'])
+    Route::post('entrega-itens/{entregaItem}/confirmar', [EntregaController::class, 'confirmar'])
         ->name('entregas.confirmar');
-    Route::post('entregas/{item}/quebra', [EntregaController::class, 'registrarQuebra'])
+    Route::post('entrega-itens/{entregaItem}/quebra', [EntregaController::class, 'registrarQuebra'])
         ->name('entregas.quebra');
 
     // Coletas

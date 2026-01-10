@@ -4,11 +4,6 @@
 
 ```mermaid
 flowchart TB
-    subgraph Audit["🔍 AUDITORIA GLOBAL (Event Sourced)<br/>Aplica a TUDO"]
-        direction TB
-        AuditDesc["*_events tables para cada tabela<br/>(vendas_events, estoque_lotes_events, alocacoes_events, etc)<br/>audit_log + integridade_log<br/>Imutável: fn_prevent_mutation()"]
-    end
-
     subgraph MasterData["📋 DADOS MESTRES"]
         direction LR
         Lojas["lojas"]
@@ -66,7 +61,7 @@ flowchart TB
         direction TB
 
         NFeTable["nfes<br/>tipo: ENTRADA<br/>compra_id"]
-        NFeItens["nfe_itens (JSONB)<br/>Imutável"]
+        NFeItens["nfe_itens (JSONB)"]
         NFeTable --> NFeItens
     end
 
@@ -97,13 +92,13 @@ flowchart TB
 
         subgraph LogisticCore["Entregas"]
             Entregas["entregas"]
-            EntregaItem["entrega_itens<br/>(Imutável)"]
+            EntregaItem["entrega_itens"]
             Entregas --> EntregaItem
         end
 
         subgraph NFeSaidaBox["NFe SAÍDA (Para Cliente)"]
             NFeTableOut["nfes<br/>tipo: SAIDA"]
-            NFeItensOut["nfe_itens<br/>(Imutável)"]
+            NFeItensOut["nfe_itens"]
             NFeTableOut --> NFeItensOut
         end
 
@@ -124,13 +119,6 @@ flowchart TB
 
         FP --> Views2
     end
-
-    MasterData -.->|"auditado por"| Audit
-    CommercialFlow -.->|"auditado por"| Audit
-    NFe -.->|"auditado por"| Audit
-    Inventory -.->|"auditado por"| Audit
-    Logistics -.->|"auditado por"| Audit
-    Financial -.->|"auditado por"| Audit
 
     MasterData --> CommercialFlow
     CommercialFlow --> NFe

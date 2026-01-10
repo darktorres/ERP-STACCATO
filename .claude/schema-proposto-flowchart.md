@@ -113,8 +113,8 @@ flowchart TB
         end
 
         subgraph Views2["Clarity Views"]
-            VRec["parcelas_receber"]
-            VPag["parcelas_pagar"]
+            VRec["parcelas_receber<br/>(de Vendas)"]
+            VPag["parcelas_pagar<br/>(de Compras)"]
         end
 
         FP --> Views2
@@ -125,6 +125,10 @@ flowchart TB
     NFe -->|"Cria Estoque"| Inventory
     CommercialFlow -->|"origem=ESTOQUE"| Inventory
     Inventory --> Logistics
+
+    Sales -->|"Gera<br/>parcelas_receber"| VRec
+    Purchase -->|"Gera<br/>parcelas_pagar"| VPag
+
     Logistics --> Financial
 ```
 

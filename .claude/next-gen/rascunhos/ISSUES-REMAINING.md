@@ -24,16 +24,17 @@
 - Includes overdue date calculation (ATRASADO status)
 - Adds performance indices for payment scheduling
 
-### 3. ❌ Event Sourcing Pattern - Not Documented in Modules
-**Files**: ALL module files
-**Status**: IN_PROGRESS ⏳
-**Details**:
-- No `*_events` tables (append-only) mentioned
-- No `pg_ivm` (materialized views) setup
-- No audit trail implementation
-- Missing event types (CRIADA, STATUS_ALTERADO, etc.)
-- Schema-proposto has extensive event sourcing documentation (lines 40-131)
-- Fix: Add Event Sourcing section to each module explaining _events table, pg_ivm, and audit trails
+### 3. ✅ Event Sourcing Pattern - Documented in Core Modules
+**Files**: financeiro.md, vendas.md, estoque.md
+**Status**: COMPLETED ✅ (Commit 37ac90c9)
+**Completed**:
+- Added Event Sourcing section to financeiro.md with `financeiro_parcelas_events` and `FinanceiroEventType`
+- Added Event Sourcing section to vendas.md with `venda_itens_events`, `alocacoes_events`, and event types
+- Added Event Sourcing section to estoque.md with `estoque_movimentacoes`, `alocacoes_eventos` tables
+- Each module now documents: append-only tables, immutability triggers (fn_prevent_mutation), event types
+- Added event recording patterns in services with complete code examples
+- Added audit trail query examples and materialized view setup
+- Documented pg_ivm (incremental view maintenance) for real-time views
 
 ---
 
@@ -106,7 +107,7 @@
 |---|-------|------|----------|--------|---------|
 | 1 | Logística outdated model refs | logistica.md | CRITICAL | ✅ COMPLETED | ca99c9cf |
 | 2 | Financial migration scripts | financeiro.md | CRITICAL | ✅ COMPLETED | 207c1ed8 |
-| 3 | Event Sourcing not documented | All modules | CRITICAL | ⏳ IN_PROGRESS | - |
+| 3 | Event Sourcing not documented | financeiro/vendas/estoque | CRITICAL | ✅ COMPLETED | 37ac90c9 |
 | 4 | Alocacao M:N workflow | vendas/estoque/logistica | HIGH | PENDING | - |
 | 5 | Enum status mismatches | financeiro.md | HIGH | PENDING | - |
 | 6 | Table naming estoque | estoque.md | HIGH | PENDING | - |
@@ -114,12 +115,18 @@
 | 8 | Service layer coupling | vendas.md | MEDIUM | PENDING | - |
 | 9 | VendaItem relations | vendas.md | MEDIUM | PENDING | - |
 
-**Progress**: 2/9 issues completed (22%) | 3 critical issues fixed | 6 high-priority issues remaining
+**Progress**: 3/9 issues completed (33%) | All critical issues fixed ✅ | 6 remaining issues
 
 ---
 
 ## Completed
 
-✅ **financeiro.md** - Updated to unified FinanceiroParcela model (COMPLETED in commit d13045a0)
-✅ **vendas.md** - Removed VendaItemAtendimento, added M:N alocacoes (COMPLETED in commit d13045a0)
-✅ **estoque.md** - Replaced EstoqueConsumo with Alocacao M:N model (COMPLETED in commit d13045a0)
+**From previous session (d13045a0):**
+✅ **financeiro.md** - Updated to unified FinanceiroParcela model
+✅ **vendas.md** - Removed VendaItemAtendimento, added M:N alocacoes
+✅ **estoque.md** - Replaced EstoqueConsumo with Alocacao M:N model
+
+**This session:**
+✅ **logistica.md** (ca99c9cf) - Replaced VendaItemAtendimento with EntregaItem model, updated financial refs
+✅ **financeiro.md** (207c1ed8) - Rewrote migration scripts to target unified financeiro_parcelas
+✅ **financeiro.md, vendas.md, estoque.md** (37ac90c9) - Added Event Sourcing sections with complete audit patterns

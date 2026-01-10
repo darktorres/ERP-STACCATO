@@ -101,7 +101,9 @@ COPY --from=composer /app/vendor vendor/
 COPY --from=frontend /app/public/build public/build/
 COPY . .
 
-RUN chown -R www-data:www-data storage bootstrap/cache \
+RUN mkdir -p storage/{app,framework/{sessions,views,cache},logs} \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 COPY docker/scripts/entrypoint.sh /entrypoint.sh

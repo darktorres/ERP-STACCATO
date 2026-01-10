@@ -50,7 +50,9 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN chown -R www-data:www-data . \
+RUN mkdir -p storage/{app,framework/{sessions,views,cache},logs} \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data . \
     && chmod -R 775 storage bootstrap/cache
 
 ENV APP_ENV=local

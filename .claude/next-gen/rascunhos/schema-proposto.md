@@ -1986,7 +1986,150 @@ $$ LANGUAGE plpgsql;
 
 -- Schedule this to run nightly (requires pg_cron extension):
 -- SELECT cron.schedule('verificacao_estoque_nightly', '0 2 * * *', 'SELECT log_verificacao_integridade();');
-```text
+```
+
+---
+
+### 4.6 Immutability Enforcement (Append-Only Tables)
+
+Certas tabelas são **append-only** (insert-only). Nenhuma UPDATE/DELETE permitida. Isto garante:
+- **Auditoria Imutável**: Histórico nunca pode ser adulterado
+- **Conformidade Fiscal**: Registros fiscais (NFe) preservados intactos
+- **Segurança**: Impossível sobrescrever logs de investigação
+
+**Tabelas Imutáveis:**
+1. `audit_log` - Registro de todas alterações
+2. `estoque_movimentacoes` - Transações de entrada/saída
+3. `integridade_log` - Resultado de verificações
+4. `nfe_itens` - Dados fiscais (nunca deve mudar após emissão)
+5. `entrega_itens` - O que foi entregue é um fato histórico
+
+**Padrão de Correção**: Quando precisa-se corrigir algo em tabelas imutáveis, não atualizar o registro original. Ao invés disso:
+1. Inserir novo registro com valores corrigidos
+2. Marcar o original como "revertido" (via nova linha em tabela de reversão)
+3. Mostrar cadeia completa no relatório (original + reversão)
+
+```sql
+-- ============================================================================
+-- IMMUTABILITY ENFORCEMENT: Trigger para Bloquear UPDATE/DELETE
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION fn_prevent_mutation()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' THEN
+        RAISE EXCEPTION 'Tabela % é imutável (append-only). Não é permitido UPDATE no registro %',
+            TG_TABLE_NAME, NEW.id;
+    END IF;
+
+    IF TG_OP = 'DELETE' THEN
+        RAISE EXCEPTION 'Tabela % é imutável (append-only). Não é permitido DELETE no registro %',
+            TG_TABLE_NAME, OLD.id;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION fn_prevent_mutation() IS
+'Bloqueia UPDATE e DELETE em tabelas imutáveis.
+Garante que auditoria, movimentações fiscais e histórico nunca podem ser adulterados.
+Se precisar corrigir algo, inserir novo registro com valores corretos.';
+
+-- ============================================================================
+-- Apply immutability to audit_log
+-- ============================================================================
+CREATE TRIGGER trg_audit_log_immutable
+    BEFORE UPDATE OR DELETE ON audit_log
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- ============================================================================
+-- Apply immutability to estoque_movimentacoes
+-- ============================================================================
+-- Toda movimentação de estoque é uma transação. Histórico jamais deve mudar.
+CREATE TRIGGER trg_estoque_movimentacoes_immutable
+    BEFORE UPDATE OR DELETE ON estoque_movimentacoes
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- ============================================================================
+-- Apply immutability to integridade_log
+-- ============================================================================
+-- Resultado de verificações de integridade. Auditoria DBA nunca deve ser apagada.
+CREATE TRIGGER trg_integridade_log_immutable
+    BEFORE UPDATE OR DELETE ON integridade_log
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- ============================================================================
+-- Apply immutability to nfe_itens
+-- ============================================================================
+-- Dados fiscais. Nunca mudam após emissão. Exigência de conformidade.
+CREATE TRIGGER trg_nfe_itens_immutable
+    BEFORE UPDATE OR DELETE ON nfe_itens
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+
+-- ============================================================================
+-- Apply immutability to entrega_itens
+-- ============================================================================
+-- O que foi entregue é um fato histórico. Não deve ser reescrito.
+CREATE TRIGGER trg_entrega_itens_immutable
+    BEFORE UPDATE OR DELETE ON entrega_itens
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+```
+
+**Exemplos de Uso:**
+
+```sql
+-- ❌ ERRO: Tentar atualizar movimento
+UPDATE estoque_movimentacoes
+SET quantidade = 100
+WHERE id = 5;
+-- Error: Tabela estoque_movimentacoes é imutável (append-only).
+--        Não é permitido UPDATE no registro 5
+
+-- ❌ ERRO: Tentar deletar log de auditoria
+DELETE FROM audit_log WHERE id = 42;
+-- Error: Tabela audit_log é imutável (append-only).
+--        Não é permitido DELETE no registro 42
+
+-- ✅ CORRETO: Corrigir via novo registro
+-- Se entrega_itens registrou 50 unidades mas deveria ser 55:
+-- 1. Manter registro original intacto
+-- 2. Criar movimento de ajuste
+INSERT INTO estoque_movimentacoes (
+    lote_id, tipo, quantidade, custo_unitario,
+    referencia_tipo, referencia_id, usuario_id, observacoes
+) VALUES (
+    123, 'ENTRADA_AJUSTE', 5, 10.00,
+    'entrega_item_correcao', 99, 1, 'Correção: entrega_item #99 registrada como 50 mas era 55'
+);
+
+-- 3. Adicionar nota em auditoria explicando a correção
+INSERT INTO audit_log (
+    tabela, registro_id, operacao, usuario_id, dados_anterior, dados_novo, motivo
+) VALUES (
+    'entrega_itens', 99, 'CORRECAO', 1,
+    '{"quantidade": 50}', '{"quantidade": 55}',
+    'Correção de quantidade entregue - ajuste via estoque_movimentacoes #9999'
+);
+
+-- 4. Relatório agora mostra:
+--    - entrega_item #99: 50 un (registro original)
+--    - estoque_movimentacoes #9999: +5 un (ajuste)
+--    - audit_log: registro da correção com rastreabilidade completa
+--    Total efetivo: 55 un ✓
+```
+
+**Benefícios:**
+
+| Aspecto | Benefício |
+|---------|-----------|
+| **Auditoria** | Cada alteração deixa rastro imutável. Impossível cobrir trilhas. |
+| **Conformidade** | NFe e movimentações fiscais nunca mudam (exigência legal). |
+| **Investigação** | Se há problema, histórico completo está preservado. |
+| **Recuperação** | Revertendo histórico é reversível. Deletar é não. |
+| **Performance** | Sem UPDATE/DELETE, sem lock contention em tabelas críticas. |
+
+```
 
 ---
 

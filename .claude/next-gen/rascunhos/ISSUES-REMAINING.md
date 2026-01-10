@@ -113,19 +113,26 @@
 | 2 | Financial migration scripts | financeiro.md | CRITICAL | ✅ COMPLETED | 207c1ed8 |
 | 3 | Event Sourcing not documented | financeiro/vendas/estoque | CRITICAL | ✅ COMPLETED | 37ac90c9 |
 | 4 | Alocacao M:N workflow | alocacao-m2n-workflow.md | HIGH | ✅ COMPLETED | 22509f81 |
-| 5 | Enum status mismatches | financeiro.md | HIGH | PENDING | - |
-| 6 | Table naming estoque | estoque.md | HIGH | PENDING | - |
-| 7 | N1/N2 terminology | Multiple | MEDIUM | PENDING | - |
-| 8 | Service layer coupling | vendas.md | MEDIUM | PENDING | - |
-| 9 | VendaItem relations | vendas.md | MEDIUM | PENDING | - |
+| 5 | Enum status mismatches | financeiro.md | HIGH | ✅ COMPLETED | f92fff47 |
+| 6 | Table naming estoque | estoque.md | HIGH | ✅ COMPLETED | 2b4c7f5d |
+| 7 | N1/N2 terminology | vendas.md | MEDIUM | ✅ COMPLETED | 0b46af28 |
+| 8 | Service layer coupling | vendas.md | MEDIUM | ✅ COMPLETED | ece259c9 |
+| 9 | VendaItem relations | vendas.md | MEDIUM | ✅ COMPLETED | a2f62029 |
 
-**Progress**: 4/9 issues completed (44%) | All critical + 1 high priority fixed ✅ | 5 remaining issues
+**Progress**: 9/9 issues completed (100%) ✅ | All critical, high, and medium priority fixed ✅
 
 ---
 
 ## Completed
 
-**From previous session (d13045a0):**
+**THIS SESSION - Final Resolution (All 9 Issues):**
+✅ **Issue #5** (f92fff47) - Unified FinanceiroStatus enum, consolidated services (ContaReceberService + ContaPagarService → FinanceiroParcelaService)
+✅ **Issue #6** (2b4c7f5d) - Aligned table naming from `estoque` → `estoque_lotes`, updated all model references
+✅ **Issue #7** (0b46af28) - Removed N1/N2 terminology, clarified flat item + M:N allocation architecture
+✅ **Issue #8** (ece259c9) - Documented service layer architecture, established event-driven decoupling pattern
+✅ **Issue #9** (a2f62029) - Completed VendaItem relationships with entregas link, polymorphic origin documentation
+
+**From previous session (d13045a0 & this session):**
 ✅ **financeiro.md** - Updated to unified FinanceiroParcela model
 ✅ **vendas.md** - Removed VendaItemAtendimento, added M:N alocacoes
 ✅ **estoque.md** - Replaced EstoqueConsumo with Alocacao M:N model

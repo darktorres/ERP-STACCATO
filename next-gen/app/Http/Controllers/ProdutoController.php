@@ -125,8 +125,8 @@ class ProdutoController extends Controller
         }
 
         $perPage = $request->input('per_page', 15);
-        $produtos = $query->paginate($perPage);
+        $produtos = $query->with('fornecedor')->paginate($perPage);
 
-        return response()->json($produtos);
+        return ProdutoResource::collection($produtos);
     }
 }

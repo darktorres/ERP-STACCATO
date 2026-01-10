@@ -7,9 +7,18 @@ use Illuminate\Validation\Rule;
 
 class StoreClienteRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * NOTE: Authorization policies will be implemented in Phase 2.
+     * For now, all authenticated users can create clients.
+     * In Phase 2, this will be replaced with a policy check:
+     *   return $this->user()->can('create', Cliente::class);
+     */
     public function authorize(): bool
     {
-        return true;
+        // Phase 1: All authenticated users can create. Phase 2: Add policy check.
+        return $this->user() !== null;
     }
 
     public function rules(): array

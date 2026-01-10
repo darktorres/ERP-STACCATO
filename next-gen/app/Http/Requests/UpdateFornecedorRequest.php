@@ -7,9 +7,13 @@ use Illuminate\Validation\Rule;
 
 class UpdateFornecedorRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     * NOTE: Authorization policies will be implemented in Phase 2.
+     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     public function rules(): array

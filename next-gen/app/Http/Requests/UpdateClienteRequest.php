@@ -7,9 +7,18 @@ use Illuminate\Validation\Rule;
 
 class UpdateClienteRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * NOTE: Authorization policies will be implemented in Phase 2.
+     * For now, all authenticated users can update clients.
+     * In Phase 2, this will be replaced with a policy check:
+     *   return $this->user()->can('update', $this->route('cliente'));
+     */
     public function authorize(): bool
     {
-        return true;
+        // Phase 1: All authenticated users can update. Phase 2: Add policy check.
+        return $this->user() !== null;
     }
 
     public function rules(): array

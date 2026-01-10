@@ -124,8 +124,8 @@ class ClienteController extends Controller
         }
 
         $perPage = $request->input('per_page', 15);
-        $clientes = $query->with('vendedor')->paginate($perPage);
+        $clientes = $query->with(['loja', 'vendedor'])->paginate($perPage);
 
-        return response()->json($clientes);
+        return ClienteResource::collection($clientes);
     }
 }

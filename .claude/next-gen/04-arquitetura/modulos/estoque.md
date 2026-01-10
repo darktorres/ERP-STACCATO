@@ -90,41 +90,42 @@ Ver documento detalhado: [estrategia/05-correcao-fifo.md](../../estrategia/05-co
 ### Tabelas do Banco de Dados
 
 ```sql
--- Tabela principal de estoque
-estoque
-├── idEstoque (PK)
-├── idNFe (FK)              -- NFe de origem
-├── idProduto (FK)          -- Produto
-├── idBloco (FK)            -- Localização no galpão
-├── status                  -- TEMP, ESTOQUE, CANCELADO
-├── fornecedor (VARCHAR!)   -- ⚠️ Desnormalizado
-├── descricao               -- Descrição do produto
-├── quant                   -- Quantidade original recebida
-├── restante                -- Quantidade disponível
-├── valorUnid               -- Custo unitário
-├── lote                    -- Número do lote
-├── created                 -- Data de entrada
-├── -- Campos de impostos da NFe:
-├── vBC, pICMS, vICMS, vIPI, pPIS, vPIS, pCOFINS, vCOFINS
+-- Tabela principal de estoque de lotes (NEW SCHEMA - estoque_lotes)
+estoque_lotes
+├── id (PK)                         -- Nova: Auto-increment primária
+├── loja_id (FK)                    -- Loja/filial
+├── produto_id (FK)                 -- Produto
+├── nfe_id (FK, nullable)           -- NFe de origem (se aplicável)
+├── compra_id (FK, nullable)        -- Compra relacionada
+├── fornecedor_id (FK, nullable)    -- Fornecedor
+├── status                          -- RECEBIDO, RESERVADO, CONSUMIDO, QUEBRA, DEVOLUCAO
+├── quantidade                      -- Quantidade original recebida/alocada
+├── quantidade_disponivel           -- Quantidade livre para alocação (RECEBIDO)
+├── quantidade_reservada            -- Quantidade alocada a vendas
+├── custo_unitario                  -- Custo unitário do lote
+├── lote                            -- Número do lote (FIFO/FEFO key)
+├── data_validade (nullable)        -- Data de validade (perecíveis)
+├── data_entrada                    -- Data de entrada/recebimento
+├── -- Campos de impostos da NFe (proporcionais):
+├── base_icms, aliq_icms, valor_icms
+├── valor_ipi, aliq_pis, valor_pis
+├── aliq_cofins, valor_cofins
+├── bloco_id (nullable)             -- Localização no galpão (FK)
 └── ...
 
--- Tabela de consumo
-estoque_has_consumo
-├── idConsumo (PK)
-├── idEstoque (FK)          -- Lote de estoque
-├── idVendaProduto2 (FK)    -- Item da venda que consumiu
-├── status                  -- PRÉ-CONSUMO, CONSUMO, AJUSTE, DEVOLVIDO
-├── quant                   -- NEGATIVO = consumido
-├── valor                   -- Valor do consumo
-└── -- Campos de impostos proporcionais
+-- Tabela de alocações M:N (REPLACED: estoque_has_consumo)
+-- Ver: alocacoes table no schema-proposto
+alocacoes
+├── id (PK)
+├── venda_item_id (FK)         -- Item da venda
+├── estoque_lote_id (FK)       -- Lote alocado
+├── quantidade                 -- Quantidade alocada
+├── status                     -- ATIVO, REVERTIDA, CANCELADA
+└── ...
 
--- Link compra-estoque
-estoque_has_compra
-├── idEstoqueCompra (PK)
-├── idEstoque (FK)
-├── idCompra (FK)           -- ID do pedido de compra
-├── idPedido2 (FK)          -- Item do pedido
-└── quant                   -- Quantidade vinculada
+-- DEPRECATED: Old tables (for migration only)
+-- estoque_has_consumo        → REPLACED by alocacoes
+-- estoque_has_compra         → REPLACED by relationship fields in estoque_lotes
 ```
 
 ### Fluxo de Estados
@@ -151,39 +152,76 @@ stateDiagram-v2
     PRE_CONSUMO --> CANCELADO : Cancelamento
 ```
 
-### Cálculo do Campo `restante`
+### Cálculo da Quantidade Disponível (NEW SCHEMA)
 
 ```sql
--- Stored procedure: update_quant_estoque()
-restante = quant + COALESCE(SUM(estoque_has_consumo.quant), 0)
+-- NEW SCHEMA: quantidade_disponível é calculada dinamicamente
+quantidade_disponível = quantidade - COALESCE(SUM(alocacoes.quantidade), 0)
 
--- Exemplo:
--- estoque.quant = 100 (recebido)
--- consumo #1: quant = -40
--- consumo #2: quant = -30
--- restante = 100 + (-40) + (-30) = 30
+-- Exemplo com estoque_lotes + alocacoes:
+-- estoque_lotes.quantidade = 100 (recebido)
+-- alocacao #1: quantidade = 40 (ATIVO)
+-- alocacao #2: quantidade = 30 (ATIVO)
+-- quantidade_disponível = 100 - (40 + 30) = 30
+
+-- QUERY para calcular dinâmicamente:
+SELECT
+    el.id,
+    el.quantidade,
+    COALESCE(SUM(a.quantidade), 0) as alocado,
+    el.quantidade - COALESCE(SUM(a.quantidade), 0) as disponivel
+FROM estoque_lotes el
+LEFT JOIN alocacoes a ON a.estoque_lote_id = el.id AND a.status = 'ATIVO'
+GROUP BY el.id;
 ```
 
-### Consumo de Estoque
+### Consumo de Estoque (NEW SCHEMA)
 
-O consumo é criado **durante importação da NFe**, não na entrega:
+Com a nova arquitetura M:N, o consumo é **criado explicitamente** durante alocação:
 
-```cpp
-// importarxml.cpp:1030-1130
-void criarConsumo(rowCompra, rowEstoque) {
-    idVendaProduto2 = modelCompra.data(rowCompra, "idVendaProduto2");
-    if (idVendaProduto2 == 0) return;  // Sem venda vinculada
+```php
+// app/Services/AlocacaoService.php - NEW SCHEMA
+// Chamada manual via controller para alocar estoque a um venda_item
 
-    quantConsumo = min(quantVenda, restanteEstoque);
+class AlocacaoService {
+    public function alocar(
+        VendaItem $vendaItem,
+        EstoqueLote $estoque,
+        int $quantidade
+    ): Alocacao {
+        return DB::transaction(function () use ($vendaItem, $estoque, $quantidade) {
+            // Validar disponibilidade
+            $disponivel = $estoque->quantidade -
+                          $estoque->alocacoes()
+                              ->where('status', AlocacaoStatus::ATIVO)
+                              ->sum('quantidade');
 
-    INSERT INTO estoque_has_consumo (
-        idEstoque, idVendaProduto2,
-        status = 'PRÉ-CONSUMO',
-        quant = -quantConsumo,  // NEGATIVO
-        // Impostos proporcionais...
-    );
+            if ($quantidade > $disponivel) {
+                throw new BusinessException("Quantidade insuficiente");
+            }
 
-    UPDATE estoque SET restante = restante - quantConsumo;
+            // Criar alocação (M:N link)
+            $alocacao = Alocacao::create([
+                'venda_item_id' => $vendaItem->id,
+                'estoque_lote_id' => $estoque->id,
+                'quantidade' => $quantidade,
+                'status' => AlocacaoStatus::ATIVO,
+            ]);
+
+            // Registrar evento para auditoria
+            DB::table('alocacoes_eventos')->insert([
+                'alocacao_id' => $alocacao->id,
+                'event_type' => 'CRIADA',
+                'event_data' => json_encode([
+                    'estoque_lote_id' => $estoque->id,
+                    'quantidade' => $quantidade,
+                ]),
+                'created_at' => now(),
+            ]);
+
+            return $alocacao;
+        });
+    }
 }
 ```
 
@@ -194,11 +232,14 @@ O sistema integra com o módulo de Galpão para rastrear localização física:
 ```text
 Galpão (Armazém)
 ├── Bloco A
-│   ├── Posição A1 → estoque.idBloco
+│   ├── Posição A1 → estoque_lotes.bloco_id (FK)
 │   ├── Posição A2
 │   └── ...
 ├── Bloco B
 └── ...
+
+-- Cada estoque_lote pode ter localização no galpão
+-- Usado para separação física durante picking/entrega
 ```
 
 ---
@@ -208,21 +249,25 @@ Galpão (Armazém)
 ### Models
 
 ```php
-// app/Models/Estoque.php
-class Estoque extends Model
+// app/Models/EstoqueLote.php (NEW SCHEMA - was: Estoque)
+// Table: estoque_lotes (not 'estoques' - renamed for clarity: lotes de estoque)
+
+class EstoqueLote extends Model
 {
+    protected $table = 'estoque_lotes';  // Explicit table name mapping
+
     protected $fillable = [
-        'loja_id', 'nfe_id', 'produto_id', 'fornecedor_id', 'bloco_id',
-        'status', 'quantidade', 'quantidade_disponivel', 'custo_unitario',
-        'lote', 'data_validade', 'data_entrada',
-        // Campos de impostos
+        'loja_id', 'produto_id', 'fornecedor_id', 'nfe_id', 'compra_id', 'bloco_id',
+        'status', 'quantidade', 'quantidade_disponivel', 'quantidade_reservada',
+        'custo_unitario', 'lote', 'data_validade', 'data_entrada',
+        // Campos de impostos (proporcionais)
         'base_icms', 'aliq_icms', 'valor_icms',
         'valor_ipi', 'aliq_pis', 'valor_pis',
         'aliq_cofins', 'valor_cofins',
     ];
 
     protected $casts = [
-        'status' => EstoqueStatus::class,
+        'status' => EstoqueLoteStatus::class,
         'data_validade' => 'date',
         'data_entrada' => 'datetime',
     ];
@@ -232,11 +277,6 @@ class Estoque extends Model
         return $this->belongsTo(Loja::class);
     }
 
-    public function nfe(): BelongsTo
-    {
-        return $this->belongsTo(Nfe::class);
-    }
-
     public function produto(): BelongsTo
     {
         return $this->belongsTo(Produto::class);
@@ -244,31 +284,41 @@ class Estoque extends Model
 
     public function fornecedor(): BelongsTo
     {
-        return $this->belongsTo(Fornecedor::class);
+        return $this->belongsTo(Fornecedor::class)->nullable();
+    }
+
+    public function nfe(): BelongsTo
+    {
+        return $this->belongsTo(Nfe::class)->nullable();
+    }
+
+    public function compra(): BelongsTo
+    {
+        return $this->belongsTo(Compra::class)->nullable();
+    }
+
+    // M:N: Alocações a venda_items
+    public function alocacoes(): HasMany
+    {
+        return $this->hasMany(Alocacao::class, 'estoque_lote_id');
+    }
+
+    // Evento Sourcing: histórico imutável
+    public function eventos(): HasMany
+    {
+        return $this->hasMany(EstoqueLoteEvento::class, 'lote_id');
     }
 
     public function bloco(): BelongsTo
     {
-        return $this->belongsTo(GalpaoBloco::class);
+        return $this->belongsTo(GalpaoBloco::class)->nullable();
     }
 
-    // M:N: one estoque (lote) can be allocated to multiple venda_items
-    public function alocacoes(): HasMany
-    {
-        return $this->hasMany(Alocacao::class);
-    }
-
-    public function compras(): BelongsToMany
-    {
-        return $this->belongsToMany(Compra::class, 'estoque_compras')
-            ->withPivot('quantidade');
-    }
-
-    // Scopes para FIFO
+    // Scopes para FIFO/FEFO ordering
     public function scopeDisponivel(Builder $query): Builder
     {
         return $query->where('quantidade_disponivel', '>', 0)
-            ->where('status', EstoqueStatus::ESTOQUE);
+            ->where('status', EstoqueLoteStatus::RECEBIDO);
     }
 
     public function scopeFifo(Builder $query): Builder
@@ -278,22 +328,23 @@ class Estoque extends Model
 
     public function scopeFefo(Builder $query): Builder
     {
+        // Earliest expiry first (FEFO), then oldest by entry date
         return $query->orderByRaw('COALESCE(data_validade, DATE("9999-12-31")) ASC')
             ->orderBy('data_entrada', 'asc');
     }
 
-    // Calculate total allocated quantity for this estoque
+    // Calculate total allocated quantity from ATIVO allocations
     public function quantidadeAlocada(): float
     {
         return $this->alocacoes()
             ->where('status', AlocacaoStatus::ATIVO)
-            ->sum('quantidade');
+            ->sum('quantidade') ?? 0;
     }
 
     // Calculate available quantity for new allocations
     public function quantidadeParaAlocar(): float
     {
-        return max(0, $this->quantidade_disponivel - $this->quantidadeAlocada());
+        return max(0, $this->quantidade - $this->quantidadeAlocada());
     }
 }
 
@@ -303,7 +354,7 @@ class Alocacao extends Model
     protected $table = 'alocacoes';
 
     protected $fillable = [
-        'venda_item_id', 'estoque_id',
+        'venda_item_id', 'estoque_lote_id',
         'quantidade', 'status',
     ];
 
@@ -317,9 +368,16 @@ class Alocacao extends Model
         return $this->belongsTo(VendaItem::class);
     }
 
-    public function estoque(): BelongsTo
+    // M:N relationship: references EstoqueLote (not old Estoque)
+    public function estoqueLote(): BelongsTo
     {
-        return $this->belongsTo(Estoque::class);
+        return $this->belongsTo(EstoqueLote::class);
+    }
+
+    // Event Sourcing: histórico de mudanças
+    public function eventos(): HasMany
+    {
+        return $this->hasMany(AlocacaoEvento::class);
     }
 
     // Helper to check if allocation is active

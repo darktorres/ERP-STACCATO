@@ -1445,6 +1445,1002 @@ Route::middleware(['auth'])->group(function () {
 
 ---
 
+## Sistema de Desconto Progressivo
+
+> **Nova funcionalidade** para controle de margens e autorização de descontos.
+
+### Visão Geral
+
+O sistema de desconto progressivo implementa:
+
+1. **Limites por perfil**: Cada perfil de usuário tem um limite máximo de desconto
+2. **Tiers de margem**: Visualização verde/amarelo/vermelho baseada na margem resultante
+3. **Workflow de aprovação**: Descontos acima do limite requerem aprovação de superior
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        SISTEMA DE DESCONTO PROGRESSIVO                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  VENDEDOR                    GERENTE                      DIRETOR            │
+│  ┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐│
+│  │ Limite: 10%      │        │ Limite: 20%      │        │ Limite: 35%      ││
+│  │                  │        │                  │        │                  ││
+│  │ 🟢 0-5%   Livre  │        │ 🟢 0-10%  Livre  │        │ 🟢 0-20%  Livre  ││
+│  │ 🟡 5-10%  Livre  │ ──────▶│ 🟡 10-20% Livre  │ ──────▶│ 🟡 20-35% Livre  ││
+│  │ 🔴 >10%  Aprova  │        │ 🔴 >20%  Aprova  │        │ 🔴 >35%  Aprova  ││
+│  └──────────────────┘        └──────────────────┘        └──────────────────┘│
+│                                                                              │
+│  MARGEM DO ORÇAMENTO (baseada no custo vs preço final)                      │
+│  ┌──────────────────────────────────────────────────────────────────────────┐│
+│  │ 🟢 VERDE   │ Margem ≥ 20%  │ Desconto seguro, boa rentabilidade         ││
+│  │ 🟡 AMARELO │ Margem 10-20% │ Zona de atenção, margem reduzida           ││
+│  │ 🔴 VERMELHO│ Margem < 10%  │ Zona crítica, margem insuficiente/negativa ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Schema do Banco de Dados
+
+```sql
+-- =====================================================
+-- DESCONTO PROGRESSIVO - Schema
+-- =====================================================
+
+-- Limites de desconto por perfil de usuário
+CREATE TABLE desconto_limites (
+    id BIGSERIAL PRIMARY KEY,
+
+    -- Identificação (um dos dois preenchidos)
+    perfil VARCHAR(50),                    -- VENDEDOR, GERENTE, DIRETOR, etc.
+    usuario_id BIGINT REFERENCES usuarios(id), -- Override específico para usuário
+
+    -- Limites de desconto
+    desconto_maximo_percentual DECIMAL(5,2) NOT NULL, -- Ex: 10.00 = 10%
+
+    -- Limites por tier de margem (opcional - para ser mais granular)
+    desconto_verde_max DECIMAL(5,2),       -- Até quanto fica verde
+    desconto_amarelo_max DECIMAL(5,2),     -- Até quanto fica amarelo
+    -- Acima de amarelo_max = vermelho
+
+    -- Aprovador padrão
+    aprovador_perfil VARCHAR(50),          -- GERENTE, DIRETOR
+    aprovador_usuario_id BIGINT REFERENCES usuarios(id), -- Aprovador específico
+
+    -- Controle
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    -- Apenas um registro por perfil ou usuário
+    CONSTRAINT uq_desconto_limite_perfil UNIQUE (perfil),
+    CONSTRAINT uq_desconto_limite_usuario UNIQUE (usuario_id),
+    CONSTRAINT chk_perfil_ou_usuario CHECK (
+        (perfil IS NOT NULL AND usuario_id IS NULL) OR
+        (perfil IS NULL AND usuario_id IS NOT NULL)
+    )
+);
+
+-- Configuração de tiers de margem (configurável por loja ou global)
+CREATE TABLE margem_tiers_config (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT REFERENCES lojas(id),   -- NULL = global
+
+    -- Thresholds de margem
+    margem_verde_min DECIMAL(5,2) NOT NULL DEFAULT 20.00,   -- ≥ 20% = verde
+    margem_amarelo_min DECIMAL(5,2) NOT NULL DEFAULT 10.00, -- ≥ 10% = amarelo
+    -- < amarelo_min = vermelho
+
+    -- Margem mínima absoluta (bloqueia venda abaixo disso)
+    margem_minima_absoluta DECIMAL(5,2) DEFAULT 0.00,       -- 0 = pode ter margem zero
+    bloquear_margem_negativa BOOLEAN DEFAULT TRUE,
+
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT uq_margem_tier_loja UNIQUE (loja_id)
+);
+
+-- Solicitações de aprovação de desconto
+CREATE TABLE desconto_aprovacoes (
+    id BIGSERIAL PRIMARY KEY,
+    uuid UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,
+
+    -- Documento
+    orcamento_id BIGINT REFERENCES orcamentos(id),
+    venda_id BIGINT REFERENCES vendas(id),
+
+    -- Solicitante
+    solicitante_id BIGINT NOT NULL REFERENCES usuarios(id),
+    solicitante_limite DECIMAL(5,2) NOT NULL,  -- Limite do solicitante na época
+
+    -- Desconto solicitado
+    desconto_percentual_solicitado DECIMAL(5,2) NOT NULL,
+    desconto_reais_solicitado DECIMAL(15,2),
+
+    -- Informações de margem
+    margem_original DECIMAL(5,2) NOT NULL,     -- Margem sem desconto
+    margem_com_desconto DECIMAL(5,2) NOT NULL, -- Margem após desconto
+    tier_margem VARCHAR(10) NOT NULL,          -- VERDE, AMARELO, VERMELHO
+
+    -- Justificativa
+    justificativa TEXT NOT NULL,
+
+    -- Aprovação
+    aprovador_id BIGINT REFERENCES usuarios(id),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE', -- PENDENTE, APROVADO, NEGADO, EXPIRADO
+
+    -- Resposta
+    resposta_observacao TEXT,
+    respondido_em TIMESTAMP,
+
+    -- Desconto alternativo (aprovador pode sugerir outro valor)
+    desconto_aprovado_percentual DECIMAL(5,2),
+
+    -- Controle
+    expira_em TIMESTAMP DEFAULT NOW() + INTERVAL '24 hours',
+    notificacao_id BIGINT REFERENCES notificacoes(id),
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT chk_orcamento_ou_venda CHECK (
+        (orcamento_id IS NOT NULL AND venda_id IS NULL) OR
+        (orcamento_id IS NULL AND venda_id IS NOT NULL)
+    )
+);
+
+CREATE INDEX idx_desconto_aprov_status ON desconto_aprovacoes(status) WHERE status = 'PENDENTE';
+CREATE INDEX idx_desconto_aprov_aprovador ON desconto_aprovacoes(aprovador_id, status);
+CREATE INDEX idx_desconto_aprov_orcamento ON desconto_aprovacoes(orcamento_id);
+
+-- Histórico de descontos aplicados (auditoria)
+CREATE TABLE desconto_historico (
+    id BIGSERIAL PRIMARY KEY,
+
+    orcamento_id BIGINT REFERENCES orcamentos(id),
+    venda_id BIGINT REFERENCES vendas(id),
+
+    -- Desconto
+    desconto_percentual DECIMAL(5,2),
+    desconto_reais DECIMAL(15,2),
+
+    -- Margem resultante
+    margem_resultante DECIMAL(5,2) NOT NULL,
+    tier_margem VARCHAR(10) NOT NULL,
+
+    -- Quem aplicou
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id),
+
+    -- Se foi aprovado por outro
+    aprovacao_id BIGINT REFERENCES desconto_aprovacoes(id),
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Adicionar campos ao orçamento para cálculo de margem
+ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
+    custo_total DECIMAL(15,2) DEFAULT 0;
+
+ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
+    margem_percentual DECIMAL(5,2) GENERATED ALWAYS AS (
+        CASE
+            WHEN total > 0 THEN ((total - custo_total - frete) / total * 100)
+            ELSE 0
+        END
+    ) STORED;
+
+ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
+    tier_margem VARCHAR(10) DEFAULT 'VERDE';
+
+ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
+    desconto_pendente_aprovacao BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE orcamentos ADD COLUMN IF NOT EXISTS
+    desconto_aprovacao_id BIGINT REFERENCES desconto_aprovacoes(id);
+
+-- Trigger para atualizar tier de margem automaticamente
+CREATE OR REPLACE FUNCTION fn_atualizar_tier_margem()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_config margem_tiers_config%ROWTYPE;
+BEGIN
+    -- Buscar config (loja específica ou global)
+    SELECT * INTO v_config
+    FROM margem_tiers_config
+    WHERE (loja_id = NEW.loja_id OR loja_id IS NULL)
+    AND ativo = TRUE
+    ORDER BY loja_id NULLS LAST
+    LIMIT 1;
+
+    -- Se não encontrou config, usar defaults
+    IF v_config.id IS NULL THEN
+        v_config.margem_verde_min := 20.00;
+        v_config.margem_amarelo_min := 10.00;
+    END IF;
+
+    -- Determinar tier
+    NEW.tier_margem := CASE
+        WHEN NEW.margem_percentual >= v_config.margem_verde_min THEN 'VERDE'
+        WHEN NEW.margem_percentual >= v_config.margem_amarelo_min THEN 'AMARELO'
+        ELSE 'VERMELHO'
+    END;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_orcamento_tier_margem
+BEFORE INSERT OR UPDATE OF total, custo_total ON orcamentos
+FOR EACH ROW EXECUTE FUNCTION fn_atualizar_tier_margem();
+```
+
+### Dados Padrão
+
+```sql
+-- Limites de desconto por perfil
+INSERT INTO desconto_limites (perfil, desconto_maximo_percentual, desconto_verde_max, desconto_amarelo_max, aprovador_perfil) VALUES
+('VENDEDOR', 10.00, 5.00, 10.00, 'GERENTE'),
+('GERENTE', 20.00, 10.00, 20.00, 'DIRETOR'),
+('DIRETOR', 35.00, 20.00, 35.00, 'ADMIN'),
+('ADMIN', 50.00, 35.00, 50.00, NULL); -- Admin não precisa aprovação
+
+-- Configuração global de margem
+INSERT INTO margem_tiers_config (loja_id, margem_verde_min, margem_amarelo_min, margem_minima_absoluta, bloquear_margem_negativa) VALUES
+(NULL, 20.00, 10.00, 5.00, TRUE);
+```
+
+### Enums
+
+```php
+// app/Enums/TierMargem.php
+enum TierMargem: string
+{
+    case VERDE = 'VERDE';
+    case AMARELO = 'AMARELO';
+    case VERMELHO = 'VERMELHO';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::VERDE => 'Margem Saudável',
+            self::AMARELO => 'Margem Reduzida',
+            self::VERMELHO => 'Margem Crítica',
+        };
+    }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::VERDE => 'green',
+            self::AMARELO => 'yellow',
+            self::VERMELHO => 'red',
+        };
+    }
+
+    public function icon(): string
+    {
+        return match($this) {
+            self::VERDE => '🟢',
+            self::AMARELO => '🟡',
+            self::VERMELHO => '🔴',
+        };
+    }
+}
+
+// app/Enums/StatusAprovacaoDesconto.php
+enum StatusAprovacaoDesconto: string
+{
+    case PENDENTE = 'PENDENTE';
+    case APROVADO = 'APROVADO';
+    case NEGADO = 'NEGADO';
+    case EXPIRADO = 'EXPIRADO';
+
+    public function isFinal(): bool
+    {
+        return in_array($this, [self::APROVADO, self::NEGADO, self::EXPIRADO]);
+    }
+}
+```
+
+### Service de Desconto
+
+```php
+// app/Services/Vendas/DescontoService.php
+class DescontoService
+{
+    public function __construct(
+        private NotificacaoService $notificacaoService,
+    ) {}
+
+    /**
+     * Calcular margem do orçamento
+     */
+    public function calcularMargem(Orcamento $orcamento): array
+    {
+        // Custo total dos itens
+        $custoTotal = $orcamento->itens->sum(function ($item) {
+            return $item->quantidade * $item->produto->custo;
+        });
+
+        // Preço final (após descontos)
+        $precoFinal = $orcamento->total - $orcamento->frete;
+
+        // Margem
+        $margemReais = $precoFinal - $custoTotal;
+        $margemPercentual = $precoFinal > 0
+            ? ($margemReais / $precoFinal) * 100
+            : 0;
+
+        // Determinar tier
+        $config = $this->getMargemConfig($orcamento->loja_id);
+        $tier = $this->determinarTier($margemPercentual, $config);
+
+        return [
+            'custo_total' => $custoTotal,
+            'preco_final' => $precoFinal,
+            'margem_reais' => $margemReais,
+            'margem_percentual' => round($margemPercentual, 2),
+            'tier' => $tier,
+            'config' => $config,
+        ];
+    }
+
+    /**
+     * Simular desconto e retornar impacto na margem
+     */
+    public function simularDesconto(Orcamento $orcamento, float $descontoPercentual): array
+    {
+        // Margem atual
+        $margemAtual = $this->calcularMargem($orcamento);
+
+        // Calcular novo total com desconto
+        $descontoReais = $orcamento->subtotal_liquido * ($descontoPercentual / 100);
+        $novoTotal = $orcamento->subtotal_liquido - $descontoReais + $orcamento->frete;
+        $novoPrecoFinal = $novoTotal - $orcamento->frete;
+
+        // Nova margem
+        $novaMargemReais = $novoPrecoFinal - $margemAtual['custo_total'];
+        $novaMargemPercentual = $novoPrecoFinal > 0
+            ? ($novaMargemReais / $novoPrecoFinal) * 100
+            : 0;
+
+        $config = $this->getMargemConfig($orcamento->loja_id);
+        $novoTier = $this->determinarTier($novaMargemPercentual, $config);
+
+        // Verificar limite do usuário
+        $usuario = auth()->user();
+        $limite = $this->getLimiteUsuario($usuario);
+        $precisaAprovacao = $descontoPercentual > $limite['desconto_maximo'];
+
+        return [
+            'desconto_percentual' => $descontoPercentual,
+            'desconto_reais' => round($descontoReais, 2),
+            'novo_total' => round($novoTotal, 2),
+
+            'margem_atual' => $margemAtual,
+            'margem_nova' => [
+                'margem_reais' => round($novaMargemReais, 2),
+                'margem_percentual' => round($novaMargemPercentual, 2),
+                'tier' => $novoTier,
+            ],
+
+            'limite_usuario' => $limite,
+            'precisa_aprovacao' => $precisaAprovacao,
+
+            // Validações
+            'margem_negativa' => $novaMargemPercentual < 0,
+            'abaixo_minimo' => $novaMargemPercentual < $config['margem_minima_absoluta'],
+            'bloqueado' => $config['bloquear_margem_negativa'] && $novaMargemPercentual < 0,
+        ];
+    }
+
+    /**
+     * Aplicar desconto (com verificação de limite)
+     */
+    public function aplicarDesconto(
+        Orcamento $orcamento,
+        float $descontoPercentual,
+        ?string $justificativa = null
+    ): array {
+        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+
+        // Verificar se está bloqueado
+        if ($simulacao['bloqueado']) {
+            throw new BusinessException(
+                'Desconto resulta em margem negativa e está bloqueado pela política'
+            );
+        }
+
+        // Verificar se precisa aprovação
+        if ($simulacao['precisa_aprovacao']) {
+            if (empty($justificativa)) {
+                throw new BusinessException(
+                    'Desconto acima do limite requer justificativa'
+                );
+            }
+
+            return $this->solicitarAprovacao($orcamento, $descontoPercentual, $justificativa);
+        }
+
+        // Aplicar direto
+        return $this->aplicarDescontoDireto($orcamento, $descontoPercentual);
+    }
+
+    /**
+     * Aplicar desconto diretamente (sem aprovação)
+     */
+    private function aplicarDescontoDireto(Orcamento $orcamento, float $descontoPercentual): array
+    {
+        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+
+        DB::transaction(function () use ($orcamento, $descontoPercentual, $simulacao) {
+            $orcamento->update([
+                'desconto_percentual' => $descontoPercentual,
+                'desconto_reais' => $simulacao['desconto_reais'],
+                'total' => $simulacao['novo_total'],
+                'custo_total' => $simulacao['margem_atual']['custo_total'],
+                'tier_margem' => $simulacao['margem_nova']['tier'],
+                'desconto_pendente_aprovacao' => false,
+            ]);
+
+            // Registrar histórico
+            DescontoHistorico::create([
+                'orcamento_id' => $orcamento->id,
+                'desconto_percentual' => $descontoPercentual,
+                'desconto_reais' => $simulacao['desconto_reais'],
+                'margem_resultante' => $simulacao['margem_nova']['margem_percentual'],
+                'tier_margem' => $simulacao['margem_nova']['tier'],
+                'usuario_id' => auth()->id(),
+            ]);
+        });
+
+        return [
+            'status' => 'aplicado',
+            'orcamento' => $orcamento->fresh(),
+            'simulacao' => $simulacao,
+        ];
+    }
+
+    /**
+     * Solicitar aprovação de desconto
+     */
+    private function solicitarAprovacao(
+        Orcamento $orcamento,
+        float $descontoPercentual,
+        string $justificativa
+    ): array {
+        $simulacao = $this->simularDesconto($orcamento, $descontoPercentual);
+        $limite = $simulacao['limite_usuario'];
+
+        // Encontrar aprovador
+        $aprovador = $this->encontrarAprovador($limite);
+
+        if (!$aprovador) {
+            throw new BusinessException('Nenhum aprovador disponível para este limite');
+        }
+
+        $aprovacao = DB::transaction(function () use (
+            $orcamento, $descontoPercentual, $justificativa, $simulacao, $limite, $aprovador
+        ) {
+            // Criar solicitação
+            $aprovacao = DescontoAprovacao::create([
+                'orcamento_id' => $orcamento->id,
+                'solicitante_id' => auth()->id(),
+                'solicitante_limite' => $limite['desconto_maximo'],
+                'desconto_percentual_solicitado' => $descontoPercentual,
+                'desconto_reais_solicitado' => $simulacao['desconto_reais'],
+                'margem_original' => $simulacao['margem_atual']['margem_percentual'],
+                'margem_com_desconto' => $simulacao['margem_nova']['margem_percentual'],
+                'tier_margem' => $simulacao['margem_nova']['tier'],
+                'justificativa' => $justificativa,
+                'aprovador_id' => $aprovador->id,
+                'status' => StatusAprovacaoDesconto::PENDENTE,
+            ]);
+
+            // Marcar orçamento como pendente
+            $orcamento->update([
+                'desconto_pendente_aprovacao' => true,
+                'desconto_aprovacao_id' => $aprovacao->id,
+            ]);
+
+            // Criar notificação para aprovador
+            $notificacao = $this->notificacaoService->criar(
+                tipo: 'DESCONTO_PENDENTE',
+                titulo: "Desconto de {$descontoPercentual}% aguarda aprovação",
+                mensagem: "O vendedor " . auth()->user()->nome . " solicitou desconto de {$descontoPercentual}% " .
+                         "no orçamento #{$orcamento->id}. Margem resultante: {$simulacao['margem_nova']['margem_percentual']}%",
+                acaoUrl: "/orcamentos/{$orcamento->id}/aprovacao-desconto/{$aprovacao->uuid}",
+                entidadeTipo: 'orcamento',
+                entidadeId: $orcamento->id,
+                usuariosIds: [$aprovador->id],
+                prioridade: $simulacao['margem_nova']['tier'] === 'VERMELHO'
+                    ? NotificacaoPrioridade::URGENTE
+                    : NotificacaoPrioridade::ALTA
+            );
+
+            $aprovacao->update(['notificacao_id' => $notificacao->id]);
+
+            return $aprovacao;
+        });
+
+        return [
+            'status' => 'pendente_aprovacao',
+            'aprovacao' => $aprovacao,
+            'aprovador' => $aprovador->only(['id', 'nome']),
+            'simulacao' => $simulacao,
+            'message' => "Desconto enviado para aprovação de {$aprovador->nome}",
+        ];
+    }
+
+    /**
+     * Aprovar desconto
+     */
+    public function aprovarDesconto(
+        DescontoAprovacao $aprovacao,
+        ?float $descontoAlternativo = null,
+        ?string $observacao = null
+    ): array {
+        if ($aprovacao->status !== StatusAprovacaoDesconto::PENDENTE) {
+            throw new BusinessException('Esta solicitação já foi processada');
+        }
+
+        // Verificar se é o aprovador
+        if ($aprovacao->aprovador_id !== auth()->id()) {
+            throw new BusinessException('Você não é o aprovador desta solicitação');
+        }
+
+        $descontoFinal = $descontoAlternativo ?? $aprovacao->desconto_percentual_solicitado;
+
+        return DB::transaction(function () use ($aprovacao, $descontoFinal, $observacao) {
+            // Atualizar aprovação
+            $aprovacao->update([
+                'status' => StatusAprovacaoDesconto::APROVADO,
+                'resposta_observacao' => $observacao,
+                'desconto_aprovado_percentual' => $descontoFinal,
+                'respondido_em' => now(),
+            ]);
+
+            // Aplicar desconto
+            $resultado = $this->aplicarDescontoDireto($aprovacao->orcamento, $descontoFinal);
+
+            // Atualizar orçamento
+            $aprovacao->orcamento->update([
+                'desconto_pendente_aprovacao' => false,
+            ]);
+
+            // Registrar histórico com aprovação
+            DescontoHistorico::where('orcamento_id', $aprovacao->orcamento_id)
+                ->latest()
+                ->first()
+                ?->update(['aprovacao_id' => $aprovacao->id]);
+
+            // Notificar solicitante
+            $this->notificacaoService->criar(
+                tipo: 'DESCONTO_APROVADO',
+                titulo: "Desconto aprovado!",
+                mensagem: "Seu desconto de {$descontoFinal}% no orçamento #{$aprovacao->orcamento_id} foi aprovado.",
+                acaoUrl: "/orcamentos/{$aprovacao->orcamento_id}",
+                entidadeTipo: 'orcamento',
+                entidadeId: $aprovacao->orcamento_id,
+                usuariosIds: [$aprovacao->solicitante_id],
+            );
+
+            return [
+                'status' => 'aprovado',
+                'aprovacao' => $aprovacao->fresh(),
+                'orcamento' => $resultado['orcamento'],
+            ];
+        });
+    }
+
+    /**
+     * Negar desconto
+     */
+    public function negarDesconto(
+        DescontoAprovacao $aprovacao,
+        string $motivo
+    ): array {
+        if ($aprovacao->status !== StatusAprovacaoDesconto::PENDENTE) {
+            throw new BusinessException('Esta solicitação já foi processada');
+        }
+
+        return DB::transaction(function () use ($aprovacao, $motivo) {
+            $aprovacao->update([
+                'status' => StatusAprovacaoDesconto::NEGADO,
+                'resposta_observacao' => $motivo,
+                'respondido_em' => now(),
+            ]);
+
+            // Limpar flag do orçamento
+            $aprovacao->orcamento->update([
+                'desconto_pendente_aprovacao' => false,
+                'desconto_aprovacao_id' => null,
+            ]);
+
+            // Notificar solicitante
+            $this->notificacaoService->criar(
+                tipo: 'DESCONTO_NEGADO',
+                titulo: "Desconto negado",
+                mensagem: "Seu desconto de {$aprovacao->desconto_percentual_solicitado}% no orçamento " .
+                         "#{$aprovacao->orcamento_id} foi negado. Motivo: {$motivo}",
+                acaoUrl: "/orcamentos/{$aprovacao->orcamento_id}",
+                entidadeTipo: 'orcamento',
+                entidadeId: $aprovacao->orcamento_id,
+                usuariosIds: [$aprovacao->solicitante_id],
+            );
+
+            return [
+                'status' => 'negado',
+                'aprovacao' => $aprovacao->fresh(),
+            ];
+        });
+    }
+
+    /**
+     * Obter limite do usuário
+     */
+    public function getLimiteUsuario(Usuario $usuario): array
+    {
+        // Primeiro busca limite específico do usuário
+        $limite = DescontoLimite::where('usuario_id', $usuario->id)->first();
+
+        // Se não encontrou, busca pelo perfil
+        if (!$limite) {
+            $limite = DescontoLimite::where('perfil', $usuario->perfil)->first();
+        }
+
+        // Se ainda não encontrou, usar valores padrão mínimos
+        if (!$limite) {
+            return [
+                'desconto_maximo' => 5.00,
+                'desconto_verde_max' => 2.50,
+                'desconto_amarelo_max' => 5.00,
+                'aprovador_perfil' => 'GERENTE',
+            ];
+        }
+
+        return [
+            'desconto_maximo' => $limite->desconto_maximo_percentual,
+            'desconto_verde_max' => $limite->desconto_verde_max ?? $limite->desconto_maximo_percentual * 0.5,
+            'desconto_amarelo_max' => $limite->desconto_amarelo_max ?? $limite->desconto_maximo_percentual,
+            'aprovador_perfil' => $limite->aprovador_perfil,
+            'aprovador_usuario_id' => $limite->aprovador_usuario_id,
+        ];
+    }
+
+    private function getMargemConfig(?int $lojaId): array
+    {
+        $config = MargemTiersConfig::where(function ($q) use ($lojaId) {
+            $q->where('loja_id', $lojaId)->orWhereNull('loja_id');
+        })
+        ->where('ativo', true)
+        ->orderByRaw('loja_id IS NULL')
+        ->first();
+
+        return [
+            'margem_verde_min' => $config?->margem_verde_min ?? 20.00,
+            'margem_amarelo_min' => $config?->margem_amarelo_min ?? 10.00,
+            'margem_minima_absoluta' => $config?->margem_minima_absoluta ?? 0.00,
+            'bloquear_margem_negativa' => $config?->bloquear_margem_negativa ?? true,
+        ];
+    }
+
+    private function determinarTier(float $margemPercentual, array $config): TierMargem
+    {
+        if ($margemPercentual >= $config['margem_verde_min']) {
+            return TierMargem::VERDE;
+        }
+        if ($margemPercentual >= $config['margem_amarelo_min']) {
+            return TierMargem::AMARELO;
+        }
+        return TierMargem::VERMELHO;
+    }
+
+    private function encontrarAprovador(array $limite): ?Usuario
+    {
+        // Se tem aprovador específico
+        if ($limite['aprovador_usuario_id']) {
+            return Usuario::find($limite['aprovador_usuario_id']);
+        }
+
+        // Buscar pelo perfil
+        if ($limite['aprovador_perfil']) {
+            return Usuario::where('perfil', $limite['aprovador_perfil'])
+                ->where('ativo', true)
+                ->first();
+        }
+
+        return null;
+    }
+}
+```
+
+### Controller
+
+```php
+// app/Http/Controllers/DescontoController.php
+class DescontoController extends Controller
+{
+    public function __construct(
+        private DescontoService $descontoService,
+    ) {}
+
+    /**
+     * Simular desconto (preview)
+     */
+    public function simular(Orcamento $orcamento, Request $request)
+    {
+        $request->validate([
+            'desconto_percentual' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $simulacao = $this->descontoService->simularDesconto(
+            $orcamento,
+            $request->desconto_percentual
+        );
+
+        return response()->json($simulacao);
+    }
+
+    /**
+     * Aplicar desconto
+     */
+    public function aplicar(Orcamento $orcamento, Request $request)
+    {
+        $request->validate([
+            'desconto_percentual' => 'required|numeric|min:0|max:100',
+            'justificativa' => 'nullable|string|max:500',
+        ]);
+
+        $resultado = $this->descontoService->aplicarDesconto(
+            $orcamento,
+            $request->desconto_percentual,
+            $request->justificativa
+        );
+
+        return response()->json($resultado);
+    }
+
+    /**
+     * Aprovar desconto
+     */
+    public function aprovar(DescontoAprovacao $aprovacao, Request $request)
+    {
+        $request->validate([
+            'desconto_alternativo' => 'nullable|numeric|min:0|max:100',
+            'observacao' => 'nullable|string|max:500',
+        ]);
+
+        $resultado = $this->descontoService->aprovarDesconto(
+            $aprovacao,
+            $request->desconto_alternativo,
+            $request->observacao
+        );
+
+        return response()->json($resultado);
+    }
+
+    /**
+     * Negar desconto
+     */
+    public function negar(DescontoAprovacao $aprovacao, Request $request)
+    {
+        $request->validate([
+            'motivo' => 'required|string|max:500',
+        ]);
+
+        $resultado = $this->descontoService->negarDesconto(
+            $aprovacao,
+            $request->motivo
+        );
+
+        return response()->json($resultado);
+    }
+
+    /**
+     * Listar aprovações pendentes (para aprovadores)
+     */
+    public function pendentes()
+    {
+        $aprovacoes = DescontoAprovacao::where('aprovador_id', auth()->id())
+            ->where('status', StatusAprovacaoDesconto::PENDENTE)
+            ->with(['orcamento.cliente:id,razao_social', 'solicitante:id,nome'])
+            ->orderBy('created_at')
+            ->get();
+
+        return response()->json($aprovacoes);
+    }
+}
+```
+
+### Rotas
+
+```php
+// routes/web.php
+Route::middleware(['auth'])->group(function () {
+    // Desconto
+    Route::prefix('orcamentos/{orcamento}')->group(function () {
+        Route::post('desconto/simular', [DescontoController::class, 'simular'])
+            ->name('orcamentos.desconto.simular');
+        Route::post('desconto/aplicar', [DescontoController::class, 'aplicar'])
+            ->name('orcamentos.desconto.aplicar');
+    });
+
+    // Aprovações
+    Route::prefix('aprovacoes-desconto')->group(function () {
+        Route::get('pendentes', [DescontoController::class, 'pendentes'])
+            ->name('aprovacoes-desconto.pendentes');
+        Route::post('{aprovacao}/aprovar', [DescontoController::class, 'aprovar'])
+            ->name('aprovacoes-desconto.aprovar');
+        Route::post('{aprovacao}/negar', [DescontoController::class, 'negar'])
+            ->name('aprovacoes-desconto.negar');
+    });
+});
+```
+
+### Interface de Usuário
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Orçamento #12345                                           Cliente: ABC Ltda │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ ITENS                                                                        │
+│ ┌───────────────────────────────────────────────────────────────────────────┐│
+│ │ Produto           │ Qtd │ Preço Unit. │ Desc. │ Total        │ Custo     ││
+│ │───────────────────┼─────┼─────────────┼───────┼──────────────┼───────────││
+│ │ Piso Porcelanato  │ 100 │ R$ 89,90    │ 5%    │ R$ 8.540,50  │ R$ 55,00  ││
+│ │ Argamassa AC-III  │ 50  │ R$ 25,00    │ 0%    │ R$ 1.250,00  │ R$ 15,00  ││
+│ │ Rejunte Flexível  │ 20  │ R$ 18,00    │ 10%   │ R$ 324,00    │ R$ 10,00  ││
+│ └───────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│ RESUMO                                                                       │
+│ ┌───────────────────────────────────────────────────────────────────────────┐│
+│ │ Subtotal:                                              R$ 10.114,50       ││
+│ │ Frete:                                                 R$ 150,00          ││
+│ │ ─────────────────────────────────────────────────────────────────────────││
+│ │ DESCONTO GLOBAL                                                           ││
+│ │                                                                           ││
+│ │ ┌────────────────────────────────────────────────────────────────────────┐││
+│ │ │  Desconto: [____8____] %    ou    R$ [__________]                     │││
+│ │ │                                                                        │││
+│ │ │  ┌─────────────── SIMULAÇÃO ───────────────┐                          │││
+│ │ │  │                                          │                          │││
+│ │ │  │  Desconto:        R$ 809,16  (8%)       │                          │││
+│ │ │  │  Novo Total:      R$ 9.455,34           │                          │││
+│ │ │  │                                          │                          │││
+│ │ │  │  MARGEM                                  │                          │││
+│ │ │  │  ├── Atual:  🟢 28,5% (R$ 2.614,50)     │                          │││
+│ │ │  │  └── Nova:   🟡 18,2% (R$ 1.805,34)     │                          │││
+│ │ │  │                                          │                          │││
+│ │ │  │  ⚠️ Margem entrará na zona AMARELA      │                          │││
+│ │ │  │                                          │                          │││
+│ │ │  │  Seu limite: 10%                        │                          │││
+│ │ │  │  ❌ Desconto acima do limite            │                          │││
+│ │ │  │  → Requer aprovação do GERENTE          │                          │││
+│ │ │  │                                          │                          │││
+│ │ │  └──────────────────────────────────────────┘                          │││
+│ │ │                                                                        │││
+│ │ │  Justificativa (obrigatório para aprovação):                          │││
+│ │ │  ┌────────────────────────────────────────────────────────────────┐   │││
+│ │ │  │ Cliente importante, primeira compra grande, fidelização...    │   │││
+│ │ │  └────────────────────────────────────────────────────────────────┘   │││
+│ │ │                                                                        │││
+│ │ │  [Solicitar Aprovação]        [Ajustar para 10%]                      │││
+│ │ └────────────────────────────────────────────────────────────────────────┘││
+│ │                                                                           ││
+│ │ TOTAL:                                                 R$ 9.455,34       ││
+│ └───────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Tela de Aprovação (Gerente)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔔 Aprovação de Desconto                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ Orçamento: #12345                                                            │
+│ Cliente: ABC Ltda                                                            │
+│ Vendedor: João Silva                                                         │
+│ Solicitado em: 10/01/2026 14:32                                             │
+│                                                                              │
+│ ┌───────────────────────────────────────────────────────────────────────────┐│
+│ │ DESCONTO SOLICITADO                                                       ││
+│ │                                                                           ││
+│ │ Percentual:          8%                                                   ││
+│ │ Valor:               R$ 809,16                                            ││
+│ │ Limite do vendedor:  10%                                                  ││
+│ │                                                                           ││
+│ │ IMPACTO NA MARGEM                                                         ││
+│ │ ├── Margem atual:   🟢 28,5%                                              ││
+│ │ └── Margem nova:    🟡 18,2%                                              ││
+│ │                                                                           ││
+│ │ JUSTIFICATIVA                                                             ││
+│ │ "Cliente importante, primeira compra grande, potencial de fidelização    ││
+│ │  para projetos futuros. Concorrência ofereceu 10% de desconto."          ││
+│ │                                                                           ││
+│ └───────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│ ┌───────────────────────────────────────────────────────────────────────────┐│
+│ │ SUA DECISÃO                                                               ││
+│ │                                                                           ││
+│ │ [⦿] Aprovar desconto de 8%                                               ││
+│ │ [ ] Aprovar desconto alternativo: [______] %                             ││
+│ │ [ ] Negar                                                                 ││
+│ │                                                                           ││
+│ │ Observação:                                                               ││
+│ │ ┌────────────────────────────────────────────────────────────────────┐   ││
+│ │ │                                                                    │   ││
+│ │ └────────────────────────────────────────────────────────────────────┘   ││
+│ │                                                                           ││
+│ │ [Confirmar]                                                               ││
+│ └───────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Indicador Visual de Margem (Componente)
+
+```
+┌────────────────────────────────────────────┐
+│ MARGEM                                      │
+│                                            │
+│ ┌──────────────────────────────────────┐   │
+│ │🟢🟢🟢🟢🟢🟢│🟡🟡🟡🟡│🔴🔴🔴🔴🔴🔴🔴│   │
+│ │   ≥20%    │ 10-20% │    <10%        │   │
+│ │           │        │                 │   │
+│ │           │   ▲    │                 │   │
+│ │           │ 18,2%  │                 │   │
+│ └──────────────────────────────────────┘   │
+│                                            │
+│ Margem atual: 18,2% (R$ 1.805,34)         │
+│ Status: 🟡 Zona de atenção                 │
+└────────────────────────────────────────────┘
+```
+
+### Tipos de Notificação (Adicionar ao notificacoes.md)
+
+```sql
+-- Notificações de desconto
+INSERT INTO notificacao_tipos (codigo, categoria, titulo_template, mensagem_template, acao_tipo, acao_url_template, prioridade_padrao) VALUES
+('DESCONTO_PENDENTE', 'VENDAS',
+ 'Desconto de {desconto}% aguarda aprovação',
+ '{solicitante} solicitou desconto de {desconto}% no orçamento #{orcamento_id}. Margem resultante: {margem}%',
+ 'NAVEGAR', '/orcamentos/{orcamento_id}/aprovacao-desconto/{aprovacao_uuid}', 'ALTA'),
+
+('DESCONTO_APROVADO', 'VENDAS',
+ 'Desconto aprovado!',
+ 'Seu desconto de {desconto}% no orçamento #{orcamento_id} foi aprovado por {aprovador}.',
+ 'NAVEGAR', '/orcamentos/{orcamento_id}', 'NORMAL'),
+
+('DESCONTO_NEGADO', 'VENDAS',
+ 'Desconto negado',
+ 'Seu desconto de {desconto}% no orçamento #{orcamento_id} foi negado. Motivo: {motivo}',
+ 'NAVEGAR', '/orcamentos/{orcamento_id}', 'ALTA'),
+
+('DESCONTO_EXPIRADO', 'VENDAS',
+ 'Solicitação de desconto expirada',
+ 'A solicitação de desconto de {desconto}% no orçamento #{orcamento_id} expirou sem resposta.',
+ 'NAVEGAR', '/orcamentos/{orcamento_id}', 'NORMAL');
+```
+
+### Resumo do Sistema
+
+| Componente | Descrição |
+|------------|-----------|
+| **Limites por perfil** | VENDEDOR: 10%, GERENTE: 20%, DIRETOR: 35% |
+| **Tiers de margem** | 🟢 ≥20%, 🟡 10-20%, 🔴 <10% |
+| **Workflow** | Desconto > limite → Solicitar aprovação → Notificar gerente → Aprovar/Negar |
+| **Bloqueio** | Margem negativa bloqueada por padrão |
+| **Auditoria** | Histórico completo de todos os descontos aplicados |
+
+---
+
 ## Considerações de Migração
 
 ### Migração de Dados

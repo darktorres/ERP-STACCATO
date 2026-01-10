@@ -20,13 +20,115 @@
 
 ### 1.2 Decisões Adotadas
 
-| Decisão             | Escolha                | Justificativa                         |
-| ------------------- | ---------------------- | ------------------------------------- |
-| Modelo de entidades | **3 entidades**        | Validado pela indústria               |
-| Dados fiscais NFe   | **JSONB**              | Flexibilidade para reforma tributária |
-| Status              | **ENUMs PostgreSQL**   | Type-safety, transições validadas     |
-| Auditoria           | **CRUD + audit_log**   | Event Sourcing rejeitado para v1      |
-| Consumo estoque     | **Seleção manual 1:1** | Variação de lote (tom/calibre)        |
+| Decisão             | Escolha                                 | Justificativa                         |
+| ------------------- | --------------------------------------- | ------------------------------------- |
+| Modelo de entidades | **3 entidades**                         | Validado pela indústria               |
+| Dados fiscais NFe   | **JSONB**                               | Flexibilidade para reforma tributária |
+| Status              | **ENUMs PostgreSQL**                    | Type-safety, transições validadas     |
+| **Auditoria**       | **Event Sourcing + Materialized Views** | Histórico completo + zero overhead    |
+| **View Manutenção** | **pg_ivm (Incremental)**                | Atualizações em tempo real, sem cron  |
+| Consumo estoque     | **Seleção manual M:N**                  | Múltiplos lotes por item, qualidade   |
+
+### 1.3 Arquitetura Event Sourcing + Materialized Views
+
+**Problema Clássico:**
+- Tabelas normalizadas UPDATE/DELETE reescrevem história
+- Auditoria requer triggers complexos em cada tabela
+- Concorrência causa race conditions
+- Difícil recuperar "como era" em data passada
+
+**Solução Adotada: Event Sourcing**
+
+Para cada tabela operacional, há **dois artefatos**:
+
+1. **`*_events` table** (Append-Only)
+   - Imutável: apenas INSERT, nunca UPDATE/DELETE
+   - Registra cada mudança de estado como evento
+   - Não indexada para operações frequentes
+   - Exemplo: `vendas_events`, `estoque_lotes_events`
+
+2. **Materialized View** (Current State)
+   - Agregação dos eventos mais recentes
+   - Nome original (ex: `vendas`, `estoque_lotes`)
+   - **Incrementally Maintained** via pg_ivm
+   - Atualiza automaticamente quando evento é inserido
+   - Indexada, otimizada para queries
+
+**Fluxo:**
+
+```
+┌──────────────────────────────────────────────────┐
+│        Aplicação insere evento                    │
+│  INSERT INTO vendas_events (...)                 │
+│      tipo='STATUS_ALTERADO', dados_novo={...}   │
+└────────────────┬─────────────────────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────────────────────┐
+│    pg_ivm detecta evento inserido                 │
+└────────────────┬─────────────────────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────────────────────┐
+│  Materialized View atualizada incrementalmente    │
+│  SELECT * FROM vendas WHERE id=5                 │
+│     ↓ Retorna estado atual (sem lag)             │
+└──────────────────────────────────────────────────┘
+```
+
+**Benefícios:**
+
+| Aspecto | Benefício |
+|---------|-----------|
+| **Auditoria** | Cada mudança é um evento imutável. Histórico completo preservado. |
+| **Performance** | Views indexadas para queries rápidas. Append-only é otimizado para discos. |
+| **Concorrência** | Sem UPDATE contention. INSERTs paralelos sem lock. |
+| **Compliance** | Dados fiscais/movimentações jamais podem ser alterados. |
+| **Recuperação** | Restaurar estado em data passada: rolar eventos até aquela data. |
+| **Trigger Overhead** | Triggers apenas INSERT, não UPDATE. Mais rápido. |
+
+**Estrutura de um Evento:**
+
+```sql
+CREATE TABLE vendas_events (
+    event_id BIGSERIAL PRIMARY KEY,        -- Sequência global
+    entidade_id INTEGER NOT NULL,          -- ID da venda (múltiplos eventos por ID)
+    tipo VARCHAR(100) NOT NULL,            -- CRIADA, STATUS_ALTERADO, ITEM_ADICIONADO, etc
+    dados_anterior JSONB,                  -- Estado antes da mudança
+    dados_novo JSONB,                      -- Estado depois da mudança
+    mudancas_totais JSONB,                 -- Apenas os campos que mudaram
+    usuario_id INTEGER,                    -- Quem fez a mudança
+    motivo TEXT,                           -- Por quê (obrigatório para algumas transições)
+    changed_at TIMESTAMPTZ DEFAULT NOW(),  -- Quando (timestamp Brasileiro)
+
+    CONSTRAINT chk_evento_valido CHECK (tipo IN (...all valid types...))
+);
+
+CREATE INDEX idx_vendas_events_entidade ON vendas_events(entidade_id, changed_at DESC);
+CREATE INDEX idx_vendas_events_tipo ON vendas_events(tipo);
+CREATE INDEX idx_vendas_events_data ON vendas_events(changed_at DESC);
+```
+
+**Materialized View (Agregação):**
+
+```sql
+-- View que reconstrói estado atual a partir dos eventos
+CREATE MATERIALIZED VIEW vendas AS
+SELECT DISTINCT ON (v.entidade_id)
+    v.entidade_id as id,
+    (v.dados_novo ->> 'numero')::VARCHAR as numero,
+    (v.dados_novo ->> 'cliente_id')::INTEGER as cliente_id,
+    (v.dados_novo ->> 'loja_id')::INTEGER as loja_id,
+    (v.dados_novo ->> 'data_venda')::DATE as data_venda,
+    (v.dados_novo ->> 'status')::venda_status as status,
+    v.changed_at,
+    v.usuario_id
+FROM vendas_events v
+ORDER BY v.entidade_id, v.changed_at DESC;
+
+-- pg_ivm mantém esta view atualizada incrementalmente
+-- Sem cron jobs, sem REFRESH MATERIALIZED VIEW completa
+```
 
 ---
 
@@ -2133,45 +2235,367 @@ INSERT INTO audit_log (
 
 ---
 
-## 5. Comparação: Legado vs Novo
+## 5. Event Sourcing: Implementação Prática
+
+Esta seção mostra como tabelas operacionais são convertidas ao padrão event sourcing com pg_ivm.
+
+### 5.1 Exemplo 1: Vendas (venda_status PENDENTE → CONCLUÍDA)
+
+**Events Table (Append-Only):**
+
+```sql
+CREATE TABLE vendas_events (
+    event_id BIGSERIAL PRIMARY KEY,
+    entidade_id INTEGER NOT NULL,          -- ID da venda
+    tipo VARCHAR(100) NOT NULL,
+    dados_anterior JSONB,
+    dados_novo JSONB,
+    mudancas_totais JSONB,                 -- {"status": {"de": "PENDENTE", "para": "CONCLUÍDA"}}
+    usuario_id INTEGER REFERENCES usuarios(id),
+    motivo TEXT,
+    changed_at TIMESTAMPTZ DEFAULT NOW(),
+
+    CONSTRAINT chk_venda_eventos CHECK (tipo IN (
+        'VENDA_CRIADA',
+        'STATUS_ALTERADO',
+        'VALOR_ATUALIZADO',
+        'CLIENTE_ALTERADO',
+        'VENDA_CANCELADA'
+    ))
+);
+
+-- Índices para performance
+CREATE INDEX idx_vendas_events_entidade ON vendas_events(entidade_id, changed_at DESC);
+CREATE INDEX idx_vendas_events_tipo ON vendas_events(tipo);
+CREATE INDEX idx_vendas_events_data ON vendas_events(changed_at DESC);
+
+-- Tabela imutável: bloqueia UPDATE/DELETE
+CREATE TRIGGER trg_vendas_events_immutable
+    BEFORE UPDATE OR DELETE ON vendas_events
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+```
+
+**Materialized View (Current State):**
+
+```sql
+-- Reconstrói estado atual da venda a partir dos últimos eventos
+CREATE MATERIALIZED VIEW vendas AS
+SELECT DISTINCT ON (v.entidade_id)
+    v.entidade_id as id,
+    (v.dados_novo ->> 'numero')::VARCHAR as numero,
+    (v.dados_novo ->> 'cliente_id')::INTEGER as cliente_id,
+    (v.dados_novo ->> 'loja_id')::INTEGER as loja_id,
+    (v.dados_novo ->> 'data_venda')::DATE as data_venda,
+    (v.dados_novo ->> 'valor_total')::DECIMAL(15,2) as valor_total,
+    (v.dados_novo ->> 'status')::venda_status as status,
+    v.changed_at,
+    v.usuario_id
+FROM vendas_events v
+ORDER BY v.entidade_id, v.changed_at DESC;
+
+-- Índices na view para queries rápidas
+CREATE UNIQUE INDEX idx_vendas_id ON vendas(id);
+CREATE INDEX idx_vendas_cliente ON vendas(cliente_id);
+CREATE INDEX idx_vendas_status ON vendas(status);
+
+-- pg_ivm mantém automaticamente
+-- (Requer: CREATE EXTENSION pg_ivm; DECLARE MATERIALIZED VIEW vendas WITH NO DATA AS ...)
+```
+
+**Como Usar (Aplicação):**
+
+```sql
+-- ❌ ANTES (UPDATE direto):
+UPDATE vendas SET status = 'CONCLUIDA' WHERE id = 5;
+
+-- ✅ DEPOIS (INSERT evento):
+INSERT INTO vendas_events (entidade_id, tipo, dados_anterior, dados_novo, usuario_id, motivo)
+SELECT 5, 'STATUS_ALTERADO',
+       jsonb_build_object('status', status),
+       jsonb_build_object('status', 'CONCLUIDA'),
+       1, 'Todos os itens entregues'
+FROM vendas
+WHERE id = 5;
+-- pg_ivm atualiza vendas view automaticamente
+-- SELECT * FROM vendas WHERE id = 5; ← retorna status='CONCLUIDA'
+```
+
+**Auditoria Completa (DBA):**
+
+```sql
+-- Ver histórico completo de uma venda
+SELECT event_id, tipo, mudancas_totais, usuario_id, changed_at
+FROM vendas_events
+WHERE entidade_id = 5
+ORDER BY changed_at;
+
+-- Resultado:
+-- event_id | tipo                | mudancas_totais                              | usuario_id | changed_at
+-- 1001     | VENDA_CRIADA        | {"numero": {"de": null, "para": "V-001"}}  | 1          | 2025-01-10 10:00
+-- 1002     | CLIENTE_ALTERADO    | {"cliente_id": {"de": 5, "para": 10}}      | 1          | 2025-01-10 10:15
+-- 1003     | STATUS_ALTERADO     | {"status": {"de": "PENDENTE", "para": ...} | 2          | 2025-01-10 14:30
+```
+
+---
+
+### 5.2 Exemplo 2: Estoque Lotes (Alocações Modificam Estado)
+
+**Events Table:**
+
+```sql
+CREATE TABLE estoque_lotes_events (
+    event_id BIGSERIAL PRIMARY KEY,
+    entidade_id INTEGER NOT NULL,          -- ID do lote
+    tipo VARCHAR(100) NOT NULL,
+    dados_anterior JSONB,
+    dados_novo JSONB,
+    mudancas_totais JSONB,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    motivo TEXT,
+    referencia_tipo VARCHAR(50),           -- 'alocacao', 'entrega', 'ajuste'
+    referencia_id INTEGER,
+    changed_at TIMESTAMPTZ DEFAULT NOW(),
+
+    CONSTRAINT chk_lote_eventos CHECK (tipo IN (
+        'LOTE_CRIADO',
+        'QUANTIDADE_ALTERADA',
+        'STATUS_ALTERADO',
+        'LOCALIZACAO_ALTERADA',
+        'LOTE_BLOQUEADO'
+    ))
+);
+
+CREATE INDEX idx_estoque_lotes_events_entidade ON estoque_lotes_events(entidade_id, changed_at DESC);
+CREATE INDEX idx_estoque_lotes_events_referencia ON estoque_lotes_events(referencia_tipo, referencia_id);
+
+CREATE TRIGGER trg_estoque_lotes_events_immutable
+    BEFORE UPDATE OR DELETE ON estoque_lotes_events
+    FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
+```
+
+**Materialized View:**
+
+```sql
+CREATE MATERIALIZED VIEW estoque_lotes AS
+SELECT DISTINCT ON (l.entidade_id)
+    l.entidade_id as id,
+    (l.dados_novo ->> 'produto_id')::INTEGER as produto_id,
+    (l.dados_novo ->> 'fornecedor_id')::INTEGER as fornecedor_id,
+    (l.dados_novo ->> 'numero_lote')::VARCHAR as numero_lote,
+    (l.dados_novo ->> 'quantidade_inicial')::DECIMAL(15,4) as quantidade_inicial,
+    (l.dados_novo ->> 'quantidade_disponivel')::DECIMAL(15,4) as quantidade_disponivel,
+    (l.dados_novo ->> 'quantidade_reservada')::DECIMAL(15,4) as quantidade_reservada,
+    (l.dados_novo ->> 'status')::estoque_lote_status as status,
+    l.changed_at,
+    l.usuario_id
+FROM estoque_lotes_events l
+ORDER BY l.entidade_id, l.changed_at DESC;
+
+CREATE UNIQUE INDEX idx_estoque_lotes_id ON estoque_lotes(id);
+CREATE INDEX idx_estoque_lotes_produto ON estoque_lotes(produto_id);
+CREATE INDEX idx_estoque_lotes_status ON estoque_lotes(status);
+```
+
+**Trigger para Alocação (agora INSERT evento, não UPDATE):**
+
+```sql
+CREATE OR REPLACE FUNCTION fn_alocacao_criada()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Inserir evento de redução de disponível
+    INSERT INTO estoque_lotes_events (
+        entidade_id, tipo, dados_anterior, dados_novo,
+        usuario_id, motivo, referencia_tipo, referencia_id
+    ) SELECT
+        NEW.lote_id,
+        'QUANTIDADE_ALTERADA',
+        jsonb_build_object(
+            'quantidade_disponivel', el.quantidade_disponivel,
+            'quantidade_reservada', el.quantidade_reservada
+        ),
+        jsonb_build_object(
+            'quantidade_disponivel', el.quantidade_disponivel - NEW.quantidade,
+            'quantidade_reservada', el.quantidade_reservada + NEW.quantidade,
+            'status', CASE WHEN (el.quantidade_disponivel - NEW.quantidade) = 0 THEN 'RESERVADO' ELSE 'DISPONIVEL' END
+        ),
+        NEW.created_by,
+        'Alocação de ' || NEW.quantidade || ' unidades',
+        'alocacao',
+        NEW.id
+    FROM estoque_lotes el
+    WHERE el.id = NEW.lote_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_alocacao_cria_evento
+    AFTER INSERT ON alocacoes
+    FOR EACH ROW EXECUTE FUNCTION fn_alocacao_criada();
+```
+
+---
+
+### 5.3 Exemplo 3: Alocações (Status ATIVO → ESTORNADO)
+
+**Events Table:**
+
+```sql
+CREATE TABLE alocacoes_events (
+    event_id BIGSERIAL PRIMARY KEY,
+    entidade_id INTEGER NOT NULL,          -- ID da alocação
+    tipo VARCHAR(100) NOT NULL,
+    dados_anterior JSONB,
+    dados_novo JSONB,
+    mudancas_totais JSONB,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    motivo TEXT,
+    changed_at TIMESTAMPTZ DEFAULT NOW(),
+
+    CONSTRAINT chk_alocacao_eventos CHECK (tipo IN (
+        'ALOCACAO_CRIADA',
+        'STATUS_ALTERADO',
+        'QUANTIDADE_AJUSTADA',
+        'ALOCACAO_ESTORNADA'
+    ))
+);
+
+CREATE INDEX idx_alocacoes_events_entidade ON alocacoes_events(entidade_id, changed_at DESC);
+```
+
+**Materialized View:**
+
+```sql
+CREATE MATERIALIZED VIEW alocacoes AS
+SELECT DISTINCT ON (a.entidade_id)
+    a.entidade_id as id,
+    (a.dados_novo ->> 'venda_item_id')::INTEGER as venda_item_id,
+    (a.dados_novo ->> 'lote_id')::INTEGER as lote_id,
+    (a.dados_novo ->> 'quantidade')::DECIMAL(15,4) as quantidade,
+    (a.dados_novo ->> 'custo_unitario')::DECIMAL(15,4) as custo_unitario,
+    (a.dados_novo ->> 'status')::VARCHAR as status,
+    a.changed_at,
+    a.usuario_id
+FROM alocacoes_events a
+ORDER BY a.entidade_id, a.changed_at DESC;
+```
+
+**Estorno (INSERT evento, não UPDATE):**
+
+```sql
+-- ❌ ANTES:
+UPDATE alocacoes SET status = 'TOTALMENTE_ESTORNADO' WHERE id = 99;
+
+-- ✅ DEPOIS:
+INSERT INTO alocacoes_events (entidade_id, tipo, dados_anterior, dados_novo, usuario_id, motivo)
+SELECT 99, 'ALOCACAO_ESTORNADA',
+       jsonb_build_object('status', 'ATIVO'),
+       jsonb_build_object('status', 'TOTALMENTE_ESTORNADO'),
+       1, 'Cliente rejeitou mercadoria - qualidade'
+FROM alocacoes
+WHERE id = 99;
+```
+
+---
+
+### 5.4 Setup pg_ivm para Views Incrementais
+
+**Instalação (uma única vez):**
+
+```sql
+-- Instalar extensão
+CREATE EXTENSION pg_ivm;
+
+-- Converter materialized views para incremental
+
+-- Para vendas:
+DROP MATERIALIZED VIEW vendas;
+
+CREATE INCREMENTAL MATERIALIZED VIEW vendas AS
+SELECT DISTINCT ON (v.entidade_id)
+    v.entidade_id as id,
+    (v.dados_novo ->> 'numero')::VARCHAR as numero,
+    (v.dados_novo ->> 'cliente_id')::INTEGER as cliente_id,
+    ...
+FROM vendas_events v
+ORDER BY v.entidade_id, v.changed_at DESC;
+
+-- Para estoque_lotes:
+DROP MATERIALIZED VIEW estoque_lotes;
+
+CREATE INCREMENTAL MATERIALIZED VIEW estoque_lotes AS
+SELECT DISTINCT ON (l.entidade_id)
+    ...
+FROM estoque_lotes_events l
+ORDER BY l.entidade_id, l.changed_at DESC;
+
+-- Para alocacoes:
+DROP MATERIALIZED VIEW alocacoes;
+
+CREATE INCREMENTAL MATERIALIZED VIEW alocacoes AS
+SELECT DISTINCT ON (a.entidade_id)
+    ...
+FROM alocacoes_events a
+ORDER BY a.entidade_id, a.changed_at DESC;
+
+-- Pronto! pg_ivm cuidará de manter todas as views atualizadas
+-- Não precisa de cron jobs ou REFRESH MATERIALIZED VIEW
+```
+
+---
+
+## 6. Comparação: Legado vs Novo
 
 | Aspecto | Legado | Novo |
 |---------|--------|------|
 | **Tabelas L1/L2** | venda_has_produto + venda_has_produto2 com idRelacionado | venda_itens única (sem splits) |
 | **Referência fornecedor** | VARCHAR em ~9 tabelas | fornecedor_id FK em todo lugar |
-| **Dados fiscais NFe** | ~30 colunas em estoque + estoque_has_consumo | JSONB em nfe_itens |
+| **Dados fiscais NFe** | ~30 colunas em estoque + estoque_has_consumo | JSONB em nfe_itens (imutável) |
 | **Status** | Strings mágicas ("Em Estoque") | ENUMs PostgreSQL |
 | **Alocação de Estoque** | FIFO automático (quebrado) | M:N: múltiplos lotes por venda_item + entrega_itens para parciais |
-| **Auditoria** | Nenhuma | audit_log + triggers |
+| **Auditoria** | Nenhuma | **Event Sourcing completo** via `*_events` tables |
+| **Histórico** | Triggers complexos em UPDATE | INSERTs imutáveis (sem UPDATE) |
+| **Views Atualizadas** | Nenhuma | **pg_ivm**: views incrementais em tempo real |
 | **Tabela produto** | 100+ colunas | produtos + produto_precos + produto_tributos |
 | **Devoluções** | Incompleto | alocacoes.status (ATIVO/PARCIALMENTE_ESTORNADO/TOTALMENTE_ESTORNADO) |
 | **Financeiro** | contas_receber + parcelas_receber + contas_pagar + parcelas_pagar (4 tabelas) | financeiro_parcelas unificado (1 tabela + 2 views) |
 | **Localização Estoque** | Sem suporte a split (1 lote = 1 bloco) | estoque_localizacoes (1 lote → múltiplos blocos) |
+| **Imutabilidade** | Nenhuma | fn_prevent_mutation() em todas as tabelas críticas |
+| **Recuperação Temporal** | Impossível ("como era em Jan?") | Trivial: replay eventos até data desejada |
 
 ---
 
-## 6. Estatísticas do Schema
+## 6. Estatísticas do Schema (Event Sourcing Edition)
 
 | Métrica | Quantidade |
 |---------|------------|
 | ENUMs | 16 |
-| Tabelas | 31 (+ 1 integridade_log) |
-| Views | 7 (+ 3 verificação) |
-| Triggers | 6 |
-| Funções PL/pgSQL | 8 (+ 2 verificação) |
-| Índices | ~47 |
-| CHECK Constraints | ~37 |
+| **Tabelas Operacionais** | 31 (estado atual) |
+| **Tabelas Events** | 15+ (histórico imutável) |
+| **Materialized Views** | 15+ (via pg_ivm incremental) |
+| **Views (Auditoria)** | 7 (+ 3 verificação) |
+| Triggers | 20+ (INSERT eventos, validação) |
+| Funções PL/pgSQL | 12+ (incluindo fn_prevent_mutation) |
+| Índices | ~70+ (events tables + views + verificação) |
+| CHECK Constraints | ~40 |
 | GENERATED Columns | 2 |
+| **Imutáveis (fn_prevent_mutation)** | 5 tabelas críticas mínimo |
 
-**Enforcement Mechanisms**:
-- **CAMADA 1**: 7 CHECK constraints na quantidade
-- **CAMADA 2**: 2 GENERATED columns (custo_total)
-- **CAMADA 3**: 6 triggers (validação + atualização)
-- **CAMADA 4**: 3 views de verificação + 1 função periódica + 1 tabela de log
+**Enforcement Mechanisms (5 Camadas)**:
+- **CAMADA 1**: CHECK constraints na quantidade (~7)
+- **CAMADA 2**: GENERATED columns (custo_total auto-calculado)
+- **CAMADA 3**: Triggers INSERT em `*_events` (validação + evento)
+- **CAMADA 4**: fn_prevent_mutation() (imutabilidade)
+- **CAMADA 5**: Verificação periódica + integridade_log
 
-**Nota**:
-- Schema reduzido em 3 tabelas (contas_receber, parcelas_receber, contas_pagar, parcelas_pagar → financeiro_parcelas unificado)
-- Views adicionadas (parcelas_receber, parcelas_pagar) para manter clarity semântica
+**Nota sobre Event Sourcing**:
+- **`*_events` tables**: Append-only, nunca UPDATE/DELETE. Imutáveis por trigger.
+- **Materialized Views**: Reconstruem estado atual a partir dos eventos mais recentes.
+- **pg_ivm**: Extension que mantém views atualizadas incrementalmente em tempo real.
+- **Zero cron jobs**: Não é preciso `REFRESH MATERIALIZED VIEW` manual. Automático.
+- **Recuperação Temporal**: Restaurar estado em qualquer data? Replay eventos até aquela data.
+- **Compliance**: Dados fiscais, movimentações e auditoria jamais podem ser alterados.
+- **Performance**: Append-only é otimizado para disco. Sem UPDATE contention.
 - ENUM adicional: financeiro_tipo (RECEBER/PAGAR)
 - Nova tabela: estoque_localizacoes (para split de paletes em múltiplos blocos)
 - Adicionado: integridade_log para auditoria de verificações periódicas

@@ -1,4 +1,11 @@
-# Análise: Event Sourcing para o ERP
+# Event Sourcing Architecture (Evaluated for v2+)
+
+> **Decision**: Not adopted for v1 - deferred to v2+
+> **Reason**: Team size/complexity tradeoff not justified for initial release
+> **Status**: Kept for future reconsideration
+> **Note**: schema-proposto-flowchart.md explores pg_ivm (incremental materialized views) which is an ES-adjacent pattern we ARE adopting
+
+---
 
 > **Status**: Avaliado e **não adotado** para v1
 > **Data**: 2025-12-28

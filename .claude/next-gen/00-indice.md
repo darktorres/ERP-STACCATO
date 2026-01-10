@@ -17,15 +17,17 @@
 
 ## Links Rapidos
 
-| Precisa...                  | Va para                                                                                |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| Entender o projeto          | [Visao Geral](#visao-geral-do-projeto)                                                 |
-| Entender fluxos de negocio  | [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md)         |
-| Comparar legado vs novo     | [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md) |
-| Ver decisoes de arquitetura | [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)                                     |
-| Ver arquitetura Laravel     | [04-arquitetura/01-arquitetura.md](./04-arquitetura/01-arquitetura.md)                 |
-| Ver design do banco         | [04-arquitetura/02-banco-dados.md](./04-arquitetura/02-banco-dados.md)                 |
-| Verificar fases da migracao | [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md)                 |
+| Precisa...                     | Va para                                                                                |
+| ------------------------------ | -------------------------------------------------------------------------------------- |
+| Entender o projeto             | [Visao Geral](#visao-geral-do-projeto)                                                 |
+| Entender fluxos de negocio     | [01-contexto/01-visao-geral-fluxos.md](./01-contexto/01-visao-geral-fluxos.md)         |
+| Comparar legado vs novo        | [02-analise/01-comparativo-legado-novo.md](./02-analise/01-comparativo-legado-novo.md) |
+| Ver schema PostgreSQL completo | [03-decisoes/02-schema-redesenhado.md](./03-decisoes/02-schema-redesenhado.md)         |
+| Ver arquitetura visual schema  | [03-decisoes/02-schema-visual-overview.md](./03-decisoes/02-schema-visual-overview.md) |
+| Ver decisoes de arquitetura    | [03-decisoes/01-adrs.md](./03-decisoes/01-adrs.md)                                     |
+| Ver arquitetura Laravel        | [04-arquitetura/01-arquitetura.md](./04-arquitetura/01-arquitetura.md)                 |
+| Ver design do banco            | [04-arquitetura/02-banco-dados.md](./04-arquitetura/02-banco-dados.md)                 |
+| Verificar fases da migracao    | [05-execucao/01-plano-migracao.md](./05-execucao/01-plano-migracao.md)                 |
 
 ---
 
@@ -75,7 +77,8 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 │
 ├── 03-decisoes/                          # FASE 3: O que escolhemos
 │   ├── 01-adrs.md                        # Registros de Decisao de Arquitetura
-│   ├── 02-schema-redesenhado.md          # Schema completo redesenhado
+│   ├── 02-schema-redesenhado.md          # 🟢 AUTHORITATIVE - Schema PostgreSQL completo
+│   ├── 02-schema-visual-overview.md      # 📊 Visual companion (flowcharts + patterns)
 │   └── 03-design-greenfield.md           # Design de fluxo greenfield
 │
 ├── 04-arquitetura/                       # FASE 4: Como construir
@@ -114,10 +117,11 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 │   ├── 03-paridade-funcionalidades.md    # Checklist de paridade funcional
 │   └── 04-treinamento.md                 # Plano de treinamento e rollout
 │
-└── rascunhos/                            # Ideias e rascunhos exploratorios
-    ├── schema-alternativo-2-entidades.md # Brainstorm de schema alternativo
-    ├── schema-proposto.md                # Schema proposto (em desenvolvimento)
-    └── event-sourcing-analise.md         # Analise de Event Sourcing (nao adotado)
+└── rascunhos/                            # Exploracoes e Decisoes Avaliadas
+    ├── 1nn-problem-flowchart.md          # 🔴 LEIA PRIMEIRO - Análise do problema raiz
+    ├── schema-alternativo-2-entidades.md # 📋 Avaliado - Modelo 2 entidades (não adotado)
+    ├── schema-proposto.md                # ❌ DEPRECATED - Use 03-decisoes/02-schema-redesenhado.md
+    └── event-sourcing-analise.md         # 📋 Avaliado para v2+ - Event Sourcing (não v1)
 ```
 
 ---
@@ -148,11 +152,12 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 ## 03 - Decisoes (O Que Escolhemos)
 
-| Doc                                          | Titulo             | Descricao                                    |
-| -------------------------------------------- | ------------------ | -------------------------------------------- |
-| [01](./03-decisoes/01-adrs.md)               | ADRs               | Laravel, PostgreSQL, frontend, NFe, migracao |
-| [02](./03-decisoes/02-schema-redesenhado.md) | Schema Redesenhado | Schema completo com todas as correcoes       |
-| [03](./03-decisoes/03-design-greenfield.md)  | Design Greenfield  | Reimaginacao completa do sistema             |
+| Doc                                                    | Titulo                   | Descricao                                          |
+| ------------------------------------------------------ | ------------------------ | -------------------------------------------------- |
+| [01](./03-decisoes/01-adrs.md)                         | ADRs                     | Laravel, PostgreSQL, frontend, NFe, migracao      |
+| [02](./03-decisoes/02-schema-redesenhado.md)           | Schema Redesenhado       | 🟢 **AUTHORITATIVE** - Schema PostgreSQL completo |
+| [02b](./03-decisoes/02-schema-visual-overview.md)      | Visual Overview          | 📊 Flowcharts, Event Sourcing, allocation models  |
+| [03](./03-decisoes/03-design-greenfield.md)            | Design Greenfield        | Reimaginacao completa do sistema                  |
 
 ---
 

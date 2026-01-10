@@ -1,4 +1,10 @@
-# Schema Alternativo: 2 Entidades (Brainstorm)
+# Schema Alternativo: 2-Entity Model (Evaluated - Not Adopted)
+
+> **Decision**: 3-Entity model selected (See [03-decisoes/02-schema-redesenhado.md](../../03-decisoes/02-schema-redesenhado.md))
+> **Status**: Evaluation complete - Kept for future reference
+> **When to read**: If reconsidering architectural tradeoffs or planning v2+ refactoring
+
+---
 
 > Status: **Brainstorm**
 > Última atualização: 2025-12-28

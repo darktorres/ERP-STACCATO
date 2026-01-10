@@ -116,9 +116,12 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 │   ├── 03-paridade-funcionalidades.md    # Checklist de paridade funcional
 │   └── 04-treinamento.md                 # Plano de treinamento e rollout
 │
+├── greenfield/                           # V2.0+ Enterprise Vision
+│   ├── 01-design-greenfield.md           # 📘 Complete system design (v2.0 goal)
+│   ├── 02-v1-v2-evolution-roadmap.md     # 🛣️ Incremental evolution path v1→v2+
+│   └── 03-greenfield-vs-schema-comparison.md  # 📊 Feature comparison analysis
+│
 └── rascunhos/                            # Exploracoes Ativas e Referencias
-    ├── v1-v2-evolution-roadmap.md        # 🛣️ V1→V2+ incremental evolution path
-    ├── 03-design-greenfield.md           # 📘 Complete system design overview (v2.0 vision)
     ├── alocacao-m2n-workflow.md          # 📘 M:N allocation workflow guide
     └── event-sourcing-analise.md         # 🔮 Event Sourcing v2+ roadmap (hybrid in v1)
 ```
@@ -235,14 +238,24 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 ---
 
+## Greenfield (V2.0+ Enterprise Vision)
+
+Documentos sobre o design completo v2.0 e roadmap de evolução:
+
+| Doc                                                              | Titulo               | Descricao                                                  |
+| -------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
+| [design](./greenfield/01-design-greenfield.md)                 | Complete System Design | Design overview v2.0 (target enterprise architecture)     |
+| [evolution](./greenfield/02-v1-v2-evolution-roadmap.md)        | V1→V2+ Evolution Map | Roadmap for incremental evolution (8-part strategy)       |
+| [comparison](./greenfield/03-greenfield-vs-schema-comparison.md) | Greenfield vs Schema | Feature comparison (v2.0 vision vs v1.0 pragmatic)       |
+
+---
+
 ## Rascunhos
 
-Documentos de referencia ativa (exploracoes, roadmaps, design completo):
+Documentos de referencia ativa (exploracoes, padroes, design patterns):
 
 | Doc                                                           | Titulo               | Descricao                                                  |
 | ----------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
-| [v1-v2-evolution](./rascunhos/v1-v2-evolution-roadmap.md)    | V1→V2+ Evolution Map | Roadmap for evolving from pragmatic v1 to enterprise v2+   |
-| [design-greenfield](./rascunhos/03-design-greenfield.md)    | Complete System Design | Design overview v1.0 (antes module-specific deep-dives)   |
 | [alocacao-m2n](./rascunhos/alocacao-m2n-workflow.md)        | M:N Allocation Flow  | Detailed workflow guide para modelo de alocacoes          |
 | [event-sourcing](./rascunhos/event-sourcing-analise.md)     | Event Sourcing Road  | Roadmap para v2+ (ES + CQRS), hybrid approach em v1       |
 

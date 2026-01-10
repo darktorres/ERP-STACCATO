@@ -478,10 +478,10 @@ class EstoqueService
     /**
      * Record incoming stock from NFe with RECEBIDO event
      */
-    public function darEntrada(array $dados): Estoque
+    public function darEntrada(array $dados): EstoqueLote
     {
         return DB::transaction(function () use ($dados) {
-            $estoque = Estoque::create([
+            $estoque = EstoqueLote::create([
                 'loja_id' => $dados['loja_id'],
                 'nfe_id' => $dados['nfe_id'],
                 'produto_id' => $dados['produto_id'],
@@ -518,7 +518,7 @@ class EstoqueService
      * Adjust inventory with audit trail
      */
     public function ajustar(
-        Estoque $estoque,
+        EstoqueLote $estoque,
         float $novaQuantidade,
         string $motivo
     ): void {
@@ -555,7 +555,7 @@ class EstoqueService
      * Register breakage/loss with complete audit trail
      */
     public function registrarQuebra(
-        Estoque $estoque,
+        EstoqueLote $estoque,
         float $quantidade,
         string $motivo
     ): void {
@@ -594,10 +594,10 @@ class AlocacaoService
                 'event_type' => AllocationEventType::REVERTIDA->value,
                 'event_data' => json_encode([
                     'venda_item_id' => $alocacao->venda_item_id,
-                    'estoque_id' => $alocacao->estoque_id,
+                    'estoque_lote_id' => $alocacao->estoque_lote_id,
                     'quantidade_revertida' => $alocacao->quantidade,
                     'motivo' => $motivo,
-                    'custo_impactado' => $alocacao->quantidade * $alocacao->estoque->custo_unitario,
+                    'custo_impactado' => $alocacao->quantidade * $alocacao->estoqueLote->custo_unitario,
                 ]),
                 'usuario_id' => auth()->id(),
                 'ip_address' => request()->ip(),

@@ -585,26 +585,26 @@ class VendaService
 // app/Services/Estoque/AlocacaoService.php
 class AlocacaoService
 {
-    public function alocar(int $vendaItemId, int $estoqueId, float $quantidade): Alocacao
+    public function alocar(int $vendaItemId, int $estoqueLoteId, float $quantidade): Alocacao
     {
-        return DB::transaction(function () use ($vendaItemId, $estoqueId, $quantidade) {
+        return DB::transaction(function () use ($vendaItemId, $estoqueLoteId, $quantidade) {
             $alocacao = Alocacao::create([
                 'venda_item_id' => $vendaItemId,
-                'estoque_id' => $estoqueId,
+                'estoque_lote_id' => $estoqueLoteId,
                 'quantidade' => $quantidade,
                 'status' => AlocacaoStatus::ATIVO,
             ]);
 
             // Record CRIADA event
-            DB::table('alocacoes_events')->insert([
+            DB::table('alocacoes_eventos')->insert([
                 'alocacao_id' => $alocacao->id,
                 'event_type' => AlocacaoEventType::CRIADA->value,
                 'event_data' => json_encode([
                     'venda_item_id' => $vendaItemId,
-                    'estoque_id' => $estoqueId,
+                    'estoque_lote_id' => $estoqueLoteId,
                     'quantidade' => $quantidade,
-                    'custo_unitario' => $alocacao->estoque->custo_unitario,
-                    'valor_total' => $quantidade * $alocacao->estoque->custo_unitario,
+                    'custo_unitario' => $alocacao->estoqueLote->custo_unitario,
+                    'valor_total' => $quantidade * $alocacao->estoqueLote->custo_unitario,
                 ]),
                 'usuario_id' => auth()->id(),
                 'ip_address' => request()->ip(),

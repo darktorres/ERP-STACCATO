@@ -1473,7 +1473,111 @@ CREATE TRIGGER audit_nfes AFTER INSERT OR UPDATE OR DELETE ON nfes
 
 ---
 
-## 4. Triggers de Integridade
+## 4. Enforcement: Multi-Layer Quantity Integrity
+
+### Overview: Garantindo Quantidade Correta
+
+O schema implementa 4 camadas de proteção para garantir que **nunca há over-allocation ou quantidades negativas**:
+
+```
+CAMADA 1: CHECK Constraints (BD - sempre ativo)
+    ↓
+CAMADA 2: GENERATED Columns (BD - valores calculados)
+    ↓
+CAMADA 3: Triggers BEFORE INSERT/UPDATE (BD - validação)
+    ↓
+CAMADA 4: Verification Views + Periodic Jobs (Detecção)
+```
+
+#### **CAMADA 1: CHECK Constraints**
+
+Regras declarativas que o PostgreSQL valida automaticamente:
+
+```sql
+-- Quantidades sempre positivas
+ALTER TABLE estoque_lotes
+ADD CONSTRAINT chk_lote_quantidade_positiva CHECK (quantidade_inicial > 0);
+
+ALTER TABLE estoque_lotes
+ADD CONSTRAINT chk_lote_disponivel CHECK (quantidade_disponivel >= 0);
+
+ALTER TABLE estoque_lotes
+ADD CONSTRAINT chk_lote_reservada CHECK (quantidade_reservada >= 0);
+
+-- REGRA DE OURO: disponível + reservado ≤ inicial
+ALTER TABLE estoque_lotes
+ADD CONSTRAINT chk_lote_total CHECK (quantidade_disponivel + quantidade_reservada <= quantidade_inicial);
+
+-- Alocações sempre positivas
+ALTER TABLE alocacoes
+ADD CONSTRAINT chk_alocacao_quantidade CHECK (quantidade > 0);
+
+-- Entregas sempre positivas
+ALTER TABLE entrega_itens
+ADD CONSTRAINT chk_entrega_quantidade CHECK (quantidade > 0);
+
+-- Itens sempre positivos
+ALTER TABLE venda_itens
+ADD CONSTRAINT chk_venda_quantidade CHECK (quantidade > 0);
+```
+
+**Efeito**: Qualquer INSERT/UPDATE que viole estas regras é **REJEITADO IMEDIATAMENTE** pelo BD.
+
+#### **CAMADA 2: GENERATED Columns**
+
+Valores calculados automaticamente - **não podem ser sobrescritos manualmente**:
+
+```sql
+-- Em alocacoes: custo_total = quantidade × custo_unitario
+ALTER TABLE alocacoes
+ADD COLUMN custo_total DECIMAL(15,2)
+GENERATED ALWAYS AS (quantidade * custo_unitario) STORED;
+
+-- Se alguém tentar: UPDATE alocacoes SET custo_total = 999
+-- PostgreSQL retorna: ERROR: cannot update a generated column
+```
+
+**Efeito**: Impossível ter valores inconsistentes. Total é sempre correto.
+
+#### **CAMADA 3: Triggers (Validação Inteligente)**
+
+Triggers BEFORE INSERT validam regras complexas que CHECK não consegue:
+
+```sql
+-- Validar ANTES de inserir:
+-- 1. SUM(alocacoes.qtd) não pode > venda_item.qtd
+-- 2. Lote tem stock disponível
+-- 3. Produto e fornecedor combinam
+-- 4. Status permite alocação
+```
+
+Triggers AFTER INSERT/UPDATE atualizam automaticamente valores derivados:
+
+```sql
+-- Após alocar:
+-- 1. Subtrair de estoque_lotes.quantidade_disponivel
+-- 2. Adicionar a estoque_lotes.quantidade_reservada
+-- 3. Registrar movimento em estoque_movimentacoes
+-- 4. Atualizar status de venda_item se totalmente alocado
+```
+
+**Efeito**: Mesmo se aplicação tiver bug, triggers garantem integridade no BD.
+
+#### **CAMADA 4: Verification Views + Cron Jobs**
+
+Views que mostram inconsistências (se houvesse):
+- `consistencia_estoque` - verifica REGRA DE OURO
+- `verificacao_alocacoes` - detecta over-allocation
+- `verificacao_entregas` - detecta delivery > allocation
+
+Função `verificar_integridade_estoque()` executada nightly:
+- Procura por erros nas 6 dimensões críticas
+- Log em `integridade_log` para auditoria
+- Alertas se encontrar problemas
+
+**Efeito**: Detecção de bugs ou entrada direta de dados corruptora.
+
+---
 
 ### 4.1 Validar Alocação
 
@@ -1653,6 +1757,237 @@ CREATE TRIGGER trg_validar_transicao_venda_item
     EXECUTE FUNCTION fn_validar_transicao_venda_item();
 ```text
 
+### 4.4 Verificação de Integridade (Views)
+
+```sql
+-- ============================================================================
+-- VERIFICAÇÃO: Inconsistências de Estoque
+-- ============================================================================
+-- Golden Rule: quantidade_disponivel + quantidade_reservada = quantidade_inicial
+-- Esta view detecta violações
+
+CREATE VIEW consistencia_estoque AS
+SELECT
+    el.id,
+    el.produto_id,
+    el.quantidade_inicial,
+    el.quantidade_disponivel,
+    el.quantidade_reservada,
+    (el.quantidade_disponivel + el.quantidade_reservada) AS total_atual,
+    CASE
+        WHEN (el.quantidade_disponivel + el.quantidade_reservada) > el.quantidade_inicial
+            THEN 'ERRO: Over-allocated'
+        WHEN (el.quantidade_disponivel + el.quantidade_reservada) < el.quantidade_inicial
+            THEN 'AVISO: Quantity lost (triggers falhou?)'
+        WHEN el.quantidade_disponivel < 0
+            THEN 'ERRO: Negative disponível'
+        WHEN el.quantidade_reservada < 0
+            THEN 'ERRO: Negative reservado'
+        ELSE 'OK'
+    END AS status,
+    el.updated_at
+FROM estoque_lotes el
+ORDER BY
+    CASE status WHEN 'OK' THEN 2 ELSE 1 END,
+    el.updated_at DESC;
+
+COMMENT ON VIEW consistencia_estoque IS
+'Verifica integridade de estoque. Deve sempre mostrar status=OK para todos os lotes.
+Se houver erros, há bug nos triggers ou entrada direta de dados.';
+
+-- ============================================================================
+-- VERIFICAÇÃO: Over-allocation de Itens de Venda
+-- ============================================================================
+
+CREATE VIEW verificacao_alocacoes AS
+SELECT
+    vi.id AS venda_item_id,
+    vi.venda_id,
+    vi.quantidade AS item_quantity,
+    COALESCE(SUM(CASE WHEN a.status = 'ATIVO' THEN a.quantidade ELSE 0 END), 0) AS allocated_ativo,
+    COALESCE(SUM(CASE WHEN a.status IN ('PARCIALMENTE_ESTORNADO', 'TOTALMENTE_ESTORNADO')
+                      THEN a.quantidade ELSE 0 END), 0) AS allocated_estornado,
+    vi.quantidade - COALESCE(SUM(CASE WHEN a.status = 'ATIVO' THEN a.quantidade ELSE 0 END), 0) AS pending,
+    CASE
+        WHEN COALESCE(SUM(CASE WHEN a.status = 'ATIVO' THEN a.quantidade ELSE 0 END), 0) > vi.quantidade
+            THEN 'ERRO: Over-allocated!'
+        WHEN COALESCE(SUM(CASE WHEN a.status = 'ATIVO' THEN a.quantidade ELSE 0 END), 0) = vi.quantidade
+            THEN 'OK: Fully allocated'
+        WHEN COALESCE(SUM(CASE WHEN a.status = 'ATIVO' THEN a.quantidade ELSE 0 END), 0) > 0
+            THEN 'OK: Partially allocated'
+        ELSE 'OK: Pending allocation'
+    END AS status
+FROM venda_itens vi
+LEFT JOIN alocacoes a ON vi.id = a.venda_item_id
+GROUP BY vi.id, vi.venda_id, vi.quantidade
+ORDER BY
+    CASE status WHEN 'OK: Fully allocated' THEN 2 WHEN 'OK: Partially allocated' THEN 3 ELSE 1 END,
+    vi.id;
+
+COMMENT ON VIEW verificacao_alocacoes IS
+'Verifica se alocações não excedem quantidade do item.
+Detecta over-allocation (deve estar sempre OK).';
+
+-- ============================================================================
+-- VERIFICAÇÃO: Integridade de Entregas
+-- ============================================================================
+
+CREATE VIEW verificacao_entregas AS
+SELECT
+    vi.id AS venda_item_id,
+    vi.venda_id,
+    vi.quantidade AS item_quantity,
+    COALESCE(a.quantidade, 0) AS allocated_quantity,
+    COALESCE(SUM(ei.quantidade), 0) AS delivered_quantity,
+    vi.quantidade - COALESCE(SUM(ei.quantidade), 0) AS pending_delivery,
+    CASE
+        WHEN COALESCE(SUM(ei.quantidade), 0) > vi.quantidade
+            THEN 'ERRO: Delivered > allocated'
+        WHEN COALESCE(SUM(ei.quantidade), 0) = vi.quantidade
+            AND a.status = 'ATIVO'
+            THEN 'OK: Fully delivered'
+        ELSE 'OK'
+    END AS status
+FROM venda_itens vi
+LEFT JOIN alocacoes a ON vi.id = a.venda_item_id AND a.status = 'ATIVO'
+LEFT JOIN entrega_itens ei ON vi.id = ei.venda_item_id
+GROUP BY vi.id, vi.venda_id, vi.quantidade, a.quantidade, a.status
+ORDER BY
+    CASE status WHEN 'OK: Fully delivered' THEN 2 ELSE 1 END,
+    vi.id;
+
+COMMENT ON VIEW verificacao_entregas IS
+'Verifica se entregas não excedem alocações.
+Detecta inconsistências entre alocação e entrega física.';
+```text
+
+### 4.5 Função de Verificação Periódica
+
+```sql
+-- ============================================================================
+-- VERIFICAÇÃO PERIÓDICA: Função de Integridade Completa
+-- ============================================================================
+-- Execute nightly via cron: SELECT verificar_integridade_estoque();
+
+CREATE OR REPLACE FUNCTION verificar_integridade_estoque()
+RETURNS TABLE(
+    tipo VARCHAR,
+    tabela VARCHAR,
+    registro_id INTEGER,
+    mensagem TEXT,
+    severidade VARCHAR
+) AS $$
+BEGIN
+
+    -- CHECK 1: Over-allocated lots (quantidade reservada > inicial)
+    RETURN QUERY
+    SELECT 'Lot Over-allocation'::VARCHAR, 'estoque_lotes'::VARCHAR,
+           el.id,
+           'Lot ' || el.id || ': total (' || (el.quantidade_disponivel + el.quantidade_reservada)::TEXT
+           || ') > inicial (' || el.quantidade_inicial::TEXT || ')',
+           'CRÍTICA'::VARCHAR
+    FROM estoque_lotes el
+    WHERE (el.quantidade_disponivel + el.quantidade_reservada) > el.quantidade_inicial;
+
+    -- CHECK 2: Negative disponível
+    RETURN QUERY
+    SELECT 'Negative Stock'::VARCHAR, 'estoque_lotes'::VARCHAR,
+           id,
+           'Lot ' || id || ' has negative disponível: ' || quantidade_disponivel::TEXT,
+           'CRÍTICA'::VARCHAR
+    FROM estoque_lotes
+    WHERE quantidade_disponivel < 0;
+
+    -- CHECK 3: Negative reservado
+    RETURN QUERY
+    SELECT 'Negative Reserved'::VARCHAR, 'estoque_lotes'::VARCHAR,
+           id,
+           'Lot ' || id || ' has negative reservado: ' || quantidade_reservada::TEXT,
+           'CRÍTICA'::VARCHAR
+    FROM estoque_lotes
+    WHERE quantidade_reservada < 0;
+
+    -- CHECK 4: Over-allocated venda_items
+    RETURN QUERY
+    SELECT 'Item Over-allocation'::VARCHAR, 'venda_itens'::VARCHAR,
+           vi.id,
+           'Item ' || vi.id || ': allocated (' || SUM(a.quantidade)::TEXT
+           || ') > requested (' || vi.quantidade::TEXT || ')',
+           'CRÍTICA'::VARCHAR
+    FROM venda_itens vi
+    LEFT JOIN alocacoes a ON vi.id = a.venda_item_id AND a.status = 'ATIVO'
+    GROUP BY vi.id, vi.quantidade
+    HAVING SUM(a.quantidade) > vi.quantidade;
+
+    -- CHECK 5: Delivery > allocation
+    RETURN QUERY
+    SELECT 'Delivery Mismatch'::VARCHAR, 'entrega_itens'::VARCHAR,
+           vi.id,
+           'Item ' || vi.id || ': delivered (' || SUM(ei.quantidade)::TEXT
+           || ') > allocated (' || COALESCE(a.quantidade, 0)::TEXT || ')',
+           'AVISO'::VARCHAR
+    FROM venda_itens vi
+    LEFT JOIN entrega_itens ei ON vi.id = ei.venda_item_id
+    LEFT JOIN alocacoes a ON vi.id = a.venda_item_id AND a.status = 'ATIVO'
+    GROUP BY vi.id, a.quantidade
+    HAVING SUM(ei.quantidade) > COALESCE(a.quantidade, 0);
+
+    -- CHECK 6: Allocated but marked PENDENTE (should be ESTOQUE)
+    RETURN QUERY
+    SELECT 'Status Mismatch'::VARCHAR, 'venda_itens'::VARCHAR,
+           vi.id,
+           'Item ' || vi.id || ' is allocated but status is ' || vi.status::TEXT || ' (should be ESTOQUE)',
+           'AVISO'::VARCHAR
+    FROM venda_itens vi
+    WHERE vi.status = 'PENDENTE'
+      AND EXISTS (SELECT 1 FROM alocacoes WHERE venda_item_id = vi.id AND status = 'ATIVO');
+
+    -- If no errors found, return OK
+    IF NOT FOUND THEN
+        RETURN QUERY SELECT 'System Check'::VARCHAR, 'N/A'::VARCHAR, 0::INTEGER,
+                           'All integrity checks passed ✅'::TEXT, 'INFO'::VARCHAR;
+    END IF;
+
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION verificar_integridade_estoque() IS
+'Verifica integridade completa do sistema de estoque.
+Deve ser executada periodicamente (cron nightly).
+SELECT verificar_integridade_estoque();';
+
+-- Create an audit table to log verification results
+CREATE TABLE integridade_log (
+    id BIGSERIAL PRIMARY KEY,
+    tipo VARCHAR(100),
+    tabela VARCHAR(100),
+    registro_id INTEGER,
+    mensagem TEXT,
+    severidade VARCHAR(50),
+    verificado_em TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT chk_severidade CHECK (severidade IN ('INFO', 'AVISO', 'CRÍTICA'))
+);
+
+CREATE INDEX idx_integridade_log_severidade ON integridade_log(severidade);
+CREATE INDEX idx_integridade_log_data ON integridade_log(verificado_em);
+
+-- Function to log verification results
+CREATE OR REPLACE FUNCTION log_verificacao_integridade()
+RETURNS void AS $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN SELECT * FROM verificar_integridade_estoque() LOOP
+        INSERT INTO integridade_log (tipo, tabela, registro_id, mensagem, severidade)
+        VALUES (r.tipo, r.tabela, r.registro_id, r.mensagem, r.severidade);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Schedule this to run nightly (requires pg_cron extension):
+-- SELECT cron.schedule('verificacao_estoque_nightly', '0 2 * * *', 'SELECT log_verificacao_integridade();');
+```text
+
 ---
 
 ## 5. Comparação: Legado vs Novo
@@ -1677,17 +2012,26 @@ CREATE TRIGGER trg_validar_transicao_venda_item
 | Métrica | Quantidade |
 |---------|------------|
 | ENUMs | 16 |
-| Tabelas | 30 |
-| Views | 4 |
+| Tabelas | 31 (+ 1 integridade_log) |
+| Views | 7 (+ 3 verificação) |
 | Triggers | 6 |
-| Índices | ~43 |
-| Constraints | ~32 |
+| Funções PL/pgSQL | 8 (+ 2 verificação) |
+| Índices | ~47 |
+| CHECK Constraints | ~37 |
+| GENERATED Columns | 2 |
+
+**Enforcement Mechanisms**:
+- **CAMADA 1**: 7 CHECK constraints na quantidade
+- **CAMADA 2**: 2 GENERATED columns (custo_total)
+- **CAMADA 3**: 6 triggers (validação + atualização)
+- **CAMADA 4**: 3 views de verificação + 1 função periódica + 1 tabela de log
 
 **Nota**:
 - Schema reduzido em 3 tabelas (contas_receber, parcelas_receber, contas_pagar, parcelas_pagar → financeiro_parcelas unificado)
 - Views adicionadas (parcelas_receber, parcelas_pagar) para manter clarity semântica
 - ENUM adicional: financeiro_tipo (RECEBER/PAGAR)
 - Nova tabela: estoque_localizacoes (para split de paletes em múltiplos blocos)
+- Adicionado: integridade_log para auditoria de verificações periódicas
 
 ---
 

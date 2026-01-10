@@ -11,7 +11,7 @@
 | Aspecto                | Sistema Legado (C++ Qt) | Novo Sistema (Laravel)     |
 | ---------------------- | ----------------------- | -------------------------- |
 | **Arquitetura**        | Desktop monolítico      | Web com Service Layer      |
-| **Banco de Dados**     | MySQL/MariaDB           | PostgreSQL 16              |
+| **Banco de Dados**     | MySQL/MariaDB           | PostgreSQL 18              |
 | **Frontend**           | Qt Widgets              | Inertia + Vue.js           |
 | **Estrutura de Dados** | Tabelas L1/L2           | Tabela única + parent_id   |
 | **Status**             | Strings mágicas         | ENUMs PostgreSQL           |

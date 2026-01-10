@@ -2,7 +2,7 @@
 
 > **Status**: Fase de Planejamento
 > **Ultima atualizacao**: 2025-12-29
-> **Stack Alvo**: Laravel 11 + PostgreSQL 16 + Inertia/Vue
+> **Stack Alvo**: Laravel 11 + PostgreSQL 18 + PHP 8.5 + Node 24 + Inertia/Vue
 
 ---
 

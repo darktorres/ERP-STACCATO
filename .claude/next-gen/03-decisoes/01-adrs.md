@@ -51,7 +51,7 @@ Usar **Laravel 11** como framework backend.
 
 ### Consequências - ADR-001
 
-- Necessário hosting PHP 8.2+
+- Necessário hosting PHP 8.5+
 - Equipe precisa treinamento em Laravel
 - Pode aproveitar pacotes Composer
 
@@ -73,7 +73,7 @@ Sistema atual usa MySQL/MariaDB. Avaliando opções de banco de dados:
 
 ### Decisão - ADR-002
 
-Migrar para **PostgreSQL 16**.
+Migrar para **PostgreSQL 18**.
 
 ### Justificativa - ADR-002
 

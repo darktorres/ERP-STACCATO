@@ -2,7 +2,7 @@
 
 > Status: **Rascunho**
 > Última atualização: 2025-12-28
-> Alvo: PostgreSQL 16
+> Alvo: PostgreSQL 18
 
 ---
 

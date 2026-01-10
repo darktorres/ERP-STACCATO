@@ -82,7 +82,7 @@ services:
       - staccato_network
 
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_db
     restart: unless-stopped
     environment:
@@ -103,7 +103,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: staccato_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
@@ -115,7 +115,7 @@ services:
       - staccato_network
 
   backup:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_backup
     restart: unless-stopped
     environment:

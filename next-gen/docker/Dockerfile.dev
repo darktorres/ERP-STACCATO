@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.5-fpm-alpine
 
 RUN apk add --no-cache \
     git \
@@ -42,7 +42,7 @@ RUN apk del .build-deps
 COPY docker/php/php-dev.ini /usr/local/etc/php/php.ini
 COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.9 /usr/bin/composer /usr/bin/composer
 
 RUN apk add --no-cache nodejs npm
 

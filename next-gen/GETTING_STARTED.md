@@ -130,7 +130,7 @@ docker-compose -f docker-compose.dev.yml down
 
 ### Prerequisites
 
-- PHP 8.3+ with extensions: pdo_pgsql, gd, zip, intl, bcmath, redis
+- PHP 8.5+ with extensions: pdo_pgsql, gd, zip, intl, bcmath, redis
 - PostgreSQL 15+
 - Redis 7+
 - Composer
@@ -437,6 +437,6 @@ php artisan serve --port=8001
 
 **Created**: 2026-01-10
 **Framework**: Laravel 11
-**PHP Version**: 8.3
+**PHP Version**: 8.5
 **Database**: PostgreSQL 16
 **Cache**: Redis 7

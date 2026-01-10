@@ -23,7 +23,7 @@ services:
       - staccato_dev
 
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_dev_db
     environment:
       - POSTGRES_DB=staccato_dev
@@ -37,7 +37,7 @@ services:
       - staccato_dev
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: staccato_dev_redis
     ports:
       - "6380:6379"

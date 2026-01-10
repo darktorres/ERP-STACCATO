@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Build Frontend Assets
 # ==========================================
-FROM node:20-alpine AS frontend
+FROM node:24-alpine AS frontend
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN npm run build
 # ==========================================
 # Stage 2: Composer Dependencies
 # ==========================================
-FROM composer:2.6 AS composer
+FROM composer:2.9 AS composer
 
 WORKDIR /app
 
@@ -36,7 +36,7 @@ RUN composer dump-autoload --optimize --no-dev
 # ==========================================
 # Stage 3: Production Image
 # ==========================================
-FROM php:8.3-fpm-alpine AS production
+FROM php:8.5-fpm-alpine AS production
 
 ARG APP_VERSION=1.0.0
 ARG BUILD_DATE

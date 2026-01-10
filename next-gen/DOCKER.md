@@ -68,7 +68,7 @@ docker-compose -f docker-compose.yml up -d
 
 | Service | Image | Port | Purpose |
 |---------|-------|------|---------|
-| **app** | PHP 8.3 FPM Alpine | 8000 | Laravel application with Xdebug |
+| **app** | PHP 8.5 FPM Alpine | 8000 | Laravel application with Xdebug |
 | **db** | PostgreSQL 16 Alpine | 5433 | Database server |
 | **redis** | Redis 7 Alpine | 6380 | Cache and session storage |
 | **mailpit** | Mailpit | 8025 | Email testing interface |
@@ -77,9 +77,9 @@ docker-compose -f docker-compose.yml up -d
 
 | Service | Image | Purpose |
 |---------|-------|---------|
-| **app** | PHP 8.3 FPM Alpine | Laravel application |
-| **queue** | PHP 8.3 FPM Alpine | Background job processing |
-| **scheduler** | PHP 8.3 FPM Alpine | Task scheduling |
+| **app** | PHP 8.5 FPM Alpine | Laravel application |
+| **queue** | PHP 8.5 FPM Alpine | Background job processing |
+| **scheduler** | PHP 8.5 FPM Alpine | Task scheduling |
 | **db** | PostgreSQL 16 Alpine | Database server |
 | **redis** | Redis 7 Alpine | Cache and session storage |
 | **backup** | PostgreSQL 16 Alpine | Automated backups |

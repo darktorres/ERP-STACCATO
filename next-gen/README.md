@@ -104,7 +104,7 @@ docker-compose -f docker-compose.dev.yml exec db psql -U staccato -d staccato_de
 
 ### Requirements
 
-- PHP 8.3+
+- PHP 8.5+
 - PostgreSQL 15+
 - Redis 7+
 - Composer

@@ -614,9 +614,9 @@ The key insight: **Evolution, not revolution**. By designing v1 to layer new cap
 
 ## Related Documents
 
-- [03-design-greenfield.md](./03-design-greenfield.md) - Complete v2.0 vision with all features
+- [01-design-greenfield.md](./01-design-greenfield.md) - Complete v2.0 vision with all features
+- [03-greenfield-vs-schema-comparison.md](./03-greenfield-vs-schema-comparison.md) - Detailed feature comparison
 - [02-schema-redesenhado.md](../03-decisoes/02-schema-redesenhado.md) - v1.0 proposed schema (primary reference)
-- [event-sourcing-analise.md](./event-sourcing-analise.md) - Full ES patterns and implementation details
-- [GREENFIELD-VS-SCHEMA-COMPARISON.md](../03-decisoes/GREENFIELD-VS-SCHEMA-COMPARISON.md) - Detailed feature comparison
-- [alocacao-m2n-workflow.md](./alocacao-m2n-workflow.md) - v1 allocation implementation guide
+- [event-sourcing-analise.md](../rascunhos/event-sourcing-analise.md) - Full ES patterns and implementation details
+- [alocacao-m2n-workflow.md](../rascunhos/alocacao-m2n-workflow.md) - v1 allocation implementation guide
 - [04-arquitetura/modulos/](../04-arquitetura/modulos/) - v1 module-specific implementations

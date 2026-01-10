@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-10
 **Documents**:
-- Greenfield: `rascunhos/03-design-greenfield.md` (1766 lines)
+- Greenfield: `greenfield/01-design-greenfield.md` (1766 lines)
 - Proposed: `03-decisoes/02-schema-redesenhado.md` (1800+ lines)
 
 ---

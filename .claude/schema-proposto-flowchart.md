@@ -4,6 +4,11 @@
 
 ```mermaid
 flowchart TB
+    subgraph Audit["🔍 AUDITORIA GLOBAL (Event Sourced)<br/>Aplica a TUDO"]
+        direction TB
+        AuditDesc["*_events tables para cada tabela<br/>(vendas_events, estoque_lotes_events, alocacoes_events, etc)<br/>audit_log + integridade_log<br/>Imutável: fn_prevent_mutation()"]
+    end
+
     subgraph MasterData["📋 DADOS MESTRES"]
         direction LR
         Lojas["lojas"]
@@ -32,8 +37,6 @@ flowchart TB
         Produtos --> Categorias
     end
 
-    MasterData --> CommercialFlow
-
     subgraph CommercialFlow["🛍️ FLUXO COMERCIAL"]
         direction TB
 
@@ -45,13 +48,13 @@ flowchart TB
 
         subgraph Sales["Vendas"]
             Venda["vendas"]
-            VendaItem["venda_itens<br/>(com parent_id/root_id)<br/>origem: COMPRA ou ESTOQUE"]
+            VendaItem["venda_itens<br/>origem: COMPRA ou ESTOQUE"]
             Venda --> VendaItem
         end
 
         subgraph Purchase["Compras"]
             Compra["compras"]
-            CompraItem["compra_itens<br/>(com parent_id/root_id)"]
+            CompraItem["compra_itens"]
             Compra --> CompraItem
         end
 
@@ -63,67 +66,49 @@ flowchart TB
         direction TB
 
         NFeTable["nfes<br/>tipo: ENTRADA<br/>compra_id"]
-        NFeItens["nfe_itens (JSONB)<br/>compra_item_id"]
+        NFeItens["nfe_itens (JSONB)<br/>Imutável"]
         NFeTable --> NFeItens
     end
-
-    Purchase -->|"Fornecedor envia"| NFe
-
-    NFe -->|"Cria Estoque"| Inventory
 
     subgraph Inventory["📦 INVENTÁRIO<br/>(Event Sourced)"]
         direction TB
 
         subgraph Events["Events (Append-Only)"]
-            LotesEvents["estoque_lotes_events<br/>(todas mudanças como eventos)<br/>Imutável: fn_prevent_mutation()"]
-            AlocationEvents["alocacoes_events<br/>(histórico de alocações)"]
+            LotesEvents["estoque_lotes_events<br/>alocacoes_events"]
         end
 
-        subgraph Views["Materialized Views<br/>(Current State via pg_ivm)"]
-            Lotes["estoque_lotes (view)<br/>(quantidade_disponível,<br/>quantidade_reservada)<br/>← reconstructed from events"]
-            Alocacoes["alocacoes (view)<br/>(venda_item ↔ lote)"]
+        subgraph Views["Materialized Views<br/>(pg_ivm)"]
+            Lotes["estoque_lotes"]
+            Alocacoes["alocacoes"]
         end
 
         subgraph Location["Localização no Galpão"]
             Blocos["galpao_blocos"]
-            Localizacoes["estoque_localizacoes<br/>(1 lote → múltiplos blocos)<br/>split de paletes"]
+            Localizacoes["estoque_localizacoes"]
             Blocos -.-> Localizacoes
-        end
-
-        subgraph StockLog["Log Histórico (Imutável)"]
-            Movimentacoes["estoque_movimentacoes_events<br/>(ENTRADA_COMPRA, SAIDA_VENDA, etc)<br/>Append-only audit trail"]
         end
 
         Events --> Views
         Views --> Location
-        Movimentacoes -.->|"auditoria"| Events
     end
-
-    Sales -->|"origem=ESTOQUE:<br/>aloca estoque existente"| Allocation
-
-    Inventory --> Logistics
 
     subgraph Logistics["🚚 LOGÍSTICA & SAÍDA"]
         direction TB
 
         subgraph LogisticCore["Entregas"]
             Entregas["entregas"]
-            EntregaItem["entrega_itens"]
+            EntregaItem["entrega_itens<br/>(Imutável)"]
             Entregas --> EntregaItem
         end
 
         subgraph NFeSaidaBox["NFe SAÍDA (Para Cliente)"]
-            NFeTableOut["nfes<br/>tipo: SAIDA<br/>venda_id"]
-            NFeItensOut["nfe_itens<br/>venda_item_id"]
+            NFeTableOut["nfes<br/>tipo: SAIDA"]
+            NFeItensOut["nfe_itens<br/>(Imutável)"]
             NFeTableOut --> NFeItensOut
         end
 
         LogisticCore --> NFeSaidaBox
     end
-
-    Sales -->|"Gera NFe para cliente"| NFeSaidaBox
-
-    Logistics --> Financial
 
     subgraph Financial["💰 FINANCEIRO (Unified)"]
         direction TB
@@ -132,31 +117,27 @@ flowchart TB
             FP["financeiro_parcelas<br/>(tipo: RECEBER ou PAGAR)"]
         end
 
-        subgraph Views["Clarity Views"]
+        subgraph Views2["Clarity Views"]
             VRec["parcelas_receber"]
             VPag["parcelas_pagar"]
         end
 
-        subgraph CNAB["CNAB/Remessa"]
-            Remessas["remessas_cnab"]
-            Retornos["retornos_cnab"]
-        end
-
-        FP --> Views
-        FP -.-> Remessas
+        FP --> Views2
     end
 
-    Financial --> Audit
+    MasterData -.->|"auditado por"| Audit
+    CommercialFlow -.->|"auditado por"| Audit
+    NFe -.->|"auditado por"| Audit
+    Inventory -.->|"auditado por"| Audit
+    Logistics -.->|"auditado por"| Audit
+    Financial -.->|"auditado por"| Audit
 
-    subgraph Audit["🔍 AUDITORIA (Event Sourced)"]
-        direction TB
-        AuditLog["audit_log<br/>(INSERT/UPDATE/DELETE<br/>com dados_antigos/novos)"]
-        EventLog["*_events tables<br/>(Todas: imutável append-only)<br/>vendas_events, estoque_lotes_events,<br/>alocacoes_events, entrega_itens_events"]
-        IntegridadeLog["integridade_log<br/>(Verificações periódicas)<br/>Imutável: fn_prevent_mutation()"]
-
-        AuditLog --> EventLog
-        EventLog --> IntegridadeLog
-    end
+    MasterData --> CommercialFlow
+    CommercialFlow --> NFe
+    NFe -->|"Cria Estoque"| Inventory
+    CommercialFlow -->|"origem=ESTOQUE"| Inventory
+    Inventory --> Logistics
+    Logistics --> Financial
 ```
 
 ---

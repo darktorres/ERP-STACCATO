@@ -78,8 +78,7 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 ├── 03-decisoes/                          # FASE 3: O que escolhemos
 │   ├── 01-adrs.md                        # Registros de Decisao de Arquitetura
 │   ├── 02-schema-redesenhado.md          # 🟢 AUTHORITATIVE - Schema PostgreSQL completo
-│   ├── 02-schema-visual-overview.md      # 📊 Visual companion (flowcharts + patterns)
-│   └── 03-design-greenfield.md           # Design de fluxo greenfield
+│   └── 02-schema-visual-overview.md      # 📊 Visual companion (flowcharts + patterns)
 │
 ├── 04-arquitetura/                       # FASE 4: Como construir
 │   ├── 01-arquitetura.md                 # Estrutura Laravel, padroes, servicos
@@ -117,11 +116,11 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 │   ├── 03-paridade-funcionalidades.md    # Checklist de paridade funcional
 │   └── 04-treinamento.md                 # Plano de treinamento e rollout
 │
-└── rascunhos/                            # Exploracoes e Decisoes Avaliadas
-    ├── 1nn-problem-flowchart.md          # 🔴 LEIA PRIMEIRO - Análise do problema raiz
-    ├── schema-alternativo-2-entidades.md # 📋 Avaliado - Modelo 2 entidades (não adotado)
-    ├── schema-proposto.md                # ❌ DEPRECATED - Use 03-decisoes/02-schema-redesenhado.md
-    └── event-sourcing-analise.md         # 📋 Avaliado para v2+ - Event Sourcing (não v1)
+└── rascunhos/                            # Exploracoes Ativas e Referencias
+    ├── v1-v2-evolution-roadmap.md        # 🛣️ V1→V2+ incremental evolution path
+    ├── 03-design-greenfield.md           # 📘 Complete system design overview (v2.0 vision)
+    ├── alocacao-m2n-workflow.md          # 📘 M:N allocation workflow guide
+    └── event-sourcing-analise.md         # 🔮 Event Sourcing v2+ roadmap (hybrid in v1)
 ```
 
 ---
@@ -157,7 +156,6 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 | [01](./03-decisoes/01-adrs.md)                         | ADRs                     | Laravel, PostgreSQL, frontend, NFe, migracao      |
 | [02](./03-decisoes/02-schema-redesenhado.md)           | Schema Redesenhado       | 🟢 **AUTHORITATIVE** - Schema PostgreSQL completo |
 | [02b](./03-decisoes/02-schema-visual-overview.md)      | Visual Overview          | 📊 Flowcharts, Event Sourcing, allocation models  |
-| [03](./03-decisoes/03-design-greenfield.md)            | Design Greenfield        | Reimaginacao completa do sistema                  |
 
 ---
 
@@ -239,13 +237,14 @@ Reescrevendo a aplicacao ERP desktop existente em C++ Qt como uma aplicacao web 
 
 ## Rascunhos
 
-Documentos exploratorios com ideias em desenvolvimento:
+Documentos de referencia ativa (exploracoes, roadmaps, design completo):
 
-| Doc                                                                 | Titulo             | Descricao                                               |
-| ------------------------------------------------------------------- | ------------------ | ------------------------------------------------------- |
-| [schema-alternativo](./rascunhos/schema-alternativo-2-entidades.md) | Schema Alternativo | Brainstorm de modelo com 2 entidades                    |
-| [schema-proposto](./rascunhos/schema-proposto.md)                   | Schema Proposto    | Schema baseado em pesquisa de ERPs (em desenvolvimento) |
-| [event-sourcing](./rascunhos/event-sourcing-analise.md)             | Event Sourcing     | Analise e motivos para nao adocao                       |
+| Doc                                                           | Titulo               | Descricao                                                  |
+| ----------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
+| [v1-v2-evolution](./rascunhos/v1-v2-evolution-roadmap.md)    | V1→V2+ Evolution Map | Roadmap for evolving from pragmatic v1 to enterprise v2+   |
+| [design-greenfield](./rascunhos/03-design-greenfield.md)    | Complete System Design | Design overview v1.0 (antes module-specific deep-dives)   |
+| [alocacao-m2n](./rascunhos/alocacao-m2n-workflow.md)        | M:N Allocation Flow  | Detailed workflow guide para modelo de alocacoes          |
+| [event-sourcing](./rascunhos/event-sourcing-analise.md)     | Event Sourcing Road  | Roadmap para v2+ (ES + CQRS), hybrid approach em v1       |
 
 ---
 

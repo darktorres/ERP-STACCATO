@@ -59,39 +59,33 @@ orcamento                    venda
 ├── validade                 ├── idOrcamento (FK)
 └── semaforo                 └── statusFinanceiro
 
-orcamento_has_produto        venda_has_produto (N1)
-├── idOrcamentoProduto       ├── idVendaProduto
-├── idOrcamento (FK)         ├── idVenda (FK)
-├── idProduto (FK)           ├── idProduto (FK)
-├── fornecedor (VARCHAR!)    ├── fornecedor (VARCHAR!)
-├── quant                    ├── quant
-├── prcUnitario              ├── prcUnitario
+orcamento_itens              venda_itens (Flat structure - NEW SCHEMA)
+├── id                       ├── id (PK)
+├── orcamento_id (FK)        ├── venda_id (FK)
+├── produto_id (FK)          ├── produto_id (FK)
+├── quantidade               ├── quantidade
+├── valor_unitario           ├── valor_unitario
 ├── desconto                 ├── desconto
-├── descGlobal               └── descGlobal
-└── total
-```
+└── total                    └── valor_total
 
-#### Nível 2 (Atendimento/Entrega)
+#### Alocações (M:N Relationship - NEW SCHEMA)
 
 ```text
-venda_has_produto2 (N2) - O "burro de carga" do sistema
-├── idVendaProduto2
-├── idVendaProduto (FK para N1)
-├── idVenda (FK)
-├── idProduto (FK)
-├── idCompra                    ← Link para pedido de compra
-├── idNFeSaida                  ← NFe para cliente
-├── idNFeEntrada                ← NFe do fornecedor
-├── idNFeFutura                 ← NFe de entrega futura
-├── status                      ← Status do fluxo de trabalho
-├── quant                       ← Pode ser PARCIAL do N1
-├── lote                        ← Número do lote do estoque
-├── dataPrevCompra / dataRealCompra
-├── dataPrevConf / dataRealConf
-├── dataPrevFat / dataRealFat
-├── dataPrevColeta / dataRealColeta
-├── dataPrevReceb / dataRealReceb
-└── dataPrevEnt / dataRealEnt
+alocacoes - Links venda_items to estoque_lotes (FIFO/FEFO fulfillment)
+├── id (PK)
+├── venda_item_id (FK)          ← Venda item being fulfilled
+├── estoque_lote_id (FK)        ← Inventory batch (estoque_lotes)
+├── quantidade                  ← Allocated quantity (can be partial)
+├── status                      ← ATIVO | REVERTIDA | CANCELADA
+└── created_at / updated_at     ← Timestamps for audit
+
+**Key Architecture Change**:
+- **OLD**: Two-level structure (N1 + N2) with complex partial splitting
+  - N1 (venda_has_produto): Product line item
+  - N2 (venda_has_produto2): Fulfillment variant/batch
+- **NEW**: Flat single-level items + M:N allocations
+  - venda_itens: Single product line (no splitting)
+  - alocacoes: M:N relationship to inventory batches (supports FIFO/FEFO)
 ```
 
 ### Fluxo de Estados
@@ -881,7 +875,7 @@ class VendaService
                 'representacao' => $orcamento->representacao,
             ]);
 
-            // Copiar itens (N1)
+            // Copiar itens de orçamento para venda (flat structure)
             foreach ($orcamento->itens as $orcItem) {
                 $vendaItem = $venda->itens()->create([
                     'produto_id' => $orcItem->produto_id,
@@ -896,8 +890,8 @@ class VendaService
                     'unidade' => $orcItem->unidade,
                 ]);
 
-                // Criar item de atendimento (N2)
-                $this->criarItemAtendimento($venda, $vendaItem);
+                // Initialize delivery/fulfillment (allocations handled separately)
+                $this->inicializarAtendimento($venda, $vendaItem);
             }
 
             // Fechar orçamento
@@ -910,9 +904,11 @@ class VendaService
     }
 
     /**
-     * Criar item de atendimento (N2) - pode ser único ou dividido
+     * Inicializar atendimento/fulfillment
+     * NEW SCHEMA: Allocations (alocacoes) are created separately via AlocacaoService
+     * This method just initializes the venda_item status based on stock availability
      */
-    private function criarItemAtendimento(Venda $venda, VendaItem $vendaItem): void
+    private function inicializarAtendimento(Venda $venda, VendaItem $vendaItem): void
     {
         // Verificar se há estoque disponível
         $estoqueDisponivel = $this->estoqueService->verificarDisponibilidade(
@@ -921,15 +917,22 @@ class VendaService
             $vendaItem->quantidade
         );
 
+        // Definir status inicial baseado em disponibilidade
         $status = $estoqueDisponivel >= $vendaItem->quantidade
             ? VendaItemStatus::ESTOQUE
             : VendaItemStatus::INICIADO;
 
-        $venda->itensAtendimento()->create([
-            'venda_item_id' => $vendaItem->id,
-            'produto_id' => $vendaItem->produto_id,
+        // Atualizar status do item de venda
+        $vendaItem->update([
             'status' => $status,
-            'quantidade' => $vendaItem->quantidade,
+        ]);
+
+        // Event Sourcing: Registrar evento de criação
+        DB::table('venda_itens_events')->insert([
+            'venda_item_id' => $vendaItem->id,
+            'event_type' => 'CRIADO',
+            'event_data' => json_encode(['status' => $status->value]),
+            'created_at' => now(),
         ]);
     }
 
@@ -1196,17 +1199,22 @@ Route::middleware(['auth'])->group(function () {
 
 ### Migração de Dados
 
+**Architecture Change: Two-level (N1+N2) → Flat (items + M:N allocations)**
+
 1. **Orçamentos**: `orcamento` → `orcamentos` (direto)
 2. **Orçamento Itens**: `orcamento_has_produto` → `orcamento_itens` (normalizar fornecedor)
 3. **Vendas**: `venda` → `vendas` (direto)
-4. **Venda Itens N1**: `venda_has_produto` → `venda_itens` (normalizar fornecedor)
-5. **Venda Itens N2**: `venda_has_produto2` → `venda_item_atendimentos`
+4. **Venda Itens**: `venda_has_produto` + `venda_has_produto2` → `venda_itens` (FLAT, no N2 splitting)
+   - Merge N1 + N2 in migration to single venda_itens per product/supplier combination
+   - Remove "partial division" logic - allocations handle fulfillment
+5. **Allocations**: `estoque_has_consumo` → `alocacoes` (M:N, supports FIFO/FEFO)
 
 ### Mudanças Incompatíveis
 
+- Two-level structure (N1 + N2) → Single level + M:N relationships
 - `fornecedor` VARCHAR → `fornecedor_id` FK (normalização obrigatória)
 - Status como strings → Status como Enum
-- Dois níveis mantidos mas com nomenclatura clara (VendaItem vs VendaItemAtendimento)
+- Old `venda_has_produto2` complex partial logic → Simple `alocacoes` M:N model
 
 ### Scripts de Migração
 

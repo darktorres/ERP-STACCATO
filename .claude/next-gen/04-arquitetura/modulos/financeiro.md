@@ -987,19 +987,92 @@ Route::middleware(['auth'])->prefix('financeiro')->name('financeiro.')->group(fu
 ### Scripts de Migração
 
 ```sql
--- Normalizar cliente em contas a receber
-UPDATE contas_receber cr
-SET cliente_id = (
-    SELECT c.id FROM clientes c
-    WHERE c.razao_social = cr.contraparte LIMIT 1
+-- Step 1: Create unified financeiro_parcelas table from old contas_receber
+INSERT INTO financeiro_parcelas (
+    loja_id, tipo, cliente_id, fornecedor_id,
+    venda_id, numero_parcela, total_parcelas,
+    valor, valor_recebido_pago, valor_juros, valor_multa, valor_desconto,
+    data_vencimento, data_recebimento_pagamento,
+    forma_pagamento, status, observacoes,
+    created_at, updated_at
 )
-WHERE cliente_id IS NULL;
+SELECT
+    1,  -- Default loja_id (update with actual loja mapping)
+    'RECEBER',
+    c.id,  -- cliente_id from normalized cliente
+    NULL,  -- No fornecedor for receivable
+    cr.venda_id,
+    cr.numero_parcela,
+    cr.total_parcelas,
+    cr.valor,
+    cr.valor_recebido,
+    cr.valor_juros,
+    cr.valor_multa,
+    cr.valor_desconto,
+    cr.data_vencimento,
+    CASE WHEN cr.status = 'RECEBIDO' THEN cr.data_recebimento ELSE NULL END,
+    cr.forma_pagamento,
+    CASE
+        WHEN cr.status = 'RECEBIDO' THEN 'RECEBIDO'
+        WHEN cr.status = 'CANCELADO' THEN 'CANCELADO'
+        WHEN cr.status = 'PENDENTE' THEN 'PENDENTE'
+        WHEN CURDATE() > cr.data_vencimento AND cr.status NOT IN ('RECEBIDO', 'CANCELADO')
+            THEN 'ATRASADO'
+        ELSE 'PENDENTE'
+    END,
+    cr.observacoes,
+    cr.created_at,
+    cr.updated_at
+FROM contas_receber cr
+LEFT JOIN clientes c ON cr.cliente_id = c.id OR (cr.contraparte IS NOT NULL AND c.razao_social = cr.contraparte)
+WHERE cr.id NOT IN (SELECT original_id FROM financeiro_parcelas WHERE original_id IS NOT NULL);
 
--- Normalizar fornecedor em contas a pagar
-UPDATE contas_pagar cp
-SET fornecedor_id = (
-    SELECT f.id FROM fornecedores f
-    WHERE f.razao_social = cp.contraparte LIMIT 1
+-- Step 2: Create unified financeiro_parcelas table from old contas_pagar
+INSERT INTO financeiro_parcelas (
+    loja_id, tipo, cliente_id, fornecedor_id,
+    compra_id, numero_parcela, total_parcelas,
+    valor, valor_recebido_pago, valor_juros, valor_multa, valor_desconto,
+    data_vencimento, data_recebimento_pagamento,
+    forma_pagamento, status, observacoes,
+    created_at, updated_at
 )
-WHERE fornecedor_id IS NULL;
+SELECT
+    1,  -- Default loja_id (update with actual loja mapping)
+    'PAGAR',
+    NULL,  -- No cliente for payable
+    f.id,  -- fornecedor_id from normalized fornecedor
+    cp.compra_id,
+    cp.numero_parcela,
+    cp.total_parcelas,
+    cp.valor,
+    cp.valor_pago,
+    cp.valor_juros,
+    cp.valor_multa,
+    cp.valor_desconto,
+    cp.data_vencimento,
+    CASE WHEN cp.status = 'PAGO' THEN cp.data_pagamento ELSE NULL END,
+    cp.forma_pagamento,
+    CASE
+        WHEN cp.status = 'PAGO' THEN 'PAGO'
+        WHEN cp.status = 'CANCELADO' THEN 'CANCELADO'
+        WHEN cp.status = 'PENDENTE' THEN 'PENDENTE'
+        WHEN CURDATE() > cp.data_vencimento AND cp.status NOT IN ('PAGO', 'CANCELADO')
+            THEN 'ATRASADO'
+        ELSE 'PENDENTE'
+    END,
+    cp.observacoes,
+    cp.created_at,
+    cp.updated_at
+FROM contas_pagar cp
+LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id OR (cp.contraparte IS NOT NULL AND f.razao_social = cp.contraparte)
+WHERE cp.id NOT IN (SELECT original_id FROM financeiro_parcelas WHERE original_id IS NOT NULL);
+
+-- Step 3: Add index for query performance (FIFO for payment scheduling)
+CREATE INDEX idx_financeiro_parcelas_vencimento
+ON financeiro_parcelas (tipo, status, data_vencimento)
+WHERE status IN ('PENDENTE', 'AGENDADO', 'ATRASADO');
+
+-- Step 4: Add index for client/supplier queries
+CREATE INDEX idx_financeiro_parcelas_partes
+ON financeiro_parcelas (cliente_id, fornecedor_id, tipo);
 ```

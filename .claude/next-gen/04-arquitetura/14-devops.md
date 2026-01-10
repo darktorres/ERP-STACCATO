@@ -44,7 +44,7 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 │                       │              └───────────┘          │
 │                       │                    │                 │
 │                  ┌────▼────────────────────▼────┐           │
-│                  │      PostgreSQL 16           │           │
+│                  │      PostgreSQL 18           │           │
 │                  └──────────────────────────────┘           │
 │                                                              │
 │  Deployment: Docker → GitHub Actions → VPS/Cloud            │
@@ -61,10 +61,10 @@ Este documento define a estratégia de DevOps e deployment para a migração do 
 | Componente    | Tecnologia             | Versão |
 | ------------- | ---------------------- | ------ |
 | Web Server    | Nginx                  | 1.25+  |
-| PHP Runtime   | PHP-FPM                | 8.3+   |
+| PHP Runtime   | PHP-FPM                | 8.5+   |
 | Framework     | Laravel                | 12.x   |
-| Database      | PostgreSQL             | 16+    |
-| Cache/Queue   | Redis                  | 7+     |
+| Database      | PostgreSQL             | 18+    |
+| Cache/Queue   | Redis                  | 8+     |
 | Container     | Docker                 | 24+    |
 | Orquestração  | Docker Compose         | 2.20+  |
 | CI/CD         | GitHub Actions         | -      |
@@ -123,7 +123,7 @@ docker/
 # ==========================================
 # Stage 1: Build Frontend Assets
 # ==========================================
-FROM node:20-alpine AS frontend
+FROM node:24-alpine AS frontend
 
 WORKDIR /app
 
@@ -144,7 +144,7 @@ RUN npm run build
 # ==========================================
 # Stage 2: Composer Dependencies
 # ==========================================
-FROM composer:2.6 AS composer
+FROM composer:2.9 AS composer
 
 WORKDIR /app
 
@@ -168,7 +168,7 @@ RUN composer dump-autoload --optimize --no-dev
 # ==========================================
 # Stage 3: Production Image
 # ==========================================
-FROM php:8.3-fpm-alpine AS production
+FROM php:8.5-fpm-alpine AS production
 
 # Argumentos de build
 ARG APP_VERSION=1.0.0
@@ -268,8 +268,6 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 ### docker-compose.yml (Produção)
 
 ```yaml
-version: "3.8"
-
 services:
   app:
     build:
@@ -354,7 +352,7 @@ services:
       - staccato_network
 
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_db
     restart: unless-stopped
     environment:
@@ -375,7 +373,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: staccato_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
@@ -388,7 +386,7 @@ services:
 
   # Backup automático
   backup:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_backup
     restart: unless-stopped
     environment:
@@ -425,8 +423,6 @@ networks:
 ### docker-compose.dev.yml (Desenvolvimento)
 
 ```yaml
-version: "3.8"
-
 services:
   app:
     build:
@@ -452,7 +448,7 @@ services:
       - staccato_dev
 
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: staccato_dev_db
     environment:
       - POSTGRES_DB=staccato_dev
@@ -466,7 +462,7 @@ services:
       - staccato_dev
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: staccato_dev_redis
     ports:
       - "6380:6379"
@@ -794,8 +790,8 @@ on:
     types: [published]
 
 env:
-  PHP_VERSION: "8.3"
-  NODE_VERSION: "20"
+  PHP_VERSION: "8.5"
+  NODE_VERSION: "24"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -809,7 +805,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:18
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -823,7 +819,7 @@ jobs:
           --health-retries 5
 
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         ports:
           - 6379:6379
 

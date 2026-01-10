@@ -1130,7 +1130,7 @@ jobs:
           --health-retries=3
 
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 6379:6379
 
@@ -1140,7 +1140,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.5"
           extensions: mbstring, mysql, redis
           coverage: xdebug
 
@@ -1174,7 +1174,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.5"
 
       - name: Install dependencies
         run: |
@@ -1209,7 +1209,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.5"
 
       - name: Install dependencies
         run: composer install

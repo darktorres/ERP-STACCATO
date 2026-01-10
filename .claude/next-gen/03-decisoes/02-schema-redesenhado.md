@@ -125,18 +125,18 @@ flowchart TB
         VendaItens["venda_itens"]
         CompraItens["compra_itens"]
         NfeItens["nfe_itens"]
-        Estoques["estoques"]
-        EstoqueConsumos["estoque_consumos"]
+        EstoqueLotes["estoque_lotes"]
+        Alocacoes["alocacoes<br/>(venda_item ↔ lote)"]
         Entregas["entregas"]
 
         OrcamentoItens --> VendaItens
         VendaItens --> CompraItens
         CompraItens --> NfeItens
-        NfeItens --> Estoques
-        CompraItens --> Estoques
-        Estoques --> EstoqueConsumos
-        VendaItens --> EstoqueConsumos
-        EstoqueConsumos --> Entregas
+        NfeItens --> EstoqueLotes
+        CompraItens --> EstoqueLotes
+        EstoqueLotes --> Alocacoes
+        VendaItens --> Alocacoes
+        Alocacoes --> Entregas
     end
 
     Produtos --> TransactionFlow
@@ -712,8 +712,8 @@ CREATE TABLE compra_itens (
 ### 4.4 Tabelas de Estoque
 
 ```sql
--- Estoques (Estoque - um registro por lote/linha NFe)
-CREATE TABLE estoques (
+-- Estoque Lotes (um registro por lote/linha NFe)
+CREATE TABLE estoque_lotes (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
@@ -727,6 +727,7 @@ CREATE TABLE estoques (
     -- Quantidades
     quantidade_original DECIMAL(15,4) NOT NULL,
     quantidade_disponivel DECIMAL(15,4) NOT NULL,
+    quantidade_reservada DECIMAL(15,4) DEFAULT 0,
 
     -- Custo
     custo_unitario DECIMAL(15,4) NOT NULL,
@@ -746,32 +747,40 @@ CREATE TABLE estoques (
     data_entrada TIMESTAMP NOT NULL DEFAULT NOW(),
 
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    -- Golden Rule: disponível + reservado = original
+    CONSTRAINT chk_estoque_total CHECK (
+        quantidade_disponivel + quantidade_reservada = quantidade_original
+    )
 );
 
 -- Índice para busca de estoque disponível
-CREATE INDEX idx_estoques_disponivel
-    ON estoques(produto_id, loja_id, data_entrada)
+CREATE INDEX idx_estoque_lotes_disponivel
+    ON estoque_lotes(produto_id, loja_id, data_entrada)
     WHERE quantidade_disponivel > 0;
 
--- Estoque Consumos (Vínculo 1:1 entre venda_item e estoque)
--- Seleção MANUAL pelo usuário (não automática) devido a variação de lote
-CREATE TABLE estoque_consumos (
+CREATE INDEX idx_estoque_lotes_status
+    ON estoque_lotes(status);
+
+-- Alocacoes (M:N entre venda_item e estoque_lote)
+-- Permite múltiplos lotes por item e vice-versa com seleção MANUAL
+CREATE TABLE alocacoes (
     id SERIAL PRIMARY KEY,
 
-    -- Vínculo 1:1 (cada venda_item liga a um estoque específico)
+    -- M:N relationship
     venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id),
-    estoque_id INTEGER NOT NULL REFERENCES estoques(id),
+    estoque_lote_id INTEGER NOT NULL REFERENCES estoque_lotes(id),
 
-    -- Quantidade e custo (snapshot no momento do pareamento)
+    -- Quantidade alocada (deve somar a quantidade do venda_item)
     quantidade DECIMAL(15,4) NOT NULL,
     custo_unitario DECIMAL(15,4) NOT NULL,
     custo_total DECIMAL(15,2) GENERATED ALWAYS AS (quantidade * custo_unitario) STORED,
 
-    -- Tipo de consumo
-    motivo consumo_motivo NOT NULL DEFAULT 'VENDA',
+    -- Status da alocação
+    status VARCHAR(50) DEFAULT 'ATIVO',  -- ATIVO, ENTREGUE, PARCIALMENTE_ESTORNADO, CANCELADA
 
-    -- Reversão/Estorno (mantém histórico)
+    -- Reversão/Estorno (mantém histórico - nunca DELETE)
     is_estornado BOOLEAN DEFAULT FALSE,
     estornado_em TIMESTAMP,
     estorno_motivo VARCHAR(200),
@@ -782,14 +791,11 @@ CREATE TABLE estoque_consumos (
     created_by INTEGER REFERENCES usuarios(id)
 );
 
--- CONSTRAINT 1:1: Apenas um consumo ativo por venda_item
-CREATE UNIQUE INDEX idx_consumos_venda_item_ativo
-    ON estoque_consumos(venda_item_id)
-    WHERE NOT is_estornado;
-
--- CONSTRAINT 1:1: Cada estoque só pode ser consumido uma vez (por completo)
-CREATE UNIQUE INDEX idx_consumos_estoque_ativo
-    ON estoque_consumos(estoque_id)
+-- INDEXES: Suportar M:N queries rápidas (sem unicidade pois é M:N)
+CREATE INDEX idx_alocacoes_venda_item ON alocacoes(venda_item_id);
+CREATE INDEX idx_alocacoes_estoque_lote ON alocacoes(estoque_lote_id);
+CREATE INDEX idx_alocacoes_status ON alocacoes(status);
+CREATE INDEX idx_alocacoes_ativo ON alocacoes(venda_item_id)
     WHERE NOT is_estornado;
 ```
 
@@ -1744,24 +1750,26 @@ class NfeImportadaHandler
 
         // Criar estoque para cada item da NFe
         foreach ($nfe->itens as $item) {
-            $estoque = Estoque::create([
+            $estoque = EstoqueLote::create([
                 'loja_id' => $nfe->loja_id,
                 'produto_id' => $item->produto_id,
                 'fornecedor_id' => $nfe->emitente_id,
-                'nfe_entrada_id' => $nfe->id,
+                'nfe_id' => $nfe->id,
                 'nfe_item_id' => $item->id,
-                'quantidade_original' => $item->quantidade,
+                'quantidade' => $item->quantidade,
                 'quantidade_disponivel' => $item->quantidade,
+                'quantidade_reservada' => 0,
                 'custo_unitario' => $item->valor_unitario,
                 'custo_total' => $item->valor_total,
                 'data_entrada' => $nfe->data_emissao,
             ]);
 
-            // Se vinculado a venda, criar consumo
+            // Se vinculado a venda, criar alocação
             if ($item->venda_item_id) {
-                $this->consumoService->consumirParaVenda(
+                $this->alocacaoService->alocar(
+                    VendaItem::find($item->venda_item_id),
                     $estoque,
-                    $item->venda_item_id
+                    $item->quantidade
                 );
             }
         }

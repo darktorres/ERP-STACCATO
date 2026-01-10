@@ -58,13 +58,26 @@ Este documento detalha o processo de migração de dados do MySQL legado para o 
 | `pedido_fornecedor`                                                | `compras`         | Renomear colunas      |
 | `pedido_fornecedor_has_produto` + `pedido_fornecedor_has_produto2` | `compra_itens`    | **Merge L1/L2**       |
 
-### 1.4 Estoque (Fase 4)
+### 1.4 Estoque (Fase 4) - M:N ALLOCATION MODEL
 
-| Tabela MySQL          | Tabela PostgreSQL  | Transformação         |
-| --------------------- | ------------------ | --------------------- |
-| `estoque`             | `estoques`         | Normalizar fornecedor |
-| `estoque_has_consumo` | `estoque_consumos` | Normalizar fornecedor |
-| `bloco`               | `blocos`           | Renomear colunas      |
+**CONSOLIDATION CHANGE**: Renamed `estoque` → `estoque_lotes`, replaced 1:1 `estoque_has_consumo` with M:N `alocacoes`
+
+| Tabela MySQL (Origem)    | Tabela PostgreSQL     | Mapping                                          |
+| ------------------------ | --------------------- | ------------------------------------------------ |
+| `estoque`                | `estoque_lotes`       | Rename + add quantidade_reservada field          |
+| `estoque_has_consumo`    | `alocacoes`           | Complete replacement (1:1 → M:N model)         |
+| `bloco`                  | `blocos`              | Renomear colunas                                 |
+
+**Key Changes**:
+- `estoque_lotes` adds `quantidade_reservada` field (golden rule enforcement)
+- `alocacoes` is new M:N junction table: venda_item ↔ estoque_lote
+- Multiple lots can now be allocated to one venda_item (flexible FIFO/FEFO)
+- Soft-delete via `is_estornado` flag (never DELETE)
+- Full cost tracking + status state machine (ATIVO, ENTREGUE, PARCIALMENTE_ESTORNADO, CANCELADA)
+
+**Event Tables** (for auditoria):
+- `estoque_lotes_events`: Append-only audit trail with pg_ivm views
+- `alocacoes_events`: Append-only audit trail with pg_ivm views
 
 ### 1.5 NFe (Fase 5)
 

@@ -1167,6 +1167,59 @@ class VendaService
     }
 
     /**
+     * Estorno/Reversal Workflow - Detailed Example
+     *
+     * When customer returns 30 units out of 100:
+     *
+     * ```mermaid
+     * flowchart TB
+     *     Start["Cliente devolve 30 unidades"] --> GetConsumption
+     *
+     *     subgraph GetConsumption["1️⃣ Localizar consumo"]
+     *         Q["SELECT * FROM alocacoes<br/>WHERE venda_item_id = :id<br/>  AND status = 'ATIVO'"]
+     *         Q --> Found["Encontra:<br/>estoque_lote_id: 1<br/>quantidade: 30"]
+     *     end
+     *
+     *     GetConsumption --> MarkReversed
+     *
+     *     subgraph MarkReversed["2️⃣ Marcar alocação como revertida"]
+     *         Update["UPDATE alocacoes<br/>SET status = 'REVERTIDA',<br/>    is_estornado = TRUE,<br/>    estornado_em = NOW()<br/>WHERE venda_item_id = 100"]
+     *         Update --> Keep["✅ Registro mantido<br/>para auditoria"]
+     *     end
+     *
+     *     MarkReversed --> RestoreStock
+     *
+     *     subgraph RestoreStock["3️⃣ Restaurar estoque"]
+     *         RestoreQty["UPDATE estoque_lotes<br/>SET quantidade_disponivel += 30<br/>WHERE id = 1"]
+     *         RestoreQty --> RestoreReserved["UPDATE estoque_lotes<br/>SET quantidade_reservada -= 30"]
+     *     end
+     *
+     *     RestoreStock --> UpdateVendaItem
+     *
+     *     subgraph UpdateVendaItem["4️⃣ Atualizar venda_item"]
+     *         Decision{"Devolução<br/>total ou<br/>parcial?"}
+     *         Decision -->|"Total"| SetDevolvido["status = 'DEVOLVIDO'"]
+     *         Decision -->|"Parcial"| Split["Criar split:<br/>Original (30): DEVOLVIDO<br/>Restante (70): ALOCADO"]
+     *     end
+     *
+     *     UpdateVendaItem --> CreateNFe
+     *
+     *     subgraph CreateNFe["5️⃣ NFe de Devolução"]
+     *         NFe["Gerar NFe de devolução<br/>tipo = 'DEVOLUCAO'<br/>referenciando venda original<br/>(pode reverenciar NFe se entrada processada)"]
+     *         NFe --> Submit["Submeter ao SEFAZ"]
+     *     end
+     *
+     *     CreateNFe --> FinancialAdjust
+     *
+     *     subgraph FinancialAdjust["6️⃣ Ajuste Financeiro"]
+     *         Financial["Ajustar parcelas a receber:<br/>- Reduzir valor ou criar crédito<br/>- Gerar nota de crédito"]
+     *     end
+     *
+     *     FinancialAdjust --> End["✅ Reversão completa<br/>com trilha de auditoria"]
+     * ```
+     */
+
+    /**
      * Cancelar item de atendimento específico
      */
     private function cancelarItemAtendimento(VendaItemAtendimento $item): void

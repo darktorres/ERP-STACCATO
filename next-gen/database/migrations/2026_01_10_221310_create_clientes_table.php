@@ -34,7 +34,7 @@ return new class extends Migration
             $table->decimal('saldo_credito', 15, 2)->default(0);
 
             // Links
-            $table->foreignId('loja_id')->nullable()->constrained('lojas');
+            $table->unsignedBigInteger('loja_id')->nullable(); // Will be added as foreign key in separate migration
             $table->foreignId('vendedor_id')->nullable()->constrained('users');
 
             // Status

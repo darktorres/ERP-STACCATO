@@ -1386,3 +1386,1812 @@ WHERE status IN ('PENDENTE', 'AGENDADO', 'ATRASADO');
 CREATE INDEX idx_financeiro_parcelas_partes
 ON financeiro_parcelas (cliente_id, fornecedor_id, tipo);
 ```
+
+---
+
+## Roadmap de Expansão: ERP Financeiro Completo
+
+Este roadmap expande o módulo financeiro básico para um sistema ERP completo, seguindo padrões brasileiros e melhores práticas de mercado.
+
+### Estado Atual vs. Estado Alvo
+
+| Aspecto | Atual | Alvo |
+|---------|-------|------|
+| Tabelas | Separadas CR/CP | Unificada `financeiro_parcelas` |
+| FKs | `contraParte` VARCHAR | Proper `cliente_id`/`fornecedor_id` |
+| Status | VARCHAR | ENUM com state machine |
+| Pagamentos | Tudo-ou-nada | Pagamentos parciais |
+| Juros/Multa | Entrada manual | Cálculo automático |
+| CNAB | Somente Itaú | Multi-banco (Bradesco, Caixa, BB, Santander) |
+| Auditoria | Timestamps | Event Sourcing completo |
+| Conciliação | Manual | Automatizada com OFX |
+| PIX | Não suportado | QR Code + Webhook |
+
+---
+
+### FASE 1: FUNDAÇÃO (P0 - Crítico)
+
+**Complexidade:** Alta | **Estimativa:** 8-10 semanas
+
+#### 1.1 Schema Principal
+
+```sql
+-- =====================================================
+-- FASE 1: FUNDAÇÃO - Schema Core
+-- =====================================================
+
+-- ENUMs Base
+CREATE TYPE tipo_financeiro AS ENUM ('RECEBER', 'PAGAR');
+
+CREATE TYPE status_financeiro AS ENUM (
+    'PENDENTE',      -- Criada, aguardando ação
+    'AGENDADO',      -- Em CNAB ou agendado para pagamento
+    'PARCIAL',       -- Pagamento parcial recebido (NOVO)
+    'PAGO',          -- Totalmente pago (para PAGAR)
+    'RECEBIDO',      -- Totalmente recebido (para RECEBER)
+    'ATRASADO',      -- Vencida sem pagamento
+    'PROTESTADO',    -- Em cartório (NOVO)
+    'CANCELADO'      -- Cancelada
+);
+
+CREATE TYPE grupo_financeiro AS ENUM (
+    'VENDAS',        -- Receita de vendas
+    'TAXA_CARTAO',   -- Dedução de taxa de cartão
+    'COMPRAS',       -- Pagamento de compras
+    'COMISSAO',      -- Comissões (RT)
+    'DESPESAS',      -- Despesas operacionais
+    'IMPOSTOS',      -- Tributos
+    'SALARIOS',      -- Folha de pagamento
+    'OUTROS'         -- Outros lançamentos
+);
+
+CREATE TYPE origem_financeiro AS ENUM (
+    'VENDA',         -- Gerado de venda
+    'COMPRA',        -- Gerado de compra
+    'NFE_ENTRADA',   -- Importado de NFe entrada
+    'MANUAL',        -- Lançamento manual
+    'RENEGOCIACAO',  -- Renegociação de dívida
+    'DEVOLUCAO'      -- Devolução/estorno
+);
+
+-- Tabela Principal Unificada
+CREATE TABLE financeiro_parcelas (
+    id BIGSERIAL PRIMARY KEY,
+    uuid UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE,
+
+    -- Tipo e Origem
+    tipo tipo_financeiro NOT NULL,
+    origem origem_financeiro NOT NULL DEFAULT 'MANUAL',
+    grupo grupo_financeiro NOT NULL,
+
+    -- Relacionamentos (mutuamente exclusivos baseado em tipo)
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+    cliente_id BIGINT REFERENCES clientes(id),      -- Quando tipo='RECEBER'
+    fornecedor_id BIGINT REFERENCES fornecedores(id), -- Quando tipo='PAGAR'
+
+    -- Origem documental
+    venda_id BIGINT REFERENCES vendas(id),
+    compra_id BIGINT REFERENCES compras(id),
+    nfe_id BIGINT REFERENCES nfes(id),
+    pedido_compra_id BIGINT REFERENCES pedidos_compra(id),
+
+    -- Parcela relacionada (para taxa de cartão, etc.)
+    parcela_relacionada_id BIGINT REFERENCES financeiro_parcelas(id),
+
+    -- Dados da Parcela
+    numero_parcela SMALLINT NOT NULL DEFAULT 1,
+    total_parcelas SMALLINT NOT NULL DEFAULT 1,
+    documento VARCHAR(50),                           -- Número do documento/boleto
+    nosso_numero VARCHAR(20),                        -- Nosso número bancário
+
+    -- Valores
+    valor DECIMAL(15,2) NOT NULL,
+    valor_juros DECIMAL(15,2) DEFAULT 0,
+    valor_multa DECIMAL(15,2) DEFAULT 0,
+    valor_desconto DECIMAL(15,2) DEFAULT 0,
+    valor_pago DECIMAL(15,2) DEFAULT 0,              -- Total já pago (soma dos pagamentos)
+
+    -- Datas
+    data_emissao DATE NOT NULL DEFAULT CURRENT_DATE,
+    data_vencimento DATE NOT NULL,
+    data_competencia DATE,                           -- Mês de competência contábil
+
+    -- Status e Processamento
+    status status_financeiro NOT NULL DEFAULT 'PENDENTE',
+    forma_pagamento VARCHAR(30),
+    conta_bancaria_id BIGINT REFERENCES contas_bancarias(id),
+    centro_custo_id BIGINT REFERENCES centros_custo(id),
+
+    -- Boleto/Cobrança
+    linha_digitavel VARCHAR(54),
+    codigo_barras VARCHAR(44),
+    pix_copia_cola TEXT,
+    url_boleto TEXT,
+
+    -- Metadados
+    observacoes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    deleted_at TIMESTAMP,                            -- Soft delete
+
+    -- Constraints
+    CONSTRAINT chk_valor_positivo CHECK (valor > 0),
+    CONSTRAINT chk_parcela_valida CHECK (numero_parcela > 0 AND numero_parcela <= total_parcelas),
+    CONSTRAINT chk_tipo_referencias CHECK (
+        (tipo = 'RECEBER' AND cliente_id IS NOT NULL AND fornecedor_id IS NULL) OR
+        (tipo = 'PAGAR' AND fornecedor_id IS NOT NULL AND cliente_id IS NULL) OR
+        (tipo = 'PAGAR' AND grupo IN ('COMISSAO', 'SALARIOS', 'DESPESAS', 'IMPOSTOS', 'OUTROS'))
+    ),
+    CONSTRAINT chk_origem_documental CHECK (
+        (origem = 'VENDA' AND venda_id IS NOT NULL) OR
+        (origem = 'COMPRA' AND compra_id IS NOT NULL) OR
+        (origem = 'NFE_ENTRADA' AND nfe_id IS NOT NULL) OR
+        (origem IN ('MANUAL', 'RENEGOCIACAO', 'DEVOLUCAO'))
+    ),
+    CONSTRAINT chk_valor_pago_nao_excede CHECK (
+        valor_pago <= (valor + valor_juros + valor_multa - valor_desconto)
+    )
+);
+
+-- Índices para Fase 1
+CREATE INDEX idx_fin_parcelas_tipo_status ON financeiro_parcelas(tipo, status);
+CREATE INDEX idx_fin_parcelas_vencimento ON financeiro_parcelas(data_vencimento)
+    WHERE status IN ('PENDENTE', 'AGENDADO', 'PARCIAL', 'ATRASADO');
+CREATE INDEX idx_fin_parcelas_cliente ON financeiro_parcelas(cliente_id) WHERE cliente_id IS NOT NULL;
+CREATE INDEX idx_fin_parcelas_fornecedor ON financeiro_parcelas(fornecedor_id) WHERE fornecedor_id IS NOT NULL;
+CREATE INDEX idx_fin_parcelas_loja_periodo ON financeiro_parcelas(loja_id, data_vencimento);
+CREATE INDEX idx_fin_parcelas_venda ON financeiro_parcelas(venda_id) WHERE venda_id IS NOT NULL;
+CREATE INDEX idx_fin_parcelas_compra ON financeiro_parcelas(compra_id) WHERE compra_id IS NOT NULL;
+```
+
+#### 1.2 Pagamentos Parciais
+
+```sql
+-- Tabela de Pagamentos (suporta múltiplos pagamentos por parcela)
+CREATE TABLE financeiro_parcelas_pagamentos (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    -- Valor do pagamento
+    valor DECIMAL(15,2) NOT NULL,
+    valor_juros DECIMAL(15,2) DEFAULT 0,
+    valor_multa DECIMAL(15,2) DEFAULT 0,
+    valor_desconto DECIMAL(15,2) DEFAULT 0,
+
+    -- Detalhes do pagamento
+    data_pagamento DATE NOT NULL,
+    forma_pagamento VARCHAR(30) NOT NULL,
+    conta_bancaria_id BIGINT REFERENCES contas_bancarias(id),
+
+    -- Identificação bancária
+    nosso_numero VARCHAR(20),
+    autenticacao VARCHAR(50),                        -- Código de autenticação
+    comprovante_url TEXT,
+
+    -- Origem do pagamento
+    origem VARCHAR(20) NOT NULL DEFAULT 'MANUAL',    -- MANUAL, CNAB_RETORNO, PIX_WEBHOOK, OFX
+    referencia_externa VARCHAR(100),                 -- ID externo (tx PIX, etc.)
+
+    -- Auditoria
+    usuario_id BIGINT REFERENCES usuarios(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT chk_pagamento_valor_positivo CHECK (valor > 0)
+);
+
+CREATE INDEX idx_fin_pagamentos_parcela ON financeiro_parcelas_pagamentos(parcela_id);
+CREATE INDEX idx_fin_pagamentos_data ON financeiro_parcelas_pagamentos(data_pagamento);
+
+-- Trigger para atualizar valor_pago na parcela
+CREATE OR REPLACE FUNCTION fn_atualizar_valor_pago()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE financeiro_parcelas
+        SET valor_pago = valor_pago + NEW.valor,
+            updated_at = NOW(),
+            status = CASE
+                WHEN valor_pago + NEW.valor >= (valor + valor_juros + valor_multa - valor_desconto)
+                    THEN CASE tipo
+                        WHEN 'RECEBER' THEN 'RECEBIDO'::status_financeiro
+                        WHEN 'PAGAR' THEN 'PAGO'::status_financeiro
+                    END
+                ELSE 'PARCIAL'::status_financeiro
+            END
+        WHERE id = NEW.parcela_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE financeiro_parcelas
+        SET valor_pago = valor_pago - OLD.valor,
+            updated_at = NOW(),
+            status = CASE
+                WHEN valor_pago - OLD.valor <= 0 THEN 'PENDENTE'::status_financeiro
+                ELSE 'PARCIAL'::status_financeiro
+            END
+        WHERE id = OLD.parcela_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_atualizar_valor_pago
+AFTER INSERT OR DELETE ON financeiro_parcelas_pagamentos
+FOR EACH ROW EXECUTE FUNCTION fn_atualizar_valor_pago();
+```
+
+#### 1.3 Event Sourcing (Audit Trail Imutável)
+
+```sql
+-- Tipos de eventos financeiros
+CREATE TYPE evento_financeiro_tipo AS ENUM (
+    'CRIADA',
+    'VENCIMENTO_ALTERADO',
+    'VALOR_ALTERADO',
+    'JUROS_ADICIONADO',
+    'MULTA_ADICIONADA',
+    'DESCONTO_APLICADO',
+    'PAGAMENTO_PARCIAL',
+    'PAGAMENTO_TOTAL',
+    'AGENDADA_CNAB',
+    'RETORNO_CNAB_PROCESSADO',
+    'PROTESTADA',
+    'RENEGOCIADA',
+    'CANCELADA',
+    'ESTORNADA'
+);
+
+-- Tabela de eventos (append-only)
+CREATE TABLE financeiro_parcelas_events (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    evento_tipo evento_financeiro_tipo NOT NULL,
+    evento_dados JSONB NOT NULL DEFAULT '{}',
+
+    -- Valores no momento do evento (snapshot)
+    valor_anterior DECIMAL(15,2),
+    valor_novo DECIMAL(15,2),
+    status_anterior status_financeiro,
+    status_novo status_financeiro,
+
+    -- Auditoria
+    usuario_id BIGINT REFERENCES usuarios(id),
+    ip_address INET,
+    user_agent TEXT,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Impedir UPDATE/DELETE (imutabilidade)
+CREATE OR REPLACE FUNCTION fn_prevent_mutation_events()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Tabela de eventos é imutável. UPDATE/DELETE não permitido.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_mutation_fin_events
+BEFORE UPDATE OR DELETE ON financeiro_parcelas_events
+FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation_events();
+
+-- Índices para consultas de auditoria
+CREATE INDEX idx_fin_events_parcela_tipo ON financeiro_parcelas_events(parcela_id, evento_tipo);
+CREATE INDEX idx_fin_events_created ON financeiro_parcelas_events(created_at DESC);
+CREATE INDEX idx_fin_events_usuario ON financeiro_parcelas_events(usuario_id, created_at DESC);
+```
+
+#### 1.4 Centros de Custo
+
+```sql
+-- Centros de Custo (para rateio de despesas)
+CREATE TABLE centros_custo (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(20) NOT NULL UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    tipo VARCHAR(20) NOT NULL DEFAULT 'OPERACIONAL', -- OPERACIONAL, ADMINISTRATIVO, COMERCIAL
+    loja_id BIGINT REFERENCES lojas(id),             -- NULL = todas as lojas
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Rateio por centro de custo (quando parcela afeta múltiplos centros)
+CREATE TABLE financeiro_parcelas_rateio (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+    centro_custo_id BIGINT NOT NULL REFERENCES centros_custo(id),
+    percentual DECIMAL(5,2) NOT NULL,
+    valor DECIMAL(15,2) NOT NULL,
+
+    CONSTRAINT chk_percentual_valido CHECK (percentual > 0 AND percentual <= 100)
+);
+```
+
+#### 1.5 Features da Fase 1
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Tabela unificada | `financeiro_parcelas` com tipo discriminador | P0 |
+| FKs proper | `cliente_id` / `fornecedor_id` com constraints | P0 |
+| Pagamentos parciais | Múltiplos pagamentos por parcela | P0 |
+| Event Sourcing | Trilha de auditoria imutável | P0 |
+| Juros/Multa/Desconto | Campos dedicados com cálculo | P1 |
+| Centro de custo | Rateio de despesas | P2 |
+| Link taxa cartão | FK `parcela_relacionada_id` | P1 |
+
+---
+
+### FASE 2: INTEGRAÇÃO BANCÁRIA (P1 - Compliance)
+
+**Complexidade:** Alta | **Estimativa:** 10-12 semanas
+**Dependências:** Fase 1
+
+#### 2.1 Contas Bancárias
+
+```sql
+-- =====================================================
+-- FASE 2: INTEGRAÇÃO BANCÁRIA
+-- =====================================================
+
+CREATE TYPE tipo_conta_bancaria AS ENUM (
+    'CORRENTE',
+    'POUPANCA',
+    'PAGAMENTO',        -- Conta de pagamento (fintech)
+    'INVESTIMENTO'
+);
+
+CREATE TYPE banco_codigo AS ENUM (
+    '001',  -- Banco do Brasil
+    '033',  -- Santander
+    '104',  -- Caixa Econômica Federal
+    '237',  -- Bradesco
+    '341',  -- Itaú
+    '756',  -- Sicoob
+    '748',  -- Sicredi
+    '077',  -- Inter
+    '260',  -- Nubank
+    '336'   -- C6 Bank
+);
+
+CREATE TABLE contas_bancarias (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+
+    -- Dados bancários
+    banco_codigo banco_codigo NOT NULL,
+    banco_nome VARCHAR(50) NOT NULL,
+    agencia VARCHAR(10) NOT NULL,
+    agencia_digito VARCHAR(2),
+    conta VARCHAR(15) NOT NULL,
+    conta_digito VARCHAR(2) NOT NULL,
+    tipo tipo_conta_bancaria NOT NULL DEFAULT 'CORRENTE',
+
+    -- Titular
+    titular_nome VARCHAR(100) NOT NULL,
+    titular_documento VARCHAR(14) NOT NULL,          -- CPF ou CNPJ
+
+    -- PIX
+    pix_chave_tipo VARCHAR(20),                      -- CPF, CNPJ, EMAIL, TELEFONE, EVP
+    pix_chave VARCHAR(100),
+
+    -- Convênio/Cobrança
+    convenio_cobranca VARCHAR(20),
+    carteira_cobranca VARCHAR(5),
+    variacao_carteira VARCHAR(5),
+    codigo_beneficiario VARCHAR(20),
+
+    -- Configurações CNAB
+    cnab_layout VARCHAR(10) DEFAULT '240',           -- 240 ou 400
+    sequencial_remessa INTEGER DEFAULT 1,
+    sequencial_nosso_numero BIGINT DEFAULT 1,
+
+    -- Controle
+    saldo_atual DECIMAL(15,2) DEFAULT 0,
+    data_ultimo_saldo DATE,
+    ativo BOOLEAN DEFAULT TRUE,
+    padrao_recebimento BOOLEAN DEFAULT FALSE,
+    padrao_pagamento BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_contas_bancarias_loja ON contas_bancarias(loja_id, ativo);
+```
+
+#### 2.2 CNAB Multi-Banco
+
+```sql
+-- Tipo de arquivo CNAB
+CREATE TYPE cnab_tipo AS ENUM (
+    'REMESSA_COBRANCA',      -- Boletos para cobrança
+    'REMESSA_PAGAMENTO',     -- Pagamentos a fornecedores
+    'RETORNO_COBRANCA',      -- Retorno de cobrança
+    'RETORNO_PAGAMENTO'      -- Retorno de pagamentos
+);
+
+CREATE TYPE cnab_status AS ENUM (
+    'GERADO',
+    'ENVIADO',
+    'PROCESSADO',
+    'PROCESSADO_PARCIAL',
+    'ERRO'
+);
+
+-- Remessas CNAB (arquivos gerados)
+CREATE TABLE cnab_remessas (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+    conta_bancaria_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+
+    tipo cnab_tipo NOT NULL,
+    layout VARCHAR(10) NOT NULL,                     -- '240' ou '400'
+
+    -- Arquivo
+    sequencial INTEGER NOT NULL,
+    arquivo_nome VARCHAR(100) NOT NULL,
+    arquivo_conteudo TEXT,                           -- Conteúdo do arquivo
+    arquivo_hash VARCHAR(64),                        -- SHA256 para verificação
+
+    -- Totais
+    total_registros INTEGER DEFAULT 0,
+    total_valor DECIMAL(15,2) DEFAULT 0,
+
+    -- Status
+    status cnab_status NOT NULL DEFAULT 'GERADO',
+    data_geracao TIMESTAMP DEFAULT NOW(),
+    data_envio TIMESTAMP,
+
+    -- Auditoria
+    usuario_id BIGINT REFERENCES usuarios(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Itens da remessa (parcelas incluídas)
+CREATE TABLE cnab_remessas_itens (
+    id BIGSERIAL PRIMARY KEY,
+    remessa_id BIGINT NOT NULL REFERENCES cnab_remessas(id),
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    -- Dados no momento da remessa
+    nosso_numero VARCHAR(20) NOT NULL,
+    valor DECIMAL(15,2) NOT NULL,
+    data_vencimento DATE NOT NULL,
+
+    -- Resultado (preenchido no retorno)
+    codigo_movimento VARCHAR(5),
+    codigo_rejeicao VARCHAR(100),
+    data_credito DATE,
+    valor_pago DECIMAL(15,2),
+    valor_tarifa DECIMAL(15,2),
+
+    CONSTRAINT uq_remessa_parcela UNIQUE (remessa_id, parcela_id)
+);
+
+-- Retornos CNAB (arquivos processados)
+CREATE TABLE cnab_retornos (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+    conta_bancaria_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+    remessa_id BIGINT REFERENCES cnab_remessas(id), -- Remessa correspondente
+
+    tipo cnab_tipo NOT NULL,
+    layout VARCHAR(10) NOT NULL,
+
+    -- Arquivo
+    arquivo_nome VARCHAR(100) NOT NULL,
+    arquivo_conteudo TEXT,
+    arquivo_hash VARCHAR(64),
+
+    -- Totais
+    total_registros INTEGER DEFAULT 0,
+    registros_processados INTEGER DEFAULT 0,
+    registros_erro INTEGER DEFAULT 0,
+    total_valor_pago DECIMAL(15,2) DEFAULT 0,
+    total_valor_tarifa DECIMAL(15,2) DEFAULT 0,
+
+    -- Status
+    status cnab_status NOT NULL DEFAULT 'PROCESSADO',
+    data_arquivo DATE,
+    data_processamento TIMESTAMP DEFAULT NOW(),
+
+    -- Auditoria
+    usuario_id BIGINT REFERENCES usuarios(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Log detalhado do retorno
+CREATE TABLE cnab_retornos_log (
+    id BIGSERIAL PRIMARY KEY,
+    retorno_id BIGINT NOT NULL REFERENCES cnab_retornos(id),
+    parcela_id BIGINT REFERENCES financeiro_parcelas(id),
+
+    -- Dados do registro
+    nosso_numero VARCHAR(20),
+    codigo_movimento VARCHAR(5) NOT NULL,
+    descricao_movimento VARCHAR(100),
+
+    -- Valores
+    valor_titulo DECIMAL(15,2),
+    valor_pago DECIMAL(15,2),
+    valor_desconto DECIMAL(15,2),
+    valor_juros DECIMAL(15,2),
+    valor_multa DECIMAL(15,2),
+    valor_tarifa DECIMAL(15,2),
+
+    -- Datas
+    data_vencimento DATE,
+    data_credito DATE,
+    data_ocorrencia DATE,
+
+    -- Status do processamento
+    processado BOOLEAN DEFAULT FALSE,
+    erro_mensagem TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_cnab_remessas_status ON cnab_remessas(status, data_geracao);
+CREATE INDEX idx_cnab_retornos_status ON cnab_retornos(status, data_processamento);
+```
+
+#### 2.3 OFX Import (Conciliação)
+
+```sql
+-- Importação de extratos OFX
+CREATE TABLE ofx_importacoes (
+    id BIGSERIAL PRIMARY KEY,
+    conta_bancaria_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+
+    -- Arquivo
+    arquivo_nome VARCHAR(100) NOT NULL,
+    arquivo_hash VARCHAR(64) NOT NULL,
+
+    -- Período
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    saldo_inicial DECIMAL(15,2),
+    saldo_final DECIMAL(15,2),
+
+    -- Status
+    total_transacoes INTEGER DEFAULT 0,
+    transacoes_conciliadas INTEGER DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Transações do extrato
+CREATE TABLE ofx_transacoes (
+    id BIGSERIAL PRIMARY KEY,
+    importacao_id BIGINT NOT NULL REFERENCES ofx_importacoes(id),
+
+    -- Dados da transação
+    fitid VARCHAR(50) NOT NULL,                      -- ID único do banco
+    tipo VARCHAR(20) NOT NULL,                       -- CREDIT, DEBIT, etc.
+    data_transacao DATE NOT NULL,
+    valor DECIMAL(15,2) NOT NULL,
+    descricao TEXT,
+    memo TEXT,
+
+    -- Conciliação
+    parcela_id BIGINT REFERENCES financeiro_parcelas(id),
+    pagamento_id BIGINT REFERENCES financeiro_parcelas_pagamentos(id),
+    conciliado BOOLEAN DEFAULT FALSE,
+    conciliado_em TIMESTAMP,
+    conciliado_por BIGINT REFERENCES usuarios(id),
+
+    CONSTRAINT uq_fitid_importacao UNIQUE (importacao_id, fitid)
+);
+
+CREATE INDEX idx_ofx_transacoes_nao_conciliadas
+    ON ofx_transacoes(importacao_id) WHERE NOT conciliado;
+```
+
+#### 2.4 PIX Integration
+
+```sql
+-- Cobranças PIX (QR Codes gerados)
+CREATE TABLE pix_cobrancas (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+    conta_bancaria_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+
+    -- Identificadores
+    txid VARCHAR(35) NOT NULL UNIQUE,                -- Transaction ID
+    e2eid VARCHAR(32),                               -- End-to-End ID
+    location_id VARCHAR(100),                        -- Location ID do QR
+
+    -- QR Code
+    qr_code TEXT NOT NULL,                           -- Payload completo
+    qr_code_imagem TEXT,                             -- Base64 da imagem
+
+    -- Valores
+    valor_original DECIMAL(15,2) NOT NULL,
+    valor_final DECIMAL(15,2),                       -- Com juros/desconto
+
+    -- Validade
+    data_criacao TIMESTAMP DEFAULT NOW(),
+    data_expiracao TIMESTAMP,
+
+    -- Status
+    status VARCHAR(20) DEFAULT 'ATIVA',              -- ATIVA, PAGA, EXPIRADA, CANCELADA
+
+    -- Pagamento (quando pago)
+    data_pagamento TIMESTAMP,
+    valor_pago DECIMAL(15,2),
+    pagador_nome VARCHAR(100),
+    pagador_documento VARCHAR(14),
+    info_adicional TEXT
+);
+
+-- Webhooks PIX recebidos
+CREATE TABLE pix_webhooks (
+    id BIGSERIAL PRIMARY KEY,
+    cobranca_id BIGINT REFERENCES pix_cobrancas(id),
+
+    -- Request
+    webhook_id VARCHAR(100),
+    payload JSONB NOT NULL,
+
+    -- Processamento
+    processado BOOLEAN DEFAULT FALSE,
+    processado_em TIMESTAMP,
+    erro_mensagem TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_pix_cobrancas_txid ON pix_cobrancas(txid);
+CREATE INDEX idx_pix_cobrancas_status ON pix_cobrancas(status, data_expiracao);
+```
+
+#### 2.5 Features da Fase 2
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Contas bancárias | Multi-banco com dados de convênio | P0 |
+| CNAB 240/400 | Remessa e retorno multi-banco | P0 |
+| OFX Import | Importação de extratos | P1 |
+| Conciliação | Match automático extrato ↔ parcelas | P1 |
+| PIX QR Code | Geração de cobranças PIX | P1 |
+| PIX Webhook | Baixa automática via webhook | P1 |
+| Boleto multi-banco | Geração para Bradesco, Caixa, Santander, BB, Itaú | P0 |
+
+---
+
+### FASE 3: GESTÃO DE RECEBÍVEIS (P2)
+
+**Complexidade:** Média | **Estimativa:** 6-8 semanas
+**Dependências:** Fase 1
+
+#### 3.1 Cobrança Automatizada (Dunning)
+
+```sql
+-- =====================================================
+-- FASE 3: GESTÃO DE RECEBÍVEIS
+-- =====================================================
+
+CREATE TYPE cobranca_canal AS ENUM (
+    'EMAIL',
+    'SMS',
+    'WHATSAPP',
+    'TELEFONE',
+    'CARTA'
+);
+
+CREATE TYPE cobranca_status AS ENUM (
+    'AGENDADA',
+    'ENVIADA',
+    'ENTREGUE',
+    'FALHA',
+    'RESPONDIDA'
+);
+
+-- Régua de cobrança (templates)
+CREATE TABLE cobranca_reguas (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+
+    -- Aplicabilidade
+    grupo_financeiro grupo_financeiro,               -- NULL = todos
+    valor_minimo DECIMAL(15,2),
+    dias_atraso_minimo INTEGER DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Etapas da régua
+CREATE TABLE cobranca_reguas_etapas (
+    id BIGSERIAL PRIMARY KEY,
+    regua_id BIGINT NOT NULL REFERENCES cobranca_reguas(id),
+
+    ordem SMALLINT NOT NULL,
+    dias_apos_vencimento INTEGER NOT NULL,           -- -5 = 5 dias antes, +10 = 10 dias após
+    canal cobranca_canal NOT NULL,
+    template_id BIGINT REFERENCES templates_mensagem(id),
+
+    ativo BOOLEAN DEFAULT TRUE,
+
+    CONSTRAINT uq_regua_ordem UNIQUE (regua_id, ordem)
+);
+
+-- Cobranças enviadas
+CREATE TABLE cobrancas (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+    etapa_id BIGINT REFERENCES cobranca_reguas_etapas(id),
+
+    canal cobranca_canal NOT NULL,
+    status cobranca_status NOT NULL DEFAULT 'AGENDADA',
+
+    -- Destinatário
+    destinatario VARCHAR(200) NOT NULL,              -- Email, telefone, etc.
+
+    -- Conteúdo
+    assunto VARCHAR(200),
+    conteudo TEXT,
+
+    -- Rastreamento
+    data_agendada TIMESTAMP,
+    data_envio TIMESTAMP,
+    data_entrega TIMESTAMP,
+    erro_mensagem TEXT,
+
+    -- Resposta
+    respondido BOOLEAN DEFAULT FALSE,
+    data_resposta TIMESTAMP,
+    resposta TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_cobrancas_agendadas ON cobrancas(data_agendada)
+    WHERE status = 'AGENDADA';
+CREATE INDEX idx_cobrancas_parcela ON cobrancas(parcela_id);
+```
+
+#### 3.2 Limites de Crédito
+
+```sql
+-- Limites de crédito por cliente
+CREATE TABLE clientes_limites (
+    id BIGSERIAL PRIMARY KEY,
+    cliente_id BIGINT NOT NULL REFERENCES clientes(id),
+
+    -- Limite
+    limite_total DECIMAL(15,2) NOT NULL,
+    limite_utilizado DECIMAL(15,2) DEFAULT 0,        -- Calculado via trigger
+
+    -- Configurações
+    bloquear_venda_excedido BOOLEAN DEFAULT TRUE,
+    dias_tolerancia INTEGER DEFAULT 0,               -- Dias de atraso tolerados
+
+    -- Análise
+    data_ultima_analise DATE,
+    score_credito INTEGER,                           -- Score interno
+    observacoes TEXT,
+
+    -- Auditoria
+    aprovado_por BIGINT REFERENCES usuarios(id),
+    data_aprovacao TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT uq_cliente_limite UNIQUE (cliente_id)
+);
+
+-- Trigger para atualizar limite utilizado
+CREATE OR REPLACE FUNCTION fn_atualizar_limite_utilizado()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE clientes_limites cl
+    SET limite_utilizado = (
+        SELECT COALESCE(SUM(valor - valor_pago), 0)
+        FROM financeiro_parcelas fp
+        WHERE fp.cliente_id = cl.cliente_id
+          AND fp.tipo = 'RECEBER'
+          AND fp.status NOT IN ('PAGO', 'RECEBIDO', 'CANCELADO')
+    ),
+    updated_at = NOW()
+    WHERE cl.cliente_id = NEW.cliente_id OR cl.cliente_id = OLD.cliente_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_atualizar_limite_cliente
+AFTER INSERT OR UPDATE OR DELETE ON financeiro_parcelas
+FOR EACH ROW
+WHEN (NEW.tipo = 'RECEBER' OR OLD.tipo = 'RECEBER')
+EXECUTE FUNCTION fn_atualizar_limite_utilizado();
+```
+
+#### 3.3 Chargebacks
+
+```sql
+-- Disputas de cartão (chargebacks)
+CREATE TYPE chargeback_status AS ENUM (
+    'ABERTO',
+    'EM_ANALISE',
+    'DOCUMENTOS_ENVIADOS',
+    'GANHO',
+    'PERDIDO',
+    'CANCELADO'
+);
+
+CREATE TABLE chargebacks (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+    venda_id BIGINT REFERENCES vendas(id),
+
+    -- Dados do chargeback
+    data_abertura DATE NOT NULL,
+    data_limite_resposta DATE,
+    codigo_motivo VARCHAR(20),
+    motivo_descricao TEXT,
+    valor_disputado DECIMAL(15,2) NOT NULL,
+
+    -- Status
+    status chargeback_status NOT NULL DEFAULT 'ABERTO',
+
+    -- Documentação
+    documentos_enviados BOOLEAN DEFAULT FALSE,
+    data_envio_documentos TIMESTAMP,
+
+    -- Resolução
+    data_resolucao DATE,
+    valor_final DECIMAL(15,2),
+    observacoes TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Documentos do chargeback
+CREATE TABLE chargebacks_documentos (
+    id BIGSERIAL PRIMARY KEY,
+    chargeback_id BIGINT NOT NULL REFERENCES chargebacks(id),
+
+    tipo VARCHAR(50) NOT NULL,                       -- NF, COMPROVANTE_ENTREGA, etc.
+    arquivo_nome VARCHAR(200) NOT NULL,
+    arquivo_path TEXT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 3.4 Features da Fase 3
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Régua de cobrança | Automação de cobrança em etapas | P1 |
+| Multi-canal | Email, SMS, WhatsApp, Telefone | P2 |
+| Limites de crédito | Gestão de crédito por cliente | P1 |
+| Bloqueio automático | Bloquear venda se limite excedido | P1 |
+| Aging analysis | Relatório de aging (30/60/90 dias) | P1 |
+| Chargebacks | Gestão de disputas de cartão | P2 |
+| DSO metrics | Days Sales Outstanding | P2 |
+
+---
+
+### FASE 4: GESTÃO DE PAGÁVEIS (P2)
+
+**Complexidade:** Média | **Estimativa:** 6-8 semanas
+**Dependências:** Fase 1
+
+#### 4.1 Aprovação de Pagamentos
+
+```sql
+-- =====================================================
+-- FASE 4: GESTÃO DE PAGÁVEIS
+-- =====================================================
+
+CREATE TYPE aprovacao_status AS ENUM (
+    'PENDENTE',
+    'APROVADO',
+    'REJEITADO',
+    'EXPIRADO'
+);
+
+-- Níveis de aprovação
+CREATE TABLE aprovacao_niveis (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    nivel SMALLINT NOT NULL,                         -- 1, 2, 3...
+
+    -- Critérios
+    valor_minimo DECIMAL(15,2),                      -- Acima deste valor requer aprovação
+    valor_maximo DECIMAL(15,2),
+    grupos grupo_financeiro[],                       -- Grupos que requerem aprovação
+
+    -- Aprovadores
+    aprovadores_ids BIGINT[] NOT NULL,               -- IDs de usuários aprovadores
+    quorum INTEGER DEFAULT 1,                        -- Quantas aprovações necessárias
+
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Solicitações de aprovação
+CREATE TABLE aprovacoes_pagamento (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+    nivel_id BIGINT NOT NULL REFERENCES aprovacao_niveis(id),
+
+    status aprovacao_status NOT NULL DEFAULT 'PENDENTE',
+
+    -- Solicitante
+    solicitante_id BIGINT NOT NULL REFERENCES usuarios(id),
+    data_solicitacao TIMESTAMP DEFAULT NOW(),
+    justificativa TEXT,
+
+    -- Aprovação/Rejeição
+    data_resposta TIMESTAMP,
+    respondido_por BIGINT REFERENCES usuarios(id),
+    motivo_rejeicao TEXT,
+
+    -- Expiração
+    data_expiracao TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Log de aprovações (múltiplos aprovadores)
+CREATE TABLE aprovacoes_pagamento_log (
+    id BIGSERIAL PRIMARY KEY,
+    aprovacao_id BIGINT NOT NULL REFERENCES aprovacoes_pagamento(id),
+
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id),
+    acao VARCHAR(20) NOT NULL,                       -- APROVADO, REJEITADO
+    comentario TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_aprovacoes_pendentes ON aprovacoes_pagamento(status, data_expiracao)
+    WHERE status = 'PENDENTE';
+```
+
+#### 4.2 Three-Way Match
+
+```sql
+-- Verificação 3-way match (PO ↔ Recebimento ↔ NF)
+CREATE TYPE match_status AS ENUM (
+    'PENDENTE',
+    'MATCH_OK',
+    'DIVERGENCIA_QUANTIDADE',
+    'DIVERGENCIA_PRECO',
+    'DIVERGENCIA_ITEM',
+    'APROVADO_MANUAL'
+);
+
+CREATE TABLE three_way_match (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    -- Documentos
+    pedido_compra_id BIGINT REFERENCES pedidos_compra(id),
+    recebimento_id BIGINT REFERENCES recebimentos(id),
+    nfe_id BIGINT REFERENCES nfes(id),
+
+    -- Status
+    status match_status NOT NULL DEFAULT 'PENDENTE',
+
+    -- Valores comparados
+    valor_pedido DECIMAL(15,2),
+    valor_recebimento DECIMAL(15,2),
+    valor_nfe DECIMAL(15,2),
+    diferenca_valor DECIMAL(15,2),
+    diferenca_percentual DECIMAL(5,2),
+
+    -- Itens com divergência
+    divergencias JSONB,                              -- Array de divergências por item
+
+    -- Aprovação manual (quando há divergência)
+    aprovado_por BIGINT REFERENCES usuarios(id),
+    data_aprovacao TIMESTAMP,
+    motivo_aprovacao TEXT,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 4.3 Pagamentos Recorrentes
+
+```sql
+-- Templates de pagamentos recorrentes
+CREATE TYPE recorrencia_frequencia AS ENUM (
+    'DIARIA',
+    'SEMANAL',
+    'QUINZENAL',
+    'MENSAL',
+    'BIMESTRAL',
+    'TRIMESTRAL',
+    'SEMESTRAL',
+    'ANUAL'
+);
+
+CREATE TABLE pagamentos_recorrentes (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+
+    -- Descrição
+    descricao VARCHAR(200) NOT NULL,
+    grupo grupo_financeiro NOT NULL,
+    fornecedor_id BIGINT REFERENCES fornecedores(id),
+
+    -- Valores
+    valor DECIMAL(15,2) NOT NULL,
+    centro_custo_id BIGINT REFERENCES centros_custo(id),
+    conta_bancaria_id BIGINT REFERENCES contas_bancarias(id),
+
+    -- Recorrência
+    frequencia recorrencia_frequencia NOT NULL,
+    dia_vencimento SMALLINT,                         -- Dia do mês (1-31)
+    dia_semana SMALLINT,                             -- Dia da semana (1-7)
+
+    -- Período
+    data_inicio DATE NOT NULL,
+    data_fim DATE,                                   -- NULL = indefinido
+
+    -- Controle
+    proxima_geracao DATE,
+    total_gerado INTEGER DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Parcelas geradas automaticamente
+CREATE TABLE pagamentos_recorrentes_gerados (
+    id BIGSERIAL PRIMARY KEY,
+    recorrente_id BIGINT NOT NULL REFERENCES pagamentos_recorrentes(id),
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    competencia DATE NOT NULL,                       -- Mês de competência
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 4.4 Features da Fase 4
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Aprovação multinível | Workflow de aprovação por valor | P1 |
+| Three-way match | PO ↔ Recebimento ↔ NF | P1 |
+| Pagamentos recorrentes | Templates de pagamentos fixos | P2 |
+| Early payment discount | Desconto por pagamento antecipado | P2 |
+| DPO metrics | Days Payable Outstanding | P2 |
+
+---
+
+### FASE 5: GESTÃO DE CAIXA (P3)
+
+**Complexidade:** Média | **Estimativa:** 5-6 semanas
+**Dependências:** Fases 1, 2
+
+#### 5.1 Saldos Bancários
+
+```sql
+-- =====================================================
+-- FASE 5: GESTÃO DE CAIXA
+-- =====================================================
+
+-- Saldos diários (histórico)
+CREATE TABLE saldos_bancarios (
+    id BIGSERIAL PRIMARY KEY,
+    conta_bancaria_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+
+    data DATE NOT NULL,
+    saldo_inicial DECIMAL(15,2) NOT NULL,
+    saldo_final DECIMAL(15,2) NOT NULL,
+
+    -- Movimentações do dia
+    total_entradas DECIMAL(15,2) DEFAULT 0,
+    total_saidas DECIMAL(15,2) DEFAULT 0,
+    qtd_entradas INTEGER DEFAULT 0,
+    qtd_saidas INTEGER DEFAULT 0,
+
+    -- Origem
+    origem VARCHAR(20) DEFAULT 'CALCULADO',          -- CALCULADO, OFX, MANUAL
+
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT uq_saldo_conta_data UNIQUE (conta_bancaria_id, data)
+);
+
+CREATE INDEX idx_saldos_conta_data ON saldos_bancarios(conta_bancaria_id, data DESC);
+```
+
+#### 5.2 Transferências Internas
+
+```sql
+-- Transferências entre contas
+CREATE TYPE transferencia_status AS ENUM (
+    'PENDENTE',
+    'CONFIRMADA',
+    'CANCELADA'
+);
+
+CREATE TABLE transferencias_internas (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+
+    -- Contas
+    conta_origem_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+    conta_destino_id BIGINT NOT NULL REFERENCES contas_bancarias(id),
+
+    -- Valores
+    valor DECIMAL(15,2) NOT NULL,
+    tarifa DECIMAL(15,2) DEFAULT 0,
+
+    -- Datas
+    data_transferencia DATE NOT NULL,
+    data_confirmacao TIMESTAMP,
+
+    -- Status
+    status transferencia_status NOT NULL DEFAULT 'PENDENTE',
+    observacoes TEXT,
+
+    -- Auditoria
+    criado_por BIGINT NOT NULL REFERENCES usuarios(id),
+    confirmado_por BIGINT REFERENCES usuarios(id),
+
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT chk_contas_diferentes CHECK (conta_origem_id != conta_destino_id)
+);
+```
+
+#### 5.3 Caixa Pequeno
+
+```sql
+-- Fundos de caixa pequeno
+CREATE TABLE caixa_pequeno (
+    id BIGSERIAL PRIMARY KEY,
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+
+    nome VARCHAR(100) NOT NULL,                      -- "Caixa Loja Centro"
+    responsavel_id BIGINT NOT NULL REFERENCES usuarios(id),
+
+    -- Valores
+    limite DECIMAL(15,2) NOT NULL,
+    saldo_atual DECIMAL(15,2) DEFAULT 0,
+
+    -- Controle
+    ultima_reposicao DATE,
+    proximo_fechamento DATE,
+
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Movimentações do caixa pequeno
+CREATE TABLE caixa_pequeno_movimentacoes (
+    id BIGSERIAL PRIMARY KEY,
+    caixa_id BIGINT NOT NULL REFERENCES caixa_pequeno(id),
+
+    tipo VARCHAR(10) NOT NULL,                       -- ENTRADA, SAIDA, REPOSICAO
+    valor DECIMAL(15,2) NOT NULL,
+    descricao TEXT NOT NULL,
+
+    -- Categorização
+    grupo grupo_financeiro,
+    centro_custo_id BIGINT REFERENCES centros_custo(id),
+
+    -- Comprovante
+    comprovante_url TEXT,
+
+    -- Auditoria
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id),
+    data_movimento DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Trigger para atualizar saldo
+CREATE OR REPLACE FUNCTION fn_atualizar_saldo_caixa_pequeno()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE caixa_pequeno
+    SET saldo_atual = saldo_atual +
+        CASE NEW.tipo
+            WHEN 'ENTRADA' THEN NEW.valor
+            WHEN 'REPOSICAO' THEN NEW.valor
+            WHEN 'SAIDA' THEN -NEW.valor
+        END
+    WHERE id = NEW.caixa_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_saldo_caixa_pequeno
+AFTER INSERT ON caixa_pequeno_movimentacoes
+FOR EACH ROW EXECUTE FUNCTION fn_atualizar_saldo_caixa_pequeno();
+```
+
+#### 5.4 Fluxo de Caixa Projetado
+
+```sql
+-- View materializada para fluxo de caixa
+CREATE MATERIALIZED VIEW fluxo_caixa_projetado AS
+WITH parcelas_abertas AS (
+    SELECT
+        data_vencimento AS data,
+        loja_id,
+        CASE tipo
+            WHEN 'RECEBER' THEN (valor + valor_juros + valor_multa - valor_desconto - valor_pago)
+            ELSE 0
+        END AS entrada,
+        CASE tipo
+            WHEN 'PAGAR' THEN (valor + valor_juros + valor_multa - valor_desconto - valor_pago)
+            ELSE 0
+        END AS saida
+    FROM financeiro_parcelas
+    WHERE status IN ('PENDENTE', 'AGENDADO', 'PARCIAL', 'ATRASADO')
+      AND deleted_at IS NULL
+)
+SELECT
+    data,
+    loja_id,
+    SUM(entrada) AS total_entradas,
+    SUM(saida) AS total_saidas,
+    SUM(entrada) - SUM(saida) AS saldo_dia
+FROM parcelas_abertas
+WHERE data BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '90 days'
+GROUP BY data, loja_id
+ORDER BY loja_id, data;
+
+CREATE UNIQUE INDEX idx_fluxo_caixa_loja_data ON fluxo_caixa_projetado(loja_id, data);
+
+-- Refresh job (via pg_cron)
+-- SELECT cron.schedule('refresh_fluxo_caixa', '0 * * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY fluxo_caixa_projetado');
+```
+
+#### 5.5 Features da Fase 5
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Saldos bancários | Histórico de saldos diários | P1 |
+| Transferências | Entre contas da empresa | P1 |
+| Caixa pequeno | Gestão de fundo fixo | P2 |
+| Fluxo projetado | Previsão 30/60/90 dias | P1 |
+| Conciliação UI | Interface de conciliação bancária | P1 |
+
+---
+
+### FASE 6: COMPLIANCE & AUDITORIA (P3)
+
+**Complexidade:** Média | **Estimativa:** 4-5 semanas
+**Dependências:** Fases 1, 4
+
+#### 6.1 Retenções de Impostos
+
+```sql
+-- =====================================================
+-- FASE 6: COMPLIANCE & AUDITORIA
+-- =====================================================
+
+CREATE TYPE tipo_retencao AS ENUM (
+    'IRRF',          -- Imposto de Renda Retido na Fonte
+    'PIS',           -- PIS
+    'COFINS',        -- COFINS
+    'CSLL',          -- Contribuição Social
+    'ISS',           -- ISS retido
+    'INSS'           -- INSS retido
+);
+
+-- Retenções aplicadas em pagamentos
+CREATE TABLE retencoes_impostos (
+    id BIGSERIAL PRIMARY KEY,
+    parcela_id BIGINT NOT NULL REFERENCES financeiro_parcelas(id),
+
+    tipo tipo_retencao NOT NULL,
+
+    -- Base e valores
+    base_calculo DECIMAL(15,2) NOT NULL,
+    aliquota DECIMAL(5,4) NOT NULL,                  -- Ex: 0.0150 = 1.5%
+    valor_retido DECIMAL(15,2) NOT NULL,
+
+    -- Código de receita (DARF)
+    codigo_receita VARCHAR(10),
+
+    -- Controle
+    data_retencao DATE NOT NULL DEFAULT CURRENT_DATE,
+    competencia DATE NOT NULL,                       -- Mês de competência
+
+    -- DARF gerado
+    darf_gerado BOOLEAN DEFAULT FALSE,
+    data_vencimento_darf DATE,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_retencoes_competencia ON retencoes_impostos(competencia, tipo);
+```
+
+#### 6.2 Vinculação NFe
+
+```sql
+-- Vincular parcelas a NFes (para compliance)
+-- Já existe no financeiro_parcelas: nfe_id
+
+-- View para relatório de compliance NFe ↔ Financeiro
+CREATE VIEW financeiro_nfe_compliance AS
+SELECT
+    fp.id AS parcela_id,
+    fp.tipo,
+    fp.valor,
+    fp.data_vencimento,
+    fp.status,
+    n.id AS nfe_id,
+    n.numero AS nfe_numero,
+    n.serie AS nfe_serie,
+    n.chave AS nfe_chave,
+    n.valor_total AS nfe_valor,
+    CASE
+        WHEN fp.tipo = 'RECEBER' AND n.tipo_operacao = 'SAIDA' THEN 'OK'
+        WHEN fp.tipo = 'PAGAR' AND n.tipo_operacao = 'ENTRADA' THEN 'OK'
+        WHEN n.id IS NULL THEN 'SEM_NFE'
+        ELSE 'DIVERGENCIA_TIPO'
+    END AS status_compliance
+FROM financeiro_parcelas fp
+LEFT JOIN nfes n ON fp.nfe_id = n.id
+WHERE fp.deleted_at IS NULL;
+```
+
+#### 6.3 Features da Fase 6
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Retenções IRRF/ISS/INSS | Cálculo e controle | P1 |
+| Link NFe ↔ Financeiro | Vinculação para compliance | P1 |
+| Dados DIRF | Auxiliar para DIRF | P2 |
+| Dados EFD-Reinf | Auxiliar para EFD-Reinf | P2 |
+| Audit trail completo | Event sourcing (Fase 1) | P0 |
+
+---
+
+### FASE 7: RELATÓRIOS & ANALYTICS (P4)
+
+**Complexidade:** Baixa | **Estimativa:** 4-5 semanas
+**Dependências:** Fases 1-5
+
+#### 7.1 Views Analíticas
+
+```sql
+-- =====================================================
+-- FASE 7: RELATÓRIOS & ANALYTICS
+-- =====================================================
+
+-- Aging de Recebíveis
+CREATE VIEW aging_receber AS
+SELECT
+    cliente_id,
+    c.razao_social AS cliente_nome,
+    SUM(CASE WHEN data_vencimento > CURRENT_DATE THEN (valor - valor_pago) ELSE 0 END) AS a_vencer,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 1 AND 30 THEN (valor - valor_pago) ELSE 0 END) AS vencido_1_30,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 31 AND 60 THEN (valor - valor_pago) ELSE 0 END) AS vencido_31_60,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 61 AND 90 THEN (valor - valor_pago) ELSE 0 END) AS vencido_61_90,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento > 90 THEN (valor - valor_pago) ELSE 0 END) AS vencido_90_mais,
+    SUM(valor - valor_pago) AS total_aberto
+FROM financeiro_parcelas fp
+JOIN clientes c ON fp.cliente_id = c.id
+WHERE fp.tipo = 'RECEBER'
+  AND fp.status NOT IN ('RECEBIDO', 'CANCELADO')
+  AND fp.deleted_at IS NULL
+GROUP BY cliente_id, c.razao_social;
+
+-- Aging de Pagáveis
+CREATE VIEW aging_pagar AS
+SELECT
+    fornecedor_id,
+    f.razao_social AS fornecedor_nome,
+    SUM(CASE WHEN data_vencimento > CURRENT_DATE THEN (valor - valor_pago) ELSE 0 END) AS a_vencer,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 1 AND 30 THEN (valor - valor_pago) ELSE 0 END) AS vencido_1_30,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 31 AND 60 THEN (valor - valor_pago) ELSE 0 END) AS vencido_31_60,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento BETWEEN 61 AND 90 THEN (valor - valor_pago) ELSE 0 END) AS vencido_61_90,
+    SUM(CASE WHEN CURRENT_DATE - data_vencimento > 90 THEN (valor - valor_pago) ELSE 0 END) AS vencido_90_mais,
+    SUM(valor - valor_pago) AS total_aberto
+FROM financeiro_parcelas fp
+JOIN fornecedores f ON fp.fornecedor_id = f.id
+WHERE fp.tipo = 'PAGAR'
+  AND fp.status NOT IN ('PAGO', 'CANCELADO')
+  AND fp.deleted_at IS NULL
+GROUP BY fornecedor_id, f.razao_social;
+
+-- DSO (Days Sales Outstanding)
+CREATE VIEW dso_mensal AS
+SELECT
+    DATE_TRUNC('month', data_vencimento) AS mes,
+    loja_id,
+    AVG(
+        CASE
+            WHEN status IN ('RECEBIDO') AND data_vencimento IS NOT NULL
+            THEN EXTRACT(EPOCH FROM (
+                (SELECT MIN(created_at) FROM financeiro_parcelas_pagamentos pp WHERE pp.parcela_id = fp.id)
+                - data_emissao
+            )) / 86400
+            ELSE NULL
+        END
+    )::DECIMAL(10,2) AS dso_medio
+FROM financeiro_parcelas fp
+WHERE tipo = 'RECEBER'
+  AND status = 'RECEBIDO'
+  AND deleted_at IS NULL
+GROUP BY DATE_TRUNC('month', data_vencimento), loja_id;
+
+-- DPO (Days Payable Outstanding)
+CREATE VIEW dpo_mensal AS
+SELECT
+    DATE_TRUNC('month', data_vencimento) AS mes,
+    loja_id,
+    AVG(
+        CASE
+            WHEN status IN ('PAGO') AND data_vencimento IS NOT NULL
+            THEN EXTRACT(EPOCH FROM (
+                (SELECT MIN(created_at) FROM financeiro_parcelas_pagamentos pp WHERE pp.parcela_id = fp.id)
+                - data_emissao
+            )) / 86400
+            ELSE NULL
+        END
+    )::DECIMAL(10,2) AS dpo_medio
+FROM financeiro_parcelas fp
+WHERE tipo = 'PAGAR'
+  AND status = 'PAGO'
+  AND deleted_at IS NULL
+GROUP BY DATE_TRUNC('month', data_vencimento), loja_id;
+```
+
+#### 7.2 Features da Fase 7
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Aging por cliente | 30/60/90/90+ dias | P1 |
+| Aging por fornecedor | 30/60/90/90+ dias | P1 |
+| DSO dashboard | Days Sales Outstanding | P2 |
+| DPO dashboard | Days Payable Outstanding | P2 |
+| Fluxo realizado vs projetado | Comparativo | P2 |
+| Por centro de custo | Relatórios por CC | P2 |
+| Por forma de pagamento | Análise de mix | P3 |
+
+---
+
+### FASE 8: CONTABILIDADE GERAL (P5 - Futuro)
+
+**Complexidade:** Alta | **Estimativa:** 12-16 semanas
+**Dependências:** Todas as fases anteriores
+
+#### 8.1 Plano de Contas
+
+```sql
+-- =====================================================
+-- FASE 8: CONTABILIDADE GERAL
+-- =====================================================
+
+CREATE TYPE natureza_conta AS ENUM (
+    'DEVEDORA',      -- Ativo, Despesa
+    'CREDORA'        -- Passivo, Receita, PL
+);
+
+CREATE TYPE tipo_conta AS ENUM (
+    'ANALITICA',     -- Aceita lançamentos
+    'SINTETICA'      -- Apenas agrupamento
+);
+
+-- Plano de contas (modelo brasileiro)
+CREATE TABLE plano_contas (
+    id BIGSERIAL PRIMARY KEY,
+
+    -- Hierarquia
+    codigo VARCHAR(20) NOT NULL UNIQUE,              -- "1.1.1.01"
+    codigo_reduzido VARCHAR(10),
+    pai_id BIGINT REFERENCES plano_contas(id),
+    nivel SMALLINT NOT NULL,
+
+    -- Descrição
+    nome VARCHAR(200) NOT NULL,
+    descricao TEXT,
+
+    -- Classificação
+    natureza natureza_conta NOT NULL,
+    tipo tipo_conta NOT NULL,
+
+    -- Grupo contábil
+    grupo VARCHAR(50) NOT NULL,                      -- ATIVO, PASSIVO, RECEITA, DESPESA, PL
+    subgrupo VARCHAR(50),
+
+    -- Controle
+    aceita_lancamento BOOLEAN GENERATED ALWAYS AS (tipo = 'ANALITICA') STORED,
+    ativo BOOLEAN DEFAULT TRUE,
+
+    -- SPED
+    codigo_sped VARCHAR(10),                         -- Código para SPED Contábil
+
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_plano_contas_codigo ON plano_contas(codigo);
+CREATE INDEX idx_plano_contas_pai ON plano_contas(pai_id);
+
+-- Contas padrão brasileiras (inserção inicial)
+-- 1 - ATIVO
+-- 1.1 - ATIVO CIRCULANTE
+-- 1.1.1 - DISPONIBILIDADES
+-- 1.1.1.01 - Caixa
+-- 1.1.1.02 - Bancos Conta Movimento
+-- ...
+```
+
+#### 8.2 Lançamentos Contábeis
+
+```sql
+-- Lançamentos contábeis
+CREATE TABLE lancamentos_contabeis (
+    id BIGSERIAL PRIMARY KEY,
+
+    -- Identificação
+    numero VARCHAR(20) NOT NULL,                     -- Número do lançamento
+    data_lancamento DATE NOT NULL,
+    data_competencia DATE NOT NULL,
+
+    -- Origem
+    loja_id BIGINT NOT NULL REFERENCES lojas(id),
+    origem VARCHAR(50),                              -- FINANCEIRO, ESTOQUE, VENDA, MANUAL
+    origem_id BIGINT,                                -- ID do documento de origem
+
+    -- Descrição
+    historico TEXT NOT NULL,
+
+    -- Valores (débito = crédito)
+    valor_total DECIMAL(15,2) NOT NULL,
+
+    -- Status
+    status VARCHAR(20) DEFAULT 'ATIVO',              -- ATIVO, ESTORNADO
+    estorno_de BIGINT REFERENCES lancamentos_contabeis(id),
+
+    -- Auditoria
+    usuario_id BIGINT REFERENCES usuarios(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Partidas do lançamento (débito/crédito)
+CREATE TABLE lancamentos_contabeis_partidas (
+    id BIGSERIAL PRIMARY KEY,
+    lancamento_id BIGINT NOT NULL REFERENCES lancamentos_contabeis(id),
+
+    conta_id BIGINT NOT NULL REFERENCES plano_contas(id),
+
+    -- Valores (uma das colunas deve ser NULL)
+    valor_debito DECIMAL(15,2),
+    valor_credito DECIMAL(15,2),
+
+    -- Complemento
+    historico_complementar TEXT,
+    centro_custo_id BIGINT REFERENCES centros_custo(id),
+
+    CONSTRAINT chk_debito_ou_credito CHECK (
+        (valor_debito IS NOT NULL AND valor_credito IS NULL) OR
+        (valor_debito IS NULL AND valor_credito IS NOT NULL)
+    )
+);
+
+CREATE INDEX idx_lancamentos_data ON lancamentos_contabeis(data_competencia, loja_id);
+CREATE INDEX idx_partidas_conta ON lancamentos_contabeis_partidas(conta_id);
+
+-- Trigger para validar débito = crédito
+CREATE OR REPLACE FUNCTION fn_validar_lancamento_equilibrado()
+RETURNS TRIGGER AS $$
+DECLARE
+    total_debito DECIMAL(15,2);
+    total_credito DECIMAL(15,2);
+BEGIN
+    SELECT
+        COALESCE(SUM(valor_debito), 0),
+        COALESCE(SUM(valor_credito), 0)
+    INTO total_debito, total_credito
+    FROM lancamentos_contabeis_partidas
+    WHERE lancamento_id = NEW.lancamento_id;
+
+    IF total_debito != total_credito THEN
+        RAISE EXCEPTION 'Lançamento desequilibrado: Débito (%) != Crédito (%)',
+            total_debito, total_credito;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+#### 8.3 Integração Financeiro → Contábil
+
+```sql
+-- Configuração de contabilização automática
+CREATE TABLE financeiro_contabil_config (
+    id BIGSERIAL PRIMARY KEY,
+
+    -- Critério
+    tipo tipo_financeiro NOT NULL,
+    grupo grupo_financeiro NOT NULL,
+    forma_pagamento VARCHAR(30),
+
+    -- Contas
+    conta_debito_id BIGINT NOT NULL REFERENCES plano_contas(id),
+    conta_credito_id BIGINT NOT NULL REFERENCES plano_contas(id),
+
+    -- Histórico padrão
+    historico_padrao TEXT,
+
+    ativo BOOLEAN DEFAULT TRUE,
+
+    CONSTRAINT uq_config_contabil UNIQUE (tipo, grupo, forma_pagamento)
+);
+
+-- Exemplo de configuração:
+-- RECEBER + VENDAS → D: Clientes (1.1.3) / C: Receita de Vendas (3.1.1)
+-- RECEBER + VENDAS (baixa) → D: Banco (1.1.1) / C: Clientes (1.1.3)
+-- PAGAR + COMPRAS → D: Estoque (1.1.4) / C: Fornecedores (2.1.1)
+```
+
+#### 8.4 Features da Fase 8
+
+| Feature | Descrição | Prioridade |
+|---------|-----------|------------|
+| Plano de contas | Modelo brasileiro completo | P1 |
+| Lançamentos | Partidas dobradas com validação | P1 |
+| Auto-contabilização | Financeiro gera lançamentos | P1 |
+| Balancete | Balancete de verificação | P1 |
+| DRE | Demonstração de Resultado | P2 |
+| Balanço | Balanço Patrimonial | P2 |
+| DFC | Demonstração de Fluxo de Caixa | P3 |
+| SPED Contábil | Exportação para SPED | P3 |
+
+---
+
+## Resumo do Roadmap
+
+| Fase | Prioridade | Duração | Entregável Principal |
+|------|------------|---------|---------------------|
+| 1. Fundação | P0 | 8-10 sem | Modelo unificado, pagamentos parciais, audit |
+| 2. Integração Bancária | P1 | 10-12 sem | Multi-banco CNAB, PIX, conciliação |
+| 3. Recebíveis | P2 | 6-8 sem | Cobrança, limites de crédito, aging |
+| 4. Pagáveis | P2 | 6-8 sem | Aprovações, 3-way match, recorrentes |
+| 5. Gestão de Caixa | P3 | 5-6 sem | Previsão, transferências, caixa pequeno |
+| 6. Compliance | P3 | 4-5 sem | Retenções, vinculação NFe, auditoria |
+| 7. Relatórios | P4 | 4-5 sem | Dashboards, analytics, DSO/DPO |
+| 8. Contabilidade | P5 | 12-16 sem | Plano de contas, lançamentos, DRE |
+
+**Total estimado: 55-70 semanas para implementação completa**
+
+---
+
+## Estratégia de Migração
+
+### Da Estrutura Atual para Fase 1
+
+```sql
+-- =====================================================
+-- MIGRAÇÃO: Tabelas Legadas → financeiro_parcelas
+-- =====================================================
+
+-- 1. Criar tabelas novas (financeiro_parcelas, _pagamentos, _events)
+-- 2. Migrar dados existentes:
+
+-- Contas a Receber
+INSERT INTO financeiro_parcelas (
+    tipo, origem, grupo, loja_id, cliente_id, venda_id,
+    numero_parcela, total_parcelas, valor, valor_pago,
+    data_emissao, data_vencimento, status, forma_pagamento,
+    observacoes, created_at
+)
+SELECT
+    'RECEBER'::tipo_financeiro,
+    CASE WHEN cr.idVenda IS NOT NULL THEN 'VENDA' ELSE 'MANUAL' END::origem_financeiro,
+    COALESCE(cr.grupo, 'VENDAS')::grupo_financeiro,
+    cr.idLoja,
+    (SELECT id FROM clientes c WHERE c.razao_social = cr.contraParte LIMIT 1),
+    cr.idVenda,
+    COALESCE(CAST(SPLIT_PART(cr.parcela, '/', 1) AS SMALLINT), 1),
+    COALESCE(CAST(SPLIT_PART(cr.parcela, '/', 2) AS SMALLINT), 1),
+    cr.valor,
+    COALESCE(cr.valorReal, 0),
+    COALESCE(DATE(cr.created_at), CURRENT_DATE),
+    cr.dataPagamento,
+    CASE cr.status
+        WHEN 'RECEBIDO' THEN 'RECEBIDO'
+        WHEN 'CANCELADO' THEN 'CANCELADO'
+        WHEN 'AGENDADO' THEN 'AGENDADO'
+        ELSE 'PENDENTE'
+    END::status_financeiro,
+    cr.tipo,
+    cr.observacao,
+    cr.created_at
+FROM conta_a_receber_has_pagamento cr;
+
+-- Contas a Pagar
+INSERT INTO financeiro_parcelas (
+    tipo, origem, grupo, loja_id, fornecedor_id, compra_id,
+    numero_parcela, total_parcelas, valor, valor_pago,
+    data_emissao, data_vencimento, status, forma_pagamento,
+    observacoes, created_at
+)
+SELECT
+    'PAGAR'::tipo_financeiro,
+    CASE WHEN cp.idCompra IS NOT NULL THEN 'COMPRA' ELSE 'MANUAL' END::origem_financeiro,
+    COALESCE(cp.grupo, 'COMPRAS')::grupo_financeiro,
+    cp.idLoja,
+    (SELECT id FROM fornecedores f WHERE f.razao_social = cp.contraParte LIMIT 1),
+    cp.idCompra,
+    COALESCE(CAST(SPLIT_PART(cp.parcela, '/', 1) AS SMALLINT), 1),
+    COALESCE(CAST(SPLIT_PART(cp.parcela, '/', 2) AS SMALLINT), 1),
+    cp.valor,
+    COALESCE(cp.valorReal, 0),
+    COALESCE(DATE(cp.created_at), CURRENT_DATE),
+    cp.dataPagamento,
+    CASE cp.status
+        WHEN 'PAGO' THEN 'PAGO'
+        WHEN 'CANCELADO' THEN 'CANCELADO'
+        WHEN 'AGENDADO' THEN 'AGENDADO'
+        ELSE 'PENDENTE'
+    END::status_financeiro,
+    cp.tipo,
+    cp.observacao,
+    cp.created_at
+FROM conta_a_pagar_has_pagamento cp;
+
+-- 3. Criar registros de pagamento para parcelas já pagas
+INSERT INTO financeiro_parcelas_pagamentos (
+    parcela_id, valor, data_pagamento, forma_pagamento, origem, created_at
+)
+SELECT
+    fp.id,
+    fp.valor_pago,
+    fp.data_vencimento,  -- Usar vencimento como aproximação
+    fp.forma_pagamento,
+    'MIGRACAO',
+    fp.created_at
+FROM financeiro_parcelas fp
+WHERE fp.valor_pago > 0
+  AND fp.status IN ('PAGO', 'RECEBIDO');
+
+-- 4. Criar evento inicial para cada parcela migrada
+INSERT INTO financeiro_parcelas_events (
+    parcela_id, evento_tipo, evento_dados, created_at
+)
+SELECT
+    id,
+    'CRIADA'::evento_financeiro_tipo,
+    jsonb_build_object(
+        'origem', 'MIGRACAO',
+        'tabela_original', CASE tipo WHEN 'RECEBER' THEN 'conta_a_receber_has_pagamento' ELSE 'conta_a_pagar_has_pagamento' END
+    ),
+    created_at
+FROM financeiro_parcelas;
+
+-- 5. Após validação, renomear tabelas antigas
+ALTER TABLE conta_a_receber_has_pagamento RENAME TO _legacy_conta_a_receber;
+ALTER TABLE conta_a_pagar_has_pagamento RENAME TO _legacy_conta_a_pagar;
+```
+
+### Rollback Strategy
+
+```sql
+-- Em caso de problemas, restaurar tabelas legadas:
+ALTER TABLE _legacy_conta_a_receber RENAME TO conta_a_receber_has_pagamento;
+ALTER TABLE _legacy_conta_a_pagar RENAME TO conta_a_pagar_has_pagamento;
+
+-- Recriar views/triggers que dependiam das tabelas antigas
+```
+
+---
+
+## Documentos Relacionados
+
+- [02-schema-redesenhado.md](../../03-decisoes/02-schema-redesenhado.md) - Schema PostgreSQL completo
+- [nfe.md](./nfe.md) - Módulo NFe (vinculação com financeiro)
+- [compras.md](./compras.md) - Módulo Compras (origem de pagáveis)
+- [vendas.md](./vendas.md) - Módulo Vendas (origem de recebíveis)

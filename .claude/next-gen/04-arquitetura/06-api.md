@@ -11,14 +11,14 @@ Este documento define a arquitetura e padrões para a API REST do ERP Staccato e
 
 ### Decisões Principais
 
-| Aspecto       | Decisão               | Justificativa                               |
-| ------------- | --------------------- | ------------------------------------------- |
-| Estilo        | REST                  | Simplicidade, cacheabilidade, amplo suporte |
-| Formato       | JSON                  | Padrão da indústria, suporte nativo Laravel |
-| Especificação | OpenAPI 3.1           | Documentação auto-gerada, tipagem forte     |
-| Versionamento | URL path (`/api/v1/`) | Explícito, fácil migração                   |
-| Autenticação  | Laravel Sanctum       | SPA + API tokens em um só pacote            |
-| Rate Limiting | Laravel nativo        | 60 req/min padrão, ajustável por rota       |
+| Aspecto       | Decisão                  | Justificativa                                      |
+| ------------- | ------------------------ | -------------------------------------------------- |
+| Estilo        | REST                     | Simplicidade, cacheabilidade, amplo suporte        |
+| Formato       | JSON                     | Padrão da indústria, suporte nativo Laravel        |
+| Especificação | OpenAPI 3.1 (Scramble)   | Auto-generated, zero annotations, sempre sincronizado |
+| Versionamento | URL path (`/api/v1/`)    | Explícito, fácil migração                          |
+| Autenticação  | Laravel Sanctum          | SPA + API tokens em um só pacote                   |
+| Rate Limiting | Laravel nativo           | 60 req/min padrão, ajustável por rota              |
 
 ---
 
@@ -744,103 +744,193 @@ class DispatchWebhook implements ShouldQueue
 
 ---
 
-## Documentação OpenAPI
+## Documentação OpenAPI com Scramble
 
-### Geração com L5-Swagger
+### Geração Automática (Zero Annotations)
 
-```php
-// config/l5-swagger.php
-return [
-    'default' => 'default',
-    'documentations' => [
-        'default' => [
-            'api' => [
-                'title' => 'ERP Staccato API',
-                'description' => 'API REST do sistema ERP Staccato',
-                'version' => '1.0.0',
-            ],
-            'routes' => [
-                'api' => 'api/documentation',
-                'docs' => 'docs',
-            ],
-            'paths' => [
-                'docs' => storage_path('api-docs'),
-                'annotations' => [
-                    base_path('app/Http/Controllers/Api'),
-                ],
-            ],
-        ],
-    ],
-];
+Scramble auto-generates OpenAPI documentation diretamente do código Laravel, sem anotações manuais.
+
+```bash
+# Instalação
+composer require dedoc/scramble --dev
+
+# Documentação disponível em
+http://localhost/docs
 ```
 
-### Anotações no Controller
+### Controller com Documentação Automática
+
+Scramble detecta automaticamente:
+- Rota, método HTTP, path parameters
+- Query parameters (com validação)
+- Request body (com validação rules)
+- Response types (return type hints)
+- Authorization requirements (policies/gates)
 
 ```php
-/**
- * @OA\Get(
- *     path="/api/v1/clientes",
- *     operationId="getClientes",
- *     tags={"Clientes"},
- *     summary="Listar clientes",
- *     description="Retorna lista paginada de clientes",
- *     security={{"sanctum":{}}},
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         description="Número da página",
- *         required=false,
- *         @OA\Schema(type="integer", default=1)
- *     ),
- *     @OA\Parameter(
- *         name="per_page",
- *         in="query",
- *         description="Itens por página",
- *         required=false,
- *         @OA\Schema(type="integer", default=25, maximum=100)
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Sucesso",
- *         @OA\JsonContent(
- *             @OA\Property(property="data", type="array",
- *                 @OA\Items(ref="#/components/schemas/Cliente")
- *             ),
- *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta")
- *         )
- *     ),
- *     @OA\Response(response=401, ref="#/components/responses/Unauthorized"),
- *     @OA\Response(response=403, ref="#/components/responses/Forbidden")
- * )
- */
-public function index(): AnonymousResourceCollection
+// app/Http/Controllers/Api/ClienteController.php
+namespace App\Http\Controllers\Api;
+
+use App\Models\Cliente;
+use App\Http\Requests\StoreClienteRequest;
+use App\Http\Resources\ClienteResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
+class ClienteController extends Controller
 {
-    // ...
+    /**
+     * Listar clientes com paginação
+     *
+     * Retorna lista paginada de clientes da loja autenticada.
+     * Ordenação padrão: criado mais recentemente
+     */
+    public function index(): AnonymousResourceCollection
+    {
+        return ClienteResource::collection(
+            Cliente::query()
+                ->paginate(request('per_page', 25))
+        );
+    }
+
+    /**
+     * Criar novo cliente
+     */
+    public function store(StoreClienteRequest $request): ClienteResource
+    {
+        $cliente = Cliente::create($request->validated());
+        return new ClienteResource($cliente);
+    }
+
+    /**
+     * Obter cliente específico
+     */
+    public function show(Cliente $cliente): ClienteResource
+    {
+        $this->authorize('view', $cliente);
+        return new ClienteResource($cliente);
+    }
+
+    /**
+     * Atualizar cliente
+     */
+    public function update(StoreClienteRequest $request, Cliente $cliente): ClienteResource
+    {
+        $this->authorize('update', $cliente);
+        $cliente->update($request->validated());
+        return new ClienteResource($cliente);
+    }
+
+    /**
+     * Excluir cliente
+     */
+    public function destroy(Cliente $cliente): void
+    {
+        $this->authorize('delete', $cliente);
+        $cliente->delete();
+    }
 }
 ```
 
-### Schema de Modelo
+### Request Validation = OpenAPI Documentation
+
+Scramble extrai constraints de validação automaticamente:
 
 ```php
-/**
- * @OA\Schema(
- *     schema="Cliente",
- *     required={"id", "nome_razao"},
- *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="nome_razao", type="string", example="João Silva"),
- *     @OA\Property(property="cpf_cnpj", type="string", example="123.456.789-00"),
- *     @OA\Property(property="email", type="string", format="email"),
- *     @OA\Property(property="telefone", type="string", example="(11) 99999-9999"),
- *     @OA\Property(property="credito", type="number", format="float", example=1500.00),
- *     @OA\Property(property="created_at", type="string", format="date-time"),
- *     @OA\Property(property="updated_at", type="string", format="date-time")
- * )
- */
+// app/Http/Requests/StoreClienteRequest.php
+class StoreClienteRequest extends FormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'nome_razao' => ['required', 'string', 'max:255'],
+            'cpf_cnpj' => ['required', 'string', 'regex:/^\d{11,14}$/'],
+            'email' => ['required', 'email', 'unique:cliente'],
+            'telefone' => ['nullable', 'string', 'regex:/^\(\d{2}\)\s?\d{4,5}-\d{4}$/'],
+            'credito' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+        ];
+    }
+}
+// Automatically documented in OpenAPI as:
+// - nome_razao: required string, max 255 chars
+// - cpf_cnpj: required string, regex pattern
+// - email: required email, unique
+// - etc.
+```
+
+### Model Resource = OpenAPI Schema
+
+Scramble analisa Eloquent Models e Resources para gerar schemas:
+
+```php
+// app/Models/Cliente.php
 class Cliente extends Model
 {
-    // ...
+    protected $fillable = [
+        'loja_id',
+        'nome_razao',
+        'cpf_cnpj',
+        'email',
+        'telefone',
+        'credito',
+    ];
+
+    protected $casts = [
+        'credito' => 'decimal:2',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    public function enderecos()
+    {
+        return $this->hasMany(Endereco::class);
+    }
 }
+
+// app/Http/Resources/ClienteResource.php
+class ClienteResource extends JsonResource
+{
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'nome_razao' => $this->nome_razao,
+            'cpf_cnpj' => $this->cpf_cnpj,
+            'email' => $this->email,
+            'telefone' => $this->telefone,
+            'credito' => $this->credito,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'enderecos' => EnderecoResource::collection($this->enderecos),
+        ];
+    }
+}
+// Automatically documented as schema with all properties and types
 ```
+
+### Proteção de Rotas = OpenAPI Security
+
+Scramble detecta automaticamente:
+
+```php
+// routes/api.php
+Route::middleware('auth:sanctum')->group(function () {
+    // Automatically marked as requiring Sanctum Bearer token
+    Route::apiResource('clientes', ClienteController::class);
+
+    Route::middleware('can:gerenciar-financeiro')->group(function () {
+        // Automatically requires additional permission
+        Route::apiResource('contas-pagar', ContaPagarController::class);
+    });
+});
+// Documentado no OpenAPI como requerendo autenticação
+```
+
+### Documentação Sempre Sincronizada
+
+- Muda a validação rule? OpenAPI atualiza automáticamente
+- Adiciona novo campo no Resource? Schema atualizado
+- Muda nome do parâmetro? Documentação refletida
+- **Sem risco de docs desincronizadas**
 
 ---
 
@@ -1181,8 +1271,8 @@ class ClienteContractTest extends TestCase
 - [ ] Implementar Query Builder com filtros/ordenação
 - [ ] Configurar rate limiting por endpoint
 - [ ] Criar exception handler para API
-- [ ] Configurar L5-Swagger
-- [ ] Documentar todos os endpoints com OpenAPI
+- [ ] Instalar e configurar Scramble
+- [ ] Implementar FormRequests com validação completa
 - [ ] Criar sistema de webhooks
 - [ ] Implementar cache para integrações externas
 - [ ] Criar testes de API para todos os endpoints

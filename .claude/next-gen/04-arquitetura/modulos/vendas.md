@@ -198,7 +198,7 @@ Flag `checkBoxRT` indica se venda gera comissão para profissional indicador.
 
 ---
 
-## Implementação Laravel
+## Implementação Laravel (V2 - Simplified)
 
 ### Models
 
@@ -266,7 +266,7 @@ class Venda extends Model
     protected $fillable = [
         'loja_id', 'orcamento_id', 'cliente_id', 'vendedor_id', 'profissional_id',
         'endereco_entrega_id', 'endereco_faturamento_id',
-        'status', 'status_financeiro',
+        'status',
         'subtotal_bruto', 'subtotal_liquido',
         'desconto_percentual', 'desconto_reais',
         'frete', 'frete_manual', 'total',
@@ -275,7 +275,6 @@ class Venda extends Model
 
     protected $casts = [
         'status' => VendaStatus::class,
-        'status_financeiro' => VendaStatusFinanceiro::class,
         'representacao' => 'boolean',
         'rt' => 'boolean',
         'frete_manual' => 'boolean',
@@ -296,39 +295,40 @@ class Venda extends Model
         return $this->hasMany(VendaItem::class);
     }
 
-    public function itensAtendimento(): HasMany
+    public function parcelasReceber(): HasMany
     {
-        return $this->hasMany(VendaItemAtendimento::class);
+        return $this->hasMany(FinanceiroParcela::class)
+            ->where('tipo', FinanceiroTipo::RECEBER);
     }
 
-    public function contasReceber(): HasMany
+    public function entregas(): HasMany
     {
-        return $this->hasMany(ContaReceber::class);
-    }
-
-    public function compras(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Compra::class,
-            VendaItemAtendimento::class,
-            'venda_id',
-            'id',
-            'id',
-            'compra_id'
-        );
+        return $this->hasMany(Entrega::class);
     }
 }
 
-// app/Models/VendaItem.php (Nível 1)
+// app/Models/VendaItem.php (Flat structure - no N2 level)
 class VendaItem extends Model
 {
     protected $table = 'venda_itens';
 
     protected $fillable = [
-        'venda_id', 'produto_id', 'fornecedor_id',
-        'quantidade', 'preco_unitario', 'desconto_percentual',
-        'desconto_global_percentual', 'subtotal', 'total',
-        'descricao_produto', 'unidade', 'codigo_comercial',
+        'venda_id', 'posicao', 'produto_id', 'fornecedor_id',
+        'descricao_produto', 'codigo_produto',
+        'quantidade', 'quantidade_caixas', 'unidade',
+        'valor_unitario', 'desconto_item_percentual', 'valor_total',
+        'origem', 'status',
+        'observacoes', 'orcamento_item_id', 'compra_item_id',
+    ];
+
+    protected $casts = [
+        'origem' => VendaItemOrigem::class,
+        'status' => VendaItemStatus::class,
+        'quantidade' => 'decimal:4',
+        'quantidade_caixas' => 'decimal:4',
+        'valor_unitario' => 'decimal:4',
+        'desconto_item_percentual' => 'decimal:2',
+        'valor_total' => 'decimal:2',
     ];
 
     public function venda(): BelongsTo
@@ -346,59 +346,40 @@ class VendaItem extends Model
         return $this->belongsTo(Fornecedor::class);
     }
 
-    public function atendimentos(): HasMany
+    // M:N allocation relationship
+    public function alocacoes(): HasMany
     {
-        return $this->hasMany(VendaItemAtendimento::class);
-    }
-}
-
-// app/Models/VendaItemAtendimento.php (Nível 2)
-class VendaItemAtendimento extends Model
-{
-    protected $table = 'venda_item_atendimentos';
-
-    protected $fillable = [
-        'venda_id', 'venda_item_id', 'produto_id', 'compra_id',
-        'nfe_saida_id', 'nfe_entrada_id', 'nfe_futura_id',
-        'status', 'quantidade', 'lote',
-        'data_prev_compra', 'data_real_compra',
-        'data_prev_confirmacao', 'data_real_confirmacao',
-        'data_prev_faturamento', 'data_real_faturamento',
-        'data_prev_coleta', 'data_real_coleta',
-        'data_prev_recebimento', 'data_real_recebimento',
-        'data_prev_entrega', 'data_real_entrega',
-    ];
-
-    protected $casts = [
-        'status' => VendaItemStatus::class,
-        'data_prev_compra' => 'date',
-        'data_real_compra' => 'date',
-        // ... outras datas
-    ];
-
-    public function venda(): BelongsTo
-    {
-        return $this->belongsTo(Venda::class);
+        return $this->hasMany(Alocacao::class);
     }
 
-    public function vendaItem(): BelongsTo
+    public function compraItem(): BelongsTo
     {
-        return $this->belongsTo(VendaItem::class);
+        return $this->belongsTo(CompraItem::class);
     }
 
-    public function compra(): BelongsTo
+    public function orcamentoItem(): BelongsTo
     {
-        return $this->belongsTo(Compra::class);
+        return $this->belongsTo(OrcamentoItem::class);
     }
 
-    public function nfeSaida(): BelongsTo
+    // Calculate total allocated quantity
+    public function quantidadeAlocada(): float
     {
-        return $this->belongsTo(Nfe::class, 'nfe_saida_id');
+        return $this->alocacoes()
+            ->where('status', 'ATIVO')
+            ->sum('quantidade');
     }
 
-    public function consumos(): HasMany
+    // Calculate remaining unallocated quantity
+    public function quantidadePendente(): float
     {
-        return $this->hasMany(EstoqueConsumo::class);
+        return max(0, $this->quantidade - $this->quantidadeAlocada());
+    }
+
+    // Check if fully allocated
+    public function fullyAllocated(): bool
+    {
+        return $this->quantidadePendente() == 0;
     }
 }
 ```

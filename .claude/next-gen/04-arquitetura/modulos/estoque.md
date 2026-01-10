@@ -252,9 +252,10 @@ class Estoque extends Model
         return $this->belongsTo(GalpaoBloco::class);
     }
 
-    public function consumos(): HasMany
+    // M:N: one estoque (lote) can be allocated to multiple venda_items
+    public function alocacoes(): HasMany
     {
-        return $this->hasMany(EstoqueConsumo::class);
+        return $this->hasMany(Alocacao::class);
     }
 
     public function compras(): BelongsToMany
@@ -280,39 +281,63 @@ class Estoque extends Model
         return $query->orderByRaw('COALESCE(data_validade, DATE("9999-12-31")) ASC')
             ->orderBy('data_entrada', 'asc');
     }
+
+    // Calculate total allocated quantity for this estoque
+    public function quantidadeAlocada(): float
+    {
+        return $this->alocacoes()
+            ->where('status', AlocacaoStatus::ATIVO)
+            ->sum('quantidade');
+    }
+
+    // Calculate available quantity for new allocations
+    public function quantidadeParaAlocar(): float
+    {
+        return max(0, $this->quantidade_disponivel - $this->quantidadeAlocada());
+    }
 }
 
-// app/Models/EstoqueConsumo.php
-class EstoqueConsumo extends Model
+// app/Models/Alocacao.php
+class Alocacao extends Model
 {
-    protected $table = 'estoque_consumos';
+    protected $table = 'alocacoes';
 
     protected $fillable = [
-        'estoque_id', 'venda_item_atendimento_id', 'compra_item_id',
-        'status', 'quantidade', 'custo_unitario', 'motivo',
-        'estornado', 'estornado_at', 'estornado_por',
+        'venda_item_id', 'estoque_id',
+        'quantidade', 'status',
     ];
 
     protected $casts = [
-        'status' => EstoqueConsumoStatus::class,
-        'estornado' => 'boolean',
-        'estornado_at' => 'datetime',
+        'status' => AlocacaoStatus::class,
+        'quantidade' => 'decimal:4',
     ];
+
+    public function vendaItem(): BelongsTo
+    {
+        return $this->belongsTo(VendaItem::class);
+    }
 
     public function estoque(): BelongsTo
     {
         return $this->belongsTo(Estoque::class);
     }
 
-    public function vendaItemAtendimento(): BelongsTo
+    // Helper to check if allocation is active
+    public function isActive(): bool
     {
-        return $this->belongsTo(VendaItemAtendimento::class);
+        return $this->status === AlocacaoStatus::ATIVO;
     }
 
-    // Valor total do consumo
+    // Helper to check if allocation has been reversed
+    public function isReversed(): bool
+    {
+        return $this->status === AlocacaoStatus::REVERTIDA;
+    }
+
+    // Calculate cost for this allocation
     public function getValorTotalAttribute(): float
     {
-        return $this->quantidade * $this->custo_unitario;
+        return $this->quantidade * $this->estoque->custo_unitario;
     }
 }
 ```
@@ -346,25 +371,30 @@ enum EstoqueStatus: string
     }
 }
 
-// app/Enums/EstoqueConsumoStatus.php
-enum EstoqueConsumoStatus: string
+// app/Enums/AlocacaoStatus.php
+enum AlocacaoStatus: string
 {
-    case PRE_CONSUMO = 'PRE_CONSUMO';
-    case CONSUMO = 'CONSUMO';
-    case AJUSTE = 'AJUSTE';
-    case DEVOLVIDO = 'DEVOLVIDO';
-    case CANCELADO = 'CANCELADO';
-}
+    case ATIVO = 'ATIVO';
+    case REVERTIDA = 'REVERTIDA';
+    case CANCELADA = 'CANCELADA';
 
-// app/Enums/EstoqueConsumoMotivo.php
-enum EstoqueConsumoMotivo: string
-{
-    case VENDA = 'VENDA';
-    case AJUSTE_ENTRADA = 'AJUSTE_ENTRADA';
-    case AJUSTE_SAIDA = 'AJUSTE_SAIDA';
-    case QUEBRA = 'QUEBRA';
-    case TRANSFERENCIA = 'TRANSFERENCIA';
-    case DEVOLUCAO = 'DEVOLUCAO';
+    public function label(): string
+    {
+        return match($this) {
+            self::ATIVO => 'Ativa',
+            self::REVERTIDA => 'Revertida',
+            self::CANCELADA => 'Cancelada',
+        };
+    }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::ATIVO => 'green',
+            self::REVERTIDA => 'orange',
+            self::CANCELADA => 'red',
+        };
+    }
 }
 ```
 
@@ -436,7 +466,8 @@ class EstoqueService
             'custo_medio' => $custoMedio,
             'lotes' => $estoques->map(fn($e) => [
                 'id' => $e->id,
-                'quantidade' => $e->quantidade_disponivel,
+                'quantidade_disponivel' => $e->quantidade_disponivel,
+                'quantidade_para_alocar' => $e->quantidadeParaAlocar(),
                 'custo' => $e->custo_unitario,
                 'data_entrada' => $e->data_entrada,
                 'lote' => $e->lote,
@@ -460,9 +491,9 @@ class EstoqueService
      */
     public function cancelar(Estoque $estoque, string $motivo): void
     {
-        if ($estoque->consumos()->where('estornado', false)->exists()) {
+        if ($estoque->alocacoes()->where('status', AlocacaoStatus::ATIVO)->exists()) {
             throw new BusinessException(
-                'Não é possível cancelar estoque com consumos ativos'
+                'Não é possível cancelar estoque com alocações ativas'
             );
         }
 
@@ -475,156 +506,135 @@ class EstoqueService
     }
 }
 
-// app/Services/Estoque/EstoqueConsumoService.php
-class EstoqueConsumoService
+// app/Services/Estoque/AlocacaoService.php
+class AlocacaoService
 {
     /**
-     * Consumir estoque usando FIFO
+     * List available lotes (estoque) for allocation to a venda_item
+     * Optionally filter by supplier and sort by FIFO/FEFO
      */
-    public function consumirFifo(
+    public function listarLotesDisponiveis(
         int $produtoId,
         int $lojaId,
-        float $quantidade,
-        ?int $vendaItemAtendimentoId = null,
-        string $motivo = 'VENDA'
+        ?int $fornecedorId = null,
+        ?string $ordenacao = 'fifo'
     ): Collection {
-        return DB::transaction(function () use (
-            $produtoId, $lojaId, $quantidade, $vendaItemAtendimentoId, $motivo
-        ) {
-            $consumos = collect();
-            $restante = $quantidade;
+        $query = Estoque::where('produto_id', $produtoId)
+            ->where('loja_id', $lojaId)
+            ->disponivel();
 
-            // Obter estoque disponível em ordem FIFO com lock
-            $estoques = Estoque::where('produto_id', $produtoId)
-                ->where('loja_id', $lojaId)
-                ->disponivel()
-                ->fifo()
-                ->lockForUpdate()
-                ->get();
+        if ($fornecedorId) {
+            $query->where('fornecedor_id', $fornecedorId);
+        }
 
-            foreach ($estoques as $estoque) {
-                if ($restante <= 0) break;
+        // Apply sort (FIFO/FEFO)
+        if ($ordenacao === 'fefo') {
+            $query->fefo();
+        } else {
+            $query->fifo();
+        }
 
-                $consumir = min($restante, $estoque->quantidade_disponivel);
-
-                // Atualizar estoque
-                $estoque->decrement('quantidade_disponivel', $consumir);
-
-                // Criar registro de consumo
-                $consumo = EstoqueConsumo::create([
-                    'estoque_id' => $estoque->id,
-                    'venda_item_atendimento_id' => $vendaItemAtendimentoId,
-                    'status' => EstoqueConsumoStatus::PRE_CONSUMO,
-                    'quantidade' => $consumir,
-                    'custo_unitario' => $estoque->custo_unitario,
-                    'motivo' => $motivo,
-                ]);
-
-                $consumos->push($consumo);
-                $restante -= $consumir;
-            }
-
-            if ($restante > 0) {
-                throw new EstoqueInsuficienteException(
-                    produtoId: $produtoId,
-                    quantidadeNecessaria: $quantidade,
-                    quantidadeDisponivel: $quantidade - $restante
-                );
-            }
-
-            return $consumos;
-        });
+        return $query->get()->map(fn($estoque) => [
+            'id' => $estoque->id,
+            'lote' => $estoque->lote,
+            'quantidade_disponivel' => $estoque->quantidade_disponivel,
+            'quantidade_para_alocar' => $estoque->quantidadeParaAlocar(),
+            'custo_unitario' => $estoque->custo_unitario,
+            'data_entrada' => $estoque->data_entrada,
+            'data_validade' => $estoque->data_validade,
+            'bloco' => $estoque->bloco?->nome,
+        ]);
     }
 
     /**
-     * Consumir de lote específico (ignora FIFO)
+     * Create allocation between venda_item and estoque
+     * A venda_item can have multiple alocacoes (M:N relationship)
      */
-    public function consumirLoteEspecifico(
+    public function alocar(
+        int $vendaItemId,
         int $estoqueId,
-        float $quantidade,
-        ?int $vendaItemAtendimentoId = null,
-        string $motivo = 'VENDA'
-    ): EstoqueConsumo {
-        return DB::transaction(function () use (
-            $estoqueId, $quantidade, $vendaItemAtendimentoId, $motivo
-        ) {
+        float $quantidade
+    ): Alocacao {
+        return DB::transaction(function () use ($vendaItemId, $estoqueId, $quantidade) {
             $estoque = Estoque::lockForUpdate()->findOrFail($estoqueId);
+            $vendaItem = VendaItem::lockForUpdate()->findOrFail($vendaItemId);
 
-            if ($estoque->quantidade_disponivel < $quantidade) {
-                throw new EstoqueInsuficienteException(
-                    produtoId: $estoque->produto_id,
-                    quantidadeNecessaria: $quantidade,
-                    quantidadeDisponivel: $estoque->quantidade_disponivel
+            // Validate quantities
+            if ($quantidade > $estoque->quantidadeParaAlocar()) {
+                throw new BusinessException(
+                    "Quantidade solicitada ({$quantidade}) maior que disponível para alocação ({$estoque->quantidadeParaAlocar()})"
                 );
             }
 
-            $estoque->decrement('quantidade_disponivel', $quantidade);
+            if ($vendaItem->quantidadePendente() < $quantidade) {
+                throw new BusinessException(
+                    "Quantidade solicitada ({$quantidade}) maior que necessária para venda ({$vendaItem->quantidadePendente()})"
+                );
+            }
 
-            return EstoqueConsumo::create([
+            $alocacao = Alocacao::create([
+                'venda_item_id' => $vendaItemId,
                 'estoque_id' => $estoqueId,
-                'venda_item_atendimento_id' => $vendaItemAtendimentoId,
-                'status' => EstoqueConsumoStatus::PRE_CONSUMO,
                 'quantidade' => $quantidade,
-                'custo_unitario' => $estoque->custo_unitario,
-                'motivo' => $motivo,
+                'status' => AlocacaoStatus::ATIVO,
             ]);
+
+            event(new AlocacaoCriada($alocacao));
+
+            return $alocacao;
         });
     }
 
     /**
-     * Estornar consumo (para devoluções/cancelamentos)
+     * Reverse/cancel an allocation
      */
-    public function estornar(EstoqueConsumo $consumo, ?int $userId = null): void
+    public function desfazerAlocacao(Alocacao $alocacao, string $motivo = null): void
     {
-        DB::transaction(function () use ($consumo, $userId) {
-            // Retornar quantidade ao estoque
-            $consumo->estoque->increment('quantidade_disponivel', $consumo->quantidade);
+        DB::transaction(function () use ($alocacao, $motivo) {
+            if (!$alocacao->isActive()) {
+                throw new BusinessException('Apenas alocações ativas podem ser desfeitas');
+            }
 
-            // Marcar consumo como estornado
-            $consumo->update([
-                'estornado' => true,
-                'estornado_at' => now(),
-                'estornado_por' => $userId ?? auth()->id(),
+            $alocacao->update([
+                'status' => AlocacaoStatus::REVERTIDA,
             ]);
 
-            event(new EstoqueConsumoEstornado($consumo));
+            event(new AlocacaoRevertida($alocacao, $motivo));
         });
     }
 
     /**
-     * Desfazer todos os consumos de um item de venda
+     * Get FIFO suggestions for allocating a venda_item
+     * Returns estoque lotes sorted by FIFO order
      */
-    public function desfazerConsumo(VendaItemAtendimento $item): void
+    public function sugestoesFifo(VendaItem $vendaItem): Collection
     {
-        $consumos = EstoqueConsumo::where('venda_item_atendimento_id', $item->id)
-            ->where('estornado', false)
-            ->get();
-
-        foreach ($consumos as $consumo) {
-            $this->estornar($consumo);
-        }
+        return $this->listarLotesDisponiveis(
+            $vendaItem->produto_id,
+            $vendaItem->venda->loja_id,
+            $vendaItem->fornecedor_id,
+            'fifo'
+        );
     }
 
     /**
-     * Confirmar consumo (PRE_CONSUMO → CONSUMO)
+     * Get FEFO suggestions for allocating a venda_item
+     * Returns estoque lotes sorted by FEFO order (earliest expiry first)
      */
-    public function confirmarConsumo(EstoqueConsumo $consumo): void
+    public function sugestoesFEFO(VendaItem $vendaItem): Collection
     {
-        if ($consumo->status !== EstoqueConsumoStatus::PRE_CONSUMO) {
-            throw new BusinessException('Apenas pré-consumos podem ser confirmados');
-        }
-
-        $consumo->update(['status' => EstoqueConsumoStatus::CONSUMO]);
+        return $this->listarLotesDisponiveis(
+            $vendaItem->produto_id,
+            $vendaItem->venda->loja_id,
+            $vendaItem->fornecedor_id,
+            'fefo'
+        );
     }
 }
 
 // app/Services/Estoque/EstoqueAjusteService.php
 class EstoqueAjusteService
 {
-    public function __construct(
-        private EstoqueConsumoService $consumoService
-    ) {}
-
     /**
      * Ajustar estoque (inventário, quebra, etc.)
      */
@@ -633,28 +643,19 @@ class EstoqueAjusteService
         float $novaQuantidade,
         string $motivo,
         ?string $observacao = null
-    ): EstoqueConsumo {
+    ): void {
         $diferenca = $novaQuantidade - $estoque->quantidade_disponivel;
 
         if ($diferenca == 0) {
             throw new BusinessException('Quantidade não alterada');
         }
 
-        return DB::transaction(function () use ($estoque, $diferenca, $motivo, $observacao) {
-            // Atualizar estoque
+        DB::transaction(function () use ($estoque, $diferenca) {
             $estoque->update([
                 'quantidade_disponivel' => $estoque->quantidade_disponivel + $diferenca,
             ]);
 
-            // Criar registro de ajuste
-            return EstoqueConsumo::create([
-                'estoque_id' => $estoque->id,
-                'status' => EstoqueConsumoStatus::AJUSTE,
-                'quantidade' => $diferenca,  // Positivo = entrada, Negativo = saída
-                'custo_unitario' => $estoque->custo_unitario,
-                'motivo' => $motivo,
-                'observacao' => $observacao,
-            ]);
+            event(new EstoqueAjustado($estoque, $diferenca));
         });
     }
 
@@ -665,15 +666,14 @@ class EstoqueAjusteService
         Estoque $estoque,
         float $quantidade,
         string $motivo
-    ): EstoqueConsumo {
+    ): void {
         if ($quantidade > $estoque->quantidade_disponivel) {
             throw new BusinessException('Quantidade de quebra maior que disponível');
         }
 
-        return $this->ajustar(
+        $this->ajustar(
             $estoque,
             $estoque->quantidade_disponivel - $quantidade,
-            EstoqueConsumoMotivo::QUEBRA->value,
             $motivo
         );
     }
@@ -717,7 +717,7 @@ class EstoqueController extends Controller
             'fornecedor',
             'nfe',
             'bloco.galpao',
-            'consumos' => fn($q) => $q->with('vendaItemAtendimento.venda'),
+            'alocacoes' => fn($q) => $q->with('vendaItem.venda'),
             'compras',
         ]);
 
@@ -749,6 +749,78 @@ class EstoqueController extends Controller
         $this->estoqueService->atualizarLocalizacao($estoque, $request->bloco_id);
 
         return back()->with('success', 'Localização atualizada');
+    }
+}
+
+// app/Http/Controllers/AlocacaoController.php
+class AlocacaoController extends Controller
+{
+    public function __construct(
+        private AlocacaoService $alocacaoService
+    ) {}
+
+    public function listarLotes(Request $request)
+    {
+        $request->validate([
+            'produto_id' => 'required|exists:produtos,id',
+            'loja_id' => 'required|exists:lojas,id',
+            'fornecedor_id' => 'sometimes|exists:fornecedores,id',
+            'ordenacao' => 'sometimes|in:fifo,fefo',
+        ]);
+
+        $lotes = $this->alocacaoService->listarLotesDisponiveis(
+            $request->produto_id,
+            $request->loja_id,
+            $request->fornecedor_id,
+            $request->ordenacao ?? 'fifo'
+        );
+
+        return response()->json(['lotes' => $lotes]);
+    }
+
+    public function alocar(Request $request)
+    {
+        $request->validate([
+            'venda_item_id' => 'required|exists:venda_itens,id',
+            'estoque_id' => 'required|exists:estoques,id',
+            'quantidade' => 'required|numeric|min:0.01',
+        ]);
+
+        $alocacao = $this->alocacaoService->alocar(
+            $request->venda_item_id,
+            $request->estoque_id,
+            $request->quantidade
+        );
+
+        return response()->json([
+            'message' => 'Alocação criada com sucesso',
+            'alocacao' => $alocacao,
+        ], 201);
+    }
+
+    public function desfazer(Alocacao $alocacao, Request $request)
+    {
+        $request->validate([
+            'motivo' => 'sometimes|string',
+        ]);
+
+        $this->alocacaoService->desfazerAlocacao($alocacao, $request->motivo);
+
+        return back()->with('success', 'Alocação desfeita');
+    }
+
+    public function sugestoesFifo(VendaItem $vendaItem)
+    {
+        $sugestoes = $this->alocacaoService->sugestoesFifo($vendaItem);
+
+        return response()->json(['sugestoes' => $sugestoes]);
+    }
+
+    public function sugestoesFEFO(VendaItem $vendaItem)
+    {
+        $sugestoes = $this->alocacaoService->sugestoesFEFO($vendaItem);
+
+        return response()->json(['sugestoes' => $sugestoes]);
     }
 }
 
@@ -789,6 +861,7 @@ class EstoqueAjusteController extends Controller
 ```php
 // routes/web.php
 Route::middleware(['auth'])->group(function () {
+    // Estoque (lotes)
     Route::resource('estoques', EstoqueController::class)->only(['index', 'show']);
 
     Route::get('estoques/verificar-disponibilidade', [EstoqueController::class, 'verificarDisponibilidade'])
@@ -802,6 +875,22 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('estoques/{estoque}/quebra', [EstoqueAjusteController::class, 'registrarQuebra'])
         ->name('estoques.registrar-quebra');
+
+    // Alocações (M:N entre venda_items e estoques)
+    Route::get('alocacoes/lotes', [AlocacaoController::class, 'listarLotes'])
+        ->name('alocacoes.listar-lotes');
+
+    Route::post('alocacoes', [AlocacaoController::class, 'alocar'])
+        ->name('alocacoes.alocar');
+
+    Route::delete('alocacoes/{alocacao}', [AlocacaoController::class, 'desfazer'])
+        ->name('alocacoes.desfazer');
+
+    Route::get('venda-itens/{vendaItem}/sugestoes-fifo', [AlocacaoController::class, 'sugestoesFifo'])
+        ->name('venda-itens.sugestoes-fifo');
+
+    Route::get('venda-itens/{vendaItem}/sugestoes-fefo', [AlocacaoController::class, 'sugestoesFEFO'])
+        ->name('venda-itens.sugestoes-fefo');
 });
 ```
 

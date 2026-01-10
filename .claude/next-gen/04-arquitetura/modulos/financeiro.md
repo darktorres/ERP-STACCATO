@@ -255,32 +255,43 @@ void Contas::preencher(const QModelIndex &index) {
 
 ---
 
-## Implementação Laravel
+## Implementação Laravel (V2 - Event Sourced)
 
 ### Models
 
 ```php
-// app/Models/ContaReceber.php
-class ContaReceber extends Model
+// app/Models/FinanceiroParcela.php
+// Unified table: financeiro_parcelas (tipo: RECEBER or PAGAR)
+class FinanceiroParcela extends Model
 {
-    protected $table = 'contas_receber';
+    protected $table = 'financeiro_parcelas';
 
     protected $fillable = [
-        'loja_id', 'venda_id', 'cliente_id',
-        'forma_pagamento_id', 'conta_bancaria_id',
-        'parcela', 'total_parcelas',
-        'valor', 'valor_real',
-        'status', 'grupo', 'subgrupo',
-        'vencimento', 'data_recebimento',
-        'tipo_real', 'centro_custo',
-        'observacao',
+        'loja_id', 'tipo',
+        'cliente_id', 'fornecedor_id',  // One OR the other depending on tipo
+        'venda_id', 'compra_id',
+        'nfe_entrada_id',
+        'numero_parcela', 'total_parcelas',
+        'valor', 'valor_recebido_pago',
+        'valor_juros', 'valor_multa', 'valor_desconto',
+        'data_vencimento', 'data_recebimento_pagamento',
+        'forma_pagamento',
+        'status',
+        'nosso_numero', 'linha_digitavel', 'codigo_barras',
+        'remessa_id', 'documento', 'observacoes',
     ];
 
     protected $casts = [
-        'status' => ContaReceberStatus::class,
-        'grupo' => ContaGrupo::class,
-        'vencimento' => 'date',
-        'data_recebimento' => 'date',
+        'tipo' => FinanceiroTipo::class,
+        'status' => FinanceiroStatus::class,
+        'forma_pagamento' => FormaPagamento::class,
+        'valor' => 'decimal:2',
+        'valor_recebido_pago' => 'decimal:2',
+        'valor_juros' => 'decimal:2',
+        'valor_multa' => 'decimal:2',
+        'valor_desconto' => 'decimal:2',
+        'data_vencimento' => 'date',
+        'data_recebimento_pagamento' => 'date',
     ];
 
     public function venda(): BelongsTo
@@ -288,146 +299,109 @@ class ContaReceber extends Model
         return $this->belongsTo(Venda::class);
     }
 
-    public function cliente(): BelongsTo
-    {
-        return $this->belongsTo(Cliente::class);
-    }
-
-    public function formaPagamento(): BelongsTo
-    {
-        return $this->belongsTo(FormaPagamento::class);
-    }
-
-    public function contaBancaria(): BelongsTo
-    {
-        return $this->belongsTo(ContaBancaria::class);
-    }
-
-    // Escopo para vencidos
-    public function scopeVencidos(Builder $query): Builder
-    {
-        return $query->where('vencimento', '<', now())
-            ->whereIn('status', [
-                ContaReceberStatus::PENDENTE,
-                ContaReceberStatus::CONFERIDO,
-            ]);
-    }
-
-    // Escopo para a vencer
-    public function scopeAVencer(Builder $query, int $dias = 7): Builder
-    {
-        return $query->whereBetween('vencimento', [now(), now()->addDays($dias)])
-            ->whereIn('status', [
-                ContaReceberStatus::PENDENTE,
-                ContaReceberStatus::CONFERIDO,
-            ]);
-    }
-}
-
-// app/Models/ContaPagar.php
-class ContaPagar extends Model
-{
-    protected $table = 'contas_pagar';
-
-    protected $fillable = [
-        'loja_id', 'compra_id', 'fornecedor_id',
-        'forma_pagamento_id', 'conta_bancaria_id',
-        'parcela', 'total_parcelas',
-        'valor', 'valor_real',
-        'status', 'grupo', 'subgrupo',
-        'vencimento', 'data_pagamento',
-        'numero_documento', 'centro_custo',
-        'observacao',
-    ];
-
-    protected $casts = [
-        'status' => ContaPagarStatus::class,
-        'grupo' => ContaGrupo::class,
-        'vencimento' => 'date',
-        'data_pagamento' => 'date',
-    ];
-
     public function compra(): BelongsTo
     {
         return $this->belongsTo(Compra::class);
+    }
+
+    public function cliente(): BelongsTo
+    {
+        return $this->belongsTo(Cliente::class);
     }
 
     public function fornecedor(): BelongsTo
     {
         return $this->belongsTo(Fornecedor::class);
     }
+
+    public function loja(): BelongsTo
+    {
+        return $this->belongsTo(Loja::class);
+    }
+
+    public function nfeEntrada(): BelongsTo
+    {
+        return $this->belongsTo(Nfe::class, 'nfe_entrada_id');
+    }
+
+    // View: Contas a Receber
+    public static function scopeReceber(Builder $query): Builder
+    {
+        return $query->where('tipo', FinanceiroTipo::RECEBER);
+    }
+
+    // View: Contas a Pagar
+    public static function scopePagar(Builder $query): Builder
+    {
+        return $query->where('tipo', FinanceiroTipo::PAGAR);
+    }
+
+    // Vencidos
+    public static function scopeVencidos(Builder $query): Builder
+    {
+        return $query->where('data_vencimento', '<', now()->toDateString())
+            ->whereIn('status', [FinanceiroStatus::PENDENTE, FinanceiroStatus::ATRASADO]);
+    }
+
+    // A vencer
+    public static function scopeAVencer(Builder $query, int $dias = 7): Builder
+    {
+        return $query->whereBetween('data_vencimento', [now()->toDateString(), now()->addDays($dias)->toDateString()])
+            ->where('status', FinanceiroStatus::PENDENTE);
+    }
+
+    // Pago/Recebido
+    public static function scopePagos(Builder $query): Builder
+    {
+        return $query->where('status', FinanceiroStatus::PAGO)
+            ->orWhere('status', FinanceiroStatus::RECEBIDO);
+    }
+
+    // Calcula dias em atraso
+    public function diasAtraso(): int
+    {
+        if ($this->status->isCompleto()) {
+            return 0;
+        }
+        return now()->diffInDays($this->data_vencimento);
+    }
+
+    // Valor pendente
+    public function valorPendente(): float
+    {
+        $base = $this->valor + $this->valor_juros + $this->valor_multa - $this->valor_desconto;
+        return max(0, $base - $this->valor_recebido_pago);
+    }
 }
 
-// app/Models/FormaPagamento.php
-class FormaPagamento extends Model
+// app/Models/RemessaCnab.php
+class RemessaCnab extends Model
 {
-    protected $table = 'formas_pagamento';
+    protected $table = 'remessas_cnab';
 
     protected $fillable = [
-        'nome', 'conta_bancaria_id', 'parcelas',
-        'taxa_percentual', 'd_mais_um', 'pula_primeiro_mes',
-        'ajusta_dia_util', 'ativo',
+        'loja_id', 'tipo', 'forma_pagamento',
+        'data_geracao', 'sequencia_remessa',
+        'arquivo_nome', 'conteudo',
+        'status', 'data_envio', 'data_retorno',
     ];
 
     protected $casts = [
-        'd_mais_um' => 'boolean',
-        'pula_primeiro_mes' => 'boolean',
-        'ajusta_dia_util' => 'boolean',
-        'ativo' => 'boolean',
-    ];
-
-    public function contaBancaria(): BelongsTo
-    {
-        return $this->belongsTo(ContaBancaria::class);
-    }
-
-    /**
-     * Calcular data de vencimento da parcela
-     */
-    public function calcularVencimento(Carbon $dataBase, int $numeroParcela): Carbon
-    {
-        $vencimento = $dataBase->copy();
-
-        if ($this->d_mais_um) {
-            $vencimento->addDay();
-        }
-
-        if ($this->pula_primeiro_mes) {
-            $vencimento->addMonth();
-        }
-
-        // Adicionar meses para parcelas subsequentes
-        $vencimento->addMonths($numeroParcela - 1);
-
-        if ($this->ajusta_dia_util) {
-            // Ajustar para próximo dia útil se cair em fim de semana/feriado
-            while ($vencimento->isWeekend() || $this->isFeriado($vencimento)) {
-                $vencimento->addDay();
-            }
-        }
-
-        return $vencimento;
-    }
-}
-
-// app/Models/ContaBancaria.php
-class ContaBancaria extends Model
-{
-    protected $table = 'contas_bancarias';
-
-    protected $fillable = [
-        'loja_id', 'banco', 'agencia', 'conta', 'digito',
-        'tipo', 'saldo', 'ativo',
-    ];
-
-    protected $casts = [
-        'tipo' => TipoContaBancaria::class,
-        'ativo' => 'boolean',
+        'tipo' => RemessaTipo::class,
+        'status' => RemessaStatus::class,
+        'data_geracao' => 'datetime',
+        'data_envio' => 'datetime',
+        'data_retorno' => 'datetime',
     ];
 
     public function loja(): BelongsTo
     {
         return $this->belongsTo(Loja::class);
+    }
+
+    public function parcelas(): BelongsToMany
+    {
+        return $this->belongsToMany(FinanceiroParcela::class, 'financeiro_parcelas', 'remessa_id');
     }
 }
 ```
@@ -435,6 +409,84 @@ class ContaBancaria extends Model
 ### Enums
 
 ```php
+// app/Enums/FinanceiroTipo.php
+enum FinanceiroTipo: string
+{
+    case RECEBER = 'RECEBER';
+    case PAGAR = 'PAGAR';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::RECEBER => 'Contas a Receber',
+            self::PAGAR => 'Contas a Pagar',
+        };
+    }
+}
+
+// app/Enums/FinanceiroStatus.php
+enum FinanceiroStatus: string
+{
+    case PENDENTE = 'PENDENTE';
+    case AGENDADO = 'AGENDADO';
+    case PAGO = 'PAGO';
+    case RECEBIDO = 'RECEBIDO';
+    case ATRASADO = 'ATRASADO';
+    case CANCELADO = 'CANCELADO';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::PENDENTE => 'Pendente',
+            self::AGENDADO => 'Agendado',
+            self::PAGO => 'Pago',
+            self::RECEBIDO => 'Recebido',
+            self::ATRASADO => 'Atrasado',
+            self::CANCELADO => 'Cancelado',
+        };
+    }
+
+    public function isCompleto(): bool
+    {
+        return in_array($this, [self::PAGO, self::RECEBIDO, self::CANCELADO]);
+    }
+}
+
+// app/Enums/FormaPagamento.php
+enum FormaPagamento: string
+{
+    case DINHEIRO = 'DINHEIRO';
+    case PIX = 'PIX';
+    case CARTAO_DEBITO = 'CARTAO_DEBITO';
+    case CARTAO_CREDITO = 'CARTAO_CREDITO';
+    case BOLETO = 'BOLETO';
+    case TRANSFERENCIA = 'TRANSFERENCIA';
+    case CHEQUE = 'CHEQUE';
+    case OUTROS = 'OUTROS';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::DINHEIRO => 'Dinheiro',
+            self::PIX => 'PIX',
+            self::CARTAO_DEBITO => 'Cartão Débito',
+            self::CARTAO_CREDITO => 'Cartão Crédito',
+            self::BOLETO => 'Boleto',
+            self::TRANSFERENCIA => 'Transferência Bancária',
+            self::CHEQUE => 'Cheque',
+            self::OUTROS => 'Outros',
+        };
+    }
+
+    public function temErro(): bool
+    {
+        return match($this) {
+            self::BOLETO, self::CARTAO_CREDITO => true,
+            default => false,
+        };
+    }
+}
+
 // app/Enums/ContaReceberStatus.php
 enum ContaReceberStatus: string
 {

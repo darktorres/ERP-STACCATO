@@ -683,47 +683,9 @@ enum FormaPagamento: string
     }
 }
 
-// app/Enums/ContaReceberStatus.php
-enum ContaReceberStatus: string
-{
-    case PENDENTE = 'PENDENTE';
-    case CONFERIDO = 'CONFERIDO';
-    case AGENDADO = 'AGENDADO';
-    case RECEBIDO = 'RECEBIDO';
-    case CANCELADO = 'CANCELADO';
-
-    public function label(): string
-    {
-        return match($this) {
-            self::PENDENTE => 'Pendente',
-            self::CONFERIDO => 'Conferido',
-            self::AGENDADO => 'Agendado',
-            self::RECEBIDO => 'Recebido',
-            self::CANCELADO => 'Cancelado',
-        };
-    }
-
-    public function color(): string
-    {
-        return match($this) {
-            self::PENDENTE => 'yellow',
-            self::CONFERIDO => 'blue',
-            self::AGENDADO => 'purple',
-            self::RECEBIDO => 'green',
-            self::CANCELADO => 'red',
-        };
-    }
-
-    public function canTransitionTo(self $new): bool
-    {
-        return match($this) {
-            self::PENDENTE => in_array($new, [self::CONFERIDO, self::RECEBIDO, self::CANCELADO]),
-            self::CONFERIDO => in_array($new, [self::AGENDADO, self::RECEBIDO, self::CANCELADO]),
-            self::AGENDADO => in_array($new, [self::RECEBIDO, self::CANCELADO]),
-            self::RECEBIDO, self::CANCELADO => false,
-        };
-    }
-}
+// NOTE: ContaReceberStatus and ContaPagarStatus are DEPRECATED
+// Use the unified FinanceiroStatus enum instead
+// Both receivables and payables use the same status values, distinguished by tipo field
 
 // app/Enums/ContaGrupo.php
 enum ContaGrupo: string
@@ -741,23 +703,29 @@ enum ContaGrupo: string
 ### Services
 
 ```php
-// app/Services/Financeiro/ContaReceberService.php
-class ContaReceberService
+// app/Services/Financeiro/FinanceiroParcelaService.php
+//
+// UNIFIED SERVICE - Handles both receivables and payables
+// Replaces: ContaReceberService, ContaPagarService
+// Distinction: tipo field on FinanceiroParcela ('RECEBER' vs 'PAGAR')
+
+class FinanceiroParcelaService
 {
     /**
-     * Gerar contas a receber de uma venda
+     * Gerar parcelas de venda (contas a receber)
      */
     public function gerarDeVenda(Venda $venda, array $pagamentos): Collection
     {
         return DB::transaction(function () use ($venda, $pagamentos) {
-            $contas = collect();
+            $parcelas = collect();
 
             foreach ($pagamentos as $pagamento) {
                 $formaPagamento = FormaPagamento::findOrFail($pagamento['forma_pagamento_id']);
                 $valorParcela = $pagamento['valor'] / $formaPagamento->parcelas;
 
                 for ($i = 1; $i <= $formaPagamento->parcelas; $i++) {
-                    $conta = ContaReceber::create([
+                    $parcela = FinanceiroParcela::create([
+                        'tipo' => FinanceiroTipo::RECEBER,
                         'loja_id' => $venda->loja_id,
                         'venda_id' => $venda->id,
                         'cliente_id' => $venda->cliente_id,
@@ -766,7 +734,7 @@ class ContaReceberService
                         'parcela' => $i,
                         'total_parcelas' => $formaPagamento->parcelas,
                         'valor' => $valorParcela,
-                        'status' => ContaReceberStatus::PENDENTE,
+                        'status' => FinanceiroStatus::PENDENTE,
                         'grupo' => ContaGrupo::VENDAS,
                         'vencimento' => $formaPagamento->calcularVencimento(
                             $venda->created_at,
@@ -774,18 +742,21 @@ class ContaReceberService
                         ),
                     ]);
 
-                    $contas->push($conta);
+                    // Record event
+                    $this->recordarEvento($parcela, 'CRIADA');
+                    $parcelas->push($parcela);
                 }
 
                 // Criar taxa de cartão se aplicável
                 if ($formaPagamento->taxa_percentual > 0) {
-                    $taxa = ContaReceber::create([
+                    $taxa = FinanceiroParcela::create([
+                        'tipo' => FinanceiroTipo::RECEBER,
                         'loja_id' => $venda->loja_id,
                         'venda_id' => $venda->id,
                         'cliente_id' => $venda->cliente_id,
                         'forma_pagamento_id' => $formaPagamento->id,
                         'valor' => -($pagamento['valor'] * $formaPagamento->taxa_percentual / 100),
-                        'status' => ContaReceberStatus::PENDENTE,
+                        'status' => FinanceiroStatus::PENDENTE,
                         'grupo' => ContaGrupo::TAXA_CARTAO,
                         'vencimento' => $formaPagamento->calcularVencimento(
                             $venda->created_at,
@@ -793,171 +764,192 @@ class ContaReceberService
                         ),
                     ]);
 
-                    $contas->push($taxa);
+                    $this->recordarEvento($taxa, 'CRIADA');
+                    $parcelas->push($taxa);
                 }
             }
 
-            return $contas;
+            return $parcelas;
         });
     }
 
     /**
-     * Baixar conta (receber pagamento)
-     */
-    public function baixar(
-        ContaReceber $conta,
-        Carbon $dataRecebimento,
-        ?float $valorReal = null,
-        ?int $contaBancariaId = null
-    ): void {
-        $this->validarBaixa($conta);
-
-        DB::transaction(function () use ($conta, $dataRecebimento, $valorReal, $contaBancariaId) {
-            $conta->update([
-                'status' => ContaReceberStatus::RECEBIDO,
-                'data_recebimento' => $dataRecebimento,
-                'valor_real' => $valorReal ?? $conta->valor,
-                'conta_bancaria_id' => $contaBancariaId ?? $conta->conta_bancaria_id,
-            ]);
-
-            // Se for venda, baixar taxa de cartão correspondente
-            if ($conta->grupo === ContaGrupo::VENDAS) {
-                $this->baixarTaxaCartaoCorrespondente($conta, $dataRecebimento);
-            }
-
-            event(new ContaRecebida($conta));
-        });
-    }
-
-    /**
-     * Baixar taxa de cartão correspondente
-     */
-    private function baixarTaxaCartaoCorrespondente(ContaReceber $conta, Carbon $dataRecebimento): void
-    {
-        $taxaCartao = ContaReceber::where('venda_id', $conta->venda_id)
-            ->where('forma_pagamento_id', $conta->forma_pagamento_id)
-            ->where('grupo', ContaGrupo::TAXA_CARTAO)
-            ->where('status', ContaReceberStatus::PENDENTE)
-            ->first();
-
-        if ($taxaCartao) {
-            $taxaCartao->update([
-                'status' => ContaReceberStatus::RECEBIDO,
-                'data_recebimento' => $dataRecebimento,
-                'valor_real' => $taxaCartao->valor,
-            ]);
-        }
-    }
-
-    /**
-     * Cancelar conta
-     */
-    public function cancelar(ContaReceber $conta, string $motivo): void
-    {
-        if ($conta->status === ContaReceberStatus::RECEBIDO) {
-            throw new BusinessException('Não é possível cancelar conta já recebida');
-        }
-
-        $conta->update([
-            'status' => ContaReceberStatus::CANCELADO,
-            'observacao' => $motivo,
-        ]);
-    }
-
-    private function validarBaixa(ContaReceber $conta): void
-    {
-        if (!$conta->status->canTransitionTo(ContaReceberStatus::RECEBIDO)) {
-            throw new BusinessException(
-                "Conta com status {$conta->status->label()} não pode ser baixada"
-            );
-        }
-    }
-}
-
-// app/Services/Financeiro/ContaPagarService.php
-class ContaPagarService
-{
-    /**
-     * Gerar contas a pagar de uma compra (via NFe)
+     * Gerar parcelas de compra (contas a pagar)
      */
     public function gerarDeCompra(Compra $compra, array $duplicatas): Collection
     {
         return DB::transaction(function () use ($compra, $duplicatas) {
-            $contas = collect();
+            $parcelas = collect();
 
             foreach ($duplicatas as $duplicata) {
-                $conta = ContaPagar::create([
+                $parcela = FinanceiroParcela::create([
+                    'tipo' => FinanceiroTipo::PAGAR,
                     'loja_id' => $compra->loja_id,
                     'compra_id' => $compra->id,
                     'fornecedor_id' => $compra->fornecedor_id,
                     'parcela' => $duplicata['numero'],
                     'total_parcelas' => count($duplicatas),
                     'valor' => $duplicata['valor'],
-                    'status' => ContaPagarStatus::PENDENTE,
+                    'status' => FinanceiroStatus::PENDENTE,
                     'grupo' => ContaGrupo::COMPRAS,
                     'vencimento' => Carbon::parse($duplicata['vencimento']),
                     'numero_documento' => $duplicata['numero_documento'] ?? null,
                 ]);
 
-                $contas->push($conta);
+                $this->recordarEvento($parcela, 'CRIADA');
+                $parcelas->push($parcela);
             }
 
-            return $contas;
+            return $parcelas;
         });
     }
 
     /**
-     * Baixar conta (efetuar pagamento)
+     * Baixar parcela (receber/pagar)
      */
     public function baixar(
-        ContaPagar $conta,
-        Carbon $dataPagamento,
+        FinanceiroParcela $parcela,
+        Carbon $dataMovimentacao,
         ?float $valorReal = null,
         ?int $contaBancariaId = null
     ): void {
-        DB::transaction(function () use ($conta, $dataPagamento, $valorReal, $contaBancariaId) {
-            $conta->update([
-                'status' => ContaPagarStatus::PAGO,
-                'data_pagamento' => $dataPagamento,
-                'valor_real' => $valorReal ?? $conta->valor,
-                'conta_bancaria_id' => $contaBancariaId ?? $conta->conta_bancaria_id,
+        $this->validarBaixa($parcela);
+
+        DB::transaction(function () use ($parcela, $dataMovimentacao, $valorReal, $contaBancariaId) {
+            $novoStatus = match ($parcela->tipo) {
+                FinanceiroTipo::RECEBER => FinanceiroStatus::RECEBIDA,
+                FinanceiroTipo::PAGAR => FinanceiroStatus::PAGA,
+            };
+
+            $parcela->update([
+                'status' => $novoStatus,
+                'data_movimentacao' => $dataMovimentacao,
+                'valor_real' => $valorReal ?? $parcela->valor,
+                'conta_bancaria_id' => $contaBancariaId ?? $parcela->conta_bancaria_id,
             ]);
 
-            event(new ContaPaga($conta));
+            $this->recordarEvento($parcela, 'RECEBIDA/PAGA', [
+                'valor' => $valorReal ?? $parcela->valor,
+                'data' => $dataMovimentacao->format('Y-m-d'),
+            ]);
+
+            // Se for venda, baixar taxa de cartão correspondente
+            if ($parcela->grupo === ContaGrupo::VENDAS) {
+                $this->baixarTaxaCartaoCorrespondente($parcela, $dataMovimentacao);
+            }
+
+            event(new FinanceiroParcelaBaixa($parcela));
         });
     }
 
     /**
-     * Criar comissão (RT)
+     * Criar comissão (RT) - contas a pagar
      */
     public function criarComissao(
         Venda $venda,
         Profissional $profissional,
         float $valor
-    ): ContaPagar {
-        return ContaPagar::create([
-            'loja_id' => $venda->loja_id,
-            'fornecedor_id' => null,  // Profissional não é fornecedor
-            'parcela' => 1,
-            'total_parcelas' => 1,
-            'valor' => $valor,
-            'status' => ContaPagarStatus::PENDENTE,
-            'grupo' => ContaGrupo::RT,
-            'vencimento' => now()->addDays(30),
-            'observacao' => "Comissão venda #{$venda->id} - {$profissional->nome}",
+    ): FinanceiroParcela {
+        return DB::transaction(function () use ($venda, $profissional, $valor) {
+            $parcela = FinanceiroParcela::create([
+                'tipo' => FinanceiroTipo::PAGAR,
+                'loja_id' => $venda->loja_id,
+                'fornecedor_id' => null,  // Profissional não é fornecedor
+                'parcela' => 1,
+                'total_parcelas' => 1,
+                'valor' => $valor,
+                'status' => FinanceiroStatus::PENDENTE,
+                'grupo' => ContaGrupo::RT,
+                'vencimento' => now()->addDays(30),
+                'observacao' => "Comissão venda #{$venda->id} - {$profissional->nome}",
+            ]);
+
+            $this->recordarEvento($parcela, 'CRIADA');
+            return $parcela;
+        });
+    }
+
+    /**
+     * Cancelar parcela
+     */
+    public function cancelar(FinanceiroParcela $parcela, string $motivo): void
+    {
+        if (in_array($parcela->status, [FinanceiroStatus::RECEBIDA, FinanceiroStatus::PAGA])) {
+            throw new BusinessException('Não é possível cancelar parcela já liquidada');
+        }
+
+        $parcela->update([
+            'status' => FinanceiroStatus::CANCELADA,
+            'observacao' => $motivo,
+        ]);
+
+        $this->recordarEvento($parcela, 'CANCELADA', ['motivo' => $motivo]);
+    }
+
+    /**
+     * Baixar taxa de cartão correspondente
+     */
+    private function baixarTaxaCartaoCorrespondente(FinanceiroParcela $parcela, Carbon $dataMovimentacao): void
+    {
+        $taxaCartao = FinanceiroParcela::where('venda_id', $parcela->venda_id)
+            ->where('forma_pagamento_id', $parcela->forma_pagamento_id)
+            ->where('grupo', ContaGrupo::TAXA_CARTAO)
+            ->where('status', FinanceiroStatus::PENDENTE)
+            ->first();
+
+        if ($taxaCartao) {
+            $taxaCartao->update([
+                'status' => FinanceiroStatus::RECEBIDA,
+                'data_movimentacao' => $dataMovimentacao,
+                'valor_real' => $taxaCartao->valor,
+            ]);
+
+            $this->recordarEvento($taxaCartao, 'RECEBIDA/PAGA');
+        }
+    }
+
+    private function validarBaixa(FinanceiroParcela $parcela): void
+    {
+        $statusPermitidos = [FinanceiroStatus::PENDENTE, FinanceiroStatus::ATRASADA];
+        if (!in_array($parcela->status, $statusPermitidos)) {
+            throw new BusinessException(
+                "Parcela com status {$parcela->status->label()} não pode ser baixada"
+            );
+        }
+    }
+
+    private function recordarEvento(FinanceiroParcela $parcela, string $tipoEvento, array $dados = []): void
+    {
+        DB::table('financeiro_parcelas_events')->insert([
+            'parcela_id' => $parcela->id,
+            'event_type' => $tipoEvento,
+            'event_data' => json_encode($dados),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
 
 // app/Services/Financeiro/CnabService.php
+//
+// CNAB Processing - Works with unified FinanceiroParcela model
+// Handles both receivables (tipo='RECEBER') remittance and return processing
+
 class CnabService
 {
+    public function __construct(private FinanceiroParcelaService $parcelaService) {}
+
     /**
      * Gerar arquivo CNAB 240 para cobrança
+     * Filtra apenas parcelas RECEBER com forma de pagamento BOLETO
      */
-    public function gerarCnab240(Collection $contas, ContaBancaria $contaBancaria): string
+    public function gerarCnab240(Collection $parcelas, ContaBancaria $contaBancaria): string
     {
-        // Usar biblioteca como nfrm/laravel-cnab ou php-cnab
+        // Validar que todas são RECEBER
+        if ($parcelas->contains(fn($p) => $p->tipo !== FinanceiroTipo::RECEBER)) {
+            throw new BusinessException('CNAB de cobrança deve conter apenas parcelas a receber');
+        }
+
         $cnab = new Cnab240();
 
         $cnab->setEmpresa([
@@ -972,27 +964,36 @@ class CnabService
             'digito' => $contaBancaria->digito,
         ]);
 
-        foreach ($contas as $conta) {
+        $parcelas->each(function (FinanceiroParcela $parcela) use ($cnab) {
             $cnab->addBoleto([
-                'nosso_numero' => $conta->id,
-                'valor' => $conta->valor,
-                'vencimento' => $conta->vencimento->format('Y-m-d'),
+                'nosso_numero' => $parcela->id,
+                'valor' => $parcela->valor,
+                'vencimento' => $parcela->vencimento->format('Y-m-d'),
                 'sacado' => [
-                    'nome' => $conta->cliente->razao_social,
-                    'cpf_cnpj' => $conta->cliente->cpf_cnpj,
-                    'endereco' => $conta->cliente->endereco,
+                    'nome' => $parcela->cliente->razao_social,
+                    'cpf_cnpj' => $parcela->cliente->cpf_cnpj,
+                    'endereco' => $parcela->cliente->endereco,
                 ],
             ]);
 
-            // Marcar como agendado
-            $conta->update(['status' => ContaReceberStatus::AGENDADO]);
-        }
+            // Marcar como agendado para cobrança
+            $parcela->update(['status' => FinanceiroStatus::AGENDADA]);
+
+            DB::table('financeiro_parcelas_events')->insert([
+                'parcela_id' => $parcela->id,
+                'event_type' => 'REMESSA_CNAB_GERADA',
+                'event_data' => json_encode(['banco' => $cnab->getBanco()]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
 
         return $cnab->gerar();
     }
 
     /**
      * Processar arquivo de retorno CNAB
+     * Atualiza parcelas com informações de pagamento recebidas do banco
      */
     public function processarRetorno(string $conteudo): array
     {
@@ -1001,16 +1002,27 @@ class CnabService
 
         foreach ($cnab->getRegistros() as $registro) {
             if ($registro->isPago()) {
-                $conta = ContaReceber::find($registro->getNossoNumero());
+                $parcela = FinanceiroParcela::find($registro->getNossoNumero());
 
-                if ($conta) {
-                    $conta->update([
-                        'status' => ContaReceberStatus::RECEBIDO,
-                        'data_recebimento' => $registro->getDataPagamento(),
-                        'valor_real' => $registro->getValorPago(),
+                if ($parcela) {
+                    $this->parcelaService->baixar(
+                        $parcela,
+                        Carbon::parse($registro->getDataPagamento()),
+                        $registro->getValorPago()
+                    );
+
+                    DB::table('financeiro_parcelas_events')->insert([
+                        'parcela_id' => $parcela->id,
+                        'event_type' => 'RETORNO_PROCESSADO',
+                        'event_data' => json_encode([
+                            'banco' => $registro->getBanco(),
+                            'sequencial' => $registro->getSequencial(),
+                        ]),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
 
-                    $processados[] = $conta;
+                    $processados[] = $parcela;
                 }
             }
         }
@@ -1023,61 +1035,147 @@ class CnabService
 ### Controllers
 
 ```php
-// app/Http/Controllers/ContaReceberController.php
-class ContaReceberController extends Controller
+// app/Http/Controllers/FinanceiroParcelaController.php
+//
+// UNIFIED CONTROLLER - Handles receivables and payables
+// Replaces: ContaReceberController, ContaPagarController
+// Routes are filtered by tipo parameter (RECEBER vs PAGAR)
+
+class FinanceiroParcelaController extends Controller
 {
     public function __construct(
-        private ContaReceberService $contaReceberService
+        private FinanceiroParcelaService $parcelaService
     ) {}
 
-    public function index(Request $request)
+    /**
+     * Listar parcelas (contas a receber ou pagar)
+     */
+    public function index(Request $request, string $tipo = 'RECEBER')
     {
-        $contas = ContaReceber::query()
-            ->with(['venda:id', 'cliente:id,razao_social', 'formaPagamento:id,nome'])
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->cliente_id, fn($q) => $q->where('cliente_id', $request->cliente_id))
-            ->when($request->vencidos, fn($q) => $q->vencidos())
-            ->when($request->a_vencer, fn($q) => $q->aVencer($request->a_vencer))
-            ->when($request->periodo, function($q) use ($request) {
-                [$inicio, $fim] = explode(',', $request->periodo);
-                $q->whereBetween('vencimento', [$inicio, $fim]);
-            })
-            ->orderBy('vencimento')
-            ->paginate(50);
+        $tipoEnum = FinanceiroTipo::tryFrom(strtoupper($tipo));
+        if (!$tipoEnum) {
+            return back()->withErrors('Tipo inválido: deve ser RECEBER ou PAGAR');
+        }
 
-        return Inertia::render('Financeiro/ContasReceber/Index', [
-            'contas' => $contas,
-            'totais' => [
-                'pendente' => $contas->where('status', ContaReceberStatus::PENDENTE)->sum('valor'),
-                'vencido' => ContaReceber::vencidos()->sum('valor'),
-            ],
+        $query = FinanceiroParcela::where('tipo', $tipoEnum);
+
+        if ($tipoEnum === FinanceiroTipo::RECEBER) {
+            $parcelas = $query->with(['venda:id', 'cliente:id,razao_social', 'formaPagamento:id,nome'])
+                ->when($request->status, fn($q) => $q->where('status', $request->status))
+                ->when($request->cliente_id, fn($q) => $q->where('cliente_id', $request->cliente_id))
+                ->when($request->vencidos, fn($q) => $q->where('vencimento', '<', now())->where('status', '!=', FinanceiroStatus::RECEBIDA))
+                ->when($request->a_vencer, fn($q) => $q->where('vencimento', '<=', now()->addDays($request->a_vencer)))
+                ->when($request->periodo, function($q) use ($request) {
+                    [$inicio, $fim] = explode(',', $request->periodo);
+                    $q->whereBetween('vencimento', [$inicio, $fim]);
+                })
+                ->orderBy('vencimento')
+                ->paginate(50);
+
+            return Inertia::render('Financeiro/Parcelas/Receber', [
+                'parcelas' => $parcelas,
+                'totais' => [
+                    'pendente' => FinanceiroParcela::where('tipo', FinanceiroTipo::RECEBER)
+                        ->where('status', FinanceiroStatus::PENDENTE)->sum('valor'),
+                    'vencida' => FinanceiroParcela::where('tipo', FinanceiroTipo::RECEBER)
+                        ->where('vencimento', '<', now())
+                        ->where('status', '!=', FinanceiroStatus::RECEBIDA)
+                        ->sum('valor'),
+                ],
+            ]);
+        } else {
+            // PAGAR
+            $parcelas = $query->with(['compra:id', 'fornecedor:id,razao_social'])
+                ->when($request->status, fn($q) => $q->where('status', $request->status))
+                ->when($request->fornecedor_id, fn($q) => $q->where('fornecedor_id', $request->fornecedor_id))
+                ->when($request->vencidos, fn($q) => $q->where('vencimento', '<', now())->where('status', '!=', FinanceiroStatus::PAGA))
+                ->orderBy('vencimento')
+                ->paginate(50);
+
+            return Inertia::render('Financeiro/Parcelas/Pagar', [
+                'parcelas' => $parcelas,
+                'totais' => [
+                    'pendente' => FinanceiroParcela::where('tipo', FinanceiroTipo::PAGAR)
+                        ->where('status', FinanceiroStatus::PENDENTE)->sum('valor'),
+                    'vencida' => FinanceiroParcela::where('tipo', FinanceiroTipo::PAGAR)
+                        ->where('vencimento', '<', now())
+                        ->where('status', '!=', FinanceiroStatus::PAGA)
+                        ->sum('valor'),
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * Visualizar parcela
+     */
+    public function show(FinanceiroParcela $parcela)
+    {
+        return Inertia::render('Financeiro/Parcelas/Show', [
+            'parcela' => $parcela->load('eventos'),
+            'eventos' => $parcela->eventos()
+                ->orderByDesc('created_at')
+                ->get(),
         ]);
     }
 
-    public function baixar(ContaReceber $conta, BaixarContaRequest $request)
+    /**
+     * Baixar parcela (receber/pagar)
+     */
+    public function baixar(FinanceiroParcela $parcela, BaixarParcelaRequest $request)
     {
-        $this->contaReceberService->baixar(
-            $conta,
-            Carbon::parse($request->data_recebimento),
-            $request->valor_real,
-            $request->conta_bancaria_id
-        );
+        try {
+            $this->parcelaService->baixar(
+                $parcela,
+                Carbon::parse($request->data_movimentacao),
+                $request->valor_real ?? $parcela->valor,
+                $request->conta_bancaria_id
+            );
 
-        return back()->with('success', 'Conta baixada com sucesso');
+            return back()->with('success', match ($parcela->tipo) {
+                FinanceiroTipo::RECEBER => 'Parcela recebida com sucesso',
+                FinanceiroTipo::PAGAR => 'Parcela paga com sucesso',
+            });
+        } catch (BusinessException $e) {
+            return back()->withErrors($e->getMessage());
+        }
     }
 
-    public function baixarEmLote(BaixarContasEmLoteRequest $request)
+    /**
+     * Baixar parcelas em lote
+     */
+    public function baixarEmLote(BaixarParcelasEmLoteRequest $request)
     {
-        $contas = ContaReceber::whereIn('id', $request->conta_ids)->get();
+        $parcelas = FinanceiroParcela::whereIn('id', $request->parcela_ids)->get();
 
-        foreach ($contas as $conta) {
-            $this->contaReceberService->baixar(
-                $conta,
-                Carbon::parse($request->data_recebimento)
-            );
+        try {
+            foreach ($parcelas as $parcela) {
+                $this->parcelaService->baixar(
+                    $parcela,
+                    Carbon::parse($request->data_movimentacao ?? now()),
+                    null,
+                    $request->conta_bancaria_id ?? null
+                );
+            }
+
+            return back()->with('success', count($parcelas) . ' parcelas liquidadas');
+        } catch (BusinessException $e) {
+            return back()->withErrors($e->getMessage());
         }
+    }
 
-        return back()->with('success', count($contas) . ' contas baixadas');
+    /**
+     * Cancelar parcela
+     */
+    public function cancelar(FinanceiroParcela $parcela, CancelarParcelaRequest $request)
+    {
+        try {
+            $this->parcelaService->cancelar($parcela, $request->motivo);
+
+            return back()->with('success', 'Parcela cancelada com sucesso');
+        } catch (BusinessException $e) {
+            return back()->withErrors($e->getMessage());
+        }
     }
 }
 ```
@@ -1087,17 +1185,27 @@ class ContaReceberController extends Controller
 ```php
 // routes/web.php
 Route::middleware(['auth'])->prefix('financeiro')->name('financeiro.')->group(function () {
-    // Contas a Receber
-    Route::resource('receber', ContaReceberController::class)->only(['index', 'show']);
-    Route::post('receber/{conta}/baixar', [ContaReceberController::class, 'baixar'])
-        ->name('receber.baixar');
-    Route::post('receber/baixar-lote', [ContaReceberController::class, 'baixarEmLote'])
-        ->name('receber.baixar-lote');
+    // UNIFIED: Parcelas (Contas a Receber e Pagar)
+    // Filter by tipo parameter: ?tipo=RECEBER (default) or ?tipo=PAGAR
 
-    // Contas a Pagar
-    Route::resource('pagar', ContaPagarController::class)->only(['index', 'show', 'store']);
-    Route::post('pagar/{conta}/baixar', [ContaPagarController::class, 'baixar'])
-        ->name('pagar.baixar');
+    Route::get('parcelas/{tipo?}', [FinanceiroParcelaController::class, 'index'])
+        ->name('parcelas.index');
+
+    Route::get('parcelas/{parcela}', [FinanceiroParcelaController::class, 'show'])
+        ->name('parcelas.show');
+
+    Route::post('parcelas/{parcela}/baixar', [FinanceiroParcelaController::class, 'baixar'])
+        ->name('parcelas.baixar');
+
+    Route::post('parcelas/baixar-lote', [FinanceiroParcelaController::class, 'baixarEmLote'])
+        ->name('parcelas.baixar-lote');
+
+    Route::post('parcelas/{parcela}/cancelar', [FinanceiroParcelaController::class, 'cancelar'])
+        ->name('parcelas.cancelar');
+
+    // Legacy routes for backwards compatibility (redirect to unified controller)
+    Route::redirect('receber', '/financeiro/parcelas/RECEBER')->name('receber.index');
+    Route::redirect('pagar', '/financeiro/parcelas/PAGAR')->name('pagar.index');
 
     // CNAB
     Route::post('cnab/gerar', [CnabController::class, 'gerar'])->name('cnab.gerar');
@@ -1113,19 +1221,23 @@ Route::middleware(['auth'])->prefix('financeiro')->name('financeiro.')->group(fu
 
 ## Componentes de UI
 
-### Lista de Contas a Receber
+### Lista de Parcelas (Contas a Receber/Pagar)
 
+**UNIFIED VIEW** - Filtra por `tipo` (RECEBER ou PAGAR)
+
+#### Contas a Receber (`/financeiro/parcelas/RECEBER`)
 - Filtros: Status, Cliente, Vencimento, Vencidos, A Vencer
 - Colunas: Venda, Cliente, Forma, Parcela, Valor, Vencimento, Status
 - Totalizadores: Pendente, Vencido, Recebido no período
 - Ações: Visualizar, Baixar, Baixar em lote, Cancelar
+- Status valores: PENDENTE, AGENDADA, RECEBIDA, ATRASADA, CANCELADA
 
-### Lista de Contas a Pagar
-
+#### Contas a Pagar (`/financeiro/parcelas/PAGAR`)
 - Filtros: Status, Fornecedor, Grupo, Vencimento
 - Colunas: Compra, Fornecedor, Grupo, Valor, Vencimento, Status
 - Totalizadores: Por grupo, Vencido, A vencer
 - Ações: Visualizar, Baixar, Cancelar
+- Status valores: PENDENTE, AGENDADA, PAGA, ATRASADA, CANCELADA
 
 ### Fluxo de Caixa
 
@@ -1152,15 +1264,17 @@ Route::middleware(['auth'])->prefix('financeiro')->name('financeiro.')->group(fu
 
 ## Eventos
 
-| Evento               | Dispara              |
-| -------------------- | -------------------- |
-| `ContaReceberCriada` | Notificar financeiro |
-| `ContaRecebida`      | Atualizar saldo, log |
-| `ContaPagarCriada`   | Notificar financeiro |
-| `ContaPaga`          | Atualizar saldo, log |
-| `ContaVencida`       | Alerta para cobrança |
-| `CnabGerado`         | Log de remessa       |
-| `RetornoProcessado`  | Notificar baixas     |
+**UNIFIED EVENTS** - All events use the same `FinanceiroParcelaBaixa` event
+
+| Evento                    | Tipo         | Dispara              | Nota |
+| ----------------------- | ------------ | -------------------- | ---- |
+| `FinanceiroParcelaBaixa` | RECEBER      | Notificar cliente quando recebe | Com `tipo='RECEBER'` |
+| `FinanceiroParcelaBaixa` | PAGAR        | Notificar quando efetua pagamento | Com `tipo='PAGAR'` |
+| `FinanceiroParcelaAtrasada` | RECEBER/PAGAR | Alerta para cobrança/pagamento | Triggered by scheduler |
+| Event type: `REMESSA_CNAB_GERADA` | Audit trail | Log de remessa gerada | Event Sourcing table |
+| Event type: `RETORNO_PROCESSADO` | Audit trail | Log de retorno processado | Event Sourcing table |
+
+Ver: **Event Sourcing** section acima (Database → Event Sourcing) para tabelas `financeiro_parcelas_events` e tipos de eventos completos.
 
 ---
 

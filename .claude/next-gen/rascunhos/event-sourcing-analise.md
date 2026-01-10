@@ -1,15 +1,26 @@
-# Event Sourcing Architecture (Evaluated for v2+)
+# Event Sourcing Architecture (Partially Adopted in v1)
 
-> **Decision**: Not adopted for v1 - deferred to v2+
-> **Reason**: Team size/complexity tradeoff not justified for initial release
-> **Status**: Kept for future reconsideration
-> **Note**: schema-proposto-flowchart.md explores pg_ivm (incremental materialized views) which is an ES-adjacent pattern we ARE adopting
+> **Update (2026-01-10)**: STATUS CHANGED - Event Sourcing PARTIALLY implemented in v1
+>
+> **Decision**: Hybrid approach adopted - Append-only audit tables + immutability triggers (NOT full CQRS)
+> **What we implemented**:
+> - Append-only event tables: estoque_movimentacoes, alocacoes_eventos, financeiro_parcelas_events, venda_itens_events
+> - Immutability triggers: fn_prevent_mutation() on all *_events tables
+> - Event recording in services with full audit trail (usuario_id, ip_address, timestamps)
+>
+> **What we deferred to v2+**:
+> - Full Event Sourcing (complete state reconstruction from events)
+> - CQRS pattern (Command Query Responsibility Segregation)
+> - Materialized view maintenance for all entities
+>
+> **Status**: This document describes the full ES pattern - v1 implements foundation (append-only events)
+> **See**: estoque.md, vendas.md, financeiro.md for implementation details
 
 ---
 
-> **Status**: Avaliado e **não adotado** para v1
-> **Data**: 2025-12-28
-> **Motivo**: Complexidade vs benefício para equipe pequena
+> **Status**: Avaliado - **Parcialmente Adotado** para v1 (Fundação para ES completo em v2+)
+> **Data**: 2025-12-28, Atualizado: 2026-01-10
+> **Motivo**: Implementamos audit trail + imutabilidade, mas sem full CQRS (deferred to v2+)
 
 ---
 

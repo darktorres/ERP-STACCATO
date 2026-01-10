@@ -354,63 +354,65 @@ flowchart TB
 
 ---
 
-## Allocation (Alocação): The 1:1 Link
+## Allocation (Alocação): M:N Model
 
 ```mermaid
 flowchart TB
-    subgraph Before["ANTES: Consumo Automático"]
+    subgraph Before["ANTES: 1:1 Rígido"]
         direction LR
 
-        Problem["❌ Automático quebra com variação<br/>Cliente quer tom T01<br/>Sistema aloca T02"]
+        Problem["❌ Força splits complexos<br/>Múltiplos lotes<br/>= Múltiplos venda_itens<br/>= Hierarchy hell"]
 
-        OldFlow["venda_item (quant=100)<br/>↓<br/>estoque_has_consumo (automático)<br/>↓<br/>Qual estoque? Aleatório!"]
+        OldFlow["venda_item #100 (100un)<br/>↓<br/>Lote #1 (30un) → venda_item #100<br/>Lote #2 (50un) → venda_item #101<br/>Lote #3 (20un) → venda_item #102<br/>parent_id = 100, root_id = 100"]
 
         Problem --- OldFlow
     end
 
     Before --> Proposed
 
-    subgraph Proposed["NOVO: Alocação Manual Inteligente"]
+    subgraph Proposed["NOVO: M:N Flexível"]
         direction TB
 
-        Step1["1️⃣ Usuário abre diálogo<br/>de pareamento"]
-        Step2["2️⃣ Sistema sugere FIFO<br/>ORDER BY data_entrada<br/>mas usuário escolhe lote"]
-        Step3["3️⃣ Sistema valida<br/>- Mesmo produto ✅<br/>- Mesmo fornecedor ✅<br/>- Quantidade disponível ✅"]
-        Step4["4️⃣ Criar alocacao<br/>INSERT INTO alocacoes<br/>venda_item_id ↔ lote_id"]
+        Step1["1️⃣ Usuário abre diálogo<br/>de pareamento para 1 venda_item"]
+        Step2["2️⃣ Sistema sugere FIFO<br/>ORDER BY data_entrada<br/>usuário escolhe múltiplos lotes"]
+        Step3["3️⃣ Sistema valida para CADA lote<br/>- Mesmo produto ✅<br/>- Mesmo fornecedor ✅<br/>- Quantidade disponível ✅<br/>- Soma <= item.quantidade ✅"]
+        Step4["4️⃣ Criar múltiplas alocacoes<br/>INSERT INTO alocacoes<br/>venda_item_id ↔ lote_id (M:N)"]
         Step5["5️⃣ Atualizar estoque<br/>quantidade_disponível -= qtd<br/>quantidade_reservada += qtd"]
-        Step6["6️⃣ Registrar movimento<br/>INSERT movimentacao<br/>tipo: SAIDA_VENDA"]
+        Step6["6️⃣ Registrar movimentos<br/>INSERT movimentacoes<br/>tipo: SAIDA_VENDA"]
 
         Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6
     end
 
     Proposed --> Database
 
-    subgraph Database["CONSTRAINTS NO BD<br/>Proteção automática"]
+    subgraph Database["DATABASE VALIDATION<br/>Sem UNIQUE constraints!"]
         direction LR
 
-        Constraint1["UNIQUE INDEX<br/>alocacoes(venda_item_id)<br/>WHERE NOT is_estornado<br/>⚠️ 1 aloc. por item"]
+        Trigger1["TRIGGER: Validar soma<br/>SUM(alocacoes.qtd)<br/><= venda_item.qtd"]
 
-        Constraint2["UNIQUE INDEX<br/>alocacoes(lote_id)<br/>WHERE NOT is_estornado<br/>⚠️ 1 item por lote"]
+        Trigger2["TRIGGER: Atualizar status<br/>Se SUM = quantidade<br/>então status = ESTOQUE"]
 
-        Constraint1 --- Constraint2
+        Trigger1 --- Trigger2
     end
 
     Database --> Examples
 
-    subgraph Examples["EXEMPLOS PRÁTICOS"]
+    subgraph Examples["CASOS SIMPLES"]
         direction TB
 
-        Ex1["CASO 1: Devolução Parcial<br/>Alocação original: 100 un<br/>Cliente devolve 30<br/>➜ Dividir venda_item<br/>   - 30 un (DEVOLVIDO)<br/>   - 70 un (ESTOQUE)"]
+        Ex1["CASO 1: Dano Parcial<br/>alocacao #1: status=PARCIALMENTE_ESTORNADO<br/>= Sem split, sem hierarquia!"]
 
-        Ex2["CASO 2: Múltiplos Lotes<br/>Venda 100 un, tem 3 lotes:<br/>- Lote 1 (T01): 40 un → aloca<br/>- Lote 2 (T01): 35 un → aloca<br/>- Lote 3 (T02): 25 un → aloca<br/>= 3 alocações para 1 venda_item"]
+        Ex2["CASO 2: Múltiplos Lotes<br/>3 alocacoes para 1 venda_item<br/>= 1 registro, 3 linhas in alocacoes"]
 
-        Ex1 --> Ex2
+        Ex3["CASO 3: Entrega Parcial<br/>1 alocacao, múltiplas entrega_itens<br/>= Não precisa split"]
+
+        Ex1 --> Ex2 --> Ex3
     end
 ```
 
 ---
 
-## Real-World Scenarios: Complex Allocations
+## Real-World Scenarios: M:N Allocation Model
 
 ### Scenario 1: Multiple NFes from One Purchase Order
 
@@ -426,35 +428,31 @@ flowchart TB
     NFe2 --> Lote2["estoque_lotes #2<br/>50 un, FIFO=2025-01-08"]
     NFe3 --> Lote3["estoque_lotes #3<br/>20 un, FIFO=2025-01-10"]
 
-    Lote1 --> Venda["venda_itens #100<br/>quantidade: 100un<br/>status: PENDENTE"]
+    Lote1 --> Venda["venda_itens #100<br/>quantidade: 100un<br/>status: PENDENTE<br/>(1 item único!)"]
     Lote2 --> Venda
     Lote3 --> Venda
 
-    Venda --> Decision{"Alocar de 1 ou<br/>múltiplos lotes?"}
+    Venda --> Allocation["Alocar 3 lotes<br/>para 1 venda_item"]
 
-    Decision -->|"Opção 1: Uma alocação<br/>(maior quantidade primeiro)"| Split["DIVIDIR venda_item:<br/>venda_itens #100 (50un)<br/>+ venda_itens #101 (30un)<br/>+ venda_itens #102 (20un)"]
+    Allocation --> A1["alocacoes #1<br/>venda_item #100 ↔ lote #2<br/>quantidade: 50un"]
+    Allocation --> A2["alocacoes #2<br/>venda_item #100 ↔ lote #1<br/>quantidade: 30un"]
+    Allocation --> A3["alocacoes #3<br/>venda_item #100 ↔ lote #3<br/>quantidade: 20un"]
 
-    Decision -->|"Opção 2: Consolidar<br/>lotes"| Consolidate["Mover estoque entre<br/>blocos físicos<br/>(ENTRADA_AJUSTE)"]
+    A1 --> Status["venda_item #100:<br/>quantidade: 100un<br/>status: ESTOQUE ✅<br/>(SUM(alocacoes.qtd) = 100)"]
+    A2 --> Status
+    A3 --> Status
 
-    Split --> A1["alocacoes #1<br/>venda_item #100 ↔ lote #2<br/>(50un, FIFO recente)"]
-    Split --> A2["alocacoes #2<br/>venda_item #101 ↔ lote #1<br/>(30un, FIFO antigo)"]
-    Split --> A3["alocacoes #3<br/>venda_item #102 ↔ lote #3<br/>(20un, FIFO recente)"]
+    Status --> Query["Query: Onde vem este item?<br/>SELECT lote_id, quantidade<br/>FROM alocacoes<br/>WHERE venda_item_id = 100<br/><br/>Resultado: 3 linhas, 100un total ✅"]
 
-    Consolidate --> A1
-
-    A1 --> End["✅ 100un alocadas<br/>em 3 alocacoes<br/>(respeitando FIFO)"]
-    A2 --> End
-    A3 --> End
-
-    style Split fill:#e1f5ff
-    style Consolidate fill:#fff3e0
+    style Venda fill:#c8e6c9
+    style Status fill:#c8e6c9
 ```
 
 **Key Points:**
-- Cada NFe = 1 `estoque_lotes` (respeita FIFO)
-- 1 venda_item pode necessitar de múltiplas alocações
-- **Solução**: dividir venda_item em splits (parent_id) + múltiplas alocações
-- Alternativa: consolidar lotes (1 entrada_ajuste em bloco único)
+- 1 venda_item = 1 registro (sem splits!)
+- Múltiplas alocacoes (M:N) ligam ao mesmo item
+- Sem parent_id/root_id complexity
+- FIFO respeitado: SELECT... ORDER BY data_entrada
 
 ---
 
@@ -462,43 +460,37 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    Start["Cenário: Venda 100un<br/>Entrega 1: 40un<br/>Entrega 2: 60un (depois)"] --> VI["venda_itens #100<br/>quantidade: 100un<br/>status: ESTOQUE"]
+    Start["Cenário: Venda 100un<br/>Entrega 1: 40un em 2025-01-20<br/>Entrega 2: 60un em 2025-02-10"] --> VI["venda_itens #100<br/>quantidade: 100un<br/>status: ESTOQUE"]
 
-    VI --> Alocacao["alocacoes #1<br/>venda_item #100 ↔ lote #5<br/>quantidade: 100un"]
+    VI --> Alocacao["alocacoes #1<br/>venda_item #100 ↔ lote #5<br/>quantidade: 100un<br/>status: ATIVO"]
 
-    Alocacao --> Status1["status = ESTOQUE<br/>(quantidade_reservada = 100)"]
+    Alocacao --> Entrega1["ENTREGA #1 criada<br/>data: 2025-01-20"]
 
-    Status1 --> Entrega1["ENTREGA #1<br/>data: 2025-01-20<br/>agendada: 40un"]
+    Entrega1 --> EI1["entrega_itens #1<br/>venda_item #100<br/>quantidade: 40un<br/>status: ENTREGUE"]
 
-    Entrega1 --> Split["SPLIT: venda_item #100"]
+    EI1 --> Estoque1["lote #5 ainda tem:<br/>quantidade_disponível: 0<br/>quantidade_reservada: 100<br/>(60un ainda alocados)"]
 
-    Split --> VI_Entregue["venda_itens #100<br/>quantidade: 40un<br/>status: ENTREGUE<br/>parent_id: NULL<br/>root_id: NULL<br/>(original reduzido)"]
+    Estoque1 --> Entrega2["ENTREGA #2 criada<br/>data: 2025-02-10"]
 
-    Split --> VI_Pendente["venda_itens #103<br/>quantidade: 60un<br/>status: ENTREGA_AGENDADA<br/>parent_id: 100<br/>root_id: 100<br/>(novo split)"]
+    Entrega2 --> EI2["entrega_itens #2<br/>venda_item #100<br/>quantidade: 60un<br/>status: ENTREGUE"]
 
-    VI_Entregue --> Mov1["estoque_consumos #1<br/>venda_item #100 → lote #5<br/>quantidade: 40un"]
+    EI2 --> Query["Query: Quanto foi entregue?<br/>SELECT SUM(quantidade)<br/>FROM entrega_itens<br/>WHERE venda_item_id = 100<br/>= 100un ✅"]
 
-    VI_Pendente --> Reserva["lote #5 ainda tem:<br/>quantidade_disponível: 0<br/>quantidade_reservada: 100<br/>(60un pendentes)"]
+    Query --> NFeSaida["NFe SAIDA (tipo: SAIDA)<br/>referencia: venda_item #100<br/>(única referência!)"]
 
-    Reserva --> Entrega2["ENTREGA #2<br/>data: 2025-02-10<br/>agendada: 60un restantes"]
+    NFeSaida --> End["✅ Venda completa<br/>100un em 2 entregas<br/>1 venda_item<br/>1 alocacao<br/>2 entrega_itens"]
 
-    Entrega2 --> VI_EntregueResto["venda_itens #103<br/>status: ENTREGUE"]
-
-    VI_EntregueResto --> Mov2["estoque_consumos #2<br/>venda_item #103 → lote #5<br/>quantidade: 60un"]
-
-    Mov2 --> NFeSaida["NFe SAIDA (tipo: SAIDA)<br/>referencia: venda_items #100, #103<br/>(ambas entregues)"]
-
-    NFeSaida --> End["✅ Venda completa<br/>100un em 2 entregas<br/>1 alocação"]
-
-    style VI_Entregue fill:#c8e6c9
-    style VI_Pendente fill:#ffe0b2
+    style VI fill:#c8e6c9
+    style Alocacao fill:#c8e6c9
+    style End fill:#c8e6c9
 ```
 
 **Key Points:**
-- Alocação permanece 1:1 (lote ↔ venda_item original)
-- Split usa parent_id para rastrear entregas parciais
-- UNIQUE (venda_item_id) na alocação continua válida
-- NFe SAIDA referencia ambas as partes da split
+- 1 venda_item (sem splits!)
+- 1 alocacao rastreia o estoque
+- 2+ entrega_itens rastreiam entregas parciais
+- Nenhuma hierarchia parent_id/root_id complexa
+- Query simples: quanto foi entregue = SUM(entrega_itens.qtd)
 
 ---
 
@@ -506,45 +498,41 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    Start["Cenário: Entregue 100un<br/>Cliente reporta: 10un quebradas"] --> Delivered["venda_itens #100<br/>status: ENTREGUE<br/>alocacoes #1 ativo"]
+    Start["Cenário: Entregue 100un<br/>Cliente reporta: 10un quebradas"] --> Delivered["venda_itens #100<br/>quantidade: 100un<br/>status: ENTREGUE<br/>alocacoes #1: ATIVO"]
 
-    Delivered --> Report["Cliente reporta quebra<br/>data: 2025-01-25<br/>quantidade: 10un"]
+    Delivered --> EI["entrega_itens #1<br/>quantidade: 100un<br/>status: ENTREGUE<br/>data: 2025-01-20"]
 
-    Report --> Split1["SPLIT: venda_itens #100"]
+    EI --> Report["Cliente reporta quebra<br/>data: 2025-01-25<br/>quantidade: 10un"]
 
-    Split1 --> VI_Bom["venda_itens #100<br/>quantidade: 90un<br/>status: ENTREGUE<br/>(reduzido)"]
-
-    Split1 --> VI_Quebrado["venda_itens #104<br/>quantidade: 10un<br/>status: DEVOLVIDO<br/>parent_id: 100<br/>root_id: 100<br/>split_reason: QUEBRA"]
-
-    VI_Quebrado --> Estorno["UPDATE alocacoes #1<br/>is_estornado = TRUE<br/>estornado_por = vendedor_id<br/>estorno_motivo = 'Quebra após entrega'"]
+    Report --> Estorno["UPDATE alocacoes #1<br/>status = PARCIALMENTE_ESTORNADO<br/>estorno_motivo = 'Quebra após entrega'<br/>estornado_por = vendedor_id<br/>estornado_em = NOW()"]
 
     Estorno --> RestoreStock["UPDATE estoque_lotes #5<br/>quantidade_disponível += 10<br/>quantidade_reservada -= 10"]
 
-    RestoreStock --> NFeDevolucao["NFe DEVOLUCAO_ENTRADA<br/>tipo: DEVOLUCAO_ENTRADA<br/>nfe_referenciada_id: (NFe original)<br/>cfop: 1411 (devolução)<br/>quantidade: 10un"]
-
-    NFeDevolucao --> Mov["estoque_movimentacoes<br/>tipo: ENTRADA_AJUSTE<br/>quantidade: +10<br/>observacoes: 'Devolução por quebra'"]
+    RestoreStock --> Mov["estoque_movimentacoes<br/>tipo: ENTRADA_AJUSTE<br/>quantidade: +10<br/>observacoes: 'Devolução por quebra'"]
 
     Mov --> Inventory["lote #5 reabastecido:<br/>quantidade_disponível: 10<br/>status: DISPONIVEL"]
 
-    Inventory --> NewSale["Cliente pede reposição<br/>venda_itens #105<br/>quantidade: 10un<br/>origem: ESTOQUE"]
+    Inventory --> NewItem["Criar item de reposição<br/>venda_itens #101<br/>quantidade: 10un<br/>origem: ESTOQUE<br/>(novo pedido de cliente)"]
 
-    NewSale --> NewAloc["alocacoes #2<br/>venda_item #105 ↔ lote #5<br/>quantidade: 10un<br/>(mesmo lote, dados originais)"]
+    NewItem --> NewAloc["alocacoes #2<br/>venda_item #101 ↔ lote #5<br/>quantidade: 10un<br/>status: ATIVO"]
 
-    NewAloc --> Delivered2["✅ Reposição entregue<br/>Data: 2025-02-05"]
+    NewAloc --> NewDeliv["entrega_itens #2<br/>venda_item #101<br/>quantidade: 10un<br/>status: ENTREGUE<br/>data: 2025-02-05"]
 
-    style VI_Quebrado fill:#ffcdd2
+    NewDeliv --> Audit["Auditoria completa:<br/>alocacoes #1: PARCIALMENTE_ESTORNADO<br/>alocacoes #2: ATIVO → ENTREGUE<br/>Fluxo rastreável"]
+
+    style Estorno fill:#ffcdd2
     style Inventory fill:#c8e6c9
-    style Delivered2 fill:#c8e6c9
+    style NewDeliv fill:#c8e6c9
 
-    Delivered --> End["Auditoria completa:<br/>- Estorno rastreado<br/>- NFe registrada<br/>- Reposição documentada"]
+    Delivered --> End["✅ Problema resolvido<br/>1 venda_item original<br/>Dano marcado em alocacoes.status<br/>Reposição = nova venda_item"]
 ```
 
 **Key Points:**
-- Quebra = split do venda_item original
-- Estorno (soft delete) preserva auditoria
-- NFe DEVOLUCAO_ENTRADA registra oficialmente
-- Estoque reabastecido e pronto para nova alocação
-- Mesmo lote pode ser alocado novamente
+- Alocação original marcada como PARCIALMENTE_ESTORNADO
+- Sem split de venda_item!
+- Estoque restaurado automaticamente via trigger
+- Reposição = novo venda_item + nova alocacao
+- Auditoria clara no status de alocacoes
 
 ---
 

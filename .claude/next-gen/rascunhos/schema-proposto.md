@@ -745,11 +745,6 @@ CREATE TABLE venda_itens (
 
     venda_id INTEGER NOT NULL REFERENCES vendas(id) ON DELETE CASCADE,
 
-    -- Hierarquia de split (para entregas parciais, etc)
-    parent_id INTEGER REFERENCES venda_itens(id),
-    root_id INTEGER REFERENCES venda_itens(id),
-    split_reason VARCHAR(50),  -- 'NFE_PARCIAL', 'ENTREGA_PARCIAL', 'DEVOLUCAO'
-
     -- Ordenação
     posicao SMALLINT NOT NULL DEFAULT 1,
 
@@ -774,15 +769,8 @@ CREATE TABLE venda_itens (
     -- Origem
     origem venda_item_origem NOT NULL DEFAULT 'COMPRA',
 
-    -- Status
+    -- Status (overall item status based on alocacoes)
     status venda_item_status NOT NULL DEFAULT 'PENDENTE',
-
-    -- Datas previstas/reais
-    data_prev_entrega DATE,
-    data_real_entrega TIMESTAMPTZ,
-
-    -- Quem recebeu
-    recebido_por VARCHAR(100),
 
     -- Observações
     observacoes TEXT,
@@ -790,7 +778,6 @@ CREATE TABLE venda_itens (
     -- Links
     orcamento_item_id INTEGER REFERENCES orcamento_itens(id),
     compra_item_id INTEGER REFERENCES compra_itens(id),
-    nfe_saida_item_id INTEGER,  -- FK para nfe_itens (saída)
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -802,7 +789,6 @@ CREATE TABLE venda_itens (
 CREATE INDEX idx_venda_itens_venda ON venda_itens(venda_id);
 CREATE INDEX idx_venda_itens_produto ON venda_itens(produto_id);
 CREATE INDEX idx_venda_itens_status ON venda_itens(status);
-CREATE INDEX idx_venda_itens_root ON venda_itens(root_id) WHERE root_id IS NOT NULL;
 
 -- ============================================================================
 -- COMPRAS
@@ -847,11 +833,6 @@ CREATE TABLE compra_itens (
 
     compra_id INTEGER NOT NULL REFERENCES compras(id) ON DELETE CASCADE,
 
-    -- Hierarquia de split
-    parent_id INTEGER REFERENCES compra_itens(id),
-    root_id INTEGER REFERENCES compra_itens(id),
-    split_reason VARCHAR(50),
-
     -- Produto
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
 
@@ -867,11 +848,8 @@ CREATE TABLE compra_itens (
     -- Status
     status compra_item_status NOT NULL DEFAULT 'PENDENTE',
 
-    -- Origem
+    -- Origem (pode estar vinculado a uma venda_item específica)
     venda_item_id INTEGER REFERENCES venda_itens(id),
-
-    -- NFe
-    nfe_entrada_item_id INTEGER,  -- FK para nfe_itens
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -1114,22 +1092,27 @@ CREATE INDEX idx_movimentacoes_tipo ON estoque_movimentacoes(tipo);
 CREATE INDEX idx_movimentacoes_data ON estoque_movimentacoes(created_at);
 
 -- ============================================================================
--- ALOCAÇÕES (link 1:1 entre venda_item e lote)
+-- ALOCAÇÕES (M:N: múltiplos lotes podem abastecer 1 venda_item)
 -- ============================================================================
 CREATE TABLE alocacoes (
     id SERIAL PRIMARY KEY,
 
-    -- Links 1:1
-    venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id),
+    -- M:N: venda_item pode ter múltiplas alocacoes (de diferentes lotes)
+    venda_item_id INTEGER NOT NULL REFERENCES venda_itens(id) ON DELETE CASCADE,
     lote_id INTEGER NOT NULL REFERENCES estoque_lotes(id),
 
-    -- Quantidade e custo (snapshot)
+    -- Quantidade DESTA alocação (não precisa ser a quantidade total do item)
     quantidade DECIMAL(15,4) NOT NULL,
     custo_unitario DECIMAL(15,4) NOT NULL,
     custo_total DECIMAL(15,2) GENERATED ALWAYS AS (quantidade * custo_unitario) STORED,
 
+    -- Status da alocação (não do item)
+    -- ATIVO: alocação ativa
+    -- PARCIALMENTE_ESTORNADO: parte foi estornada
+    -- TOTALMENTE_ESTORNADO: inteiramente estornada
+    status VARCHAR(50) DEFAULT 'ATIVO',
+
     -- Estorno
-    is_estornado BOOLEAN DEFAULT FALSE,
     estornado_em TIMESTAMPTZ,
     estorno_motivo VARCHAR(200),
     estornado_por INTEGER REFERENCES usuarios(id),
@@ -1139,11 +1122,13 @@ CREATE TABLE alocacoes (
     created_by INTEGER REFERENCES usuarios(id)
 );
 
--- Constraint 1:1: um venda_item só pode ter uma alocação ativa
-CREATE UNIQUE INDEX idx_alocacoes_venda_item_ativo ON alocacoes(venda_item_id) WHERE NOT is_estornado;
+-- Índices (sem UNIQUE - permite M:N)
+CREATE INDEX idx_alocacoes_venda_item ON alocacoes(venda_item_id);
+CREATE INDEX idx_alocacoes_lote ON alocacoes(lote_id);
+CREATE INDEX idx_alocacoes_status ON alocacoes(status);
 
--- Constraint 1:1: um lote só pode ser alocado uma vez (por completo)
-CREATE UNIQUE INDEX idx_alocacoes_lote_ativo ON alocacoes(lote_id) WHERE NOT is_estornado;
+-- TRIGGER: Validar que SUM(quantidade) de alocacoes ativas <= venda_item.quantidade
+-- (Implementado em 4. Triggers de Integridade)
 
 -- ============================================================================
 -- VIEW: Saldo de Estoque por Produto
@@ -1497,6 +1482,7 @@ CREATE OR REPLACE FUNCTION fn_validar_alocacao()
 RETURNS TRIGGER AS $$
 DECLARE
     v_qtd_item DECIMAL(15,4);
+    v_qtd_alocada_total DECIMAL(15,4);
     v_qtd_disponivel DECIMAL(15,4);
     v_status_item venda_item_status;
     v_produto_item INTEGER;
@@ -1514,10 +1500,15 @@ BEGIN
     INTO v_qtd_disponivel, v_produto_lote, v_fornecedor_lote
     FROM estoque_lotes WHERE id = NEW.lote_id;
 
-    -- REGRA 1: Quantidade deve ser igual
-    IF NEW.quantidade != v_qtd_item THEN
-        RAISE EXCEPTION 'Quantidade da alocação (%) deve ser igual ao item (%)',
-            NEW.quantidade, v_qtd_item;
+    -- REGRA 1: Quantidade alocada não pode exceder quantidade do item
+    SELECT COALESCE(SUM(quantidade), 0)
+    INTO v_qtd_alocada_total
+    FROM alocacoes
+    WHERE venda_item_id = NEW.venda_item_id AND status = 'ATIVO';
+
+    IF (v_qtd_alocada_total + NEW.quantidade) > v_qtd_item THEN
+        RAISE EXCEPTION 'Total alocado (% + %) excede quantidade do item (%)',
+            v_qtd_alocada_total, NEW.quantidade, v_qtd_item;
     END IF;
 
     -- REGRA 2: Lote deve ter disponível
@@ -1558,9 +1549,12 @@ CREATE TRIGGER trg_validar_alocacao
 ```sql
 CREATE OR REPLACE FUNCTION fn_apos_alocacao()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_total_alocado DECIMAL(15,4);
+    v_qtd_item DECIMAL(15,4);
 BEGIN
-    IF TG_OP = 'INSERT' AND NOT NEW.is_estornado THEN
-        -- Alocação: diminuir disponível, aumentar reservado
+    IF TG_OP = 'INSERT' AND NEW.status = 'ATIVO' THEN
+        -- Alocação ativa: diminuir disponível, aumentar reservado
         UPDATE estoque_lotes
         SET quantidade_disponivel = quantidade_disponivel - NEW.quantidade,
             quantidade_reservada = quantidade_reservada + NEW.quantidade,
@@ -1571,9 +1565,23 @@ BEGIN
             updated_at = NOW()
         WHERE id = NEW.lote_id;
 
-        -- Atualizar status do item
+        -- Calcular total alocado para este venda_item
+        SELECT COALESCE(SUM(quantidade), 0)
+        INTO v_total_alocado
+        FROM alocacoes
+        WHERE venda_item_id = NEW.venda_item_id AND status = 'ATIVO';
+
+        SELECT quantidade
+        INTO v_qtd_item
+        FROM venda_itens
+        WHERE id = NEW.venda_item_id;
+
+        -- Atualizar status do item se totalmente alocado
         UPDATE venda_itens
-        SET status = 'ESTOQUE',
+        SET status = CASE
+                WHEN v_total_alocado >= v_qtd_item THEN 'ESTOQUE'::venda_item_status
+                ELSE status
+            END,
             updated_at = NOW()
         WHERE id = NEW.venda_item_id;
 
@@ -1581,7 +1589,7 @@ BEGIN
         INSERT INTO estoque_movimentacoes (lote_id, tipo, quantidade, custo_unitario, referencia_tipo, referencia_id, usuario_id)
         VALUES (NEW.lote_id, 'SAIDA_VENDA', -NEW.quantidade, NEW.custo_unitario, 'venda_item', NEW.venda_item_id, NEW.created_by);
 
-    ELSIF TG_OP = 'UPDATE' AND NEW.is_estornado AND NOT OLD.is_estornado THEN
+    ELSIF TG_OP = 'UPDATE' AND (NEW.status = 'TOTALMENTE_ESTORNADO' OR (NEW.status = 'PARCIALMENTE_ESTORNADO' AND OLD.status = 'ATIVO')) THEN
         -- Estorno: restaurar disponível, diminuir reservado
         UPDATE estoque_lotes
         SET quantidade_disponivel = quantidade_disponivel + OLD.quantidade,
@@ -1651,16 +1659,16 @@ CREATE TRIGGER trg_validar_transicao_venda_item
 
 | Aspecto | Legado | Novo |
 |---------|--------|------|
-| **Tabelas L1/L2** | venda_has_produto + venda_has_produto2 com idRelacionado | venda_itens única com parent_id/root_id |
+| **Tabelas L1/L2** | venda_has_produto + venda_has_produto2 com idRelacionado | venda_itens única (sem splits) |
 | **Referência fornecedor** | VARCHAR em ~9 tabelas | fornecedor_id FK em todo lugar |
 | **Dados fiscais NFe** | ~30 colunas em estoque + estoque_has_consumo | JSONB em nfe_itens |
 | **Status** | Strings mágicas ("Em Estoque") | ENUMs PostgreSQL |
-| **Consumo estoque** | FIFO automático (quebrado) | Seleção manual 1:1 + movimentações |
+| **Alocação de Estoque** | FIFO automático (quebrado) | M:N: múltiplos lotes por venda_item + entrega_itens para parciais |
 | **Auditoria** | Nenhuma | audit_log + triggers |
 | **Tabela produto** | 100+ colunas | produtos + produto_precos + produto_tributos |
-| **Devoluções** | Incompleto | Fluxo completo com NFe tipo DEVOLUCAO |
+| **Devoluções** | Incompleto | alocacoes.status (ATIVO/PARCIALMENTE_ESTORNADO/TOTALMENTE_ESTORNADO) |
 | **Financeiro** | contas_receber + parcelas_receber + contas_pagar + parcelas_pagar (4 tabelas) | financeiro_parcelas unificado (1 tabela + 2 views) |
-| **Localização Estoque** | Sem suporte a split (1 lote = 1 bloco) | estoque_localizacoes (1 lote pode estar em múltiplos blocos) |
+| **Localização Estoque** | Sem suporte a split (1 lote = 1 bloco) | estoque_localizacoes (1 lote → múltiplos blocos) |
 
 ---
 

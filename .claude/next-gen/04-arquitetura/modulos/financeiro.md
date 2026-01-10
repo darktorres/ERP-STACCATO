@@ -2055,6 +2055,114 @@ CREATE INDEX idx_pix_cobrancas_status ON pix_cobrancas(status, data_expiracao);
 | PIX Webhook | Baixa automática via webhook | P1 |
 | Boleto multi-banco | Geração para Bradesco, Caixa, Santander, BB, Itaú | P0 |
 
+#### 2.6 Alternativas Modernas ao CNAB
+
+O Brasil evoluiu significativamente na modernização bancária. As principais alternativas ao CNAB tradicional:
+
+| Alternativa | Maturidade | Recomendação |
+|-------------|------------|--------------|
+| API PIX Cobrança | ✅ Pronta | Adotar agora |
+| Open Finance APIs | ✅ Pronta | Avaliar por banco |
+| PIX Automático | 🆕 2025 | Monitorar |
+| Boleto Híbrido | ✅ Pronta | Transição gradual |
+| CNAB 750 (PIX) | ✅ Pronta | Se precisar de arquivos |
+
+##### Comparativo: CNAB vs APIs
+
+| Critério | CNAB 240/400 | API PIX | API Open Finance |
+|----------|--------------|---------|------------------|
+| **Integração** | Arquivos FTP/VAN | REST/JSON | REST/JSON + OAuth2 |
+| **Tempo real** | ❌ Batch | ✅ Instantâneo | ✅ Instantâneo |
+| **Conciliação** | Manual (arquivo retorno) | Webhook automático | Webhook automático |
+| **Disponibilidade** | Horário bancário | 24/7 | 24/7 |
+| **Complexidade** | Alta (layouts variados) | Baixa (padrão único) | Média (OAuth2) |
+| **Custo médio** | R$ 2-5 por boleto | R$ 0-1 por transação | Variável |
+| **Compensação** | 1-3 dias úteis | Instantânea | Instantânea |
+
+##### PIX Cobrança (API PIX)
+
+Tipos de cobrança:
+- **COB**: QR Code com data de expiração
+- **COBV**: Cobrança com Vencimento (inclui multa, juros e descontos)
+
+```
+Fluxo CNAB Tradicional:
+ERP → Gera Remessa → Upload VAN/Banco → Aguarda Retorno → Processa Retorno → Baixa
+
+Fluxo API PIX:
+ERP → API POST /cob → Recebe QR Code → Webhook pagamento → Baixa automática
+```
+
+##### Boleto Híbrido (BolePix)
+
+Estratégia de transição: boleto tradicional com QR Code PIX embutido.
+
+- Cliente escolhe como pagar (código de barras ou PIX)
+- Mantém compatibilidade com sistemas legados
+- Se pago via PIX, compensação instantânea
+- Único documento, duas formas de pagamento
+
+##### PIX Automático (2025)
+
+Lançado pelo Banco Central em 2025, permite pagamentos recorrentes:
+
+- Funciona como débito automático, mas via PIX
+- Cliente autoriza uma vez, pagamentos são automáticos
+- Ideal para: assinaturas, mensalidades, seguros
+- Liquidação instantânea
+
+##### Maturidade de APIs por Banco
+
+| Banco | Cobrança API | PIX API | Pagamentos | Observações |
+|-------|--------------|---------|------------|-------------|
+| **Banco do Brasil** | ✅ Completa | ✅ | ✅ | Todas operações via WebService |
+| **Itaú** | ✅ Completa | ✅ | ✅ | Layout PIX 750 posições |
+| **Bradesco** | ⚠️ Parcial | ✅ | ⚠️ | Apenas ShopFácil via WS |
+| **Santander** | ✅ | ✅ | ✅ | Consultas e transferências |
+| **Caixa** | ✅ | ✅ | ✅ | CNAB 240 + API |
+| **Inter** | ✅ Completa | ✅ | ✅ | BolePix (Boleto + PIX) |
+| **Sicoob** | ✅ Completa | ✅ | ✅ | Biblioteca completa |
+
+**Prioridade de Integração:**
+1. Banco do Brasil - API completa, priorizar
+2. Itaú - API completa, boa documentação
+3. Inter - API moderna, fácil integração
+4. Sicoob - Biblioteca completa
+5. Bradesco - Parcial, manter CNAB por enquanto
+6. Caixa - Funcional, mas documentação limitada
+
+##### Roadmap de Migração CNAB → API
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ SUB-FASE 2.1 (Curto Prazo)                                          │
+│ ├── Manter CNAB 240 existente                                       │
+│ ├── Adicionar Boleto Híbrido (boleto + QR PIX)                      │
+│ └── Benefício: Zero mudança para clientes, ganho imediato em PIX    │
+├─────────────────────────────────────────────────────────────────────┤
+│ SUB-FASE 2.2 (Médio Prazo)                                          │
+│ ├── Implementar API PIX Cobrança                                    │
+│ ├── Eliminar arquivos de remessa/retorno gradualmente               │
+│ └── Benefício: Conciliação instantânea, menos erros                 │
+├─────────────────────────────────────────────────────────────────────┤
+│ SUB-FASE 2.3 (Longo Prazo)                                          │
+│ ├── Migrar para PIX Automático (débitos recorrentes)                │
+│ ├── Integrar Open Finance para multi-banco                          │
+│ └── Benefício: Experiência premium, menor custo operacional         │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+##### Recursos e Referências
+
+| Recurso | Descrição |
+|---------|-----------|
+| [Manual PIX - BCB](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf) | Documentação oficial do Banco Central |
+| [Open Finance Brasil](https://openbanking-brasil.github.io/openapi/swagger-apis/payments/) | Especificação das APIs |
+| [API Cobrança BolePix - Inter](https://developers.inter.co/references/cobranca-bolepix) | Exemplo de implementação moderna |
+| [PlugBoleto - TecnoSpeed](https://blog.tecnospeed.com.br/cnab-240/) | API unificada multi-banco |
+
+> **Tendência:** Em 3-5 anos, o CNAB será minoritário, com a maioria das operações via API.
+
 ---
 
 ### FASE 3: GESTÃO DE RECEBÍVEIS (P2)

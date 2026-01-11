@@ -1454,6 +1454,21 @@ CREATE TYPE origem_financeiro AS ENUM (
     'DEVOLUCAO'      -- Devolução/estorno
 );
 
+-- ⚠️ IMPORTANTE: Dois campos diferentes com nome "tipo"
+-- Não confundir estes dois campos não relacionados:
+--
+-- 1. financeiro_parcelas.tipo (Discriminador)
+--    └── Valores: RECEBER, PAGAR
+--    └── Propósito: Distinguir se é conta a receber ou a pagar
+--    └── Referencia FK: cliente_id OU fornecedor_id
+--
+-- 2. centros_custo.tipo (Classificação)
+--    └── Valores: OPERACIONAL, ADMINISTRATIVO, COMERCIAL
+--    └── Propósito: Classificar o centro de custo por função
+--    └── Sem relação com financeiro_parcelas.tipo
+--
+-- Código deve usar o tipo correto em cada contexto.
+
 -- Tabela Principal Unificada
 CREATE TABLE financeiro_parcelas (
     id BIGSERIAL PRIMARY KEY,

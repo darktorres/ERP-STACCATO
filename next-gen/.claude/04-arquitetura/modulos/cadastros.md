@@ -61,53 +61,72 @@ flowchart TB
 
 ### Tabelas do Banco de Dados
 
+#### Endereços (Compartilhado - Polimórfico)
+
+```sql
+-- Tabela compartilhada para endereços de múltiplas entidades
+enderecos (POLYMORPHIC)
+├── id (PK)
+├── enderecavel_type    -- 'cliente', 'fornecedor', 'loja', 'transportadora'
+├── enderecavel_id      -- FK para a entidade específica
+├── tipo                -- 'principal', 'entrega', 'cobranca'
+├── cep
+├── logradouro
+├── numero
+├── complemento
+├── bairro
+├── cidade
+├── uf
+├── latitude, longitude -- Geolocalização
+├── is_ativo
+├── created_at, updated_at
+└── UNIQUE(enderecavel_type, enderecavel_id, tipo)
+```
+
+**Padrão Polimórfico**: Uma tabela `enderecos` serve Clientes, Fornecedores, Lojas e Transportadoras.
+- `enderecavel_type`: Identifica qual entidade (não é FK, é string para flexibilidade)
+- `enderecavel_id`: ID da entidade específica
+- Unique constraint garante um endereço de cada tipo por entidade
+
 #### Cliente
 
 ```sql
 cliente
-├── idCliente (PK)
-├── pfpj                      -- PF ou PJ
+├── id (PK)
+├── tipo                      -- PF ou PJ
 ├── nome_razao                -- Nome/Razão Social
-├── nomeFantasia              -- Nome Fantasia
-├── cpf / cnpj (UNIQUE)       -- Documento fiscal
-├── inscEstadual              -- Inscrição Estadual
-├── email, tel, cel           -- Contatos
-├── credito                   -- Saldo de crédito
-├── idProfissionalRel (FK)    -- Representante vinculado
-├── incompleto                -- Cadastro incompleto
-└── desativado
-
-cliente_has_endereco
-├── idEndereco (PK)
-├── idCliente (FK)
-├── cep, logradouro, numero, bairro, cidade, uf
-├── latitude, longitude       -- Geolocalização
-├── tipoEndereco              -- ENTREGA, FATURAMENTO, AMBOS
-└── desativado
+├── nome_fantasia             -- Nome Fantasia
+├── cpf_cnpj (UNIQUE)         -- Documento fiscal unificado
+├── inscricao_estadual        -- Inscrição Estadual
+├── email, telefone           -- Contatos
+├── limite_credito            -- Limite de crédito
+├── saldo_credito             -- Saldo disponível
+├── vendedor_id (FK)          -- Representante vinculado
+├── is_incompleto             -- Cadastro incompleto
+├── is_ativo
+└── deleted_at (Soft Delete)
 ```
 
 #### Fornecedor
 
 ```sql
 fornecedor
-├── idFornecedor (PK)
-├── razaoSocial, nomeFantasia
+├── id (PK)
+├── razao_social, nome_fantasia
 ├── cnpj (UNIQUE)
-├── inscEstadual
-├── email, tel, fax
-├── banco, agencia, cc        -- Dados bancários
-├── comissao1, comissao2      -- Taxas de comissão
-├── representacao             -- É representação?
-├── fretePagoLoja             -- Quem paga frete
-├── vemDoSul                  -- Origem do Sul
-└── desativado
+├── inscricao_estadual
+├── email, telefone
+├── banco, agencia, conta     -- Dados bancários (Phase 2)
+├── comissao_1, comissao_2    -- Taxas de comissão (Phase 2)
+├── is_representacao          -- É representação? (Phase 2)
+├── is_frete_pago_loja        -- Quem paga frete (Phase 2)
+├── is_ativo
+└── deleted_at (Soft Delete)
 
-fornecedor_has_endereco
-├── idEndereco (PK)
-├── idFornecedor (FK)
-├── cep, logradouro, numero, bairro, cidade, uf
-└── desativado
+-- Endereços: via tabela compartilhada enderecos com enderecavel_type='fornecedor'
 ```
+
+**Nota**: Dados bancários, comissões e flags de negócio foram adiados para Phase 2.
 
 #### Produto
 
@@ -191,15 +210,16 @@ usuario
 
 ```sql
 loja
-├── idLoja (PK)
-├── descricao
-├── razaoSocial, nomeFantasia
+├── id (PK)
+├── codigo (UNIQUE)           -- Código da loja
+├── nome
 ├── cnpj (UNIQUE)
-├── inscEstadual
-├── sigla                     -- Sigla para prefixos
-├── valorMinimoFrete          -- Valor mínimo para frete grátis
-├── porcentagemFrete          -- Percentual de frete
-└── desativado
+├── inscricao_estadual
+├── config (JSONB)            -- Configurações flexíveis
+├── is_ativo
+└── deleted_at (Soft Delete)
+
+-- Endereços: via tabela compartilhada enderecos com enderecavel_type='loja'
 ```
 
 ---

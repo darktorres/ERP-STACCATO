@@ -98,9 +98,9 @@ estoque_lotes
 ├── nfe_id (FK, nullable)           -- NFe de origem (se aplicável)
 ├── compra_id (FK, nullable)        -- Compra relacionada
 ├── fornecedor_id (FK, nullable)    -- Fornecedor
-├── status                          -- RECEBIDO, RESERVADO, CONSUMIDO, QUEBRA, DEVOLUCAO
+├── status                          -- DISPONIVEL, RESERVADO, ESGOTADO, BLOQUEADO
 ├── quantidade                      -- Quantidade original recebida/alocada
-├── quantidade_disponivel           -- Quantidade livre para alocação (RECEBIDO)
+├── quantidade_disponivel           -- Quantidade livre para alocação (DISPONIVEL)
 ├── quantidade_reservada            -- Quantidade alocada a vendas
 ├── custo_unitario                  -- Custo unitário do lote
 ├── lote                            -- Número do lote (FIFO/FEFO key)
@@ -120,7 +120,7 @@ alocacoes
 ├── venda_item_id (FK)         -- Item da venda
 ├── estoque_lote_id (FK)       -- Lote alocado
 ├── quantidade                 -- Quantidade alocada
-├── status                     -- ATIVO, REVERTIDA, CANCELADA
+├── status                     -- ATIVO, PARCIALMENTE_ESTORNADO, CANCELADA
 └── ...
 
 -- DEPRECATED: Old tables (for migration only)
@@ -134,12 +134,13 @@ alocacoes
 
 ```mermaid
 stateDiagram-v2
-    [*] --> TEMP : Importação NFe iniciada
-    TEMP --> ESTOQUE : Importação confirmada
-    TEMP --> CANCELADO : Importação cancelada
-    ESTOQUE --> ESTOQUE : Consumo parcial
-    ESTOQUE --> CONSUMIDO : Totalmente consumido (restante=0)
-    ESTOQUE --> CANCELADO : Cancelamento
+    [*] --> DISPONIVEL : Importação NFe confirmada
+    DISPONIVEL --> RESERVADO : Alocação a venda
+    DISPONIVEL --> BLOQUEADO : Bloqueio/avaria detectada
+    RESERVADO --> ESGOTADO : Consumo da alocação (entrega)
+    RESERVADO --> DISPONIVEL : Reversão de alocação
+    BLOQUEADO --> DISPONIVEL : Desbloqueio
+    ESGOTADO --> [*] : Totalmente consumido (histórico)
 ```
 
 #### Consumo
@@ -209,7 +210,7 @@ class AlocacaoService {
             ]);
 
             // Registrar evento para auditoria
-            DB::table('alocacoes_eventos')->insert([
+            DB::table('alocacoes_events')->insert([
                 'alocacao_id' => $alocacao->id,
                 'event_type' => 'CRIADA',
                 'event_data' => json_encode([
@@ -389,7 +390,7 @@ class Alocacao extends Model
     // Helper to check if allocation has been reversed
     public function isReversed(): bool
     {
-        return $this->status === AlocacaoStatus::REVERTIDA;
+        return $this->status === AlocacaoStatus::PARCIALMENTE_ESTORNADO;
     }
 
     // Calculate cost for this allocation
@@ -408,7 +409,7 @@ This module uses Event Sourcing to maintain immutable log of all inventory movem
 
 ```sql
 -- Append-only movements log for estoque_lotes (inventory receiving/adjustments)
-CREATE TABLE estoque_movimentacoes (
+CREATE TABLE estoque_lotes_events (
     id BIGSERIAL PRIMARY KEY,
     estoque_id BIGINT NOT NULL,
     event_type VARCHAR(50) NOT NULL,               -- RECEBIDO, AJUSTE, QUEBRA, TRANSFERENCIA, etc.
@@ -419,16 +420,16 @@ CREATE TABLE estoque_movimentacoes (
 );
 
 -- Immutability constraint
-CREATE TRIGGER fn_prevent_mutation_estoque_movimentacoes
-BEFORE UPDATE OR DELETE ON estoque_movimentacoes
+CREATE TRIGGER fn_prevent_mutation_estoque_lotes_events
+BEFORE UPDATE OR DELETE ON estoque_lotes_events
 FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
 
 -- Index for query performance
-CREATE INDEX idx_estoque_movimentacoes_lote_tipo
-ON estoque_movimentacoes (estoque_id, event_type, created_at);
+CREATE INDEX idx_estoque_lotes_events_lote_tipo
+ON estoque_lotes_events (estoque_id, event_type, created_at);
 
 -- Append-only log for allocation events
-CREATE TABLE alocacoes_eventos (
+CREATE TABLE alocacoes_events (
     id BIGSERIAL PRIMARY KEY,
     alocacao_id BIGINT NOT NULL,
     event_type VARCHAR(50) NOT NULL,               -- CRIADA, REVERTIDA, CANCELADA
@@ -438,12 +439,12 @@ CREATE TABLE alocacoes_eventos (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TRIGGER fn_prevent_mutation_alocacoes_eventos
-BEFORE UPDATE OR DELETE ON alocacoes_eventos
+CREATE TRIGGER fn_prevent_mutation_alocacoes_events
+BEFORE UPDATE OR DELETE ON alocacoes_events
 FOR EACH ROW EXECUTE FUNCTION fn_prevent_mutation();
 
-CREATE INDEX idx_alocacoes_eventos_alocacao_tipo
-ON alocacoes_eventos (alocacao_id, event_type, created_at);
+CREATE INDEX idx_alocacoes_events_alocacao_tipo
+ON alocacoes_events (alocacao_id, event_type, created_at);
 ```
 
 #### Event Types
@@ -460,13 +461,8 @@ enum EstoqueEventType: string
     case DEVOLUCAO = 'DEVOLUCAO';                  // Return from customer
 }
 
-// app/Enums/AllocationEventType.php (same as VendaItem)
-enum AllocationEventType: string
-{
-    case CRIADA = 'CRIADA';
-    case REVERTIDA = 'REVERTIDA';
-    case CANCELADA = 'CANCELADA';
-}
+// NOTE: Event types for alocacoes_events are documented in schema (no separate enum)
+// See alocacoes_events table definition for valid event_type values: CRIADA, REVERTIDA, CANCELADA
 ```
 
 #### Event Recording
@@ -492,7 +488,7 @@ class EstoqueService
             ]);
 
             // Record RECEBIDO event in append-only log
-            DB::table('estoque_movimentacoes')->insert([
+            DB::table('estoque_lotes_events')->insert([
                 'estoque_id' => $estoque->id,
                 'event_type' => EstoqueEventType::RECEBIDO->value,
                 'event_data' => json_encode([
@@ -529,7 +525,7 @@ class EstoqueService
                 : EstoqueEventType::AJUSTE_SAIDA;
 
             // Record adjustment event
-            DB::table('estoque_movimentacoes')->insert([
+            DB::table('estoque_lotes_events')->insert([
                 'estoque_id' => $estoque->id,
                 'event_type' => $eventType->value,
                 'event_data' => json_encode([
@@ -560,7 +556,7 @@ class EstoqueService
         string $motivo
     ): void {
         DB::transaction(function () use ($estoque, $quantidade, $motivo) {
-            DB::table('estoque_movimentacoes')->insert([
+            DB::table('estoque_lotes_events')->insert([
                 'estoque_id' => $estoque->id,
                 'event_type' => EstoqueEventType::QUEBRA->value,
                 'event_data' => json_encode([
@@ -589,9 +585,9 @@ class AlocacaoService
     {
         DB::transaction(function () use ($alocacao, $motivo) {
             // Record allocation reversal event
-            DB::table('alocacoes_eventos')->insert([
+            DB::table('alocacoes_events')->insert([
                 'alocacao_id' => $alocacao->id,
-                'event_type' => AllocationEventType::REVERTIDA->value,
+                'event_type' => 'REVERTIDA',
                 'event_data' => json_encode([
                     'venda_item_id' => $alocacao->venda_item_id,
                     'estoque_lote_id' => $alocacao->estoque_lote_id,
@@ -605,7 +601,7 @@ class AlocacaoService
             ]);
 
             $alocacao->update([
-                'status' => AlocacaoStatus::REVERTIDA,
+                'status' => AlocacaoStatus::PARCIALMENTE_ESTORNADO,
             ]);
 
             event(new AlocacaoRevertida($alocacao));
@@ -618,7 +614,7 @@ class AlocacaoService
 
 ```php
 // Reconstruct cost of inventory at specific date
-$movimentos = DB::table('estoque_movimentacoes')
+$movimentos = DB::table('estoque_lotes_events')
     ->where('estoque_id', $estoqueId)
     ->where('created_at', '<=', $data)
     ->orderBy('created_at')
@@ -655,27 +651,32 @@ $custoPorData = collect($movimentos)
 
 ```php
 // app/Enums/EstoqueStatus.php
+// NOTA: Este enum representa o status de estoque_lotes (estado físico do inventário)
+// Não confundir com VendaItemStatus (posição no fluxo de vendas)
 enum EstoqueStatus: string
 {
-    case TEMP = 'TEMP';
-    case ESTOQUE = 'ESTOQUE';
-    case CANCELADO = 'CANCELADO';
+    case DISPONIVEL = 'DISPONIVEL';          // Disponível para alocação
+    case RESERVADO = 'RESERVADO';            // Alocado a uma venda
+    case ESGOTADO = 'ESGOTADO';              // Totalmente consumido
+    case BLOQUEADO = 'BLOQUEADO';            // Bloqueado (avaria, etc)
 
     public function label(): string
     {
         return match($this) {
-            self::TEMP => 'Temporário',
-            self::ESTOQUE => 'Em Estoque',
-            self::CANCELADO => 'Cancelado',
+            self::DISPONIVEL => 'Disponível',
+            self::RESERVADO => 'Reservado',
+            self::ESGOTADO => 'Esgotado',
+            self::BLOQUEADO => 'Bloqueado',
         };
     }
 
     public function color(): string
     {
         return match($this) {
-            self::TEMP => 'yellow',
-            self::ESTOQUE => 'green',
-            self::CANCELADO => 'red',
+            self::DISPONIVEL => 'green',
+            self::RESERVADO => 'blue',
+            self::ESGOTADO => 'gray',
+            self::BLOQUEADO => 'red',
         };
     }
 }
@@ -684,14 +685,14 @@ enum EstoqueStatus: string
 enum AlocacaoStatus: string
 {
     case ATIVO = 'ATIVO';
-    case REVERTIDA = 'REVERTIDA';
+    case PARCIALMENTE_ESTORNADO = 'PARCIALMENTE_ESTORNADO';
     case CANCELADA = 'CANCELADA';
 
     public function label(): string
     {
         return match($this) {
             self::ATIVO => 'Ativa',
-            self::REVERTIDA => 'Revertida',
+            self::PARCIALMENTE_ESTORNADO => 'Parcialmente Estornada',
             self::CANCELADA => 'Cancelada',
         };
     }
@@ -700,7 +701,7 @@ enum AlocacaoStatus: string
     {
         return match($this) {
             self::ATIVO => 'green',
-            self::REVERTIDA => 'orange',
+            self::PARCIALMENTE_ESTORNADO => 'orange',
             self::CANCELADA => 'red',
         };
     }
@@ -905,7 +906,7 @@ class AlocacaoService
             }
 
             $alocacao->update([
-                'status' => AlocacaoStatus::REVERTIDA,
+                'status' => AlocacaoStatus::PARCIALMENTE_ESTORNADO,
             ]);
 
             event(new AlocacaoRevertida($alocacao, $motivo));

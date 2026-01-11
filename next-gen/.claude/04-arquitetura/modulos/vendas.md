@@ -76,7 +76,7 @@ alocacoes - Links venda_items to estoque_lotes (FIFO/FEFO fulfillment)
 ├── venda_item_id (FK)          ← Venda item being fulfilled
 ├── estoque_lote_id (FK)        ← Inventory batch (estoque_lotes)
 ├── quantidade                  ← Allocated quantity (can be partial)
-├── status                      ← ATIVO | REVERTIDA | CANCELADA
+├── status                      ← ATIVO | PARCIALMENTE_ESTORNADO | CANCELADA
 └── created_at / updated_at     ← Timestamps for audit
 
 **Key Architecture Change**:
@@ -545,7 +545,7 @@ class VendaService
             // Record allocation reversals first
             $item->alocacoes()
                 ->where('status', AlocacaoStatus::ATIVO)
-                ->update(['status' => AlocacaoStatus::REVERTIDA]);
+                ->update(['status' => AlocacaoStatus::PARCIALMENTE_ESTORNADO]);
 
             foreach ($item->alocacoes as $alocacao) {
                 DB::table('alocacoes_events')->insert([
@@ -757,6 +757,30 @@ enum VendaItemStatus: string
             ]),
             self::CANCELADO, self::DEVOLVIDO => false,
             default => false,
+        };
+    }
+}
+
+// app/Enums/VendaItemOrigem.php
+// Origem do item na venda - de onde vem a quantidade?
+enum VendaItemOrigem: string
+{
+    case ESTOQUE = 'ESTOQUE';         // Item vem do estoque existente
+    case COMPRA = 'COMPRA';           // Item precisa ser comprado do fornecedor
+
+    public function label(): string
+    {
+        return match($this) {
+            self::ESTOQUE => 'Do Estoque',
+            self::COMPRA => 'Precisa Comprar',
+        };
+    }
+
+    public function icon(): string
+    {
+        return match($this) {
+            self::ESTOQUE => '📦',
+            self::COMPRA => '🛒',
         };
     }
 }

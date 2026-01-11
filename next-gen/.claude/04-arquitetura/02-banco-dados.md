@@ -133,6 +133,7 @@ Padrão atual usa dois níveis:
 CREATE TABLE venda_itens (
     id SERIAL PRIMARY KEY,
     venda_id INTEGER REFERENCES vendas(id) ON DELETE CASCADE,
+    orcamento_item_id INTEGER REFERENCES orcamento_itens(id),  -- Origem do orçamento
     produto_id INTEGER REFERENCES produtos(id),
     fornecedor_id INTEGER REFERENCES fornecedores(id),
     quantidade DECIMAL(15,4) NOT NULL,
@@ -141,8 +142,10 @@ CREATE TABLE venda_itens (
     -- Desnormalizado para performance (capturado no momento da venda)
     descricao_produto VARCHAR(500),
     unidade VARCHAR(10),
-    -- Rastreamento
-    estoque_id INTEGER REFERENCES estoques(id), -- qual estoque foi consumido
+    -- Origem do item (discriminator)
+    origem venda_item_origem NOT NULL,  -- COMPRA ou ESTOQUE
+    -- Status no fluxo
+    status venda_item_status NOT NULL DEFAULT 'PENDENTE',
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -203,6 +206,27 @@ Atual: Strings mágicas como `"PENDENTE"`, `"PEND. APROV."`, `"EM ENTREGA"`.
 **Correção**: ENUMs do PostgreSQL:
 
 ```sql
+-- Status de Estoque Lote (Estado Físico do Inventário)
+CREATE TYPE estoque_lote_status AS ENUM (
+    'DISPONIVEL',    -- Disponível para alocação
+    'RESERVADO',     -- Alocado a uma venda
+    'ESGOTADO',      -- Totalmente consumido
+    'BLOQUEADO'      -- Bloqueado (avaria, etc)
+);
+
+-- Origem do Item da Venda (Discriminator)
+CREATE TYPE venda_item_origem AS ENUM (
+    'COMPRA',        -- Item precisa ser comprado do fornecedor
+    'ESTOQUE'        -- Item vem do estoque existente
+);
+
+-- Status do Item da Venda (Posição no Fluxo)
+CREATE TYPE venda_item_status AS ENUM (
+    'PENDENTE',      -- Aguardando ser fonte (compra ou estoque)
+    'ESTOQUE',       -- Alocado ao estoque
+    'ENTREGUE'       -- Entregue ao cliente
+);
+
 CREATE TYPE venda_status AS ENUM (
     'ORCAMENTO',
     'PENDENTE',
@@ -439,45 +463,68 @@ CREATE INDEX idx_compras_fornecedor ON compras(fornecedor_id);
 ### Tabelas de Estoque
 
 ```sql
--- Estoque (recebimentos/entradas de estoque)
-CREATE TABLE estoques (
+-- Estoque Lotes (recebimentos/entradas de estoque) - FIFO tracking
+CREATE TABLE estoque_lotes (
     id SERIAL PRIMARY KEY,
     loja_id INTEGER REFERENCES lojas(id) NOT NULL,
+    nfe_item_id INTEGER REFERENCES nfe_itens(id),  -- Origem da nota fiscal
     compra_id INTEGER REFERENCES compras(id),
     produto_id INTEGER REFERENCES produtos(id) NOT NULL,
     fornecedor_id INTEGER REFERENCES fornecedores(id),
 
+    -- Quantidade
     quantidade DECIMAL(15,4) NOT NULL,
-    quantidade_disponivel DECIMAL(15,4) NOT NULL, -- disponível atual
+    quantidade_disponivel DECIMAL(15,4) NOT NULL, -- disponível para alocação
+    quantidade_reservada DECIMAL(15,4) DEFAULT 0,  -- reservado em vendas
+
+    -- Custo
     custo_unitario DECIMAL(15,2),
 
-    -- Localização
-    bloco_id INTEGER REFERENCES blocos(id), -- localização no armazém
+    -- Rastreamento FIFO
+    lote VARCHAR(100),              -- Número do lote do fornecedor
+    data_entrada TIMESTAMP DEFAULT NOW(),  -- FIFO key
+    data_validade DATE,
 
-    -- Datas
-    data_entrada TIMESTAMP DEFAULT NOW(),
-    validade DATE,
+    -- Localização
+    bloco_id INTEGER REFERENCES blocos(id), -- localização no galpão
+
+    -- Status
+    status estoque_lote_status NOT NULL DEFAULT 'DISPONIVEL',
+
+    -- Impostos (proporcionais da NFe)
+    base_icms DECIMAL(15,2),
+    aliq_icms DECIMAL(5,2),
+    valor_icms DECIMAL(15,2),
+    valor_ipi DECIMAL(15,2),
+    aliq_pis DECIMAL(5,2),
+    valor_pis DECIMAL(15,2),
+    aliq_cofins DECIMAL(5,2),
+    valor_cofins DECIMAL(15,2),
 
     observacoes TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_estoques_produto ON estoques(produto_id);
-CREATE INDEX idx_estoques_disponivel ON estoques(produto_id, quantidade_disponivel)
-    WHERE quantidade_disponivel > 0;
+CREATE INDEX idx_estoque_lotes_produto ON estoque_lotes(produto_id);
+CREATE INDEX idx_estoque_lotes_disponivel ON estoque_lotes(produto_id, quantidade_disponivel)
+    WHERE status IN ('DISPONIVEL', 'RESERVADO');
+CREATE INDEX idx_estoque_lotes_fifo ON estoque_lotes(produto_id, data_entrada);
 
--- Consumos de estoque (rastreamento de consumo)
-CREATE TABLE estoque_consumos (
+-- Event Sourcing: Movimentações de estoque
+CREATE TABLE estoque_lotes_events (
     id SERIAL PRIMARY KEY,
-    estoque_id INTEGER REFERENCES estoques(id) NOT NULL,
-    venda_item_id INTEGER REFERENCES venda_itens(id),
-    quantidade DECIMAL(15,4) NOT NULL,
-    data_consumo TIMESTAMP DEFAULT NOW(),
+    entidade_id INTEGER NOT NULL REFERENCES estoque_lotes(id),
+    tipo VARCHAR(50) NOT NULL,  -- ENTRADA_COMPRA, SAIDA_VENDA, ENTRADA_AJUSTE, etc
+    quantidade_delta DECIMAL(15,4),  -- Positivo (entrada) ou negativo (saída)
+    dados_anterior JSONB,
+    dados_novo JSONB,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    motivo TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_estoque_consumos_estoque ON estoque_consumos(estoque_id);
+CREATE INDEX idx_estoque_lotes_events_entidade ON estoque_lotes_events(entidade_id);
 ```
 
 ---

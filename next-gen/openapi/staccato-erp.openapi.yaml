@@ -1,0 +1,2577 @@
+openapi: 3.1.0
+info:
+  title: Staccato ERP API
+  description: |
+    Complete RESTful API specification for Staccato ERP system - Brazilian business management platform.
+
+    **Authentication**: All endpoints require Bearer token (Sanctum API Token)
+
+    **Base URL**: `/api`
+
+    **Modules**:
+    - Cadastros (Catalog management)
+    - Estoque (Inventory management)
+    - Vendas (Sales management)
+    - Compras (Purchase management)
+    - Financeiro (Financial management)
+    - Logística (Logistics management)
+    - NFe (Electronic invoicing)
+  version: 1.0.0
+  contact:
+    name: Staccato ERP Team
+    url: https://staccato.com.br
+  license:
+    name: Proprietary
+    url: https://staccato.com.br/license
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://api.staccato.com.br/api
+    description: Production
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+      description: Sanctum API token authentication
+
+  schemas:
+    # ============================================
+    # SHARED SCHEMAS
+    # ============================================
+
+    Pagination:
+      type: object
+      properties:
+        data:
+          type: array
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 156
+            per_page:
+              type: integer
+              example: 15
+            current_page:
+              type: integer
+              example: 1
+            last_page:
+              type: integer
+              example: 11
+            from:
+              type: integer
+              example: 1
+            to:
+              type: integer
+              example: 15
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Recurso não encontrado"
+        code:
+          type: integer
+          example: 404
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+            example: ["Campo obrigatório"]
+
+    # ============================================
+    # CADASTROS (CATALOG) SCHEMAS
+    # ============================================
+
+    Loja:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        codigo:
+          type: string
+          example: "01"
+        nome:
+          type: string
+          example: "Loja Centro"
+        cnpj:
+          type: string
+          example: "12.345.678/0001-90"
+        inscricao_estadual:
+          type: string
+          example: "123.456.789.012"
+        is_ativo:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LojaCreate:
+      type: object
+      required:
+        - codigo
+        - nome
+        - cnpj
+      properties:
+        codigo:
+          type: string
+          maxLength: 10
+        nome:
+          type: string
+          maxLength: 255
+        cnpj:
+          type: string
+          pattern: '^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$'
+        inscricao_estadual:
+          type: string
+          maxLength: 20
+        is_ativo:
+          type: boolean
+          default: true
+
+    Cliente:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        tipo:
+          type: string
+          enum: [PF, PJ]
+          description: "PF = Pessoa Física, PJ = Pessoa Jurídica"
+        nome_razao:
+          type: string
+        nome_fantasia:
+          type: string
+        cpf_cnpj:
+          type: string
+        inscricao_estadual:
+          type: string
+        email:
+          type: string
+          format: email
+        telefone:
+          type: string
+        limite_credito:
+          type: number
+          format: decimal
+        saldo_credito:
+          type: number
+          format: decimal
+        is_incompleto:
+          type: boolean
+        is_ativo:
+          type: boolean
+        vendedor_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ClienteCreate:
+      type: object
+      required:
+        - loja_id
+        - tipo
+        - nome_razao
+        - cpf_cnpj
+      properties:
+        loja_id:
+          type: integer
+        tipo:
+          type: string
+          enum: [PF, PJ]
+        nome_razao:
+          type: string
+          maxLength: 255
+        nome_fantasia:
+          type: string
+          maxLength: 255
+          nullable: true
+        cpf_cnpj:
+          type: string
+          maxLength: 20
+        inscricao_estadual:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        telefone:
+          type: string
+          maxLength: 20
+          nullable: true
+        limite_credito:
+          type: number
+          format: decimal
+          nullable: true
+        vendedor_id:
+          type: integer
+          nullable: true
+        is_ativo:
+          type: boolean
+          default: true
+
+    Fornecedor:
+      type: object
+      properties:
+        id:
+          type: integer
+        razao_social:
+          type: string
+        nome_fantasia:
+          type: string
+        cnpj:
+          type: string
+        inscricao_estadual:
+          type: string
+        email:
+          type: string
+          format: email
+        telefone:
+          type: string
+        is_ativo:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    FornecedorCreate:
+      type: object
+      required:
+        - razao_social
+        - cnpj
+      properties:
+        razao_social:
+          type: string
+          maxLength: 255
+        nome_fantasia:
+          type: string
+          maxLength: 255
+          nullable: true
+        cnpj:
+          type: string
+          pattern: '^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$'
+        inscricao_estadual:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        telefone:
+          type: string
+          maxLength: 20
+          nullable: true
+        is_ativo:
+          type: boolean
+          default: true
+
+    Produto:
+      type: object
+      properties:
+        id:
+          type: integer
+        fornecedor_id:
+          type: integer
+        descricao:
+          type: string
+        codigo_comercial:
+          type: string
+        codigo_barras:
+          type: string
+          nullable: true
+        unidade:
+          type: string
+          example: "UN"
+        quantidade_caixa:
+          type: number
+          format: decimal
+        preco_custo:
+          type: number
+          format: decimal
+        preco_tabela:
+          type: number
+          format: decimal
+        margem:
+          type: number
+          format: decimal
+          description: "Calculated margin percentage"
+        is_ativo:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProdutoCreate:
+      type: object
+      required:
+        - fornecedor_id
+        - descricao
+        - codigo_comercial
+        - unidade
+        - preco_custo
+        - preco_tabela
+      properties:
+        fornecedor_id:
+          type: integer
+        descricao:
+          type: string
+          maxLength: 255
+        codigo_comercial:
+          type: string
+          maxLength: 50
+        codigo_barras:
+          type: string
+          maxLength: 50
+          nullable: true
+        unidade:
+          type: string
+          maxLength: 10
+        quantidade_caixa:
+          type: number
+          format: decimal
+          minimum: 1
+        preco_custo:
+          type: number
+          format: decimal
+          minimum: 0
+        preco_tabela:
+          type: number
+          format: decimal
+          minimum: 0
+        is_ativo:
+          type: boolean
+          default: true
+
+    # ============================================
+    # ESTOQUE (INVENTORY) SCHEMAS
+    # ============================================
+
+    EstoqueLote:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        nfe_item_id:
+          type: integer
+          nullable: true
+        compra_id:
+          type: integer
+          nullable: true
+        produto_id:
+          type: integer
+        fornecedor_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+        quantidade_disponivel:
+          type: number
+          format: decimal
+        quantidade_reservada:
+          type: number
+          format: decimal
+        custo_unitario:
+          type: number
+          format: decimal
+        lote:
+          type: string
+          nullable: true
+        data_entrada:
+          type: string
+          format: date-time
+        data_validade:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+          enum: [DISPONIVEL, RESERVADO, ESGOTADO, BLOQUEADO]
+        bloco_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EstoqueLoteCreate:
+      type: object
+      required:
+        - loja_id
+        - produto_id
+        - quantidade
+        - custo_unitario
+      properties:
+        loja_id:
+          type: integer
+        nfe_item_id:
+          type: integer
+          nullable: true
+        compra_id:
+          type: integer
+          nullable: true
+        produto_id:
+          type: integer
+        fornecedor_id:
+          type: integer
+          nullable: true
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+        custo_unitario:
+          type: number
+          format: decimal
+          minimum: 0
+        lote:
+          type: string
+          nullable: true
+        data_validade:
+          type: string
+          format: date
+          nullable: true
+        bloco_id:
+          type: integer
+          nullable: true
+
+    Alocacao:
+      type: object
+      properties:
+        id:
+          type: integer
+        venda_item_id:
+          type: integer
+        estoque_lote_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [ATIVO, PARCIALMENTE_ESTORNADO, CANCELADA]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AlocacaoCreate:
+      type: object
+      required:
+        - venda_item_id
+        - estoque_lote_id
+        - quantidade
+      properties:
+        venda_item_id:
+          type: integer
+        estoque_lote_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+
+    # ============================================
+    # VENDAS (SALES) SCHEMAS
+    # ============================================
+
+    Orcamento:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        cliente_id:
+          type: integer
+        vendedor_id:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum: [ATIVO, FECHADO, EXPIRADO, PERDIDO, REPLICADO]
+        semaforo:
+          type: string
+          enum: [FRIO, MORNO, QUENTE]
+        subtotal_bruto:
+          type: number
+          format: decimal
+        subtotal_liquido:
+          type: number
+          format: decimal
+        desconto_percentual:
+          type: number
+          format: decimal
+        desconto_reais:
+          type: number
+          format: decimal
+        frete:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        prazo_entrega:
+          type: integer
+          description: "Days"
+        validade:
+          type: string
+          format: date
+        representacao:
+          type: boolean
+        observacoes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    OrcamentoCreate:
+      type: object
+      required:
+        - loja_id
+        - cliente_id
+      properties:
+        loja_id:
+          type: integer
+        cliente_id:
+          type: integer
+        vendedor_id:
+          type: integer
+          nullable: true
+        semaforo:
+          type: string
+          enum: [FRIO, MORNO, QUENTE]
+        prazo_entrega:
+          type: integer
+          nullable: true
+        validade:
+          type: string
+          format: date
+          nullable: true
+        representacao:
+          type: boolean
+          default: false
+        observacoes:
+          type: string
+          nullable: true
+
+    OrcamentoItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        orcamento_id:
+          type: integer
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+        valor_unitario:
+          type: number
+          format: decimal
+        desconto:
+          type: number
+          format: decimal
+        valor_total:
+          type: number
+          format: decimal
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    OrcamentoItemCreate:
+      type: object
+      required:
+        - produto_id
+        - quantidade
+        - valor_unitario
+      properties:
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+        valor_unitario:
+          type: number
+          format: decimal
+          minimum: 0
+        desconto:
+          type: number
+          format: decimal
+          default: 0
+
+    Venda:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        orcamento_id:
+          type: integer
+          nullable: true
+        cliente_id:
+          type: integer
+        vendedor_id:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum: [PENDENTE, AGENDADA, ENTREGANDO, ENTREGUE, CANCELADA]
+        subtotal_bruto:
+          type: number
+          format: decimal
+        subtotal_liquido:
+          type: number
+          format: decimal
+        desconto_percentual:
+          type: number
+          format: decimal
+        desconto_reais:
+          type: number
+          format: decimal
+        frete:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        prazo_entrega:
+          type: integer
+        representacao:
+          type: boolean
+        rt:
+          type: boolean
+        observacoes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    VendaCreate:
+      type: object
+      required:
+        - loja_id
+        - cliente_id
+      properties:
+        loja_id:
+          type: integer
+        orcamento_id:
+          type: integer
+          nullable: true
+        cliente_id:
+          type: integer
+        vendedor_id:
+          type: integer
+          nullable: true
+        prazo_entrega:
+          type: integer
+          nullable: true
+        representacao:
+          type: boolean
+          default: false
+        rt:
+          type: boolean
+          default: false
+        observacoes:
+          type: string
+          nullable: true
+
+    VendaItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        venda_id:
+          type: integer
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+        valor_unitario:
+          type: number
+          format: decimal
+        desconto:
+          type: number
+          format: decimal
+        valor_total:
+          type: number
+          format: decimal
+        origem:
+          type: string
+          enum: [ESTOQUE, COMPRA]
+          description: "ESTOQUE = from inventory, COMPRA = needs purchase order"
+        status:
+          type: string
+          enum: [PENDENTE, ESTOQUE, ENTREGUE, CANCELADO]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    VendaItemCreate:
+      type: object
+      required:
+        - produto_id
+        - quantidade
+        - valor_unitario
+        - origem
+      properties:
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+        valor_unitario:
+          type: number
+          format: decimal
+          minimum: 0
+        desconto:
+          type: number
+          format: decimal
+          default: 0
+        origem:
+          type: string
+          enum: [ESTOQUE, COMPRA]
+
+    # ============================================
+    # COMPRAS (PURCHASES) SCHEMAS
+    # ============================================
+
+    PedidoCompra:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        fornecedor_id:
+          type: integer
+        status:
+          type: string
+          enum: [PENDENTE, ENVIADO, RECEBIDO_PARCIAL, RECEBIDO, CANCELADO]
+        data_pedido:
+          type: string
+          format: date-time
+        data_entrega_prevista:
+          type: string
+          format: date
+          nullable: true
+        data_entrega_real:
+          type: string
+          format: date
+          nullable: true
+        total:
+          type: number
+          format: decimal
+        observacoes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PedidoCompraCreate:
+      type: object
+      required:
+        - loja_id
+        - fornecedor_id
+      properties:
+        loja_id:
+          type: integer
+        fornecedor_id:
+          type: integer
+        data_entrega_prevista:
+          type: string
+          format: date
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+
+    PedidoCompraItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        pedido_compra_id:
+          type: integer
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+        preco_unitario:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PedidoCompraItemCreate:
+      type: object
+      required:
+        - produto_id
+        - quantidade
+        - preco_unitario
+      properties:
+        produto_id:
+          type: integer
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+        preco_unitario:
+          type: number
+          format: decimal
+          minimum: 0
+
+    # ============================================
+    # FINANCEIRO (FINANCIAL) SCHEMAS
+    # ============================================
+
+    FinanceiroParcela:
+      type: object
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        loja_id:
+          type: integer
+        tipo:
+          type: string
+          enum: [RECEBER, PAGAR]
+          description: "RECEBER = Accounts Receivable, PAGAR = Accounts Payable"
+        cliente_id:
+          type: integer
+          nullable: true
+        fornecedor_id:
+          type: integer
+          nullable: true
+        valor:
+          type: number
+          format: decimal
+        valor_pago:
+          type: number
+          format: decimal
+          default: 0
+        status:
+          type: string
+          enum: [PENDENTE, AGENDADO, PARCIAL, PAGO, RECEBIDO, ATRASADO, PROTESTADO, CANCELADO]
+        data_vencimento:
+          type: string
+          format: date
+        data_pagamento:
+          type: string
+          format: date
+          nullable: true
+        origem:
+          type: string
+          enum: [VENDA, COMPRA, NFE_ENTRADA, MANUAL, RENEGOCIACAO, DEVOLUCAO]
+        venda_id:
+          type: integer
+          nullable: true
+        compra_id:
+          type: integer
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    FinanceiroParcelaCreate:
+      type: object
+      required:
+        - loja_id
+        - tipo
+        - valor
+        - data_vencimento
+      properties:
+        loja_id:
+          type: integer
+        tipo:
+          type: string
+          enum: [RECEBER, PAGAR]
+        cliente_id:
+          type: integer
+          nullable: true
+        fornecedor_id:
+          type: integer
+          nullable: true
+        valor:
+          type: number
+          format: decimal
+          minimum: 0
+        data_vencimento:
+          type: string
+          format: date
+        origem:
+          type: string
+          enum: [VENDA, COMPRA, NFE_ENTRADA, MANUAL, RENEGOCIACAO, DEVOLUCAO]
+          default: MANUAL
+        venda_id:
+          type: integer
+          nullable: true
+        compra_id:
+          type: integer
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+
+    CentroCusto:
+      type: object
+      properties:
+        id:
+          type: integer
+        codigo:
+          type: string
+        nome:
+          type: string
+        tipo:
+          type: string
+          enum: [OPERACIONAL, ADMINISTRATIVO, COMERCIAL]
+          description: "Different from financeiro_parcelas.tipo - this is cost center classification"
+        loja_id:
+          type: integer
+          nullable: true
+        ativo:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    CentroCustoCreate:
+      type: object
+      required:
+        - codigo
+        - nome
+        - tipo
+      properties:
+        codigo:
+          type: string
+          maxLength: 20
+        nome:
+          type: string
+          maxLength: 100
+        tipo:
+          type: string
+          enum: [OPERACIONAL, ADMINISTRATIVO, COMERCIAL]
+        loja_id:
+          type: integer
+          nullable: true
+        ativo:
+          type: boolean
+          default: true
+
+    # ============================================
+    # LOGÍSTICA (LOGISTICS) SCHEMAS
+    # ============================================
+
+    Entrega:
+      type: object
+      properties:
+        id:
+          type: integer
+        venda_id:
+          type: integer
+        transportadora_id:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum: [AGENDADA, COLETANDO, EM_TRANSITO, ENTREGUE, FALHA, CANCELADA]
+        data_agendada:
+          type: string
+          format: date
+        data_coleta:
+          type: string
+          format: date
+          nullable: true
+        data_entrega:
+          type: string
+          format: date
+          nullable: true
+        rastreamento:
+          type: string
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EntregaCreate:
+      type: object
+      required:
+        - venda_id
+      properties:
+        venda_id:
+          type: integer
+        transportadora_id:
+          type: integer
+          nullable: true
+        data_agendada:
+          type: string
+          format: date
+        rastreamento:
+          type: string
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+
+    # ============================================
+    # NFE (ELECTRONIC INVOICE) SCHEMAS
+    # ============================================
+
+    NFe:
+      type: object
+      properties:
+        id:
+          type: integer
+        loja_id:
+          type: integer
+        numero:
+          type: integer
+        serie:
+          type: integer
+        chave:
+          type: string
+          description: "Chave de Acesso (44 digits)"
+        status:
+          type: string
+          enum: [RASCUNHO, VALIDANDO, AUTORIZADA, REJEITADA, CANCELADA]
+        tipo_documento:
+          type: string
+          enum: [ENTRADA, SAIDA]
+        data_emissao:
+          type: string
+          format: date-time
+        valor_total:
+          type: number
+          format: decimal
+        xml:
+          type: string
+          nullable: true
+        pdf:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    NFeCreate:
+      type: object
+      required:
+        - loja_id
+        - numero
+        - serie
+        - tipo_documento
+      properties:
+        loja_id:
+          type: integer
+        numero:
+          type: integer
+        serie:
+          type: integer
+        tipo_documento:
+          type: string
+          enum: [ENTRADA, SAIDA]
+        data_emissao:
+          type: string
+          format: date-time
+
+paths:
+  # ============================================
+  # CADASTROS - LOJAS
+  # ============================================
+
+  /cadastros/lojas:
+    get:
+      tags:
+        - Cadastros / Lojas
+      summary: List all lojas
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: is_ativo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of lojas with pagination
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Loja'
+
+    post:
+      tags:
+        - Cadastros / Lojas
+      summary: Create a new loja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LojaCreate'
+      responses:
+        '201':
+          description: Loja created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loja'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /cadastros/lojas/{id}:
+    get:
+      tags:
+        - Cadastros / Lojas
+      summary: Get a loja by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Loja details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loja'
+        '404':
+          description: Loja not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Cadastros / Lojas
+      summary: Update a loja
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LojaCreate'
+      responses:
+        '200':
+          description: Loja updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loja'
+        '404':
+          description: Loja not found
+        '422':
+          description: Validation error
+
+    delete:
+      tags:
+        - Cadastros / Lojas
+      summary: Delete a loja
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Loja deleted successfully
+        '404':
+          description: Loja not found
+
+  # ============================================
+  # CADASTROS - CLIENTES
+  # ============================================
+
+  /cadastros/clientes:
+    get:
+      tags:
+        - Cadastros / Clientes
+      summary: List all clientes
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [PF, PJ]
+        - name: is_ativo
+          in: query
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          description: Search by name or CPF/CNPJ
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of clientes with pagination
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Cliente'
+
+    post:
+      tags:
+        - Cadastros / Clientes
+      summary: Create a new cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCreate'
+      responses:
+        '201':
+          description: Cliente created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '422':
+          description: Validation error
+
+  /cadastros/clientes/{id}:
+    get:
+      tags:
+        - Cadastros / Clientes
+      summary: Get a cliente by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '404':
+          description: Cliente not found
+
+    put:
+      tags:
+        - Cadastros / Clientes
+      summary: Update a cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCreate'
+      responses:
+        '200':
+          description: Cliente updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '404':
+          description: Cliente not found
+        '422':
+          description: Validation error
+
+    delete:
+      tags:
+        - Cadastros / Clientes
+      summary: Delete a cliente (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Cliente deleted successfully
+        '404':
+          description: Cliente not found
+
+  /cadastros/clientes/bulk-delete:
+    post:
+      tags:
+        - Cadastros / Clientes
+      summary: Delete multiple clientes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Clientes deleted successfully
+
+  # ============================================
+  # CADASTROS - FORNECEDORES
+  # ============================================
+
+  /cadastros/fornecedores:
+    get:
+      tags:
+        - Cadastros / Fornecedores
+      summary: List all fornecedores
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: is_ativo
+          in: query
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of fornecedores with pagination
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Fornecedor'
+
+    post:
+      tags:
+        - Cadastros / Fornecedores
+      summary: Create a new fornecedor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FornecedorCreate'
+      responses:
+        '201':
+          description: Fornecedor created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fornecedor'
+        '422':
+          description: Validation error
+
+  /cadastros/fornecedores/{id}:
+    get:
+      tags:
+        - Cadastros / Fornecedores
+      summary: Get a fornecedor by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fornecedor details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fornecedor'
+        '404':
+          description: Fornecedor not found
+
+    put:
+      tags:
+        - Cadastros / Fornecedores
+      summary: Update a fornecedor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FornecedorCreate'
+      responses:
+        '200':
+          description: Fornecedor updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fornecedor'
+        '404':
+          description: Fornecedor not found
+        '422':
+          description: Validation error
+
+    delete:
+      tags:
+        - Cadastros / Fornecedores
+      summary: Delete a fornecedor (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Fornecedor deleted successfully
+        '404':
+          description: Fornecedor not found
+
+  /cadastros/fornecedores/bulk-delete:
+    post:
+      tags:
+        - Cadastros / Fornecedores
+      summary: Delete multiple fornecedores
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Fornecedores deleted successfully
+
+  # ============================================
+  # CADASTROS - PRODUTOS
+  # ============================================
+
+  /cadastros/produtos:
+    get:
+      tags:
+        - Cadastros / Produtos
+      summary: List all produtos
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: fornecedor_id
+          in: query
+          schema:
+            type: integer
+        - name: is_ativo
+          in: query
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of produtos with pagination
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Produto'
+
+    post:
+      tags:
+        - Cadastros / Produtos
+      summary: Create a new produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoCreate'
+      responses:
+        '201':
+          description: Produto created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '422':
+          description: Validation error
+
+  /cadastros/produtos/{id}:
+    get:
+      tags:
+        - Cadastros / Produtos
+      summary: Get a produto by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Produto details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '404':
+          description: Produto not found
+
+    put:
+      tags:
+        - Cadastros / Produtos
+      summary: Update a produto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoCreate'
+      responses:
+        '200':
+          description: Produto updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '404':
+          description: Produto not found
+        '422':
+          description: Validation error
+
+    delete:
+      tags:
+        - Cadastros / Produtos
+      summary: Delete a produto (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Produto deleted successfully
+        '404':
+          description: Produto not found
+
+  /cadastros/produtos/by-fornecedor/{fornecedor_id}:
+    get:
+      tags:
+        - Cadastros / Produtos
+      summary: List produtos by fornecedor
+      parameters:
+        - name: fornecedor_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: List of produtos for fornecedor
+
+  /cadastros/produtos/bulk-delete:
+    post:
+      tags:
+        - Cadastros / Produtos
+      summary: Delete multiple produtos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Produtos deleted successfully
+
+  # ============================================
+  # ESTOQUE
+  # ============================================
+
+  /estoque/lotes:
+    get:
+      tags:
+        - Estoque
+      summary: List inventory batches
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: produto_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DISPONIVEL, RESERVADO, ESGOTADO, BLOQUEADO]
+      responses:
+        '200':
+          description: List of inventory batches
+
+    post:
+      tags:
+        - Estoque
+      summary: Create inventory batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstoqueLoteCreate'
+      responses:
+        '201':
+          description: Batch created
+
+  /estoque/lotes/{id}:
+    get:
+      tags:
+        - Estoque
+      summary: Get batch details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Batch details
+
+    put:
+      tags:
+        - Estoque
+      summary: Update batch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstoqueLoteCreate'
+      responses:
+        '200':
+          description: Batch updated
+
+  /estoque/alocacoes:
+    get:
+      tags:
+        - Estoque
+      summary: List allocations
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: venda_item_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ATIVO, PARCIALMENTE_ESTORNADO, CANCELADA]
+      responses:
+        '200':
+          description: List of allocations
+
+    post:
+      tags:
+        - Estoque
+      summary: Create allocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlocacaoCreate'
+      responses:
+        '201':
+          description: Allocation created
+
+  /estoque/alocacoes/{id}:
+    get:
+      tags:
+        - Estoque
+      summary: Get allocation details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Allocation details
+
+    delete:
+      tags:
+        - Estoque
+      summary: Cancel allocation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Allocation cancelled
+
+  # ============================================
+  # VENDAS
+  # ============================================
+
+  /vendas/orcamentos:
+    get:
+      tags:
+        - Vendas / Orçamentos
+      summary: List orçamentos
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: cliente_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ATIVO, FECHADO, EXPIRADO, PERDIDO, REPLICADO]
+      responses:
+        '200':
+          description: List of orçamentos
+
+    post:
+      tags:
+        - Vendas / Orçamentos
+      summary: Create orçamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrcamentoCreate'
+      responses:
+        '201':
+          description: Orçamento created
+
+  /vendas/orcamentos/{id}:
+    get:
+      tags:
+        - Vendas / Orçamentos
+      summary: Get orçamento details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orçamento details
+
+    put:
+      tags:
+        - Vendas / Orçamentos
+      summary: Update orçamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrcamentoCreate'
+      responses:
+        '200':
+          description: Orçamento updated
+
+  /vendas/orcamentos/{id}/itens:
+    get:
+      tags:
+        - Vendas / Orçamentos
+      summary: List orçamento items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of items
+
+    post:
+      tags:
+        - Vendas / Orçamentos
+      summary: Add item to orçamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrcamentoItemCreate'
+      responses:
+        '201':
+          description: Item added
+
+  /vendas/vendas:
+    get:
+      tags:
+        - Vendas / Vendas
+      summary: List vendas
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: cliente_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of vendas
+
+    post:
+      tags:
+        - Vendas / Vendas
+      summary: Create venda
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendaCreate'
+      responses:
+        '201':
+          description: Venda created
+
+  /vendas/vendas/{id}:
+    get:
+      tags:
+        - Vendas / Vendas
+      summary: Get venda details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Venda details
+
+    put:
+      tags:
+        - Vendas / Vendas
+      summary: Update venda
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendaCreate'
+      responses:
+        '200':
+          description: Venda updated
+
+  /vendas/vendas/{id}/itens:
+    get:
+      tags:
+        - Vendas / Vendas
+      summary: List venda items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of items
+
+    post:
+      tags:
+        - Vendas / Vendas
+      summary: Add item to venda
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendaItemCreate'
+      responses:
+        '201':
+          description: Item added
+
+  # ============================================
+  # COMPRAS
+  # ============================================
+
+  /compras/pedidos:
+    get:
+      tags:
+        - Compras
+      summary: List purchase orders
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: fornecedor_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of purchase orders
+
+    post:
+      tags:
+        - Compras
+      summary: Create purchase order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCompraCreate'
+      responses:
+        '201':
+          description: Purchase order created
+
+  /compras/pedidos/{id}:
+    get:
+      tags:
+        - Compras
+      summary: Get purchase order details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Purchase order details
+
+    put:
+      tags:
+        - Compras
+      summary: Update purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCompraCreate'
+      responses:
+        '200':
+          description: Purchase order updated
+
+  /compras/pedidos/{id}/itens:
+    get:
+      tags:
+        - Compras
+      summary: List purchase order items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of items
+
+    post:
+      tags:
+        - Compras
+      summary: Add item to purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCompraItemCreate'
+      responses:
+        '201':
+          description: Item added
+
+  # ============================================
+  # FINANCEIRO
+  # ============================================
+
+  /financeiro/parcelas:
+    get:
+      tags:
+        - Financeiro / Parcelas
+      summary: List financial parcels
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [RECEBER, PAGAR]
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of parcels
+
+    post:
+      tags:
+        - Financeiro / Parcelas
+      summary: Create parcel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinanceiroParcelaCreate'
+      responses:
+        '201':
+          description: Parcel created
+
+  /financeiro/parcelas/{id}:
+    get:
+      tags:
+        - Financeiro / Parcelas
+      summary: Get parcel details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Parcel details
+
+    put:
+      tags:
+        - Financeiro / Parcelas
+      summary: Update parcel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinanceiroParcelaCreate'
+      responses:
+        '200':
+          description: Parcel updated
+
+  /financeiro/centros-custo:
+    get:
+      tags:
+        - Financeiro / Centros de Custo
+      summary: List cost centers
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [OPERACIONAL, ADMINISTRATIVO, COMERCIAL]
+      responses:
+        '200':
+          description: List of cost centers
+
+    post:
+      tags:
+        - Financeiro / Centros de Custo
+      summary: Create cost center
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CentroCustoCreate'
+      responses:
+        '201':
+          description: Cost center created
+
+  /financeiro/centros-custo/{id}:
+    get:
+      tags:
+        - Financeiro / Centros de Custo
+      summary: Get cost center details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cost center details
+
+    put:
+      tags:
+        - Financeiro / Centros de Custo
+      summary: Update cost center
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CentroCustoCreate'
+      responses:
+        '200':
+          description: Cost center updated
+
+  # ============================================
+  # LOGÍSTICA
+  # ============================================
+
+  /logistica/entregas:
+    get:
+      tags:
+        - Logística
+      summary: List deliveries
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: venda_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of deliveries
+
+    post:
+      tags:
+        - Logística
+      summary: Create delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntregaCreate'
+      responses:
+        '201':
+          description: Delivery created
+
+  /logistica/entregas/{id}:
+    get:
+      tags:
+        - Logística
+      summary: Get delivery details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Delivery details
+
+    put:
+      tags:
+        - Logística
+      summary: Update delivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntregaCreate'
+      responses:
+        '200':
+          description: Delivery updated
+
+  # ============================================
+  # NFE
+  # ============================================
+
+  /nfe/notas:
+    get:
+      tags:
+        - NFe
+      summary: List electronic invoices
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+        - name: loja_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of invoices
+
+    post:
+      tags:
+        - NFe
+      summary: Create electronic invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NFeCreate'
+      responses:
+        '201':
+          description: Invoice created
+
+  /nfe/notas/{id}:
+    get:
+      tags:
+        - NFe
+      summary: Get invoice details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invoice details
+
+tags:
+  - name: Cadastros / Lojas
+    description: Store management
+  - name: Cadastros / Clientes
+    description: Customer catalog
+  - name: Cadastros / Fornecedores
+    description: Supplier catalog
+  - name: Cadastros / Produtos
+    description: Product catalog
+  - name: Estoque
+    description: Inventory management with FIFO batches and allocations
+  - name: Vendas / Orçamentos
+    description: Sales quotes
+  - name: Vendas / Vendas
+    description: Sales orders
+  - name: Compras
+    description: Purchase orders
+  - name: Financeiro / Parcelas
+    description: Financial parcels (payables and receivables)
+  - name: Financeiro / Centros de Custo
+    description: Cost center management
+  - name: Logística
+    description: Delivery and logistics
+  - name: NFe
+    description: Electronic invoicing (Nota Fiscal)

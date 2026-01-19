@@ -795,8 +795,6 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
       stream << "vFrete = " + QString::number(frete, 'f', 2) + "\n";
     }
 
-    if (tipo == Tipo::Futura) { continue; }
-
     stream << "[ICMS" + numProd + "]\n";
     stream << "CST = " + modelProduto.data(row, "cstICMS").toString() + "\n";
     stream << "Modalidade = " + modelProduto.data(row, "modBC").toString() + "\n";
@@ -1826,6 +1824,23 @@ void CadastrarNFe::validarDados() {
     if (qFuzzyIsNull(modelProduto.data(row, "quant").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Quantidade = 0!", this); }
     if (qFuzzyIsNull(modelProduto.data(row, "descUnitario").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Preço unitário = R$ 0!", this); }
     if (qFuzzyIsNull(modelProduto.data(row, "total").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": Total produto = R$ 0!", this); }
+
+    // Phase 2: Validate Futura NFe has CST codes and zero taxes
+    if (tipo == Tipo::Futura) {
+      const QString cstICMS = modelProduto.data(row, "cstICMS").toString();
+      const QString cstPIS = modelProduto.data(row, "cstPIS").toString();
+      const QString cstCOFINS = modelProduto.data(row, "cstCOFINS").toString();
+
+      if (cstICMS.isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CST ICMS não preenchido (Futura NFe)!", this); }
+      if (cstPIS.isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CST PIS não preenchido (Futura NFe)!", this); }
+      if (cstCOFINS.isEmpty()) { throw RuntimeError("Linha " + QString::number(row + 1) + ": CST COFINS não preenchido (Futura NFe)!", this); }
+
+      // Verify all tax values are zero for Futura
+      if (!qFuzzyIsNull(modelProduto.data(row, "vBC").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": vBC deve ser 0 em Futura NFe!", this); }
+      if (!qFuzzyIsNull(modelProduto.data(row, "vICMS").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": vICMS deve ser 0 em Futura NFe!", this); }
+      if (!qFuzzyIsNull(modelProduto.data(row, "vPIS").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": vPIS deve ser 0 em Futura NFe!", this); }
+      if (!qFuzzyIsNull(modelProduto.data(row, "vCOFINS").toDouble())) { throw RuntimeError("Linha " + QString::number(row + 1) + ": vCOFINS deve ser 0 em Futura NFe!", this); }
+    }
   }
 }
 
@@ -2387,28 +2402,36 @@ void CadastrarNFe::preencherImpostos() {
 
       // Buscar se o NCM está sujeito a ST e IS (Imposto Seletivo), e classificações tributárias
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
-      bool produtoST = true; // default: assume ST
-      bool produtoIS = false;
-      double aliqIS = 0.0;
-      QString cClassTribIBS = "000001"; // default: tributação integral
-      QString cClassTribCBS = "000001"; // default: tributação integral
-      QString cClassTribIS;
 
-      if (not ncmProduto.isEmpty()) {
-        SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
-        queryNcm.bindValue(":ncm", ncmProduto);
+      SqlQuery queryNcm;
+      queryNcm.prepare("SELECT st, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
+      queryNcm.bindValue(":ncm", ncmProduto);
 
-        if (queryNcm.exec() and queryNcm.first()) {
-          produtoST = queryNcm.value("st").toBool();
-          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
-          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
-          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
-          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
-          produtoIS = queryNcm.value("sujeitoIS").toBool();
-          aliqIS = queryNcm.value("pIS").toDouble();
-          cClassTribIS = queryNcm.value("cClassTribIS").toString();
-        }
+      if (not queryNcm.exec()) {
+        throw RuntimeException("Erro buscando NCM: " + queryNcm.lastError().text());
+      }
+
+      if (not queryNcm.first()) {
+        throw RuntimeException("NCM " + ncmProduto + " não encontrado na tabela NCM!");
+      }
+
+      // Extract values - MANDATORY, no defaults allowed
+      const bool produtoST = queryNcm.value("st").toBool();
+      const QString cClassTribIBS = queryNcm.value("cClassTribIBS").toString();
+      const QString cClassTribCBS = queryNcm.value("cClassTribCBS").toString();
+      const bool produtoIS = queryNcm.value("sujeitoIS").toBool();
+      const double aliqIS = queryNcm.value("pIS").toDouble();
+      const QString cClassTribIS = queryNcm.value("cClassTribIS").toString();
+
+      // Validate that classification codes are populated
+      if (cClassTribIBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIBS não preenchida!");
+      }
+      if (cClassTribCBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribCBS não preenchida!");
+      }
+      if (produtoIS && cClassTribIS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
       }
 
       // para CFOP de saída 5101/6101 usar CFOP 1201/2201
@@ -2506,30 +2529,37 @@ void CadastrarNFe::preencherImpostos() {
 
       // Buscar se o NCM está sujeito a ST, IS e obter alíquotas e classificações
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
-      bool produtoST = true; // default: assume ST
-      bool produtoIS = false;
-      double aliqICMS = 0.0;
-      double aliqIS = 0.0;
-      QString cClassTribIBS = "000001"; // default: tributação integral
-      QString cClassTribCBS = "000001"; // default: tributação integral
-      QString cClassTribIS;
 
-      if (not ncmProduto.isEmpty()) {
-        SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
-        queryNcm.bindValue(":ncm", ncmProduto);
+      SqlQuery queryNcm;
+      queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
+      queryNcm.bindValue(":ncm", ncmProduto);
 
-        if (queryNcm.exec() and queryNcm.first()) {
-          produtoST = queryNcm.value("st").toBool();
-          aliqICMS = queryNcm.value("aliq").toDouble();
-          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
-          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
-          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
-          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
-          produtoIS = queryNcm.value("sujeitoIS").toBool();
-          aliqIS = queryNcm.value("pIS").toDouble();
-          cClassTribIS = queryNcm.value("cClassTribIS").toString();
-        }
+      if (not queryNcm.exec()) {
+        throw RuntimeException("Erro buscando NCM: " + queryNcm.lastError().text());
+      }
+
+      if (not queryNcm.first()) {
+        throw RuntimeException("NCM " + ncmProduto + " não encontrado na tabela NCM!");
+      }
+
+      // Extract values - MANDATORY, no defaults allowed
+      const bool produtoST = queryNcm.value("st").toBool();
+      const double aliqICMS = queryNcm.value("aliq").toDouble();
+      const QString cClassTribIBS = queryNcm.value("cClassTribIBS").toString();
+      const QString cClassTribCBS = queryNcm.value("cClassTribCBS").toString();
+      const bool produtoIS = queryNcm.value("sujeitoIS").toBool();
+      const double aliqIS = queryNcm.value("pIS").toDouble();
+      const QString cClassTribIS = queryNcm.value("cClassTribIS").toString();
+
+      // Validate that classification codes are populated
+      if (cClassTribIBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIBS não preenchida!");
+      }
+      if (cClassTribCBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribCBS não preenchida!");
+      }
+      if (produtoIS && cClassTribIS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
       }
 
       if (produtoST) {
@@ -2624,16 +2654,112 @@ void CadastrarNFe::preencherImpostos() {
 
   if (tipo == Tipo::Futura) {
     // https://www.econeteditora.com.br/boletim_icms/bo-icms-pa/pa-12/boletim-11/icms_pa_venda_futura.php
-    // não destacar impostos aqui, somente na nota pós-futura
+    // Venda com promessa: CST codes sim, mas taxes = ZERO (não há destaque de impostos)
+    // Phase 1: Populate CST codes from NCM table, all tax values = 0
+
+    // Disable model signals during bulk updates to avoid expensive VIEW recalculations
+    const bool wasBlocked = modelProduto.signalsBlocked();
+    modelProduto.blockSignals(true);
 
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       for (int col = modelProduto.fieldIndex("numeroPedido"); col < modelProduto.columnCount(); ++col) {
         modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
+      // 1. Get NCM from product
+      const QString ncmProduto = modelProduto.data(row, "ncm").toString();
+
+      // 2. Query NCM table for ST status and classification codes
+      SqlQuery queryNcm;
+      queryNcm.prepare("SELECT st, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
+      queryNcm.bindValue(":ncm", ncmProduto);
+
+      if (not queryNcm.exec()) {
+        throw RuntimeException("Erro buscando NCM: " + queryNcm.lastError().text());
+      }
+
+      if (not queryNcm.first()) {
+        throw RuntimeException("NCM " + ncmProduto + " não encontrado na tabela NCM!");
+      }
+
+      // Extract values - MANDATORY, no defaults allowed
+      const bool produtoST = queryNcm.value("st").toBool();
+      const QString cClassTribIBS = queryNcm.value("cClassTribIBS").toString();
+      const QString cClassTribCBS = queryNcm.value("cClassTribCBS").toString();
+      const bool produtoIS = queryNcm.value("sujeitoIS").toBool();
+      const double aliqIS = queryNcm.value("pIS").toDouble();
+      const QString cClassTribIS = queryNcm.value("cClassTribIS").toString();
+
+      // Validate that classification codes are populated
+      if (cClassTribIBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIBS não preenchida!");
+      }
+      if (cClassTribCBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribCBS não preenchida!");
+      }
+      if (produtoIS && cClassTribIS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
+      }
+
+      // 3. Set CFOP for Futura (5117/6117)
       modelProduto.setData(row, "cfop", mesmaUf ? "5117" : "6117");
+
+      // 4. Set CST ICMS based on NCM ST status
+      if (produtoST) {
+        modelProduto.setData(row, "tipoICMS", "ICMS60");
+        modelProduto.setData(row, "cstICMS", "60");  // ST product
+      } else {
+        modelProduto.setData(row, "tipoICMS", "ICMS00");
+        modelProduto.setData(row, "cstICMS", "00");  // Non-ST product
+      }
+
+      // 5. Set other CST codes (same for all Futura products)
+      modelProduto.setData(row, "cstIPI", "99");
+      modelProduto.setData(row, "cstPIS", "01");
+      modelProduto.setData(row, "cstCOFINS", "01");
+
+      // 6. SET ALL TAX VALUES TO ZERO (Key characteristic of Futura = promise, no tax yet)
+      modelProduto.setData(row, "vBC", 0.0);
+      modelProduto.setData(row, "pICMS", 0.0);
+      modelProduto.setData(row, "vICMS", 0.0);
+      modelProduto.setData(row, "pMVAST", 0.0);
+      modelProduto.setData(row, "vBCST", 0.0);
+      modelProduto.setData(row, "pICMSST", 0.0);
+      modelProduto.setData(row, "vICMSST", 0.0);
+      modelProduto.setData(row, "vBCPIS", 0.0);
+      modelProduto.setData(row, "pPIS", 0.0);
+      modelProduto.setData(row, "vPIS", 0.0);
+      modelProduto.setData(row, "vBCCOFINS", 0.0);
+      modelProduto.setData(row, "pCOFINS", 0.0);
+      modelProduto.setData(row, "vCOFINS", 0.0);
+
+      // 7. NEW TAX SYSTEM - also zero for Futura
+      modelProduto.setData(row, "cstIBS", "000");
+      modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);
+      modelProduto.setData(row, "vBCIBS", 0.0);
+      modelProduto.setData(row, "pIBSUF", 0.0);
+      modelProduto.setData(row, "vTribOpIBSUF", 0.0);
+      modelProduto.setData(row, "pIBSMun", 0.0);
+      modelProduto.setData(row, "vTribOpIBSMun", 0.0);
+
+      modelProduto.setData(row, "cstCBS", "000");
+      modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);
+      modelProduto.setData(row, "vBCCBS", 0.0);
+      modelProduto.setData(row, "pCBS", 0.0);
+      modelProduto.setData(row, "vCBS", 0.0);
+      modelProduto.setData(row, "vTribOpCBS", 0.0);
+
+      // 8. Set IS fields if product is subject to selective tax
+      if (produtoIS && aliqIS > 0) {
+        modelProduto.setData(row, "cstIS", "000");
+        modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+      }
+      modelProduto.setData(row, "vBCIS", 0.0);
+      modelProduto.setData(row, "pIS", 0.0);
+      modelProduto.setData(row, "vIS", 0.0);
     }
 
+    modelProduto.blockSignals(wasBlocked);
     ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
   }
 
@@ -2645,30 +2771,37 @@ void CadastrarNFe::preencherImpostos() {
 
       // Buscar se o NCM está sujeito a ST, IS e obter alíquotas e classificações
       const QString ncmProduto = modelProduto.data(row, "ncm").toString();
-      bool produtoST = true; // default: assume ST
-      bool produtoIS = false;
-      double aliqICMS = 0.0;
-      double aliqIS = 0.0;
-      QString cClassTribIBS = "000001"; // default: tributação integral
-      QString cClassTribCBS = "000001"; // default: tributação integral
-      QString cClassTribIS;
 
-      if (not ncmProduto.isEmpty()) {
-        SqlQuery queryNcm;
-        queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
-        queryNcm.bindValue(":ncm", ncmProduto);
+      SqlQuery queryNcm;
+      queryNcm.prepare("SELECT st, aliq, cClassTribIBS, cClassTribCBS, sujeitoIS, pIS, cClassTribIS FROM ncm WHERE ncm = :ncm");
+      queryNcm.bindValue(":ncm", ncmProduto);
 
-        if (queryNcm.exec() and queryNcm.first()) {
-          produtoST = queryNcm.value("st").toBool();
-          aliqICMS = queryNcm.value("aliq").toDouble();
-          const QString ibsCode = queryNcm.value("cClassTribIBS").toString();
-          const QString cbsCode = queryNcm.value("cClassTribCBS").toString();
-          if (!ibsCode.isEmpty()) cClassTribIBS = ibsCode;
-          if (!cbsCode.isEmpty()) cClassTribCBS = cbsCode;
-          produtoIS = queryNcm.value("sujeitoIS").toBool();
-          aliqIS = queryNcm.value("pIS").toDouble();
-          cClassTribIS = queryNcm.value("cClassTribIS").toString();
-        }
+      if (not queryNcm.exec()) {
+        throw RuntimeException("Erro buscando NCM: " + queryNcm.lastError().text());
+      }
+
+      if (not queryNcm.first()) {
+        throw RuntimeException("NCM " + ncmProduto + " não encontrado na tabela NCM!");
+      }
+
+      // Extract values - MANDATORY, no defaults allowed
+      const bool produtoST = queryNcm.value("st").toBool();
+      const double aliqICMS = queryNcm.value("aliq").toDouble();
+      const QString cClassTribIBS = queryNcm.value("cClassTribIBS").toString();
+      const QString cClassTribCBS = queryNcm.value("cClassTribCBS").toString();
+      const bool produtoIS = queryNcm.value("sujeitoIS").toBool();
+      const double aliqIS = queryNcm.value("pIS").toDouble();
+      const QString cClassTribIS = queryNcm.value("cClassTribIS").toString();
+
+      // Validate that classification codes are populated
+      if (cClassTribIBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIBS não preenchida!");
+      }
+      if (cClassTribCBS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribCBS não preenchida!");
+      }
+      if (produtoIS && cClassTribIS.isEmpty()) {
+        throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
       }
 
       // CFOP 5922/6922 é para entrega futura

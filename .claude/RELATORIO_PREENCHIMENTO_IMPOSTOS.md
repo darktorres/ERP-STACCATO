@@ -25,7 +25,7 @@ Para cada produto, o sistema consulta o NCM e extrai:
 
 ## 2. Preenchimento dos Impostos por Tipo de NFe
 
-### Tipo: ENTRADA (Compra)
+### Tipo: ENTRADA (Devolução de Cliente)
 
 **De onde vem**:
 - CFOP: Determinado pelo `st` da NCM
@@ -134,7 +134,7 @@ vCOFINS = 0.01 × taxa / 100 (resultado mínimo)
 
 | Tipo NFe | CFOP | CST ICMS | vBC | vICMS | vPIS | vCOFINS |
 |----------|------|----------|-----|-------|------|---------|
-| Entrada | De NCM (1411/1202) | De NCM (60/00) | Calculado | Calculado | Calculado | Calculado |
+| Entrada (Devolução) | De NCM (1411/1202) | De NCM (60/00) | Calculado | Calculado | Calculado | Calculado |
 | Saída | De NCM (5403/5102) | De NCM (60/00) | Calculado | Calculado | Calculado | Calculado |
 | Saída Após Futura | 5922/6922 | De NCM (60/00) | Calculado | Calculado | Calculado | Calculado |
 | Futura | 5117/6117 | De NCM (60/00) | **0.00** | **0.00** | **0.00** | **0.00** |

@@ -523,18 +523,18 @@ void CadastrarNFe::updateTotais() {
     // CST 60 (ICMS ST) doesn't output vBC in XML, so exclude from total to match SEFAZ validation
     const QString cstICMS = modelProduto.data(row, "cstICMS").toString();
     if (cstICMS != "60") {
-      baseICMS += modelProduto.data(row, "vBC").toDouble();
+      baseICMS += QString::number(modelProduto.data(row, "vBC").toDouble(), 'f', 2).toDouble();
+      valorICMS += QString::number(modelProduto.data(row, "vICMS").toDouble(), 'f', 2).toDouble();
     }
-    valorICMS += modelProduto.data(row, "vICMS").toDouble();
     valorPIS += QString::number(modelProduto.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
     valorCOFINS += QString::number(modelProduto.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
-    valorProdutos += modelProduto.data(row, "total").toDouble();
+    valorProdutos += QString::number(modelProduto.data(row, "total").toDouble(), 'f', 2).toDouble();
 
     // NOVOS TRIBUTOS
-    valorIBSUF += modelProduto.data(row, "vTribOpIBSUF").toDouble();
-    valorIBSMun += modelProduto.data(row, "vTribOpIBSMun").toDouble();
-    valorCBS += modelProduto.data(row, "vCBS").toDouble();
-    valorIS += modelProduto.data(row, "vIS").toDouble();
+    valorIBSUF += QString::number(modelProduto.data(row, "vTribOpIBSUF").toDouble(), 'f', 2).toDouble();
+    valorIBSMun += QString::number(modelProduto.data(row, "vTribOpIBSMun").toDouble(), 'f', 2).toDouble();
+    valorCBS += QString::number(modelProduto.data(row, "vCBS").toDouble(), 'f', 2).toDouble();
+    valorIS += QString::number(modelProduto.data(row, "vIS").toDouble(), 'f', 2).toDouble();
   }
 
   const double valorFrete = ui->doubleSpinBoxValorFrete->value();
@@ -918,7 +918,7 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       const QString cstIBS = modelProduto.data(row, "cstIBS").toString();
       if (!cstIBS.isEmpty() && cstIBS != "0") {
-        vBCIBSCBSTot += modelProduto.data(row, "vBCIBS").toDouble();
+        vBCIBSCBSTot += QString::number(modelProduto.data(row, "vBCIBS").toDouble(), 'f', 2).toDouble();
       }
     }
 
@@ -2362,7 +2362,7 @@ void CadastrarNFe::preencherDestinatario() {
 void CadastrarNFe::preencherTotais() {
   double valorProdutos = 0;
 
-  for (int row = 0; row < modelProduto.rowCount(); ++row) { valorProdutos += modelProduto.data(row, "total").toDouble(); }
+  for (int row = 0; row < modelProduto.rowCount(); ++row) { valorProdutos += QString::number(modelProduto.data(row, "total").toDouble(), 'f', 2).toDouble(); }
 
   const double frete = modelVenda.data(0, "frete").toDouble();
   const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
@@ -2456,13 +2456,13 @@ void CadastrarNFe::preencherImpostos() {
       const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
       modelProduto.setData(row, "cstPIS", "01");
-      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "vBCPIS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pPIS", porcentagemPIS);
-      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "vPIS", QString::number((total + freteProduto) * porcentagemPIS / 100, 'f', 2).toDouble());
       modelProduto.setData(row, "cstCOFINS", "01");
-      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "vBCCOFINS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "vCOFINS", QString::number((total + freteProduto) * porcentagemCOFINS / 100, 'f', 2).toDouble());
 
       // =====================================================================
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
@@ -2483,29 +2483,27 @@ void CadastrarNFe::preencherImpostos() {
 
         modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "vBCIBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
-        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "vTribOpIBSUF", QString::number(vBC * aliq.pIBSUF / 100, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
-        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+        modelProduto.setData(row, "vTribOpIBSMun", QString::number(vBC * aliq.pIBSMun / 100, 'f', 2).toDouble());
 
         modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "vBCCBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pCBS", aliq.pCBS);
-        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
-        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
+        modelProduto.setData(row, "vTribOpCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
 
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
-          const double vIS = vBC * aliqIS / 100;
-
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
           modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
-          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
-          modelProduto.setData(row, "vIS", vIS);
-          modelProduto.setData(row, "vTribOpIS", vIS);
+          modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
+          modelProduto.setData(row, "vTribOpIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
         } else {
           modelProduto.setData(row, "cstIS", "");
           modelProduto.setData(row, "vBCIS", 0);
@@ -2585,18 +2583,18 @@ void CadastrarNFe::preencherImpostos() {
       }
 
       // ICMS
-      modelProduto.setData(row, "vBC", total + freteProduto);
+      modelProduto.setData(row, "vBC", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pICMS", icmsRate);
-      modelProduto.setData(row, "vICMS", (total + freteProduto) * icmsRate / 100);
+      modelProduto.setData(row, "vICMS", QString::number((total + freteProduto) * icmsRate / 100, 'f', 2).toDouble());
 
       modelProduto.setData(row, "cstPIS", "01");
-      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "vBCPIS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pPIS", porcentagemPIS);
-      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "vPIS", QString::number((total + freteProduto) * porcentagemPIS / 100, 'f', 2).toDouble());
       modelProduto.setData(row, "cstCOFINS", "01");
-      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "vBCCOFINS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "vCOFINS", QString::number((total + freteProduto) * porcentagemCOFINS / 100, 'f', 2).toDouble());
 
       // =====================================================================
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
@@ -2616,29 +2614,27 @@ void CadastrarNFe::preencherImpostos() {
 
         modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "vBCIBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
-        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "vTribOpIBSUF", QString::number(vBC * aliq.pIBSUF / 100, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
-        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+        modelProduto.setData(row, "vTribOpIBSMun", QString::number(vBC * aliq.pIBSMun / 100, 'f', 2).toDouble());
 
         modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "vBCCBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pCBS", aliq.pCBS);
-        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
-        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
+        modelProduto.setData(row, "vTribOpCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
 
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
-          const double vIS = vBC * aliqIS / 100;
-
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
           modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
-          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
-          modelProduto.setData(row, "vIS", vIS);
-          modelProduto.setData(row, "vTribOpIS", vIS);
+          modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
+          modelProduto.setData(row, "vTribOpIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
         } else {
           modelProduto.setData(row, "cstIS", "");
           modelProduto.setData(row, "vBCIS", 0);
@@ -2826,18 +2822,18 @@ void CadastrarNFe::preencherImpostos() {
       }
 
       // ICMS
-      modelProduto.setData(row, "vBC", total + freteProduto);
+      modelProduto.setData(row, "vBC", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pICMS", icmsRate);
-      modelProduto.setData(row, "vICMS", (total + freteProduto) * icmsRate / 100);
+      modelProduto.setData(row, "vICMS", QString::number((total + freteProduto) * icmsRate / 100, 'f', 2).toDouble());
 
       modelProduto.setData(row, "cstPIS", "01");
-      modelProduto.setData(row, "vBCPIS", total + freteProduto);
+      modelProduto.setData(row, "vBCPIS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pPIS", porcentagemPIS);
-      modelProduto.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
+      modelProduto.setData(row, "vPIS", QString::number((total + freteProduto) * porcentagemPIS / 100, 'f', 2).toDouble());
       modelProduto.setData(row, "cstCOFINS", "01");
-      modelProduto.setData(row, "vBCCOFINS", total + freteProduto);
+      modelProduto.setData(row, "vBCCOFINS", QString::number(total + freteProduto, 'f', 2).toDouble());
       modelProduto.setData(row, "pCOFINS", porcentagemCOFINS);
-      modelProduto.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
+      modelProduto.setData(row, "vCOFINS", QString::number((total + freteProduto) * porcentagemCOFINS / 100, 'f', 2).toDouble());
 
       // =====================================================================
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
@@ -2857,29 +2853,27 @@ void CadastrarNFe::preencherImpostos() {
 
         modelProduto.setData(row, "cstIBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribIBS", cClassTribIBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCIBS", vBC);
+        modelProduto.setData(row, "vBCIBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSUF", aliq.pIBSUF);
-        modelProduto.setData(row, "vTribOpIBSUF", vBC * aliq.pIBSUF / 100);
+        modelProduto.setData(row, "vTribOpIBSUF", QString::number(vBC * aliq.pIBSUF / 100, 'f', 2).toDouble());
         modelProduto.setData(row, "pIBSMun", aliq.pIBSMun);
-        modelProduto.setData(row, "vTribOpIBSMun", vBC * aliq.pIBSMun / 100);
+        modelProduto.setData(row, "vTribOpIBSMun", QString::number(vBC * aliq.pIBSMun / 100, 'f', 2).toDouble());
 
         modelProduto.setData(row, "cstCBS", "000");  // 000 = Tributação integral
         modelProduto.setData(row, "cClassTribCBS", cClassTribCBS);  // From NCM table or default
-        modelProduto.setData(row, "vBCCBS", vBC);
+        modelProduto.setData(row, "vBCCBS", QString::number(vBC, 'f', 2).toDouble());
         modelProduto.setData(row, "pCBS", aliq.pCBS);
-        modelProduto.setData(row, "vCBS", vBC * aliq.pCBS / 100);
-        modelProduto.setData(row, "vTribOpCBS", vBC * aliq.pCBS / 100);
+        modelProduto.setData(row, "vCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
+        modelProduto.setData(row, "vTribOpCBS", QString::number(vBC * aliq.pCBS / 100, 'f', 2).toDouble());
 
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
-          const double vIS = vBC * aliqIS / 100;
-
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
           modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
-          modelProduto.setData(row, "vBCIS", vBC);
+          modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
-          modelProduto.setData(row, "vIS", vIS);
-          modelProduto.setData(row, "vTribOpIS", vIS);
+          modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
+          modelProduto.setData(row, "vTribOpIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
         } else {
           modelProduto.setData(row, "cstIS", "");
           modelProduto.setData(row, "vBCIS", 0);

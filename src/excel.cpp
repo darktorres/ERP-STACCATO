@@ -23,13 +23,14 @@ void Excel::gerarExcel() {
 
   if (folderKey.isEmpty()) { throw RuntimeError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString arquivoModelo = QDir::currentPath() + "/modelos/pedido.xlsx";
+  setQuerys();
+
+  const QString sigla = queryLoja.value("sigla").toString();
+  const QString arquivoModelo = QDir::currentPath() + "/modelos/" + (sigla == "BRSL" ? "pedido_brasil" : "pedido") + ".xlsx";
 
   File modelo(arquivoModelo);
 
   if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
-
-  setQuerys();
 
   if (anexoCompra) {
     fileName = customFileName;
@@ -273,7 +274,7 @@ void Excel::setQuerys() {
 
   //------------------------------------------------------------------------
 
-  queryLoja.prepare("SELECT tel, tel2 FROM loja WHERE idLoja = :idLoja");
+  queryLoja.prepare("SELECT tel, tel2, sigla FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }

@@ -39,7 +39,10 @@ void PDF::gerarPdf() {
 
   dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, false);
 
-  const QString modelo = QDir::currentPath() + "/modelos/" + ((tipo == Tipo::Orcamento) ? "orcamento" : "venda") + ".lrxml";
+  const QString sigla = queryLoja.value("sigla").toString();
+  const QString templateType = (tipo == Tipo::Orcamento) ? "orcamento" : "venda";
+  const QString templateName = templateType + (sigla == "BRSL" ? "_brasil" : "") + ".lrxml";
+  const QString modelo = QDir::currentPath() + "/modelos/" + templateName;
 
   if (not report.loadFromFile(modelo)) { throw RuntimeException("Não encontrou o modelo de impressão!", parent); }
 
@@ -221,7 +224,7 @@ void PDF::setQuerys() {
 
   //------------------------------------------------------------------------
 
-  queryLoja.prepare("SELECT descricao, tel, tel2 FROM loja WHERE idLoja = :idLoja");
+  queryLoja.prepare("SELECT descricao, tel, tel2, sigla FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLoja.exec()) { throw RuntimeException("Erro buscando loja: " + queryLoja.lastError().text()); }

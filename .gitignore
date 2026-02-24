@@ -44,6 +44,8 @@ qrs/Thumbs.db
 *.log
 *.lrxml
 *.xlsx
+!modelos/*.lrxml
+!modelos/*.xlsx
 cloc-1.92.exe
 script_atualizacao.bat
 /web-symfony/node_modules

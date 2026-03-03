@@ -421,10 +421,14 @@ void CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   if (resposta.contains("Erro Interno", Qt::CaseInsensitive)) {
     qDebug() << "processarResposta -> erro interno sefaz";
 
-    removerNota(idNFe);
+    // DO NOT delete the pending NFe - it may have been processed by SEFAZ despite the HTTP 500 error
+    // Keep it pending so user can query SEFAZ to check status or retrieve receipt number
+    // removerNota(idNFe);
 
-    manterAberto = true;
-    throw RuntimeException("Erro interno na SEFAZ, tente enviar novamente!");
+    manterAberto = false;
+    throw RuntimeException("Erro interno na SEFAZ. A NF-e foi mantida como PENDENTE.\n"
+                          "A transmissão pode ter sido processada pela SEFAZ.\n"
+                          "Você deve consultar o status na SEFAZ antes de tentar enviar novamente.");
   }
 
   if (resposta.contains("Autorizado o uso da NF-e", Qt::CaseInsensitive) or resposta.contains("Uso Denegado", Qt::CaseInsensitive)) { return carregarArquivo(acbr, filePath); }

@@ -127,8 +127,8 @@ void CalculoFrete::setOrcamento(const QVariant idEndereco, const double pesoSul,
     const QStringList cidadesSemQualp = queryCustos.value("cidadesSemQualp").toString().split(";");
     const QString cidade = ui->itemBoxDestino->text().split(" - ").at(3);
 
-    if (cidadesSemQualp.contains(cidade, Qt::CaseInsensitive)) {
-      returnZero = true;
+    if (cidadesSemQualp.contains(cidade, Qt::CaseInsensitive) and pesoTotal < 100.) {
+      freteFixo = true;
       return;
     }
 
@@ -178,7 +178,7 @@ double CalculoFrete::getDistancia() {
 
 double CalculoFrete::getFrete()
 {
-  if (returnZero) { return 0.; }
+  if (freteFixo) { return 200.; }
   qualp();
   return ui->doubleSpinBoxTotal->value();
 }

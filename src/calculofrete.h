@@ -22,7 +22,7 @@ public:
 
 private:
   // attributes
-  bool returnZero = false;
+  bool freteFixo = false;
   SqlTableModel modelItem;
   Ui::CalculoFrete *ui;
   // methods

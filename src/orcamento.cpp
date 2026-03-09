@@ -1289,7 +1289,7 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
 
     if (User::isGerente()) {
       const double freteMenor = qMin(freteQualp, freteMaior);
-      minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 1.2;
+      minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 0.8;
       qDebug() << "minimoGerente: R$" << minimoGerente;
     }
   }

@@ -351,6 +351,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   if (canChangeFrete) {
     ui->checkBoxFreteManual->setChecked(true);
     ui->checkBoxFreteManual->setDisabled(true);
+    ui->doubleSpinBoxFrete->setMinimum(0);
   }
 
   ui->doubleSpinBoxDescontoGlobal->setValue(queryOrc.value("descontoPorc").toDouble());

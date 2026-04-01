@@ -300,7 +300,7 @@ bool Orcamento::viewRegister() {
 
     if (canChangeFrete) {
       ui->checkBoxFreteManual->setDisabled(true);
-      if (User::temPermissao("ajusteFrete")) { ui->doubleSpinBoxFrete->setMinimum(0); }
+      ui->doubleSpinBoxFrete->setMinimum(0);
     }
 
     if (User::isGerente()) { calcularFrete(false); }

@@ -642,6 +642,8 @@ bool WidgetNFeDistribuicao::enviarEvento(ACBr &acbr, const QString &operacao, co
   qApp->startTransaction("NFeDistribuicao::enviarEvento_" + operacao);
 
   for (const auto &evento : eventos) {
+    if (not evento.contains("XMotivo=", Qt::CaseInsensitive)) { continue; }
+
     const QString motivo = qApp->findTag(evento, "XMotivo=");
 
     if (motivo == "Lote de evento processado") { continue; }

@@ -343,10 +343,10 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
 
   const double frete = queryOrc.value("frete").toDouble();
-
-  if (User::isGerente()) { calcularFrete(false); }
-  ui->doubleSpinBoxFrete->setValue(frete);
   canChangeFrete = queryOrc.value("freteManual").toBool();
+
+  if (User::isGerente() and not canChangeFrete) { calcularFrete(false); }
+  ui->doubleSpinBoxFrete->setValue(frete);
 
   if (canChangeFrete) {
     ui->checkBoxFreteManual->setChecked(true);

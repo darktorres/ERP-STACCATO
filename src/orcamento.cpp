@@ -104,11 +104,11 @@ void Orcamento::on_tableProdutos_selectionChanged() {
 
   const auto index = selection.first();
 
-  ui->pushButtonAtualizarItem->show();
-  ui->pushButtonRemoverItem->show();
-  ui->pushButtonLimparSelecao->show();
-
   ui->pushButtonAdicionarItem->hide();
+
+  ui->pushButtonAtualizarItem->show();
+  ui->pushButtonLimparSelecao->show();
+  ui->pushButtonRemoverItem->show();
 
   currentRowItem = index.row();
 
@@ -163,6 +163,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonAbrirVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirVenda_clicked, connectionType);
   connect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked, connectionType);
   connect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked, connectionType);
+  connect(ui->pushButtonDescerItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonDescerItem_clicked, connectionType);
   connect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked, connectionType);
   connect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked, connectionType);
@@ -174,6 +175,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
+  connect(ui->pushButtonSubirItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonSubirItem_clicked, connectionType);
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Orcamento::on_tableProdutos_selectionChanged, connectionType);
 }
 
@@ -201,6 +203,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonAbrirVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonAbrirVenda_clicked);
   disconnect(ui->pushButtonAdicionarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAdicionarItem_clicked);
   disconnect(ui->pushButtonApagarOrc, &QPushButton::clicked, this, &Orcamento::on_pushButtonApagarOrc_clicked);
+  disconnect(ui->pushButtonDescerItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonDescerItem_clicked);
   disconnect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked);
   disconnect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked);
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
@@ -212,6 +215,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonModelo3d, &QPushButton::clicked, this, &Orcamento::on_pushButtonModelo3d_clicked);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
+  disconnect(ui->pushButtonSubirItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonSubirItem_clicked);
   disconnect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Orcamento::on_tableProdutos_selectionChanged);
 }
 
@@ -356,11 +360,13 @@ QVariant Orcamento::dataItem(const QString &key) const { return modelItem.data(c
 void Orcamento::setDataItem(const QString &key, const QVariant &value, const bool adjustValue) { modelItem.setData(currentRowItem, key, value, adjustValue); }
 
 void Orcamento::novoItem() {
+  currentRowItem = -1;
+
   ui->pushButtonAdicionarItem->show();
 
   ui->pushButtonAtualizarItem->hide();
-  ui->pushButtonRemoverItem->hide();
   ui->pushButtonLimparSelecao->hide();
+  ui->pushButtonRemoverItem->hide();
 
   ui->itemBoxProduto->clear();
   ui->tableProdutos->clearSelection();
@@ -761,6 +767,46 @@ void Orcamento::clearFields() {
 
 void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
+void Orcamento::on_pushButtonSubirItem_clicked() {
+  if (currentRowItem <= 0) { return; }
+
+  const int rowA = currentRowItem;
+  const int rowB = currentRowItem - 1;
+
+  const int ordemA = modelItem.data(rowA, "ordem").toInt();
+  const int ordemB = modelItem.data(rowB, "ordem").toInt();
+
+  modelItem.setData(rowA, "ordem", ordemB);
+  modelItem.setData(rowB, "ordem", ordemA);
+  modelItem.proxyModel->sort(modelItem.fieldIndex("ordem"), Qt::AscendingOrder);
+
+  currentRowItem = rowB;
+
+  if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
+
+  ui->tableProdutos->selectRow(rowB);
+}
+
+void Orcamento::on_pushButtonDescerItem_clicked() {
+  if (currentRowItem < 0 or currentRowItem >= modelItem.rowCount() - 1) { return; }
+
+  const int rowA = currentRowItem;
+  const int rowB = currentRowItem + 1;
+
+  const int ordemA = modelItem.data(rowA, "ordem").toInt();
+  const int ordemB = modelItem.data(rowB, "ordem").toInt();
+
+  modelItem.setData(rowA, "ordem", ordemB);
+  modelItem.setData(rowB, "ordem", ordemA);
+  modelItem.proxyModel->sort(modelItem.fieldIndex("ordem"), Qt::AscendingOrder);
+
+  currentRowItem = rowB;
+
+  if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
+
+  ui->tableProdutos->selectRow(rowB);
+}
+
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   const double stepQt = ui->doubleSpinBoxQuant->singleStep();
   const double prcUn = ui->doubleSpinBoxPrecoUn->value();
@@ -870,11 +916,15 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
 
+  modelItem.setSort("ordem", Qt::AscendingOrder);
+
   modelItem.proxyModel = new ProdutoProxyModel(&modelItem, this);
+  modelItem.proxyModel->sort(modelItem.fieldIndex("ordem"), Qt::AscendingOrder);
 
   ui->tableProdutos->setModel(&modelItem);
 
   ui->tableProdutos->hideColumn("idOrcamentoProduto");
+  ui->tableProdutos->hideColumn("ordem");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idOrcamento");
   ui->tableProdutos->hideColumn("idLoja");
@@ -905,7 +955,15 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
   unsetConnections();
 
   try {
-    if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
+    if (tipoItem == Tipo::Cadastrar) {
+      currentRowItem = modelItem.insertRowAtEnd();
+
+      int maxOrdem = -1;
+      for (int row = 0; row < currentRowItem; ++row) {
+        if (modelItem.headerData(row, Qt::Vertical) != "!") { maxOrdem = qMax(maxOrdem, modelItem.data(row, "ordem").toInt()); }
+      }
+      setDataItem("ordem", maxOrdem + 1);
+    }
 
     setDataItem("idProduto", ui->itemBoxProduto->getId().toInt());
     setDataItem("fornecedor", ui->lineEditFornecedor->text());

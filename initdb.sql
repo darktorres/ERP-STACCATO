@@ -1964,6 +1964,7 @@ CREATE TABLE IF NOT EXISTS `staccato`.`orcamento_has_produto` (
   `promocao` TINYINT(1) NULL DEFAULT NULL,
   `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastUpdated` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  `ordem` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`idOrcamentoProduto`),
   INDEX `fk_Orcamento_has_Produto_Produto2_idx` (`idProduto` ASC) VISIBLE,
   INDEX `fk_Orcamento_has_Produto_Orcamento2_idx` (`idOrcamento` ASC) VISIBLE,

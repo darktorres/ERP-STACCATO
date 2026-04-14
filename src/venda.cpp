@@ -1534,7 +1534,7 @@ void Venda::on_itemBoxProfissional_textChanged() {
 
 void Venda::copiaProdutosOrcamento() {
   SqlQuery queryProdutos;
-  queryProdutos.prepare("SELECT * FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
+  queryProdutos.prepare("SELECT * FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento ORDER BY ordem ASC");
   queryProdutos.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
   if (not queryProdutos.exec()) { throw RuntimeException("Erro buscando produtos: " + queryProdutos.lastError().text()); }

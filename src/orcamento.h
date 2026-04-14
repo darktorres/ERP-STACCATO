@@ -84,8 +84,10 @@ private:
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonGerarVenda_clicked() -> void;
   auto on_pushButtonModelo3d_clicked() -> void;
+  auto on_pushButtonDescerItem_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
+  auto on_pushButtonSubirItem_clicked() -> void;
   auto on_tableProdutos_selectionChanged() -> void;
   auto redoBackupItem() -> void;
   auto registerMode() -> void final;

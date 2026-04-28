@@ -107,7 +107,7 @@ void WidgetRh::setupTables() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   //  ui->table->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  ui->table->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelFolhaPag.fieldIndex("dataPagamento"), modelFolhaPag.fieldIndex("tipo"), false, this));
+  ui->table->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelFolhaPag.fieldIndex("dataPagamento"), this));
 
   ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this));
 

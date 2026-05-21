@@ -427,11 +427,112 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   setConnections();
 }
 
+void Venda::corrigirValores() {
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+
+    const double quant = modelItem.data(row, "quant").toDouble();
+    const double prcUnitario = modelItem.data(row, "prcUnitario").toDouble();
+    const double descUnitario = modelItem.data(row, "descUnitario").toDouble();
+    const double descGlobal = modelItem.data(row, "descGlobal").toDouble();
+
+    modelItem.setData(row, "parcial", prcUnitario * quant);
+    modelItem.setData(row, "parcialDesc", descUnitario * quant);
+    modelItem.setData(row, "total", (descUnitario * quant) * (1 - (descGlobal / 100)));
+  }
+}
+
+std::tuple<double, double, double> Venda::calcularTotais() {
+  double subTotalBruto = 0.;
+  double subTotalLiq = 0.;
+  double total = 0.;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+
+    subTotalBruto += modelItem.data(row, "parcial").toDouble();
+    subTotalLiq += modelItem.data(row, "parcialDesc").toDouble();
+    total += modelItem.data(row, "total").toDouble();
+  }
+
+  return std::make_tuple<>(subTotalBruto, subTotalLiq, total);
+}
+
+QString Venda::montarLog() {
+  const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
+
+  const double spinBruto = ui->doubleSpinBoxSubTotalBruto->value();
+  const double spinLiq = ui->doubleSpinBoxSubTotalLiq->value();
+  const double spinDescR = ui->doubleSpinBoxDescontoGlobalReais->value();
+  const double spinFrete = ui->doubleSpinBoxFrete->value();
+  const double spinTotal = ui->doubleSpinBoxTotal->value();
+
+  QStringList logString;
+
+  logString << "IdVenda: " + ui->lineEditVenda->text();
+  logString << "IdOrcamento: " + ui->lineEditIdOrcamento->text();
+  logString << "\nsubTotalBruto: " + QString::number(subTotalBruto) + "\nspinBoxBruto: " + QString::number(spinBruto);
+  logString << "\nsubTotalLiq: " + QString::number(subTotalLiq) + "\nspinBoxLiq: " + QString::number(spinLiq);
+  logString << "\ntotal (itens): " + QString::number(total) + "\nspinBoxTotal: " + QString::number(spinTotal);
+  logString << "\nspinBoxFrete: " + QString::number(spinFrete);
+  logString << "\nspinBoxDescontoReais: " + QString::number(spinDescR);
+  logString << "\ninvariante (spinLiq - spinDescR + spinFrete): " + QString::number(spinLiq - spinDescR + spinFrete);
+  logString << "";
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+
+    logString << "--------------------";
+
+    logString << "\nId: " + modelItem.data(row, "idVendaProduto1").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                     "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                     "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                     "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                     "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString();
+  }
+
+  return logString.join("\n");
+}
+
+void Venda::verificarTotais() {
+  const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
+
+  const double spinBruto = ui->doubleSpinBoxSubTotalBruto->value();
+  const double spinLiq = ui->doubleSpinBoxSubTotalLiq->value();
+  const double spinDescR = ui->doubleSpinBoxDescontoGlobalReais->value();
+  const double spinFrete = ui->doubleSpinBoxFrete->value();
+  const double spinTotal = ui->doubleSpinBoxTotal->value();
+
+  const bool brutoErrado = abs(subTotalBruto - spinBruto) > 0.1;
+  const bool liquidoErrado = abs(subTotalLiq - spinLiq) > 0.1;
+  const bool totalErrado = abs(total - (spinTotal - spinFrete)) > 0.1;
+  const bool freteErrado = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > 0.1;
+
+  if (brutoErrado or liquidoErrado or totalErrado or freteErrado) {
+    corrigirValores();
+
+    const auto [subTotalBruto2, subTotalLiq2, total2] = calcularTotais();
+
+    const bool brutoErrado2 = abs(subTotalBruto2 - spinBruto) > 0.1;
+    const bool liquidoErrado2 = abs(subTotalLiq2 - spinLiq) > 0.1;
+    const bool totalErrado2 = abs(total2 - (spinTotal - spinFrete)) > 0.1;
+    const bool freteErrado2 = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > 0.1;
+
+    if (brutoErrado2 or liquidoErrado2 or totalErrado2 or freteErrado2) {
+      Log::createLog("Exceção", montarLog());
+
+      throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
+    }
+  }
+}
+
 void Venda::verifyFields() {
   // TODO: pintar campos errados de vermelho
   // TODO: pintar campos necessarios de amarelo
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
+
+  verificarTotais();
 
   if (not financeiro) { verificaDisponibilidadeEstoque(); }
 

@@ -44,16 +44,19 @@ private:
   auto cadastrar() -> void final;
   auto calcularFrete(const bool updateSpinBox) -> void;
   auto calcularPesoTotal() -> void;
+  auto calcularTotais() -> std::tuple<double, double, double>;
   auto cancelamento() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
   auto copiaProdutosOrcamento() -> void;
+  auto corrigirValores() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;
   auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto financeiroSalvar() -> void;
   auto generateId() -> void;
   auto montarFluxoCaixa() -> void;
+  auto montarLog() -> QString;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxMostrarCancelados_toggled(const bool checked) -> void;
   auto on_checkBoxPontuacaoIsento_toggled(const bool checked) -> void;
@@ -95,6 +98,7 @@ private:
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaFreteLoja() -> void;
   auto verificaServicosEspeciais() -> bool;
+  auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

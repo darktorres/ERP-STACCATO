@@ -17,9 +17,12 @@
 
 #include "application.h"
 #include "cadastrocliente.h"
+#include "cadastrofornecedor.h"
+#include "cadastroloja.h"
 #include "integration_fixture.h"
 #include "searchdialog.h"
 #include "user.h"
+#include "venda.h"
 
 #include <QDir>
 #include <QFile>
@@ -167,6 +170,69 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestRegisterDialogVariants — opens the other Cadastro* dialogs against
+// the canonical seed. Same login + no-show pattern as TestCadastroClienteDialog.
+// -----------------------------------------------------------------------------
+class TestRegisterDialogVariants : public QObject {
+  Q_OBJECT
+
+private slots:
+  void initTestCase() {
+    try {
+      User::login(QStringLiteral("admin_test"), QStringLiteral("admin123"));
+    } catch (const std::exception &e) { QSKIP(qPrintable(QStringLiteral("seed login failed: %1").arg(QString::fromLocal8Bit(e.what())))); }
+  }
+
+  void cleanupTestCase() {
+    User::idLoja.clear();
+    User::idUsuario.clear();
+    User::nome.clear();
+    User::tipo.clear();
+    User::usuario.clear();
+    User::senha.clear();
+  }
+
+  void cadastroLojaLoadsSeededRow() {
+    CadastroLoja dialog(nullptr);
+    QVERIFY(dialog.viewRegisterById(1));
+  }
+
+  void cadastroFornecedorLoadsSeededRow() {
+    CadastroFornecedor dialog(nullptr);
+    QVERIFY(dialog.viewRegisterById(1));
+  }
+};
+
+// -----------------------------------------------------------------------------
+// TestVendaDialogSmoke — heaviest production dialog. Just constructing it
+// triggers many model setups (venda items grid, search dialogs, custom
+// delegates). The smoke test verifies construction succeeds; loading an
+// existing venda row needs a richer fixture chain (cliente_has_endereco,
+// profissional, etc.) which is deferred.
+// -----------------------------------------------------------------------------
+class TestVendaDialogSmoke : public QObject {
+  Q_OBJECT
+
+private slots:
+  void initTestCase() {
+    try {
+      User::login(QStringLiteral("admin_test"), QStringLiteral("admin123"));
+    } catch (const std::exception &e) { QSKIP(qPrintable(QStringLiteral("seed login failed: %1").arg(QString::fromLocal8Bit(e.what())))); }
+  }
+
+  void cleanupTestCase() {
+    User::idLoja.clear();
+    User::idUsuario.clear();
+    User::tipo.clear();
+  }
+
+  void constructsWithoutThrowing() {
+    Venda dialog(nullptr);
+    QVERIFY(not dialog.windowTitle().isEmpty());
+  }
+};
+
+// -----------------------------------------------------------------------------
 // TestSearchDialogVendedorFilter — regression for the bug surfaced during
 // M4 development: SearchDialog::vendedor used to build " AND idLoja = "
 // (with empty value) when no user was logged in, producing invalid SQL.
@@ -225,6 +291,16 @@ int main(int argc, char *argv[]) {
 
   {
     TestCadastroClienteDialog t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestRegisterDialogVariants t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestVendaDialogSmoke t;
     status |= QTest::qExec(&t, argc, argv);
   }
 

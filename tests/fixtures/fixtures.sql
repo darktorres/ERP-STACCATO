@@ -42,3 +42,8 @@ INSERT IGNORE INTO `cliente`
     (`idCliente`, `pfpj`, `nome_razao`, `cnpj`)
 VALUES
     (2, 'PJ', 'Cliente PJ Teste LTDA', '11.222.333/0001-81');
+
+INSERT IGNORE INTO `fornecedor`
+    (`idFornecedor`, `razaoSocial`)
+VALUES
+    (1, 'Fornecedor Teste LTDA');

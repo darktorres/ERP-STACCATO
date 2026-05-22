@@ -33,6 +33,7 @@ Makefile*
 *.qmlproject.user.*
 
 !libmysql.dll
+!zlib1.dll
 *.bak
 *.user
 qrs/Thumbs.db

@@ -106,3 +106,17 @@ FORMS =
 RESOURCES += qrs/resources.qrc
 
 SOURCES += src/main.cpp
+
+#-----------------------------------------------------
+# Deploy runtime dependencies next to Loja.exe after each link.
+# tools/deploy.cmd runs windeployqt and copies 3rdparty DLLs. Config files
+# (mysql.txt, lojas.txt, google_api.txt) hold secrets and are NOT deployed —
+# provide them manually in the .exe's working directory.
+
+win32-msvc {
+    CONFIG(debug, debug|release): _deploy_target = debug/$${TARGET}.exe
+    else: _deploy_target = release/$${TARGET}.exe
+
+    QMAKE_POST_LINK += $$shell_path($$PWD/tools/deploy.cmd) \
+                       $$shell_quote($$shell_path($$OUT_PWD/$$_deploy_target)) app
+}

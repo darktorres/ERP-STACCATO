@@ -48,23 +48,26 @@ nmake
 
 ## Run
 
-Por padrão, qmake com `CONFIG += testcase` adiciona um target `check` que executa
-o binário:
+O `nmake` invoca `tools/deploy.cmd` no `QMAKE_POST_LINK` de cada `.pro`,
+copiando os DLLs do Qt (via `windeployqt`) para o lado do `.exe`. O test
+binary roda sem mexer no PATH:
 
 ```batch
 cd tests\tier1
 nmake check
 ```
 
-Ou rode o executável diretamente. Importante: Qt e cURL DLLs precisam estar no
-PATH (use `windeployqt` para deploy permanente ou adicione manualmente):
+Ou direto:
 
 ```batch
-set "PATH=C:\Qt\5.15.2\msvc2019\bin;3rdparty\cURL_x86-msvc\bin;%PATH%"
 tests\tier1\debug\tier1_tests.exe
 :: ou para JUnit XML (útil para CI futuro):
 tests\tier1\debug\tier1_tests.exe -o results.xml,junitxml
 ```
+
+`Loja.exe` recebe um deploy mais completo (3rdparty DLLs além dos do Qt),
+mas para subir de verdade ainda precisa de arquivos de config que não vão
+para o repo (ver "Config files" abaixo).
 
 Saída esperada (M2):
 
@@ -104,7 +107,25 @@ mais uma classe e um bloco no `main()` — sem mudança no `.pro`.
 e Qt — o linker não puxa o resto da `libstaccato`. Por isso o binário não
 precisa de `libcurl.dll`/`zlib1.dll` para subir. Tests futuros que toquem
 mais código de `libstaccato` vão herdar as mesmas dependências do
-`Loja.exe` (`windeployqt` é o caminho usual de deploy).
+`Loja.exe`.
+
+## Config files (NÃO entram no repo)
+
+`Loja.exe` lê os seguintes arquivos do diretório de trabalho ao iniciar.
+Eles contêm segredos / credenciais e **não devem ser commitados**:
+
+| Arquivo            | Lido por                             | Conteúdo                        |
+|--------------------|--------------------------------------|---------------------------------|
+| `mysql.txt`        | `Application::genericLogin` (application.cpp:127) | senha do MySQL                  |
+| `lojas.txt`        | `Application::readSettingsFile`      | mapa nome → hostname das lojas  |
+| `google_api.txt`   | `Application::googleMapsApi`         | chave da API do Google Maps     |
+| `ACBrLib.ini`      | ACBr (NFe)                           | configuração da DLL fiscal      |
+| `webdav.txt`       | uploads WebDAV                       | credenciais de armazenamento    |
+
+Para rodar `debug\Loja.exe` localmente, copie esses arquivos do seu
+build do Qt Creator (geralmente
+`C:\Builds\build-Loja-Desktop_Qt_5_15_2_MSVC2019_32bit-Debug\debug\`) para
+o `debug\` deste repo. `tools/deploy.cmd` deliberadamente não toca neles.
 
 ## Próximos passos
 

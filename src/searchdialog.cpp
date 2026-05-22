@@ -508,7 +508,10 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   const QList<FullTextIndex> fullTextIndex = {/*{"tipo", "Função"},*/ {"nome", "Nome"}};
 
   const QString filtro = "tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL') AND desativado = FALSE";
-  const QString filtroLoja = (User::idLoja == "1" or User::isEspecial()) ? "" : " AND idLoja = " + User::idLoja;
+  // Skip the loja filter if no user is logged in (User::idLoja empty) —
+  // otherwise we'd produce " AND idLoja = " (no value) and MySQL would
+  // reject the resulting SQL with a syntax error at the next AND keyword.
+  const QString filtroLoja = (User::idLoja.isEmpty() or User::idLoja == "1" or User::isEspecial()) ? "" : " AND idLoja = " + User::idLoja;
   const QString filtroAdmin = (User::isAdministrativo()) ? "" : " AND nome != 'REPOSIÇÂO'";
 
   auto *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, fullTextIndex, filtro + filtroLoja + filtroAdmin, "nome", false, parent);

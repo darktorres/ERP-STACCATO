@@ -18,6 +18,7 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "integration_fixture.h"
+#include "searchdialog.h"
 #include "user.h"
 
 #include <QDir>
@@ -166,6 +167,37 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestSearchDialogVendedorFilter — regression for the bug surfaced during
+// M4 development: SearchDialog::vendedor used to build " AND idLoja = "
+// (with empty value) when no user was logged in, producing invalid SQL.
+// Run with cleared User state to verify the fix at searchdialog.cpp:507.
+// -----------------------------------------------------------------------------
+class TestSearchDialogVendedorFilter : public QObject {
+  Q_OBJECT
+
+private slots:
+  void initTestCase() {
+    // The previous TestCadastroClienteDialog::cleanupTestCase clears these,
+    // but be defensive in case the suite is re-ordered.
+    User::idLoja.clear();
+    User::idUsuario.clear();
+    User::tipo.clear();
+  }
+
+  void vendedorWithNoLoggedUserDoesNotThrow() {
+    // Before the fix this would throw RuntimeException from
+    // SqlTableModel::select() with the MySQL syntax-error message
+    // "near ' AND nome != 'REPOSIÇÂO' ORDER BY …'".
+    SearchDialog *sd = nullptr;
+    try {
+      sd = SearchDialog::vendedor(nullptr);
+    } catch (const std::exception &e) { QFAIL(qPrintable(QStringLiteral("vendedor() threw with empty User state: %1").arg(QString::fromLocal8Bit(e.what())))); }
+    QVERIFY(sd != nullptr);
+    sd->deleteLater();
+  }
+};
+
+// -----------------------------------------------------------------------------
 // main — Tier 3 bootstrap (stub config + DB) then run smoke suite.
 // -----------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
@@ -193,6 +225,11 @@ int main(int argc, char *argv[]) {
 
   {
     TestCadastroClienteDialog t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestSearchDialogVendedorFilter t;
     status |= QTest::qExec(&t, argc, argv);
   }
 

@@ -66,7 +66,7 @@ tests\tier1\debug\tier1_tests.exe
 tests\tier1\debug\tier1_tests.exe -o results.xml,junitxml
 ```
 
-Saída esperada (M1):
+Saída esperada (M2):
 
 ```
 ********* Start testing of TestSmoke *********
@@ -75,34 +75,36 @@ PASS   : TestSmoke::buildPipelineWorks()
 PASS   : TestSmoke::cleanupTestCase()
 Totals: 3 passed, 0 failed, 0 skipped
 ********* Finished testing of TestSmoke *********
+********* Start testing of TestValidators *********
+PASS   : TestValidators::initTestCase()
+PASS   : TestValidators::cpfValidoFormatado()
+PASS   : TestValidators::cpfValidoSemFormatacao()
+PASS   : TestValidators::cpfTamanhoErrado()
+PASS   : TestValidators::cpfTodosDigitosIguais()
+PASS   : TestValidators::cpfChecksumInvalido()
+PASS   : TestValidators::cnpjValidoFormatado()
+PASS   : TestValidators::cnpjValidoSemFormatacao()
+PASS   : TestValidators::cnpjTamanhoErrado()
+PASS   : TestValidators::cnpjChecksumInvalido()
+PASS   : TestValidators::cleanupTestCase()
+Totals: 11 passed, 0 failed, 0 skipped
+********* Finished testing of TestValidators *********
 ```
 
-## Escopo do M1
+## Layout do test_tier1.cpp
 
-M1 prova apenas que o pipeline build → link → run de testes funciona
-end-to-end. O teste `test_smoke.cpp` deliberadamente **não** referencia código
-de `libstaccato`.
+Todos os test cases vivem em `tests/tier1/test_tier1.cpp` como classes
+`QObject` independentes. O `main()` ao final do arquivo instancia cada uma
+e roda via `QTest::qExec`. Para adicionar uma nova suite, basta declarar
+mais uma classe e um bloco no `main()` — sem mudança no `.pro`.
 
-### Por que não há ainda teste de validadores em M1
+## Por que tests/tier1 não exige DLLs do projeto
 
-A tentativa inicial era subclassar `RegisterDialog` (`Probe`) para expor
-`validaCPF`/`validaCNPJ` protected. Esbarrou em três problemas, todos
-resolvidos pela refactor leve do M2:
-
-1. `RegisterDialog` é abstrato — exigia stub das 9 puras virtuais.
-2. Construtor chama `model.setTable(...)` que lança se não houver
-   `QSqlDatabase` default. Workaround: abrir QSQLITE in-memory no
-   `initTestCase`.
-3. **DLL_INIT_FAILED em runtime**: ao referenciar `RegisterDialog` o linker
-   puxa transitivamente código de `Application` + QSimpleUpdater + LimeReport
-   para dentro do .exe de teste, e algum desses .obj's depende de recursos/
-   inicializadores que só vivem em `Loja.exe`. O processo morre antes
-   mesmo do `main()` rodar (`STATUS_DLL_INIT_FAILED`, código 0xC0000142).
-
-A solução limpa é extrair `validaCPF/CNPJ` para funções livres em
-`src/validators.h/.cpp` (sem `RuntimeError`, sem QMessageBox no caminho
-inválido — apenas retornam `bool`). Aí o teste só puxa `validators.obj`,
-sem cascata.
+`TestSmoke` e `TestValidators` referenciam apenas `validators::*` (puro)
+e Qt — o linker não puxa o resto da `libstaccato`. Por isso o binário não
+precisa de `libcurl.dll`/`zlib1.dll` para subir. Tests futuros que toquem
+mais código de `libstaccato` vão herdar as mesmas dependências do
+`Loja.exe` (`windeployqt` é o caminho usual de deploy).
 
 ## Próximos passos
 

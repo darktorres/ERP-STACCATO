@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "itembox.h"
+#include "validators.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -234,82 +235,24 @@ void RegisterDialog::remove() {
 }
 
 bool RegisterDialog::validaCNPJ(const QString &text) {
+  // Preserve legacy contract: malformed length → return false (caller asks
+  // user to keep typing); bad checksum → throw so the QMessageBox surfaces.
   const QString cnpj = QString(text).remove(".").remove("/").remove("-");
 
   if (cnpj.size() != 14) { return false; }
 
-  const QString sub = cnpj.left(12);
-
-  QVector<int> sub2;
-
-  for (const auto &i : sub) { sub2.push_back(i.digitValue()); }
-
-  const QVector<int> multiplicadores = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
-
-  int soma = 0;
-
-  for (int i = 0; i < 12; ++i) { soma += sub2.at(i) * multiplicadores.at(i); }
-
-  const int resto = soma % 11;
-
-  const int digito1 = resto < 2 ? 0 : 11 - resto;
-
-  sub2.push_back(digito1);
-
-  const QVector<int> multiplicadores2 = {6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
-
-  int soma2 = 0;
-
-  for (int i = 0; i < 13; ++i) { soma2 += sub2.at(i) * multiplicadores2.at(i); }
-
-  const int resto2 = soma2 % 11;
-
-  const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
-
-  if (digito1 != cnpj.at(12).digitValue() or digito2 != cnpj.at(13).digitValue()) { throw RuntimeError("CNPJ inválido!", this); }
+  if (not validators::cnpjValido(text)) { throw RuntimeError("CNPJ inválido!", this); }
 
   return true;
 }
 
 bool RegisterDialog::validaCPF(const QString &text) {
+  // Same contract as validaCNPJ — see comment there.
   const QString cpf = QString(text).remove(".").remove("-");
 
   if (cpf.size() != 11) { return false; }
 
-  if (cpf == "00000000000" or cpf == "11111111111" or cpf == "22222222222" or cpf == "33333333333" or cpf == "44444444444" or cpf == "55555555555" or cpf == "66666666666" or cpf == "77777777777" or
-      cpf == "88888888888" or cpf == "99999999999") {
-    throw RuntimeError("CPF inválido!", this);
-  }
-
-  const QString sub = cpf.left(9);
-
-  QVector<int> sub2;
-
-  for (const auto &i : sub) { sub2.push_back(i.digitValue()); }
-
-  const QVector<int> multiplicadores = {10, 9, 8, 7, 6, 5, 4, 3, 2};
-
-  int soma = 0;
-
-  for (int i = 0; i < 9; ++i) { soma += sub2.at(i) * multiplicadores.at(i); }
-
-  const int resto = soma % 11;
-
-  const int digito1 = resto < 2 ? 0 : 11 - resto;
-
-  sub2.push_back(digito1);
-
-  const QVector<int> multiplicadores2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
-
-  int soma2 = 0;
-
-  for (int i = 0; i < 10; ++i) { soma2 += sub2.at(i) * multiplicadores2.at(i); }
-
-  const int resto2 = soma2 % 11;
-
-  const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
-
-  if (digito1 != cpf.at(9).digitValue() or digito2 != cpf.at(10).digitValue()) { throw RuntimeError("CPF inválido!", this); }
+  if (not validators::cpfValido(text)) { throw RuntimeError("CPF inválido!", this); }
 
   return true;
 }

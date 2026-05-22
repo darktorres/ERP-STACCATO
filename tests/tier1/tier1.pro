@@ -59,4 +59,4 @@ linux {
 MOC_DIR     = build_files/moc
 OBJECTS_DIR = build_files/obj
 
-SOURCES += test_smoke.cpp
+SOURCES += test_tier1.cpp

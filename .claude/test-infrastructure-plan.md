@@ -141,7 +141,9 @@ Lowest priority; added in M4 once Tier 2 is stable.
 
 The originally planned `Probe`-subclass-of-`RegisterDialog` approach was dropped after discovering it crashes at runtime with `STATUS_DLL_INIT_FAILED`: referencing `RegisterDialog` forces the linker to pull in `Application`, QSimpleUpdater, LimeReport, etc., and something in that transitive set fails to initialize without the resource setup that lives in `Loja.exe`. M2's free-function extraction (next milestone) sidesteps the cascade entirely.
 
-**M2 — Tier 1 coverage (2 PRs, ~1 week).** Extract `src/validators.h/.cpp` with free `cpfValido()/cnpjValido()`; rewire `RegisterDialog` to delegate. Add 8–10 tests across `Application` helpers and `SQL::*` builders. Extract `Orcamento::calcularPeso` and `Venda` arithmetic helpers; test.
+**M2 — Tier 1 coverage (2 PRs, ~1 week). [IN PROGRESS]** Extract `src/validators.h/.cpp` with free `cpfValido()/cnpjValido()`; rewire `RegisterDialog` to delegate. **[Done — first PR, 11 validator tests + 1 smoke, all PASS.]** Add 8–10 tests across `Application` helpers and `SQL::*` builders. Extract `Orcamento::calcularPeso` and `Venda` arithmetic helpers; test. **[Remaining for the second PR.]**
+
+Layout note: tier1 tests aggregate into a single `test_tier1.cpp` with one custom `main()` running each `QObject` test class via `QTest::qExec`. Adding a new suite is one class + one block in `main()` — no `.pro` change.
 
 **M3 — Tier 2 enablement (2 PRs, ~1 week).** Add `Application::dbConnectFromEnv()`. Demote QMYSQL hard-fail to throw. Add `tests/fixtures/fixtures.sql`, `tests/common/integrationfixture.h`, `tests/tier2/tier2.pro`. 3–4 tests including one `[procedure]` tagged.
 

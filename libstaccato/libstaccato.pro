@@ -190,6 +190,7 @@ SOURCES += \
     $$ROOT_PWD/src/user.cpp \
     $$ROOT_PWD/src/userconfig.cpp \
     $$ROOT_PWD/src/validadedialog.cpp \
+    $$ROOT_PWD/src/validators.cpp \
     $$ROOT_PWD/src/venda.cpp \
     $$ROOT_PWD/src/vendaproxymodel.cpp \
     $$ROOT_PWD/src/viewgalpao.cpp \
@@ -332,6 +333,7 @@ HEADERS += \
     $$ROOT_PWD/src/user.h \
     $$ROOT_PWD/src/userconfig.h \
     $$ROOT_PWD/src/validadedialog.h \
+    $$ROOT_PWD/src/validators.h \
     $$ROOT_PWD/src/venda.h \
     $$ROOT_PWD/src/vendaproxymodel.h \
     $$ROOT_PWD/src/viewgalpao.h \

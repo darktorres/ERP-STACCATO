@@ -154,7 +154,15 @@ Layout note: tier1 tests aggregate into a single `test_tier1.cpp` with one custo
 Not extracted (intentionally):
 - `Orcamento::calcularPeso`: not pure — queries the DB for `kgcx`. Only `caixas * kgcx` is arithmetic, not worth a separate helper.
 
-**M3 — Tier 2 enablement (2 PRs, ~1 week).** Add `Application::dbConnectFromEnv()`. Demote QMYSQL hard-fail to throw. Add `tests/fixtures/fixtures.sql`, `tests/common/integrationfixture.h`, `tests/tier2/tier2.pro`. 3–4 tests including one `[procedure]` tagged.
+**M3 — Tier 2 enablement. [M3.1 done]**
+- M3.1: `tests/common/integration_fixture.{h,cpp}` with env-driven connection, hard refusal of `staccato`/`staccato_staging`, auto-bootstrap (CREATE DATABASE + load initdb.sql via `mysql.exe` if `loja` table absent). `tests/tier2/tier2.pro` + `test_tier2.cpp` with TestConnectionSafety (4 pass with no DB), TestConnection (3 tests gated by IntegrationFixture rollback), TestSqlExecutesAgainstSchema (3 SQL-builders run against real schema). Hard guidance toward `mysql_native_password` because the bundled `libmysql.dll` lacks `caching_sha2_password.dll` plugin.
+- M3.2 (future): `tests/fixtures/fixtures.sql` curated dataset (2 lojas, usuários, produtos, clientes PF/PJ). Tests that depend on canonical seed data.
+- M3.3 (future): `[procedure]`-tagged tests using truncate-snapshot pattern for procedures that open their own transactions (e.g., `update_venda_status`).
+
+Decisions taken in M3.1:
+- Did **not** add `Application::dbConnectFromEnv()` — would force changes to Application's constructor that risk regressions in production startup. Test connection lives entirely in `tests/common/`, decoupled from Application.
+- Did **not** demote the QMYSQL hard-fail (same reason: production behavior unchanged). Tests use `QApplication` directly, never instantiating Application, so they never hit the driver check.
+- Auto-bootstrap shells out to `mysql.exe` via `QProcess` because `initdb.sql` uses `DELIMITER` and multi-statement procedures that `QSqlQuery` can't execute directly. Probe order: env var `STACCATO_TEST_MYSQL_BIN` → `QStandardPaths::findExecutable("mysql")` → hardcoded `C:\Program Files\MySQL\MySQL Server 8.4/8.0/5.7\bin\mysql.exe`.
 
 **M4 — Tier 3 smoke + Venda/Orcamento invariants (ongoing).** One dialog test per major surface, added alongside future bug fixes (regression-driven coverage).
 

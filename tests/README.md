@@ -11,12 +11,18 @@ Plano completo em `.claude/test-infrastructure-plan.md`.
 
 ```
 tests/
-├── tests.pro          (SUBDIRS aggregator)
-├── tier1/             (M1+) — unit, no DB, no event loop além do QApplication padrão
+├── tests.pro                       (SUBDIRS aggregator)
+├── common/                         (M3+) — shared test infrastructure
+│   ├── integration_fixture.h       — connection helper + IntegrationFixture base
+│   └── integration_fixture.cpp
+├── fixtures/                       (M3+) — curated seed data (optional)
+├── tier1/                          (M1+) — unit, no DB
 │   ├── tier1.pro
-│   └── test_validators.cpp
-├── tier2/             (M3) — integração contra MySQL staccato_test local
-└── tier3/             (M4) — UI smoke via QTest::keyClicks/mouseClick
+│   └── test_tier1.cpp
+├── tier2/                          (M3+) — integração contra staccato_test local
+│   ├── tier2.pro
+│   └── test_tier2.cpp
+└── tier3/                          (M4) — UI smoke via QTest::keyClicks/mouseClick
 ```
 
 ## Build
@@ -116,6 +122,73 @@ falhariam mesmo com os DLLs presentes. O deploy completo é só para o exe
 
 O `QMAKE_POST_LINK` de `tests/tier1/tier1.pro` invoca
 `tools/deploy.cmd ... app` para cobrir esses DLLs no diretório do `.exe`.
+
+## Tier 2 — staccato_test local
+
+`tests/tier2/` roda contra um MySQL local. O binary se auto-bootstrapa:
+ao iniciar, abre uma conexão admin no banco `mysql`, e se `staccato_test`
+não existir cria com `CREATE DATABASE … utf8mb4`. Se existir mas sem a
+tabela sentinela `loja`, invoca `mysql.exe < initdb.sql` para carregar o
+schema todo (216 tabelas + 106 procedures/triggers/views — leva ~10 s na
+primeira execução).
+
+**Variáveis de ambiente** (todas opcionais):
+
+| Var                          | Default       | Uso                                  |
+|------------------------------|---------------|--------------------------------------|
+| `STACCATO_TEST_DB_HOST`      | `127.0.0.1`   | Host do MySQL                        |
+| `STACCATO_TEST_DB_PORT`      | `3306`        | Porta                                |
+| `STACCATO_TEST_DB_USER`      | `root`        | Usuário (precisa CREATE DATABASE na 1ª vez) |
+| `STACCATO_TEST_DB_PASS`      | (vazia)       | Senha                                |
+| `STACCATO_TEST_DB_NAME`      | `staccato_test` | Schema; `staccato`/`staccato_staging` são **rejeitados em runtime** |
+| `STACCATO_TEST_MYSQL_BIN`    | auto-detect   | Caminho do `mysql.exe` para bootstrap |
+
+**Salvaguardas:**
+
+- `readEnvConnectionInfo()` lança `std::runtime_error` se o nome do schema
+  bater com `staccato` ou `staccato_staging`. Não há override.
+- A conexão admin é só no banco `mysql` (não na produção).
+- Cada teste roda dentro de uma transação que é rolled-back no `cleanup()`.
+- Tests que chamem stored procedures que abrem transações próprias
+  precisam do padrão `[procedure]` (truncate-snapshot — a documentar quando
+  o primeiro for adicionado).
+
+**Pré-requisito — usuário com `mysql_native_password`:**
+
+O projeto inteiro usa `mysql_native_password` (a `libmysql.dll` vendorada,
+da Connector/C 6.1, não tem o plugin `caching_sha2_password.dll`). O default
+do MySQL 8.4 para `root@localhost` é `caching_sha2_password` — então o root
+de uma instalação fresca *não* funciona. Crie um usuário dedicado para os
+testes (uma vez):
+
+```sql
+CREATE USER 'staccato_test'@'localhost'
+  IDENTIFIED WITH mysql_native_password BY 'staccato_test';
+GRANT ALL PRIVILEGES ON *.* TO 'staccato_test'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+O `GRANT ALL PRIVILEGES ON *.*` é necessário porque o bootstrap precisa
+de `CREATE DATABASE` no primeiro run. Depois dá pra apertar pra apenas
+`staccato_test.*`.
+
+**Rodar:**
+
+```batch
+set "STACCATO_TEST_DB_USER=staccato_test"
+set "STACCATO_TEST_DB_PASS=staccato_test"
+cd tests\tier2
+nmake check
+:: ou:
+tests\tier2\debug\tier2_tests.exe
+```
+
+A primeira execução cria o schema; corridas subsequentes detectam que
+`loja` já existe e pulam o carregamento (~10 ms de overhead).
+
+**Sem creds configuradas:** os testes que dependem de DB usam `QSKIP` no
+`initTestCase` com a mensagem do `lastError()` do driver. Os testes que
+não tocam DB (`TestConnectionSafety`) seguem rodando normalmente.
 
 ## Config files (NÃO entram no repo)
 

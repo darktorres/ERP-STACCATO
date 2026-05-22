@@ -20,6 +20,7 @@
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
 #include "integration_fixture.h"
+#include "orcamento.h"
 #include "searchdialog.h"
 #include "user.h"
 #include "venda.h"
@@ -243,6 +244,38 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestOrcamentoDialog — Orcamento construction + read path against the
+// seeded TEST-ORC-001 row. Smaller FK footprint than Venda (no endereço at
+// the orcamento level), but still exercises the model item grid + UI bindings.
+// -----------------------------------------------------------------------------
+class TestOrcamentoDialog : public QObject {
+  Q_OBJECT
+
+private slots:
+  void initTestCase() {
+    try {
+      User::login(QStringLiteral("admin_test"), QStringLiteral("admin123"));
+    } catch (const std::exception &e) { QSKIP(qPrintable(QStringLiteral("seed login failed: %1").arg(QString::fromLocal8Bit(e.what())))); }
+  }
+
+  void cleanupTestCase() {
+    User::idLoja.clear();
+    User::idUsuario.clear();
+    User::tipo.clear();
+  }
+
+  void constructsWithoutThrowing() {
+    Orcamento dialog(nullptr);
+    QVERIFY(not dialog.windowTitle().isEmpty());
+  }
+
+  void loadsSeededOrcamento() {
+    Orcamento dialog(nullptr);
+    QVERIFY2(dialog.viewRegisterById(QStringLiteral("TEST-ORC-001")), "Orcamento read path threw — see stderr");
+  }
+};
+
+// -----------------------------------------------------------------------------
 // TestSearchDialogVendedorFilter — regression for the bug surfaced during
 // M4 development: SearchDialog::vendedor used to build " AND idLoja = "
 // (with empty value) when no user was logged in, producing invalid SQL.
@@ -311,6 +344,11 @@ int main(int argc, char *argv[]) {
 
   {
     TestVendaDialogSmoke t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestOrcamentoDialog t;
     status |= QTest::qExec(&t, argc, argv);
   }
 

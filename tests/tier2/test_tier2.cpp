@@ -224,6 +224,94 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestRoundTrips — extra INSERT/SELECT/rollback per major business table.
+// Each test inserts using fields that are NOT NULL without defaults
+// (sourced from information_schema), reads back, and asserts. Rollback
+// from IntegrationFixture cleanup wipes the rows.
+// -----------------------------------------------------------------------------
+class TestRoundTrips : public integration::IntegrationFixture {
+  Q_OBJECT
+
+private slots:
+  void fornecedorRoundTrip() {
+    QSqlQuery q(db);
+    // fornecedor: idFornecedor (auto), razaoSocial NOT NULL.
+    q.prepare(QStringLiteral("INSERT INTO fornecedor (razaoSocial) VALUES (:r)"));
+    q.bindValue(QStringLiteral(":r"), QStringLiteral("RoundTrip Fornecedor"));
+    QVERIFY2(q.exec(), qPrintable(q.lastError().text()));
+
+    const QVariant newId = q.lastInsertId();
+    QVERIFY(newId.isValid());
+
+    QSqlQuery sel(db);
+    sel.prepare(QStringLiteral("SELECT razaoSocial FROM fornecedor WHERE idFornecedor = :id"));
+    sel.bindValue(QStringLiteral(":id"), newId);
+    QVERIFY(sel.exec());
+    QVERIFY(sel.next());
+    QCOMPARE(sel.value(0).toString(), QStringLiteral("RoundTrip Fornecedor"));
+  }
+
+  void produtoRoundTrip() {
+    // produto: requires idFornecedor (FK), fornecedor, descricao, un,
+    // codComercial, custo. Uses the seeded fornecedor (idFornecedor=1,
+    // razaoSocial 'Fornecedor Teste LTDA').
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("INSERT INTO produto "
+                             "(idFornecedor, fornecedor, descricao, un, codComercial, custo) "
+                             "VALUES (1, 'Fornecedor Teste LTDA', :desc, 'M2', :cod, 99.99)"));
+    q.bindValue(QStringLiteral(":desc"), QStringLiteral("RoundTrip Produto"));
+    q.bindValue(QStringLiteral(":cod"), QStringLiteral("RT-COD-001"));
+    QVERIFY2(q.exec(), qPrintable(q.lastError().text()));
+
+    const QVariant newId = q.lastInsertId();
+    QVERIFY(newId.isValid());
+
+    QSqlQuery sel(db);
+    sel.prepare(QStringLiteral("SELECT descricao, un, codComercial, custo FROM produto WHERE idProduto = :id"));
+    sel.bindValue(QStringLiteral(":id"), newId);
+    QVERIFY(sel.exec());
+    QVERIFY(sel.next());
+    QCOMPARE(sel.value(0).toString(), QStringLiteral("RoundTrip Produto"));
+    QCOMPARE(sel.value(1).toString(), QStringLiteral("M2"));
+    QCOMPARE(sel.value(2).toString(), QStringLiteral("RT-COD-001"));
+    QCOMPARE(sel.value(3).toDouble(), 99.99);
+  }
+
+  void pedidoFornecedorP1P2RoundTrip() {
+    // The OC tree has two tables: pedido_fornecedor_has_produto (p1, the
+    // master) and pedido_fornecedor_has_produto2 (p2, the leaf breakdown
+    // per OC/lote/recebimento). p2.idPedidoFK references p1.idPedido1, so
+    // a round-trip needs both inserts.
+    QSqlQuery p1(db);
+    p1.prepare(QStringLiteral("INSERT INTO pedido_fornecedor_has_produto (fornecedor) VALUES (:f)"));
+    p1.bindValue(QStringLiteral(":f"), QStringLiteral("Fornecedor Teste LTDA"));
+    QVERIFY2(p1.exec(), qPrintable(p1.lastError().text()));
+
+    const QVariant idPedido1 = p1.lastInsertId();
+    QVERIFY(idPedido1.isValid());
+
+    QSqlQuery p2(db);
+    p2.prepare(QStringLiteral("INSERT INTO pedido_fornecedor_has_produto2 "
+                              "(idPedidoFK, fornecedor) VALUES (:fk, :f)"));
+    p2.bindValue(QStringLiteral(":fk"), idPedido1);
+    p2.bindValue(QStringLiteral(":f"), QStringLiteral("Fornecedor Teste LTDA"));
+    QVERIFY2(p2.exec(), qPrintable(p2.lastError().text()));
+
+    const QVariant idPedido2 = p2.lastInsertId();
+    QVERIFY(idPedido2.isValid());
+
+    QSqlQuery sel(db);
+    sel.prepare(QStringLiteral("SELECT fornecedor, idPedidoFK FROM pedido_fornecedor_has_produto2 "
+                               "WHERE idPedido2 = :id"));
+    sel.bindValue(QStringLiteral(":id"), idPedido2);
+    QVERIFY(sel.exec());
+    QVERIFY(sel.next());
+    QCOMPARE(sel.value(0).toString(), QStringLiteral("Fornecedor Teste LTDA"));
+    QCOMPARE(sel.value(1).toInt(), idPedido1.toInt());
+  }
+};
+
+// -----------------------------------------------------------------------------
 // TestStoredProcedures — calls a handful of stored procedures with no-op
 // inputs to confirm they exist, accept the production-expected parameter
 // types, and don't blow up on edge cases. Real behavioural tests would need
@@ -301,6 +389,7 @@ int main(int argc, char *argv[]) {
   { TestSqlExecutesAgainstSchema t; status |= QTest::qExec(&t, argc, argv); }
   { TestFixtures t; status |= QTest::qExec(&t, argc, argv); }
   { TestClienteRoundTrip t; status |= QTest::qExec(&t, argc, argv); }
+  { TestRoundTrips t; status |= QTest::qExec(&t, argc, argv); }
   { TestStoredProcedures t; status |= QTest::qExec(&t, argc, argv); }
 
   return status;

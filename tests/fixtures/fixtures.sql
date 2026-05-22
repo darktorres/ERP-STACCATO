@@ -78,3 +78,12 @@ INSERT IGNORE INTO `venda`
      `idProfissional`, `data`, `dataOrc`, `total`, `prazoEntrega`)
 VALUES
     ('TEST-001', 1, 1, 1, 2, 2, 1, NOW(), NOW(), 0, 0);
+
+-- A canonical orcamento — used by the Orcamento dialog read-path test.
+-- Orcamento needs fewer FKs than venda (no entrega/faturamento endereço,
+-- no cliente at the orcamento level — cliente is per-itembox in the
+-- dialog, not part of the orcamento row itself).
+INSERT IGNORE INTO `orcamento`
+    (`idOrcamento`, `idLoja`, `idUsuario`, `idProfissional`, `data`, `total`)
+VALUES
+    ('TEST-ORC-001', 1, 1, 1, NOW(), 0);

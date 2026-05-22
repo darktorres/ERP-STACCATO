@@ -35,4 +35,15 @@ QDate ajustarDiaUtil(QDate date) {
   return date;
 }
 
+std::optional<QString> findTag(const QString &texto, const QString &tag) {
+  // NOTE: `Qt::CaseInsensitive` is the historical literal here but it lands
+  // in QString::indexOf's `from` argument (=1), not the case-sensitivity
+  // argument. See header for details.
+  const int index = texto.indexOf(QStringLiteral("\r\n") + tag, Qt::CaseInsensitive);
+
+  if (index == -1) { return std::nullopt; }
+
+  return texto.mid(index + tag.length() + 2).split(QStringLiteral("\r\n")).first();
+}
+
 } // namespace app

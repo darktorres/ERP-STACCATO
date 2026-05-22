@@ -9,6 +9,7 @@
 #include "app_helpers.h"
 #include "sql.h"
 #include "validators.h"
+#include "venda_calc.h"
 
 #include <QApplication>
 #include <QSqlDatabase>
@@ -166,6 +167,101 @@ private slots:
   void ajustarDiaUtilFridayUnchanged() {
     QCOMPARE(app::ajustarDiaUtil(QDate(2026, 5, 22)), QDate(2026, 5, 22));
   }
+
+  // ---- findTag -------------------------------------------------------------
+
+  void findTagSimple() {
+    const QString texto = QStringLiteral("preamble\r\ncStat: 100\r\nxMotivo: OK");
+    const auto found = app::findTag(texto, QStringLiteral("cStat:"));
+    QVERIFY(found.has_value());
+    QCOMPARE(*found, QStringLiteral(" 100"));
+  }
+
+  void findTagIsActuallyCaseSensitive() {
+    // The original `indexOf(needle, Qt::CaseInsensitive)` looks like it asks
+    // for case-insensitive matching but actually passes the enum value as the
+    // `from` offset (see app_helpers.h NOTE). Document the real behaviour:
+    // case-sensitive match. Production SEFAZ events ship exact case so the
+    // bug went unnoticed — fix it deliberately in a separate PR.
+    const QString texto = QStringLiteral("aaa\r\nCSTAT:100");
+    QVERIFY(not app::findTag(texto, QStringLiteral("cstat:")).has_value());
+    QVERIFY(app::findTag(texto, QStringLiteral("CSTAT:")).has_value());
+  }
+
+  void findTagMissing() { QVERIFY(not app::findTag(QStringLiteral("nope\r\nfoo"), QStringLiteral("bar:")).has_value()); }
+
+  void findTagRequiresPrecedingCRLF() {
+    // The tag must be CRLF-prefixed — a match at index 0 (no preceding CRLF)
+    // is NOT found. Documents legacy behaviour; callers prepend "\r\n" if the
+    // tag could be the first line.
+    QVERIFY(not app::findTag(QStringLiteral("cStat: 100\r\nxMotivo: OK"), QStringLiteral("cStat:")).has_value());
+  }
+
+  void findTagStopsAtNextCRLF() {
+    const QString texto = QStringLiteral("a\r\ntag:value\r\nnext:other");
+    QCOMPARE(*app::findTag(texto, QStringLiteral("tag:")), QStringLiteral("value"));
+  }
+};
+
+// -----------------------------------------------------------------------------
+// TestVendaCalc — extracted pure arithmetic for Venda::calcularTotais (M2.3).
+// -----------------------------------------------------------------------------
+class TestVendaCalc : public QObject {
+  Q_OBJECT
+
+private slots:
+  void empty() {
+    const auto [bruto, liq, total] = venda_calc::calcularTotais({});
+    QCOMPARE(bruto, 0.0);
+    QCOMPARE(liq, 0.0);
+    QCOMPARE(total, 0.0);
+  }
+
+  void singleRow() {
+    const auto [bruto, liq, total] = venda_calc::calcularTotais({
+        {100.0, 90.0, 95.0, false},
+    });
+    QCOMPARE(bruto, 100.0);
+    QCOMPARE(liq, 90.0);
+    QCOMPARE(total, 95.0);
+  }
+
+  void multipleRowsSummed() {
+    const auto [bruto, liq, total] = venda_calc::calcularTotais({
+        {100.0, 90.0, 95.0, false},
+        {200.0, 180.0, 195.0, false},
+        {50.0, 50.0, 50.0, false},
+    });
+    QCOMPARE(bruto, 350.0);
+    QCOMPARE(liq, 320.0);
+    QCOMPARE(total, 340.0);
+  }
+
+  void pendingDeletionSkipped() {
+    // Row marked for deletion must not contribute to any column.
+    const auto [bruto, liq, total] = venda_calc::calcularTotais({
+        {100.0, 90.0, 95.0, false},
+        {999.0, 999.0, 999.0, true}, // ← deletion-pending, must be ignored
+        {200.0, 180.0, 195.0, false},
+    });
+    QCOMPARE(bruto, 300.0);
+    QCOMPARE(liq, 270.0);
+    QCOMPARE(total, 290.0);
+  }
+
+  void invariantSubTotalBrutoGeSubTotalLiq() {
+    // For any non-deletion row, parcial (bruto) ≥ parcialDesc (líquido)
+    // is expected business invariant. The helper itself is a plain sum —
+    // this test documents the invariant at the data-shape level.
+    const QVector<venda_calc::LineItem> items = {
+        {100.0, 90.0, 95.0, false},
+        {50.0, 50.0, 50.0, false},
+        {25.0, 20.0, 22.0, false},
+    };
+    const auto [bruto, liq, total] = venda_calc::calcularTotais(items);
+    QVERIFY(bruto >= liq);
+    QVERIFY(total >= 0.0);
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -253,6 +349,11 @@ int main(int argc, char *argv[]) {
 
   {
     TestSqlBuilders t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestVendaCalc t;
     status |= QTest::qExec(&t, argc, argv);
   }
 

@@ -586,11 +586,9 @@ bool Application::notify(QObject *receiver, QEvent *event) {
 }
 
 QString Application::findTag(const QString &texto, const QString &tag) {
-  const int index = texto.indexOf("\r\n" + tag, Qt::CaseInsensitive);
+  if (auto found = app::findTag(texto, tag); found) { return *found; }
 
-  if (index == -1) { throw RuntimeException("Não encontrou o campo '" + tag + "' no evento: " + texto); }
-
-  return texto.mid(index + tag.length() + 2).split("\r\n").first();
+  throw RuntimeException("Não encontrou o campo '" + tag + "' no evento: " + texto);
 }
 
 #ifndef BENCHMARK_BUILD

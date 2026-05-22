@@ -193,6 +193,7 @@ SOURCES += \
     $$ROOT_PWD/src/validadedialog.cpp \
     $$ROOT_PWD/src/validators.cpp \
     $$ROOT_PWD/src/venda.cpp \
+    $$ROOT_PWD/src/venda_calc.cpp \
     $$ROOT_PWD/src/vendaproxymodel.cpp \
     $$ROOT_PWD/src/viewgalpao.cpp \
     $$ROOT_PWD/src/widgetcompraavulsa.cpp \
@@ -337,6 +338,7 @@ HEADERS += \
     $$ROOT_PWD/src/validadedialog.h \
     $$ROOT_PWD/src/validators.h \
     $$ROOT_PWD/src/venda.h \
+    $$ROOT_PWD/src/venda_calc.h \
     $$ROOT_PWD/src/vendaproxymodel.h \
     $$ROOT_PWD/src/viewgalpao.h \
     $$ROOT_PWD/src/widgetcompraavulsa.h \

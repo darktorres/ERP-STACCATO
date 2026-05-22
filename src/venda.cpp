@@ -3,6 +3,7 @@
 
 #include "acbrlib.h"
 #include "application.h"
+#include "venda_calc.h"
 #include "calculofrete.h"
 #include "checkboxdelegate.h"
 #include "comprovantes.h"
@@ -443,19 +444,19 @@ void Venda::corrigirValores() {
 }
 
 std::tuple<double, double, double> Venda::calcularTotais() {
-  double subTotalBruto = 0.;
-  double subTotalLiq = 0.;
-  double total = 0.;
+  QVector<venda_calc::LineItem> items;
+  items.reserve(modelItem.rowCount());
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
-
-    subTotalBruto += modelItem.data(row, "parcial").toDouble();
-    subTotalLiq += modelItem.data(row, "parcialDesc").toDouble();
-    total += modelItem.data(row, "total").toDouble();
+    items.append({
+        modelItem.data(row, "parcial").toDouble(),
+        modelItem.data(row, "parcialDesc").toDouble(),
+        modelItem.data(row, "total").toDouble(),
+        modelItem.headerData(row, Qt::Vertical) == "!",
+    });
   }
 
-  return std::make_tuple<>(subTotalBruto, subTotalLiq, total);
+  return venda_calc::calcularTotais(items);
 }
 
 QString Venda::montarLog() {

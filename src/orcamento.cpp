@@ -10,6 +10,7 @@
 #include "file.h"
 #include "log.h"
 #include "logindialog.h"
+#include "orcamento_calc.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
@@ -1287,8 +1288,7 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
   if (verificaServicosEspeciais()) { return; }
   if (replicando) { return; }
 
-  double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
-  double freteMaior = qMax(fretePorcentagem, minimoFrete);
+  double freteMaior = orcamento_calc::minimoFreteBase(ui->doubleSpinBoxSubTotalBruto->value(), porcFrete, minimoFrete);
 
   if (!ui->itemBoxEndereco->text().isEmpty() and ui->itemBoxEndereco->text() != "NÃO HÁ/RETIRA") {
     double pesoSul = 0.;
@@ -1336,10 +1336,7 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
 
     freteMaior = qMax(freteMaior, freteQualp);
 
-    if (User::isGerente()) {
-      const double freteMenor = qMin(freteQualp, freteMaior);
-      minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 0.8;
-    }
+    if (User::isGerente()) { minimoGerente = orcamento_calc::minimoGerente(freteMaior, freteQualp); }
   }
 
   ui->doubleSpinBoxFrete->setMinimum(User::isGerente() ? minimoGerente : freteMaior);

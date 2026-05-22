@@ -47,3 +47,34 @@ INSERT IGNORE INTO `fornecedor`
     (`idFornecedor`, `razaoSocial`)
 VALUES
     (1, 'Fornecedor Teste LTDA');
+
+-- The endereço placeholder used by the Orcamento/Venda dialogs when the
+-- client is picking up at the store. Production special-cases this id with
+-- the literal text 'NÃO HÁ/RETIRA' (see orcamento.cpp:1261, venda.cpp:1525).
+INSERT IGNORE INTO `cliente_has_endereco`
+    (`idEndereco`, `idCliente`, `descricao`)
+VALUES
+    (1, NULL, 'NÃO HÁ/RETIRA');
+
+-- A real address attached to the PF cliente seeded above. Reused by
+-- venda below for both entrega and faturamento.
+INSERT IGNORE INTO `cliente_has_endereco`
+    (`idEndereco`, `idCliente`, `descricao`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `uf`)
+VALUES
+    (2, 1, 'Endereço PF Teste', '01310-100', 'Av. Paulista', '1578', 'Bela Vista', 'São Paulo', 'SP');
+
+-- The profissional placeholder used when a venda has no architect/designer.
+-- idProfissional=1 is special-cased to "NÃO HÁ" throughout the code (see
+-- registerdialog.cpp:38 — viewRegisterById refuses to load it).
+INSERT IGNORE INTO `profissional`
+    (`idProfissional`, `nome_razao`)
+VALUES
+    (1, 'NÃO HÁ');
+
+-- A canonical venda row pulling together the seeded FKs. Used by the
+-- TestVendaReadPath tier3 test to exercise Venda::viewRegisterById.
+INSERT IGNORE INTO `venda`
+    (`idVenda`, `idLoja`, `idUsuario`, `idCliente`, `idEnderecoEntrega`, `idEnderecoFaturamento`,
+     `idProfissional`, `data`, `dataOrc`, `total`, `prazoEntrega`)
+VALUES
+    ('TEST-001', 1, 1, 1, 2, 2, 1, NOW(), NOW(), 0, 0);

@@ -7,6 +7,7 @@
 // in static init paths, and QApplication is cheap enough on Tier 1.
 
 #include "app_helpers.h"
+#include "orcamento_calc.h"
 #include "sql.h"
 #include "validators.h"
 #include "venda_calc.h"
@@ -264,6 +265,60 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestOrcamentoCalc — freight rule arithmetic extracted from
+// Orcamento::calcularFrete. Production keeps the DB/QUALP plumbing; the
+// pure math is now testable here.
+// -----------------------------------------------------------------------------
+class TestOrcamentoCalc : public QObject {
+  Q_OBJECT
+
+private slots:
+  // ---- minimoFreteBase -----------------------------------------------------
+
+  void minimoFreteBasePercentBeatsMinimum() {
+    // 1000.00 * 4% = 40 < min 80 → minimum wins.
+    QCOMPARE(orcamento_calc::minimoFreteBase(1000.0, 4.0, 80.0), 80.0);
+  }
+
+  void minimoFreteBaseMinimumBeatsPercent() {
+    // 5000.00 * 4% = 200 > min 80 → percent wins.
+    QCOMPARE(orcamento_calc::minimoFreteBase(5000.0, 4.0, 80.0), 200.0);
+  }
+
+  void minimoFreteBaseZeroSubTotal() {
+    // subTotal 0 → percentage 0 → minimum wins.
+    QCOMPARE(orcamento_calc::minimoFreteBase(0.0, 4.0, 80.0), 80.0);
+  }
+
+  void minimoFreteBaseZeroPorc() {
+    // porc 0 → percentage 0 → minimum wins.
+    QCOMPARE(orcamento_calc::minimoFreteBase(1000.0, 0.0, 80.0), 80.0);
+  }
+
+  void minimoFreteBaseEqualReturnsEither() {
+    // Boundary: percent equals minimum.
+    QCOMPARE(orcamento_calc::minimoFreteBase(2000.0, 4.0, 80.0), 80.0);
+  }
+
+  // ---- minimoGerente -------------------------------------------------------
+
+  void minimoGerenteUsesEightyPercentOfSmaller() {
+    // freteQualp (60) < freteMaior (100) → freteMenor=60 → 60*0.8 = 48.
+    QCOMPARE(orcamento_calc::minimoGerente(100.0, 60.0), 48.0);
+  }
+
+  void minimoGerenteFreteQualpZeroFallsBackToFreteMaior() {
+    // freteQualp = 0 → freteMenor=0 → fuzzy null → returns freteMaior unchanged.
+    QCOMPARE(orcamento_calc::minimoGerente(100.0, 0.0), 100.0);
+  }
+
+  void minimoGerenteFreteQualpEqualsMaior() {
+    // freteQualp == freteMaior → freteMenor=freteMaior → 0.8 of it.
+    QCOMPARE(orcamento_calc::minimoGerente(100.0, 100.0), 80.0);
+  }
+};
+
+// -----------------------------------------------------------------------------
 // TestSqlBuilders — Sql:: query-string builders (M2.2).
 //
 // These functions take filter/search strings and produce SQL text. They never
@@ -353,6 +408,11 @@ int main(int argc, char *argv[]) {
 
   {
     TestVendaCalc t;
+    status |= QTest::qExec(&t, argc, argv);
+  }
+
+  {
+    TestOrcamentoCalc t;
     status |= QTest::qExec(&t, argc, argv);
   }
 

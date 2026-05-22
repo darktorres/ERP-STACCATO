@@ -230,6 +230,16 @@ private slots:
     Venda dialog(nullptr);
     QVERIFY(not dialog.windowTitle().isEmpty());
   }
+
+  void loadsSeededVenda() {
+    // Read-path: viewRegisterById('TEST-001') loads the canonical venda
+    // from fixtures.sql. Exercises Venda::viewRegister at venda.cpp:691 —
+    // modelItem/modelItem2/modelFluxoCaixa selects, the itemBoxEndereco
+    // filter against the seeded cliente_has_endereco, plus the data
+    // bindings on every widget mapped to the venda columns.
+    Venda dialog(nullptr);
+    QVERIFY2(dialog.viewRegisterById(QStringLiteral("TEST-001")), "Venda read path threw — see stderr for the underlying error");
+  }
 };
 
 // -----------------------------------------------------------------------------

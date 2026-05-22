@@ -159,6 +159,7 @@ SOURCES += \
     $$ROOT_PWD/src/nfeproxymodel.cpp \
     $$ROOT_PWD/src/noeditdelegate.cpp \
     $$ROOT_PWD/src/orcamento.cpp \
+    $$ROOT_PWD/src/orcamento_calc.cpp \
     $$ROOT_PWD/src/orcamentoproxymodel.cpp \
     $$ROOT_PWD/src/pagamentosdia.cpp \
     $$ROOT_PWD/src/palletitem.cpp \
@@ -304,6 +305,7 @@ HEADERS += \
     $$ROOT_PWD/src/nfeproxymodel.h \
     $$ROOT_PWD/src/noeditdelegate.h \
     $$ROOT_PWD/src/orcamento.h \
+    $$ROOT_PWD/src/orcamento_calc.h \
     $$ROOT_PWD/src/orcamentoproxymodel.h \
     $$ROOT_PWD/src/pagamentosdia.h \
     $$ROOT_PWD/src/palletitem.h \

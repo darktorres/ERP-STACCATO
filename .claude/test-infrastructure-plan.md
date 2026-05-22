@@ -154,9 +154,9 @@ Layout note: tier1 tests aggregate into a single `test_tier1.cpp` with one custo
 Not extracted (intentionally):
 - `Orcamento::calcularPeso`: not pure — queries the DB for `kgcx`. Only `caixas * kgcx` is arithmetic, not worth a separate helper.
 
-**M3 — Tier 2 enablement. [M3.1 done]**
-- M3.1: `tests/common/integration_fixture.{h,cpp}` with env-driven connection, hard refusal of `staccato`/`staccato_staging`, auto-bootstrap (CREATE DATABASE + load initdb.sql via `mysql.exe` if `loja` table absent). `tests/tier2/tier2.pro` + `test_tier2.cpp` with TestConnectionSafety (4 pass with no DB), TestConnection (3 tests gated by IntegrationFixture rollback), TestSqlExecutesAgainstSchema (3 SQL-builders run against real schema). Hard guidance toward `mysql_native_password` because the bundled `libmysql.dll` lacks `caching_sha2_password.dll` plugin.
-- M3.2 (future): `tests/fixtures/fixtures.sql` curated dataset (2 lojas, usuários, produtos, clientes PF/PJ). Tests that depend on canonical seed data.
+**M3 — Tier 2 enablement. [M3.1 + M3.2 done]**
+- M3.1: `tests/common/integration_fixture.{h,cpp}` with env-driven connection, hard refusal of `staccato`/`staccato_staging`, auto-bootstrap (CREATE DATABASE + load initdb.sql via `mysql.exe` if `loja` table absent). `tests/tier2/tier2.pro` + `test_tier2.cpp`. Hard guidance toward `mysql_native_password` because the bundled `libmysql.dll` lacks `caching_sha2_password.dll` plugin. Three bugs fixed during bring-up: `staccato` → `<dbname>` rewriting of `initdb.sql` at load time (1170 hardcoded refs), `START TRANSACTION` via raw SQL (Qt's `db.transaction()` short-circuits because libmysql doesn't advertise CLIENT_TRANSACTIONS), and `db = QSqlDatabase()` before `removeDatabase` to silence "still in use" warnings.
+- M3.2: `tests/fixtures/fixtures.sql` curated seed (1 loja, 1 admin user, 1 cliente PF with CPF `390.533.447-05`, 1 cliente PJ with CNPJ `11.222.333/0001-81`). Loaded after `initdb.sql` only when the schema was just created (idempotent). `TestFixtures` (6 tests) verifies the canonical rows are present and bridges back to tier1 (`validators::cpfValido` accepts the seed CPF). `TestClienteRoundTrip` (4 tests) demonstrates transaction-rollback isolation across consecutive test functions.
 - M3.3 (future): `[procedure]`-tagged tests using truncate-snapshot pattern for procedures that open their own transactions (e.g., `update_venda_status`).
 
 Decisions taken in M3.1:

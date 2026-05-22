@@ -153,6 +153,15 @@ primeira execução).
   precisam do padrão `[procedure]` (truncate-snapshot — a documentar quando
   o primeiro for adicionado).
 
+**Seed canônico (`tests/fixtures/fixtures.sql`):** após o load do
+schema, o bootstrap também aplica um dataset mínimo (1 loja, 1 admin,
+1 cliente PF com CPF válido, 1 cliente PJ com CNPJ válido). IDs são
+fixos (`idLoja=1`, `idUsuario=1`, `idCliente=1` PF, `idCliente=2` PJ)
+para que os testes possam referenciar diretamente. O .sql é
+idempotente (`INSERT IGNORE`); o load só roda quando o bootstrap
+acabou de criar o schema do zero — em corridas subsequentes a presença
+do `loja` table já indica setup completo.
+
 **Pré-requisito — usuário com `mysql_native_password`:**
 
 O projeto inteiro usa `mysql_native_password` (a `libmysql.dll` vendorada,

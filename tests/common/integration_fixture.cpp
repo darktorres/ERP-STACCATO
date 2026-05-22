@@ -118,14 +118,17 @@ QString rewriteInitDbToTempFile(const QString &initSqlPath, const QString &dbNam
   return path;
 }
 
-void runInitDbSql(const ConnectionInfo &info, const QString &initSqlPath) {
+// Run a .sql script through the mysql client, after rewriting `staccato`
+// references to the test DB name. Used for both initdb.sql (schema) and
+// fixtures.sql (canonical seed).
+void runSqlScript(const ConnectionInfo &info, const QString &sqlPath) {
   const QString mysqlBin = findMysqlBin();
   if (mysqlBin.isEmpty()) {
     throw std::runtime_error("mysql client not found. Set STACCATO_TEST_MYSQL_BIN to its path or "
                              "ensure mysql.exe is on PATH.");
   }
 
-  const QString rewrittenPath = rewriteInitDbToTempFile(initSqlPath, info.dbName);
+  const QString rewrittenPath = rewriteInitDbToTempFile(sqlPath, info.dbName);
   // RAII delete on the rewritten temp file regardless of how we exit.
   struct TempCleanup {
     QString path;
@@ -151,7 +154,11 @@ void runInitDbSql(const ConnectionInfo &info, const QString &initSqlPath) {
   if (p.exitCode() != 0) {
     const QString stderr_ = QString::fromLocal8Bit(p.readAllStandardError());
     const QString stdout_ = QString::fromLocal8Bit(p.readAllStandardOutput());
-    throw std::runtime_error(QString::fromLatin1("mysql client failed loading initdb.sql (exit %1).\nstderr: %2\nstdout: %3").arg(p.exitCode()).arg(stderr_, stdout_).toStdString());
+    throw std::runtime_error(QString::fromLatin1("mysql client failed loading %1 (exit %2).\nstderr: %3\nstdout: %4")
+                                 .arg(QFileInfo(sqlPath).fileName())
+                                 .arg(p.exitCode())
+                                 .arg(stderr_, stdout_)
+                                 .toStdString());
   }
 }
 
@@ -225,9 +232,19 @@ void ensureSchemaLoaded(const ConnectionInfo &info) {
     const QString initSql = repoRoot + QStringLiteral("/initdb.sql");
     qInfo("[tier2] loading %s into '%s' (this takes ~10s)…", qPrintable(initSql), qPrintable(info.dbName));
 
-    runInitDbSql(info, initSql);
+    runSqlScript(info, initSql);
 
     qInfo("[tier2] schema loaded");
+
+    // After the initial schema load, also apply the canonical seed
+    // (fixtures.sql). We only do this when we just loaded the schema —
+    // subsequent runs (which find `loja` already present) skip both.
+    const QString fixturesSql = repoRoot + QStringLiteral("/tests/fixtures/fixtures.sql");
+    if (QFile::exists(fixturesSql)) {
+      qInfo("[tier2] loading fixtures from %s", qPrintable(fixturesSql));
+      runSqlScript(info, fixturesSql);
+      qInfo("[tier2] fixtures loaded");
+    }
   }
 }
 

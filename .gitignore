@@ -49,3 +49,24 @@ qrs/Thumbs.db
 cloc-1.92.exe
 script_atualizacao.bat
 /web-symfony/node_modules
+
+# MSVC build artifacts (Loja.pro, libstaccato.pro, tests/*.pro)
+*.obj
+*.lib
+*.pdb
+*.ilk
+*.exe
+*.res
+Loja_resource.rc
+/build_files/
+/debug/
+/release/
+/win32/
+/win64/
+libstaccato/build_files/
+libstaccato/debug/
+libstaccato/release/
+tests/**/build_files/
+tests/**/debug/
+tests/**/release/
+tests/**/target_wrapper.bat

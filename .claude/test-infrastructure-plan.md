@@ -137,7 +137,9 @@ Lowest priority; added in M4 once Tier 2 is stable.
 
 ## Phased rollout
 
-**M1 — Build pipeline proof (1 PR, ~2 days).** Add `staccato.pro`, `libstaccato.pro`, shrink `Loja.pro`. Add `tests/tier1/tier1.pro` + `test_validators.cpp` with one passing assertion using a `Probe` subclass of `RegisterDialog` (zero touches inside `src/`). Acceptance: `nmake check` from `tests/tier1/` prints `PASS : TestValidators::cpfValido()`. Production binary `Loja.exe` builds identically.
+**M1 — Build pipeline proof (1 PR, ~2 days). [DONE]** Add `staccato.pro`, `libstaccato.pro`, shrink `Loja.pro` to a thin app shell linking against `libstaccato`. Add `tests/tier1/tier1.pro` + `test_smoke.cpp` containing one assertion (`QCOMPARE(1+1, 2)`). Acceptance: `nmake check` produces a binary that prints `PASS : TestSmoke::buildPipelineWorks()`. Production `Loja.exe` builds and starts up identically.
+
+The originally planned `Probe`-subclass-of-`RegisterDialog` approach was dropped after discovering it crashes at runtime with `STATUS_DLL_INIT_FAILED`: referencing `RegisterDialog` forces the linker to pull in `Application`, QSimpleUpdater, LimeReport, etc., and something in that transitive set fails to initialize without the resource setup that lives in `Loja.exe`. M2's free-function extraction (next milestone) sidesteps the cascade entirely.
 
 **M2 — Tier 1 coverage (2 PRs, ~1 week).** Extract `src/validators.h/.cpp` with free `cpfValido()/cnpjValido()`; rewire `RegisterDialog` to delegate. Add 8–10 tests across `Application` helpers and `SQL::*` builders. Extract `Orcamento::calcularPeso` and `Venda` arithmetic helpers; test.
 
@@ -149,43 +151,26 @@ Lowest priority; added in M4 once Tier 2 is stable.
 
 Zero changes inside `src/`. Build glue + one trivial test that proves the link works end-to-end.
 
-| File | Status | Approx. lines |
+Actual files shipped:
+
+| File | Status | Lines |
 |---|---|---|
-| `staccato.pro` | new | 5 |
-| `libstaccato.pro` | new | 30 |
-| `Loja.pro` | rewrite | 40 |
-| `tests/tests.pro` | new | 3 (SUBDIRS) |
-| `tests/tier1/tier1.pro` | new | 15 |
-| `tests/tier1/main.cpp` | new | (in test_validators.cpp via QTEST_MAIN) |
-| `tests/tier1/test_validators.cpp` | new | ~50 |
-| `tests/README.md` | new | ~40 (how to build/run) |
+| `staccato.pro` | new | 23 |
+| `libstaccato/libstaccato.pro` | new | 326 (mostly the explicit SOURCES/HEADERS/FORMS lists migrated from Loja.pro) |
+| `Loja.pro` | rewrite | 91 (was 519) |
+| `tests/tests.pro` | new | 11 (SUBDIRS) |
+| `tests/tier1/tier1.pro` | new | 60 |
+| `tests/tier1/test_smoke.cpp` | new | ~28 |
+| `tests/README.md` | new | how to build/run + scope notes |
 
-`test_validators.cpp` sketch — uses a test-only subclass to access protected `validaCPF`/`validaCNPJ`. Acknowledged as a temporary expedient; M2 replaces with the free-function form.
+Decisions made during implementation, recorded for future-us:
 
-```cpp
-#include "registerdialog.h"
-#include "application.h"
-#include <QtTest>
-
-class Probe : public RegisterDialog {
-public:
-    Probe() : RegisterDialog("cliente","idCliente",nullptr) {}
-    using RegisterDialog::validaCPF;
-    using RegisterDialog::validaCNPJ;
-};
-
-class TestValidators : public QObject {
-    Q_OBJECT
-private slots:
-    void cpfValido()    { Probe p; QVERIFY(p.validaCPF("390.533.447-05")); }
-    void cpfInvalido()  { Probe p;
-        try { p.validaCPF("111.111.111-11"); QFAIL("should throw"); }
-        catch (const RuntimeError &) {} }
-    void cnpjValido()   { Probe p; QVERIFY(p.validaCNPJ("11.222.333/0001-81")); }
-};
-QTEST_MAIN(TestValidators)
-#include "test_validators.moc"
-```
+- **LimeReport `lrfactoryinitializer.cpp`** is gated on `CONFIG=staticlib` in its `.pri`, but transitively needs `designer.pri` sources that aren't included. Workaround in `libstaccato.pro`: drop `staticlib` from CONFIG around the `include()` call, re-add it after.
+- **Repo root must be on INCLUDEPATH** for both `libstaccato.pro` and `tests/tier1/tier1.pro`. The `.ui` files reference custom widgets as `<header>src/itembox.h</header>`; UIC emits `#include "src/itembox.h"` verbatim, which only resolves when the search path contains the repo root. (Legacy `Loja.pro` got this implicitly because cl ran from the repo root, so `-I.` covered it.)
+- **All RESOURCES live in `Loja.pro`**, not in `libstaccato.pro`. Static-lib `.qrc` on MSVC needs explicit `Q_INIT_RESOURCE()` calls in `main()` to auto-init; keeping resources in the app sidesteps that. The 3rdparty `.pri` files get re-included in `Loja.pro` purely to harvest their RESOURCES; their SOURCES/HEADERS/FORMS are immediately cleared (already compiled in libstaccato).
+- **`tests/tier1/tier1.pro` mirrors libstaccato's full QT module list** (`core gui sql network xml charts widgets testlib printsupport svg uitools qml`). The linker pulls in object files transitively from the static lib, and those need every module libstaccato itself uses. Saves debugging unresolved-symbol storms.
+- **Build is x86 (32-bit)**, matching the legacy `.qmake.stash`. cURL libs only ship as x86 in `3rdparty/`; the original `Loja.pro` had the same asymmetry (cURL only added under `contains(QT_ARCH, i386)`).
+- **CLAUDE.md MSVC path is stale**: VS 2022 BuildTools at `Microsoft Visual Studio\2022\BuildTools` no longer exists — the live install is under `\18\BuildTools`. Update CLAUDE.md alongside M2.
 
 ## Critical files
 

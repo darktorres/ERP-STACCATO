@@ -147,7 +147,7 @@ The originally planned `Probe`-subclass-of-`RegisterDialog` approach was dropped
 - M2.3: extracted `src/venda_calc.h/.cpp` (`venda_calc::calcularTotais` with `LineItem` POD); `Venda::calcularTotais` now reads rows from `modelItem` into a vector and delegates. Added `app::findTag` (`std::optional<QString>`-returning) — `Application::findTag` wraps with throw. 7 venda_calc tests + 5 findTag tests.
 - **Total Tier 1: 51 PASS, 0 FAIL, 0 connections opened.**
 
-Found a pre-existing bug while extracting `findTag`: the original `texto.indexOf(needle, Qt::CaseInsensitive)` passed the enum as the `from` offset (Qt's signature is `indexOf(str, from, cs)`), giving a case-sensitive search from index 1. The extraction preserves the buggy behavior; a comment in `app_helpers.h` calls it out and a test (`findTagIsActuallyCaseSensitive`) locks the current behavior. Fix as a separate PR.
+Found a pre-existing bug while extracting `findTag`: the original `texto.indexOf(needle, Qt::CaseInsensitive)` passed the enum as the `from` offset (Qt's signature is `indexOf(str, from, cs)`), giving a case-sensitive search from index 0. Fixed in commit (TBD) — `findTag` now does case-insensitive matching as the original developer intended. Production SEFAZ events happen to ship exact case, so this is a no-op for known callers but more robust to future variation.
 
 Layout note: tier1 tests aggregate into a single `test_tier1.cpp` with one custom `main()` running each `QObject` test class via `QTest::qExec`. Adding a new suite is one class + one block in `main()` — no `.pro` change.
 

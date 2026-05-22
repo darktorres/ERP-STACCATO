@@ -31,19 +31,10 @@ QString removerDiacriticos(const QString &s, bool removerSimbolos = false);
 // original Application::ajustarDiaUtil.
 QDate ajustarDiaUtil(QDate date);
 
-// Search `texto` for a line whose first characters match `tag`, preceded by
-// CRLF, and return the rest of that line. Returns `std::nullopt` if the tag
-// isn't present. Used to parse NFe SEFAZ events. `Application::findTag`
-// wraps this and throws RuntimeException on miss.
-//
-// LEGACY BUG (preserved here for behavioral parity with the original):
-//   the source called `indexOf(needle, Qt::CaseInsensitive)`, intending a
-//   case-insensitive match. But Qt's signature is
-//   `indexOf(needle, qsizetype from = 0, Qt::CaseSensitivity cs = …)` —
-//   the enum value (1) became the `from` offset and the search ran
-//   *case-sensitively* from index 1. Real callers (NFe events) happen to
-//   match exact case, so the bug went unnoticed. Fix this deliberately
-//   in a follow-up PR rather than silently as part of the extraction.
+// Search `texto` for a line whose first characters match `tag` (case-
+// insensitive), preceded by CRLF, and return the rest of that line. Returns
+// `std::nullopt` if the tag isn't present. Used to parse NFe SEFAZ events.
+// `Application::findTag` wraps this and throws RuntimeException on miss.
 std::optional<QString> findTag(const QString &texto, const QString &tag);
 
 } // namespace app

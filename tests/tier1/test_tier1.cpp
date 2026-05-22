@@ -177,15 +177,14 @@ private slots:
     QCOMPARE(*found, QStringLiteral(" 100"));
   }
 
-  void findTagIsActuallyCaseSensitive() {
-    // The original `indexOf(needle, Qt::CaseInsensitive)` looks like it asks
-    // for case-insensitive matching but actually passes the enum value as the
-    // `from` offset (see app_helpers.h NOTE). Document the real behaviour:
-    // case-sensitive match. Production SEFAZ events ship exact case so the
-    // bug went unnoticed — fix it deliberately in a separate PR.
+  void findTagIsCaseInsensitive() {
+    // Original code intended case-insensitive matching but had the
+    // arguments wrong (Qt::CaseInsensitive landed in the `from` offset).
+    // Bug fixed; verify both casings match.
     const QString texto = QStringLiteral("aaa\r\nCSTAT:100");
-    QVERIFY(not app::findTag(texto, QStringLiteral("cstat:")).has_value());
+    QVERIFY(app::findTag(texto, QStringLiteral("cstat:")).has_value());
     QVERIFY(app::findTag(texto, QStringLiteral("CSTAT:")).has_value());
+    QCOMPARE(*app::findTag(texto, QStringLiteral("cstat:")), QStringLiteral("100"));
   }
 
   void findTagMissing() { QVERIFY(not app::findTag(QStringLiteral("nope\r\nfoo"), QStringLiteral("bar:")).has_value()); }

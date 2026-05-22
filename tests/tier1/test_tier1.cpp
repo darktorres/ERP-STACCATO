@@ -9,6 +9,7 @@
 #include "validators.h"
 
 #include <QApplication>
+#include <QSqlDatabase>
 #include <QtTest>
 
 // -----------------------------------------------------------------------------
@@ -81,6 +82,14 @@ private slots:
 // -----------------------------------------------------------------------------
 // Aggregating main — keeps a single .exe so adding test classes doesn't need
 // build-system changes.
+//
+// SAFETY: Tier 1 must NEVER open a QSqlDatabase. The production schemas
+// `staccato` and `staccato_staging` hold real data, and initdb.sql defines
+// 106 stored procedures/triggers — an accidental connection could fire side
+// effects. We assert at end of run that no connection was ever registered.
+// Tier 2 (M3) will introduce DB access through a separate `staccato_test`
+// schema and a dedicated `IntegrationFixture` base class, which must never
+// be linked into Tier 1.
 // -----------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
@@ -96,6 +105,12 @@ int main(int argc, char *argv[]) {
   {
     TestValidators t;
     status |= QTest::qExec(&t, argc, argv);
+  }
+
+  if (not QSqlDatabase::connectionNames().isEmpty()) {
+    qCritical("Tier 1 must not open a QSqlDatabase. Connections found: %s",
+              qPrintable(QSqlDatabase::connectionNames().join(QStringLiteral(", "))));
+    status |= 1;
   }
 
   return status;

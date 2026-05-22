@@ -224,6 +224,71 @@ private slots:
 };
 
 // -----------------------------------------------------------------------------
+// TestStoredProcedures — calls a handful of stored procedures with no-op
+// inputs to confirm they exist, accept the production-expected parameter
+// types, and don't blow up on edge cases. Real behavioural tests would need
+// deep fixture chains (venda → loja/cliente/usuario/endereco/profissional);
+// they can be added incrementally as M3 fixtures expand.
+//
+// IMPORTANT: every procedure in initdb.sql is verified (via grep) to NOT
+// contain explicit START TRANSACTION / COMMIT / ROLLBACK. So they all run
+// inside the caller's transaction — IntegrationFixture's rollback wrapper
+// undoes their effects, just like for any other DML. No truncate-snapshot
+// pattern is needed.
+// -----------------------------------------------------------------------------
+class TestStoredProcedures : public integration::IntegrationFixture {
+  Q_OBJECT
+
+private slots:
+  void updateVendaStatusOnNonexistentIdIsNoop() {
+    // Production calls this whenever a venda_has_produto row changes. With a
+    // non-existent idVenda, the cursor over venda_has_produto matches nothing
+    // and the UPDATE statements find no rows — verifies the procedure exists
+    // and handles the empty-state edge case without error.
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("CALL update_venda_status(:id)"));
+    q.bindValue(QStringLiteral(":id"), QStringLiteral("NONEXISTENT_VENDA_X"));
+    QVERIFY2(q.exec(), qPrintable(q.lastError().text()));
+  }
+
+  void updateFornecedoresOrcamentoOnNonexistentIdIsNoop() {
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("CALL update_fornecedores_orcamento(:id)"));
+    q.bindValue(QStringLiteral(":id"), QStringLiteral("NONEXISTENT_ORC_X"));
+    QVERIFY2(q.exec(), qPrintable(q.lastError().text()));
+  }
+
+  void updateFornecedoresVendaOnNonexistentIdIsNoop() {
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("CALL update_fornecedores_venda(:id)"));
+    q.bindValue(QStringLiteral(":id"), QStringLiteral("NONEXISTENT_VENDA_X"));
+    QVERIFY2(q.exec(), qPrintable(q.lastError().text()));
+  }
+
+  void mydateFunctionExists() {
+    // MYDATE() is referenced extensively in views (view_resumo_relatorio).
+    // It returns the session variable @mydate, so the value will be NULL
+    // unless explicitly set — what we verify here is just that the
+    // function exists and is callable.
+    QSqlQuery q(db);
+    QVERIFY2(q.exec(QStringLiteral("SELECT MYDATE()")), qPrintable(q.lastError().text()));
+    QVERIFY(q.next());
+  }
+
+  void sha1PasswordFunctionRoundTrips() {
+    // SHA1_PASSWORD() is the auth-hash helper used by usuario rows in
+    // initdb.sql / fixtures.sql. Verify the function produces a stable
+    // 41-character MySQL-style hash for a known input.
+    QSqlQuery q(db);
+    QVERIFY(q.exec(QStringLiteral("SELECT SHA1_PASSWORD('admin123')")));
+    QVERIFY(q.next());
+    const QString hash = q.value(0).toString();
+    QCOMPARE(hash.length(), 41);
+    QVERIFY(hash.startsWith(QLatin1Char('*')));
+  }
+};
+
+// -----------------------------------------------------------------------------
 // Aggregating main.
 // -----------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
@@ -236,6 +301,7 @@ int main(int argc, char *argv[]) {
   { TestSqlExecutesAgainstSchema t; status |= QTest::qExec(&t, argc, argv); }
   { TestFixtures t; status |= QTest::qExec(&t, argc, argv); }
   { TestClienteRoundTrip t; status |= QTest::qExec(&t, argc, argv); }
+  { TestStoredProcedures t; status |= QTest::qExec(&t, argc, argv); }
 
   return status;
 }

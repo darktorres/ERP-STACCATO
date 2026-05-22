@@ -250,7 +250,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   updateTables();
 
-  const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+  const int xMotivoIndex = resposta.indexOf("XMotivo=", 0, Qt::CaseInsensitive);
 
   if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'xMotivo': " + resposta); }
 
@@ -431,7 +431,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
     qApp->endTransaction();
 
-    const int xMotivoIndex = resposta.indexOf("XMotivo=", Qt::CaseInsensitive);
+    const int xMotivoIndex = resposta.indexOf("XMotivo=", 0, Qt::CaseInsensitive);
 
     if (xMotivoIndex == -1) { throw RuntimeException("Não encontrou o campo 'XMotivo':\n" + resposta); }
 

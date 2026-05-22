@@ -9,4 +9,4 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS = tier1 tier2
+SUBDIRS = tier1 tier2 tier3

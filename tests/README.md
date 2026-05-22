@@ -22,7 +22,9 @@ tests/
 ├── tier2/                          (M3+) — integração contra staccato_test local
 │   ├── tier2.pro
 │   └── test_tier2.cpp
-└── tier3/                          (M4) — UI smoke via QTest::keyClicks/mouseClick
+└── tier3/                          (M4+) — UI smoke: instancia Application real,
+    ├── tier3.pro                            abre QDialogs de produção, autentica
+    └── test_tier3.cpp                       como admin via User::login
 ```
 
 ## Build

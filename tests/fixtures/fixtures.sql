@@ -23,10 +23,15 @@ INSERT IGNORE INTO `loja`
 VALUES
     (1, 'Loja Teste',  'Loja Teste LTDA', '11999999999');
 
+-- The schema has two password columns and two hash functions for historical
+-- reasons: `passwd` (NOT NULL, hashed via SHA1_PASSWORD) is legacy, while
+-- `password` (nullable, hashed via SHA_PASSWORD) is what User::login actually
+-- checks against. Tier 3 tests authenticate via User::login('admin_test',
+-- 'admin123'), so both columns need consistent test-credential values.
 INSERT IGNORE INTO `usuario`
-    (`idUsuario`, `idLoja`, `user`, `passwd`, `tipo`, `nome`)
+    (`idUsuario`, `idLoja`, `user`, `passwd`, `password`, `tipo`, `nome`)
 VALUES
-    (1, 1, 'admin_test', SHA1_PASSWORD('admin123'), 'ADMINISTRADOR', 'Test Admin');
+    (1, 1, 'admin_test', SHA1_PASSWORD('admin123'), SHA_PASSWORD('admin123'), 'ADMINISTRADOR', 'Test Admin');
 
 INSERT IGNORE INTO `cliente`
     (`idCliente`, `pfpj`, `nome_razao`, `cpf`)

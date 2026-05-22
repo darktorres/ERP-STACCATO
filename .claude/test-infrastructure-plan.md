@@ -164,7 +164,12 @@ Decisions taken in M3.1:
 - Did **not** demote the QMYSQL hard-fail (same reason: production behavior unchanged). Tests use `QApplication` directly, never instantiating Application, so they never hit the driver check.
 - Auto-bootstrap shells out to `mysql.exe` via `QProcess` because `initdb.sql` uses `DELIMITER` and multi-statement procedures that `QSqlQuery` can't execute directly. Probe order: env var `STACCATO_TEST_MYSQL_BIN` → `QStandardPaths::findExecutable("mysql")` → hardcoded `C:\Program Files\MySQL\MySQL Server 8.4/8.0/5.7\bin\mysql.exe`.
 
-**M4 — Tier 3 smoke + Venda/Orcamento invariants (ongoing).** One dialog test per major surface, added alongside future bug fixes (regression-driven coverage).
+**M4 — Tier 3 UI smoke. [first PR done]**
+- `tests/tier3/tier3.pro` + `test_tier3.cpp`. Bootstraps the real `Application` class (not just QApplication) and installs a default-connection `QSqlDatabase` pointing at `staccato_test`. Stub `lojas.txt` is written next to the test exe before Application's ctor reads it.
+- `TestTier3Smoke` (6 tests): verifies qApp is the Application subclass, default DB is open, targets staccato_test, can read seeded loja row.
+- `TestCadastroClienteDialog` (4 tests): logs in as the seeded admin via `User::login("admin_test", "admin123")`, then constructs CadastroCliente and exercises `viewRegisterById(1)` to load the seeded PF cliente. No `show()` — Tier 3 stays headless; the dialog being constructable and the model→mapper chain reading data is the assertion.
+- **Bug surfaced during M4 development**: `SearchDialog::vendedor` (`searchdialog.cpp:507`) builds the filter fragment `" AND idLoja = " + User::idLoja`. When no user is logged in (`User::idLoja` empty), the SQL becomes `… AND idLoja =  AND nome != 'REPOSIÇÂO' …` — invalid syntax. Masked in production because `LoginDialog` always runs before any dialog opens. Tier 3 satisfies the invariant by calling `User::login` in `initTestCase`. Worth fixing the production filter (guard against empty idLoja) in a follow-up — would harden against accidental dialog opens during background tasks.
+- **Schema oddity fixed in fixtures.sql**: `User::login` checks `password = SHA_PASSWORD(:password)`, but the seeded admin row only had `passwd = SHA1_PASSWORD(…)`. Two different columns and two different hash functions live in the schema for historical reasons. fixtures.sql now populates both.
 
 ## First PR — concrete file list
 

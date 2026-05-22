@@ -5,9 +5,11 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
+#include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QStandardPaths>
+#include <QTemporaryFile>
 #include <QtTest>
 
 #include <stdexcept>
@@ -88,6 +90,34 @@ bool tablesLoaded(QSqlDatabase &db) {
   return q.next();
 }
 
+// `initdb.sql` is a dump of the production schema with ~1170 hardcoded
+// `` `staccato` `` references (USE statements + qualified table names). It
+// can't be loaded into a different DB name directly. We stream it through
+// a rewrite that swaps every `` `staccato` `` for `` `<info.dbName>` ``
+// into a temp file, then feed THAT to mysql.exe.
+QString rewriteInitDbToTempFile(const QString &initSqlPath, const QString &dbName) {
+  QFile orig(initSqlPath);
+  if (not orig.open(QFile::ReadOnly)) { throw std::runtime_error(QString::fromLatin1("Cannot read %1: %2").arg(initSqlPath, orig.errorString()).toStdString()); }
+
+  // 410 KB file — comfortably small to slurp.
+  QString sql = QString::fromUtf8(orig.readAll());
+  sql.replace(QStringLiteral("`staccato`"), QStringLiteral("`%1`").arg(dbName));
+
+  auto *temp = new QTemporaryFile(QDir::tempPath() + QStringLiteral("/staccato-initdb-XXXXXX.sql"));
+  temp->setAutoRemove(false); // keep alive across QProcess; caller deletes
+  if (not temp->open()) {
+    const QString err = temp->errorString();
+    delete temp;
+    throw std::runtime_error(QString::fromLatin1("Cannot create temp file: %1").arg(err).toStdString());
+  }
+
+  temp->write(sql.toUtf8());
+  const QString path = temp->fileName();
+  temp->close();
+  delete temp;
+  return path;
+}
+
 void runInitDbSql(const ConnectionInfo &info, const QString &initSqlPath) {
   const QString mysqlBin = findMysqlBin();
   if (mysqlBin.isEmpty()) {
@@ -95,8 +125,15 @@ void runInitDbSql(const ConnectionInfo &info, const QString &initSqlPath) {
                              "ensure mysql.exe is on PATH.");
   }
 
+  const QString rewrittenPath = rewriteInitDbToTempFile(initSqlPath, info.dbName);
+  // RAII delete on the rewritten temp file regardless of how we exit.
+  struct TempCleanup {
+    QString path;
+    ~TempCleanup() { QFile::remove(path); }
+  } cleanup{rewrittenPath};
+
   QProcess p;
-  p.setStandardInputFile(initSqlPath);
+  p.setStandardInputFile(rewrittenPath);
 
   QStringList args;
   args << QStringLiteral("--host=") + info.host;
@@ -112,81 +149,86 @@ void runInitDbSql(const ConnectionInfo &info, const QString &initSqlPath) {
   }
 
   if (p.exitCode() != 0) {
-    throw std::runtime_error(QString::fromLatin1("mysql client failed loading initdb.sql (exit %1): %2").arg(p.exitCode()).arg(QString::fromLocal8Bit(p.readAllStandardError())).toStdString());
+    const QString stderr_ = QString::fromLocal8Bit(p.readAllStandardError());
+    const QString stdout_ = QString::fromLocal8Bit(p.readAllStandardOutput());
+    throw std::runtime_error(QString::fromLatin1("mysql client failed loading initdb.sql (exit %1).\nstderr: %2\nstdout: %3").arg(p.exitCode()).arg(stderr_, stdout_).toStdString());
   }
 }
 
 void ensureSchemaLoaded(const ConnectionInfo &info) {
-  auto adminDb = openAdminConnection(info);
-  if (not adminDb.isOpen()) {
-    QString hint = QStringLiteral("Set STACCATO_TEST_DB_USER/PASS env vars (see tests/README.md).");
-    // The vendored libmysql.dll ships without caching_sha2_password.dll, so
-    // MySQL 8+ accounts using that auth method fail here. Detect and steer.
-    if (adminDb.lastError().text().contains(QStringLiteral("caching_sha2_password"), Qt::CaseInsensitive)) {
-      hint = QStringLiteral("This project uses mysql_native_password (not caching_sha2_password). "
-                            "Create a dedicated user via "
-                            "`CREATE USER 'staccato_test'@'localhost' IDENTIFIED WITH "
-                            "mysql_native_password BY '…'` and set "
-                            "STACCATO_TEST_DB_USER/PASS to point at it. "
-                            "See tests/README.md Tier 2 section.");
+  // Use admin connection in a tight scope so it's closed before we
+  // removeDatabase (otherwise Qt warns "connection still in use").
+  {
+    auto adminDb = openAdminConnection(info);
+    if (not adminDb.isOpen()) {
+      QString hint = QStringLiteral("Set STACCATO_TEST_DB_USER/PASS env vars (see tests/README.md).");
+      // The vendored libmysql.dll ships without caching_sha2_password.dll, so
+      // MySQL 8+ accounts using that auth method fail here. Detect and steer.
+      if (adminDb.lastError().text().contains(QStringLiteral("caching_sha2_password"), Qt::CaseInsensitive)) {
+        hint = QStringLiteral("This project uses mysql_native_password (not caching_sha2_password). "
+                              "Create a dedicated user via "
+                              "`CREATE USER 'staccato_test'@'localhost' IDENTIFIED WITH "
+                              "mysql_native_password BY '…'` and set "
+                              "STACCATO_TEST_DB_USER/PASS to point at it. "
+                              "See tests/README.md Tier 2 section.");
+      }
+      throw std::runtime_error(QString::fromLatin1("Cannot connect to MySQL server (%1@%2:%3): %4. %5")
+                                   .arg(info.user, info.host)
+                                   .arg(info.port)
+                                   .arg(adminDb.lastError().text(), hint)
+                                   .toStdString());
     }
-    throw std::runtime_error(QString::fromLatin1("Cannot connect to MySQL server (%1@%2:%3): %4. %5")
-                                 .arg(info.user, info.host)
-                                 .arg(info.port)
-                                 .arg(adminDb.lastError().text(), hint)
-                                 .toStdString());
-  }
 
-  if (not schemaExists(adminDb, info.dbName)) {
-    QSqlQuery q(adminDb);
-    if (not q.exec(QStringLiteral("CREATE DATABASE `%1` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci").arg(info.dbName))) {
-      throw std::runtime_error(QString::fromLatin1("CREATE DATABASE %1 failed: %2").arg(info.dbName, q.lastError().text()).toStdString());
+    if (not schemaExists(adminDb, info.dbName)) {
+      QSqlQuery q(adminDb);
+      if (not q.exec(QStringLiteral("CREATE DATABASE `%1` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci").arg(info.dbName))) {
+        throw std::runtime_error(QString::fromLatin1("CREATE DATABASE %1 failed: %2").arg(info.dbName, q.lastError().text()).toStdString());
+      }
+      qInfo("[tier2] created database '%s'", qPrintable(info.dbName));
     }
-    qInfo("[tier2] created database '%s'", qPrintable(info.dbName));
-  }
 
-  // Open a probe connection to check whether tables are present.
+    adminDb.close();
+  }
+  QSqlDatabase::removeDatabase(QStringLiteral("tier2_admin"));
+
+  // Probe whether tables are already loaded. We do this in a nested scope
+  // so the QSqlDatabase value goes out of scope BEFORE we call
+  // removeDatabase (otherwise Qt warns "connection still in use").
+  bool needsLoad = false;
   {
     const QString probeName = QStringLiteral("tier2_probe");
-
     if (QSqlDatabase::contains(probeName)) { QSqlDatabase::removeDatabase(probeName); }
+    {
+      auto probe = QSqlDatabase::addDatabase(QStringLiteral("QMYSQL"), probeName);
+      probe.setHostName(info.host);
+      probe.setPort(info.port);
+      probe.setUserName(info.user);
+      probe.setPassword(info.pass);
+      probe.setDatabaseName(info.dbName);
+      probe.setConnectOptions(QStringLiteral("MYSQL_OPT_CONNECT_TIMEOUT=3"));
 
-    auto probe = QSqlDatabase::addDatabase(QStringLiteral("QMYSQL"), probeName);
-    probe.setHostName(info.host);
-    probe.setPort(info.port);
-    probe.setUserName(info.user);
-    probe.setPassword(info.pass);
-    probe.setDatabaseName(info.dbName);
-    probe.setConnectOptions(QStringLiteral("MYSQL_OPT_CONNECT_TIMEOUT=3"));
+      if (not probe.open()) { throw std::runtime_error(QString::fromLatin1("Cannot open '%1' after CREATE: %2").arg(info.dbName, probe.lastError().text()).toStdString()); }
 
-    if (not probe.open()) {
-      throw std::runtime_error(QString::fromLatin1("Cannot open '%1' after CREATE: %2").arg(info.dbName, probe.lastError().text()).toStdString());
-    }
-
-    if (not tablesLoaded(probe)) {
-      const QString repoRoot = findRepoRoot();
-      if (repoRoot.isEmpty()) {
-        throw std::runtime_error("Cannot locate repo root (initdb.sql + Loja.pro). "
-                                 "Run tier2 tests from inside the repo tree.");
-      }
-
-      const QString initSql = repoRoot + QStringLiteral("/initdb.sql");
-      qInfo("[tier2] loading %s into '%s' (this takes ~10s)…", qPrintable(initSql), qPrintable(info.dbName));
-
+      needsLoad = not tablesLoaded(probe);
       probe.close();
-      QSqlDatabase::removeDatabase(probeName);
-
-      runInitDbSql(info, initSql);
-
-      qInfo("[tier2] schema loaded");
-    } else {
-      probe.close();
-      QSqlDatabase::removeDatabase(probeName);
     }
+    QSqlDatabase::removeDatabase(probeName);
   }
 
-  adminDb.close();
-  QSqlDatabase::removeDatabase(QStringLiteral("tier2_admin"));
+  if (needsLoad) {
+    const QString repoRoot = findRepoRoot();
+    if (repoRoot.isEmpty()) {
+      throw std::runtime_error("Cannot locate repo root (initdb.sql + Loja.pro). "
+                               "Run tier2 tests from inside the repo tree.");
+    }
+
+    const QString initSql = repoRoot + QStringLiteral("/initdb.sql");
+    qInfo("[tier2] loading %s into '%s' (this takes ~10s)…", qPrintable(initSql), qPrintable(info.dbName));
+
+    runInitDbSql(info, initSql);
+
+    qInfo("[tier2] schema loaded");
+  }
 }
 
 } // namespace
@@ -250,14 +292,28 @@ void IntegrationFixture::initTestCase() {
   if (not db.isOpen()) { QSKIP(qPrintable(QStringLiteral("Cannot open test DB: %1").arg(db.lastError().text()))); }
 }
 
-void IntegrationFixture::cleanupTestCase() { closeTestConnection(); }
+void IntegrationFixture::cleanupTestCase() {
+  // Release the fixture's handle BEFORE removeDatabase, otherwise Qt warns
+  // "connection still in use".
+  if (db.isOpen()) { db.close(); }
+  db = QSqlDatabase();
+  closeTestConnection();
+}
 
 void IntegrationFixture::init() {
-  if (db.isOpen()) { QVERIFY(db.transaction()); }
+  if (not db.isOpen()) { QSKIP("DB connection not open"); }
+
+  // QSqlDatabase::transaction() returns false here even on InnoDB because the
+  // bundled libmysql.dll doesn't advertise the CLIENT_TRANSACTIONS capability
+  // bit, so Qt's hasFeature(Transactions) gates the call. Bypass via raw SQL.
+  QSqlQuery q(db);
+  QVERIFY2(q.exec(QStringLiteral("START TRANSACTION")), qPrintable(q.lastError().text()));
 }
 
 void IntegrationFixture::cleanup() {
-  if (db.isOpen()) { db.rollback(); }
+  if (not db.isOpen()) { return; }
+  QSqlQuery q(db);
+  q.exec(QStringLiteral("ROLLBACK"));
 }
 
 } // namespace integration

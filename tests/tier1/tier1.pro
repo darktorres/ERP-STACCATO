@@ -61,14 +61,17 @@ OBJECTS_DIR = build_files/obj
 
 SOURCES += test_tier1.cpp
 
-# Deploy Qt DLLs + platform plugin next to tier1_tests.exe so it can be run
-# without manipulating PATH. No 3rdparty DLLs are copied — the test exe only
-# imports Qt5*d.dll + MSVC runtime (validators are pure; libstaccato's
-# DB/network code is never linked in).
+# Deploy Qt + 3rdparty DLLs next to tier1_tests.exe so it can be run without
+# manipulating PATH. We use the "app" profile (full deploy) because, once tests
+# start referencing static methods from sql.cpp / application.cpp, the linker
+# pulls in transitive .obj's that import QtCUrl symbols — making libcurl.dll
+# (and friends) a load-time requirement even though the tests never call into
+# that code path. The DB-safety guard at the end of main() still ensures no
+# QSqlDatabase is opened at runtime.
 win32-msvc {
     CONFIG(debug, debug|release): _deploy_target = debug/$${TARGET}.exe
     else: _deploy_target = release/$${TARGET}.exe
 
     QMAKE_POST_LINK += $$shell_path($$ROOT_PWD/tools/deploy.cmd) \
-                       $$shell_quote($$shell_path($$OUT_PWD/$$_deploy_target)) test
+                       $$shell_quote($$shell_path($$OUT_PWD/$$_deploy_target)) app
 }

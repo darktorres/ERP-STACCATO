@@ -141,9 +141,17 @@ Lowest priority; added in M4 once Tier 2 is stable.
 
 The originally planned `Probe`-subclass-of-`RegisterDialog` approach was dropped after discovering it crashes at runtime with `STATUS_DLL_INIT_FAILED`: referencing `RegisterDialog` forces the linker to pull in `Application`, QSimpleUpdater, LimeReport, etc., and something in that transitive set fails to initialize without the resource setup that lives in `Loja.exe`. M2's free-function extraction (next milestone) sidesteps the cascade entirely.
 
-**M2 — Tier 1 coverage (2 PRs, ~1 week). [IN PROGRESS]** Extract `src/validators.h/.cpp` with free `cpfValido()/cnpjValido()`; rewire `RegisterDialog` to delegate. **[Done — first PR, 11 validator tests + 1 smoke, all PASS.]** Add 8–10 tests across `Application` helpers and `SQL::*` builders. Extract `Orcamento::calcularPeso` and `Venda` arithmetic helpers; test. **[Remaining for the second PR.]**
+**M2 — Tier 1 coverage. [LARGELY DONE]**
+- M2.1: extracted `src/validators.h/.cpp`, delegated from `RegisterDialog`, 11 validator tests + 1 smoke.
+- M2.2: extracted `src/app_helpers.h/.cpp` (`app::roundDouble`, `sanitizeSQL`, `removerDiacriticos`, `ajustarDiaUtil`); Application methods delegate. 15 tests for those + 6 tests for `Sql::contasPagar/contasReceber/queryEstoque` (no refactor — already `static`). DB-safety guard at end of `main()` asserts no `QSqlDatabase` was opened.
+- **Total Tier 1: 39 PASS, 0 FAIL, 0 connections opened.**
 
 Layout note: tier1 tests aggregate into a single `test_tier1.cpp` with one custom `main()` running each `QObject` test class via `QTest::qExec`. Adding a new suite is one class + one block in `main()` — no `.pro` change.
+
+Deferred (would-be M2.3, candidates for a future PR before M3):
+- `Venda::calcularTotais` extraction. The arithmetic itself is trivial (sum 3 columns across rows, skip rows marked `"!"`), but the source data lives in `modelItem` (a `SqlTableModel` member of `Venda`). Cleanest extraction is a free `venda_calc::totais(QVector<LineItem>)` taking POD; `Venda::calcularTotais` becomes a thin row-reader + delegate.
+- `Orcamento::calcularPeso`: not pure — queries the DB for `kgcx`. Only the trivial multiplication is arithmetic; not worth a separate helper.
+- `Application::findTag`: pure but throws `RuntimeException` on missing tag (which calls `qApp->enqueueException`, null in tests). Extract a `std::optional<QString>`-returning variant.
 
 **M3 — Tier 2 enablement (2 PRs, ~1 week).** Add `Application::dbConnectFromEnv()`. Demote QMYSQL hard-fail to throw. Add `tests/fixtures/fixtures.sql`, `tests/common/integrationfixture.h`, `tests/tier2/tier2.pro`. 3–4 tests including one `[procedure]` tagged.
 

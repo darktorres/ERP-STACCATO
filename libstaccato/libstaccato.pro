@@ -96,6 +96,7 @@ SOURCES += \
     $$ROOT_PWD/src/acbr.cpp \
     $$ROOT_PWD/src/acbrlib.cpp \
     $$ROOT_PWD/src/anteciparrecebimento.cpp \
+    $$ROOT_PWD/src/app_helpers.cpp \
     $$ROOT_PWD/src/application.cpp \
     $$ROOT_PWD/src/baixaorcamento.cpp \
     $$ROOT_PWD/src/cadastrarnfe.cpp \
@@ -239,6 +240,7 @@ HEADERS += \
     $$ROOT_PWD/src/acbr.h \
     $$ROOT_PWD/src/acbrlib.h \
     $$ROOT_PWD/src/anteciparrecebimento.h \
+    $$ROOT_PWD/src/app_helpers.h \
     $$ROOT_PWD/src/application.h \
     $$ROOT_PWD/src/baixaorcamento.h \
     $$ROOT_PWD/src/cadastrarnfe.h \

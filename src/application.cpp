@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include "QSimpleUpdater.h"
+#include "app_helpers.h"
 #include "file.h"
 #include "log.h"
 #include "user.h"
@@ -438,16 +439,7 @@ void Application::updater() {
 #endif
 }
 
-QString Application::removerDiacriticos(const QString &s, const bool removerSimbolos) {
-  QString normalized = s.normalized(QString::NormalizationForm_KD);
-  QString result;
-
-  copy_if(normalized.begin(), normalized.end(), std::back_inserter(result), [](QChar &c) { return c.toLatin1() != 0; });
-
-  if (removerSimbolos) { result.remove(QRegularExpression("[^a-zA-Z\\d\\s]")); }
-
-  return result;
-}
+QString Application::removerDiacriticos(const QString &s, const bool removerSimbolos) { return app::removerDiacriticos(s, removerSimbolos); }
 
 bool Application::getSilent() const { return silent; }
 
@@ -482,21 +474,11 @@ QDate Application::serverDate() {
   return serverDateCache;
 }
 
-double Application::roundDouble(const double value) { return roundDouble(value, 4); }
+double Application::roundDouble(const double value) { return app::roundDouble(value, 4); }
 
-double Application::roundDouble(const double value, const int decimais) {
-  const double multiploDez = std::pow(10, decimais);
+double Application::roundDouble(const double value, const int decimais) { return app::roundDouble(value, decimais); }
 
-  return std::round(value * multiploDez) / multiploDez;
-}
-
-QString Application::sanitizeSQL(const QString &string) {
-  QString sanitized = string;
-
-  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove(R"(\)");
-
-  return sanitized;
-}
+QString Application::sanitizeSQL(const QString &string) { return app::sanitizeSQL(string); }
 
 int Application::reservarIdEstoque() {
   if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
@@ -588,15 +570,7 @@ int Application::reservarIdPedido2() {
   return id;
 }
 
-QDate Application::ajustarDiaUtil(const QDate date) {
-  // TODO: adicionar feriados bancarios
-
-  QDate newDate = date;
-
-  while (newDate.dayOfWeek() > 5) { newDate = newDate.addDays(1); }
-
-  return newDate;
-}
+QDate Application::ajustarDiaUtil(const QDate date) { return app::ajustarDiaUtil(date); }
 
 bool Application::notify(QObject *receiver, QEvent *event) {
   bool done = true;

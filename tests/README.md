@@ -101,13 +101,21 @@ Todos os test cases vivem em `tests/tier1/test_tier1.cpp` como classes
 e roda via `QTest::qExec`. Para adicionar uma nova suite, basta declarar
 mais uma classe e um bloco no `main()` — sem mudança no `.pro`.
 
-## Por que tests/tier1 não exige DLLs do projeto
+## DLL deploy do test binary
 
-`TestSmoke` e `TestValidators` referenciam apenas `validators::*` (puro)
-e Qt — o linker não puxa o resto da `libstaccato`. Por isso o binário não
-precisa de `libcurl.dll`/`zlib1.dll` para subir. Tests futuros que toquem
-mais código de `libstaccato` vão herdar as mesmas dependências do
-`Loja.exe`.
+Desde M2.2 (que adiciona testes de `Sql::*` builders), o linker puxa para
+o test exe arquivos como `sql.obj` que referenciam `SqlQuery` / `Application`
+transitivamente — mesmo que os testes não cheguem a chamar nada com DB. O
+result: `tier1_tests.exe` importa `libcurl.dll`, `zlib1.dll` etc. em tempo
+de carga.
+
+A guarda de DB-safety no `main()` continua impedindo qualquer `QSqlDatabase`
+de ser aberta — então testes que tentassem (acidentalmente) conectar
+falhariam mesmo com os DLLs presentes. O deploy completo é só para o exe
+*conseguir subir*.
+
+O `QMAKE_POST_LINK` de `tests/tier1/tier1.pro` invoca
+`tools/deploy.cmd ... app` para cobrir esses DLLs no diretório do `.exe`.
 
 ## Config files (NÃO entram no repo)
 

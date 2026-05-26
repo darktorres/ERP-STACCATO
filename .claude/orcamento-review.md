@@ -1,82 +1,100 @@
 # Deep review — `src/orcamento.cpp`
 
-Scope: `src/orcamento.cpp` (1944 lines), `src/orcamento.h`, `src/orcamento_calc.{h,cpp}`.
-Ordered by severity.
+Scope: `src/orcamento.cpp` (1944 lines), `src/orcamento.h`, `src/orcamento_calc.{h,cpp}`. Cross-checked against `src/sqltablemodel.{h,cpp}`, `src/registerdialog.{h,cpp}`, `src/sortfilterproxymodel.{h,cpp}`, `src/produtoproxymodel.{h,cpp}`, `src/sql.cpp`, `src/application.cpp`.
+
+Ordered by severity. Each finding annotated with whether deeper investigation confirmed, narrowed, or invalidated it.
 
 ---
 
-## Real bugs
+## Confirmed bugs
 
-### 1. "Pending deletion" rows leak into business logic
-Most loops correctly skip rows where `modelItem.headerData(row, Qt::Vertical) == "!"` (rows that `removeRow` marked for deletion but not yet submitted). Four places don't, and each is a real bug:
+### 1. "Pending deletion" rows leak into business logic — **confirmed for 3 of 4 sites**
+`SqlTableModel::setTable` forces `OnManualSubmit` (src/sqltablemodel.cpp:165), so `removeRow` only marks rows for deletion — `headerData(row, Qt::Vertical)` returns `"!"` until `submitAll()` runs. Most loops handle this; these three don't:
 
-- **`verificaServicosEspeciais()` @ src/orcamento.cpp:1273** — builds `fornecedores` from every row. If all remaining (non-`!`) rows are SSE but a `!`-row from a different fornecedor lingers, `fornecedores.size() == 1` is false → SSE freight-zero rule fails to trigger.
-- **`calcularFrete()` @ src/orcamento.cpp:1297** — sums `pesoSul`/`pesoTotal` over deleted rows too, inflating QUALP weights and the resulting freight floor.
-- **`buscarConsultor()` @ src/orcamento.cpp:731** — collects fornecedores from `!`-rows, then may throw "Mais de um consultor disponível" or set the wrong consultor.
-- **`on_pushButtonReplicar_clicked()` @ src/orcamento.cpp:1392** — replicates rows the user just deleted (the unsaved deletion is invisible to the new dialog).
+- **`verificaServicosEspeciais()` @ src/orcamento.cpp:1273** — collects `fornecedores` from every row. With a `!`-marked row of a different fornecedor still present, the SSE-only check (`fornecedores.size() == 1 and fornecedores.first() == "SSE"`) fails to trigger the freight-zero rule.
+- **`calcularFrete()` @ src/orcamento.cpp:1297** — sums `pesoSul` / `pesoTotal` over deleted rows, inflating the QUALP-derived freight floor.
+- **`buscarConsultor()` @ src/orcamento.cpp:731** — collects fornecedores from `!`-rows, may then throw "Mais de um consultor disponível" or set the wrong consultor.
 
-Fix: add the same `if (modelItem.headerData(row, Qt::Vertical) == "!") continue;` guard, or factor a small helper `forEachActiveRow(...)` to make this uniform.
+Reachability confirmed via `removeItem` (src/orcamento.cpp:513): after `modelItem.removeRow(currentRowItem)` at line 517, both `calcPrecoGlobalTotal()` (which calls `calcularFrete` → `verificaServicosEspeciais`) and `save(true)` (which calls `buscarConsultor` via `savingProcedures`) run while the `!`-row is still present. `on_itemBoxEndereco_idChanged` (src/orcamento.cpp:1255) also calls `calcularFrete` and is reachable after a delete but before save.
 
-### 2. `on_doubleSpinBoxCaixas_valueChanged` rounds with the wrong step
-At src/orcamento.cpp:1053-1054:
+**Originally cited but actually safe:** `on_pushButtonReplicar_clicked` (src/orcamento.cpp:1392). The replicar button is only shown in the read-only branch of `viewRegister` (src/orcamento.cpp:256-259), and `on_tableProdutos_selectionChanged` early-returns under `isReadOnly` (src/orcamento.cpp:102) so the remove button is never exposed. No `!`-rows can exist on this code path.
+
+Fix: add `if (modelItem.headerData(row, Qt::Vertical) == "!") continue;` to the three sites, or factor a `forEachActiveRow(...)` helper.
+
+### 2. `on_doubleSpinBoxCaixas_valueChanged` rounds with the wrong step — **confirmed**
+src/orcamento.cpp:1053-1054:
 ```cpp
 const double resto = fmod(caixas, stepCx);
 const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
 ```
-The peer `on_doubleSpinBoxQuant_valueChanged` (src/orcamento.cpp:819-820) correctly does `ceil(quant / stepQt) * stepQt`. Here, when a product has a non-unit `multiplo`, `setarParametrosProduto` sets `doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa)` (src/orcamento.cpp:1173) — a fraction. `ceil(caixas)` then snaps to integer caixas, ignoring `stepCx`. Should be `ceil(caixas / stepCx) * stepCx`.
+The peer `on_doubleSpinBoxQuant_valueChanged` does `ceil(quant / stepQt) * stepQt`. Here `stepCx` is `1` by default but becomes `multiplo / quantCaixa` when the product has a `multiplo` set (src/orcamento.cpp:1173) — a fraction. Worked example: produto with `quantCaixa = 10`, `multiplo = 3` → `stepCx = 0.3`. User types `caixas = 2.0`: `resto = fmod(2, 0.3) ≈ 0.2`, `ceil(2.0) = 2.0` → snaps to 2.0 caixas (not a multiple of 0.3). The correct value is `ceil(2 / 0.3) * 0.3 = 2.1` caixas (= 21 units = 7×3). The bug also degrades the quant downstream because `quant2 = caixas2 * stepQt` propagates the off-grid value.
 
-### 3. `atualizaReplica` only patches `EXPIRADO`
-src/orcamento.cpp:756: `WHERE idOrcamento = :idOrcamento AND status = 'EXPIRADO'`. But the replicar button is shown for any non-ATIVO/expired status (src/orcamento.cpp:256-259), so replicating a `FECHADO`/`PERDIDO`/`CANCELADO` orçamento silently leaves `replicadoEm` unset on the source. Either drop the status predicate or branch explicitly on status.
+Fix: `ceil(caixas / stepCx) * stepCx`, mirroring the quant handler.
 
-### 4. `buscarConsultor` bypasses `RegisterDialog::setData` on the empty branch
-src/orcamento.cpp:747-749:
-```cpp
-if (query.size() == 1 and query.first()) { setData("idUsuarioConsultor", query.value("idUsuario")); }
-if (query.size() == 0) { model.setData(currentRow, "idUsuarioConsultor", {}); }
-```
-The success branch goes through the wrapper (dirty tracking, `adjustValue`), the clear branch goes through the raw model. They should be symmetric (`setData("idUsuarioConsultor", {})`). Also: `query.size()` is driver-dependent (returns -1 in some setups) — prefer `query.first()` followed by `query.next()` to detect "exactly one", or `COUNT(*)` in SQL.
+### 3. `atualizaReplica` strands `replicadoEm` for non-EXPIRADO sources — **confirmed, with nuance**
+src/orcamento.cpp:756: `UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento AND status = 'EXPIRADO'`.
 
-### 5. `removeItem` can throw from unrelated business rules
-`removeItem` → `save(true)` (src/orcamento.cpp:522) → `cadastrar` → `savingProcedures` → `buscarConsultor`. If a stale "more than one consultor" state exists (e.g., from a row the user added before fixing it), deleting an item now fails for an unrelated reason. Reorderings (`subir`/`descer` also call `save(true)`) carry the same risk. `buscarConsultor` arguably belongs only in `Tipo::Cadastrar` (it's already on the wrong side of `if (tipo == Tipo::Cadastrar)` at src/orcamento.cpp:699).
+The replicar button is shown for any non-ATIVO/non-expired status (src/orcamento.cpp:256-259), i.e. `{EXPIRADO, FECHADO, PERDIDO, CANCELADO, REPLICADO}`. The status transition `EXPIRADO → REPLICADO` is presumably intentional (you don't want to "downgrade" FECHADO/PERDIDO/CANCELADO to REPLICADO since those carry more business weight). But `replicadoEm` is purely informational — it tracks "what was this replicated into" — and the current WHERE clause silently drops the linkage whenever the source isn't EXPIRADO. The "Abrir Réplica" button on the source dialog (src/orcamento.cpp:326-330, src/orcamento.cpp:1892) never appears for those orcamentos.
 
-### 6. Replica seeded without disconnecting signals
-`on_pushButtonReplicar_clicked` (src/orcamento.cpp:1465-1473) bulk-assigns to `itemBoxProduto`, `doubleSpinBoxQuant`, etc. on the new dialog without any `unsetConnections()`. Each `setValue` fires its handler. `replicando = true` short-circuits `calcularFrete`, but `on_doubleSpinBoxQuant_valueChanged` *does* fire and silently re-rounds the quantity per the bug in #2. For correctness and perf, wrap the loop in unset/set or call a "seed quietly" variant.
+Also: replicating from an already-REPLICADO source overwrites nothing because the WHERE filter excludes it, so the first replica's id stays sticky in `replicadoEm` regardless of how many further replicas are made. May be intentional, but is not documented.
 
-### 7. `proxyModel->sort()` after two `setData` calls is racy
-src/orcamento.cpp:780-784 (also 800-804) sets `ordem` on `rowA`, then on `rowB`, then calls `proxyModel->sort(...)`. With `QSortFilterProxyModel::dynamicSortFilter` on (default), the first `setData` can reorder the proxy before the second `setData` runs — so `rowB` no longer points to the row you intended. In practice the two values are adjacent so the swap usually "works", but the invariant is fragile. Either disable dynamic sorting around the swap or update both rows atomically via a single transaction on the model.
+Fix: split the two updates — always set `replicadoEm`; only transition status when the source is EXPIRADO.
 
-### 8. URL not percent-encoded in `on_pushButtonModelo3d_clicked`
-src/orcamento.cpp:1771 interpolates `fornecedor` and `codComercial` directly into a `https://…` URL. Fornecedor names contain spaces and accents (and parentheses — "STACCATO SERVIÇOS ESPECIAIS (SSE)"). `QUrl(QString)` is lenient but downstream WebDAV servers vary. Use `QUrl::toPercentEncoding` for both segments.
+### 4. `removeItem` / `subir` / `descer` can throw from `buscarConsultor` — **confirmed, narrower than originally stated**
+Trace: `removeItem` → `save(true)` (src/orcamento.cpp:522) → `RegisterDialog::save` → `cadastrar` (src/orcamento.cpp:1481) → `savingProcedures` → `buscarConsultor` (src/orcamento.cpp:699). The `buscarConsultor` throw "Mais de um consultor disponível" (src/orcamento.cpp:745) cannot fire if it didn't fire at original-create time, *unless* the consultor/fornecedor-especialidade mapping changed in the DB between save and now (admin added a new consultor). Rare but observable.
 
----
+Original review claimed `buscarConsultor` is "on the wrong side of `if (tipo == Tipo::Cadastrar)`". Re-reading, the placement is *intentional*: removing the last item from a fornecedor needs to clear `idUsuarioConsultor`, so it must run on `Atualizar` too. The real defect is that on an `Atualizar` path the throw is too eager — at update time, prefer downgrading to a non-fatal warning or fall back to the existing `idUsuarioConsultor` when it remains valid.
 
-## Suspect / inconsistent
+Fix options: (a) suppress the throw when `tipo == Atualizar` and just leave `idUsuarioConsultor` unchanged; (b) only re-run `buscarConsultor` when the fornecedor set actually changed since load.
 
-- **`removeRow` failure leaves connections off.** `removeItem` (src/orcamento.cpp:517) throws inside the try, the catch reconnects — OK. But the caller path from `save(true)` failing inside `cadastrar` does not run through `removeItem`'s catch. Audit that the global try/catch in callers re-syncs.
-- **`spinBoxPesoTotal->setValue(total)`** at src/orcamento.cpp:1845 with `total` a `double` — silent narrowing (the existing `// TODO: implicit conversion double -> int` flags this).
-- **Validade UI uses local date math** (`addDays(data("validade").toInt())`, src/orcamento.cpp:254) while saving uses `qApp->serverDateTime()`. Cross-timezone clients could see expiry inconsistently.
-- **N+1 SQL in `calcularFrete`** (two queries × `rowCount`, src/orcamento.cpp:1300-1316) and **`calcularPesoTotal`** (one query × rowCount, src/orcamento.cpp:1833-1838). For an orçamento with 50 items, that's 100–150 round-trips just to refresh totals — and `calcPrecoGlobalTotal` calls `calcularFrete` on every quant/desconto change. Pre-fetch into a `QHash<idProduto, kgcx>` (and `vemDoSul`) once per save / per orçamento load.
-- **`generateId` ID size invariant** (`id.size() != 12 and id.size() != 13`, src/orcamento.cpp:566) silently wedges any loja that exceeds 9999 orcamentos in a year.
-- **`buscarConsultor` empty-fornecedores edge case.** It returns early only on `rowCount() == 0`, never clearing `idUsuarioConsultor` when all fornecedor strings are blanks — but the `IN ('','','')` clause finds nothing, falls to the `size() == 0` branch, which does clear. OK in practice but only by luck.
-- **`Sql::updateFornecedoresOrcamento(primaryId)`** runs inside the transaction (src/orcamento.cpp:1499) — make sure it actually participates in the same connection/transaction, otherwise a rollback leaves it half-applied.
+### 5. Replica seeded without disconnecting signals — **confirmed, smaller blast radius**
+src/orcamento.cpp:1453-1473 bulk-assigns to the new dialog's widgets without `unsetConnections()`. Signal handlers fire per-`setX`. Re-traced what each one actually does:
+
+- The pre-loop setters (cliente / profissional / vendedor / endereco / dataEmissao / representacao) fire *before* `replicando = true`, so `on_itemBoxEndereco_idChanged` → `calcularFrete(true)` runs with empty `modelItem` and writes `minimoFrete` into the freight spinbox. Recovered after the loop by the explicit `replica->calcPrecoGlobalTotal()` at src/orcamento.cpp:1476.
+- Inside the loop, `replicando = true` short-circuits `calcularFrete`, so totals don't churn against the API. But `on_doubleSpinBoxQuant_valueChanged` *does* fire and applies the bug from §2 if the product's `multiplo` changed since the original save. `setarParametrosProduto` also sets `setMinimum(minimo)` and `setMaximum(estoqueRestante)` (src/orcamento.cpp:1158, 1183-1184) before the setValue lands, so a `setValue(oldQuant)` can be silently *clamped up* to a newer `minimo` — not caught by the pre-loop estoque skip-list.
+- Each `on_itemBoxProduto_idChanged` runs a full `setarParametrosProduto` DB lookup — a few queries per replicated row. Perf nuisance, not a bug.
+
+Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenario, plus reduced query churn.
 
 ---
 
-## Code-quality / structural
+## Suspect / worth knowing
 
-- **1944-line "god dialog".** Strong candidate for further extraction. Pure math is already in `orcamento_calc.cpp`; freight querying, item CRUD, and id generation are all extractable similarly. The existing pattern (`venda_calc`, `orcamento_calc`) is the right direction.
-- **`unset/setConnections` pattern is everywhere and brittle.** A scoped `BlockSignalsGuard` (RAII) eliminates the manual try/catch in 8+ handlers and removes the "remember to call setConnections before early `return`" footgun (src/orcamento.cpp:1583-1586 is a near-miss).
-- **`setConnections`/`unsetConnections` are two parallel ~35-line lists.** A `QVector<QMetaObject::Connection>` populated once and toggled with `blockSignals` on each widget would halve maintenance cost.
-- **Loose duplication of `if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }`** in `removeItem`, `subir`, `descer`, `adicionarItem`. Wrap in a `persistIfSaved()` helper.
-- **`montarLog` and the totals re-check** (src/orcamento.cpp:642-664) implement defensive double-bookkeeping. Worth a comment explaining the historical drift this was added to catch, otherwise future-you will be tempted to delete it.
-- **Magic strings** for status (`"ATIVO"`, `"EXPIRADO"`, `"REPLICADO"`, `"FECHADO"`, `"PERDIDO"`, `"CANCELADO"`) and headerData (`"!"`, `"*"`) — there's already an enum-based status refactor in the project notes ("Process Improvements" in CLAUDE.md); orcamento.cpp is a heavy user and a good migration target.
+- **`on_pushButtonModelo3d_clicked` URL not percent-encoded** (src/orcamento.cpp:1771). Investigated: `QUrl(QString)` defaults to `TolerantMode`, which auto-encodes spaces and most non-ASCII characters, so "MODELOS 3D" and accented fornecedor names like "SÃO" survive. The remaining hazards are admin-controlled but theoretically real: fornecedor / codComercial containing `/`, `?`, or `#` would be interpreted as path / query / fragment delimiters (parentheses are sub-delims and pass through). Severity downgraded from "bug" to "harden if fornecedor naming is ever opened up."
+- **`buscarConsultor` asymmetric `setData` paths** (src/orcamento.cpp:747-749). Re-checked: `RegisterDialog::setData(key, value)` is literally `model.setData(currentRow, key, value)` (src/registerdialog.cpp:80). Both branches are functionally equivalent — there is no dirty-tracking bypass as originally claimed. Only stylistic inconsistency. The `query.size()` portability concern (returns -1 on some drivers/configurations) remains valid; prefer `COUNT(*)` or `first() + next()` semantics.
+- **`removeRow` failure leaves connections off in the parent caller path.** `removeItem`'s own try/catch reconnects (src/orcamento.cpp:533-536). But if `save(true)` later throws from `cadastrar`, the outer `cadastrar` catch in src/orcamento.cpp:1508 rolls the transaction back but doesn't re-fire `setConnections`. Audit relies on the caller (`save()` in `RegisterDialog`) to leave the dialog in a sensible state.
+- **N+1 SQL in `calcularFrete`** (two queries × `rowCount`, src/orcamento.cpp:1300-1316) and **`calcularPesoTotal`** (one query × rowCount, src/orcamento.cpp:1833-1838). For a 50-item orcamento with QUALP enabled, that's 100-150 round trips per recalculation, and `calcPrecoGlobalTotal` calls `calcularFrete` on every quant/desconto edit. A single JOIN against `produto`/`fornecedor` once per save would be a major win.
+- **`Sql::updateFornecedoresOrcamento(primaryId)`** (called at src/orcamento.cpp:1499). Source is `CALL update_fornecedores_orcamento('<id>')` with the id interpolated into SQL, not parameterized (src/sql.cpp:22). The id comes from `generateId` (deterministic, not user input), so not a live SQL-injection issue, but worth parameterizing. The CALL participates in the same connection / transaction since `SqlQuery` uses the default connection — confirmed safe under rollback assuming the stored procedure body itself doesn't `COMMIT`.
+- **`generateId` ID size invariant** (`id.size() != 12 and id.size() != 13`, src/orcamento.cpp:566) silently throws on any loja that ever exceeds 9999 orcamentos in a year.
+- **`spinBoxPesoTotal->setValue(double total)`** at src/orcamento.cpp:1845 — silent narrowing (the file's own `// TODO: implicit conversion double -> int` flags this).
+- **Validade UI uses local date math** (`addDays(data("validade").toInt())`, src/orcamento.cpp:254) while save uses `qApp->serverDateTime()` (src/orcamento.cpp:701). `serverDate()` is cached (src/application.cpp:462-463), so cross-day drift is bounded but cross-timezone clients could see different expiry states. Low severity.
+
+---
+
+## Invalidated by investigation
+
+### proxyModel sort race
+Originally flagged: setting `modelItem.setData(rowA, "ordem", ordemB)` followed by `setData(rowB, "ordem", ordemA)` could re-sort mid-sequence under `QSortFilterProxyModel`'s default `dynamicSortFilter = true`, making `rowB` no longer point at the intended row.
+
+**Re-checked:** `SortFilterProxyModel`'s constructor explicitly calls `setDynamicSortFilter(false)` (src/sortfilterproxymodel.cpp:9, 15), inherited by `ProdutoProxyModel`. The proxy only re-sorts when `sort()` is invoked. Both `setData` calls land before the explicit `proxyModel->sort(...)` at src/orcamento.cpp:782 / src/orcamento.cpp:802, so the swap is safe. **Not a bug.**
+
+---
+
+## Code-quality / structural (unchanged)
+
+- **1944-line "god dialog."** Pure math already extracted into `orcamento_calc.cpp`; freight querying, item CRUD, and id generation are the next layers to peel off, following the existing `venda_calc` / `orcamento_calc` pattern.
+- **`unset/setConnections` pattern is brittle.** A scoped `BlockSignalsGuard` (RAII) eliminates the manual try/catch in 8+ handlers and removes the early-return footgun in src/orcamento.cpp:1583-1586.
+- **`setConnections` and `unsetConnections` are two parallel ~35-line lists** (src/orcamento.cpp:139-221). Storing the `QMetaObject::Connection` handles once and toggling `blockSignals` on each widget would halve maintenance cost.
+- **Duplicated `if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }`** in `removeItem` / `subir` / `descer` / `adicionarItem`. Wrap in a `persistIfSaved()` helper.
+- **`montarLog` + double-bookkeeping `verificarTotais`** (src/orcamento.cpp:642-664) defensively re-runs the math against the spinbox values to catch drift. Worth a comment explaining the historical incident this guards against; otherwise it reads as dead defensive code.
+- **Magic strings** for statuses (`"ATIVO"`, `"EXPIRADO"`, `"REPLICADO"`, `"FECHADO"`, `"PERDIDO"`, `"CANCELADO"`) and `headerData` (`"!"`, `"*"`). CLAUDE.md's "Process Improvements" already targets an enum-based status refactor; this file is a heavy user.
 
 ---
 
 ## Suggested next steps (in priority order)
 
-1. Add the `headerData == "!"` skip to the four loops in §1 — this is mechanical and has direct user-visible effects.
-2. Fix the caixas rounding (§2) and add a tier-1 test in `orcamento_calc` for "non-unit caixas step" mirroring the existing freight tests.
-3. Move `buscarConsultor()` inside the `tipo == Tipo::Cadastrar` block in `savingProcedures` (§5) and symmetrize its `setData` calls (§4).
-4. Decide on `atualizaReplica`'s status filter (§3) — likely drop the `status = 'EXPIRADO'` predicate.
-5. Wrap the replica-seeding loop in `unsetConnections` (§6).
+1. **§1**: add the `headerData == "!"` skip in `verificaServicosEspeciais`, `calcularFrete`, `buscarConsultor`. Mechanical change with direct user-visible effects.
+2. **§2**: fix caixas rounding to `ceil(caixas / stepCx) * stepCx`, and add a tier-1 test in `orcamento_calc` covering "non-unit caixas step" alongside the existing freight tests.
+3. **§4**: relax `buscarConsultor`'s throw on the `Atualizar` path (warn + keep existing value) or scope it to fornecedor-set changes only.
+4. **§3**: split `atualizaReplica` into two updates — always set `replicadoEm`, only flip status when source was EXPIRADO.
+5. **§5**: wrap the replica-seeding loop in `unsetConnections` / `setConnections`.

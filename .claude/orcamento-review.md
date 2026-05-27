@@ -61,7 +61,6 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 ## Suspect / worth knowing
 
 - **`on_pushButtonModelo3d_clicked` URL not percent-encoded** (src/orcamento.cpp:1771). Investigated: `QUrl(QString)` defaults to `TolerantMode`, which auto-encodes spaces and most non-ASCII characters, so "MODELOS 3D" and accented fornecedor names like "SÃO" survive. The remaining hazards are admin-controlled but theoretically real: fornecedor / codComercial containing `/`, `?`, or `#` would be interpreted as path / query / fragment delimiters (parentheses are sub-delims and pass through). Severity downgraded from "bug" to "harden if fornecedor naming is ever opened up."
-- **`buscarConsultor` asymmetric `setData` paths** (src/orcamento.cpp:747-749). Re-checked: `RegisterDialog::setData(key, value)` is literally `model.setData(currentRow, key, value)` (src/registerdialog.cpp:80). Both branches are functionally equivalent — there is no dirty-tracking bypass as originally claimed. Only stylistic inconsistency. The `query.size()` portability concern (returns -1 on some drivers/configurations) remains valid; prefer `COUNT(*)` or `first() + next()` semantics.
 - **`removeRow` failure leaves connections off in the parent caller path.** `removeItem`'s own try/catch reconnects (src/orcamento.cpp:533-536). But if `save(true)` later throws from `cadastrar`, the outer `cadastrar` catch in src/orcamento.cpp:1508 rolls the transaction back but doesn't re-fire `setConnections`. Audit relies on the caller (`save()` in `RegisterDialog`) to leave the dialog in a sensible state.
 - **N+1 SQL in `calcularFrete`** (two queries × `rowCount`, src/orcamento.cpp:1300-1316) and **`calcularPesoTotal`** (one query × rowCount, src/orcamento.cpp:1833-1838). For a 50-item orcamento with QUALP enabled, that's 100-150 round trips per recalculation, and `calcPrecoGlobalTotal` calls `calcularFrete` on every quant/desconto edit. A single JOIN against `produto`/`fornecedor` once per save would be a major win.
 - **`Sql::updateFornecedoresOrcamento(primaryId)`** (called at src/orcamento.cpp:1499). Source is `CALL update_fornecedores_orcamento('<id>')` with the id interpolated into SQL, not parameterized (src/sql.cpp:22). The id comes from `generateId` (deterministic, not user input), so not a live SQL-injection issue, but worth parameterizing. The CALL participates in the same connection / transaction since `SqlQuery` uses the default connection — confirmed safe under rollback assuming the stored procedure body itself doesn't `COMMIT`.
@@ -71,20 +70,10 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 
 ---
 
-## Invalidated by investigation
-
-### proxyModel sort race
-Originally flagged: setting `modelItem.setData(rowA, "ordem", ordemB)` followed by `setData(rowB, "ordem", ordemA)` could re-sort mid-sequence under `QSortFilterProxyModel`'s default `dynamicSortFilter = true`, making `rowB` no longer point at the intended row.
-
-**Re-checked:** `SortFilterProxyModel`'s constructor explicitly calls `setDynamicSortFilter(false)` (src/sortfilterproxymodel.cpp:9, 15), inherited by `ProdutoProxyModel`. The proxy only re-sorts when `sort()` is invoked. Both `setData` calls land before the explicit `proxyModel->sort(...)` at src/orcamento.cpp:782 / src/orcamento.cpp:802, so the swap is safe. **Not a bug.**
-
----
-
 ## Code-quality / structural (unchanged)
 
 - **1944-line "god dialog."** Pure math already extracted into `orcamento_calc.cpp`; freight querying, item CRUD, and id generation are the next layers to peel off, following the existing `venda_calc` / `orcamento_calc` pattern.
-- **`unset/setConnections` pattern is brittle.** A scoped `BlockSignalsGuard` (RAII) eliminates the manual try/catch in 8+ handlers and removes the early-return footgun in src/orcamento.cpp:1583-1586.
-- **`setConnections` and `unsetConnections` are two parallel ~35-line lists** (src/orcamento.cpp:139-221). Storing the `QMetaObject::Connection` handles once and toggling `blockSignals` on each widget would halve maintenance cost.
+- **`unset/setConnections` pattern is brittle.** Migrating to the `ScopedUpdate` guard from `src/scopedupdate.h` (connect signals once, gate slot bodies with `if (updating) return; ScopedUpdate guard(updating);`) would eliminate the manual try/catch in 8+ handlers and the early-return footgun in src/orcamento.cpp:1583-1586. Per CLAUDE.md, do NOT use `QSignalBlocker`/`blockSignals` — they break signals Qt internals depend on.
 - **Duplicated `if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }`** in `removeItem` / `subir` / `descer` / `adicionarItem`. Wrap in a `persistIfSaved()` helper.
 - **`montarLog` + double-bookkeeping `verificarTotais`** (src/orcamento.cpp:642-664) defensively re-runs the math against the spinbox values to catch drift. Worth a comment explaining the historical incident this guards against; otherwise it reads as dead defensive code.
 - **Magic strings** for statuses (`"ATIVO"`, `"EXPIRADO"`, `"REPLICADO"`, `"FECHADO"`, `"PERDIDO"`, `"CANCELADO"`) and `headerData` (`"!"`, `"*"`). CLAUDE.md's "Process Improvements" already targets an enum-based status refactor; this file is a heavy user.

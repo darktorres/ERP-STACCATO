@@ -21,6 +21,18 @@ Reachability confirmed via `removeItem` (src/orcamento.cpp:513): after `modelIte
 
 Fix: add `if (modelItem.headerData(row, Qt::Vertical) == "!") continue;` to the three sites, or factor a `forEachActiveRow(...)` helper.
 
+**Same class, lower severity — three more sites in discount/total handlers:**
+
+- **`on_doubleSpinBoxDescontoGlobalReais_valueChanged`** loop @ src/orcamento.cpp:1592
+- **`on_doubleSpinBoxDescontoGlobal_valueChanged`** loop @ src/orcamento.cpp:1658
+- **`on_doubleSpinBoxTotal_valueChanged`** loop @ src/orcamento.cpp:1693
+
+All three iterate `modelItem.rowCount()` and call `setData` on every row (setting `descGlobal` and `total`) without checking for `"!"` pending-deletion rows. Meanwhile, `calcPrecoGlobalTotal` at lines 855 and 887 DOES correctly skip them, as do `corrigirValores` (line 588), `calcularTotais` (line 607), and `montarLog` (line 630).
+
+**Severity is lower than the three confirmed sites above** because all three handlers are guarded by `unsetConnections()` during the `removeItem` flow: `removeItem` calls `unsetConnections()` at line 516 before `calcPrecoGlobalTotal()` or `save()`, and `calcPrecoGlobalTotal` directly sets the discount/total spinbox values (lines 880-884) without reconnecting. The handlers can only fire from direct user interaction with the spinboxes, which cannot happen during the synchronous `removeItem` execution.
+
+**Residual risk:** if `unset/setConnections` is ever migrated to `ScopedUpdate`, the `setData` calls on `"!"` rows would still dirty those rows in the model. Worth fixing for consistency with the established skip pattern regardless. Same fix as above.
+
 ### 2. `on_doubleSpinBoxCaixas_valueChanged` rounds with the wrong step — **confirmed**
 src/orcamento.cpp:1053-1054:
 ```cpp
@@ -64,6 +76,7 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 - **`removeRow` failure leaves connections off in the parent caller path.** `removeItem`'s own try/catch reconnects (src/orcamento.cpp:533-536). But if `save(true)` later throws from `cadastrar`, the outer `cadastrar` catch in src/orcamento.cpp:1508 rolls the transaction back but doesn't re-fire `setConnections`. Audit relies on the caller (`save()` in `RegisterDialog`) to leave the dialog in a sensible state.
 - **N+1 SQL in `calcularFrete`** (two queries × `rowCount`, src/orcamento.cpp:1300-1316) and **`calcularPesoTotal`** (one query × rowCount, src/orcamento.cpp:1833-1838). For a 50-item orcamento with QUALP enabled, that's 100-150 round trips per recalculation, and `calcPrecoGlobalTotal` calls `calcularFrete` on every quant/desconto edit. A single JOIN against `produto`/`fornecedor` once per save would be a major win.
 - **`Sql::updateFornecedoresOrcamento(primaryId)`** (called at src/orcamento.cpp:1499). Source is `CALL update_fornecedores_orcamento('<id>')` with the id interpolated into SQL, not parameterized (src/sql.cpp:22). The id comes from `generateId` (deterministic, not user input), so not a live SQL-injection issue, but worth parameterizing. The CALL participates in the same connection / transaction since `SqlQuery` uses the default connection — confirmed safe under rollback assuming the stored procedure body itself doesn't `COMMIT`.
+- **`calculofrete.cpp` SQL concatenation** (src/calculofrete.cpp:224, 245, 441). Three queries use string concatenation for `idEndereco` and `idProduto` values instead of parameterized queries: the QUALP cache lookup (line 224), the destination address lookup (line 245), and the fornecedor-vemDoSul lookup in the per-row loop (line 441). Values originate from ItemBox IDs (integer-derived from DB lookups), so not directly exploitable. But the same file uses `prepare`/`bindValue` in other queries, making the inconsistency a maintenance hazard.
 - **`generateId` ID size invariant** (`id.size() != 12 and id.size() != 13`, src/orcamento.cpp:566) silently throws on any loja that ever exceeds 9999 orcamentos in a year.
 - **`spinBoxPesoTotal->setValue(double total)`** at src/orcamento.cpp:1845 — silent narrowing (the file's own `// TODO: implicit conversion double -> int` flags this).
 - **Validade UI uses local date math** (`addDays(data("validade").toInt())`, src/orcamento.cpp:254) while save uses `qApp->serverDateTime()` (src/orcamento.cpp:701). `serverDate()` is cached (src/application.cpp:462-463), so cross-day drift is bounded but cross-timezone clients could see different expiry states. Low severity.
@@ -76,6 +89,7 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 - **`unset/setConnections` pattern is brittle.** Migrating to the `ScopedUpdate` guard from `src/scopedupdate.h` (connect signals once, gate slot bodies with `if (updating) return; ScopedUpdate guard(updating);`) would eliminate the manual try/catch in 8+ handlers and the early-return footgun in src/orcamento.cpp:1583-1586. Per CLAUDE.md, do NOT use `QSignalBlocker`/`blockSignals` — they break signals Qt internals depend on.
 - **Duplicated `if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }`** in `removeItem` / `subir` / `descer` / `adicionarItem`. Wrap in a `persistIfSaved()` helper.
 - **`montarLog` + double-bookkeeping `verificarTotais`** (src/orcamento.cpp:642-664) defensively re-runs the math against the spinbox values to catch drift. Worth a comment explaining the historical incident this guards against; otherwise it reads as dead defensive code.
+- **Dead code behind `pushButtonModelo3d->hide()`** (src/orcamento.cpp:54). The `on_pushButtonModelo3d_clicked` handler (src/orcamento.cpp:1762) and its `authenticationRequired` lambda (line 1778, which uses `[&]` capture — a dangling-reference hazard if the signal fired asynchronously) are unreachable. Consider removing the handler if 3D model support is not planned for re-enablement.
 - **Magic strings** for statuses (`"ATIVO"`, `"EXPIRADO"`, `"REPLICADO"`, `"FECHADO"`, `"PERDIDO"`, `"CANCELADO"`) and `headerData` (`"!"`, `"*"`). CLAUDE.md's "Process Improvements" already targets an enum-based status refactor; this file is a heavy user.
 
 ---
@@ -87,3 +101,5 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 3. **§4**: relax `buscarConsultor`'s throw on the `Atualizar` path (warn + keep existing value) or scope it to fornecedor-set changes only.
 4. **§3**: split `atualizaReplica` into two updates — always set `replicadoEm`, only flip status when source was EXPIRADO.
 5. **§5**: wrap the replica-seeding loop in `unsetConnections` / `setConnections`.
+6. **Cross-file: audit `venda.cpp` discount handlers for the same `"!"` skip.** `src/venda.cpp` lines 896, 978, 1008 have the identical pattern — looping over `modelItem.rowCount()` without `headerData == "!"` checks. Same severity assessment as the orcamento §1 addendum (gated by `unsetConnections` during delete flow). Fix alongside the orcamento sites.
+7. **Parameterize SQL in `calculofrete.cpp`** (lines 224, 245, 441). Mechanical change to match the file's own established `prepare`/`bindValue` style.

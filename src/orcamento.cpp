@@ -50,6 +50,8 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   if (User::isVendedor()) { buscarParametrosFrete(); }
 
+  ui->pushButtonModelo3d->hide();
+
   ui->labelEstoque->hide();
   ui->doubleSpinBoxEstoque->hide();
 

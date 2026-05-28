@@ -779,8 +779,6 @@ void ImportaProdutos::salvar() {
 
       for (int batchStart = 0; batchStart < newProducts.size(); batchStart += BATCH_SIZE) {
         const int batchEnd = qMin(batchStart + BATCH_SIZE, newProducts.size());
-        const int batchCount = batchEnd - batchStart;
-
 
         QString insertSql = "INSERT INTO produto (atualizarTabelaPreco, promocao, idFornecedor, fornecedor, descricao, "
                             "un, un2, colecao, m2cx, pccx, kgcx, formComercial, codComercial, codBarras, ncm, "

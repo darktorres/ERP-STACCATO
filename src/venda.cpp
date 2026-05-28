@@ -52,6 +52,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
 
+  ui->pushButtonModelo3d->hide();
+
   if (User::isAdministrativo()) {
     ui->dateTimeEdit->setReadOnly(false);
     ui->dateTimeEdit->setCalendarPopup(true);
@@ -818,10 +820,11 @@ void Venda::verificaDisponibilidadeEstoque() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
 
-    const QString idProduto = modelItem.data(row, "idProduto").toString();
-    const QString quant = modelItem.data(row, "quant").toString();
+    query.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant LIMIT 1");
+    query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
+    query.bindValue(":quant", modelItem.data(row, "quant"));
 
-    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant + " LIMIT 1")) {
+    if (not query.exec()) {
       throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text());
     }
 
@@ -884,10 +887,13 @@ void Venda::montarFluxoCaixa() {
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
+  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+
+  if (qFuzzyIsNull(subTotalLiq)) { return; }
+
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
     const double descontoPorc = descontoReais / subTotalLiq;
@@ -998,10 +1004,13 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
+  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+
+  if (qFuzzyIsNull(subTotalLiq)) { return; }
+
   unsetConnections();
 
   try {
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1161,11 +1170,20 @@ void Venda::cancelamento() {
 
   const QString idOrcamento = ui->lineEditIdOrcamento->text();
 
-  SqlQuery query1;
-
   if (not idOrcamento.isEmpty()) {
-    // TODO: não marcar orçamento como ativo se ele estiver fora da validade
-    query1.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
+    SqlQuery queryValidade;
+    queryValidade.prepare("SELECT data, validade FROM orcamento WHERE idOrcamento = :idOrcamento");
+    queryValidade.bindValue(":idOrcamento", idOrcamento);
+
+    if (not queryValidade.exec() or not queryValidade.first()) { throw RuntimeException("Erro buscando validade do orçamento: " + queryValidade.lastError().text()); }
+
+    const QDate dataEmissao = queryValidade.value("data").toDateTime().date();
+    const int validade = queryValidade.value("validade").toInt();
+    const bool expirado = (qApp->serverDate() > dataEmissao.addDays(validade));
+
+    SqlQuery query1;
+    query1.prepare("UPDATE orcamento SET status = :status WHERE idOrcamento = :idOrcamento");
+    query1.bindValue(":status", expirado ? "EXPIRADO" : "ATIVO");
     query1.bindValue(":idOrcamento", idOrcamento);
 
     if (not query1.exec()) { throw RuntimeException("Erro reativando orçamento: " + query1.lastError().text()); }
@@ -1279,9 +1297,10 @@ void Venda::on_pushButtonCancelamento_clicked() {
       // ----------------------------------------------------
 
       SqlQuery queryData;
-      QString dataStr = dataAtual.toString("yyyy-MM-dd");
+      queryData.prepare("SELECT * FROM feriados_bancarios WHERE data = :data");
+      queryData.bindValue(":data", dataAtual.toString("yyyy-MM-dd"));
 
-      if (not queryData.exec("SELECT * FROM feriados_bancarios WHERE data = '" + dataStr + "'")) { throw RuntimeException("Erro verificando data: " + queryData.lastError().text()); }
+      if (not queryData.exec()) { throw RuntimeException("Erro verificando data: " + queryData.lastError().text()); }
 
       if (queryData.size() > 0) { allowed = true; }
 
@@ -1515,7 +1534,15 @@ void Venda::on_itemBoxEndereco_idChanged() {
   ui->checkBoxFreteManual->setEnabled(true);
 
   if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(0); }
-  calcularFrete(true);
+
+  try {
+    calcularFrete(true);
+  } catch (std::exception &e) {
+    Log::createLog("Exceção", "calcularFrete: " + QString(e.what()));
+    qApp->enqueueInformation("Erro no cálculo do frete. Verifique o valor manualmente.", this);
+    canChangeFrete = true;
+  }
+
   if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(not qFuzzyIsNull(minimoGerente) ? minimoGerente : ui->doubleSpinBoxFrete->value()); }
 
   const QString disclaimer = "O VALOR CALCULADO PARA O FRETE É VÁLIDO APENAS PARA AS REGIÕES DE SÃO PAULO, BARUERI E JUNDIAÍ.";
@@ -1562,28 +1589,20 @@ void Venda::calcularFrete(const bool updateSpinBox) {
     double pesoSul = 0.;
     double pesoTotal = 0.;
 
+    QStringList idProdutos;
+    for (int row = 0; row < modelItem.rowCount(); ++row) { idProdutos << modelItem.data(row, "idProduto").toString(); }
+
+    const auto pesos = Sql::pesosProdutos(idProdutos);
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
       const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-      SqlQuery sqlQueryKgCx;
+      if (not pesos.contains(idProduto)) { throw RuntimeException("Produto não encontrado com id: " + idProduto); }
 
-      if (not sqlQueryKgCx.exec("SELECT kgcx FROM produto WHERE idProduto = " + idProduto) or not sqlQueryKgCx.first()) {
-        throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text());
-      }
+      const auto &p = pesos.value(idProduto);
+      const double peso = modelItem.data(row, "caixas").toDouble() * p.kgcx;
 
-      const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
-      const double caixas = modelItem.data(row, "caixas").toDouble();
-      const double peso = caixas * kgcx;
-
-      SqlQuery queryFornecedor;
-
-      if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
-        throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
-      }
-
-      if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
-
-      if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
+      if (p.vemDoSul) { pesoSul += peso; }
 
       pesoTotal += peso;
     }
@@ -1656,7 +1675,10 @@ void Venda::copiaProdutosOrcamento() {
     if (modelItem.data(rowItem, "estoque").toInt() > 0) {
       SqlQuery queryStatus;
 
-      if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString())) {
+      queryStatus.prepare("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = :idProduto");
+      queryStatus.bindValue(":idProduto", modelItem.data(rowItem, "idProduto"));
+
+      if (not queryStatus.exec()) {
         throw RuntimeException("Erro buscando status do estoque: " + queryStatus.lastError().text());
       }
 
@@ -1730,24 +1752,31 @@ void Venda::on_pushButtonModelo3d_clicked() {
 
   auto *reply = manager->get(QNetworkRequest(QUrl(url)));
 
-  connect(reply, &QNetworkReply::finished, this, [=, this] {
-    if (reply->error() != QNetworkReply::NoError) {
-      if (reply->error() == QNetworkReply::ContentNotFoundError) { throw RuntimeError("Produto não possui modelo 3D!"); }
+  QPointer<Venda> self(this);
 
-      throw RuntimeException("Erro ao baixar arquivo: " + reply->errorString(), this);
+  connect(reply, &QNetworkReply::finished, this, [=] {
+    if (not self) { return; }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      const QString msg = reply->error() == QNetworkReply::ContentNotFoundError ? "Produto não possui modelo 3D!" : "Erro ao baixar arquivo: " + reply->errorString();
+      qApp->enqueueInformation(msg, self);
+      return;
     }
 
     const QString filename = QDir::currentPath() + "/arquivos/" + url.split("/").last();
 
     File file(filename);
 
-    if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
+    if (not file.open(QFile::WriteOnly)) {
+      qApp->enqueueInformation("Erro abrindo arquivo para escrita: " + file.errorString(), self);
+      return;
+    }
 
     file.write(reply->readAll());
 
     file.close();
 
-    if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { throw RuntimeException("Não foi possível abrir o arquivo 3D!"); }
+    if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filename))) { qApp->enqueueInformation("Não foi possível abrir o arquivo 3D!", self); }
   });
 }
 
@@ -1764,9 +1793,11 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
   if (User::isAdmin() or User::isAdministrativo()) {
     const QString idVendaProduto2 = modelItem2.data(row, "idVendaProduto2").toString();
 
-    QSqlQuery query;
+    SqlQuery query;
+    query.prepare("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2))");
+    query.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query.exec("SELECT xml FROM nfe WHERE idNFe = (SELECT idNFe FROM estoque WHERE idEstoque = (SELECT idEstoque FROM estoque_has_consumo WHERE idVendaProduto2 = " + idVendaProduto2 + "))")) {
+    if (not query.exec()) {
       throw RuntimeException("Erro buscando NF-e: " + query.lastError().text());
     }
 
@@ -1777,19 +1808,19 @@ void Venda::on_treeView_doubleClicked(const QModelIndex &index) {
 }
 
 void Venda::calcularPesoTotal() {
+  QStringList idProdutos;
+  for (int row = 0; row < modelItem.rowCount(); ++row) { idProdutos << modelItem.data(row, "idProduto").toString(); }
+
+  const auto pesos = Sql::pesosProdutos(idProdutos);
+
   double total = 0;
 
-  SqlQuery queryProduto;
-
   for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (not queryProduto.exec("SELECT kgcx FROM produto WHERE idProduto = " + modelItem.data(row, "idProduto").toString())) {
-      throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text());
-    }
+    const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
+    if (not pesos.contains(idProduto)) { throw RuntimeException("Peso não encontrado do produto com id: '" + idProduto + "'"); }
 
-    const double kgcx = queryProduto.value("kgcx").toDouble();
-    total += modelItem.data(row, "caixas").toDouble() * kgcx;
+    total += modelItem.data(row, "caixas").toDouble() * pesos.value(idProduto).kgcx;
   }
 
   // TODO: implicit conversion double -> int
@@ -1994,8 +2025,11 @@ void Venda::trocarEnderecoEntrega() {
   qApp->startTransaction("Venda::trocarEnderecoEntrega");
 
   SqlQuery query;
+  query.prepare("UPDATE venda SET idEnderecoEntrega = :idEndereco WHERE idVenda = :idVenda");
+  query.bindValue(":idEndereco", ui->itemBoxEndereco->getId());
+  query.bindValue(":idVenda", primaryId);
 
-  if (not query.exec("UPDATE venda SET idEnderecoEntrega = " + ui->itemBoxEndereco->getId().toString() + " WHERE idVenda = '" + primaryId + "'")) {
+  if (not query.exec()) {
     throw RuntimeException("Erro alterando endereço de entrega: " + query.lastError().text());
   }
 

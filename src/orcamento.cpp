@@ -1304,28 +1304,23 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
     double pesoSul = 0.;
     double pesoTotal = 0.;
 
+    QStringList idProdutos;
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
+      idProdutos << modelItem.data(row, "idProduto").toString();
+    }
+
+    const auto pesos = Sql::pesosProdutos(idProdutos);
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
       const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-      SqlQuery sqlQueryKgCx;
-      sqlQueryKgCx.prepare("SELECT kgcx FROM produto WHERE idProduto = :id");
-      sqlQueryKgCx.bindValue(":id", idProduto);
+      if (not pesos.contains(idProduto)) { throw RuntimeException("Produto não encontrado com id: " + idProduto); }
 
-      if (not sqlQueryKgCx.exec() or not sqlQueryKgCx.first()) { throw RuntimeException("Erro buscando peso do produto: " + sqlQueryKgCx.lastError().text()); }
+      const auto &p = pesos.value(idProduto);
+      const double peso = modelItem.data(row, "caixas").toDouble() * p.kgcx;
 
-      const double kgcx = sqlQueryKgCx.value("kgcx").toDouble();
-      const double caixas = modelItem.data(row, "caixas").toDouble();
-      const double peso = caixas * kgcx;
-
-      SqlQuery queryFornecedor;
-      queryFornecedor.prepare("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = :id)");
-      queryFornecedor.bindValue(":id", idProduto);
-
-      if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text()); }
-
-      if (not queryFornecedor.first()) { throw RuntimeException("Fornecedor não encontrado para produto com id: " + idProduto); }
-
-      if (queryFornecedor.value("vemDoSul").toBool()) { pesoSul += peso; }
+      if (p.vemDoSul) { pesoSul += peso; }
 
       pesoTotal += peso;
     }
@@ -1833,22 +1828,24 @@ double Orcamento::calcularPeso() {
 }
 
 void Orcamento::calcularPesoTotal() {
-  double total = 0;
+  QStringList idProdutos;
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+    idProdutos << modelItem.data(row, "idProduto").toString();
+  }
 
-  SqlQuery queryProduto;
+  const auto pesos = Sql::pesosProdutos(idProdutos);
+
+  double total = 0;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
 
-    queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :id");
-    queryProduto.bindValue(":id", modelItem.data(row, "idProduto"));
+    const QString idProduto = modelItem.data(row, "idProduto").toString();
 
-    if (not queryProduto.exec()) { throw RuntimeException("Erro buscando kgcx: " + queryProduto.lastError().text()); }
+    if (not pesos.contains(idProduto)) { throw RuntimeException("Peso não encontrado do produto com id: '" + idProduto + "'"); }
 
-    if (not queryProduto.first()) { throw RuntimeException("Peso não encontrado do produto com id: '" + modelItem.data(row, "idProduto").toString() + "'"); }
-
-    const double kgcx = queryProduto.value("kgcx").toDouble();
-    total += modelItem.data(row, "caixas").toDouble() * kgcx;
+    total += modelItem.data(row, "caixas").toDouble() * pesos.value(idProduto).kgcx;
   }
 
   // TODO: implicit conversion double -> int

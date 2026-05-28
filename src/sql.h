@@ -2,6 +2,7 @@
 
 #include "application.h"
 
+#include <QHash>
 #include <QString>
 
 class Sql {
@@ -9,7 +10,13 @@ class Sql {
 public:
   Sql() = delete;
 
+  struct ProdutoPeso {
+    double kgcx = 0;
+    bool vemDoSul = false;
+  };
+
   static auto contasPagar(const QString &filtros, const QString &busca) -> QString;
+  static auto pesosProdutos(const QStringList &idProdutos) -> QHash<QString, ProdutoPeso>;
   static auto contasReceber(const QString &filtros) -> QString;
   static auto queryEstoque(const QString &match, const QString &having) -> QString;
   static auto queryExportarNCM() -> QString;

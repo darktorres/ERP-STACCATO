@@ -5,6 +5,28 @@
 #include <QSqlError>
 #include <QStringList>
 
+QHash<QString, Sql::ProdutoPeso> Sql::pesosProdutos(const QStringList &idProdutos) {
+  QHash<QString, ProdutoPeso> result;
+
+  QStringList ids = idProdutos;
+  ids.removeDuplicates();
+
+  if (ids.isEmpty()) { return result; }
+
+  QStringList placeholders;
+  for (int i = 0; i < ids.size(); ++i) { placeholders << ":id" + QString::number(i); }
+
+  SqlQuery query;
+  query.prepare("SELECT p.idProduto, p.kgcx, f.vemDoSul FROM produto p LEFT JOIN fornecedor f ON p.idFornecedor = f.idFornecedor WHERE p.idProduto IN (" + placeholders.join(", ") + ")");
+  for (int i = 0; i < ids.size(); ++i) { query.bindValue(":id" + QString::number(i), ids.at(i)); }
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando pesos dos produtos: " + query.lastError().text()); }
+
+  while (query.next()) { result.insert(query.value("idProduto").toString(), {query.value("kgcx").toDouble(), query.value("vemDoSul").toBool()}); }
+
+  return result;
+}
+
 void Sql::updateVendaStatus(const QStringList &idVendas) { updateVendaStatus(idVendas.join(", ")); }
 
 void Sql::updateVendaStatus(const QString &idVendas) {

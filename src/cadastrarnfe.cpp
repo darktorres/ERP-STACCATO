@@ -285,13 +285,13 @@ int CadastrarNFe::preCadastrarNota() {
 
   if (tipo == Tipo::Saida or tipo == Tipo::SaidaAposFutura) {
     SqlQuery queryCompra;
-    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
+    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status IN ('ENTREGA AGEND.', 'SEPARADO') AND idVendaProduto2 = :idVendaProduto2");
 
     SqlQuery queryVenda;
-    queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
+    queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status IN ('ENTREGA AGEND.', 'SEPARADO') AND idVendaProduto2 = :idVendaProduto2");
 
     SqlQuery queryVeiculo;
-    queryVeiculo.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
+    queryVeiculo.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status IN ('ENTREGA AGEND.', 'SEPARADO') AND idVendaProduto2 = :idVendaProduto2");
 
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
       queryCompra.bindValue(":idVendaProduto2", modelProduto.data(row, "idVendaProduto2"));

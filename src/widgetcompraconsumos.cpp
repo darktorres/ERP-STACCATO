@@ -92,7 +92,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
     if (status == "PENDENTE" or status == "REPO. ENTREGA") { throw RuntimeError("Produto ainda não foi comprado!", this); }
 
-    if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
+    if (status == "ENTREGA AGEND." or status == "SEPARADO" or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
 
     if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { throw RuntimeError("Não permitido!", this); }
   }

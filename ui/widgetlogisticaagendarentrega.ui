@@ -200,6 +200,19 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="checkBoxSeparado">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Separado</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QCheckBox" name="checkBoxEmEntrega">
                <property name="enabled">
                 <bool>true</bool>
@@ -938,6 +951,7 @@
   <tabstop>checkBoxEmRecebimento</tabstop>
   <tabstop>checkBoxEstoque</tabstop>
   <tabstop>checkBoxEntregaAgend</tabstop>
+  <tabstop>checkBoxSeparado</tabstop>
   <tabstop>checkBoxEmEntrega</tabstop>
   <tabstop>checkBoxEntregue</tabstop>
   <tabstop>checkBoxRepoReceb</tabstop>

@@ -4029,6 +4029,7 @@ BEGIN
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'REPO. ENTREGA' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
     UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'REPO. RECEB.' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'EM ENTREGA' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
+    UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'SEPARADO' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
     UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'ENTREGA AGEND.' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'ESTOQUE' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'EM RECEBIMENTO' AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
@@ -4156,6 +4157,7 @@ BEGIN
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'REPO. ENTREGA';
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'REPO. RECEB.';
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'EM ENTREGA';
+    UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'SEPARADO';
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'ENTREGA AGEND.';
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'ESTOQUE';
     UPDATE pedido_fornecedor_has_produto pf1, pedido_fornecedor_has_produto2 pf2 SET pf1.status = pf2.status WHERE pf1.idPedido1 = pf2.idPedidoFK AND currentId = pf2.idPedidoFK AND pf2.status = 'EM RECEBIMENTO';
@@ -4263,6 +4265,7 @@ BEGIN
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'REPO. ENTREGA' AND vp2.quant != 0;
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'REPO. RECEB.' AND vp2.quant != 0;
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'EM ENTREGA' AND vp2.quant != 0;
+    UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'SEPARADO' AND vp2.quant != 0;
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'ENTREGA AGEND.' AND vp2.quant != 0;
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'ESTOQUE' AND vp2.quant != 0;
     UPDATE venda_has_produto vp1, venda_has_produto2 vp2 SET vp1.status = vp2.status WHERE vp1.idVendaProduto1 = vp2.idVendaProdutoFK AND currentId = vp2.idVendaProdutoFK AND vp2.status = 'EM RECEBIMENTO' AND vp2.quant != 0;
@@ -4304,6 +4307,7 @@ BEGIN
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'REPO. ENTREGA' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
     UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'REPO. RECEB.' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'EM ENTREGA' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
+    UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'SEPARADO' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
     UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'ENTREGA AGEND.' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'ESTOQUE' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;
 	UPDATE venda v, venda_has_produto vp SET v.status = vp.status WHERE v.idVenda = vp.idVenda AND vp.status = 'EM RECEBIMENTO' AND vp.idVenda = currentId AND v.status != 'CANCELADO' AND v.devolucao = FALSE;

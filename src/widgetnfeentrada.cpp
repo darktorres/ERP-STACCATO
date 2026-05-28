@@ -259,7 +259,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
   //--------------------------------------------------------------
 
   SqlQuery query;
-  query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
+  query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'SEPARADO', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 

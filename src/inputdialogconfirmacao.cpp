@@ -415,12 +415,20 @@ void InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   // -------------------------------------------------------------------------
 
-  dividirVenda(modelVendaProduto, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2);
+  const bool gerarReposicao = (choice == QMessageBox::Yes);
+
+  // Se a linha original ainda NÃO foi faturada, a NF-e da reposição é que cobrará as caixas
+  // quebradas: o valor vai para a linha REPO. ENTREGA e a QUEBRADO fica zerada. Se já foi
+  // faturada (idNFeSaida preenchido), a quebra já está na NF-e original e a reposição é remessa
+  // grátis (legado: QUEBRADO mantém valor, REPO zerada). Mover o valor nesse caso bitributaria.
+  const bool moverValorParaReposicao = gerarReposicao and modelVendaProduto.data(0, "idNFeSaida").isNull();
+
+  dividirVenda(modelVendaProduto, caixas, caixasDefeito, quantCaixa, novoIdVendaProduto2, moverValorParaReposicao);
 
   // -------------------------------------------------------------------------
 
-  (choice == QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2)
-                               : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
+  gerarReposicao ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2, moverValorParaReposicao)
+                 : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
 
   modelVendaProduto.submitAll();
 
@@ -502,7 +510,7 @@ void InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   modelPagamentos.submitAll();
 }
 
-void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString &obs, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString &obs, const int novoIdVendaProduto2, const bool moverValorParaReposicao) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto2
 
@@ -539,16 +547,32 @@ void InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
   modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa);
   modelVendaProduto.setData(newRow, "caixas", caixasDefeito);
   modelVendaProduto.setData(newRow, "kg", caixasDefeito * kgcx);
-  modelVendaProduto.setData(newRow, "prcUnitario", 0);
-  modelVendaProduto.setData(newRow, "descUnitario", 0);
-  modelVendaProduto.setData(newRow, "parcial", 0);
-  modelVendaProduto.setData(newRow, "desconto", 0);
-  modelVendaProduto.setData(newRow, "parcialDesc", 0);
-  modelVendaProduto.setData(newRow, "descGlobal", 0);
-  modelVendaProduto.setData(newRow, "total", 0);
   modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA");
   modelVendaProduto.setData(newRow, "reposicaoEntrega", true);
   modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
+
+  if (moverValorParaReposicao) {
+    // linha original ainda não faturada: a reposição carrega o valor das caixas quebradas
+    // (a linha 'QUEBRADO' fica zerada); preço/desc são copiados da linha 0
+    const double prcUnitario = modelVendaProduto.data(0, "prcUnitario").toDouble();
+    const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
+    const double descGlobal = modelVendaProduto.data(0, "descGlobal").toDouble() / 100;
+    const double quantDefeito = caixasDefeito * quantCaixa;
+
+    modelVendaProduto.setData(newRow, "parcial", quantDefeito * prcUnitario);
+    modelVendaProduto.setData(newRow, "parcialDesc", quantDefeito * descUnitario);
+    modelVendaProduto.setData(newRow, "desconto", quantDefeito * (prcUnitario - descUnitario));
+    modelVendaProduto.setData(newRow, "total", quantDefeito * descUnitario * (1 - descGlobal));
+  } else {
+    // linha original já faturada: reposição é remessa grátis (o valor permanece na linha 'QUEBRADO')
+    modelVendaProduto.setData(newRow, "prcUnitario", 0);
+    modelVendaProduto.setData(newRow, "descUnitario", 0);
+    modelVendaProduto.setData(newRow, "parcial", 0);
+    modelVendaProduto.setData(newRow, "desconto", 0);
+    modelVendaProduto.setData(newRow, "parcialDesc", 0);
+    modelVendaProduto.setData(newRow, "descGlobal", 0);
+    modelVendaProduto.setData(newRow, "total", 0);
+  }
 }
 
 void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
@@ -694,7 +718,7 @@ double InputDialogConfirmacao::getCaixasDefeito(const int row) {
   return caixasDefeito;
 }
 
-void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {
+void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const bool moverValorParaReposicao) {
   const double kgcx = modelVendaProduto.data(0, "kg").toDouble() / modelVendaProduto.data(0, "caixas").toDouble();
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
@@ -751,9 +775,21 @@ void InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
   modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito);
   modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO");
 
-  modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario);
-  modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario);
-  modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal));
+  if (moverValorParaReposicao) {
+    // o valor das caixas quebradas é cobrado na linha 'REPO. ENTREGA' (que é entregue e faturada),
+    // então a linha 'QUEBRADO' fica zerada para o total da venda permanecer o mesmo
+    modelVendaProduto.setData(rowQuebrado2, "prcUnitario", 0);
+    modelVendaProduto.setData(rowQuebrado2, "descUnitario", 0);
+    modelVendaProduto.setData(rowQuebrado2, "parcial", 0);
+    modelVendaProduto.setData(rowQuebrado2, "desconto", 0);
+    modelVendaProduto.setData(rowQuebrado2, "parcialDesc", 0);
+    modelVendaProduto.setData(rowQuebrado2, "descGlobal", 0);
+    modelVendaProduto.setData(rowQuebrado2, "total", 0);
+  } else {
+    modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario);
+    modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario);
+    modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal));
+  }
 }
 
 void InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) {

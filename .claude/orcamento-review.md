@@ -68,18 +68,73 @@ src/orcamento.cpp:1453-1473 bulk-assigns to the new dialog's widgets without `un
 
 Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenario, plus reduced query churn.
 
+### 6. `cadastrar()` catch block doesn't restore connections — **already fixed by ScopedUpdate migration**
+`cadastrar` now uses `ScopedUpdate guard(updating)` (RAII), which automatically restores the `updating` counter when the guard's scope exits — including on exception. No manual `setConnections()` needed.
+
+### 7. `setarParametrosProduto` — division by zero if `quantCaixa == 0` — **confirmed**
+src/orcamento.cpp:1155-1185. Three divisions by `quantCaixa` with no guard:
+- Line 1161: `ui->doubleSpinBoxCaixas->setMinimum(minimo / quantCaixa)`
+- Line 1175: `ui->doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa)`
+- Line 1185: `ui->doubleSpinBoxCaixas->setMaximum(estoqueRestante / quantCaixa)`
+
+`quantCaixa` comes from `query.value("quantCaixa").toDouble()` (line 1155). If a product has `quantCaixa = 0` or `NULL` in the DB (data migration error, admin misconfiguration), the division produces `inf` or `nan`. Qt's QDoubleSpinBox doesn't crash on these values but becomes unusable — step/min/max are meaningless. Subsequent operations using caixas (freight weight, item total) produce `nan` that propagates through all calculations.
+
+Fix: add a guard after line 1155: `if (qFuzzyIsNull(quantCaixa)) { throw RuntimeException("Produto com quantCaixa inválida: " + idProduto); }`
+
+### 8. `on_itemBoxEndereco_idChanged` — no exception handling around `calcularFrete` — **confirmed**
+src/orcamento.cpp:1250-1270. This signal handler modifies state before calling `calcularFrete(true)` at line 1257:
+- Line 1251: `minimoGerente = 0.`
+- Line 1252: `canChangeFrete = false`
+- Line 1253-1254: `checkBoxFreteManual` unchecked and enabled
+- Line 1256: frete minimum reset to 0
+
+`calcularFrete` has an internal try/catch for the QUALP API (lines 1332-1337), but the per-row SQL queries at lines 1300-1318 can throw unguarded `RuntimeException`. If they do, the exception propagates through this handler (which has no try/catch) into Qt's signal dispatch. The pre-1257 state changes (`canChangeFrete = false`, `checkBoxFreteManual` unchecked) are not rolled back. On the next address selection, `canChangeFrete` is stuck at false and the frete spinbox minimum may be wrong.
+
+Fix: wrap `calcularFrete(true)` in try/catch, log the error, and restore `canChangeFrete` / `checkBoxFreteManual` state.
+
+### 9. `calcPrecoGlobalTotal` doesn't update total spinbox minimum when frete changes — **confirmed**
+src/orcamento.cpp:874-884. `calcPrecoGlobalTotal` updates the frete spinbox (via `calcularFrete` at line 874), then sets `doubleSpinBoxTotal`'s maximum (line 883) and value (line 884), but does NOT update its minimum. The minimum is only set in `on_doubleSpinBoxFrete_valueChanged` at line 1618 (`setMinimum(frete)`), which doesn't fire during `calcPrecoGlobalTotal` because connections are off.
+
+Scenario: user selects address (frete = 100, total min = 100). User adds a heavy item → `calcPrecoGlobalTotal` recalculates frete to 200 (connections off → frete handler doesn't fire → total min stays 100). User edits total directly → can set total to 100 → `descontoReais = subTotalLiq + 200 - 100`, `descontoPorc = 1 + 100/subTotalLiq > 1` → writes `descGlobal > 100%` to all rows → negative line-item totals.
+
+The reverse case also applies: if frete decreases but total min stays at the old higher value, the user can't lower total below the stale minimum.
+
+Fix: in `calcPrecoGlobalTotal`, add `ui->doubleSpinBoxTotal->setMinimum(frete)` at line 883 (before setMaximum), mirroring the logic in `on_doubleSpinBoxFrete_valueChanged`.
+
+### 10. `on_dataEmissao_dateChanged` — validade max clamped to days remaining in month — **confirmed**
+src/orcamento.cpp:1659: `ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day())`.
+
+On the last day of any month the max becomes 0. `newRegister()` at line 457-458 calls `on_dataEmissao_dateChanged(serverDate())` followed by `spinBoxValidade->setValue(7)`, which gets clamped to 0. Any orcamento created on the 30th or 31st has 0-day validity and expires immediately.
+
+Fix: use a fixed maximum (e.g., 30 or a `loja` parameter) instead of days-remaining-in-month.
+
+### 11. `on_doubleSpinBoxDesconto_valueChanged` — same rounding bug as original §2 — **confirmed**
+src/orcamento.cpp:1517: `const double caixas2 = not qFuzzyIsNull(fmod(caixas, step)) ? ceil(caixas) : caixas;`.
+
+Uses `ceil(caixas)` instead of `ceil(caixas / step) * step` — the same formula that was fixed in `on_doubleSpinBoxCaixas_valueChanged` (§2). The handler also doesn't update the spinbox values (unlike the quant handler), so `caixas2` diverges from the displayed value.
+
+Fix: use `ui->doubleSpinBoxQuant->value()` directly instead of re-deriving from caixas. The spinbox is already grid-snapped.
+
+### 12. Duplicate stock items allowed in orcamento — **confirmed (existing FIXME)**
+src/orcamento.cpp:1871: `// FIXME: orçamento permite adicionar o mesmo estoque duas vezes`. No guard in `adicionarItem()` prevents adding the same estoque product twice. When converted to a venda, stock deduction may happen twice for the same product.
+
+Fix: in `adicionarItem`, check if `idProduto` with `estoque = true` already exists in the model.
+
 ---
 
 ## Suspect / worth knowing
 
 - **`on_pushButtonModelo3d_clicked` URL not percent-encoded** (src/orcamento.cpp:1771). Investigated: `QUrl(QString)` defaults to `TolerantMode`, which auto-encodes spaces and most non-ASCII characters, so "MODELOS 3D" and accented fornecedor names like "SÃO" survive. The remaining hazards are admin-controlled but theoretically real: fornecedor / codComercial containing `/`, `?`, or `#` would be interpreted as path / query / fragment delimiters (parentheses are sub-delims and pass through). Severity downgraded from "bug" to "harden if fornecedor naming is ever opened up."
-- **`removeRow` failure leaves connections off in the parent caller path.** `removeItem`'s own try/catch reconnects (src/orcamento.cpp:533-536). But if `save(true)` later throws from `cadastrar`, the outer `cadastrar` catch in src/orcamento.cpp:1508 rolls the transaction back but doesn't re-fire `setConnections`. Audit relies on the caller (`save()` in `RegisterDialog`) to leave the dialog in a sensible state.
+- **`removeRow` failure leaves connections off in the parent caller path** — resolved by ScopedUpdate migration in `cadastrar` (see §6).
 - **N+1 SQL in `calcularFrete`** (two queries × `rowCount`, src/orcamento.cpp:1300-1316) and **`calcularPesoTotal`** (one query × rowCount, src/orcamento.cpp:1833-1838). For a 50-item orcamento with QUALP enabled, that's 100-150 round trips per recalculation, and `calcPrecoGlobalTotal` calls `calcularFrete` on every quant/desconto edit. A single JOIN against `produto`/`fornecedor` once per save would be a major win.
 - **`Sql::updateFornecedoresOrcamento(primaryId)`** (called at src/orcamento.cpp:1499). Source is `CALL update_fornecedores_orcamento('<id>')` with the id interpolated into SQL, not parameterized (src/sql.cpp:22). The id comes from `generateId` (deterministic, not user input), so not a live SQL-injection issue, but worth parameterizing. The CALL participates in the same connection / transaction since `SqlQuery` uses the default connection — confirmed safe under rollback assuming the stored procedure body itself doesn't `COMMIT`.
 - **`calculofrete.cpp` SQL concatenation** (src/calculofrete.cpp:224, 245, 441). Three queries use string concatenation for `idEndereco` and `idProduto` values instead of parameterized queries: the QUALP cache lookup (line 224), the destination address lookup (line 245), and the fornecedor-vemDoSul lookup in the per-row loop (line 441). Values originate from ItemBox IDs (integer-derived from DB lookups), so not directly exploitable. But the same file uses `prepare`/`bindValue` in other queries, making the inconsistency a maintenance hazard.
 - **`generateId` ID size invariant** (`id.size() != 12 and id.size() != 13`, src/orcamento.cpp:566) silently throws on any loja that ever exceeds 9999 orcamentos in a year.
 - **`spinBoxPesoTotal->setValue(double total)`** at src/orcamento.cpp:1845 — silent narrowing (the file's own `// TODO: implicit conversion double -> int` flags this).
 - **Validade UI uses local date math** (`addDays(data("validade").toInt())`, src/orcamento.cpp:254) while save uses `qApp->serverDateTime()` (src/orcamento.cpp:701). `serverDate()` is cached (src/application.cpp:462-463), so cross-day drift is bounded but cross-timezone clients could see different expiry states. Low severity.
+- **`calcularFrete` called on empty model** (src/orcamento.cpp:1257). If the user sets an address before adding any items, `on_itemBoxEndereco_idChanged` → `calcularFrete(true)` runs with `modelItem.rowCount() == 0`. The per-row loops (lines 1299-1323) are skipped, `pesoTotal = 0`, and the QUALP API is called with zero weight. Not a crash, but a wasted API call that may return an unexpected freight floor. Adding `if (modelItem.rowCount() == 0) return;` at the top of `calcularFrete` would prevent this.
+- **`on_pushButtonAbrirReplicaDe/Em/Venda_clicked` don't check `viewRegisterById` return** (src/orcamento.cpp:1812-1834). If the ID is not found in the DB, `viewRegisterById` returns false but the dialog is shown anyway in a broken state.
+- **`on_checkBoxRepresentacao_toggled` hides `checkBoxFreteManual` without unchecking** (src/orcamento.cpp:1503-1504). When representação is toggled ON, the frete-manual checkbox is hidden but stays checked. On toggle OFF it reappears still checked, leading to inconsistent freight state.
 
 ---
 
@@ -96,10 +151,17 @@ Worth a wrap in unset/set for correctness around §2 and the minimo-clamp scenar
 
 ## Suggested next steps (in priority order)
 
-1. **§1**: add the `headerData == "!"` skip in `verificaServicosEspeciais`, `calcularFrete`, `buscarConsultor`. Mechanical change with direct user-visible effects.
-2. **§2**: fix caixas rounding to `ceil(caixas / stepCx) * stepCx`, and add a tier-1 test in `orcamento_calc` covering "non-unit caixas step" alongside the existing freight tests.
-3. **§4**: relax `buscarConsultor`'s throw on the `Atualizar` path (warn + keep existing value) or scope it to fornecedor-set changes only.
-4. **§3**: split `atualizaReplica` into two updates — always set `replicadoEm`, only flip status when source was EXPIRADO.
-5. **§5**: wrap the replica-seeding loop in `unsetConnections` / `setConnections`.
-6. **Cross-file: audit `venda.cpp` discount handlers for the same `"!"` skip.** `src/venda.cpp` lines 896, 978, 1008 have the identical pattern — looping over `modelItem.rowCount()` without `headerData == "!"` checks. Same severity assessment as the orcamento §1 addendum (gated by `unsetConnections` during delete flow). Fix alongside the orcamento sites.
-7. **Parameterize SQL in `calculofrete.cpp`** (lines 224, 245, 441). Mechanical change to match the file's own established `prepare`/`bindValue` style.
+1. ~~**§6**: add `setConnections()` to `cadastrar`'s catch block.~~ Already fixed by ScopedUpdate migration.
+2. ~~**§1**: add the `headerData == "!"` skip in `verificaServicosEspeciais`, `calcularFrete`, `buscarConsultor` + discount/total handlers.~~ Fixed.
+3. ~~**§9**: add `ui->doubleSpinBoxTotal->setMinimum(frete)` in `calcPrecoGlobalTotal`.~~ Fixed.
+4. ~~**§7**: add `quantCaixa == 0` guard in `setarParametrosProduto`.~~ Fixed.
+5. ~~**§8**: wrap `calcularFrete(true)` in try/catch inside `on_itemBoxEndereco_idChanged`.~~ Fixed.
+6. ~~**§2**: fix caixas rounding to `ceil(caixas / stepCx) * stepCx`.~~ Fixed.
+7. ~~**§4**: relax `buscarConsultor`'s throw on the `Atualizar` path.~~ Fixed (returns early instead of throwing).
+8. ~~**§3**: split `atualizaReplica` into two updates — always set `replicadoEm`, only flip status when source was EXPIRADO.~~ Fixed.
+9. ~~**§5**: wrap the replica-seeding loop.~~ Fixed (ScopedUpdate guard on replica->updating).
+10. **§10**: fix `on_dataEmissao_dateChanged` validade max — replace `daysInMonth() - day()` with a fixed or configurable maximum. HIGH — orcamentos created on month-end have 0-day validity.
+11. **§11**: fix `on_doubleSpinBoxDesconto_valueChanged` — use `ui->doubleSpinBoxQuant->value()` instead of re-deriving caixas2 with the wrong rounding formula.
+12. **§12**: add duplicate estoque guard in `adicionarItem()`.
+13. **Cross-file: audit `venda.cpp` discount handlers for the same `"!"` skip.** `src/venda.cpp` lines 896, 978, 1008 have the identical pattern — looping over `modelItem.rowCount()` without `headerData == "!"` checks. Fix alongside the orcamento sites.
+14. **Parameterize SQL in `calculofrete.cpp`** (lines 224, 245, 441). Mechanical change to match the file's own established `prepare`/`bindValue` style.

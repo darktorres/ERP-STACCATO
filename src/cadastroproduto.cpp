@@ -107,6 +107,8 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->doubleSpinBoxKgCx, "kgcx");
   addMapping(ui->doubleSpinBoxM2Cx, "m2cx");
   addMapping(ui->doubleSpinBoxMarkup, "markup");
+  addMapping(ui->doubleSpinBoxMinimo, "minimo");
+  addMapping(ui->doubleSpinBoxMultiplo, "multiplo");
   addMapping(ui->doubleSpinBoxPcCx, "pccx");
   addMapping(ui->doubleSpinBoxQtePallet, "qtdPallet");
   addMapping(ui->doubleSpinBoxST, "st");
@@ -145,6 +147,8 @@ void CadastroProduto::savingProcedures() {
   setData("kgcx", ui->doubleSpinBoxKgCx->value());
   setData("m2cx", ui->doubleSpinBoxM2Cx->value());
   setData("markup", ui->doubleSpinBoxMarkup->value());
+  setData("minimo", qFuzzyIsNull(ui->doubleSpinBoxMinimo->value()) ? QVariant() : ui->doubleSpinBoxMinimo->value());
+  setData("multiplo", qFuzzyIsNull(ui->doubleSpinBoxMultiplo->value()) ? QVariant() : ui->doubleSpinBoxMultiplo->value());
   setData("ncm", ui->lineEditNCM->text());
   setData("observacoes", ui->textEditObserv->toPlainText());
   setData("origem", ui->comboBoxOrigem->currentData());
@@ -268,7 +272,6 @@ void CadastroProduto::connectLineEditsToDirty() {
   for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &CadastroProduto::marcarDirty); }
 }
 
-// TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
 // TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
 // TODO: 4verificar se posso remover 'un2' de produto

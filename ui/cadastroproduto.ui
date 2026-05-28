@@ -406,6 +406,58 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
+               <item row="2" column="2">
+                <widget class="QLabel" name="labelMinimo">
+                 <property name="text">
+                  <string>Mínimo</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>doubleSpinBoxMinimo</cstring>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="3">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxMinimo">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantidade mínima de venda (na unidade do produto). 0 = sem mínimo.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="accessibleName">
+                  <string>Mínimo</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="maximum">
+                  <double>9999999999.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="4">
+                <widget class="QLabel" name="labelMultiplo">
+                 <property name="text">
+                  <string>Múltiplo</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>doubleSpinBoxMultiplo</cstring>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="5">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxMultiplo">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Incremento de venda / &amp;quot;caixa aberta&amp;quot; (na unidade do produto). 0 = vende em caixa fechada.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="accessibleName">
+                  <string>Múltiplo</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="maximum">
+                  <double>9999999999.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
              <item row="0" column="0" colspan="2">
@@ -1477,6 +1529,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>doubleSpinBoxMarkup</tabstop>
   <tabstop>doubleSpinBoxVenda</tabstop>
   <tabstop>doubleSpinBoxEstoque</tabstop>
+  <tabstop>doubleSpinBoxMinimo</tabstop>
+  <tabstop>doubleSpinBoxMultiplo</tabstop>
   <tabstop>textEditObserv</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>

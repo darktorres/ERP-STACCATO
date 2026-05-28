@@ -12,6 +12,7 @@
 #include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
+#include "webdav.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -750,51 +751,30 @@ void WidgetGalpao::on_pushButtonSelecionarMapa_clicked()
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
-  auto *manager = new QNetworkAccessManager(this);
-  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
-  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
-    Q_UNUSED(reply)
-
-    authenticator->setUser(User::usuario);
-    authenticator->setPassword(User::senha);
-  });
-
   const QString ip = qApp->getWebDavIp();
 
-  QFileInfo info(file);
-
-  const QString extension = info.suffix();
-
-//  const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa." + extension;
+//  const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa." + QFileInfo(file).suffix();
   const QString url = "https://" + ip + "/webdav/MAPA GALPAO/mapa.png";
 
   const auto fileContent = file.readAll();
 
-  manager->put(QNetworkRequest(QUrl(url)), fileContent);
-
   ui->lineEditMapa->setText("Enviando...");
 
-  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
-    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+  QString urlFinal;
 
-    if (redirect.isValid()) {
-      manager->put(QNetworkRequest(redirect), fileContent);
-      return;
-    }
+  try {
+    urlFinal = uploadWebDav(url, fileContent, this);
+  } catch (const std::exception &) {
+    ui->lineEditMapa->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+    throw;
+  }
 
-    if (reply->error() != QNetworkReply::NoError) {
-      ui->lineEditMapa->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
-      throw RuntimeException("Erro enviando foto: " + reply->errorString());
-    }
+  ui->lineEditMapa->setText(urlFinal);
+  ui->lineEditMapa->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 
-    ui->lineEditMapa->setText(reply->url().toString());
-    ui->lineEditMapa->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
-
-    ui->checkBoxEdicao->setChecked(false);
-    isSet = false;
-    updateTables();
-  });
+  ui->checkBoxEdicao->setChecked(false);
+  isSet = false;
+  updateTables();
 }
 
 // TODO: zoom por touch (e zoom por slider?)

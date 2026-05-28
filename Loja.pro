@@ -248,6 +248,7 @@ SOURCES += \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
     src/viewgalpao.cpp \
+    src/webdav.cpp \
     src/widgetcompraavulsa.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompraconsumos.cpp \
@@ -390,6 +391,7 @@ HEADERS  += \
     src/venda.h \
     src/vendaproxymodel.h \
     src/viewgalpao.h \
+    src/webdav.h \
     src/widgetcompraavulsa.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompraconsumos.h \

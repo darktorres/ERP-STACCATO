@@ -6,6 +6,7 @@
 #include "file.h"
 #include "sendmail.h"
 #include "user.h"
+#include "webdav.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -248,8 +249,6 @@ void UserConfig::salvarDadosMonitorNFe() {
 }
 
 void UserConfig::on_pushButtonSelecionarAssinatura_clicked() {
-  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
-
   const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
@@ -258,44 +257,25 @@ void UserConfig::on_pushButtonSelecionarAssinatura_clicked() {
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
-  auto *manager = new QNetworkAccessManager(this);
-  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
-  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
-    Q_UNUSED(reply)
-
-    authenticator->setUser(User::usuario);
-    authenticator->setPassword(User::senha);
-  });
-
   const QString ip = qApp->getWebDavIp();
 
-  QFileInfo info(file);
-
-  const QString extension = info.suffix();
+  const QString extension = QFileInfo(file).suffix();
 
   const QString url = "https://" + ip + "/webdav/ASSINATURA EMAIL/" + User::usuario + "." + extension;
 
   const auto fileContent = file.readAll();
 
-  manager->put(QNetworkRequest(QUrl(url)), fileContent);
-
   ui->lineEditAssinaturaEmail->setText("Enviando...");
 
-  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
-    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+  QString urlFinal;
 
-    if (redirect.isValid()) {
-      manager->put(QNetworkRequest(redirect), fileContent);
-      return;
-    }
+  try {
+    urlFinal = uploadWebDav(url, fileContent, this);
+  } catch (const std::exception &) {
+    ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+    throw;
+  }
 
-    if (reply->error() != QNetworkReply::NoError) {
-      ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
-      throw RuntimeException("Erro enviando foto: " + reply->errorString());
-    }
-
-    ui->lineEditAssinaturaEmail->setText(reply->url().toString());
-    ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
-  });
+  ui->lineEditAssinaturaEmail->setText(urlFinal);
+  ui->lineEditAssinaturaEmail->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 }

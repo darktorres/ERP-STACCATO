@@ -569,8 +569,8 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
     return "muitos redirecionamentos";
   };
 
-  // HEAD read-only: true se o arquivo (mesmo nome) já existe no servidor (HTTP 200).
-  const auto existe = [&](const QString &urlStr) -> bool {
+  // HEAD read-only: tamanho do arquivo no servidor; -1 se existe mas sem Content-Length; -2 se não encontrado/erro.
+  const auto tamanhoRemoto = [&](const QString &urlStr) -> qint64 {
     QUrl url(urlStr);
 
     for (int tentativa = 0; tentativa < 5; ++tentativa) {
@@ -583,6 +583,7 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
 
       const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
       const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+      const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
       reply->deleteLater();
 
       if (redirect.isValid()) {
@@ -590,11 +591,16 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
         continue;
       }
 
-      return http == 200;
+      if (http != 200) { return -2; }
+
+      return contentLength.isValid() ? contentLength.toLongLong() : -1;
     }
 
-    return false;
+    return -2;
   };
+
+  // true se o arquivo (mesmo nome) já existe no servidor.
+  const auto existe = [&](const QString &urlStr) -> bool { return tamanhoRemoto(urlStr) != -2; };
 
   const QString baseUrl = "https://" + webdavIp + "/webdav/FINANCEIRO/FINANCEIRO/Contas a Pagar/Pagamentos Diarios/";
 
@@ -703,7 +709,28 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
       pdf.close();
     }
 
-    const QString erroPut = enviar("PUT", fileUrl, pdfCache.value(idNFe));
+    const QByteArray &corpo = pdfCache.value(idNFe);
+
+    if (corpo.isEmpty()) {
+      avisos << nomeArquivo + ": PDF vazio (0 bytes)";
+      continue;
+    }
+
+    // envia e confirma via HEAD que o tamanho gravado bate; re-tenta uma vez se a verificação falhar
+    QString erroPut;
+
+    for (int tentativa = 0; tentativa < 2; ++tentativa) {
+      erroPut = enviar("PUT", fileUrl, corpo);
+
+      if (not erroPut.isEmpty()) { continue; }
+
+      const qint64 remoto = tamanhoRemoto(fileUrl);
+
+      if (remoto == corpo.size() or remoto == -1) { break; }
+
+      erroPut = (remoto == -2) ? "arquivo não encontrado no servidor após o envio"
+                               : "servidor gravou " + QString::number(remoto) + " bytes (esperado " + QString::number(corpo.size()) + ")";
+    }
 
     if (not erroPut.isEmpty()) {
       avisos << nomeArquivo + ": " + erroPut;

@@ -6,6 +6,7 @@
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 #include "user.h"
+#include "webdav.h"
 
 #include <QAuthenticator>
 #include <QDebug>
@@ -601,8 +602,6 @@ void InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
-  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
-
   const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
@@ -610,56 +609,35 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   File file(filePath);
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
-
-  auto *manager = new QNetworkAccessManager(this);
-  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
-  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
-    Q_UNUSED(reply)
-
-    authenticator->setUser(User::usuario);
-    authenticator->setPassword(User::senha);
-  });
 
   const QString ip = qApp->getWebDavIp();
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
   const QString idEvento = modelVeiculo.data(0, "idEvento").toString();
 
-  QFileInfo info(file);
-
-  const QString extension = info.suffix();
+  const QString extension = QFileInfo(file).suffix();
 
   const QString url = "https://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
   const auto fileContent = file.readAll();
 
-  manager->put(QNetworkRequest(QUrl(url)), fileContent);
-
   ui->lineEditFoto->setText("Enviando...");
 
-  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
-    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+  QString urlFinal;
 
-    if (redirect.isValid()) {
-      manager->put(QNetworkRequest(redirect), fileContent);
-      return;
-    }
+  try {
+    urlFinal = uploadWebDav(url, fileContent, this);
+  } catch (const std::exception &) {
+    ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+    throw;
+  }
 
-    if (reply->error() != QNetworkReply::NoError) {
-      ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
-      throw RuntimeException("Erro enviando foto: " + reply->errorString());
-    }
+  ui->lineEditFoto->setText(urlFinal);
+  ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 
-    ui->lineEditFoto->setText(reply->url().toString());
-    ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
-
-    for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", reply->url().toString()); }
-  });
+  for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", urlFinal); }
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_2_clicked() {
-  // TODO: tem alguns arquivos de 'foto entrega' com tamanho zero, verificar porque salvou sem mostrar erro para o usuario
-
   const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", "", "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
@@ -668,48 +646,29 @@ void InputDialogConfirmacao::on_pushButtonFoto_2_clicked() {
 
   if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
-  auto *manager = new QNetworkAccessManager(this);
-  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
-  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [&](QNetworkReply *reply, QAuthenticator *authenticator) {
-    Q_UNUSED(reply)
-
-    authenticator->setUser(User::usuario);
-    authenticator->setPassword(User::senha);
-  });
-
   const QString ip = qApp->getWebDavIp();
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
   const QString id = modelVeiculo.data(0, "id").toString();
 
-  QFileInfo info(file);
-
-  const QString extension = info.suffix();
+  const QString extension = QFileInfo(file).suffix();
 
   const QString url = "https://" + ip + "/webdav/FOTOS QUEBRA/" + idVenda + " - " + id + "." + extension;
 
   const auto fileContent = file.readAll();
 
-  manager->put(QNetworkRequest(QUrl(url)), fileContent);
-
   ui->lineEditFoto_2->setText("Enviando...");
 
-  connect(manager, &QNetworkAccessManager::finished, this, [=, this](QNetworkReply *reply) {
-    const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+  QString urlFinal;
 
-    if (redirect.isValid()) {
-      manager->put(QNetworkRequest(redirect), fileContent);
-      return;
-    }
+  try {
+    urlFinal = uploadWebDav(url, fileContent, this);
+  } catch (const std::exception &) {
+    ui->lineEditFoto_2->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+    throw;
+  }
 
-    if (reply->error() != QNetworkReply::NoError) {
-      ui->lineEditFoto_2->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
-      throw RuntimeException("Erro enviando foto: " + reply->errorString());
-    }
-
-    ui->lineEditFoto_2->setText(reply->url().toString());
-    ui->lineEditFoto_2->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
-  });
+  ui->lineEditFoto_2->setText(urlFinal);
+  ui->lineEditFoto_2->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 }
 
 double InputDialogConfirmacao::getCaixasDefeito(const int row) {

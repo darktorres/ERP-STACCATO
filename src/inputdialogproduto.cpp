@@ -220,12 +220,16 @@ void InputDialogProduto::setFilter(const QStringList &ids) {
 
   const double aliquotaSt = query.value("aliquotaSt").toDouble();
 
-  if (not qFuzzyIsNull(aliquotaSt)) {
-    ui->doubleSpinBoxAliquota->setValue(aliquotaSt);
-    ui->comboBoxST->setCurrentText("ST Fornecedor");
-  }
+  // No faturamento a seleção pode conter fornecedores diferentes (mesmo grupo); não propagar a
+  // alíquota ST do primeiro fornecedor para todas as linhas — cada compra mantém a sua.
+  if (tipo != Tipo::Faturamento) {
+    if (not qFuzzyIsNull(aliquotaSt)) {
+      ui->doubleSpinBoxAliquota->setValue(aliquotaSt);
+      ui->comboBoxST->setCurrentText("ST Fornecedor");
+    }
 
-  ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
+    ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
+  }
 
   if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }
 

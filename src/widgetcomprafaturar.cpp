@@ -130,9 +130,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     idVendas << modelFaturamento.data(index.row(), "idVenda").toString();
   }
 
-  const int size = fornecedores.size();
-
-  if (fornecedores.removeDuplicates() != size - 1) { throw RuntimeError("Fornecedores diferentes!", this); }
+  fornecedores.removeDuplicates();
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
   inputDlg.setFilter(idsCompra);
@@ -142,16 +140,23 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const QDate dataFaturamento = inputDlg.getDate();
 
   SqlQuery query;
+  query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
 
-  if (not query.exec("SELECT representacao FROM fornecedor WHERE razaoSocial = '" + fornecedores.first() + "'")) {
-    throw RuntimeException("Erro verificando se fornecedor é representação: " + query.lastError().text());
+  int pularNotaCount = 0;
+
+  for (const auto &fornecedor : fornecedores) {
+    query.bindValue(":razaoSocial", fornecedor);
+
+    if (not query.exec()) { throw RuntimeException("Erro verificando se fornecedor é representação: " + query.lastError().text()); }
+
+    if (not query.first()) { throw RuntimeException("Fornecedor não encontrado: " + fornecedor); }
+
+    if (query.value("representacao").toBool() or fornecedor == "ATELIER STACCATO") { ++pularNotaCount; }
   }
 
-  if (not query.first()) { throw RuntimeException("Fornecedor não encontrado!"); }
+  const bool pularNota = (pularNotaCount == fornecedores.size());
 
-  const bool isRepresentacao = query.value("representacao").toBool();
-
-  const bool pularNota = (isRepresentacao or fornecedores.first() == "ATELIER STACCATO");
+  if (pularNotaCount != 0 and not pularNota) { throw RuntimeError("Não é possível faturar representação/Atelier junto com fornecedor normal!", this); }
 
   if (pularNota) {
     qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota");

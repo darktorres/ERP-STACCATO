@@ -221,7 +221,10 @@ void CalculoFrete::qualp() {
 
   SqlQuery queryQualp;
 
-  if (not queryQualp.exec("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString() + " AND qualpData = CURDATE()")) {
+  queryQualp.prepare("SELECT qualpJson FROM cliente_has_endereco WHERE idEndereco = :idEndereco AND qualpData = CURDATE()");
+  queryQualp.bindValue(":idEndereco", ui->itemBoxDestino->getId());
+
+  if (not queryQualp.exec()) {
     throw RuntimeException("Erro buscando dados do endereço: " + queryQualp.lastError().text());
   }
 
@@ -242,7 +245,10 @@ void CalculoFrete::qualp() {
 
     SqlQuery queryDestino;
 
-    if (not queryDestino.exec("SELECT logradouro, numero, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = " + ui->itemBoxDestino->getId().toString())) {
+    queryDestino.prepare("SELECT logradouro, numero, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
+    queryDestino.bindValue(":idEndereco", ui->itemBoxDestino->getId());
+
+    if (not queryDestino.exec()) {
       throw RuntimeException("Erro buscando dados do endereço: " + queryDestino.lastError().text());
     }
 
@@ -438,7 +444,10 @@ void CalculoFrete::on_comboBoxOrcamento_currentTextChanged(const QString &orcame
 
     SqlQuery queryFornecedor;
 
-    if (not queryFornecedor.exec("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = " + idProduto + ")")) {
+    queryFornecedor.prepare("SELECT vemDoSul FROM fornecedor WHERE idFornecedor = (SELECT idFornecedor FROM produto WHERE idProduto = :idProduto)");
+    queryFornecedor.bindValue(":idProduto", idProduto);
+
+    if (not queryFornecedor.exec()) {
       throw RuntimeException("Erro buscando se fornecedor é do sul: " + queryFornecedor.lastError().text());
     }
 

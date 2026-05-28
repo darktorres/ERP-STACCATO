@@ -954,6 +954,14 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
   try {
     if (tipoItem == Tipo::Cadastrar) {
+      if (currentItemIsEstoque) {
+        const int idProduto = ui->itemBoxProduto->getId().toInt();
+        for (int row = 0; row < modelItem.rowCount(); ++row) {
+          if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
+          if (modelItem.data(row, "estoque").toBool() and modelItem.data(row, "idProduto").toInt() == idProduto) { throw RuntimeError("Produto de estoque já adicionado ao orçamento!", this); }
+        }
+      }
+
       currentRowItem = modelItem.insertRowAtEnd();
 
       int maxOrdem = -1;
@@ -1560,13 +1568,10 @@ void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
 }
 
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
-  const double caixas = ui->doubleSpinBoxCaixas->value();
-  const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->doubleSpinBoxQuantCx->value();
-
   unsetConnections();
 
   try {
+    const double quant = ui->doubleSpinBoxQuant->value();
     const double prcUn = ui->doubleSpinBoxPrecoUn->value();
     const double itemBruto = quant * prcUn;
 
@@ -1945,5 +1950,4 @@ bool Orcamento::eventFilter(QObject *obj, QEvent *event) {
 //           1. colocar um botao com seta para cima e outro para baixo
 //           2. para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
-// FIXME: orçamento permite adicionar o mesmo estoque duas vezes (e provavelmente faz o consumo duas vezes)
 // TODO: antes de gerar excel/pdf salvar o arquivo para não ficar dados divergentes

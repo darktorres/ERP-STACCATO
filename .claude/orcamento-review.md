@@ -101,12 +101,14 @@ The reverse case also applies: if frete decreases but total min stays at the old
 
 Fix: in `calcPrecoGlobalTotal`, add `ui->doubleSpinBoxTotal->setMinimum(frete)` at line 883 (before setMaximum), mirroring the logic in `on_doubleSpinBoxFrete_valueChanged`.
 
-### 10. `on_dataEmissao_dateChanged` — validade max clamped to days remaining in month — **confirmed**
+### 10. `on_dataEmissao_dateChanged` — validade max clamped to days remaining in month — **working as designed**
 src/orcamento.cpp:1659: `ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day())`.
 
-On the last day of any month the max becomes 0. `newRegister()` at line 457-458 calls `on_dataEmissao_dateChanged(serverDate())` followed by `spinBoxValidade->setValue(7)`, which gets clamped to 0. Any orcamento created on the 30th or 31st has 0-day validity and expires immediately.
+The end-of-month cap is **intentional** — documented in the spinBoxValidade tooltip (`ui/orcamento.ui:419`: "Validade em dias do orçamento, contando a partir de hoje (limitado ao fim do mês)").
 
-Fix: use a fixed maximum (e.g., 30 or a `loja` parameter) instead of days-remaining-in-month.
+On the last day of a month the max becomes 0, so `newRegister()`'s default `spinBoxValidade->setValue(7)` clamps to 0. **Correction to the original claim:** this does not "expire immediately" — with `validade = 0` and emission = today, the expiry test `serverDate() > emissao.addDays(0)` is false through end of the creation day (verified at src/orcamento.cpp:207 and the gerarVenda check at :975). The quote is simply valid for that day only, consistent with the documented cap.
+
+Resolution: owner confirmed 2026-05-28 to keep the strict end-of-month behavior. No change.
 
 ### 11. `on_doubleSpinBoxDesconto_valueChanged` — same rounding bug as original §2 — **confirmed**
 src/orcamento.cpp:1517: `const double caixas2 = not qFuzzyIsNull(fmod(caixas, step)) ? ceil(caixas) : caixas;`.
@@ -160,8 +162,8 @@ Fix: in `adicionarItem`, check if `idProduto` with `estoque = true` already exis
 7. ~~**§4**: relax `buscarConsultor`'s throw on the `Atualizar` path.~~ Fixed (returns early instead of throwing).
 8. ~~**§3**: split `atualizaReplica` into two updates — always set `replicadoEm`, only flip status when source was EXPIRADO.~~ Fixed.
 9. ~~**§5**: wrap the replica-seeding loop.~~ Fixed (ScopedUpdate guard on replica->updating).
-10. **§10**: fix `on_dataEmissao_dateChanged` validade max — replace `daysInMonth() - day()` with a fixed or configurable maximum. HIGH — orcamentos created on month-end have 0-day validity.
-11. **§11**: fix `on_doubleSpinBoxDesconto_valueChanged` — use `ui->doubleSpinBoxQuant->value()` instead of re-deriving caixas2 with the wrong rounding formula.
-12. **§12**: add duplicate estoque guard in `adicionarItem()`.
-13. **Cross-file: audit `venda.cpp` discount handlers for the same `"!"` skip.** `src/venda.cpp` lines 896, 978, 1008 have the identical pattern — looping over `modelItem.rowCount()` without `headerData == "!"` checks. Fix alongside the orcamento sites.
-14. **Parameterize SQL in `calculofrete.cpp`** (lines 224, 245, 441). Mechanical change to match the file's own established `prepare`/`bindValue` style.
+10. ~~**§10**: fix `on_dataEmissao_dateChanged` validade max.~~ **Closed — working as designed.** The end-of-month cap is intentional and documented in the UI tooltip (`ui/orcamento.ui:419`: "limitado ao fim do mês"). A quote created on the last day of the month is valid that day only (`validade = 0` → `serverDate() > emissao.addDays(0)` is false until the next day); it does NOT "expire immediately" as originally stated. Confirmed with the owner 2026-05-28: leave `daysInMonth() - day()` unchanged.
+11. ~~**§11**: fix `on_doubleSpinBoxDesconto_valueChanged` — use `ui->doubleSpinBoxQuant->value()` instead of re-deriving caixas2 with the wrong rounding formula.~~ Fixed.
+12. ~~**§12**: add duplicate estoque guard in `adicionarItem()`.~~ Fixed (guard on `currentItemIsEstoque` + matching `idProduto`; FIXME removed).
+13. ~~**Cross-file: audit `venda.cpp` discount handlers for the same `"!"` skip.**~~ **Invalidated.** Venda has no remove/delete feature — there is no `removeRow`/`removeItem` call anywhere in `src/venda.cpp`, so a row can never carry the `"!"` pending-deletion marker (it only appears after `removeRow` on an `OnManualSubmit` model). The discount handlers (`on_doubleSpinBoxDescontoGlobal_valueChanged` @ venda.cpp:930, `on_doubleSpinBoxDescontoGlobalReais_valueChanged` @ venda.cpp:954) are therefore safe without the skip. Conversely, the `"!"` skips already present at venda.cpp:398 and venda.cpp:449 are effectively dead/defensive code for the same reason.
+14. ~~**Parameterize SQL in `calculofrete.cpp`** (lines 224, 245, 441).~~ Fixed — all three converted to `prepare`/`bindValue`.

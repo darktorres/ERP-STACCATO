@@ -10,15 +10,30 @@
 #include "followup.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
+#include "user.h"
 #include "xlsxdocument.h"
 #include "xml.h"
 #include "xml_viewer.h"
 
+#include <QAuthenticator>
+#include <QComboBox>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QDir>
+#include <QEventLoop>
 #include <QFile>
+#include <QFormLayout>
+#include <QLocale>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QProgressDialog>
+#include <QRegularExpression>
+#include <QSet>
+#include <QSpinBox>
 #include <QSqlError>
 #include <QUrl>
 
@@ -49,6 +64,7 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro, connectionType);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonExportarExcel, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarExcel_clicked, connectionType);
+  connect(ui->pushButtonExportarMes, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarMes_clicked, connectionType);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
@@ -449,6 +465,263 @@ void WidgetNfeEntrada::on_pushButtonExportarExcel_clicked() {
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
+}
+
+void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
+  // Envia ao WebDAV o DANFE de cada NF-e de ENTRADA com duplicata (conta_a_pagar, exceto GARE)
+  // vencendo no mês escolhido, em 'Pagamentos Diarios/<ano>/<MM - Mês_ano>/NOTAS <dd.MM>/' (pasta do dia = dia de vencimento),
+  // nome "<valor> - <fornecedor>.pdf". Pula arquivos de mesmo nome já presentes no servidor (HEAD).
+  const QLocale brLocale(QLocale::Portuguese, QLocale::Brazil);
+
+  // ----------------------------------------- diálogo de mês/ano
+
+  QDialog dialog(this);
+  dialog.setWindowTitle("Exportar Notas do Mês");
+
+  auto *comboMes = new QComboBox(&dialog);
+  for (int m = 1; m <= 12; ++m) { comboMes->addItem(brLocale.monthName(m), m); }
+
+  auto *spinAno = new QSpinBox(&dialog);
+  spinAno->setRange(2024, qApp->serverDate().year() + 1);
+
+  comboMes->setCurrentIndex(qApp->serverDate().month() - 1);
+  spinAno->setValue(qApp->serverDate().year());
+
+  auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+  connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+  auto *layout = new QFormLayout(&dialog);
+  layout->addRow("Mês:", comboMes);
+  layout->addRow("Ano:", spinAno);
+  layout->addRow(buttonBox);
+
+  if (dialog.exec() != QDialog::Accepted) { return; }
+
+  const int mes = comboMes->currentData().toInt();
+  const int ano = spinAno->value();
+
+  const QString periodo = brLocale.monthName(mes) + "/" + QString::number(ano);
+
+  // ----------------------------------------- duplicatas (não-GARE) com vencimento no mês, por nota e dia de vencimento
+
+  // Soma das duplicatas por nota e por dia de vencimento. contraParte = nome curto do fornecedor (fallback: emitente).
+  SqlQuery query;
+  query.prepare("SELECT cp.idNFe, cp.dataPagamento AS venc, SUM(cp.valor) AS valorDia, n.numeroNFe, n.chaveAcesso, "
+                "MAX(cp.contraParte) AS contraParte, MAX(n.emitente) AS emitente "
+                "FROM conta_a_pagar_has_pagamento cp JOIN nfe n ON n.idNFe = cp.idNFe AND n.tipo = 'ENTRADA' "
+                "WHERE COALESCE(cp.contraParte, '') <> 'GARE' AND COALESCE(cp.status, '') NOT LIKE '%GARE%' "
+                "AND YEAR(cp.dataPagamento) = :ano AND MONTH(cp.dataPagamento) = :mes "
+                "GROUP BY cp.idNFe, cp.dataPagamento, n.numeroNFe, n.chaveAcesso ORDER BY cp.dataPagamento, cp.idNFe");
+  query.bindValue(":ano", ano);
+  query.bindValue(":mes", mes);
+
+  if (not query.exec()) { throw RuntimeException("Erro buscando duplicatas: " + query.lastError().text(), this); }
+
+  if (query.size() == 0) { return qApp->enqueueInformation("Nenhuma NF-e com vencimento em " + periodo + ".", this); }
+
+  // ----------------------------------------- WebDAV (mesmo servidor/credenciais das fotos de entrega)
+
+  const QString webdavIp = qApp->getWebDavIp();
+
+  if (webdavIp.isEmpty()) { throw RuntimeError("Servidor WebDAV (Locaweb) não configurado!", this); }
+
+  auto *manager = new QNetworkAccessManager(this);
+  manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  connect(manager, &QNetworkAccessManager::authenticationRequired, this, [](QNetworkReply *, QAuthenticator *authenticator) {
+    authenticator->setUser(User::usuario);
+    authenticator->setPassword(User::senha);
+  });
+
+  const auto enc = [](const QString &texto) { return QString::fromUtf8(QUrl::toPercentEncoding(texto)); };
+
+  // Executa um request (PUT/MKCOL) de forma síncrona, seguindo redirecionamentos. Retorna "" em sucesso.
+  const auto enviar = [&](const QByteArray &verbo, const QString &urlStr, const QByteArray &corpo) -> QString {
+    QUrl url(urlStr);
+
+    for (int tentativa = 0; tentativa < 5; ++tentativa) {
+      QNetworkRequest req(url);
+      QEventLoop loop;
+
+      QNetworkReply *reply = (verbo == "PUT") ? manager->put(req, corpo) : manager->sendCustomRequest(req, verbo, corpo);
+      connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+      loop.exec();
+
+      const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+      const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+      const QNetworkReply::NetworkError erro = reply->error();
+      const QString erroStr = reply->errorString();
+      reply->deleteLater();
+
+      if (redirect.isValid()) {
+        url = redirect.isRelative() ? url.resolved(redirect) : redirect;
+        continue;
+      }
+
+      if (verbo == "MKCOL" and http == 405) { return QString(); } // coleção já existe -> ok
+
+      if (erro != QNetworkReply::NoError) { return erroStr + (http > 0 ? " (HTTP " + QString::number(http) + ")" : QString()); }
+
+      return QString();
+    }
+
+    return "muitos redirecionamentos";
+  };
+
+  // HEAD read-only: true se o arquivo (mesmo nome) já existe no servidor (HTTP 200).
+  const auto existe = [&](const QString &urlStr) -> bool {
+    QUrl url(urlStr);
+
+    for (int tentativa = 0; tentativa < 5; ++tentativa) {
+      QNetworkRequest req(url);
+      QEventLoop loop;
+
+      QNetworkReply *reply = manager->head(req);
+      connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+      loop.exec();
+
+      const QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+      const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+      reply->deleteLater();
+
+      if (redirect.isValid()) {
+        url = redirect.isRelative() ? url.resolved(redirect) : redirect;
+        continue;
+      }
+
+      return http == 200;
+    }
+
+    return false;
+  };
+
+  const QString baseUrl = "https://" + webdavIp + "/webdav/FINANCEIRO/FINANCEIRO/Contas a Pagar/Pagamentos Diarios/";
+
+  QString mesNome = brLocale.monthName(mes);
+  mesNome = mesNome.left(1).toUpper() + mesNome.mid(1); // "maio" -> "Maio", "março" -> "Março"
+  const QString mesPasta = QString("%1 - %2_%3").arg(mes, 2, 10, QChar('0')).arg(mesNome).arg(ano);
+
+  const QString anoDirUrl = baseUrl + enc(QString::number(ano)) + "/";
+  const QString mesDirUrl = anoDirUrl + enc(mesPasta) + "/";
+
+  QString erroPasta = enviar("MKCOL", anoDirUrl, {});
+  if (erroPasta.isEmpty()) { erroPasta = enviar("MKCOL", mesDirUrl, {}); }
+  if (not erroPasta.isEmpty()) { throw RuntimeException("Erro criando pasta no servidor: " + erroPasta, this); }
+
+  // ----------------------------------------- envio (uma pasta NOTAS dd.MM por dia de vencimento)
+
+  SqlQuery queryXml;
+  queryXml.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+
+  QProgressDialog progress("Enviando notas para o servidor...", "Cancelar", 0, query.size(), this);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.setMinimumDuration(0);
+
+  QHash<int, QByteArray> pdfCache;  // DANFE gerado por idNFe (gera uma vez por nota)
+  QSet<QString> pastasDiaCriadas;   // pastas NOTAS dd.MM já criadas no servidor
+  QSet<QString> nomesUsados;        // dirUrl|nomeArquivo, para evitar colisão dentro da mesma pasta
+  QStringList avisos;
+  int enviados = 0;
+  int ignorados = 0;
+  int i = 0;
+
+  while (query.next()) {
+    if (progress.wasCanceled()) { break; }
+    progress.setValue(i++);
+
+    const int idNFe = query.value("idNFe").toInt();
+    const QDate venc = query.value("venc").toDate();
+    const double valorDia = query.value("valorDia").toDouble();
+    const QString numeroNFe = query.value("numeroNFe").toString();
+    const QString chaveAcesso = query.value("chaveAcesso").toString();
+
+    // nome curto do fornecedor: contraParte (mais limpo); fallback p/ emitente (razão social) e, por fim, número da NF
+    QString fornecedor = query.value("contraParte").toString().trimmed();
+    if (fornecedor.isEmpty()) { fornecedor = query.value("emitente").toString().trimmed(); }
+    fornecedor.replace(QRegularExpression(R"([\\/:*?"<>|])"), " "); // remove caracteres inválidos em nome de arquivo
+    fornecedor = fornecedor.simplified();
+    if (fornecedor.isEmpty()) { fornecedor = "NF " + numeroNFe; }
+
+    // pasta do dia = dia de vencimento da duplicata
+    const QString diaPasta = "NOTAS " + venc.toString("dd.MM");
+    const QString diaDirUrl = mesDirUrl + enc(diaPasta) + "/";
+
+    // nome do arquivo: "<valor> - <fornecedor>.pdf" (casa com a convenção da pasta)
+    const QString base = brLocale.toString(valorDia, 'f', 2) + " - " + fornecedor;
+    QString nomeArquivo = base + ".pdf";
+
+    if (nomesUsados.contains(diaDirUrl + "|" + nomeArquivo)) { nomeArquivo = base + " (NF " + numeroNFe + ").pdf"; }
+    nomesUsados.insert(diaDirUrl + "|" + nomeArquivo);
+
+    const QString fileUrl = diaDirUrl + enc(nomeArquivo);
+
+    // pula se o arquivo (mesmo nome) já existe no servidor
+    if (existe(fileUrl)) {
+      ++ignorados;
+      continue;
+    }
+
+    // cria a pasta do dia só quando há algo novo a enviar
+    if (not pastasDiaCriadas.contains(diaDirUrl)) {
+      const QString erroDia = enviar("MKCOL", diaDirUrl, {});
+
+      if (not erroDia.isEmpty()) {
+        avisos << diaPasta + ": erro criando pasta (" + erroDia + ")";
+        continue;
+      }
+
+      pastasDiaCriadas.insert(diaDirUrl);
+    }
+
+    // gera (uma vez por nota) o DANFE via ACBr em ./pdf/{chaveAcesso}-nfe.pdf
+    if (not pdfCache.contains(idNFe)) {
+      queryXml.bindValue(":idNFe", idNFe);
+
+      if (not queryXml.exec() or not queryXml.first()) {
+        avisos << "NF " + numeroNFe + ": XML não encontrado";
+        continue;
+      }
+
+      const QString xml = queryXml.value("xml").toString();
+
+      if (xml.isEmpty()) {
+        avisos << "NF " + numeroNFe + ": XML vazio";
+        continue;
+      }
+
+      ACBrLib::gerarDanfe(xml, false);
+
+      File pdf(QDir::currentPath() + "/pdf/" + chaveAcesso + "-nfe.pdf");
+
+      if (not pdf.exists() or not pdf.open(QFile::ReadOnly)) {
+        avisos << "NF " + numeroNFe + ": PDF não gerado";
+        continue;
+      }
+
+      pdfCache.insert(idNFe, pdf.readAll());
+      pdf.close();
+    }
+
+    const QString erroPut = enviar("PUT", fileUrl, pdfCache.value(idNFe));
+
+    if (not erroPut.isEmpty()) {
+      avisos << nomeArquivo + ": " + erroPut;
+      continue;
+    }
+
+    ++enviados;
+  }
+
+  progress.setValue(query.size());
+
+  // ----------------------------------------- resultado
+
+  QString msg = QString("%1 nota(s) enviada(s), %2 já existia(m) no servidor (venc. em %3).").arg(enviados).arg(ignorados).arg(periodo);
+
+  if (not avisos.isEmpty()) { msg += "\n\nAvisos (" + QString::number(avisos.size()) + "):\n" + avisos.join("\n"); }
+
+  qApp->enqueueInformation(msg, this);
 }
 
 void WidgetNfeEntrada::on_groupBoxStatus_toggled(const bool enabled) {

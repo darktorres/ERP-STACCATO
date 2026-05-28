@@ -352,6 +352,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButtonExportarMes">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Exportar Notas do Mês</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButtonFollowup">
        <property name="enabled">
         <bool>true</bool>

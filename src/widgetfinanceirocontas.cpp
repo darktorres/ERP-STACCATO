@@ -402,24 +402,36 @@ void WidgetFinanceiroContas::on_groupBoxRealizado_toggled(const bool enabled) {
   for (const auto &child : children) { child->setEnabled(enabled); }
 }
 
-void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
+void WidgetFinanceiroContas::filtrarPorResumo(const QModelIndex &index, const SqlQueryModel &resumo) {
   if (not index.isValid()) { return; }
 
-  ui->dateEditVencimentoDe->setDate(modelVencidos.record(index.row()).value("Data").toDate());
-  ui->dateEditVencimentoAte->setDate(modelVencidos.record(index.row()).value("Data").toDate());
+  // Pagar tem uma coluna por status; Receber guarda o status na linha (colunas são por tipo de pagamento)
+  const QString status = (tipo == Tipo::Pagar) ? resumo.headerData(index.column(), Qt::Horizontal).toString() : resumo.record(index.row()).value("Status").toString();
+
+  // setChecked não emite 'clicked', então o montaFiltro() explícito no fim cobre o caso de reclicar a mesma data
+  if (status == "PENDENTE") { ui->radioButtonPendente->setChecked(true); }
+  else if (status == "CONFERIDO") { ui->radioButtonConferido->setChecked(true); }
+  else if (status == "AGENDADO") { ui->radioButtonAgendado->setChecked(true); }
+  else { ui->radioButtonTodos->setChecked(true); }
+
+  const QDate data = resumo.record(index.row()).value("Data").toDate();
+
+  ui->dateEditVencimentoDe->setDate(data);
+  ui->dateEditVencimentoAte->setDate(data);
 
   ui->groupBoxVencimento->setChecked(true);
+
+  montaFiltro();
+}
+
+void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
+  filtrarPorResumo(index, modelVencidos);
 
   ui->tableVencer->clearSelection();
 }
 
 void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
-
-  ui->dateEditVencimentoDe->setDate(modelVencer.record(index.row()).value("Data").toDate());
-  ui->dateEditVencimentoAte->setDate(modelVencer.record(index.row()).value("Data").toDate());
-
-  ui->groupBoxVencimento->setChecked(true);
+  filtrarPorResumo(index, modelVencer);
 
   ui->tableVencidos->clearSelection();
 }

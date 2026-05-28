@@ -20,7 +20,7 @@ public:
   ~Contas() final;
 
   auto viewContaPagarContraparte(const QString &contraparte) -> void;
-  auto viewContaPagarData(const QString &dataPagamento) -> void;
+  auto viewContaPagarData(const QString &dataPagamento, const QString &filtrosExtra = {}) -> void;
   auto viewContaPagarOrdemCompra(const QString &ordemCompra) -> void;
   auto viewContaPagarPgt(const QString &idPagamento) -> void;
   auto viewContaReceber(const QString &idPagamento, const QString &contraparte) -> void;

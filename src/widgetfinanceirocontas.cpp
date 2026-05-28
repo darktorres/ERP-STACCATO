@@ -143,8 +143,49 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
     if (header == "Id") { contas->viewContaPagarPgt(model.data(index.row(), "idPagamento").toString()); }
     else if (header == "Contraparte") { contas->viewContaPagarContraparte(model.data(index.row(), "contraParte").toString()); }
     else if (header == "O.C.") { contas->viewContaPagarOrdemCompra(ordemCompra); }
-    else { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString()); }
+    else { contas->viewContaPagarData(model.data(index.row(), "dataPagamento").toString(), filtrosContasPagar()); }
   }
+}
+
+QString WidgetFinanceiroContas::filtrosContasPagar() const {
+  QStringList filtros;
+
+  //-------------------------------------
+
+  QString status;
+
+  const auto children = ui->groupBoxStatus->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
+
+  for (const auto &child : children) {
+    if (child->isChecked()) {
+      if (child->text() == "Todos") { break; }
+
+      status = child->text();
+      break;
+    }
+  }
+
+  if (not status.isEmpty()) { filtros << "status = '" + status + "'"; }
+
+  //-------------------------------------
+
+  if (not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())) {
+    filtros << "valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1);
+  }
+
+  //-------------------------------------
+
+  if (ui->groupBoxRealizado->isChecked()) {
+    filtros << "dataRealizado BETWEEN '" + ui->dateEditRealizadoDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditRealizadoAte->date().toString("yyyy-MM-dd") + "'";
+  }
+
+  //-------------------------------------
+
+  if (ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty()) { filtros << "idLoja = " + ui->itemBoxLojas->getId().toString(); }
+
+  //-------------------------------------
+
+  return filtros.join(" AND ");
 }
 
 void WidgetFinanceiroContas::montaFiltro() {

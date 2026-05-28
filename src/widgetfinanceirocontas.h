@@ -34,6 +34,7 @@ private:
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetFinanceiroContas *ui;
   // methods
+  auto filtrosContasPagar() const -> QString;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
   auto on_dateEditRealizadoDe_dateChanged(const QDate date) -> void;

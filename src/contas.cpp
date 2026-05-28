@@ -393,14 +393,16 @@ void Contas::viewContaPagarContraparte(const QString &contraparte) {
   modelProcessados.select();
 }
 
-void Contas::viewContaPagarData(const QString &dataPagamento) {
+void Contas::viewContaPagarData(const QString &dataPagamento, const QString &filtrosExtra) {
   setWindowTitle(windowTitle() + " - Data: " + QDate::fromString(dataPagamento, "yyyy-MM-dd").toString("dd-MM-yyyy"));
 
   // -------------------------------------------------------------------------
 
-  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')");
+  const QString extra = filtrosExtra.isEmpty() ? "" : " AND " + filtrosExtra;
 
-  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PAGO')");
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO')" + extra);
+
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PAGO')" + extra);
 
   // -------------------------------------------------------------------------
 

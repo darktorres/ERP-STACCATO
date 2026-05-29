@@ -18,12 +18,12 @@ qreal Segment::intersectValue(Segment value) {
 }
 
 bool itemSortContainerLessThen(const PItemSortContainer c1, const PItemSortContainer c2) {
-  VSegment vS1(c1->m_rect), vS2(c2->m_rect);
-  HSegment hS1(c1->m_rect), hS2(c2->m_rect);
-  if (vS1.intersectValue(vS2) > hS1.intersectValue(hS2))
-    return c1->m_rect.x() < c2->m_rect.x();
-  else
-    return c1->m_rect.y() < c2->m_rect.y();
+  // Reading order (top-to-bottom, then left-to-right). The previous heuristic chose the
+  // x/y comparison per-pair based on overlap, which is not a strict weak ordering and trips
+  // MSVC's debug-STL comparator validation inside std::sort. This lexicographic key is a
+  // valid total order, so std::sort is well-defined.
+  if (c1->m_rect.y() != c2->m_rect.y()) { return c1->m_rect.y() < c2->m_rect.y(); }
+  return c1->m_rect.x() < c2->m_rect.x();
 }
 
 void ItemsContainerDesignInft::snapshotItemsLayout(SnapshotType type) {

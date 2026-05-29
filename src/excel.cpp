@@ -201,7 +201,7 @@ void Excel::setQuerys() {
     query.bindValue(":idOrcamento", id);
 
     queryProduto.prepare(
-        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
+        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento ORDER BY ordem ASC");
     queryProduto.bindValue(":idOrcamento", id);
   }
 
@@ -211,7 +211,7 @@ void Excel::setQuerys() {
     query.bindValue(":idVenda", id);
 
     queryProduto.prepare(
-        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
+        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda ORDER BY ordem ASC");
     queryProduto.bindValue(":idVenda", id);
   }
 

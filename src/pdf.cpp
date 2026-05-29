@@ -21,6 +21,8 @@ PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : id(id), parent(p
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
+  modelItem.setSort("ordem", Qt::AscendingOrder);
+
   modelItem.select();
 }
 

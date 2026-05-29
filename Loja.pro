@@ -25,7 +25,7 @@ PRECOMPILED_HEADER = pch.h
 CONFIG *= precompile_header
 
 win32 {
-    VERSION = 0.10.156
+    VERSION = 0.10.157
     QMAKE_TARGET_COMPANY = Staccato Revestimentos
     QMAKE_TARGET_PRODUCT = ERP
     QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos

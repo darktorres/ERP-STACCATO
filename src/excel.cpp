@@ -211,7 +211,7 @@ void Excel::setQuerys() {
     query.bindValue(":idVenda", id);
 
     queryProduto.prepare(
-        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda ORDER BY ordem ASC");
+        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
     queryProduto.bindValue(":idVenda", id);
   }
 

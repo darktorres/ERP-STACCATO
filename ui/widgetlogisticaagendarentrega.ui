@@ -632,6 +632,13 @@
           <item row="0" column="0" colspan="6">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
+             <widget class="QPushButton" name="pushButtonSeparar">
+              <property name="text">
+               <string>Separar</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="pushButtonImportarNFe">
               <property name="text">
                <string>Importar NF-e</string>

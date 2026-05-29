@@ -42,7 +42,6 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonObservacao, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonObservacao_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
-  connect(ui->pushButtonSeparar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonSeparar_clicked, connectionType);
   connect(ui->tableCalendario->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntregas::on_tableCalendario_selectionChanged, connectionType);
   connect(ui->tableCarga, &TableView::doubleClicked, this, &WidgetLogisticaEntregas::on_tableCarga_doubleClicked, connectionType);
   connect(ui->tableCarga->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntregas::on_tableCarga_selectionChanged, connectionType);
@@ -267,15 +266,8 @@ void WidgetLogisticaEntregas::on_tableCarga_selectionChanged() {
 
   ui->pushButtonReagendar->setEnabled(true);
   ui->pushButtonCancelarEntrega->setEnabled(true);
-  ui->pushButtonSeparar->setEnabled(status == "ENTREGA AGEND.");
 
   if (status == "ENTREGA AGEND.") {
-    ui->pushButtonGerarNFe->setEnabled(true);
-    ui->pushButtonConfirmarEntrega->setEnabled(true);
-    ui->pushButtonImprimirDanfe->setDisabled(true);
-  }
-
-  if (status == "SEPARADO") {
     ui->pushButtonGerarNFe->setEnabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
@@ -360,55 +352,6 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   updateTables();
 
   qApp->enqueueInformation("Entrega confirmada!", this);
-}
-
-void WidgetLogisticaEntregas::separar() {
-  SqlQuery query1;
-  query1.prepare("UPDATE veiculo_has_produto SET status = 'SEPARADO' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
-
-  SqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'SEPARADO' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
-
-  SqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto2 SET status = 'SEPARADO' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
-
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-    const int idVendaProduto2 = modelProdutos.data(row, "idVendaProduto2").toInt();
-
-    query1.bindValue(":idVendaProduto2", idVendaProduto2);
-
-    if (not query1.exec()) { throw RuntimeException("Erro salvando veiculo_has_produto: " + query1.lastError().text()); }
-
-    query2.bindValue(":idVendaProduto2", idVendaProduto2);
-
-    if (not query2.exec()) { throw RuntimeException("Erro salvando pedido_fornecedor: " + query2.lastError().text()); }
-
-    query3.bindValue(":idVendaProduto2", idVendaProduto2);
-
-    if (not query3.exec()) { throw RuntimeException("Erro salvando venda_produto: " + query3.lastError().text()); }
-  }
-}
-
-void WidgetLogisticaEntregas::on_pushButtonSeparar_clicked() {
-  const auto selection = ui->tableCarga->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
-
-  QStringList idVendas;
-
-  for (const auto &index : selection) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
-
-  qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonSeparar");
-
-  separar();
-
-  Sql::updateVendaStatus(idVendas);
-
-  qApp->endTransaction();
-
-  updateTables();
-
-  qApp->enqueueInformation("Separação confirmada!", this);
 }
 
 void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {

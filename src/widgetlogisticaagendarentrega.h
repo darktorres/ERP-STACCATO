@@ -56,6 +56,7 @@ private:
   auto on_pushButtonMapa_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
+  auto on_pushButtonSeparar_clicked() -> void;
   auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableTranspAgend_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableTranspAtual_doubleClicked(const QModelIndex &index) -> void;
@@ -63,6 +64,7 @@ private:
   auto on_tableVendas_selectionChanged() -> void;
   auto processRows() -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrev, const QString &observacao) -> void;
+  auto separar() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

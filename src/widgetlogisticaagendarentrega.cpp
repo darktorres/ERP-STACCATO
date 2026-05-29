@@ -210,6 +210,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->pushButtonMapa, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked, connectionType);
   connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked, connectionType);
+  connect(ui->pushButtonSeparar, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked, connectionType);
   connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -253,6 +254,7 @@ void WidgetLogisticaAgendarEntrega::unsetConnections() {
   disconnect(ui->pushButtonMapa, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonMapa_clicked);
   disconnect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
   disconnect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
+  disconnect(ui->pushButtonSeparar, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked);
   disconnect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   disconnect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
@@ -479,11 +481,11 @@ void WidgetLogisticaAgendarEntrega::processRows() {
   querySelecao.prepare("SELECT idVenda, codComercial FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
 
   SqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('ESTOQUE', 'SEPARADO') AND idVendaProduto2 = :idVendaProduto2");
 
   SqlQuery queryVenda;
   queryVenda.prepare(
-      "UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('PENDENTE', 'REPO. ENTREGA', 'ESTOQUE') AND idVendaProduto2 = :idVendaProduto2");
+      "UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE status IN ('PENDENTE', 'REPO. ENTREGA', 'ESTOQUE', 'SEPARADO') AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
     modelTranspAtual.setData(row, "data", dataPrevEnt);
@@ -509,6 +511,50 @@ void WidgetLogisticaAgendarEntrega::processRows() {
   }
 
   modelTranspAtual.submitAll();
+}
+
+void WidgetLogisticaAgendarEntrega::separar() {
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'SEPARADO' WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'SEPARADO' WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
+
+  for (const auto &index : selection) {
+    const int idVendaProduto2 = modelProdutos.data(index.row(), "idVendaProduto2").toInt();
+
+    queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
+
+    if (not queryVenda.exec()) { throw RuntimeException("Erro salvando venda_produto: " + queryVenda.lastError().text()); }
+
+    queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
+
+    if (not queryCompra.exec()) { throw RuntimeException("Erro salvando pedido_fornecedor: " + queryCompra.lastError().text()); }
+  }
+}
+
+void WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked() {
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
+
+  QStringList idVendas;
+
+  for (const auto &index : selection) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+
+  qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonSeparar");
+
+  separar();
+
+  Sql::updateVendaStatus(idVendas);
+
+  qApp->endTransaction();
+
+  updateTables();
+
+  qApp->enqueueInformation("Separação confirmada!", this);
 }
 
 void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) {
@@ -567,9 +613,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
     const QString status = modelProdutos.data(row, "status").toString();
 
-    if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/REPO. ENTREGA!"); }
+    if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE" and status != "SEPARADO") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/SEPARADO/REPO. ENTREGA!"); }
 
-    if (status != "ESTOQUE") { semEstoque = true; }
+    if (status != "ESTOQUE" and status != "SEPARADO") { semEstoque = true; }
 
     if (qFuzzyIsNull(modelProdutos.data(row, "quant").toDouble())) { throw RuntimeError("Produto com quantidade zero!", this); }
   }

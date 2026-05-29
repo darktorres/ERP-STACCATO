@@ -64,7 +64,7 @@ private:
   auto on_tableVendas_selectionChanged() -> void;
   auto processRows() -> void;
   auto reagendar(const QModelIndexList &list, const QDate dataPrev, const QString &observacao) -> void;
-  auto separar() -> void;
+  auto separar(const bool marcarSeparado) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

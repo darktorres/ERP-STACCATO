@@ -513,22 +513,29 @@ void WidgetLogisticaAgendarEntrega::processRows() {
   modelTranspAtual.submitAll();
 }
 
-void WidgetLogisticaAgendarEntrega::separar() {
+void WidgetLogisticaAgendarEntrega::separar(const bool marcarSeparado) {
+  const QString statusAtual = marcarSeparado ? "ESTOQUE" : "SEPARADO";
+  const QString novoStatus = marcarSeparado ? "SEPARADO" : "ESTOQUE";
+
   SqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'SEPARADO' WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = :novoStatus WHERE status = :statusAtual AND idVendaProduto2 = :idVendaProduto2");
 
   SqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'SEPARADO' WHERE status = 'ESTOQUE' AND idVendaProduto2 = :idVendaProduto2");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = :novoStatus WHERE status = :statusAtual AND idVendaProduto2 = :idVendaProduto2");
 
   const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
   for (const auto &index : selection) {
     const int idVendaProduto2 = modelProdutos.data(index.row(), "idVendaProduto2").toInt();
 
+    queryVenda.bindValue(":novoStatus", novoStatus);
+    queryVenda.bindValue(":statusAtual", statusAtual);
     queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not queryVenda.exec()) { throw RuntimeException("Erro salvando venda_produto: " + queryVenda.lastError().text()); }
 
+    queryCompra.bindValue(":novoStatus", novoStatus);
+    queryCompra.bindValue(":statusAtual", statusAtual);
     queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not queryCompra.exec()) { throw RuntimeException("Erro salvando pedido_fornecedor: " + queryCompra.lastError().text()); }
@@ -541,18 +548,30 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked() {
   if (selection.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QStringList idVendas;
+  bool temEstoque = false;
+  bool temSeparado = false;
 
   for (const auto &index : selection) {
     const QString status = modelProdutos.data(index.row(), "status").toString();
 
-    if (status != "ESTOQUE") { throw RuntimeError("Produto '" + modelProdutos.data(index.row(), "produto").toString() + "' não está em estoque!", this); }
+    if (status == "ESTOQUE") {
+      temEstoque = true;
+    } else if (status == "SEPARADO") {
+      temSeparado = true;
+    } else {
+      throw RuntimeError("Produto '" + modelProdutos.data(index.row(), "produto").toString() + "' não está em estoque!", this);
+    }
 
     idVendas << modelProdutos.data(index.row(), "idVenda").toString();
   }
 
+  if (temEstoque and temSeparado) { throw RuntimeError("Selecione apenas itens em estoque OU apenas itens separados!", this); }
+
+  const bool marcarSeparado = temEstoque;
+
   qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonSeparar");
 
-  separar();
+  separar(marcarSeparado);
 
   Sql::updateVendaStatus(idVendas);
 
@@ -560,7 +579,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked() {
 
   updateTables();
 
-  qApp->enqueueInformation("Separação confirmada!", this);
+  qApp->enqueueInformation(marcarSeparado ? "Separação confirmada!" : "Separação desfeita!", this);
 }
 
 void WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) {

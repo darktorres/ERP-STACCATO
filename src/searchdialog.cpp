@@ -422,7 +422,6 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->ui->legendaEstoque->show();
   sdProd->ui->legendaPromocao->show();
   sdProd->ui->legendaStaccatoOFF->show();
-  sdProd->ui->pushButtonModelo3d->show();
   sdProd->ui->checkBoxDescontinuados->show();
 
   sdProd->ui->checkBoxDescontinuados->setChecked(false);

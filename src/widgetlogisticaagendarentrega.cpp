@@ -542,7 +542,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonSeparar_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : selection) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+  for (const auto &index : selection) {
+    const QString status = modelProdutos.data(index.row(), "status").toString();
+
+    if (status != "ESTOQUE") { throw RuntimeError("Produto '" + modelProdutos.data(index.row(), "produto").toString() + "' não está em estoque!", this); }
+
+    idVendas << modelProdutos.data(index.row(), "idVenda").toString();
+  }
 
   qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonSeparar");
 

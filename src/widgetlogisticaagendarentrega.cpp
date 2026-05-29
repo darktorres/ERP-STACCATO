@@ -723,9 +723,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const QString status = modelProdutos.data(row, "status").toString();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/REPO. ENTREGA!"); }
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "ESTOQUE" and status != "SEPARADO") { throw RuntimeError("Produto não está PENDENTE/ESTOQUE/SEPARADO/REPO. ENTREGA!"); }
 
-  if (status != "ESTOQUE") {
+  if (status != "ESTOQUE" and status != "SEPARADO") {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "O produto não está em estoque! Tem certeza que deseja agendar?", QMessageBox::Yes | QMessageBox::No, this);
     msgBox.button(QMessageBox::Yes)->setText("Agendar");
     msgBox.button(QMessageBox::No)->setText("Voltar");

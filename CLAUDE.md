@@ -65,25 +65,6 @@ Or use the PowerShell version:
 
 If the env-var pin is ever missing (e.g. fresh machine), add `-vcvars_ver=14.44` to force the working toolset.
 
-### Test Suite Compilation
-
-```batch
-# Setup MSVC environment first (toolset 14.44 auto-selected via VCVARS_USER_VERSION pin)
-"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x86
-
-# Navigate to tests directory
-cd tests
-
-# Generate Makefile with correct Qt (match the arch above — 32-bit kit shown)
-"C:\Qt\5.15.2\msvc2019\bin\qmake.exe" tests.pro
-
-# Compile tests
-nmake
-
-# Run tests
-debug\tests.exe
-```
-
 ## Architecture Overview
 
 ### Core Application Structure
@@ -133,7 +114,6 @@ debug\tests.exe
 - **3rdparty/**: External libraries and dependencies
 - **modelos/**: Report templates (.lrxml, .xlsx)
 - **db/**: Database schema and migration files
-- **tests/**: Comprehensive test suite with unit and integration tests
 
 ### Key Design Patterns
 
@@ -166,14 +146,6 @@ This is an ERP system specifically designed for Brazilian businesses, with featu
 - Extensive use of auto keyword for type deduction
 - Modern C++ features where supported by Qt 5.15+
 - Consistent indentation and formatting
-
-### Testing Framework
-
-- **Test Directory**: `tests/`
-- **Unit Tests**: Status management, validators, SQL operations
-- **Integration Tests**: Purchase workflow, sales workflow, inventory management
-- **Test Infrastructure**: Qt Test framework with mock objects and helpers
-- **Coverage**: 97 test methods covering critical functionality
 
 ### Process Improvements
 

@@ -101,6 +101,7 @@ private:
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
+  auto swapItens(const int rowA, const int rowB) -> void;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaCadastroCliente() -> void;

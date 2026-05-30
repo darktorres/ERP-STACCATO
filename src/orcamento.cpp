@@ -772,15 +772,9 @@ void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 void Orcamento::on_pushButtonSubirItem_clicked() {
   if (currentRowItem <= 0) { return; }
 
-  const int rowA = currentRowItem;
   const int rowB = currentRowItem - 1;
 
-  const int ordemA = modelItem.data(rowA, "ordem").toInt();
-  const int ordemB = modelItem.data(rowB, "ordem").toInt();
-
-  modelItem.setData(rowA, "ordem", ordemB);
-  modelItem.setData(rowB, "ordem", ordemA);
-  modelItem.proxyModel->sort(modelItem.fieldIndex("ordem"), Qt::AscendingOrder);
+  swapItens(currentRowItem, rowB);
 
   currentRowItem = rowB;
 
@@ -792,21 +786,35 @@ void Orcamento::on_pushButtonSubirItem_clicked() {
 void Orcamento::on_pushButtonDescerItem_clicked() {
   if (currentRowItem < 0 or currentRowItem >= modelItem.rowCount() - 1) { return; }
 
-  const int rowA = currentRowItem;
   const int rowB = currentRowItem + 1;
 
-  const int ordemA = modelItem.data(rowA, "ordem").toInt();
-  const int ordemB = modelItem.data(rowB, "ordem").toInt();
-
-  modelItem.setData(rowA, "ordem", ordemB);
-  modelItem.setData(rowB, "ordem", ordemA);
-  modelItem.proxyModel->sort(modelItem.fieldIndex("ordem"), Qt::AscendingOrder);
+  swapItens(currentRowItem, rowB);
 
   currentRowItem = rowB;
 
   if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
 
   ui->tableProdutos->selectRow(rowB);
+}
+
+void Orcamento::swapItens(const int rowA, const int rowB) {
+  // Troca o conteúdo das duas linhas mantendo a PK (idOrcamentoProduto) e a posição (ordem) de cada
+  // slot. Isso reordena visualmente sem chamar proxyModel->sort(), preservando a invariante de que a
+  // ordem do proxy é igual à ordem do model fonte (necessária para removeRow/insertRowAtEnd etc.).
+
+  const QSqlRecord record = modelItem.record();
+
+  for (int col = 0, colCount = record.count(); col < colCount; ++col) {
+    const QString field = record.fieldName(col);
+
+    if (field == "idOrcamentoProduto" or field == "ordem") { continue; }
+
+    const QVariant valueA = modelItem.data(rowA, col);
+    const QVariant valueB = modelItem.data(rowB, col);
+
+    modelItem.setData(rowA, col, valueB, false);
+    modelItem.setData(rowB, col, valueA, false);
+  }
 }
 
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
@@ -1313,6 +1321,8 @@ void Orcamento::calcularFrete(const bool updateSpinBox) {
     const auto pesos = Sql::pesosProdutos(idProdutos);
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
+      if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+
       const QString idProduto = modelItem.data(row, "idProduto").toString();
 
       if (not pesos.contains(idProduto)) { throw RuntimeException("Produto não encontrado com id: " + idProduto); }

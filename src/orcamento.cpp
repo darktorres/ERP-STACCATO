@@ -962,14 +962,6 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
   try {
     if (tipoItem == Tipo::Cadastrar) {
-      if (currentItemIsEstoque) {
-        const int idProduto = ui->itemBoxProduto->getId().toInt();
-        for (int row = 0; row < modelItem.rowCount(); ++row) {
-          if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
-          if (modelItem.data(row, "estoque").toBool() and modelItem.data(row, "idProduto").toInt() == idProduto) { throw RuntimeError("Produto de estoque já adicionado ao orçamento!", this); }
-        }
-      }
-
       currentRowItem = modelItem.insertRowAtEnd();
 
       int maxOrdem = -1;
@@ -1197,8 +1189,16 @@ void Orcamento::setarParametrosProduto() {
   currentItemIsPromocao = query.value("promocao").toInt();
 
   if (currentItemIsEstoque) {
-    ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / quantCaixa);
-    ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
+    const int selectedIdProduto = ui->itemBoxProduto->getId().toInt();
+    double alreadyCommitted = 0.;
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      if (row == currentRowItem) { continue; }
+      if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
+      if (modelItem.data(row, "estoque").toBool() and modelItem.data(row, "idProduto").toInt() == selectedIdProduto) { alreadyCommitted += modelItem.data(row, "quant").toDouble(); }
+    }
+    const double available = qMax(0., query.value("estoqueRestante").toDouble() - alreadyCommitted);
+    ui->doubleSpinBoxCaixas->setMaximum(available / quantCaixa);
+    ui->doubleSpinBoxQuant->setMaximum(available);
   } else {
     ui->doubleSpinBoxCaixas->setMaximum(9'999'999.000000);
     ui->doubleSpinBoxQuant->setMaximum(9'999'999.000000);
@@ -1749,21 +1749,26 @@ void Orcamento::verificaDisponibilidadeEstoque() {
   SqlQuery query;
 
   QStringList produtos;
+  QMap<int, double> totalPorProduto;
+  QMap<int, QString> nomePorProduto;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
     if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
 
-    const QString idProduto = modelItem.data(row, "idProduto").toString();
-    const QString quant = modelItem.data(row, "quant").toString();
+    const int idProduto = modelItem.data(row, "idProduto").toInt();
+    totalPorProduto[idProduto] += modelItem.data(row, "quant").toDouble();
+    nomePorProduto[idProduto] = modelItem.data(row, "produto").toString();
+  }
 
+  for (auto it = totalPorProduto.cbegin(); it != totalPorProduto.cend(); ++it) {
     query.prepare("SELECT 0 FROM produto WHERE idProduto = :id AND estoqueRestante >= :quant LIMIT 1");
-    query.bindValue(":id", idProduto);
-    query.bindValue(":quant", modelItem.data(row, "quant"));
+    query.bindValue(":id", it.key());
+    query.bindValue(":quant", it.value());
 
     if (not query.exec()) { throw RuntimeException("Erro verificando a disponibilidade do estoque: " + query.lastError().text()); }
 
-    if (not query.first()) { produtos << modelItem.data(row, "produto").toString(); }
+    if (not query.first()) { produtos << nomePorProduto[it.key()]; }
   }
 
   if (not produtos.isEmpty()) {

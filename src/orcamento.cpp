@@ -1034,7 +1034,7 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 
   if (not date.isValid()) { return; }
 
-  if (qApp->serverDate() > date.addDays(data("validade").toInt())) { throw RuntimeError("Orçamento vencido!"); }
+  if (qApp->serverDate() > date.addDays(ui->spinBoxValidade->value())) { throw RuntimeError("Orçamento vencido!"); }
 
   if (ui->itemBoxEndereco->text().isEmpty()) { throw RuntimeError("Deve selecionar endereço!"); }
 

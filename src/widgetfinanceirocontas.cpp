@@ -635,9 +635,12 @@ QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelInd
     CNAB::Pagamento pagamento;
 
     if (grupo == "RH - SALÁRIOS") {
+      const QString idLoja = QString::number(model.data(index.row(), "idLoja").toInt());
+
       SqlQuery queryFuncionario;
 
-      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nomeBanco = '" + contraParte + "'")) {
+      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nomeBanco = '" + contraParte + "' AND idLoja = " + idLoja +
+                                    " ORDER BY desativado ASC, (banco IS NULL OR banco = '' OR agencia IS NULL OR agencia = '' OR cc IS NULL OR cc = '') ASC, idUsuario DESC LIMIT 1")) {
         throw RuntimeException("Erro buscando dados báncarios do funcionário: " + queryFuncionario.lastError().text());
       }
 

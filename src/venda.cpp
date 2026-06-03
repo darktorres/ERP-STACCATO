@@ -993,20 +993,22 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
   unsetConnections();
 
   try {
-    const double descontoPorc2 = descontoPorc / 100;
-
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc);
-
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2));
-    }
-
+    // Mesma forma canônica (em reais) dos demais slots: deriva descontoReais e o total pelo invariante
+    // total = subTotalLiq - descontoReais + frete, e aplica uma única fração a todos os itens.
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
+    const double descontoFrac = descontoPorc / 100;
+    const double descontoReais = subTotalLiq * descontoFrac;
 
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      modelItem.setData(row, "descGlobal", descontoFrac * 100);
+
+      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+      modelItem.setData(row, "total", parcialDesc * (1 - descontoFrac));
+    }
+
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     montarFluxoCaixa();

@@ -909,8 +909,10 @@ void Orcamento::calcPrecoGlobalTotal() {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
     
     const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-    const double descGlobal = modelItem.data(row, "descGlobal").toDouble() / 100.;
-    modelItem.setData(row, "total", parcialDesc * (1 - descGlobal));
+    // O desconto global é único para todo o orçamento: usa a fração do cabeçalho (igual à do total do cabeçalho)
+    // e mantém o descGlobal da linha em sincronia, em vez de reler um descGlobal por linha possivelmente defasado.
+    modelItem.setData(row, "descGlobal", descGlobal);
+    modelItem.setData(row, "total", parcialDesc * (1 - descGlobalFrac));
   }
 }
 

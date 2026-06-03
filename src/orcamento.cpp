@@ -701,8 +701,13 @@ void Orcamento::savingProcedures() {
 
   setData("data", ui->dataEmissao->isReadOnly() ? qApp->serverDateTime() : ui->dataEmissao->dateTime());
   setData("data2", data("data").toDate().toString("yyyy-MM"));
-  setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value());
-  setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.);
+  // descontoReais é a fonte de verdade (em reais), derivada do total que o usuário definiu; o percentual é só exibição.
+  // Garante o invariante total = subTotalLiq - descontoReais + frete de forma exata, independente da base.
+  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+  const double frete = ui->doubleSpinBoxFrete->value();
+  const double descontoReais = subTotalLiq + frete - ui->doubleSpinBoxTotal->value();
+  setData("descontoPorc", qFuzzyIsNull(subTotalLiq) ? 0. : descontoReais / subTotalLiq * 100.);
+  setData("descontoReais", descontoReais);
   setData("frete", ui->doubleSpinBoxFrete->value());
   setData("freteManual", ui->checkBoxFreteManual->isChecked());
   setData("idCliente", ui->itemBoxCliente->getId());

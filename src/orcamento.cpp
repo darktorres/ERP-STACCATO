@@ -583,17 +583,23 @@ void Orcamento::generateId() {
 }
 
 void Orcamento::corrigirValores() {
+  // Recalcula o total dos itens pelo desconto do cabeçalho (descontoReais/subTotalLiq) em precisão cheia,
+  // não pelo descGlobal por linha arredondado a 4 casas — que, em base grande, desviava o total e (quando
+  // o descGlobal da linha estava 0/desatualizado) chegava a apagar o desconto do item.
+  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+  const double descontoFrac = qFuzzyIsNull(subTotalLiq) ? 0. : ui->doubleSpinBoxDescontoGlobalReais->value() / subTotalLiq;
+
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
     if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
 
     const double quant = modelItem.data(row, "quant").toDouble();
     const double prcUnitario = modelItem.data(row, "prcUnitario").toDouble();
     const double descUnitario = modelItem.data(row, "descUnitario").toDouble();
-    const double descGlobal = modelItem.data(row, "descGlobal").toDouble();
 
     modelItem.setData(row, "parcial", prcUnitario * quant);
     modelItem.setData(row, "parcialDesc", descUnitario * quant);
-    modelItem.setData(row, "total", (descUnitario * quant) * (1 - (descGlobal / 100)));
+    modelItem.setData(row, "descGlobal", descontoFrac * 100);
+    modelItem.setData(row, "total", (descUnitario * quant) * (1 - descontoFrac));
   }
 }
 

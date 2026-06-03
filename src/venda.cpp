@@ -505,20 +505,24 @@ void Venda::verificarTotais() {
   const double spinFrete = ui->doubleSpinBoxFrete->value();
   const double spinTotal = ui->doubleSpinBoxTotal->value();
 
-  const bool brutoErrado = abs(subTotalBruto - spinBruto) > 0.1;
-  const bool liquidoErrado = abs(subTotalLiq - spinLiq) > 0.1;
-  const bool totalErrado = abs(total - (spinTotal - spinFrete)) > 0.1;
-  const bool freteErrado = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > 0.1;
+  // Tolerância proporcional à base: os valores são DECIMAL(15,4) e os spin boxes de dinheiro têm 2 casas,
+  // então um limite fixo de 0.1 é mais fino que a precisão dos dados e gera falso erro em bases grandes.
+  const double tol = std::max(0.1, spinLiq * 1e-6);
+
+  const bool brutoErrado = abs(subTotalBruto - spinBruto) > tol;
+  const bool liquidoErrado = abs(subTotalLiq - spinLiq) > tol;
+  const bool totalErrado = abs(total - (spinTotal - spinFrete)) > tol;
+  const bool freteErrado = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > tol;
 
   if (brutoErrado or liquidoErrado or totalErrado or freteErrado) {
     corrigirValores();
 
     const auto [subTotalBruto2, subTotalLiq2, total2] = calcularTotais();
 
-    const bool brutoErrado2 = abs(subTotalBruto2 - spinBruto) > 0.1;
-    const bool liquidoErrado2 = abs(subTotalLiq2 - spinLiq) > 0.1;
-    const bool totalErrado2 = abs(total2 - (spinTotal - spinFrete)) > 0.1;
-    const bool freteErrado2 = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > 0.1;
+    const bool brutoErrado2 = abs(subTotalBruto2 - spinBruto) > tol;
+    const bool liquidoErrado2 = abs(subTotalLiq2 - spinLiq) > tol;
+    const bool totalErrado2 = abs(total2 - (spinTotal - spinFrete)) > tol;
+    const bool freteErrado2 = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > tol;
 
     if (brutoErrado2 or liquidoErrado2 or totalErrado2 or freteErrado2) {
       Log::createLog("Exceção", montarLog());

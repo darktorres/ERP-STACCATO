@@ -643,18 +643,22 @@ QString Orcamento::montarLog() {
 void Orcamento::verificarTotais() {
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
 
-  const bool brutoErrado = abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 0.1;
-  const bool liquidoErrado = abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 0.1;
-  const bool totalErrado = abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 0.1;
+  // Tolerância proporcional à base: os valores são DECIMAL(15,4) e os spin boxes de dinheiro têm 2 casas,
+  // então um limite fixo de 0.1 é mais fino que a precisão dos dados e gera falso erro em bases grandes.
+  const double tol = std::max(0.1, ui->doubleSpinBoxSubTotalLiq->value() * 1e-6);
+
+  const bool brutoErrado = abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > tol;
+  const bool liquidoErrado = abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > tol;
+  const bool totalErrado = abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > tol;
 
   if (brutoErrado or liquidoErrado or totalErrado) {
     corrigirValores();
 
     const auto [subTotalBruto2, subTotalLiq2, total2] = calcularTotais();
 
-    const bool brutoErrado2 = abs(subTotalBruto2 - ui->doubleSpinBoxSubTotalBruto->value()) > 0.1;
-    const bool liquidoErrado2 = abs(subTotalLiq2 - ui->doubleSpinBoxSubTotalLiq->value()) > 0.1;
-    const bool totalErrado2 = abs(total2 - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 0.1;
+    const bool brutoErrado2 = abs(subTotalBruto2 - ui->doubleSpinBoxSubTotalBruto->value()) > tol;
+    const bool liquidoErrado2 = abs(subTotalLiq2 - ui->doubleSpinBoxSubTotalLiq->value()) > tol;
+    const bool totalErrado2 = abs(total2 - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > tol;
 
     if (brutoErrado2 or liquidoErrado2 or totalErrado2) {
       Log::createLog("Exceção", montarLog());

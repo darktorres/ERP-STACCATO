@@ -534,6 +534,10 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
     authenticator->setPassword(User::senha);
   });
 
+  // Autenticação preemptiva: o re-envio após 401 do authenticationRequired não é confiável para verbos custom (MKCOL via
+  // sendCustomRequest), então mandamos as credenciais já na primeira requisição (vale p/ MKCOL/PUT/HEAD).
+  const QByteArray basicAuth = "Basic " + (User::usuario + ":" + User::senha).toUtf8().toBase64();
+
   const auto enc = [](const QString &texto) { return QString::fromUtf8(QUrl::toPercentEncoding(texto)); };
 
   // Executa um request (PUT/MKCOL) de forma síncrona, seguindo redirecionamentos. Retorna "" em sucesso.
@@ -542,6 +546,7 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
 
     for (int tentativa = 0; tentativa < 5; ++tentativa) {
       QNetworkRequest req(url);
+      req.setRawHeader("Authorization", basicAuth);
       QEventLoop loop;
 
       QNetworkReply *reply = (verbo == "PUT") ? manager->put(req, corpo) : manager->sendCustomRequest(req, verbo, corpo);
@@ -575,6 +580,7 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
 
     for (int tentativa = 0; tentativa < 5; ++tentativa) {
       QNetworkRequest req(url);
+      req.setRawHeader("Authorization", basicAuth);
       QEventLoop loop;
 
       QNetworkReply *reply = manager->head(req);

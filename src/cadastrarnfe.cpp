@@ -910,6 +910,27 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorFrete=" + QString::number(valorFrete, 'f', 2) + "\n";
   stream << "ValorNota=" + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
 
+  // PARTILHA ICMS — emitir vICMSUFDest AINDA sob a seção [Total], ANTES das seções IBS/CBS abaixo.
+  // Se ficar depois delas, a chave cai sob [gCBSTot] no .ini, o ACBr não a lê como total do documento
+  // e recalcula o vICMSUFDest somando bases não arredondadas, divergindo do somatório dos itens (rejeição SEFAZ).
+  {
+    const QString inscEst = ui->lineEditDestinatarioInscEst->text();
+
+    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
+      double totalIcmsDest = 0;
+
+      const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
+
+      for (int row = 0; row < modelProduto.rowCount(); ++row) {
+        const double difal = modelProduto.data(row, "vBC").toDouble() * diferencaICMS;
+
+        totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
+      }
+
+      stream << "vICMSUFDest = " + QString::number(totalIcmsDest, 'f', 2) + "\n";
+    }
+  }
+
   // IBSCBSTot - Totais IBS/CBS (Reforma Tributária 2025)
   const double vIBSUFTot = ui->doubleSpinBoxValorIBSUF->value();
   const double vIBSMunTot = ui->doubleSpinBoxValorIBSMun->value();
@@ -936,24 +957,6 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
     stream << "vIBSMun=" + QString::number(vIBSMunTot, 'f', 2) + "\n";
     stream << "[gCBSTot]\n";
     stream << "vCBS=" + QString::number(vCBSTot, 'f', 2) + "\n";
-  }
-
-  // PARTILHA ICMS
-
-  const QString inscEst = ui->lineEditDestinatarioInscEst->text();
-
-  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
-    double totalIcmsDest = 0;
-
-    const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-
-    for (int row = 0; row < modelProduto.rowCount(); ++row) {
-      const double difal = modelProduto.data(row, "vBC").toDouble() * diferencaICMS;
-
-      totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
-    }
-
-    stream << "vICMSUFDest = " + QString::number(totalIcmsDest, 'f', 2) + "\n";
   }
 }
 

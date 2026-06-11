@@ -549,11 +549,15 @@ void Venda::verifyFields() {
   if (not financeiro) { verificaDisponibilidadeEstoque(); }
 
   if (ui->widgetPgts->isVisible()) {
+    // "Sem linhas de pagamento" deve ser checado ANTES da diferença de total: com a lista de pagamentos vazia
+    // getTotalPag() == 0, então a comparação de total dispararia "Total dos pagamentos difere" indevidamente (mensagem
+    // enganosa). Com >= 1 pagamento o calcularRestante força o somatório a bater com o total, logo a comparação de
+    // total só pode falhar de fato quando a lista está vazia — por isso a checagem de lista vazia vem primeiro.
+    if (modelFluxoCaixa.rowCount() == 0) { throw RuntimeError("Sem linhas de pagamento!"); }
+
     if (abs(ui->widgetPgts->getTotalPag() - ui->doubleSpinBoxTotal->value()) > 0.1) { throw RuntimeError("Total dos pagamentos difere do total do pedido!"); }
 
     ui->widgetPgts->verifyFields();
-
-    if (modelFluxoCaixa.rowCount() == 0) { throw RuntimeError("Sem linhas de pagamento!"); }
   }
 
   if (ui->spinBoxPrazoEntrega->value() == 0) { throw RuntimeError("Por favor preencha o prazo de entrega!"); }
@@ -1414,8 +1418,11 @@ void Venda::on_pushButtonDevolucao_clicked() {
 }
 
 void Venda::on_dateTimeEdit_dateTimeChanged() {
-  // TODO: colocar uma funcao em WidgetPagamentos para setar data e não precisar apagar pagamentos
-  ui->widgetPgts->resetarPagamentos();
+  // A data da venda (dateTimeEdit, mapeada para `data`) é apenas a data de registro do pedido: NÃO alimenta as datas
+  // dos pagamentos (dataPgt usa serverDate e é editável) nem o fluxo (processarPagamento usa serverDate em dataEmissao).
+  // Antes este slot chamava resetarPagamentos(), que apagava silenciosamente todos os pagamentos já digitados — com a
+  // lista vazia getTotalPag() vira 0 e verifyFields() acusava "Total dos pagamentos difere" (na verdade "Sem linhas").
+  // Mudar a data, portanto, não deve mexer nos pagamentos.
 }
 
 void Venda::setFinanceiro() {

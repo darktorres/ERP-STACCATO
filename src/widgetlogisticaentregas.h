@@ -31,9 +31,9 @@ private:
   auto cancelarEntrega(const QModelIndexList &list) -> void;
   auto confirmarEntrega(const QDate dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
   auto gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
-                      const SqlQueryModel &modelProdutosAgrupado) -> QString;
+                      SqlQueryModel &modelProdutosAgrupado) -> QString;
   auto gerarProtocolo(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep,
-                      const SqlQueryModel &modelProdutosAgrupado) -> QString;
+                      SqlQueryModel &modelProdutosAgrupado) -> QString;
   auto montaFiltro() -> void;
   auto on_lineEditBuscar_textChanged() -> void;
   auto on_pushButtonCancelarEntrega_clicked() -> void;

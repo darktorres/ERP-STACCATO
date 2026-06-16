@@ -11,7 +11,6 @@
 #include "inputdialogconfirmacao.h"
 #include "sql.h"
 #include "user.h"
-#include "xlsxdocument.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -19,6 +18,10 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QUrl>
+
+#if __has_include("lrreportengine.h")
+#include "lrreportengine.h"
+#endif
 
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
@@ -523,15 +526,11 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // TODO: move query to Sql class
   modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, ANY_VALUE(lote) AS lote, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS "
-                                 "quant, ANY_VALUE(un) AS un, ANY_VALUE(isEstoque) AS isEstoque "
+                                 "quant, ANY_VALUE(un) AS un, ANY_VALUE(isEstoque) AS isEstoque, IF(fornecedor = 'PORTINARI', ANY_VALUE(lote), '') AS loteExibir "
                                  "FROM view_calendario_produto WHERE idVenda = '" +
                                  idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
   modelProdutosAgrupado.select();
-
-  // -------------------------------------------------------------------------
-
-  if (modelProdutosAgrupado.rowCount() > 60) { throw RuntimeException("Mais produtos do que cabe no modelo do Excel!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -593,14 +592,15 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 }
 
 QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco,
-                                                const QString &cep, const SqlQueryModel &modelProdutosAgrupado) {
-  const QString arquivoModelo = QDir::currentPath() + "/modelos/espelho_entrega.xlsx";
+                                                const QString &cep, SqlQueryModel &modelProdutosAgrupado) {
+#if __has_include("lrreportengine.h")
+  const QString modelo = QDir::currentPath() + "/modelos/protocolo_entrega.lrxml";
 
-  File modelo(arquivoModelo);
+  File modeloFile(modelo);
 
-  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do protocolo!", this); }
+  if (not modeloFile.exists()) { throw RuntimeException("Não encontrou o modelo do protocolo!", this); }
 
-  QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".xlsx";
+  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + ".pdf";
 
   File file(fileName);
 
@@ -608,56 +608,39 @@ QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const 
 
   file.close();
 
-  QXlsx::Document xlsx(arquivoModelo, this);
+  LimeReport::ReportEngine report;
+  auto *dm = report.dataManager();
 
-  xlsx.currentWorksheet()->setFitToPage(true);
-  xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
+  dm->addModel("produtos", &modelProdutosAgrupado, false);
 
-  xlsx.write("AA5", idVenda);
-  xlsx.write("G11", cliente);
-  xlsx.write("Y11", telefones);
-  xlsx.write("J19", endereco);
-  xlsx.write("I17", cep);
+  if (not report.loadFromFile(modelo)) { throw RuntimeException("Erro carregando modelo do protocolo!", this); }
 
-  const int itens = modelProdutosAgrupado.rowCount();
+  dm->setReportVariable("idVenda", idVenda);
+  dm->setReportVariable("cliente", cliente);
+  dm->setReportVariable("telefones", telefones);
+  dm->setReportVariable("endereco", endereco);
+  dm->setReportVariable("cep", cep);
 
-  for (int row = 27; row < itens * 2 + 35; ++row) { xlsx.setRowHidden(row, false); }
-
-  for (int row = 27, index = 0; index < itens; row += 2, ++index) {
-    const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
-    const QString produto = modelProdutosAgrupado.data(index, "produto").toString();
-    const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
-    const QString lote = (fornecedor == "PORTINARI") ? modelProdutosAgrupado.data(index, "lote").toString() : "";
-    const QString quant = modelProdutosAgrupado.data(index, "quant").toString();
-    const QString un = modelProdutosAgrupado.data(index, "un").toString();
-    const QString caixas = modelProdutosAgrupado.data(index, "caixas").toString();
-    const QString isEstoque = modelProdutosAgrupado.data(index, "isEstoque").toString();
-
-    xlsx.write("D" + QString::number(row), fornecedor);
-    xlsx.write("I" + QString::number(row), produto + " - " + codComercial);
-    xlsx.write("W" + QString::number(row), lote);
-    xlsx.write("Y" + QString::number(row), quant + " " + un);
-    xlsx.write("AC" + QString::number(row), isEstoque);
-    xlsx.write("AD" + QString::number(row), caixas.toDouble());
-  }
-
-  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o protocolo!", this); }
+  if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do protocolo: " + report.lastError(), this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 
   return fileName;
+#else
+  throw RuntimeException("LimeReport desativado — não é possível gerar o protocolo!", this);
+#endif
 }
 
 QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
-                                                const SqlQueryModel &modelProdutosAgrupado) {
-  const QString arquivoModelo = QDir::currentPath() + "/modelos/modelo_checklist.xlsx";
+                                                SqlQueryModel &modelProdutosAgrupado) {
+#if __has_include("lrreportengine.h")
+  const QString modelo = QDir::currentPath() + "/modelos/checklist.lrxml";
 
-  File modelo(arquivoModelo);
+  File modeloFile(modelo);
 
-  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do checklist!", this); }
+  if (not modeloFile.exists()) { throw RuntimeException("Não encontrou o modelo do checklist!", this); }
 
-  QString fileName = folderKey + "/" + idEvento + "_" + idVenda + "_checklist.xlsx";
+  const QString fileName = folderKey + "/" + idEvento + "_" + idVenda + "_checklist.pdf";
 
   File file(fileName);
 
@@ -665,44 +648,26 @@ QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const 
 
   file.close();
 
-  QXlsx::Document xlsx(arquivoModelo, this);
+  LimeReport::ReportEngine report;
+  auto *dm = report.dataManager();
 
-  xlsx.currentWorksheet()->setFitToPage(true);
-  xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
+  dm->addModel("produtos", &modelProdutosAgrupado, false);
 
-  xlsx.write("AA5", idVenda);
-  xlsx.write("G11", cliente);
-  xlsx.write("J19", endereco);
-  xlsx.write("I17", cep);
+  if (not report.loadFromFile(modelo)) { throw RuntimeException("Erro carregando modelo do checklist!", this); }
 
-  const int itens = modelProdutosAgrupado.rowCount();
+  dm->setReportVariable("idVenda", idVenda);
+  dm->setReportVariable("cliente", cliente);
+  dm->setReportVariable("endereco", endereco);
+  dm->setReportVariable("cep", cep);
 
-  for (int row = 28; row < itens * 2 + 35; ++row) { xlsx.setRowHidden(row, false); }
-
-  for (int row = 28, index = 0; index < itens; row += 2, ++index) {
-    const QString fornecedor = modelProdutosAgrupado.data(index, "fornecedor").toString();
-    const QString produto = modelProdutosAgrupado.data(index, "produto").toString();
-    const QString codComercial = modelProdutosAgrupado.data(index, "codComercial").toString();
-    const QString lote = (fornecedor == "PORTINARI") ? modelProdutosAgrupado.data(index, "lote").toString() : "";
-    const QString quant = modelProdutosAgrupado.data(index, "quant").toString();
-    const QString un = modelProdutosAgrupado.data(index, "un").toString();
-    const QString caixas = modelProdutosAgrupado.data(index, "caixas").toString();
-    const QString isEstoque = modelProdutosAgrupado.data(index, "isEstoque").toString();
-
-    xlsx.write("D" + QString::number(row), fornecedor);
-    xlsx.write("I" + QString::number(row), produto + " - " + codComercial);
-    xlsx.write("W" + QString::number(row), lote);
-    xlsx.write("Y" + QString::number(row), quant + " " + un);
-    xlsx.write("AC" + QString::number(row), isEstoque);
-    xlsx.write("AD" + QString::number(row), caixas.toDouble());
-  }
-
-  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o checklist!", this); }
+  if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do checklist: " + report.lastError(), this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 
   return fileName;
+#else
+  throw RuntimeException("LimeReport desativado — não é possível gerar o checklist!", this);
+#endif
 }
 
 void WidgetLogisticaEntregas::on_pushButtonFollowup_clicked() {

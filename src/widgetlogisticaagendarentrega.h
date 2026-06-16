@@ -42,6 +42,7 @@ private:
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> void;
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto filtroProdutos() -> void;
+  auto gerarRomaneio(const QString &folderKey, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep, SqlQueryModel &modelProdutos) -> QString;
   auto montaFiltro() -> void;
   auto montarLike(QString textoBusca) -> QString;
   auto on_dateTimeEdit_dateChanged(const QDate date) -> void;
@@ -55,6 +56,7 @@ private:
   auto on_pushButtonImportarNFe_clicked() -> void;
   auto on_pushButtonMapa_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;
+  auto on_pushButtonRomaneio_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_pushButtonSeparar_clicked() -> void;
   auto on_tableProdutos_doubleClicked(const QModelIndex &index) -> void;

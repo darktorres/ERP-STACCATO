@@ -639,6 +639,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="pushButtonRomaneio">
+              <property name="text">
+               <string>Romaneio</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="pushButtonImportarNFe">
               <property name="text">
                <string>Importar NF-e</string>

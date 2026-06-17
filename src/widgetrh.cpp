@@ -167,31 +167,6 @@ void WidgetRh::on_pushButtonImportarFolhaPag_clicked() {
 
     if (not queryConta.first()) { throw RuntimeError("Linha " + QString::number(rowExcel) + ", Conta '" + xlsx.readValue(rowExcel, 7).toString() + "' não encontrada no banco de dados!"); }
 
-    // valida que o funcionário do salário existe no centro de custo informado com dados bancários utilizáveis (mesma regra do montarPagamento)
-    if (xlsx.readValue(rowExcel, 9).toString() == "RH - SALÁRIOS") {
-      const QString nome = xlsx.readValue(rowExcel, 3).toString();
-      const QString loja = xlsx.readValue(rowExcel, 2).toString();
-
-      SqlQuery queryFuncionario;
-
-      if (not queryFuncionario.exec("SELECT banco, agencia, cc, nomeBanco, cpfBanco FROM usuario WHERE nomeBanco = '" + nome + "' AND idLoja = " + queryLoja.value("idLoja").toString() +
-                                    " ORDER BY desativado ASC, (banco IS NULL OR banco = '' OR agencia IS NULL OR agencia = '' OR cc IS NULL OR cc = '') ASC, idUsuario DESC LIMIT 1")) {
-        throw RuntimeException("Erro buscando dados bancários do funcionário: " + queryFuncionario.lastError().text());
-      }
-
-      if (not queryFuncionario.first()) { throw RuntimeError("Linha " + QString::number(rowExcel) + ", funcionário '" + nome + "' não cadastrado no centro de custo '" + loja + "'!"); }
-
-      const int codBanco = queryFuncionario.value("banco").toString().left(3).toInt();
-      const QString cpf = queryFuncionario.value("cpfBanco").toString().remove(".").remove("/").remove("-");
-      const QString agencia = queryFuncionario.value("agencia").toString().remove("-");
-      const QStringList contaDac = queryFuncionario.value("cc").toString().split("-");
-      const QString nomeBanco = queryFuncionario.value("nomeBanco").toString();
-
-      if (codBanco == 0 or cpf.isEmpty() or agencia.isEmpty() or nomeBanco.isEmpty() or contaDac.size() != 2) {
-        throw RuntimeError("Linha " + QString::number(rowExcel) + ", dados bancários incompletos/inválidos do funcionário '" + nome + "' no centro de custo '" + loja + "'!");
-      }
-    }
-
     const int rowModel = modelImportar.insertRowAtEnd();
 
     modelImportar.setData(rowModel, "dataEmissao", xlsx.readValue(rowExcel, 1));

@@ -583,8 +583,17 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString fileName = gerarProtocolo(folderKey, idEvento, idVenda, cliente, telefones, endereco, cep, modelProdutosAgrupado);
-  const QString fileName2 = gerarChecklist(folderKey, idEvento, idVenda, cliente, endereco, cep, modelProdutosAgrupado);
+  SqlQuery queryNfe;
+  queryNfe.prepare("SELECT IFNULL(GROUP_CONCAT(DISTINCT n.numeroNFe ORDER BY n.numeroNFe SEPARATOR ', '), '') "
+                   "FROM venda_has_produto2 vp2 "
+                   "LEFT JOIN nfe n ON vp2.idNFeSaida = n.idNFe "
+                   "WHERE vp2.idVenda = :idVenda AND n.idNFe IS NOT NULL");
+  queryNfe.bindValue(":idVenda", idVenda);
+  if (not queryNfe.exec() or not queryNfe.first()) { throw RuntimeException("Erro buscando NF-e: " + queryNfe.lastError().text(), this); }
+  const QString nfe = queryNfe.value(0).toString();
+
+  const QString fileName = gerarProtocolo(folderKey, idEvento, idVenda, cliente, telefones, endereco, cep, nfe, modelProdutosAgrupado);
+  const QString fileName2 = gerarChecklist(folderKey, idEvento, idVenda, cliente, endereco, cep, nfe, modelProdutosAgrupado);
 
   // -------------------------------------------------------------------------
 
@@ -592,7 +601,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 }
 
 QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco,
-                                                const QString &cep, SqlQueryModel &modelProdutosAgrupado) {
+                                                const QString &cep, const QString &nfe, SqlQueryModel &modelProdutosAgrupado) {
 #if __has_include("lrreportengine.h")
   const QString modelo = QDir::currentPath() + "/modelos/protocolo_entrega.lrxml";
 
@@ -620,6 +629,7 @@ QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const 
   dm->setReportVariable("telefones", telefones);
   dm->setReportVariable("endereco", endereco);
   dm->setReportVariable("cep", cep);
+  dm->setReportVariable("nfe", nfe);
 
   if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do protocolo: " + report.lastError(), this); }
 
@@ -632,7 +642,7 @@ QString WidgetLogisticaEntregas::gerarProtocolo(const QString &folderKey, const 
 }
 
 QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const QString &idEvento, const QString &idVenda, const QString &cliente, const QString &endereco, const QString &cep,
-                                                SqlQueryModel &modelProdutosAgrupado) {
+                                                const QString &nfe, SqlQueryModel &modelProdutosAgrupado) {
 #if __has_include("lrreportengine.h")
   const QString modelo = QDir::currentPath() + "/modelos/checklist.lrxml";
 
@@ -659,6 +669,7 @@ QString WidgetLogisticaEntregas::gerarChecklist(const QString &folderKey, const 
   dm->setReportVariable("cliente", cliente);
   dm->setReportVariable("endereco", endereco);
   dm->setReportVariable("cep", cep);
+  dm->setReportVariable("nfe", nfe);
 
   if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do checklist: " + report.lastError(), this); }
 

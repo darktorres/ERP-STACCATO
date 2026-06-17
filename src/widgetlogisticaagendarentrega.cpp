@@ -1343,6 +1343,13 @@ QString WidgetLogisticaAgendarEntrega::gerarRomaneio(const QString &folderKey, c
 
   if (not report.loadFromFile(modelo)) { throw RuntimeException("Erro carregando modelo do romaneio!", this); }
 
+  QStringList nfeList;
+  for (int i = 0; i < modelProdutos.rowCount(); ++i) {
+    const QString nfe = modelProdutos.data(i, "nfeSaida").toString();
+    if (not nfe.isEmpty() and not nfeList.contains(nfe)) { nfeList << nfe; }
+  }
+  dm->setReportVariable("nfe", nfeList.join(", "));
+
   dm->setReportVariable("idVenda", idVenda);
   dm->setReportVariable("cliente", cliente);
   dm->setReportVariable("telefones", telefones);

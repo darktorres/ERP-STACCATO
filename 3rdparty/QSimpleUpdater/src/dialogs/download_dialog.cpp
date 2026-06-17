@@ -109,6 +109,14 @@ void DownloadDialog::downloadFinished() {
 
   const QByteArray replyData = m_reply->readAll();
 
+  const qint64 expected = m_reply->header(QNetworkRequest::ContentLengthHeader).toLongLong();
+  if (expected > 0 && (qint64)replyData.size() != expected) {
+    QMessageBox::warning(this, tr("Erro no download"),
+                         tr("O arquivo baixado está corrompido (tamanho incorreto). Tente novamente."));
+    m_reply->deleteLater();
+    return;
+  }
+
   if (not replyData.isEmpty()) {
     const QStringList list = m_reply->url().toString().split("/");
     File file(QDir::currentPath() + "/" + list.at(list.count() - 1));

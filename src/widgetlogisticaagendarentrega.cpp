@@ -1307,10 +1307,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRomaneio_clicked() {
   // -------------------------------------------------------------------------
 
   SqlQueryModel modelRomaneio;
-  modelRomaneio.setQuery(Sql::view_agendar_entrega(selectedIdVenda, "vp2.status = 'SEPARADO'") + " ORDER BY local, bloco, fornecedor, produto");
+  modelRomaneio.setQuery(Sql::view_agendar_entrega(selectedIdVenda, "") + " ORDER BY local, bloco, fornecedor, produto");
   modelRomaneio.select();
 
-  if (modelRomaneio.rowCount() == 0) { throw RuntimeError("Não há itens separados para esta venda!", this); }
+  if (modelRomaneio.rowCount() == 0) { throw RuntimeError("Não há itens para esta venda!", this); }
 
   // -------------------------------------------------------------------------
 

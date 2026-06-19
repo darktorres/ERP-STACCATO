@@ -59,7 +59,7 @@
                 <!-- Title -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtTitulo</objectName>
-                  <geometry Type="QRect" x="0" y="320" width="1200" height="140"/>
+                  <geometry Type="QRect" x="0" y="320" width="1200" height="195"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -200,7 +200,7 @@
                 <!-- NF-e label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtNfeLabel</objectName>
-                  <geometry Type="QRect" x="1210" y="377" width="140" height="57"/>
+                  <geometry Type="QRect" x="1210" y="389" width="140" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -247,7 +247,7 @@
                 <!-- NF-e value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtNfeVal</objectName>
-                  <geometry Type="QRect" x="1350" y="377" width="650" height="57"/>
+                  <geometry Type="QRect" x="1350" y="389" width="650" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -294,7 +294,7 @@
                 <!-- Data Entrega label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtDataEntregaLabel</objectName>
-                  <geometry Type="QRect" x="1210" y="434" width="140" height="57"/>
+                  <geometry Type="QRect" x="1210" y="458" width="140" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -341,7 +341,7 @@
                 <!-- Data Entrega value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtDataEntregaVal</objectName>
-                  <geometry Type="QRect" x="1350" y="434" width="650" height="57"/>
+                  <geometry Type="QRect" x="1350" y="458" width="650" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>

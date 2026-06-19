@@ -1314,7 +1314,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRomaneio_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString dataEntrega = ui->dateTimeEdit->date().toString("dd/MM/yyyy");
+  const QString dataEntrega = ui->dateTimeEdit->date().toString("dd/MM/yy");
 
   const QString fileName = gerarRomaneio(folderKey, selectedIdVenda, cliente, telefones, endereco, cep, dataEntrega, modelRomaneio);
 

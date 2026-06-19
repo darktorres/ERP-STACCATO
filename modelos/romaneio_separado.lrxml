@@ -29,7 +29,7 @@
                 <!-- Logo -->
                 <item Type="Object" ClassName="ImageItem">
                   <objectName Type="QString">LogoImg</objectName>
-                  <geometry Type="QRect" x="0" y="320" width="320" height="180"/>
+                  <geometry Type="QRect" x="1640" y="60" width="320" height="180"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -59,7 +59,7 @@
                 <!-- Title -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtTitulo</objectName>
-                  <geometry Type="QRect" x="320" y="340" width="1000" height="140"/>
+                  <geometry Type="QRect" x="0" y="320" width="1200" height="140"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -106,7 +106,7 @@
                 <!-- Pedido label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtPedidoLabel</objectName>
-                  <geometry Type="QRect" x="1330" y="340" width="140" height="57"/>
+                  <geometry Type="QRect" x="1210" y="320" width="140" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -153,7 +153,7 @@
                 <!-- Pedido value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtPedidoVal</objectName>
-                  <geometry Type="QRect" x="1470" y="340" width="530" height="57"/>
+                  <geometry Type="QRect" x="1350" y="320" width="650" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -200,7 +200,7 @@
                 <!-- NF-e label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtNfeLabel</objectName>
-                  <geometry Type="QRect" x="1330" y="423" width="140" height="57"/>
+                  <geometry Type="QRect" x="1210" y="377" width="140" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -247,7 +247,7 @@
                 <!-- NF-e value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtNfeVal</objectName>
-                  <geometry Type="QRect" x="1470" y="423" width="530" height="57"/>
+                  <geometry Type="QRect" x="1350" y="377" width="650" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -294,7 +294,7 @@
                 <!-- Data Entrega label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtDataEntregaLabel</objectName>
-                  <geometry Type="QRect" x="1330" y="483" width="140" height="57"/>
+                  <geometry Type="QRect" x="1210" y="434" width="140" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -341,7 +341,7 @@
                 <!-- Data Entrega value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtDataEntregaVal</objectName>
-                  <geometry Type="QRect" x="1470" y="483" width="530" height="57"/>
+                  <geometry Type="QRect" x="1350" y="434" width="650" height="57"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -1251,7 +1251,7 @@
                 <!-- Magnet space 16cm x 3cm -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtMagnetSpace</objectName>
-                  <geometry Type="QRect" x="200" y="0" width="1600" height="300"/>
+                  <geometry Type="QRect" x="0" y="0" width="1600" height="300"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>

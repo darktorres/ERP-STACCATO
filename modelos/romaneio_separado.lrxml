@@ -453,7 +453,7 @@
                 <!-- CEP label -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtCepLabel</objectName>
-                  <geometry Type="QRect" x="1590" y="1080" width="130" height="80"/>
+                  <geometry Type="QRect" x="1800" y="1080" width="100" height="80"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -465,7 +465,7 @@
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">CEP</content>
+                  <content Type="QString">CEP:</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -500,7 +500,7 @@
                 <!-- CEP value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtCepVal</objectName>
-                  <geometry Type="QRect" x="1720" y="1080" width="380" height="80"/>
+                  <geometry Type="QRect" x="1900" y="1080" width="200" height="80"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -560,7 +560,7 @@
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">Local Entrega</content>
+                  <content Type="QString">Local Entrega:</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -595,7 +595,7 @@
                 <!-- Endereço value (yellow) -->
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TxtEnderecoVal</objectName>
-                  <geometry Type="QRect" x="210" y="1080" width="1380" height="80"/>
+                  <geometry Type="QRect" x="210" y="1080" width="1590" height="80"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>

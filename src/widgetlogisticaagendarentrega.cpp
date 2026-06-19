@@ -1307,7 +1307,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRomaneio_clicked() {
   // -------------------------------------------------------------------------
 
   SqlQueryModel modelRomaneio;
-  modelRomaneio.setQuery(Sql::view_agendar_entrega(selectedIdVenda, "vp2.status NOT IN ('CANCELADO', 'DEVOLVIDO', 'ENTREGUE')") + " ORDER BY status, local, bloco, fornecedor, produto");
+  modelRomaneio.setQuery(Sql::view_agendar_entrega(selectedIdVenda, "vp2.status NOT IN ('CANCELADO', 'DEVOLVIDO', 'ENTREGUE', 'QUEBRADO')") + " ORDER BY status, local, bloco, fornecedor, produto");
   modelRomaneio.select();
 
   if (modelRomaneio.rowCount() == 0) { throw RuntimeError("Não há itens para esta venda!", this); }

@@ -42,7 +42,7 @@ private:
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> void;
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> void;
   auto filtroProdutos() -> void;
-  auto gerarRomaneio(const QString &folderKey, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep, SqlQueryModel &modelProdutos) -> QString;
+  auto gerarRomaneio(const QString &folderKey, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep, const QString &dataEntrega, SqlQueryModel &modelProdutos) -> QString;
   auto montaFiltro() -> void;
   auto montarLike(QString textoBusca) -> QString;
   auto on_dateTimeEdit_dateChanged(const QDate date) -> void;

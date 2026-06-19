@@ -1314,13 +1314,15 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRomaneio_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const QString fileName = gerarRomaneio(folderKey, selectedIdVenda, cliente, telefones, endereco, cep, modelRomaneio);
+  const QString dataEntrega = ui->dateTimeEdit->date().toString("dd/MM/yyyy");
+
+  const QString fileName = gerarRomaneio(folderKey, selectedIdVenda, cliente, telefones, endereco, cep, dataEntrega, modelRomaneio);
 
   qApp->enqueueInformation("Romaneio salvo como:\n" + fileName, this);
 }
 
 QString WidgetLogisticaAgendarEntrega::gerarRomaneio(const QString &folderKey, const QString &idVenda, const QString &cliente, const QString &telefones, const QString &endereco, const QString &cep,
-                                                     SqlQueryModel &modelProdutos) {
+                                                     const QString &dataEntrega, SqlQueryModel &modelProdutos) {
 #if __has_include("lrreportengine.h")
   const QString modelo = QDir::currentPath() + "/modelos/romaneio_separado.lrxml";
 
@@ -1355,6 +1357,7 @@ QString WidgetLogisticaAgendarEntrega::gerarRomaneio(const QString &folderKey, c
   dm->setReportVariable("telefones", telefones);
   dm->setReportVariable("endereco", endereco);
   dm->setReportVariable("cep", cep);
+  dm->setReportVariable("dataEntrega", dataEntrega);
   dm->setReportVariable("data", QDate::currentDate().toString("dd/MM/yyyy"));
 
   if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do romaneio: " + report.lastError(), this); }

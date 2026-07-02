@@ -26,6 +26,9 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
   ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
   if (tipo != Tipo::Orcamento) { ui->frameOrcamento->hide(); }
+  if (tipo != Tipo::Compra) { ui->frameProduto->hide(); }
+
+  if (tipo == Tipo::Compra) { setupProdutos(); }
 
   setConnections();
 }
@@ -74,8 +77,10 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   }
 
   if (tipo == Tipo::Compra) {
-    query.prepare("INSERT INTO pedido_fornecedor_has_followup (ordemCompra, idLoja, idUsuario, observacao, dataFollowup) VALUES (:ordemCompra, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.prepare("INSERT INTO pedido_fornecedor_has_followup (ordemCompra, idPedido1, idLoja, idUsuario, observacao, dataFollowup) VALUES (:ordemCompra, :idPedido1, :idLoja, :idUsuario, "
+                  ":observacao, :dataFollowup)");
     query.bindValue(":ordemCompra", id);
+    query.bindValue(":idPedido1", ui->comboBoxProduto->currentData());
     query.bindValue(":idLoja", User::idLoja);
     query.bindValue(":idUsuario", User::idUsuario);
     query.bindValue(":observacao", ui->lineEditObservacao->text().toUpper());
@@ -146,7 +151,11 @@ void FollowUp::setupTables() {
     modelFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
   }
 
-  if (tipo == Tipo::Compra) { modelFollowup.setHeaderData("ordemCompra", "O.C."); }
+  if (tipo == Tipo::Compra) {
+    modelFollowup.setHeaderData("ordemCompra", "O.C.");
+    modelFollowup.setHeaderData("codComercial", "Produto");
+    modelFollowup.setHeaderData("idVenda", "Venda");
+  }
   if (tipo == Tipo::Estoque) { modelFollowup.setHeaderData("idEstoque", "Estoque"); }
   if (tipo == Tipo::NFe) { modelFollowup.setHeaderData("idNFe", "NF-e"); }
 
@@ -191,6 +200,23 @@ void FollowUp::setupTables() {
       ui->labelBaixa->hide();
       ui->lineEditBaixa->hide();
     }
+  }
+}
+
+void FollowUp::setupProdutos() {
+  ui->comboBoxProduto->addItem("O.C. INTEIRA");
+
+  SqlQuery query;
+
+  if (not query.exec("SELECT idPedido1, codComercial, descricao, idVenda FROM pedido_fornecedor_has_produto WHERE ordemCompra = " + id + " ORDER BY descricao, idVenda")) {
+    throw RuntimeException("Erro buscando produtos da O.C.: " + query.lastError().text(), this);
+  }
+
+  while (query.next()) {
+    const QString idVenda = query.value("idVenda").toString();
+
+    ui->comboBoxProduto->addItem(query.value("codComercial").toString() + " - " + query.value("descricao").toString() + " (" + (idVenda.isEmpty() ? "ESTOQUE" : idVenda) + ")",
+                                 query.value("idPedido1"));
   }
 }
 

@@ -697,6 +697,8 @@ QString Sql::view_followup_venda_misto(const QString &idVenda) {
          "          usuario u ON phf.idUsuario = u.idUsuario "
          "      WHERE "
          "          ordemCompra IN (SELECT ordemCompra FROM pedido_fornecedor_has_produto2 WHERE idVenda LIKE '" + idVenda + "%') "
+         "          AND (phf.idPedido1 IS NULL OR phf.idPedido1 IN "
+         "          (SELECT idPedido1 FROM pedido_fornecedor_has_produto WHERE idVenda LIKE '" + idVenda + "%')) "
          "    UNION "
          "      SELECT "
          "          CONCAT('Estoque: ', ehf.idEstoque), "

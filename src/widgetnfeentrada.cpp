@@ -471,6 +471,12 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
   // Envia ao WebDAV o DANFE de cada NF-e de ENTRADA com duplicata (conta_a_pagar, exceto GARE)
   // vencendo no mês escolhido, em 'Pagamentos Diarios/<ano>/<MM - Mês_ano>/NOTAS <dd.MM>/' (pasta do dia = dia de vencimento),
   // nome "<valor> - <fornecedor>.pdf". Pula arquivos de mesmo nome já presentes no servidor (HEAD).
+
+  // o Apache exige essa permissão para escrever em /webdav/FINANCEIRO (senão devolve HTTP 401)
+  if (not User::temPermissao("webdav_financeiro")) {
+    throw RuntimeError("Usuário não possui a permissão 'Rede - Financeiro', necessária para enviar os arquivos ao servidor!\nMarque a permissão no Cadastro de Usuário.", this);
+  }
+
   const QLocale brLocale(QLocale::Portuguese, QLocale::Brazil);
 
   // ----------------------------------------- diálogo de mês/ano

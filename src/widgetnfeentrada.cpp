@@ -469,8 +469,8 @@ void WidgetNfeEntrada::on_pushButtonExportarExcel_clicked() {
 
 void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
   // Envia ao WebDAV o DANFE de cada NF-e de ENTRADA com duplicata (conta_a_pagar, exceto GARE)
-  // vencendo no mês escolhido, em 'Pagamentos Diarios/<ano>/<MM - Mês_ano>/NOTAS <dd.MM>/' (pasta do dia = dia de vencimento),
-  // nome "<valor> - <fornecedor>.pdf". Pula arquivos de mesmo nome já presentes no servidor (HEAD).
+  // vencendo no mês escolhido (ou só num dia específico dele), em 'Pagamentos Diarios/<ano>/<MM - Mês_ano>/NOTAS <dd.MM>/'
+  // (pasta do dia = dia de vencimento), nome "<valor> - <fornecedor>.pdf". Pula arquivos de mesmo nome já presentes no servidor (HEAD).
 
   // o Apache exige essa permissão para escrever em /webdav/FINANCEIRO (senão devolve HTTP 401)
   if (not User::temPermissao("webdav_financeiro")) {
@@ -479,7 +479,7 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
 
   const QLocale brLocale(QLocale::Portuguese, QLocale::Brazil);
 
-  // ----------------------------------------- diálogo de mês/ano
+  // ----------------------------------------- diálogo de mês/ano/dia
 
   QDialog dialog(this);
   dialog.setWindowTitle("Exportar Notas do Mês");
@@ -489,6 +489,10 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
 
   auto *spinAno = new QSpinBox(&dialog);
   spinAno->setRange(2024, qApp->serverDate().year() + 1);
+
+  auto *comboDia = new QComboBox(&dialog);
+  comboDia->addItem("Mês inteiro", 0);
+  for (int d = 1; d <= 31; ++d) { comboDia->addItem(QString::number(d), d); }
 
   comboMes->setCurrentIndex(qApp->serverDate().month() - 1);
   spinAno->setValue(qApp->serverDate().year());
@@ -500,16 +504,18 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
   auto *layout = new QFormLayout(&dialog);
   layout->addRow("Mês:", comboMes);
   layout->addRow("Ano:", spinAno);
+  layout->addRow("Dia:", comboDia);
   layout->addRow(buttonBox);
 
   if (dialog.exec() != QDialog::Accepted) { return; }
 
   const int mes = comboMes->currentData().toInt();
   const int ano = spinAno->value();
+  const int dia = comboDia->currentData().toInt(); // 0 = mês inteiro
 
-  const QString periodo = brLocale.monthName(mes) + "/" + QString::number(ano);
+  const QString periodo = (dia > 0 ? QString("%1/").arg(dia, 2, 10, QChar('0')) : QString()) + brLocale.monthName(mes) + "/" + QString::number(ano);
 
-  // ----------------------------------------- duplicatas (não-GARE) com vencimento no mês, por nota e dia de vencimento
+  // ----------------------------------------- duplicatas (não-GARE) com vencimento no período, por nota e dia de vencimento
 
   // Soma das duplicatas por nota e por dia de vencimento. contraParte = nome curto do fornecedor (fallback: emitente).
   SqlQuery query;
@@ -517,10 +523,12 @@ void WidgetNfeEntrada::on_pushButtonExportarMes_clicked() {
                 "MAX(cp.contraParte) AS contraParte, MAX(n.emitente) AS emitente "
                 "FROM conta_a_pagar_has_pagamento cp JOIN nfe n ON n.idNFe = cp.idNFe AND n.tipo = 'ENTRADA' "
                 "WHERE COALESCE(cp.contraParte, '') <> 'GARE' AND COALESCE(cp.status, '') NOT LIKE '%GARE%' "
-                "AND YEAR(cp.dataPagamento) = :ano AND MONTH(cp.dataPagamento) = :mes "
+                "AND YEAR(cp.dataPagamento) = :ano AND MONTH(cp.dataPagamento) = :mes " +
+                QString(dia > 0 ? "AND DAY(cp.dataPagamento) = :dia " : "") +
                 "GROUP BY cp.idNFe, cp.dataPagamento, n.numeroNFe, n.chaveAcesso ORDER BY cp.dataPagamento, cp.idNFe");
   query.bindValue(":ano", ano);
   query.bindValue(":mes", mes);
+  if (dia > 0) { query.bindValue(":dia", dia); }
 
   if (not query.exec()) { throw RuntimeException("Erro buscando duplicatas: " + query.lastError().text(), this); }
 

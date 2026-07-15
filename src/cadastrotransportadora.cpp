@@ -293,7 +293,7 @@ void CadastroTransportadora::on_tableEndereco_selectionChanged() {
 
 void CadastroTransportadora::setupUi() {
   // dados
-  ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
+  ui->lineEditCNPJ->setInputMask(">NN.NNN.NNN/NNNN-99;_"); // CNPJ alfanumérico (RFB IN 2229/2024): 12 primeiras posições letra ou dígito
   ui->lineEditANTT->setInputMask("99999999;_");
   ui->lineEditPlaca->setInputMask("AAA-9N99;_");
   ui->lineEditCEP->setInputMask("99999-999;_");

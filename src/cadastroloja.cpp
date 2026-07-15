@@ -53,7 +53,7 @@ void CadastroLoja::setConnections() {
 
 void CadastroLoja::setupUi() {
   // dados
-  ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
+  ui->lineEditCNPJ->setInputMask(">NN.NNN.NNN/NNNN-99;_"); // CNPJ alfanumérico (RFB IN 2229/2024): 12 primeiras posições letra ou dígito
   ui->lineEditSIGLA->setInputMask(">XXXX;_");
 
   // endereco

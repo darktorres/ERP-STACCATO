@@ -61,6 +61,19 @@ private:
     double vBCCOFINS = 0;
     double pCOFINS = 0;
     double vCOFINS = 0;
+    // ibs/cbs (Reforma Tributária - NT 2025.002)
+    QString cstIBS;
+    QString cClassTribIBS;
+    double vBCIBS = 0;
+    double pIBSUF = 0;
+    double vTribOpIBSUF = 0;
+    double pIBSMun = 0;
+    double vTribOpIBSMun = 0;
+    QString cstCBS;
+    QString cClassTribCBS;
+    double vBCCBS = 0;
+    double pCBS = 0;
+    double vCBS = 0;
     // gare
     double valorGare = 0;
   };
@@ -115,6 +128,7 @@ private:
   // methods
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;
+  auto lerIBSCBSProduto(const QStandardItem *child) -> void;
   auto lerICMSProduto(const QStandardItem *child) -> void;
   auto lerIPIProduto(const QStandardItem *child) -> void;
   auto lerPISProduto(const QStandardItem *child) -> void;

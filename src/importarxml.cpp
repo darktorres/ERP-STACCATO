@@ -992,6 +992,18 @@ void ImportarXML::percorrerXml(XML &xml) {
     modelEstoque.setData(newRow, "vBCCOFINS", produto.vBCCOFINS);
     modelEstoque.setData(newRow, "pCOFINS", produto.pCOFINS);
     modelEstoque.setData(newRow, "vCOFINS", produto.vCOFINS);
+    modelEstoque.setData(newRow, "cstIBS", produto.cstIBS);
+    modelEstoque.setData(newRow, "cClassTribIBS", produto.cClassTribIBS);
+    modelEstoque.setData(newRow, "vBCIBS", produto.vBCIBS);
+    modelEstoque.setData(newRow, "pIBSUF", produto.pIBSUF);
+    modelEstoque.setData(newRow, "vTribOpIBSUF", produto.vTribOpIBSUF);
+    modelEstoque.setData(newRow, "pIBSMun", produto.pIBSMun);
+    modelEstoque.setData(newRow, "vTribOpIBSMun", produto.vTribOpIBSMun);
+    modelEstoque.setData(newRow, "cstCBS", produto.cstCBS);
+    modelEstoque.setData(newRow, "cClassTribCBS", produto.cClassTribCBS);
+    modelEstoque.setData(newRow, "vBCCBS", produto.vBCCBS);
+    modelEstoque.setData(newRow, "pCBS", produto.pCBS);
+    modelEstoque.setData(newRow, "vCBS", produto.vCBS);
     modelEstoque.setData(newRow, "status", "EM COLETA");
     modelEstoque.setData(newRow, "valorGare", produto.valorGare);
   }
@@ -1127,6 +1139,18 @@ void ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   modelConsumo.setData(rowConsumo, "vBCCOFINS", modelEstoque.data(rowEstoque, "vBCCOFINS").toDouble() * proporcao);
   modelConsumo.setData(rowConsumo, "pCOFINS", modelEstoque.data(rowEstoque, "pCOFINS"));
   modelConsumo.setData(rowConsumo, "vCOFINS", modelEstoque.data(rowEstoque, "vCOFINS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "cstIBS", modelEstoque.data(rowEstoque, "cstIBS"));
+  modelConsumo.setData(rowConsumo, "cClassTribIBS", modelEstoque.data(rowEstoque, "cClassTribIBS"));
+  modelConsumo.setData(rowConsumo, "vBCIBS", modelEstoque.data(rowEstoque, "vBCIBS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pIBSUF", modelEstoque.data(rowEstoque, "pIBSUF"));
+  modelConsumo.setData(rowConsumo, "vTribOpIBSUF", modelEstoque.data(rowEstoque, "vTribOpIBSUF").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pIBSMun", modelEstoque.data(rowEstoque, "pIBSMun"));
+  modelConsumo.setData(rowConsumo, "vTribOpIBSMun", modelEstoque.data(rowEstoque, "vTribOpIBSMun").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "cstCBS", modelEstoque.data(rowEstoque, "cstCBS"));
+  modelConsumo.setData(rowConsumo, "cClassTribCBS", modelEstoque.data(rowEstoque, "cClassTribCBS"));
+  modelConsumo.setData(rowConsumo, "vBCCBS", modelEstoque.data(rowEstoque, "vBCCBS").toDouble() * proporcao);
+  modelConsumo.setData(rowConsumo, "pCBS", modelEstoque.data(rowEstoque, "pCBS"));
+  modelConsumo.setData(rowConsumo, "vCBS", modelEstoque.data(rowEstoque, "vCBS").toDouble() * proporcao);
 }
 
 int ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {

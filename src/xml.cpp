@@ -86,13 +86,17 @@ void XML::lerValores(const QStandardItem *item) {
       if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child); }
       if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child); }
       if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child); }
+      if (parentText == "IBSCBS" or parentText == "gIBSCBS" or parentText == "gIBSUF" or parentText == "gIBSMun" or parentText == "gCBS") { lerIBSCBSProduto(child); }
 
       if (parentText == "ICMSTot") { lerTotais(child); }
 
       if (child->hasChildren()) {
         lerValores(child);
 
-        if (parentText == "COFINS") {
+        // Finaliza ao terminar de processar TODO o grupo <imposto> do item (não mais em "COFINS"
+        // especificamente: o grupo IBSCBS/IS da Reforma Tributária vem depois de COFINS no leiaute
+        // da NT 2025.002, e finalizar em COFINS descartava esses dados silenciosamente).
+        if (child->text() == "imposto") {
           produtos << produto;
           limparValores();
         }
@@ -173,6 +177,34 @@ void XML::lerCOFINSProduto(const QStandardItem *child) {
   if (text.contains("vBC - ")) { produto.vBCCOFINS = text.remove("vBC - ").toDouble(); }
   if (text.contains("pCOFINS - ")) { produto.pCOFINS = text.remove("pCOFINS - ").toDouble(); }
   if (text.contains("vCOFINS - ")) { produto.vCOFINS = text.remove("vCOFINS - ").toDouble(); }
+}
+
+void XML::lerIBSCBSProduto(const QStandardItem *child) {
+  // CST e cClassTrib são compartilhados por IBS e CBS no leiaute (um único par no grupo IBSCBS)
+  QString text = child->text();
+
+  if (text.contains("CST - ")) {
+    const QString cst = text.remove("CST - ");
+    produto.cstIBS = cst;
+    produto.cstCBS = cst;
+  }
+  if (text.contains("cClassTrib - ")) {
+    const QString cClassTrib = text.remove("cClassTrib - ");
+    produto.cClassTribIBS = cClassTrib;
+    produto.cClassTribCBS = cClassTrib;
+  }
+  if (text.contains("vBC - ")) {
+    // vBC do grupo gIBSCBS é a base de cálculo comum a IBS e CBS
+    const double vBC = text.remove("vBC - ").toDouble();
+    produto.vBCIBS = vBC;
+    produto.vBCCBS = vBC;
+  }
+  if (text.contains("pIBSUF - ")) { produto.pIBSUF = text.remove("pIBSUF - ").toDouble(); }
+  if (text.contains("vIBSUF - ")) { produto.vTribOpIBSUF = text.remove("vIBSUF - ").toDouble(); }
+  if (text.contains("pIBSMun - ")) { produto.pIBSMun = text.remove("pIBSMun - ").toDouble(); }
+  if (text.contains("vIBSMun - ")) { produto.vTribOpIBSMun = text.remove("vIBSMun - ").toDouble(); }
+  if (text.contains("pCBS - ")) { produto.pCBS = text.remove("pCBS - ").toDouble(); }
+  if (text.contains("vCBS - ")) { produto.vCBS = text.remove("vCBS - ").toDouble(); }
 }
 
 void XML::lerTotais(const QStandardItem *child) {

@@ -82,7 +82,7 @@ void CadastroCliente::setupUi() {
   ui->lineEditCPF->setInputMask("999.999.999-99;_");
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
-  ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
+  ui->lineEditCNPJ->setInputMask(">NN.NNN.NNN/NNNN-99;_"); // CNPJ alfanumérico (RFB IN 2229/2024): 12 primeiras posições letra ou dígito
   ui->lineEditInscEstadual->setValidator(new QRegularExpressionValidator(QRegularExpression(R"([0-9]\d{0,15})"), this));
 
   // endereco

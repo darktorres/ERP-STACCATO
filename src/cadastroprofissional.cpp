@@ -74,7 +74,7 @@ void CadastroProfissional::setupTables() {
 
 void CadastroProfissional::setupUi() {
   // dados
-  ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
+  ui->lineEditCNPJ->setInputMask(">NN.NNN.NNN/NNNN-99;_"); // CNPJ alfanumérico (RFB IN 2229/2024): 12 primeiras posições letra ou dígito
   ui->lineEditCPF->setInputMask("999.999.999-99;_");
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
@@ -86,7 +86,7 @@ void CadastroProfissional::setupUi() {
 
   // bancario
   ui->lineEditAgencia->setInputMask("9999-9;_");
-  ui->lineEditCNPJBancario->setInputMask("99.999.999/9999-99;_");
+  ui->lineEditCNPJBancario->setInputMask(">NN.NNN.NNN/NNNN-99;_"); // CNPJ alfanumérico (RFB IN 2229/2024)
   ui->lineEditCPFBancario->setInputMask("999.999.999-99;_");
 }
 

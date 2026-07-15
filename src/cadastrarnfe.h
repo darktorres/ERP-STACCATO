@@ -1,6 +1,7 @@
 #pragma once
 
 #include "acbr.h"
+#include "application.h"
 #include "sqlquery.h"
 #include "sqltablemodel.h"
 
@@ -14,62 +15,50 @@ namespace Ui {
 class CadastrarNFe;
 }
 
-// Reforma Tributária 2025 - Progressive tax rates
-// Based on LC 214/2025 transition schedule
+// Reforma Tributária 2025 - alíquotas de IBS/CBS por ano de emissão.
+// Fonte: NT 2025.002-RTC v1.40 (SEFAZ), regras UB22/UB40/UB56 - ver NT/NT_2025.002_v1.40_RTC_NF-e_IBS_CBS_IS Final.pdf
+// 2025/2026 (Art. 343/346 da LC 214/2025) e 2027/2028 (Art. 344, só IBS) já têm alíquota fixa
+// publicada. A alíquota de referência da CBS para 2027-2035 depende de resolução do Senado
+// Federal ainda não publicada (Decreto 12.955/2026, que regulamenta a CBS, só define a
+// METODOLOGIA de cálculo, não o percentual) - lança exceção em vez de arriscar um valor
+// inventado. Idem para IBS a partir de 2029 (NT diz "alíquota a ser publicada").
 struct AliquotasReformaTributaria {
-  double pIBSUF;      // IBS State rate
-  double pIBSMun;     // IBS Municipal rate
-  double pCBS;        // CBS rate
-  double fatorNovosTributos;  // Percentage of new taxes to apply (0.0 to 1.0)
-  double fatorAntigosTributos; // Percentage of old taxes to apply (1.0 to 0.0)
+  double pIBSUF;  // IBS Estadual
+  double pIBSMun; // IBS Municipal
+  double pCBS;    // CBS
 
-  // Calculate rates based on NFe emission date
   static AliquotasReformaTributaria calcular(const QDate &dataEmissao) {
     const int ano = dataEmissao.year();
 
-    // Final rates (2033+)
-    constexpr double IBSUF_FINAL = 12.0;
-    constexpr double IBSMUN_FINAL = 5.7;
-    constexpr double CBS_FINAL = 8.8;
-
-    // Transition schedule per LC 214/2025
-    double fator = 0.0;
-    switch (ano) {
-      case 2026: fator = 0.0; break;  // Test period - use fixed rates below
-      case 2027: fator = 0.10; break;
-      case 2028: fator = 0.20; break;
-      case 2029: fator = 0.30; break;
-      case 2030: fator = 0.40; break;
-      case 2031: fator = 0.50; break;
-      case 2032: fator = 0.90; break;
-      default:
-        if (ano >= 2033) fator = 1.0;
-        else fator = 0.0;  // Before 2026
-        break;
-    }
-
     AliquotasReformaTributaria aliq;
-    aliq.fatorNovosTributos = fator;
-    aliq.fatorAntigosTributos = 1.0 - fator;
 
-    if (ano == 2026) {
-      // 2026 Test period: fixed low rates for system testing (LC 214/2025 Art. 343)
-      // Total: ~1% (IBS 0.1% + CBS 0.9%) - verify against latest official rates
-      aliq.pIBSUF = 0.1;
-      aliq.pIBSMun = 0.0;  // Municipalities not yet participating in 2026
-      aliq.pCBS = 0.9;
-    } else if (ano < 2026) {
-      // Before 2026: new taxes not yet in effect
+    if (ano < 2025) {
       aliq.pIBSUF = 0.0;
       aliq.pIBSMun = 0.0;
       aliq.pCBS = 0.0;
-    } else {
-      aliq.pIBSUF = IBSUF_FINAL * fator;
-      aliq.pIBSMun = IBSMUN_FINAL * fator;
-      aliq.pCBS = CBS_FINAL * fator;
+      return aliq;
     }
 
-    return aliq;
+    if (ano <= 2026) {
+      aliq.pIBSUF = 0.1;  // Art. 343 da LC 214/2025
+      aliq.pIBSMun = 0.0; // Art. 343 da LC 214/2025
+      aliq.pCBS = 0.9;    // Art. 346 da LC 214/2025
+      return aliq;
+    }
+
+    if (ano <= 2028) {
+      // Art. 344 da LC 214/2025 só define IBS. A alíquota de referência da CBS para
+      // 2027-2035 depende de resolução do Senado Federal ainda não publicada (Decreto
+      // 12.955/2026 define só a metodologia de cálculo, não o percentual em si).
+      throw RuntimeException("Reforma Tributária: alíquota da CBS para " + QString::number(ano) +
+                              " ainda não foi fixada por resolução do Senado Federal (Decreto 12.955/2026 define só a "
+                              "metodologia, não o percentual). Confirme o valor vigente com a contabilidade/"
+                              "consultoria tributária antes de emitir NF-e neste período.");
+    }
+
+    throw RuntimeException("Reforma Tributária: alíquotas de IBS/CBS para " + QString::number(ano) +
+                            " ainda não publicadas na NT 2025.002 ('alíquota de referência a ser publicada'). "
+                            "Confirme com a contabilidade/consultoria tributária antes de emitir NF-e neste período.");
   }
 };
 

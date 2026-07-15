@@ -644,7 +644,10 @@ void CadastrarNFe::calculaDigitoVerificador() {
   int mult = 4;
 
   for (const auto &i : std::as_const(chaveAcesso)) {
-    soma += i.digitValue() * mult--;
+    // CNPJ alfanumérico (NT Conjunta CNPJ Alfa v1.00): valor = código ASCII - 48 (dígitos '0'-'9'
+    // continuam 0-9; letras maiúsculas A-Z viram 17-42), em vez de QChar::digitValue() (que
+    // retorna -1 para letras e quebraria a chave de acesso caso o emitente tenha CNPJ alfanumérico).
+    soma += (i.toLatin1() - 48) * mult--;
     mult = (mult == 1) ? 9 : mult;
   }
 
@@ -2577,6 +2580,8 @@ void CadastrarNFe::preencherImpostos() {
         modelProduto.setData(row, "cfop", mesmaUf ? "5102" : "6102");
         modelProduto.setData(row, "tipoICMS", "ICMS00");
         modelProduto.setData(row, "cstICMS", "00");
+        // modBC = 3 (Valor da Operação), coerente com o cálculo de vBC abaixo (total + frete, sem MVA)
+        modelProduto.setData(row, "modBC", 3);
       }
 
       const double total = modelProduto.data(row, "total").toDouble();
@@ -2816,6 +2821,8 @@ void CadastrarNFe::preencherImpostos() {
       } else {
         modelProduto.setData(row, "tipoICMS", "ICMS00");
         modelProduto.setData(row, "cstICMS", "00");
+        // modBC = 3 (Valor da Operação), coerente com o cálculo de vBC abaixo (total + frete, sem MVA)
+        modelProduto.setData(row, "modBC", 3);
       }
 
       const double total = modelProduto.data(row, "total").toDouble();

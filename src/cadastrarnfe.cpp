@@ -2704,8 +2704,8 @@ void CadastrarNFe::preencherImpostos() {
         throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
       }
 
-      // 3. Set CFOP for Futura (5117/6117)
-      modelProduto.setData(row, "cfop", mesmaUf ? "5117" : "6117");
+      // 3. Set CFOP for Futura (simples faturamento, sem movimentação): 5922/6922
+      modelProduto.setData(row, "cfop", mesmaUf ? "5922" : "6922");
 
       // 4. Set CST ICMS based on NCM ST status
       if (produtoST) {
@@ -2807,8 +2807,8 @@ void CadastrarNFe::preencherImpostos() {
         throw RuntimeException("NCM " + ncmProduto + ": cClassTribIS não preenchida (produto sujeito a IS)!");
       }
 
-      // CFOP 5922/6922 é para entrega futura
-      modelProduto.setData(row, "cfop", mesmaUf ? "5922" : "6922");
+      // CFOP 5117/6117 é para a entrega física após faturamento futuro
+      modelProduto.setData(row, "cfop", mesmaUf ? "5117" : "6117");
 
       if (produtoST) {
         modelProduto.setData(row, "tipoICMS", "ICMS60");

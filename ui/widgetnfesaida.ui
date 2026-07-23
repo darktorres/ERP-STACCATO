@@ -223,16 +223,6 @@
    <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayoutTable">
      <item>
-      <widget class="QLabel" name="labelLimitado">
-       <property name="text">
-        <string>Mostrando as NF-e mais recentes — role a tabela até o fim para carregar as mais antigas</string>
-       </property>
-       <property name="visible">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="TableView" name="table">
        <property name="mouseTracking">
         <bool>true</bool>

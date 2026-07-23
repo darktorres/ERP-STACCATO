@@ -69,7 +69,6 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
-  connect(&model, &SqlPaginatedModel::moreAvailableChanged, ui->labelLimitado, &QWidget::setVisible, connectionType);
   connect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetNfeEntrada::onTableScrolled, connectionType);
 }
 
@@ -95,7 +94,6 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
-  disconnect(&model, &SqlPaginatedModel::moreAvailableChanged, ui->labelLimitado, &QWidget::setVisible);
   disconnect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetNfeEntrada::onTableScrolled);
 }
 
@@ -335,8 +333,6 @@ void WidgetNfeEntrada::montaFiltro() {
   const QString sortColumnAtual = model.sortColumn().isEmpty() ? "dataHoraEmissao" : model.sortColumn();
 
   model.reset(fieldNames, sortColumnAtual, model.sortOrder(), factory);
-
-  ui->labelLimitado->setVisible(model.hasMoreAfter());
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
 
 #include <QStack>
 #include <QTimer>
@@ -25,7 +24,7 @@ private:
   // attributes
   bool isSet = false;
   QStack<int> blockingSignals;
-  SqlTableModel model;
+  SqlQueryModel model;
   SqlQueryModel modelResumo;
   Ui::WidgetNfeSaida *ui;
   // methods

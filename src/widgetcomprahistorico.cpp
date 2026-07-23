@@ -64,12 +64,11 @@ void WidgetCompraHistorico::setupTables() {
 
   //------------------------------------------------------
 
-  // TODO: substituir view por query
-  modelNFe.setTable("view_ordemcompra_nfe");
-
-  modelNFe.setHeaderData("numeroNFe", "NF-e");
+  montaFiltroNFe("0"); // monta e executa a query base (sem OC selecionada ainda), para popular as colunas do model
 
   ui->tableNFe->setModel(&modelNFe);
+
+  modelNFe.setHeaderData("numeroNFe", "NF-e");
 
   ui->tableNFe->hideColumn("ordemCompra");
   ui->tableNFe->hideColumn("idNFe");
@@ -197,9 +196,7 @@ void WidgetCompraHistorico::on_tablePedidos_selectionChanged() {
 
   setTreeView();
 
-  modelNFe.setFilter("ordemCompra = " + ordemCompra);
-
-  modelNFe.select();
+  montaFiltroNFe(ordemCompra);
 
   const QString idCompra = modelCompras.data(selection.first().row(), "Compra").toString();
 
@@ -215,6 +212,22 @@ void WidgetCompraHistorico::montaFiltro() {
   const QString filtroBusca = text.isEmpty() ? "0" : "(OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%')";
 
   modelCompras.setFilter(filtroBusca);
+}
+
+void WidgetCompraHistorico::montaFiltroNFe(const QString &ordemCompra) {
+  // mesmos joins/aliases de view_ordemcompra_nfe, com o filtro de ordemCompra aplicado direto em
+  // pf2.* antes do GROUP BY (a view original só permitia filtrar por fora, depois de já ter
+  // agrupado a pedido_fornecedor_has_produto2 inteira, sem indice para ordemCompra)
+  const QString sql = "SELECT pf2.ordemCompra AS ordemCompra, n.numeroNFe AS numeroNFe, n.idNFe AS idNFe "
+                      "FROM pedido_fornecedor_has_produto2 pf2 "
+                      "LEFT JOIN estoque_has_compra ehc ON (pf2.idPedido2 = ehc.idPedido2) "
+                      "LEFT JOIN estoque e ON (ehc.idEstoque = e.idEstoque) "
+                      "LEFT JOIN nfe n ON (e.idNFe = n.idNFe) "
+                      "WHERE n.idNFe IS NOT NULL AND pf2.ordemCompra = " +
+                      ordemCompra + " GROUP BY pf2.ordemCompra, n.idNFe";
+
+  modelNFe.setQuery(sql);
+  modelNFe.select();
 }
 
 void WidgetCompraHistorico::on_pushButtonDanfe_clicked() {

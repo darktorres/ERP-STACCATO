@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 #include "sqltreemodel.h"
 
@@ -25,13 +26,14 @@ private:
   bool isSet = false;
   SqlTableModel modelCompras;
   SqlTableModel modelFinanceiro;
-  SqlTableModel modelNFe;
+  SqlQueryModel modelNFe;
   SqlTableModel modelProdutos2;
   SqlTableModel modelProdutos;
   SqlTreeModel modelTree;
   Ui::WidgetCompraHistorico *ui;
   // methods
   auto montaFiltro() -> void;
+  auto montaFiltroNFe(const QString &ordemCompra) -> void;
   auto on_lineEditBusca_textChanged() -> void;
   auto on_pushButtonAlteraCodForn_clicked() -> void;
   auto on_pushButtonDanfe_clicked() -> void;

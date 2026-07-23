@@ -98,10 +98,9 @@ void WidgetNfeEntrada::updateTables() {
   if (not isSet) {
     ui->lineEditBusca->setDelayed();
     ui->dateEditAte->setDate(qApp->serverDate());
-    ui->dateEditDe->setDate(qApp->serverDate());
+    ui->dateEditDe->setDate(QDate(qApp->serverDate().year(), qApp->serverDate().month(), 1));
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
     setupTables();
-    montaFiltro();
     setConnections();
     isSet = true;
   }
@@ -125,22 +124,20 @@ void WidgetNfeEntrada::updateTables() {
   ui->tableResumo->setFixedHeight(hHeight + vHeight + fWidth);
 }
 
-void WidgetNfeEntrada::resetTables() {
-  setupTables();
-  montaFiltro();
-}
+void WidgetNfeEntrada::resetTables() { setupTables(); }
 
 void WidgetNfeEntrada::setupTables() {
   // TODO: arrumar a coluna n.tipo pois as nfes de tipo 'ENTRADA' de fornecedor são na verdade nfes de saída
   // TODO: mudar view para puxar apenas as NF-es com cnpjDest igual a raiz da staccato
-  model.setTable("view_nfe_entrada");
+
+  montaFiltro(); // monta e executa a query base primeiro, para popular as colunas do model antes de configurar a tabela
+
+  ui->table->setModel(&model);
 
   model.setHeaderData("utilizada", "Utilizada");
   model.setHeaderData("dataHoraEmissao", "Data");
   model.setHeaderData("dataFollowup", "Data Followup");
   model.setHeaderData("observacao", "Observação");
-
-  ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
@@ -191,20 +188,20 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtros;
+  QStringList filtrosPre; // aplicados em n.* antes do GROUP BY (permite usar indice em tipo/dataHoraEmissao)
+  QStringList filtrosPos; // aplicados depois do GROUP BY (tocam colunas agregadas: OC/Venda)
 
   //------------------------------------- filtro texto
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  const QString filtroBusca = "(Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%')";
-  if (not text.isEmpty()) { filtros << filtroBusca; }
+  if (not text.isEmpty()) { filtrosPos << "(Emitente LIKE '%" + text + "%' OR NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%')"; }
 
-  //------------------------------------- filtro data
+  //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
-                                                          : "";
-  if (not filtroData.isEmpty()) { filtros << filtroData; }
+  if (ui->groupBoxMes->isChecked()) {
+    filtrosPre << "n.dataHoraEmissao >= '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00' AND n.dataHoraEmissao < '" + ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") + " 00:00:00'";
+  }
 
   //------------------------------------- filtro status
 
@@ -216,7 +213,7 @@ void WidgetNfeEntrada::montaFiltro() {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtrosPre << "n.status IN (" + filtroCheck.join(", ") + ")"; }
 
   //------------------------------------- filtro utilizada
 
@@ -225,7 +222,7 @@ void WidgetNfeEntrada::montaFiltro() {
   if (ui->checkBoxUtilizada->isChecked()) { filtroutilizada << "1"; }
   if (ui->checkBoxInutilizada->isChecked()) { filtroutilizada << "0"; }
 
-  if (not filtroutilizada.isEmpty()) { filtros << "utilizada IN (" + filtroutilizada.join(", ") + ")"; }
+  if (not filtroutilizada.isEmpty()) { filtrosPre << "n.utilizada IN (" + filtroutilizada.join(", ") + ")"; }
 
   //------------------------------------- filtro loja
 
@@ -239,12 +236,31 @@ void WidgetNfeEntrada::montaFiltro() {
 
     if (not queryLoja.first()) { throw RuntimeException("Dados não encontrados para loja com id: '" + idLoja + "'"); }
 
-    filtros << "`CNPJ Dest` = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
+    filtrosPre << "n.cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
   }
 
-  //-------------------------------------
+  //------------------------------------- monta e executa a query (mesmos joins/aliases de view_nfe_entrada, com os
+  // filtros seletivos aplicados direto em n.* antes do GROUP BY, para poderem usar indice)
 
-  model.setFilter(filtros.join(" AND "));
+  const QString sql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
+                      "ANY_VALUE(pf2.fornecedor) AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
+                      "ANY_VALUE(e.recebidoPor) AS `Recebido Por`, ANY_VALUE(pf2.dataRealReceb) AS `Data Receb`, "
+                      "ANY_VALUE(chp.valor) AS GARE, ANY_VALUE(chp.dataRealizado) AS `GARE Pago Em`, "
+                      "GROUP_CONCAT(DISTINCT pf2.ordemCompra ORDER BY pf2.ordemCompra ASC SEPARATOR ', ') AS OC, "
+                      "GROUP_CONCAT(DISTINCT pf2.idVenda SEPARATOR ', ') AS Venda, "
+                      "n.nsu AS nsu, n.utilizada AS utilizada, n.dataHoraEmissao AS dataHoraEmissao, "
+                      "nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
+                      "FROM nfe n "
+                      "LEFT JOIN conta_a_pagar_has_pagamento chp ON (n.idNFe = chp.idNFe AND chp.contraParte = 'GARE') "
+                      "LEFT JOIN estoque e ON (n.idNFe = e.idNFe AND e.status <> 'CANCELADO') "
+                      "LEFT JOIN estoque_has_compra ehc ON (e.idEstoque = ehc.idEstoque) "
+                      "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON (ehc.idPedido2 = pf2.idPedido2) "
+                      "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup) "
+                      "WHERE n.tipo = 'ENTRADA'" +
+                      (filtrosPre.isEmpty() ? "" : " AND " + filtrosPre.join(" AND ")) + " GROUP BY n.idNFe" + (filtrosPos.isEmpty() ? "" : " HAVING " + filtrosPos.join(" AND "));
+
+  model.setQuery(sql);
+  model.select();
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {

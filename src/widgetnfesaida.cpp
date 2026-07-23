@@ -9,6 +9,7 @@
 #include "followup.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
+#include "sqltablemodel.h"
 
 #if __has_include("lrreportengine.h")
 #include "lrreportengine.h"
@@ -75,9 +76,8 @@ void WidgetNfeSaida::updateTables() {
   if (not isSet) {
     ui->lineEditBusca->setDelayed();
     ui->dateEditAte->setDate(qApp->serverDate());
-    ui->dateEditDe->setDate(qApp->serverDate());
+    ui->dateEditDe->setDate(QDate(qApp->serverDate().year(), qApp->serverDate().month(), 1));
     setupTables();
-    montaFiltro();
     setConnections();
     isSet = true;
   }
@@ -101,21 +101,19 @@ void WidgetNfeSaida::updateTables() {
   ui->tableResumo->setFixedHeight(hHeight + vHeight + fWidth);
 }
 
-void WidgetNfeSaida::resetTables() {
-  setupTables();
-  montaFiltro();
-}
+void WidgetNfeSaida::resetTables() { setupTables(); }
 
 void WidgetNfeSaida::setupTables() {
   // TODO: mudar view para puxar apenas as NF-es com cnpjOrig igual a raiz da staccato
-  model.setTable("view_nfe_saida");
+
+  montaFiltro(); // monta e executa a query base primeiro, para popular as colunas do model antes de configurar a tabela
+
+  ui->table->setModel(&model);
 
   model.setHeaderData("valor", "R$");
   model.setHeaderData("dataHoraEmissao", "Data");
   model.setHeaderData("dataFollowup", "Data Followup");
   model.setHeaderData("observacao", "Observação");
-
-  ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
@@ -157,20 +155,20 @@ void WidgetNfeSaida::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtros;
+  QStringList filtrosPre; // aplicados em n.* antes do GROUP BY (permite usar indice em tipo/dataHoraEmissao)
+  QStringList filtrosPos; // aplicados depois do GROUP BY (tocam colunas ligadas por join: CPF/CNPJ, Cliente)
 
   //------------------------------------- filtro texto
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  const QString filtroBusca = "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')";
-  if (not text.isEmpty()) { filtros << filtroBusca; }
+  if (not text.isEmpty()) { filtrosPos << "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')"; }
 
-  //------------------------------------- filtro data
+  //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`DataHoraEmissao`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
-                                                          : "";
-  if (not filtroData.isEmpty()) { filtros << filtroData; }
+  if (ui->groupBoxMes->isChecked()) {
+    filtrosPre << "n.dataHoraEmissao >= '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00' AND n.dataHoraEmissao < '" + ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") + " 00:00:00'";
+  }
 
   //------------------------------------- filtro status
 
@@ -182,11 +180,24 @@ void WidgetNfeSaida::montaFiltro() {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtrosPre << "n.status IN (" + filtroCheck.join(", ") + ")"; }
 
-  //-------------------------------------
+  //------------------------------------- monta e executa a query (mesmos joins/aliases de view_nfe_saida, com os
+  // filtros seletivos aplicados direto em n.* antes do GROUP BY, para poderem usar indice)
 
-  model.setFilter(filtros.join(" AND "));
+  const QString sql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
+                      "n.idVenda AS Venda, IF(c.pfpj = 'PF', c.cpf, c.cnpj) AS `CPF/CNPJ`, c.nome_razao AS Cliente, "
+                      "n.valor AS valor, n.dataHoraEmissao AS dataHoraEmissao, nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
+                      "FROM nfe n "
+                      "LEFT JOIN venda v ON (n.idVenda = v.idVenda) "
+                      "LEFT JOIN cliente c ON (c.idCliente = v.idCliente) "
+                      "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup) "
+                      "WHERE n.tipo = 'SAÍDA'" +
+                      (filtrosPre.isEmpty() ? "" : " AND " + filtrosPre.join(" AND ")) + " GROUP BY n.idNFe" +
+                      (filtrosPos.isEmpty() ? "" : " HAVING " + filtrosPos.join(" AND ")) + " ORDER BY n.numeroNFe, n.emitente";
+
+  model.setQuery(sql);
+  model.select();
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
@@ -298,7 +309,9 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   view.setTable("view_relatorio_nfe");
 
   // TODO: trocar 'Criado em' por 'DataEmissao'
-  view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m-%d') BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "' AND (status = 'AUTORIZADA')");
+  // comparacao direta na coluna (nao envolta em DATE_FORMAT) para poder usar indice (idx_nfe_tipo_status_created)
+  view.setFilter("`Criado em` >= '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00' AND `Criado em` < '" + ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") +
+                 " 00:00:00' AND (status = 'AUTORIZADA')");
 
   view.select();
 
@@ -307,11 +320,12 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   if (not report.loadFromFile(QDir::currentPath() + "/modelos/relatorio_nfe.lrxml")) { throw RuntimeException("Não encontrou o modelo de impressão!", this); }
 
   // TODO: trocar 'Criado em' por 'DataEmissao'
+  // comparacao direta na coluna (nao envolta em DATE_FORMAT) para poder usar indice (idx_nfe_tipo_status_created)
   SqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
-                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m-%d') BETWEEN :dataDe AND :dataAte AND (status = 'AUTORIZADA')");
-  query.bindValue(":dataDe", ui->dateEditDe->date().toString("yyyy-MM-dd"));
-  query.bindValue(":dataAte", ui->dateEditAte->date().toString("yyyy-MM-dd"));
+                "WHERE `Criado em` >= :dataDe AND `Criado em` < :dataAte AND (status = 'AUTORIZADA')");
+  query.bindValue(":dataDe", ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00");
+  query.bindValue(":dataAte", ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") + " 00:00:00");
 
   if (not query.exec()) { throw RuntimeException("Erro buscando dados: " + query.lastError().text(), this); }
 

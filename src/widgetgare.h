@@ -2,7 +2,6 @@
 
 #include "cnab.h"
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -24,7 +23,7 @@ public:
 private:
   // attributes
   bool isSet = false;
-  SqlTableModel model;
+  SqlQueryModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Ui::WidgetGare *ui;

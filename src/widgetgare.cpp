@@ -40,10 +40,7 @@ void WidgetGare::setConnections() {
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated, connectionType);
 }
 
-void WidgetGare::resetTables() {
-  setupTables();
-  montaFiltro();
-}
+void WidgetGare::resetTables() { setupTables(); }
 
 void WidgetGare::updateTables() {
   if (not isSet) {
@@ -51,7 +48,6 @@ void WidgetGare::updateTables() {
     ui->dateEditBaixa->setDate(qApp->serverDate());
     ui->dateEditFiltro->setDate(qApp->serverDate());
     setupTables();
-    montaFiltro();
     setConnections();
     isSet = true;
   }
@@ -75,35 +71,43 @@ void WidgetGare::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtros;
+  QStringList filtros; // todos aplicados em cp.*/n.* antes do GROUP BY (nenhum toca a coluna agregada Fornecedor)
 
-  //-------------------------------------
+  if (ui->radioButtonPendente->isChecked()) { filtros << "cp.status = 'PENDENTE GARE'"; }
+  if (ui->radioButtonLiberado->isChecked()) { filtros << "cp.status = 'LIBERADO GARE'"; }
+  if (ui->radioButtonGerado->isChecked()) { filtros << "cp.status = 'GERADO GARE'"; }
+  if (ui->radioButtonPago->isChecked()) { filtros << "cp.status = 'PAGO GARE'"; }
+  if (ui->radioButtonCancelado->isChecked()) { filtros << "cp.status = 'CANCELADO GARE'"; }
 
-  QString filtroRadio;
+  //------------------------------------- filtro dia (dataRealizado é DATE, comparacao direta ja e sargavel)
 
-  if (ui->radioButtonPendente->isChecked()) { filtroRadio = "status = 'PENDENTE GARE'"; }
-  if (ui->radioButtonLiberado->isChecked()) { filtroRadio = "status = 'LIBERADO GARE'"; }
-  if (ui->radioButtonGerado->isChecked()) { filtroRadio = "status = 'GERADO GARE'"; }
-  if (ui->radioButtonPago->isChecked()) { filtroRadio = "status = 'PAGO GARE'"; }
-  if (ui->radioButtonCancelado->isChecked()) { filtroRadio = "status = 'CANCELADO GARE'"; }
+  if (ui->groupBoxDia->isChecked()) { filtros << "cp.dataRealizado = '" + ui->dateEditFiltro->date().toString("yyyy-MM-dd") + "'"; }
 
-  filtros << filtroRadio;
-
-  //-------------------------------------
-
-  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(dataRealizado, '%Y-%m-%d') = '" + ui->dateEditFiltro->date().toString("yyyy-MM-dd") + "'" : "";
-  if (not filtroDia.isEmpty()) { filtros << filtroDia; }
-
-  //-------------------------------------
+  //------------------------------------- filtro busca
 
   const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
-  const QString filtroBusca = "(numeroNFe LIKE '%" + textoBusca + "%')";
 
-  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+  if (not textoBusca.isEmpty()) { filtros << "n.numeroNFe LIKE '%" + textoBusca + "%'"; }
 
-  //-------------------------------------
+  //------------------------------------- monta e executa a query (mesmos joins/aliases de view_gares, com os
+  // filtros aplicados direto em cp.*/n.* antes do GROUP BY, para poderem usar indice)
 
-  model.setFilter(filtros.join(" AND "));
+  const QString sql = "SELECT cp.idPagamento AS idPagamento, n.idNFe AS idNFe, "
+                      "GROUP_CONCAT(DISTINCT pf2.fornecedor SEPARATOR ',') AS Fornecedor, "
+                      "n.dataHoraEmissao AS referencia, cp.status AS status, cp.valor AS valor, "
+                      "n.numeroNFe AS numeroNFe, n.cnpjOrig AS cnpjOrig, cp.dataPagamento AS dataPagamento, "
+                      "cp.dataRealizado AS dataRealizado, c.banco AS banco "
+                      "FROM conta_a_pagar_has_pagamento cp "
+                      "LEFT JOIN nfe n ON (cp.idNFe = n.idNFe) "
+                      "LEFT JOIN cnab c ON (cp.idCnab = c.idCnab) "
+                      "LEFT JOIN estoque e ON (e.idNFe = n.idNFe) "
+                      "LEFT JOIN estoque_has_compra ehc ON (ehc.idEstoque = e.idEstoque) "
+                      "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON (pf2.idPedido2 = ehc.idPedido2) "
+                      "WHERE cp.status IN ('PENDENTE GARE', 'LIBERADO GARE', 'GERADO GARE', 'PAGO GARE', 'CANCELADO GARE')" +
+                      (filtros.isEmpty() ? "" : " AND " + filtros.join(" AND ")) + " GROUP BY cp.idPagamento";
+
+  model.setQuery(sql);
+  model.select();
 }
 
 void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
@@ -150,15 +154,15 @@ void WidgetGare::setupTables() {
 
   // -------------------------------------------------------------------------
 
-  model.setTable("view_gares");
+  montaFiltro(); // monta e executa a query base primeiro, para popular as colunas do model antes de configurar a tabela
+
+  ui->table->setModel(&model);
 
   model.setHeaderData("valor", "R$");
   model.setHeaderData("numeroNFe", "NF-e");
   model.setHeaderData("dataPagamento", "Data Pgt.");
   model.setHeaderData("dataRealizado", "Data Realizado");
   model.setHeaderData("banco", "Banco");
-
-  ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));

@@ -33,12 +33,12 @@ win32 {
 
     RC_ICONS = Staccato.ico
 
-    CONFIG(release, debug|release) {
-        versao.input = versao.txt.in
-        versao.output = $$OUT_PWD/release/versao.txt
-        QMAKE_SUBSTITUTES += versao
-        QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
-    }
+    # CONFIG(release, debug|release) {
+    #     versao.input = versao.txt.in
+    #     versao.output = $$OUT_PWD/release/versao.txt
+    #     QMAKE_SUBSTITUTES += versao
+    #     QMAKE_POST_LINK += $$OUT_PWD/release/script_atualizacao.bat
+    # }
 }
 
 win32-msvc {
@@ -230,6 +230,7 @@ SOURCES += \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
+    src/sqlpaginatedmodel.cpp \
     src/sqlquery.cpp \
     src/sqlquerymodel.cpp \
     src/sqltablemodel.cpp \
@@ -373,6 +374,7 @@ HEADERS  += \
     src/smtp.h \
     src/sortfilterproxymodel.h \
     src/sql.h \
+    src/sqlpaginatedmodel.h \
     src/sqlquery.h \
     src/sqlquerymodel.h \
     src/sqltablemodel.h \

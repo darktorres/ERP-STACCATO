@@ -1,0 +1,330 @@
+#include "sqlpaginatedmodel.h"
+
+#include "application.h"
+#include "sqlquery.h"
+
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QFont>
+#include <QSqlError>
+
+#include <algorithm>
+
+SqlPaginatedModel::SqlPaginatedModel(QObject *parent) : QAbstractTableModel(parent) {}
+
+void SqlPaginatedModel::reset(const QStringList &fieldNames, const QString &sortColumn, const Qt::SortOrder order, const QueryBuilderFactory &factory) {
+  fieldNames_ = fieldNames;
+  sortColumn_ = sortColumn;
+  sortOrder_ = order;
+  factory_ = factory;
+  builder_ = factory_(sortColumn_, sortOrder_);
+
+  loadFirstPage();
+}
+
+void SqlPaginatedModel::setHeaderLabel(const QString &fieldName, const QString &label) { headerLabels_.insert(fieldName, label); }
+
+QString SqlPaginatedModel::sortColumn() const { return sortColumn_; }
+
+Qt::SortOrder SqlPaginatedModel::sortOrder() const { return sortOrder_; }
+
+bool SqlPaginatedModel::hasMoreAfter() const { return hasMoreAfter_; }
+
+void SqlPaginatedModel::loadFirstPage() {
+  QElapsedTimer timer;
+  timer.start();
+
+  beginResetModel();
+
+  rows_.clear();
+  hasMoreBefore_ = false;
+
+  PageRequest request;
+  request.direction = Direction::First;
+
+  rows_ = runQuery(builder_(request));
+
+  endResetModel();
+
+  updateEdgeKeys();
+
+  hasMoreAfter_ = rows_.size() >= PAGE_SIZE;
+
+  emitMoreAvailableIfChanged();
+
+  qDebug() << "[SqlPaginatedModel] loadFirstPage: total" << timer.elapsed() << "ms, rows=" << rows_.size();
+}
+
+void SqlPaginatedModel::tryLoadNext() {
+  if (not hasMoreAfter_ or not lastKeyId_.isValid()) { return; }
+
+  QElapsedTimer timer;
+  timer.start();
+
+  PageRequest request;
+  request.cursorValue = lastKeyValue_;
+  request.cursorId = lastKeyId_;
+  request.direction = Direction::Next;
+
+  const auto newRows = runQuery(builder_(request));
+
+  const qint64 afterQuery = timer.elapsed();
+
+  if (newRows.isEmpty()) {
+    hasMoreAfter_ = false;
+    emitMoreAvailableIfChanged();
+    qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, 0 rows (fim do historico)";
+    return;
+  }
+
+  const int insertFirst = rows_.size();
+
+  beginInsertRows(QModelIndex(), insertFirst, insertFirst + newRows.size() - 1);
+  rows_ += newRows;
+  endInsertRows();
+
+  const qint64 afterInsert = timer.elapsed();
+
+  hasMoreAfter_ = newRows.size() >= PAGE_SIZE;
+  hasMoreBefore_ = true; // ja existe pelo menos uma pagina carregada antes do inicio atual
+
+  updateEdgeKeys();
+
+  // só descarta quando ha folga alem do limite, pra nao remover linhas perto da area visivel logo apos inserir
+  if (rows_.size() > MAX_ROWS) {
+    const int removeCount = rows_.size() - MAX_ROWS;
+
+    beginRemoveRows(QModelIndex(), 0, removeCount - 1);
+    rows_.remove(0, removeCount);
+    endRemoveRows();
+
+    updateEdgeKeys();
+  }
+
+  emitMoreAvailableIfChanged();
+
+  qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
+           << "totalLinhas=" << rows_.size();
+}
+
+void SqlPaginatedModel::tryLoadPrevious() {
+  if (not hasMoreBefore_ or not firstKeyId_.isValid()) { return; }
+
+  QElapsedTimer timer;
+  timer.start();
+
+  PageRequest request;
+  request.cursorValue = firstKeyValue_;
+  request.cursorId = firstKeyId_;
+  request.direction = Direction::Previous;
+
+  auto newRows = runQuery(builder_(request)); // vem do mais perto do cursor pro mais longe
+
+  const qint64 afterQuery = timer.elapsed();
+
+  if (newRows.isEmpty()) {
+    hasMoreBefore_ = false;
+    qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, 0 rows (inicio do historico)";
+    return;
+  }
+
+  std::reverse(newRows.begin(), newRows.end()); // restaura a ordem de exibicao antes de inserir no topo
+
+  beginInsertRows(QModelIndex(), 0, newRows.size() - 1);
+  rows_ = newRows + rows_;
+  endInsertRows();
+
+  const qint64 afterInsert = timer.elapsed();
+
+  hasMoreBefore_ = newRows.size() >= PAGE_SIZE;
+
+  updateEdgeKeys();
+
+  if (rows_.size() > MAX_ROWS) {
+    const int removeCount = rows_.size() - MAX_ROWS;
+    const int start = rows_.size() - removeCount;
+
+    beginRemoveRows(QModelIndex(), start, rows_.size() - 1);
+    rows_.remove(start, removeCount);
+    endRemoveRows();
+
+    hasMoreAfter_ = true;
+    updateEdgeKeys();
+    emitMoreAvailableIfChanged();
+  }
+
+  qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
+           << "totalLinhas=" << rows_.size();
+}
+
+void SqlPaginatedModel::updateEdgeKeys() {
+  const int sortIdx = fieldIndex(sortColumn_, true);
+  const int idIdx = fieldIndex("idNFe", true);
+
+  if (rows_.isEmpty() or sortIdx == -1 or idIdx == -1) {
+    firstKeyValue_ = QVariant();
+    firstKeyId_ = QVariant();
+    lastKeyValue_ = QVariant();
+    lastKeyId_ = QVariant();
+    return;
+  }
+
+  firstKeyValue_ = rows_.first().value(sortIdx);
+  firstKeyId_ = rows_.first().value(idIdx);
+  lastKeyValue_ = rows_.last().value(sortIdx);
+  lastKeyId_ = rows_.last().value(idIdx);
+}
+
+void SqlPaginatedModel::emitMoreAvailableIfChanged() {
+  if (hasMoreAfter_ != lastMoreAvailable_) {
+    lastMoreAvailable_ = hasMoreAfter_;
+    emit moreAvailableChanged(hasMoreAfter_);
+  }
+}
+
+QVector<QVector<QVariant>> SqlPaginatedModel::runQuery(const QString &sql) {
+  qDebug() << "[SqlPaginatedModel] runQuery SQL:" << sql;
+
+  QElapsedTimer timer;
+  timer.start();
+
+  SqlQuery query;
+
+  if (not query.exec(sql)) { throw RuntimeException("Erro lendo dados paginados: " + query.lastError().text()); }
+
+  const qint64 afterExec = timer.elapsed();
+
+  const int columnCount = query.record().count();
+
+  QVector<QVector<QVariant>> result;
+
+  while (query.next()) {
+    QVector<QVariant> row;
+    row.reserve(columnCount);
+
+    for (int i = 0; i < columnCount; ++i) { row << query.value(i); }
+
+    result << row;
+  }
+
+  qDebug() << "[SqlPaginatedModel] runQuery: exec" << afterExec << "ms, fetch" << (timer.elapsed() - afterExec) << "ms, rows=" << result.size();
+
+  return result;
+}
+
+int SqlPaginatedModel::rowCount(const QModelIndex &parent) const {
+  if (parent.isValid()) { return 0; }
+
+  return rows_.size();
+}
+
+int SqlPaginatedModel::columnCount(const QModelIndex &parent) const {
+  if (parent.isValid()) { return 0; }
+
+  return fieldNames_.size();
+}
+
+QVariant SqlPaginatedModel::data(const QModelIndex &index, const int role) const {
+  if (not index.isValid()) { return {}; }
+
+  if (role == Qt::FontRole) {
+    const int statusIdx = fieldIndex("status", true);
+
+    if (statusIdx != -1) {
+      const QString status = data(index.row(), statusIdx).toString();
+
+      if (status == "CANCELADA" or status == "CANCELADO" or status == "SUBSTITUIDO") {
+        QFont font;
+        font.setStrikeOut(true);
+        return font;
+      }
+    }
+
+    return {};
+  }
+
+  if (role != Qt::DisplayRole and role != Qt::EditRole) { return {}; }
+
+  return data(index.row(), index.column());
+}
+
+QVariant SqlPaginatedModel::headerData(const int section, const Qt::Orientation orientation, const int role) const {
+  if (orientation != Qt::Horizontal or role != Qt::DisplayRole) { return QAbstractTableModel::headerData(section, orientation, role); }
+  if (section < 0 or section >= fieldNames_.size()) { return {}; }
+
+  const QString &field = fieldNames_.at(section);
+
+  return headerLabels_.value(field, field);
+}
+
+void SqlPaginatedModel::sort(const int column, const Qt::SortOrder order) {
+  if (column < 0 or column >= fieldNames_.size() or not factory_) { return; }
+
+  sortColumn_ = fieldNames_.at(column);
+  sortOrder_ = order;
+  builder_ = factory_(sortColumn_, sortOrder_);
+
+  loadFirstPage();
+}
+
+QVariant SqlPaginatedModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
+
+QVariant SqlPaginatedModel::data(const int row, const int column) const {
+  if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlPaginatedModel"); }
+  if (row < 0 or row >= rows_.size() or column < 0 or column >= fieldNames_.size()) { return {}; }
+
+  return rows_.at(row).at(column);
+}
+
+int SqlPaginatedModel::fieldIndex(const QString &fieldName, const bool silent) const {
+  for (int i = 0; i < fieldNames_.size(); ++i) {
+    if (fieldNames_.at(i).compare(fieldName, Qt::CaseInsensitive) == 0) { return i; }
+  }
+
+  if (not silent) { throw RuntimeException("\"" + fieldName + "\" não encontrado no model paginado!"); }
+
+  return -1;
+}
+
+QString SqlPaginatedModel::toSqlLiteral(const QVariant &value) {
+  if (not value.isValid() or value.isNull()) { return "NULL"; }
+
+  if (value.userType() == QMetaType::QDateTime) { return "'" + value.toDateTime().toString("yyyy-MM-dd HH:mm:ss") + "'"; }
+  if (value.userType() == QMetaType::QDate) { return "'" + value.toDate().toString("yyyy-MM-dd") + "'"; }
+
+  if (value.userType() == QMetaType::Int or value.userType() == QMetaType::UInt or value.userType() == QMetaType::LongLong or value.userType() == QMetaType::ULongLong or
+      value.userType() == QMetaType::Double or value.userType() == QMetaType::Bool) {
+    return value.toString();
+  }
+
+  return "'" + qApp->sanitizeSQL(value.toString()) + "'";
+}
+
+QString SqlPaginatedModel::buildKeysetWhere(const QString &valueExpr, const QString &idExpr, const QVariant &cursorValue, const QVariant &cursorId, const Qt::SortOrder order, const bool forward) {
+  if (not cursorId.isValid()) { return "1"; } // sem cursor: 1a pagina, sem filtro de continuacao
+
+  const bool descending = (order == Qt::DescendingOrder);
+  const bool wantLess = (descending == forward);
+  const QString valueOp = wantLess ? "<" : ">";
+  const QString isNullOp = forward ? ">" : "<"; // nulos sempre por ultimo: "continuar pra frente" = isNull crescente
+
+  const QString cursorValueLiteral = toSqlLiteral(cursorValue);
+  const QString cursorIsNullLiteral = (cursorValue.isValid() and not cursorValue.isNull()) ? "0" : "1";
+  const QString cursorIdLiteral = toSqlLiteral(cursorId);
+
+  // Envolvido num parenteses externo: quem chama concatena isto com " AND " junto de outros filtros
+  // (ex.: "n.tipo = 'ENTRADA' AND " + buildKeysetWhere(...)) -- sem esse parenteses, o OR de 3 partes
+  // "vaza" por precedencia (AND liga mais forte que OR em SQL), perdendo o filtro externo em 2 dos 3 ramos.
+  return "(((" + valueExpr + " IS NULL) " + isNullOp + " " + cursorIsNullLiteral + ")" + " OR ((" + valueExpr + " IS NULL) <=> " + cursorIsNullLiteral + " AND NOT (" + valueExpr +
+         " <=> " + cursorValueLiteral + ") AND (" + valueExpr + " " + valueOp + " " + cursorValueLiteral + " OR " + cursorValueLiteral + " IS NULL))" + " OR ((" + valueExpr +
+         " IS NULL) <=> " + cursorIsNullLiteral + " AND " + valueExpr + " <=> " + cursorValueLiteral + " AND " + idExpr + " " + valueOp + " " + cursorIdLiteral + "))";
+}
+
+QString SqlPaginatedModel::buildOrderBy(const QString &valueExpr, const QString &idExpr, const Qt::SortOrder order, const bool forward) {
+  const bool descending = (order == Qt::DescendingOrder);
+  const bool effectiveDescending = (descending == forward);
+  const QString dir = effectiveDescending ? "DESC" : "ASC";
+  const QString isNullDir = forward ? "ASC" : "DESC";
+
+  return "(" + valueExpr + " IS NULL) " + isNullDir + ", " + valueExpr + " " + dir + ", " + idExpr + " " + dir;
+}

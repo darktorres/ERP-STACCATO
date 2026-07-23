@@ -225,7 +225,7 @@
      <item>
       <widget class="QLabel" name="labelLimitado">
        <property name="text">
-        <string>Mostrando as NF-e mais recentes — use o filtro de Data para ver notas mais antigas</string>
+        <string>Mostrando as NF-e mais recentes — role a tabela até o fim para carregar as mais antigas</string>
        </property>
        <property name="visible">
         <bool>false</bool>

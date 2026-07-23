@@ -22,6 +22,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFile>
 #include <QFormLayout>
@@ -36,10 +37,6 @@
 #include <QSpinBox>
 #include <QSqlError>
 #include <QUrl>
-
-// sem filtro de Data, o JOIN contra o historico inteiro (~53 mil NF-e's) leva segundos; corta para
-// as N mais recentes nesse caso (medido: ~90ms em vez de ~8s, com folga do penhasco de temp table em disco)
-constexpr int LIMITE_HISTORICO_SEM_DATA = 1000;
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
@@ -72,6 +69,8 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked, connectionType);
   connect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
+  connect(&model, &SqlPaginatedModel::moreAvailableChanged, ui->labelLimitado, &QWidget::setVisible, connectionType);
+  connect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetNfeEntrada::onTableScrolled, connectionType);
 }
 
 void WidgetNfeEntrada::unsetConnections() {
@@ -96,6 +95,8 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
+  disconnect(&model, &SqlPaginatedModel::moreAvailableChanged, ui->labelLimitado, &QWidget::setVisible);
+  disconnect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetNfeEntrada::onTableScrolled);
 }
 
 void WidgetNfeEntrada::updateTables() {
@@ -109,7 +110,7 @@ void WidgetNfeEntrada::updateTables() {
     isSet = true;
   }
 
-  model.select();
+  montaFiltro();
 
   // ---------------------------------------------------
 
@@ -134,14 +135,14 @@ void WidgetNfeEntrada::setupTables() {
   // TODO: arrumar a coluna n.tipo pois as nfes de tipo 'ENTRADA' de fornecedor são na verdade nfes de saída
   // TODO: mudar view para puxar apenas as NF-es com cnpjDest igual a raiz da staccato
 
-  montaFiltro(); // monta e executa a query base primeiro, para popular as colunas do model antes de configurar a tabela
-
   ui->table->setModel(&model);
 
-  model.setHeaderData("utilizada", "Utilizada");
-  model.setHeaderData("dataHoraEmissao", "Data");
-  model.setHeaderData("dataFollowup", "Data Followup");
-  model.setHeaderData("observacao", "Observação");
+  montaFiltro(); // monta e executa a 1a pagina, para popular as colunas do model antes de configurar a tabela
+
+  model.setHeaderLabel("utilizada", "Utilizada");
+  model.setHeaderLabel("dataHoraEmissao", "Data");
+  model.setHeaderLabel("dataFollowup", "Data Followup");
+  model.setHeaderLabel("observacao", "Observação");
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
@@ -152,9 +153,11 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("GARE Pago Em", new DateFormatDelegate(this));
-  ui->table->setItemDelegateForColumn("utilizada", new CheckBoxDelegate(true, this));
+  // "Utilizada" (não "utilizada"): o model paginado não é QSqlQueryModel, então TableView resolve a
+  // coluna via headerData() (o rótulo renomeado acima), não via record() (nome cru da coluna SQL)
+  ui->table->setItemDelegateForColumn("Utilizada", new CheckBoxDelegate(true, this));
 
-  ui->table->setPersistentColumns({"utilizada"});
+  ui->table->setPersistentColumns({"Utilizada"});
 
   // ----------------------------------------------------
 
@@ -164,6 +167,32 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->tableResumo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->tableResumo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+}
+
+void WidgetNfeEntrada::onTableScrolled(const int value) {
+  if (carregandoPagina) { return; }
+
+  carregandoPagina = true;
+
+  QElapsedTimer timer;
+  timer.start();
+
+  try {
+    auto *scrollBar = ui->table->verticalScrollBar();
+    const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
+
+    qDebug() << "[WidgetNfeEntrada] onTableScrolled: value=" << value << "max=" << scrollBar->maximum() << "threshold=" << threshold;
+
+    if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
+    if (value <= threshold) { model.tryLoadPrevious(); }
+  } catch (...) {
+    carregandoPagina = false;
+    throw;
+  }
+
+  carregandoPagina = false;
+
+  qDebug() << "[WidgetNfeEntrada] onTableScrolled: total" << timer.elapsed() << "ms";
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
@@ -192,7 +221,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtrosNFe;    // tocam só n.* — podem entrar no subquery de corte (sem filtro de data)
+  QStringList filtrosNFe;    // tocam só n.* — entram na subquery de corte, antes do JOIN
   QStringList filtrosResumo; // tocam r.* (join com nfe_resumo_compra) — só no WHERE externo, depois do join
 
   //------------------------------------- filtro texto
@@ -203,9 +232,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
-  const bool temFiltroData = ui->groupBoxMes->isChecked();
-
-  if (temFiltroData) {
+  if (ui->groupBoxMes->isChecked()) {
     filtrosNFe << "n.dataHoraEmissao >= '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00' AND n.dataHoraEmissao < '" + ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") + " 00:00:00'";
   }
 
@@ -245,41 +272,71 @@ void WidgetNfeEntrada::montaFiltro() {
     filtrosNFe << "n.cnpjDest = '" + queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") + "'";
   }
 
-  //------------------------------------- monta o FROM: direto em nfe quando ha filtro de data (ja rapido); limitado
-  // as NF-e's mais recentes quando nao ha, pra nao ter que juntar o historico inteiro contra nfe_resumo_compra/
-  // nfe_has_followup (o corte entra ANTES do join, restrito só às colunas de n, pra poder usar o índice
-  // idx_nfe_tipo_data como range scan)
+  //------------------------------------- colunas e expressao SQL de cada uma (pra ORDER BY/keyset da paginacao)
+  // -- Entrada nao tem "leque" (resumo materializado colapsou o que precisava de estoque/pedido/GARE), entao a
+  // subquery de corte sempre junta n+r direto, nao importa qual coluna esta sendo usada pra ordenar
 
-  QString fromClause;
-  QStringList filtrosFinal;
+  static const QStringList fieldNames = {"idNFe",        "chaveAcesso", "CNPJ Dest",     "Emitente", "Fornecedor",   "NFe",       "Status",
+                                          "Recebido Por", "Data Receb",  "GARE",          "GARE Pago Em", "OC",   "Venda",     "nsu",
+                                          "utilizada",    "dataHoraEmissao", "dataFollowup", "observacao"};
 
-  if (temFiltroData) {
-    fromClause = "FROM nfe n";
-    filtrosFinal << "n.tipo = 'ENTRADA'";
-    filtrosFinal += filtrosNFe;
-  } else {
-    fromClause = "FROM (SELECT idNFe FROM nfe n WHERE n.tipo = 'ENTRADA'" + (filtrosNFe.isEmpty() ? "" : " AND " + filtrosNFe.join(" AND ")) + " ORDER BY dataHoraEmissao DESC LIMIT " +
-                 QString::number(LIMITE_HISTORICO_SEM_DATA) + ") lim JOIN nfe n ON n.idNFe = lim.idNFe";
-  }
+  static const QHash<QString, QString> exprPorCampo = {
+      {"idNFe", "n.idNFe"},       {"chaveAcesso", "n.chaveAcesso"},   {"CNPJ Dest", "n.cnpjDest"}, {"Emitente", "n.emitente"},
+      {"Fornecedor", "r.fornecedor"}, {"NFe", "n.numeroNFe"},         {"Status", "n.status"},      {"Recebido Por", "r.recebidoPor"},
+      {"Data Receb", "r.dataRealReceb"}, {"GARE", "r.gare"},          {"GARE Pago Em", "r.garePagoEm"}, {"OC", "r.ordemCompra"},
+      {"Venda", "r.idVenda"},     {"nsu", "n.nsu"},                   {"utilizada", "n.utilizada"}, {"dataHoraEmissao", "n.dataHoraEmissao"},
+      {"dataFollowup", "nhf.dataFollowup"}, {"observacao", "nhf.observacao"},
+  };
 
-  filtrosFinal += filtrosResumo;
+  const QStringList filtrosNFeCopia = filtrosNFe;
+  const QStringList filtrosResumoCopia = filtrosResumo;
 
-  const QString sql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
-                      "r.fornecedor AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
-                      "r.recebidoPor AS `Recebido Por`, r.dataRealReceb AS `Data Receb`, "
-                      "r.gare AS GARE, r.garePagoEm AS `GARE Pago Em`, "
-                      "r.ordemCompra AS OC, r.idVenda AS Venda, "
-                      "n.nsu AS nsu, n.utilizada AS utilizada, n.dataHoraEmissao AS dataHoraEmissao, "
-                      "nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao " +
-                      fromClause +
-                      " LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe "
-                      "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" +
-                      (filtrosFinal.isEmpty() ? "" : " WHERE " + filtrosFinal.join(" AND "));
+  const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosNFeCopia, filtrosResumoCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+    const QString sortExpr = exprPorCampo.value(sortColumn, "n.dataHoraEmissao");
 
-  model.setQuery(sql);
-  model.select();
+    return [filtrosNFeCopia, filtrosResumoCopia, sortExpr, order](const SqlPaginatedModel::PageRequest &request) -> QString {
+      const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
-  ui->labelLimitado->setVisible(not temFiltroData);
+      QStringList capFiltros;
+      capFiltros << "n.tipo = 'ENTRADA'";
+      capFiltros += filtrosNFeCopia;
+
+      if (request.direction != SqlPaginatedModel::Direction::First) {
+        capFiltros << SqlPaginatedModel::buildKeysetWhere(sortExpr, "n.idNFe", request.cursorValue, request.cursorId, order, forward);
+      }
+
+      const QString capOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, forward);
+
+      // FORCE INDEX: sem isso o otimizador as vezes escolhe um indice so de status (nao-covering,
+      // bookmark lookup linha a linha) quando ha filtro de status/utilizada sem filtro de data -
+      // medido ~2-4s contra ~50-170ms com o indice forcado (ver db/add_index_nfe_tipo_status_utilizada_data.sql)
+      const QString capSql = "SELECT n.idNFe FROM nfe n FORCE INDEX (idx_nfe_tipo_status_utilizada_data) LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe WHERE " + capFiltros.join(" AND ") +
+                             " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+
+      const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, true); // exibicao sempre na ordem normal
+
+      return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
+             "r.fornecedor AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
+             "r.recebidoPor AS `Recebido Por`, r.dataRealReceb AS `Data Receb`, "
+             "r.gare AS GARE, r.garePagoEm AS `GARE Pago Em`, "
+             "r.ordemCompra AS OC, r.idVenda AS Venda, "
+             "n.nsu AS nsu, n.utilizada AS utilizada, n.dataHoraEmissao AS dataHoraEmissao, "
+             "nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
+             "FROM (" +
+             capSql +
+             ") lim "
+             "JOIN nfe n ON n.idNFe = lim.idNFe "
+             "LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe "
+             "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" +
+             (filtrosResumoCopia.isEmpty() ? "" : " WHERE " + filtrosResumoCopia.join(" AND ")) + " ORDER BY " + exibicaoOrderBy;
+    };
+  };
+
+  const QString sortColumnAtual = model.sortColumn().isEmpty() ? "dataHoraEmissao" : model.sortColumn();
+
+  model.reset(fieldNames, sortColumnAtual, model.sortOrder(), factory);
+
+  ui->labelLimitado->setVisible(model.hasMoreAfter());
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {

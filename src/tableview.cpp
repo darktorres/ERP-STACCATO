@@ -193,6 +193,7 @@ void TableView::setModel(QAbstractItemModel *model) {
   connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView);
   connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView);
   connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView);
+  connect(model, &QAbstractItemModel::rowsInserted, this, &TableView::redoView);
   connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView);
 
   //---------------------------------------

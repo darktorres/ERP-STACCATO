@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlpaginatedmodel.h"
 #include "sqlquerymodel.h"
 
 #include <QStack>
@@ -23,8 +24,9 @@ public:
 private:
   // attributes
   bool isSet = false;
+  bool carregandoPagina = false;
   QStack<int> blockingSignals;
-  SqlQueryModel model;
+  SqlPaginatedModel model;
   SqlQueryModel modelResumo;
   Ui::WidgetNfeEntrada *ui;
   // methods
@@ -32,6 +34,7 @@ private:
   auto ajustarGroupBoxUtilizada() -> void;
   auto inutilizar(const int row) -> void;
   auto montaFiltro() -> void;
+  auto onTableScrolled(const int value) -> void;
   auto on_dateEditDe_dateChanged(const QDate date) -> void;
   auto on_groupBoxMes_toggled(const bool enabled) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

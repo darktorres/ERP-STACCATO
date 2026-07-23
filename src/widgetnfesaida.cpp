@@ -22,6 +22,10 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+// sem filtro de Data, o JOIN contra o historico inteiro (~38 mil NF-e's) leva segundos; corta para
+// as N mais recentes nesse caso (mesmo raciocinio/medicao da correção equivalente em Entrada)
+constexpr int LIMITE_HISTORICO_SEM_DATA = 1000;
+
 WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
 
 WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
@@ -166,7 +170,9 @@ void WidgetNfeSaida::montaFiltro() {
 
   //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
-  if (ui->groupBoxMes->isChecked()) {
+  const bool temFiltroData = ui->groupBoxMes->isChecked();
+
+  if (temFiltroData) {
     filtrosPre << "n.dataHoraEmissao >= '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + " 00:00:00' AND n.dataHoraEmissao < '" + ui->dateEditAte->date().addDays(1).toString("yyyy-MM-dd") + " 00:00:00'";
   }
 
@@ -182,22 +188,36 @@ void WidgetNfeSaida::montaFiltro() {
 
   if (not filtroCheck.isEmpty()) { filtrosPre << "n.status IN (" + filtroCheck.join(", ") + ")"; }
 
-  //------------------------------------- monta e executa a query (mesmos joins/aliases de view_nfe_saida, com os
-  // filtros seletivos aplicados direto em n.* antes do GROUP BY, para poderem usar indice)
+  //------------------------------------- monta o FROM: direto em nfe quando ha filtro de data (ja rapido); limitado
+  // as NF-e's mais recentes quando nao ha, pra nao ter que juntar o historico inteiro (o corte entra ANTES do
+  // join, restrito só às colunas de n, pra poder usar o índice idx_nfe_tipo_data como range scan)
+
+  QString fromClause;
+  QStringList filtrosFinal;
+
+  if (temFiltroData) {
+    fromClause = "FROM nfe n";
+    filtrosFinal << "n.tipo = 'SAÍDA'";
+    filtrosFinal += filtrosPre;
+  } else {
+    fromClause = "FROM (SELECT idNFe FROM nfe n WHERE n.tipo = 'SAÍDA'" + (filtrosPre.isEmpty() ? "" : " AND " + filtrosPre.join(" AND ")) + " ORDER BY dataHoraEmissao DESC LIMIT " +
+                 QString::number(LIMITE_HISTORICO_SEM_DATA) + ") lim JOIN nfe n ON n.idNFe = lim.idNFe";
+  }
 
   const QString sql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
                       "n.idVenda AS Venda, IF(c.pfpj = 'PF', c.cpf, c.cnpj) AS `CPF/CNPJ`, c.nome_razao AS Cliente, "
-                      "n.valor AS valor, n.dataHoraEmissao AS dataHoraEmissao, nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
-                      "FROM nfe n "
-                      "LEFT JOIN venda v ON (n.idVenda = v.idVenda) "
+                      "n.valor AS valor, n.dataHoraEmissao AS dataHoraEmissao, nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao " +
+                      fromClause +
+                      " LEFT JOIN venda v ON (n.idVenda = v.idVenda) "
                       "LEFT JOIN cliente c ON (c.idCliente = v.idCliente) "
-                      "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup) "
-                      "WHERE n.tipo = 'SAÍDA'" +
-                      (filtrosPre.isEmpty() ? "" : " AND " + filtrosPre.join(" AND ")) + " GROUP BY n.idNFe" +
+                      "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" +
+                      (filtrosFinal.isEmpty() ? "" : " WHERE " + filtrosFinal.join(" AND ")) + " GROUP BY n.idNFe" +
                       (filtrosPos.isEmpty() ? "" : " HAVING " + filtrosPos.join(" AND ")) + " ORDER BY n.numeroNFe, n.emitente";
 
   model.setQuery(sql);
   model.select();
+
+  ui->labelLimitado->setVisible(not temFiltroData);
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {

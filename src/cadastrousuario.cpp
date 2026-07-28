@@ -173,6 +173,8 @@ void CadastroUsuario::savingProcedures() {
 
     setData("password", query.value(0), false);
     setData("passwd", query.value(1), false);
+
+    if (data("idUsuario").toString() == User::idUsuario) { User::senha = ui->lineEditPasswd->text(); }
   }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }
@@ -351,5 +353,4 @@ void CadastroUsuario::connectLineEditsToDirty() {
 // FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
 // TODO: colocar combobox para escolher regime CLT/PJ/Outros
 // TODO: não dá para visualizar cadastros desativados
-// TODO: se usuario alterar a senha deve atualizar em User::senha senao o envio de arquivos para o servidor vai falhar na autenticacao
 // TODO: limitar tamanho do nome para 32 (limite do mysql)

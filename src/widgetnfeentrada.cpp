@@ -299,11 +299,11 @@ void WidgetNfeEntrada::montaFiltro() {
       capFiltros << "n.tipo = 'ENTRADA'";
       capFiltros += filtrosNFeCopia;
 
-      if (request.direction != SqlPaginatedModel::Direction::First) {
-        capFiltros << SqlPaginatedModel::buildKeysetWhere(sortExpr, "n.idNFe", request.cursorValue, request.cursorId, order, forward);
-      }
+      const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"n.idNFe", order}};
 
-      const QString capOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, forward);
+      if (request.direction != SqlPaginatedModel::Direction::First) { capFiltros << SqlPaginatedModel::buildKeysetWhere(keys, request.cursorValues, forward); }
+
+      const QString capOrderBy = SqlPaginatedModel::buildOrderBy(keys, forward);
 
       // FORCE INDEX: sem isso o otimizador as vezes escolhe um indice so de status (nao-covering,
       // bookmark lookup linha a linha) quando ha filtro de status/utilizada sem filtro de data -
@@ -311,7 +311,7 @@ void WidgetNfeEntrada::montaFiltro() {
       const QString capSql = "SELECT n.idNFe FROM nfe n FORCE INDEX (idx_nfe_tipo_status_utilizada_data) LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe WHERE " + capFiltros.join(" AND ") +
                              " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
-      const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, true); // exibicao sempre na ordem normal
+      const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
       return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
              "r.fornecedor AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
@@ -332,7 +332,7 @@ void WidgetNfeEntrada::montaFiltro() {
 
   const QString sortColumnAtual = model.sortColumn().isEmpty() ? "dataHoraEmissao" : model.sortColumn();
 
-  model.reset(fieldNames, sortColumnAtual, model.sortOrder(), factory);
+  model.reset(fieldNames, "idNFe", sortColumnAtual, model.sortOrder(), {}, factory);
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {

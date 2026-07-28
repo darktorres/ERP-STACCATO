@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cnab.h"
+#include "sqlpaginatedmodel.h"
 #include "sqlquerymodel.h"
 #include "xlsxdocument.h"
 
@@ -28,7 +29,8 @@ public:
 private:
   // attributes
   bool isSet = false;
-  SqlQueryModel model;
+  bool carregandoPagina = false;
+  SqlPaginatedModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;
@@ -38,6 +40,7 @@ private:
   auto filtrosContasPagar() const -> QString;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
+  auto onTableScrolled(const int value) -> void;
   auto on_dateEditRealizadoDe_dateChanged(const QDate date) -> void;
   auto on_dateEditVencimentoDe_dateChanged(const QDate date) -> void;
   auto on_doubleSpinBoxDe_valueChanged(const double value) -> void;

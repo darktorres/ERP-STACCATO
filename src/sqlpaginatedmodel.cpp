@@ -10,10 +10,46 @@
 
 #include <algorithm>
 
+namespace {
+
+// "Antes do cursor ou depois dele" (NULL-safe, nulos sempre por ultimo) para uma UNICA chave
+// anulavel - branches 1+2 do esquema original de 3 branches (a 3a branch, "empatou, olha a
+// proxima chave", vem da composicao em buildKeysetWhere, nao daqui).
+QString lessGreaterNullable(const QString &expr, const QVariant &cursorValue, const Qt::SortOrder order, const bool forward) {
+  const bool descending = (order == Qt::DescendingOrder);
+  const bool wantLess = (descending == forward);
+  const QString valueOp = wantLess ? "<" : ">";
+  const QString isNullOp = forward ? ">" : "<"; // nulos sempre por ultimo: "continuar pra frente" = isNull crescente
+
+  const QString cursorValueLiteral = SqlPaginatedModel::toSqlLiteral(cursorValue);
+  const QString cursorIsNullLiteral = (cursorValue.isValid() and not cursorValue.isNull()) ? "0" : "1";
+
+  return "((" + expr + " IS NULL) " + isNullOp + " " + cursorIsNullLiteral + ")" + " OR ((" + expr + " IS NULL) <=> " + cursorIsNullLiteral + " AND NOT (" + expr + " <=> " + cursorValueLiteral +
+         ") AND (" + expr + " " + valueOp + " " + cursorValueLiteral + " OR " + cursorValueLiteral + " IS NULL))";
+}
+
+// Mesma comparacao, mas para a chave final (assumida NOT NULL, ex.: idNFe/idPagamento) - sem
+// necessidade de tratamento de nulo.
+QString lessGreaterNotNull(const QString &expr, const QVariant &cursorValue, const Qt::SortOrder order, const bool forward) {
+  const bool descending = (order == Qt::DescendingOrder);
+  const bool wantLess = (descending == forward);
+  const QString valueOp = wantLess ? "<" : ">";
+
+  return expr + " " + valueOp + " " + SqlPaginatedModel::toSqlLiteral(cursorValue);
+}
+
+// "Empatou com o cursor nesta chave" - NULL-safe via <=> (funciona tanto pra valor real quanto NULL).
+QString equalClause(const QString &expr, const QVariant &cursorValue) { return expr + " <=> " + SqlPaginatedModel::toSqlLiteral(cursorValue); }
+
+} // namespace
+
 SqlPaginatedModel::SqlPaginatedModel(QObject *parent) : QAbstractTableModel(parent) {}
 
-void SqlPaginatedModel::reset(const QStringList &fieldNames, const QString &sortColumn, const Qt::SortOrder order, const QueryBuilderFactory &factory) {
+void SqlPaginatedModel::reset(const QStringList &fieldNames, const QString &idFieldName, const QString &sortColumn, const Qt::SortOrder order, const QStringList &extraKeyFieldNames,
+                               const QueryBuilderFactory &factory) {
   fieldNames_ = fieldNames;
+  idFieldName_ = idFieldName;
+  extraKeyFieldNames_ = extraKeyFieldNames;
   sortColumn_ = sortColumn;
   sortOrder_ = order;
   factory_ = factory;
@@ -56,14 +92,13 @@ void SqlPaginatedModel::loadFirstPage() {
 }
 
 void SqlPaginatedModel::tryLoadNext() {
-  if (not hasMoreAfter_ or not lastKeyId_.isValid()) { return; }
+  if (not hasMoreAfter_ or lastKeyValues_.isEmpty()) { return; }
 
   QElapsedTimer timer;
   timer.start();
 
   PageRequest request;
-  request.cursorValue = lastKeyValue_;
-  request.cursorId = lastKeyId_;
+  request.cursorValues = lastKeyValues_;
   request.direction = Direction::Next;
 
   const auto newRows = runQuery(builder_(request));
@@ -108,14 +143,13 @@ void SqlPaginatedModel::tryLoadNext() {
 }
 
 void SqlPaginatedModel::tryLoadPrevious() {
-  if (not hasMoreBefore_ or not firstKeyId_.isValid()) { return; }
+  if (not hasMoreBefore_ or firstKeyValues_.isEmpty()) { return; }
 
   QElapsedTimer timer;
   timer.start();
 
   PageRequest request;
-  request.cursorValue = firstKeyValue_;
-  request.cursorId = firstKeyId_;
+  request.cursorValues = firstKeyValues_;
   request.direction = Direction::Previous;
 
   auto newRows = runQuery(builder_(request)); // vem do mais perto do cursor pro mais longe
@@ -157,22 +191,37 @@ void SqlPaginatedModel::tryLoadPrevious() {
            << "totalLinhas=" << rows_.size();
 }
 
-void SqlPaginatedModel::updateEdgeKeys() {
-  const int sortIdx = fieldIndex(sortColumn_, true);
-  const int idIdx = fieldIndex("idNFe", true);
+QStringList SqlPaginatedModel::keyFieldNames() const {
+  QStringList keys;
+  keys << sortColumn_;
+  keys += extraKeyFieldNames_;
+  keys << idFieldName_;
+  return keys;
+}
 
-  if (rows_.isEmpty() or sortIdx == -1 or idIdx == -1) {
-    firstKeyValue_ = QVariant();
-    firstKeyId_ = QVariant();
-    lastKeyValue_ = QVariant();
-    lastKeyId_ = QVariant();
+QVector<QVariant> SqlPaginatedModel::edgeKeyValues(const QVector<QVariant> &row) const {
+  QVector<QVariant> values;
+
+  for (const auto &fieldName : keyFieldNames()) {
+    const int idx = fieldIndex(fieldName, true);
+
+    if (idx == -1) { return {}; } // chave nao encontrada nas colunas da pagina: cursor invalido
+
+    values << row.value(idx);
+  }
+
+  return values;
+}
+
+void SqlPaginatedModel::updateEdgeKeys() {
+  if (rows_.isEmpty()) {
+    firstKeyValues_.clear();
+    lastKeyValues_.clear();
     return;
   }
 
-  firstKeyValue_ = rows_.first().value(sortIdx);
-  firstKeyId_ = rows_.first().value(idIdx);
-  lastKeyValue_ = rows_.last().value(sortIdx);
-  lastKeyId_ = rows_.last().value(idIdx);
+  firstKeyValues_ = edgeKeyValues(rows_.first());
+  lastKeyValues_ = edgeKeyValues(rows_.last());
 }
 
 void SqlPaginatedModel::emitMoreAvailableIfChanged() {
@@ -300,31 +349,47 @@ QString SqlPaginatedModel::toSqlLiteral(const QVariant &value) {
   return "'" + qApp->sanitizeSQL(value.toString()) + "'";
 }
 
-QString SqlPaginatedModel::buildKeysetWhere(const QString &valueExpr, const QString &idExpr, const QVariant &cursorValue, const QVariant &cursorId, const Qt::SortOrder order, const bool forward) {
-  if (not cursorId.isValid()) { return "1"; } // sem cursor: 1a pagina, sem filtro de continuacao
+QString SqlPaginatedModel::buildKeysetWhere(const QVector<KeyExpr> &keys, const QVector<QVariant> &cursorValues, const bool forward) {
+  if (keys.isEmpty() or cursorValues.size() != keys.size()) { return "1"; } // sem cursor: 1a pagina, sem filtro de continuacao
 
-  const bool descending = (order == Qt::DescendingOrder);
-  const bool wantLess = (descending == forward);
-  const QString valueOp = wantLess ? "<" : ">";
-  const QString isNullOp = forward ? ">" : "<"; // nulos sempre por ultimo: "continuar pra frente" = isNull crescente
+  QStringList clauses;
 
-  const QString cursorValueLiteral = toSqlLiteral(cursorValue);
-  const QString cursorIsNullLiteral = (cursorValue.isValid() and not cursorValue.isNull()) ? "0" : "1";
-  const QString cursorIdLiteral = toSqlLiteral(cursorId);
+  for (int i = 0; i < keys.size(); ++i) {
+    QStringList prefix;
+
+    for (int j = 0; j < i; ++j) { prefix << equalClause(keys.at(j).expr, cursorValues.at(j)); }
+
+    const bool isLast = (i == keys.size() - 1);
+    const QString cmp = isLast ? lessGreaterNotNull(keys.at(i).expr, cursorValues.at(i), keys.at(i).order, forward) : lessGreaterNullable(keys.at(i).expr, cursorValues.at(i), keys.at(i).order, forward);
+
+    prefix << "(" + cmp + ")";
+
+    clauses << "(" + prefix.join(" AND ") + ")";
+  }
 
   // Envolvido num parenteses externo: quem chama concatena isto com " AND " junto de outros filtros
-  // (ex.: "n.tipo = 'ENTRADA' AND " + buildKeysetWhere(...)) -- sem esse parenteses, o OR de 3 partes
-  // "vaza" por precedencia (AND liga mais forte que OR em SQL), perdendo o filtro externo em 2 dos 3 ramos.
-  return "(((" + valueExpr + " IS NULL) " + isNullOp + " " + cursorIsNullLiteral + ")" + " OR ((" + valueExpr + " IS NULL) <=> " + cursorIsNullLiteral + " AND NOT (" + valueExpr +
-         " <=> " + cursorValueLiteral + ") AND (" + valueExpr + " " + valueOp + " " + cursorValueLiteral + " OR " + cursorValueLiteral + " IS NULL))" + " OR ((" + valueExpr +
-         " IS NULL) <=> " + cursorIsNullLiteral + " AND " + valueExpr + " <=> " + cursorValueLiteral + " AND " + idExpr + " " + valueOp + " " + cursorIdLiteral + "))";
+  // (ex.: "n.tipo = 'ENTRADA' AND " + buildKeysetWhere(...)) -- sem esse parenteses, o OR de N partes
+  // "vaza" por precedencia (AND liga mais forte que OR em SQL), perdendo o filtro externo nos ramos.
+  return "(" + clauses.join(" OR ") + ")";
 }
 
-QString SqlPaginatedModel::buildOrderBy(const QString &valueExpr, const QString &idExpr, const Qt::SortOrder order, const bool forward) {
-  const bool descending = (order == Qt::DescendingOrder);
-  const bool effectiveDescending = (descending == forward);
-  const QString dir = effectiveDescending ? "DESC" : "ASC";
-  const QString isNullDir = forward ? "ASC" : "DESC";
+QString SqlPaginatedModel::buildOrderBy(const QVector<KeyExpr> &keys, const bool forward) {
+  const QString isNullDir = forward ? "ASC" : "DESC"; // nulos sempre por ultimo: "continuar pra frente" = isNull crescente
 
-  return "(" + valueExpr + " IS NULL) " + isNullDir + ", " + valueExpr + " " + dir + ", " + idExpr + " " + dir;
+  QStringList parts;
+
+  for (int i = 0; i < keys.size(); ++i) {
+    const auto &key = keys.at(i);
+    const bool descending = (key.order == Qt::DescendingOrder);
+    const bool effectiveDescending = (descending == forward);
+    const QString dir = effectiveDescending ? "DESC" : "ASC";
+
+    const bool isLast = (i == keys.size() - 1);
+
+    if (not isLast) { parts << "(" + key.expr + " IS NULL) " + isNullDir; }
+
+    parts << key.expr + " " + dir;
+  }
+
+  return parts.join(", ");
 }

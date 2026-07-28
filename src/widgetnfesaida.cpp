@@ -249,11 +249,11 @@ void WidgetNfeSaida::montaFiltro() {
       capFiltros << "n.tipo = 'SAÍDA'";
       capFiltros += filtrosPreCopia;
 
-      if (request.direction != SqlPaginatedModel::Direction::First) {
-        capFiltros << SqlPaginatedModel::buildKeysetWhere(sortExpr, "n.idNFe", request.cursorValue, request.cursorId, order, forward);
-      }
+      const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"n.idNFe", order}};
 
-      const QString capOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, forward);
+      if (request.direction != SqlPaginatedModel::Direction::First) { capFiltros << SqlPaginatedModel::buildKeysetWhere(keys, request.cursorValues, forward); }
+
+      const QString capOrderBy = SqlPaginatedModel::buildOrderBy(keys, forward);
 
       const QString capJoinCliente = precisaJoinCliente ? " LEFT JOIN venda v ON (n.idVenda = v.idVenda) LEFT JOIN cliente c ON (c.idCliente = v.idCliente)" : "";
       const QString capJoinFollowup = precisaJoinFollowup ? " LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" : "";
@@ -267,7 +267,7 @@ void WidgetNfeSaida::montaFiltro() {
       const QString capSql = "SELECT n.idNFe FROM nfe n" + forceIndex + capJoinFollowup + capJoinCliente + " WHERE " + capFiltros.join(" AND ") + " ORDER BY " + capOrderBy + " LIMIT " +
                              QString::number(1000);
 
-      const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(sortExpr, "n.idNFe", order, true); // exibicao sempre na ordem normal
+      const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
       return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
              "n.idVenda AS Venda, IF(c.pfpj = 'PF', c.cpf, c.cnpj) AS `CPF/CNPJ`, c.nome_razao AS Cliente, "
@@ -286,7 +286,7 @@ void WidgetNfeSaida::montaFiltro() {
 
   const QString sortColumnAtual = model.sortColumn().isEmpty() ? "dataHoraEmissao" : model.sortColumn();
 
-  model.reset(fieldNames, sortColumnAtual, model.sortOrder(), factory);
+  model.reset(fieldNames, "idNFe", sortColumnAtual, model.sortOrder(), {}, factory);
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {

@@ -13,8 +13,11 @@
 #include "user.h"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QScrollBar>
+#include <QSet>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -81,9 +84,36 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->radioButtonRecebido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated, connectionType);
+  connect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetFinanceiroContas::onTableScrolled, connectionType);
   connect(ui->tableVencer, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencer_doubleClicked, connectionType);
   connect(ui->tableVencidos, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencidos_doubleClicked, connectionType);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetFinanceiroContas::somarSelecao, connectionType);
+}
+
+void WidgetFinanceiroContas::onTableScrolled(const int value) {
+  if (carregandoPagina) { return; }
+
+  carregandoPagina = true;
+
+  QElapsedTimer timer;
+  timer.start();
+
+  try {
+    auto *scrollBar = ui->table->verticalScrollBar();
+    const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
+
+    qDebug() << "[WidgetFinanceiroContas] onTableScrolled: value=" << value << "max=" << scrollBar->maximum() << "threshold=" << threshold;
+
+    if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
+    if (value <= threshold) { model.tryLoadPrevious(); }
+  } catch (...) {
+    carregandoPagina = false;
+    throw;
+  }
+
+  carregandoPagina = false;
+
+  qDebug() << "[WidgetFinanceiroContas] onTableScrolled: total" << timer.elapsed() << "ms";
 }
 
 void WidgetFinanceiroContas::updateTables() {
@@ -99,14 +129,15 @@ void WidgetFinanceiroContas::updateTables() {
 
     ui->itemBoxLojas->setSearchDialog(SearchDialog::loja(this));
 
-    montaFiltro();
     setupTables();
-
     setConnections();
     isSet = true;
   }
 
-  model.select();
+  // model e SqlPaginatedModel: nao ha um select()/re-executar-a-ultima-query - montaFiltro()
+  // reconstroi os filtros (idempotente, mesmo estado da UI) e recarrega a 1a pagina.
+  montaFiltro();
+
   modelVencidos.select();
   modelVencer.select();
 
@@ -192,7 +223,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Pagar) {
-    QStringList filtros;
+    QStringList filtros; // tocam só cp.* — entram na subquery de corte (paginação), antes do JOIN
     QString status;
 
     const auto children = ui->groupBoxStatus->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
@@ -234,22 +265,110 @@ void WidgetFinanceiroContas::montaFiltro() {
     const QString loja = (ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty()) ? "cp.idLoja = " + ui->itemBoxLojas->getId().toString() : "";
     if (not loja.isEmpty()) { filtros << loja; }
 
-    //-------------------------------------
+    //------------------------------------- busca: toca colunas agregadas (GROUP_CONCAT via o fan-out
+    // cp2->pf2->ehc->e->n) — só pode ser aplicada depois do GROUP BY, na página já cortada (<=1000 linhas)
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = text.isEmpty() ? ""
                                          : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text +
                                                "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%' OR codFornecedor LIKE '%" + text + "%')";
 
-    //-------------------------------------
+    //------------------------------------- colunas, expressao SQL de cada uma (pra ORDER BY/keyset da paginacao)
 
-    model.setQuery(Sql::contasPagar(filtros.join(" AND "), busca));
+    static const QStringList fieldNames = {"idPagamento", "idLoja",       "contraparte", "dataEmissao",      "dataPagamento", "dataRealizado", "idVenda",
+                                            "ordemCompra", "numeroNFe",    "idNFe",       "status",           "valor",         "valorReal",     "tipo",
+                                            "parcela",     "observacao",   "grupo",       "statusFinanceiro", "pf2_idVenda",   "codFornecedor"};
 
-    model.sort(ui->radioButtonPago->isChecked() ? "`dataRealizado`" : "`dataPagamento`");
+    static const QHash<QString, QString> exprPorCampo = {
+        {"idPagamento", "cp.idPagamento"},     {"idLoja", "cp.idLoja"},               {"contraparte", "cp.contraParte"},   {"dataEmissao", "cp.dataEmissao"},
+        {"dataPagamento", "cp.dataPagamento"}, {"dataRealizado", "cp.dataRealizado"}, {"idVenda", "cp.idVenda"},            {"status", "cp.status"},
+        {"valor", "cp.valor"},                 {"valorReal", "cp.valorReal"},         {"tipo", "cp.tipo"},                 {"parcela", "cp.parcela"},
+        {"observacao", "cp.observacao"},       {"grupo", "cp.grupo"},
+        {"ordemCompra", "GROUP_CONCAT(DISTINCT pf2.ordemCompra SEPARATOR ',')"},
+        {"numeroNFe", "GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ')"},
+        {"idNFe", "GROUP_CONCAT(DISTINCT n.idNFe SEPARATOR ', ')"},
+        {"statusFinanceiro", "GROUP_CONCAT(DISTINCT pf2.statusFinanceiro SEPARATOR ',')"},
+        {"pf2_idVenda", "GROUP_CONCAT(DISTINCT pf2.idVenda SEPARATOR ', ')"},
+        {"codFornecedor", "GROUP_CONCAT(DISTINCT pf2.codFornecedor SEPARATOR ', ')"},
+    };
+
+    // colunas que só existem via o fan-out cp2->pf2->ehc->e->n: ordenar por elas exige repetir esse
+    // join (e agrupar) já na subquery de corte — mais lento, aceitável só nesse clique explícito de
+    // cabeçalho (mesma lógica do Cliente/CPF-CNPJ em widgetnfesaida.cpp)
+    static const QSet<QString> colunasComFanOut = {"ordemCompra", "numeroNFe", "idNFe", "statusFinanceiro", "pf2_idVenda", "codFornecedor"};
+
+    const QStringList filtrosCopia = filtros;
+    const QString buscaCopia = busca;
+
+    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+      const QString sortExpr = exprPorCampo.value(sortColumn, "cp.dataPagamento");
+      const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
+
+      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> QString {
+        const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
+
+        const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"cp.idPagamento", order}};
+
+        QStringList capFiltros = filtrosCopia;
+        QString capHaving;
+
+        if (request.direction != SqlPaginatedModel::Direction::First) {
+          const QString keysetCond = SqlPaginatedModel::buildKeysetWhere(keys, request.cursorValues, forward);
+          if (precisaFanOut) { capHaving = keysetCond; } // keyset compara uma expressao agregada - so vale em HAVING
+          else { capFiltros << keysetCond; }
+        }
+
+        const QString capOrderBy = SqlPaginatedModel::buildOrderBy(keys, forward);
+
+        const QString capJoins = precisaFanOut ? " LEFT JOIN conta_a_pagar_has_idcompra cp2 ON cp.idPagamento = cp2.idPagamento"
+                                                  " LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON cp2.idCompra = pf2.idCompra"
+                                                  " LEFT JOIN estoque_has_compra ehc ON ehc.idPedido2 = pf2.idPedido2"
+                                                  " LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque"
+                                                  " LEFT JOIN nfe n ON n.idNFe = e.idNFe"
+                                                : "";
+        // FORCE INDEX: mesmo risco medido em NFe de o otimizador preferir um indice so de status sem
+        // filtro de data (ver db/add_index_nfe_tipo_status_utilizada_data.sql) - so aplica quando a
+        // subquery de corte nao precisa do fan-out (que ja força um plano de JOIN proprio)
+        const QString forceIndex = precisaFanOut ? "" : " FORCE INDEX (idx_conta_pagar_status_date_valor)";
+        const QString capGroupBy = precisaFanOut ? " GROUP BY cp.idPagamento" : "";
+        const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
+
+        const QString capSql = "SELECT cp.idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " + (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) +
+                               capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+
+        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
+
+        return "SELECT * FROM ("
+               "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataEmissao` AS `dataEmissao`, "
+               "`cp`.`dataPagamento` AS `dataPagamento`, `cp`.`dataRealizado` AS `dataRealizado`, `cp`.`idVenda` AS `idVenda`, "
+               "GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
+               "GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, "
+               "GROUP_CONCAT(DISTINCT `n`.`idNFe` SEPARATOR ', ') AS `idNFe`, "
+               "`cp`.`status` AS `status`, `cp`.`valor` AS `valor`, `cp`.`valorReal` AS `valorReal`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, "
+               "`cp`.`observacao` AS `observacao`, `cp`.`grupo` AS `grupo`, "
+               "GROUP_CONCAT(DISTINCT `pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, "
+               "GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda`, "
+               "GROUP_CONCAT(DISTINCT `pf2`.`codFornecedor` SEPARATOR ', ') AS `codFornecedor` "
+               "FROM (" +
+               capSql +
+               ") lim "
+               "JOIN conta_a_pagar_has_pagamento cp ON cp.idPagamento = lim.idPagamento "
+               "LEFT JOIN conta_a_pagar_has_idcompra cp2 ON cp.idPagamento = cp2.idPagamento "
+               "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON cp2.idCompra = pf2.idCompra "
+               "LEFT JOIN estoque_has_compra ehc ON ehc.idPedido2 = pf2.idPedido2 "
+               "LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque "
+               "LEFT JOIN nfe n ON n.idNFe = e.idNFe "
+               "GROUP BY cp.idPagamento"
+               ") x " +
+               buscaCopia + " ORDER BY " + exibicaoOrderBy;
+      };
+    };
+
+    model.reset(fieldNames, "idPagamento", ui->radioButtonPago->isChecked() ? "dataRealizado" : "dataPagamento", Qt::AscendingOrder, {}, factory);
   }
 
   if (tipo == Tipo::Receber) {
-    QStringList filtros;
+    QStringList filtros; // tocam só cr.* — entram na subquery de corte (paginação), antes do JOIN
     QString status;
 
     const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>(QRegularExpression("radioButton"));
@@ -293,53 +412,139 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR pf2.ordemRepresentacao LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%' OR cr.observacao LIKE '%" + text + "%')";
-    if (not text.isEmpty()) { filtros << busca; }
-
-    //-------------------------------------
-
     filtros << "cr.representacao = FALSE";
 
-    model.setQuery(Sql::contasReceber(filtros.join(" AND ")));
+    //------------------------------------- busca: "ordemRepresentacao" só existe via o fan-out
+    // venda->pf2 (1:N) — usa os apelidos da página já agregada/cortada (<=1000 linhas), igual ao Pagar
 
-    model.sort(ui->radioButtonRecebido->isChecked() ? "`cr`.`dataRealizado`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela`" : "`cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela`",
-               Qt::DescendingOrder);
+    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+    const QString busca = text.isEmpty() ? "" : "(idVenda LIKE '%" + text + "%' OR ordemRepresentacao LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
+
+    //------------------------------------- colunas, expressao SQL de cada uma (pra ORDER BY/keyset da paginacao)
+
+    static const QStringList fieldNames = {"idPagamento",   "idLoja",  "representacao", "contraparte", "dataEmissao",      "dataPagamento",
+                                            "dataRealizado", "idVenda", "ordemRepresentacao", "status", "valor",            "valorReal",
+                                            "tipo",          "parcela", "observacao",    "statusFinanceiro"};
+
+    static const QHash<QString, QString> exprPorCampo = {
+        {"idPagamento", "cr.idPagamento"},     {"idLoja", "cr.idLoja"},               {"representacao", "cr.representacao"}, {"contraparte", "cr.contraParte"},
+        {"dataEmissao", "cr.dataEmissao"},     {"dataPagamento", "cr.dataPagamento"}, {"dataRealizado", "cr.dataRealizado"}, {"idVenda", "cr.idVenda"},
+        {"status", "cr.status"},               {"valor", "cr.valor"},                 {"valorReal", "cr.valorReal"},        {"tipo", "cr.tipo"},
+        {"parcela", "cr.parcela"},             {"observacao", "cr.observacao"},
+        {"ordemRepresentacao", "GROUP_CONCAT(DISTINCT pf2.ordemRepresentacao)"},
+        {"statusFinanceiro", "v.statusFinanceiro"},
+    };
+
+    // "ordemRepresentacao" só existe via o fan-out venda->pf2 (1:N) — ordenar por ela exige repetir
+    // esse join e agrupar já na subquery de corte (mesma lógica do Pagar acima)
+    static const QSet<QString> colunasComFanOut = {"ordemRepresentacao"};
+    // "statusFinanceiro" só precisa do join simples até venda (1:1 via idVenda, sem fan-out) — mais
+    // lento que o caminho rápido mas sem precisar de GROUP BY/HAVING (mesma lógica do Cliente em Saída)
+    static const QSet<QString> colunasComJoinVenda = {"statusFinanceiro"};
+
+    // desempate fixo da ordem padrão da tela (idVenda/tipo/parcela) — preserva a ordem hoje observada
+    // (so `parcela` de fato desce, ver nota no início do arquivo de plano), independente da coluna
+    // escolhida como principal (inclusive por clique de cabeçalho)
+    static const QVector<SqlPaginatedModel::KeyExpr> extraKeysFixas = {{"cr.idVenda", Qt::AscendingOrder}, {"cr.tipo", Qt::AscendingOrder}, {"cr.parcela", Qt::DescendingOrder}};
+
+    const QStringList filtrosCopia = filtros;
+    const QString buscaCopia = busca;
+
+    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+      const QString sortExpr = exprPorCampo.value(sortColumn, "cr.dataPagamento");
+      const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
+      const bool precisaJoinVenda = precisaFanOut or colunasComJoinVenda.contains(sortColumn);
+
+      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> QString {
+        const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
+
+        QVector<SqlPaginatedModel::KeyExpr> keys;
+        keys << SqlPaginatedModel::KeyExpr{sortExpr, order};
+        keys += extraKeysFixas;
+        keys << SqlPaginatedModel::KeyExpr{"cr.idPagamento", order};
+
+        QStringList capFiltros = filtrosCopia;
+        QString capHaving;
+
+        if (request.direction != SqlPaginatedModel::Direction::First) {
+          const QString keysetCond = SqlPaginatedModel::buildKeysetWhere(keys, request.cursorValues, forward);
+          if (precisaFanOut) { capHaving = keysetCond; } // keyset compara uma expressao agregada - so vale em HAVING
+          else { capFiltros << keysetCond; }
+        }
+
+        const QString capOrderBy = SqlPaginatedModel::buildOrderBy(keys, forward);
+
+        const QString capJoinVenda = precisaJoinVenda ? " LEFT JOIN venda v ON cr.idVenda = v.idVenda" : "";
+        const QString capJoinPf2 = precisaFanOut ? " LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda" : "";
+        // FORCE INDEX: mesmo risco medido em NFe (ver db/add_index_nfe_tipo_status_utilizada_data.sql)
+        // - so aplica quando a subquery de corte nao precisa de nenhum join extra
+        const QString forceIndex = precisaJoinVenda ? "" : " FORCE INDEX (idx_conta_receber_status_date_rep)";
+        const QString capGroupBy = precisaFanOut ? " GROUP BY cr.idPagamento" : "";
+        const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
+
+        const QString capSql = "SELECT cr.idPagamento FROM conta_a_receber_has_pagamento cr" + forceIndex + capJoinVenda + capJoinPf2 + " WHERE " +
+                               (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+
+        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
+
+        // Envolto em "SELECT * FROM (...) x": a busca referencia nomes crus (idVenda, ordemRepresentacao)
+        // que tambem existem como coluna real de pf2 (pf2.idVenda, pf2.ordemRepresentacao) - direto num
+        // HAVING dessa mesma query isso e ambiguo pro MySQL; via a tabela derivada x (que so expoe os
+        // apelidos já resolvidos) a referencia deixa de ser ambigua. Mesmo mecanismo usado no Pagar acima.
+        return "SELECT * FROM ("
+               "SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, "
+               "`cr`.`dataEmissao` AS `dataEmissao`, `cr`.`dataPagamento` AS `dataPagamento`, `cr`.`dataRealizado` AS `dataRealizado`, `cr`.`idVenda` AS `idVenda`, "
+               "GROUP_CONCAT(DISTINCT `pf2`.`ordemRepresentacao`) AS `ordemRepresentacao`, "
+               "`cr`.`status` AS `status`, `cr`.`valor` AS `valor`, `cr`.`valorReal` AS `valorReal`, `cr`.`tipo` AS `tipo`, `cr`.`parcela` AS `parcela`, "
+               "`cr`.`observacao` AS `observacao`, `v`.`statusFinanceiro` AS `statusFinanceiro` "
+               "FROM (" +
+               capSql +
+               ") lim "
+               "JOIN conta_a_receber_has_pagamento cr ON cr.idPagamento = lim.idPagamento "
+               "LEFT JOIN venda v ON cr.idVenda = v.idVenda "
+               "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda "
+               "GROUP BY cr.idPagamento"
+               ") x " +
+               (buscaCopia.isEmpty() ? "" : "WHERE " + buscaCopia + " ") + "ORDER BY " + exibicaoOrderBy;
+      };
+    };
+
+    model.reset(fieldNames, "idPagamento", ui->radioButtonRecebido->isChecked() ? "dataRealizado" : "dataPagamento", Qt::AscendingOrder, {"idVenda", "tipo", "parcela"}, factory);
   }
 
-  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + model.lastError().text(), this); }
-
   if (tipo == Tipo::Receber) {
-    model.setHeaderData("idVenda", "Venda");
-    model.setHeaderData("ordemRepresentacao", "O.C. Rep.");
+    model.setHeaderLabel("idVenda", "Venda");
+    model.setHeaderLabel("ordemRepresentacao", "O.C. Rep.");
   }
 
   if (tipo == Tipo::Pagar) {
-    model.setHeaderData("idVenda", "Venda");
-    model.setHeaderData("pf2_idVenda", "Venda");
-    model.setHeaderData("ordemCompra", "O.C.");
-    model.setHeaderData("numeroNFe", "NF-e");
-    model.setHeaderData("codFornecedor", "Cód. Forn.");
+    model.setHeaderLabel("idVenda", "Venda");
+    model.setHeaderLabel("pf2_idVenda", "Venda");
+    model.setHeaderLabel("ordemCompra", "O.C.");
+    model.setHeaderLabel("numeroNFe", "NF-e");
+    model.setHeaderLabel("codFornecedor", "Cód. Forn.");
   }
 
-  model.setHeaderData("idPagamento", "Id");
-  model.setHeaderData("contraParte", "Contraparte");
-  model.setHeaderData("dataEmissao", "Emissão");
-  model.setHeaderData("dataPagamento", "Vencimento");
-  model.setHeaderData("dataRealizado", "Realizado");
-  model.setHeaderData("valor", "R$");
-  model.setHeaderData("valorReal", "R$ Real");
-  model.setHeaderData("tipo", "Tipo");
-  model.setHeaderData("parcela", "Parcela");
-  model.setHeaderData("observacao", "Obs.");
-  model.setHeaderData("status", "Status");
-  model.setHeaderData("statusFinanceiro", "Status Financeiro");
+  model.setHeaderLabel("idPagamento", "Id");
+  model.setHeaderLabel("contraparte", "Contraparte"); // fieldNames usa "contraparte" (minusculo, casado com o alias SQL) - setHeaderLabel é case-sensitive
+  model.setHeaderLabel("dataEmissao", "Emissão");
+  model.setHeaderLabel("dataPagamento", "Vencimento");
+  model.setHeaderLabel("dataRealizado", "Realizado");
+  model.setHeaderLabel("valor", "R$");
+  model.setHeaderLabel("valorReal", "R$ Real");
+  model.setHeaderLabel("tipo", "Tipo");
+  model.setHeaderLabel("parcela", "Parcela");
+  model.setHeaderLabel("observacao", "Obs.");
+  model.setHeaderLabel("status", "Status");
+  model.setHeaderLabel("statusFinanceiro", "Status Financeiro");
 
   ui->table->setModel(&model);
   ui->table->setStoredSelection(true);
 
-  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
+  // "R$"/"R$ Real" (não "valor"/"valorReal"): o model paginado não é QSqlQueryModel, então TableView
+  // resolve a coluna via headerData() (o rótulo renomeado acima), não via record() (nome cru da coluna SQL)
+  ui->table->setItemDelegateForColumn("R$", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("R$ Real", new ReaisDelegate(this));
 
   if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
 

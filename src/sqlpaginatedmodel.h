@@ -7,8 +7,8 @@
 #include <functional>
 
 // Model de janela deslizante (sliding window): carrega paginas de ~1000 linhas por vez, via
-// paginacao por keyset (cursor = valor da coluna de ordenacao + idNFe como desempate, NULL-safe -
-// ver src/sqlpaginatedmodel.cpp), descartando o pedaco mais antigo quando ultrapassa ~3000 linhas
+// paginacao por keyset (cursor = valores das colunas de ordenacao/desempate, NULL-safe - ver
+// src/sqlpaginatedmodel.cpp), descartando o pedaco mais antigo quando ultrapassa ~3000 linhas
 // carregadas. Ao contrario de SqlQueryModel/SqlTableModel, nao envolve QSqlQueryModel (que nao da
 // suporte a inserir/remover linhas arbitrariamente) - por isso TableView cai no fallback generico
 // de columnIndex() baseado em headerData() para esse model (nao em record()).
@@ -22,10 +22,19 @@ class SqlPaginatedModel final : public QAbstractTableModel {
 public:
   enum class Direction { First, Next, Previous };
 
-  // Pedido de uma pagina: cursor (invalido = 1a pagina) + direcao.
+  // Uma chave de ordenacao/keyset: expressao SQL + direcao explicita. Permite misturar ASC/DESC
+  // entre colunas de um desempate composto (ex.: Financeiro Receber ordena parcela DESC dentro de
+  // colunas ASC).
+  struct KeyExpr {
+    QString expr;
+    Qt::SortOrder order = Qt::AscendingOrder;
+  };
+
+  // Pedido de uma pagina: cursor (vazio = 1a pagina) + direcao. cursorValues tem uma entrada por
+  // chave de keyset, na mesma ordem/tamanho sempre usada pelo model: {coluna de ordenacao} +
+  // extraKeyFieldNames (de reset()) + {idFieldName}.
   struct PageRequest {
-    QVariant cursorValue;
-    QVariant cursorId;
+    QVector<QVariant> cursorValues;
     Direction direction = Direction::First;
   };
 
@@ -41,16 +50,21 @@ public:
 
   explicit SqlPaginatedModel(QObject *parent = nullptr);
 
-  // Monta o fragmento WHERE (NULL-safe) pra continuar a paginacao por keyset depois do cursor,
-  // na direcao pedida. valueExpr/idExpr: expressoes SQL da coluna de ordenacao e do desempate
-  // (ex.: "n.dataHoraEmissao", "n.idNFe"). cursorValue/cursorId invalidos = sem cursor (1a
-  // pagina) - devolve "1" (sempre verdadeiro, sem filtro de continuacao). Ordena sempre com nulos
-  // por ultimo, independente de order ser ASC ou DESC. Uso: o widget monta o SQL da pagina
-  // encaixando isso no WHERE, junto dos outros filtros (status/busca/etc.).
-  static auto buildKeysetWhere(const QString &valueExpr, const QString &idExpr, const QVariant &cursorValue, const QVariant &cursorId, Qt::SortOrder order, bool forward) -> QString;
+  // Monta o fragmento WHERE (NULL-safe) pra continuar a paginacao por keyset depois do cursor, na
+  // direcao pedida, para um desempate composto de N chaves (ex.: {dataPagamento, idVenda, tipo,
+  // parcela, idPagamento}). keys: chaves em ordem de prioridade, cada uma com sua propria direcao
+  // (ex.: {"n.dataHoraEmissao", Asc}). A ULTIMA chave e tratada como NOT NULL (sem branch de nulo)
+  // - deve ser sempre o id/tiebreaker unico da tabela (ex.: idNFe/idPagamento), nunca uma coluna
+  // anulavel. Todas as chaves anteriores sao tratadas como anulaveis (nulos sempre por ultimo,
+  // independente de order ser ASC ou DESC), mesmo que na pratica nunca sejam NULL - inofensivo.
+  // cursorValues vazio ou de tamanho diferente de keys = sem cursor (1a pagina) - devolve "1"
+  // (sempre verdadeiro, sem filtro de continuacao). Uso: o widget monta o SQL da pagina encaixando
+  // isso no WHERE, junto dos outros filtros (status/busca/etc.).
+  static auto buildKeysetWhere(const QVector<KeyExpr> &keys, const QVector<QVariant> &cursorValues, bool forward) -> QString;
 
-  // Monta a expressao ORDER BY correspondente (mesma convencao de nulos por ultimo).
-  static auto buildOrderBy(const QString &valueExpr, const QString &idExpr, Qt::SortOrder order, bool forward) -> QString;
+  // Monta a expressao ORDER BY correspondente (mesma convencao de nulos por ultimo, exceto a
+  // ultima chave, assumida NOT NULL).
+  static auto buildOrderBy(const QVector<KeyExpr> &keys, bool forward) -> QString;
 
   // Converte um QVariant num literal SQL seguro (strings escapadas via qApp->sanitizeSQL, NULL,
   // datas/números formatados). Usado internamente e pelo widget ao montar os fragmentos acima.
@@ -58,7 +72,12 @@ public:
 
   // Reinicia a paginacao do zero (mudanca de filtro e/ou ordenacao). fieldNames: nomes das
   // colunas na ordem do SELECT de cada pagina (usado por data(row,QString) e headerData()).
-  auto reset(const QStringList &fieldNames, const QString &sortColumn, Qt::SortOrder order, const QueryBuilderFactory &factory) -> void;
+  // idFieldName: campo (dentre fieldNames) usado como desempate final/unico da paginacao por
+  // keyset - deve ser NOT NULL (ex.: "idNFe", "idPagamento"). extraKeyFieldNames: desempates fixos
+  // adicionais aplicados entre a coluna de ordenacao (que pode mudar por clique de cabecalho, via
+  // sort()) e idFieldName - vazio na maioria dos casos; usado quando a ordem padrão da tela
+  // precisa preservar um desempate composto (ex.: Financeiro Receber: idVenda, tipo, parcela).
+  auto reset(const QStringList &fieldNames, const QString &idFieldName, const QString &sortColumn, Qt::SortOrder order, const QStringList &extraKeyFieldNames, const QueryBuilderFactory &factory) -> void;
 
   auto setHeaderLabel(const QString &fieldName, const QString &label) -> void;
 
@@ -91,21 +110,23 @@ private:
 
   auto loadFirstPage() -> void;
   auto runQuery(const QString &sql) -> QVector<QVector<QVariant>>;
+  auto keyFieldNames() const -> QStringList; // {sortColumn_} + extraKeyFieldNames_ + {idFieldName_}
+  auto edgeKeyValues(const QVector<QVariant> &row) const -> QVector<QVariant>;
   auto updateEdgeKeys() -> void;
   auto emitMoreAvailableIfChanged() -> void;
 
   QStringList fieldNames_;
   QHash<QString, QString> headerLabels_;
+  QString idFieldName_;
+  QStringList extraKeyFieldNames_;
   QString sortColumn_;
   Qt::SortOrder sortOrder_ = Qt::DescendingOrder;
   QueryBuilderFactory factory_;
   PageQueryBuilder builder_;
 
   QVector<QVector<QVariant>> rows_;
-  QVariant firstKeyValue_;
-  QVariant firstKeyId_;
-  QVariant lastKeyValue_;
-  QVariant lastKeyId_;
+  QVector<QVariant> firstKeyValues_;
+  QVector<QVariant> lastKeyValues_;
   bool hasMoreAfter_ = false;
   bool hasMoreBefore_ = false;
   bool lastMoreAvailable_ = false;

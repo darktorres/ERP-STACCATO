@@ -188,12 +188,12 @@ QString Sql::view_a_receber_vencidos() {
            "     SUM(SUM(`cr`.`valor`)) OVER (ORDER BY dataPagamento, representacao, status) AS `Acumulado` "
            " FROM "
            "     `conta_a_receber_has_pagamento` `cr` "
-           " GROUP BY "
-           "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
-           " HAVING "
+           " WHERE "
            "     `cr`.`dataPagamento` < CURDATE() "
            "     AND `cr`.`representacao` = 0 "
-           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO')";
+           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO') "
+           " GROUP BY "
+           "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status`";
 }
 
 QString Sql::view_a_receber_vencer() {
@@ -226,12 +226,12 @@ QString Sql::view_a_receber_vencer() {
            "     SUM(SUM(`cr`.`valor`)) OVER (ORDER BY `cr`.dataPagamento, `cr`.representacao, `cr`.status) AS `Acumulado` "
            " FROM "
            "     `conta_a_receber_has_pagamento` `cr` "
-           " GROUP BY "
-           "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status` "
-           " HAVING "
+           " WHERE "
            "     `cr`.`dataPagamento` >= CURDATE() "
            "     AND `cr`.`representacao` = 0 "
-           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO')";
+           "     AND cr.status IN ('PENDENTE' , 'CONFERIDO') "
+           " GROUP BY "
+           "     `cr`.`dataPagamento` , `cr`.`representacao` , `cr`.`status`";
 }
 
 QString Sql::view_a_pagar_vencidos() {

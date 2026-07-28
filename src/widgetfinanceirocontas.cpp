@@ -304,7 +304,7 @@ void WidgetFinanceiroContas::montaFiltro() {
       const QString sortExpr = exprPorCampo.value(sortColumn, "cp.dataPagamento");
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> QString {
+      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"cp.idPagamento", order}};
@@ -333,12 +333,15 @@ void WidgetFinanceiroContas::montaFiltro() {
         const QString capGroupBy = precisaFanOut ? " GROUP BY cp.idPagamento" : "";
         const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
 
-        const QString capSql = "SELECT cp.idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " + (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) +
-                               capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+        // SELECT traz tambem a coluna de ordenacao (alem do idPagamento): usado como rawPeekSql
+        // pelo model pra avancar o cursor quando a busca (aplicada so depois do JOIN/GROUP BY, no
+        // wrapper "x" abaixo) filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
+        const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, cp.idPagamento AS idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " +
+                               (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
         const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
-        return "SELECT * FROM ("
+        const QString displaySql = "SELECT * FROM ("
                "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataEmissao` AS `dataEmissao`, "
                "`cp`.`dataPagamento` AS `dataPagamento`, `cp`.`dataRealizado` AS `dataRealizado`, `cp`.`idVenda` AS `idVenda`, "
                "GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
@@ -361,6 +364,8 @@ void WidgetFinanceiroContas::montaFiltro() {
                "GROUP BY cp.idPagamento"
                ") x " +
                buscaCopia + " ORDER BY " + exibicaoOrderBy;
+
+        return {displaySql, capSql};
       };
     };
 
@@ -455,7 +460,7 @@ void WidgetFinanceiroContas::montaFiltro() {
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
       const bool precisaJoinVenda = precisaFanOut or colunasComJoinVenda.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> QString {
+      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         QVector<SqlPaginatedModel::KeyExpr> keys;
@@ -482,8 +487,13 @@ void WidgetFinanceiroContas::montaFiltro() {
         const QString capGroupBy = precisaFanOut ? " GROUP BY cr.idPagamento" : "";
         const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
 
-        const QString capSql = "SELECT cr.idPagamento FROM conta_a_receber_has_pagamento cr" + forceIndex + capJoinVenda + capJoinPf2 + " WHERE " +
-                               (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+        // SELECT traz tambem as colunas de ordenacao/desempate (alem do idPagamento), na mesma
+        // ordem de keyFieldNames() (sortColumn + idVenda/tipo/parcela + idPagamento): usado como
+        // rawPeekSql pelo model pra avancar o cursor quando a busca (aplicada so no wrapper "x"
+        // abaixo) filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
+        const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, cr.idVenda AS idVenda, cr.tipo AS tipo, cr.parcela AS parcela, cr.idPagamento AS idPagamento FROM conta_a_receber_has_pagamento cr" +
+                               forceIndex + capJoinVenda + capJoinPf2 + " WHERE " + (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy +
+                               " LIMIT " + QString::number(1000);
 
         const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
@@ -491,7 +501,7 @@ void WidgetFinanceiroContas::montaFiltro() {
         // que tambem existem como coluna real de pf2 (pf2.idVenda, pf2.ordemRepresentacao) - direto num
         // HAVING dessa mesma query isso e ambiguo pro MySQL; via a tabela derivada x (que so expoe os
         // apelidos já resolvidos) a referencia deixa de ser ambigua. Mesmo mecanismo usado no Pagar acima.
-        return "SELECT * FROM ("
+        const QString displaySql = "SELECT * FROM ("
                "SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, "
                "`cr`.`dataEmissao` AS `dataEmissao`, `cr`.`dataPagamento` AS `dataPagamento`, `cr`.`dataRealizado` AS `dataRealizado`, `cr`.`idVenda` AS `idVenda`, "
                "GROUP_CONCAT(DISTINCT `pf2`.`ordemRepresentacao`) AS `ordemRepresentacao`, "
@@ -506,6 +516,8 @@ void WidgetFinanceiroContas::montaFiltro() {
                "GROUP BY cr.idPagamento"
                ") x " +
                (buscaCopia.isEmpty() ? "" : "WHERE " + buscaCopia + " ") + "ORDER BY " + exibicaoOrderBy;
+
+        return {displaySql, capSql};
       };
     };
 

@@ -292,7 +292,7 @@ void WidgetNfeEntrada::montaFiltro() {
   const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosNFeCopia, filtrosResumoCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
     const QString sortExpr = exprPorCampo.value(sortColumn, "n.dataHoraEmissao");
 
-    return [filtrosNFeCopia, filtrosResumoCopia, sortExpr, order](const SqlPaginatedModel::PageRequest &request) -> QString {
+    return [filtrosNFeCopia, filtrosResumoCopia, sortExpr, order](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
       const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
       QStringList capFiltros;
@@ -308,12 +308,15 @@ void WidgetNfeEntrada::montaFiltro() {
       // FORCE INDEX: sem isso o otimizador as vezes escolhe um indice so de status (nao-covering,
       // bookmark lookup linha a linha) quando ha filtro de status/utilizada sem filtro de data -
       // medido ~2-4s contra ~50-170ms com o indice forcado (ver db/add_index_nfe_tipo_status_utilizada_data.sql)
-      const QString capSql = "SELECT n.idNFe FROM nfe n FORCE INDEX (idx_nfe_tipo_status_utilizada_data) LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe WHERE " + capFiltros.join(" AND ") +
-                             " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+      // SELECT traz tambem a coluna de ordenacao (alem do idNFe): usado como rawPeekSql pelo model
+      // pra avancar o cursor quando a busca (filtrosResumoCopia, aplicado so depois do JOIN) filtra
+      // uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
+      const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, n.idNFe AS idNFe FROM nfe n FORCE INDEX (idx_nfe_tipo_status_utilizada_data) LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe WHERE " +
+                             capFiltros.join(" AND ") + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
       const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
-      return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
+      const QString displaySql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
              "r.fornecedor AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
              "r.recebidoPor AS `Recebido Por`, r.dataRealReceb AS `Data Receb`, "
              "r.gare AS GARE, r.garePagoEm AS `GARE Pago Em`, "
@@ -327,6 +330,8 @@ void WidgetNfeEntrada::montaFiltro() {
              "LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe "
              "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" +
              (filtrosResumoCopia.isEmpty() ? "" : " WHERE " + filtrosResumoCopia.join(" AND ")) + " ORDER BY " + exibicaoOrderBy;
+
+      return {displaySql, capSql};
     };
   };
 

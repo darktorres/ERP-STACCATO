@@ -242,7 +242,7 @@ void WidgetNfeSaida::montaFiltro() {
     const bool precisaJoinCliente = colunasComJoinCliente.contains(sortColumn);
     const bool precisaJoinFollowup = colunasComJoinFollowup.contains(sortColumn);
 
-    return [filtrosPreCopia, filtrosPosCopia, sortExpr, order, precisaJoinCliente, precisaJoinFollowup](const SqlPaginatedModel::PageRequest &request) -> QString {
+    return [filtrosPreCopia, filtrosPosCopia, sortExpr, order, precisaJoinCliente, precisaJoinFollowup](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
       const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
       QStringList capFiltros;
@@ -264,12 +264,15 @@ void WidgetNfeSaida::montaFiltro() {
       // Cliente/CPF-CNPJ precisa do indice de idVenda (ja validado antes, ver add_index_nfe_tipo_idvenda.sql).
       const QString forceIndex = precisaJoinCliente ? " FORCE INDEX (idx_nfe_tipo_idvenda)" : " FORCE INDEX (idx_nfe_tipo_status_utilizada_data)";
 
-      const QString capSql = "SELECT n.idNFe FROM nfe n" + forceIndex + capJoinFollowup + capJoinCliente + " WHERE " + capFiltros.join(" AND ") + " ORDER BY " + capOrderBy + " LIMIT " +
-                             QString::number(1000);
+      // SELECT traz tambem a coluna de ordenacao (alem do idNFe): usado como rawPeekSql pelo model
+      // pra avancar o cursor quando a busca (filtrosPosCopia, aplicado so depois do JOIN/GROUP BY)
+      // filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
+      const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, n.idNFe AS idNFe FROM nfe n" + forceIndex + capJoinFollowup + capJoinCliente + " WHERE " + capFiltros.join(" AND ") +
+                             " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
       const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
-      return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
+      const QString displaySql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
              "n.idVenda AS Venda, IF(c.pfpj = 'PF', c.cpf, c.cnpj) AS `CPF/CNPJ`, c.nome_razao AS Cliente, "
              "n.valor AS valor, n.dataHoraEmissao AS dataHoraEmissao, nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
              "FROM (" +
@@ -281,6 +284,8 @@ void WidgetNfeSaida::montaFiltro() {
              "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup) "
              "GROUP BY n.idNFe" +
              (filtrosPosCopia.isEmpty() ? "" : " HAVING " + filtrosPosCopia.join(" AND ")) + " ORDER BY " + exibicaoOrderBy;
+
+      return {displaySql, capSql};
     };
   };
 

@@ -70,15 +70,39 @@ void SqlPaginatedModel::loadFirstPage() {
   QElapsedTimer timer;
   timer.start();
 
+  QVector<QVariant> cursor; // vazio = sem cursor (1a tentativa)
+  Direction direction = Direction::First;
+  QVector<QVector<QVariant>> displayRows;
+  int peeks = 0;
+
+  // Se a busca filtrar a 1a janela inteira, espia (sem busca/joins) e avanca o cursor pra tentar a
+  // proxima - repete ate achar linhas ou esgotar o corte cru. Sem isso a tabela ficaria vazia (e sem
+  // scrollbar, ou seja sem chance do usuario "pedir mais") sempre que o termo buscado nao estiver na
+  // 1a janela de ~1000 linhas (ex.: filtro "Todos"/sem data, termo real mas antigo/recente demais).
+  while (true) {
+    PageRequest request;
+    request.cursorValues = cursor;
+    request.direction = direction;
+
+    const PageSql sql = builder_(request);
+
+    displayRows = runQuery(sql.displaySql);
+
+    if (not displayRows.isEmpty()) { break; }
+    if (++peeks >= MAX_PEEK_LOOPS_FIRST) { break; } // salvaguarda - nao deveria disparar na pratica
+
+    const auto peekRows = runQuery(sql.rawPeekSql);
+
+    if (peekRows.size() < PAGE_SIZE) { break; } // corte cru esgotou - fim genuino do historico
+
+    cursor = peekRows.last();
+    direction = Direction::Next;
+  }
+
   beginResetModel();
 
-  rows_.clear();
+  rows_ = displayRows;
   hasMoreBefore_ = false;
-
-  PageRequest request;
-  request.direction = Direction::First;
-
-  rows_ = runQuery(builder_(request));
 
   endResetModel();
 
@@ -88,7 +112,7 @@ void SqlPaginatedModel::loadFirstPage() {
 
   emitMoreAvailableIfChanged();
 
-  qDebug() << "[SqlPaginatedModel] loadFirstPage: total" << timer.elapsed() << "ms, rows=" << rows_.size();
+  qDebug() << "[SqlPaginatedModel] loadFirstPage: total" << timer.elapsed() << "ms, rows=" << rows_.size() << "peeks=" << peeks;
 }
 
 void SqlPaginatedModel::tryLoadNext() {
@@ -97,18 +121,44 @@ void SqlPaginatedModel::tryLoadNext() {
   QElapsedTimer timer;
   timer.start();
 
-  PageRequest request;
-  request.cursorValues = lastKeyValues_;
-  request.direction = Direction::Next;
+  QVector<QVariant> cursor = lastKeyValues_;
+  QVector<QVector<QVariant>> newRows;
+  int peeks = 0;
+  bool exhausted = false;
 
-  const auto newRows = runQuery(builder_(request));
+  while (true) {
+    PageRequest request;
+    request.cursorValues = cursor;
+    request.direction = Direction::Next;
+
+    const PageSql sql = builder_(request);
+
+    newRows = runQuery(sql.displaySql);
+
+    if (not newRows.isEmpty()) { break; }
+
+    ++peeks;
+
+    const auto peekRows = runQuery(sql.rawPeekSql);
+
+    if (peekRows.size() < PAGE_SIZE) {
+      exhausted = true;
+      if (not peekRows.isEmpty()) { cursor = peekRows.last(); }
+      break;
+    }
+
+    cursor = peekRows.last();
+
+    if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
+  }
 
   const qint64 afterQuery = timer.elapsed();
 
   if (newRows.isEmpty()) {
-    hasMoreAfter_ = false;
+    lastKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
+    hasMoreAfter_ = not exhausted;
     emitMoreAvailableIfChanged();
-    qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, 0 rows (fim do historico)";
+    qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, 0 rows apos" << peeks << "peeks" << (exhausted ? "(fim do historico)" : "(limite de peeks desta rolagem)");
     return;
   }
 
@@ -139,7 +189,7 @@ void SqlPaginatedModel::tryLoadNext() {
   emitMoreAvailableIfChanged();
 
   qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
-           << "totalLinhas=" << rows_.size();
+           << "peeks=" << peeks << "totalLinhas=" << rows_.size();
 }
 
 void SqlPaginatedModel::tryLoadPrevious() {
@@ -148,21 +198,48 @@ void SqlPaginatedModel::tryLoadPrevious() {
   QElapsedTimer timer;
   timer.start();
 
-  PageRequest request;
-  request.cursorValues = firstKeyValues_;
-  request.direction = Direction::Previous;
+  QVector<QVariant> cursor = firstKeyValues_;
+  QVector<QVector<QVariant>> newRows;
+  int peeks = 0;
+  bool exhausted = false;
 
-  auto newRows = runQuery(builder_(request)); // vem do mais perto do cursor pro mais longe
+  while (true) {
+    PageRequest request;
+    request.cursorValues = cursor;
+    request.direction = Direction::Previous;
+
+    const PageSql sql = builder_(request);
+
+    newRows = runQuery(sql.displaySql); // ja vem na ordem de exibicao (exibicaoOrderBy e sempre forward=true no widget)
+
+    if (not newRows.isEmpty()) { break; }
+
+    ++peeks;
+
+    const auto peekRows = runQuery(sql.rawPeekSql);
+
+    if (peekRows.size() < PAGE_SIZE) {
+      exhausted = true;
+      if (not peekRows.isEmpty()) { cursor = peekRows.last(); }
+      break;
+    }
+
+    // capSql (rawPeekSql) sempre ordena do mais perto do cursor pro mais longe, tanto pra Next
+    // quanto pra Previous (buildOrderBy com forward=false so inverte a direcao efetiva, nao troca
+    // "perto/longe" de lado) - por isso .last() continua correto aqui tambem.
+    cursor = peekRows.last();
+
+    if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
+  }
 
   const qint64 afterQuery = timer.elapsed();
 
   if (newRows.isEmpty()) {
-    hasMoreBefore_ = false;
-    qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, 0 rows (inicio do historico)";
+    firstKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
+    hasMoreBefore_ = not exhausted;
+    qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, 0 rows apos" << peeks << "peeks" << (exhausted ? "(inicio do historico)" : "(limite de peeks desta rolagem)");
     return;
   }
-
-  std::reverse(newRows.begin(), newRows.end()); // restaura a ordem de exibicao antes de inserir no topo
 
   beginInsertRows(QModelIndex(), 0, newRows.size() - 1);
   rows_ = newRows + rows_;
@@ -188,7 +265,7 @@ void SqlPaginatedModel::tryLoadPrevious() {
   }
 
   qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
-           << "totalLinhas=" << rows_.size();
+           << "peeks=" << peeks << "totalLinhas=" << rows_.size();
 }
 
 QStringList SqlPaginatedModel::keyFieldNames() const {

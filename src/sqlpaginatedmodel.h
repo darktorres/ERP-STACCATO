@@ -38,9 +38,20 @@ public:
     Direction direction = Direction::First;
   };
 
+  // SQL de uma pagina: displaySql e a query completa de exibicao (joins + busca aplicada, como
+  // antes). rawPeekSql e a subquery de corte "crua" sozinha (sem busca, sem os joins de exibicao),
+  // com o SELECT estendido para trazer as colunas de keyset (coluna de ordenacao + extraKeys +
+  // idField, nessa ordem - mesma ordem de keyFieldNames()) em vez de so o id. Normalmente e o
+  // "capSql" que o widget ja monta internamente, devolvido tal e qual. Usado pelo model pra
+  // continuar avançando o cursor quando a busca filtra uma pagina inteira (ver tryLoadNext()).
+  struct PageSql {
+    QString displaySql;
+    QString rawPeekSql;
+  };
+
   // Monta o SQL completo de uma pagina dado o pedido. Implementado pelo widget (reaproveita a
   // logica de filtros/joins que ele ja tem).
-  using PageQueryBuilder = std::function<QString(const PageRequest &request)>;
+  using PageQueryBuilder = std::function<PageSql(const PageRequest &request)>;
 
   // Dado o nome da coluna de ordenacao (um de fieldNames) e a ordem, devolve o construtor de
   // pagina pra essa combinacao especifica (permite ao widget mudar quais tabelas o JOIN de corte
@@ -107,6 +118,13 @@ signals:
 private:
   static constexpr int PAGE_SIZE = 1000;
   static constexpr int MAX_ROWS = 3 * PAGE_SIZE;
+  // Quando a busca filtra uma janela inteira, o model "espia" (rawPeekSql, sem busca/joins) e
+  // avanca o cursor pra tentar a proxima janela, repetindo ate achar linhas ou esgotar o cru. Limite
+  // por chamada de tryLoadNext/tryLoadPrevious (rolagem) - se estourar, o cursor fica avancado e a
+  // proxima rolagem continua dali (nao reinicia). Bem maior em loadFirstPage() pois lá, se parar sem
+  // achar nada, a tabela fica sem linha nenhuma (sem scrollbar) e o usuario nao tem como pedir mais.
+  static constexpr int MAX_PEEK_LOOPS_SCROLL = 50;
+  static constexpr int MAX_PEEK_LOOPS_FIRST = 10000;
 
   auto loadFirstPage() -> void;
   auto runQuery(const QString &sql) -> QVector<QVector<QVariant>>;

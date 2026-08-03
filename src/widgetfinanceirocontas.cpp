@@ -85,7 +85,9 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->table->verticalScrollBar(), &QScrollBar::valueChanged, this, &WidgetFinanceiroContas::onTableScrolled, connectionType);
   connect(ui->tableVencer, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencer_doubleClicked, connectionType);
   connect(ui->tableVencidos, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencidos_doubleClicked, connectionType);
-  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetFinanceiroContas::somarSelecao, connectionType);
+  // ui->table->selectionModel() so existe depois do 1o ui->table->setModel(&model), que so acontece
+  // dentro de montaFiltro() (chamado depois de setConnections()) - conectar aqui seria conectar a
+  // um sender nulo. Feito logo apos o setModel, em montaFiltro().
 }
 
 void WidgetFinanceiroContas::onTableScrolled(const int value) {
@@ -561,6 +563,9 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderLabel("statusFinanceiro", "Status Financeiro");
 
   ui->table->setModel(&model);
+  // Qt::UniqueConnection: montaFiltro() roda a cada mudanca de filtro/ordenacao - setModel(&model) com
+  // o mesmo ponteiro so recria o selectionModel na 1a vez, entao isso reconecta sem duplicar
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetFinanceiroContas::somarSelecao, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
   ui->table->setStoredSelection(true);
 
   // "R$"/"R$ Real" (não "valor"/"valorReal"): o model paginado não é QSqlQueryModel, então TableView

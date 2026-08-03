@@ -87,6 +87,10 @@ void CadastroNCM::verifyFields() {
     if (ncm.length() != 8) { throw RuntimeError("NCM deve ter 8 dígitos!", this); }
 
     if (not cest.isEmpty() and cest.length() != 7) { throw RuntimeError("CEST deve ser vazio ou ter 7 dígitos!"); }
+
+    if (model.data(row, "cClassTribIBS").toString().isEmpty()) { throw RuntimeError("NCM " + ncm + ": Classificação Tributária IBS é obrigatória!", this); }
+
+    if (model.data(row, "cClassTribCBS").toString().isEmpty()) { throw RuntimeError("NCM " + ncm + ": Classificação Tributária CBS é obrigatória!", this); }
   }
 }
 
@@ -115,8 +119,6 @@ void CadastroNCM::on_pushButtonAdicionar_clicked() {
   model.setData(row, "aliq", 0.);
   model.setData(row, "st", 1); // default: sujeito a ST
   // Reforma Tributária 2025 - IBS/CBS/IS
-  model.setData(row, "cClassTribIBS", "000001"); // default: tributação integral
-  model.setData(row, "cClassTribCBS", "000001"); // default: tributação integral
   model.setData(row, "sujeitoIS", 0); // default: não sujeito a IS
   model.setData(row, "pIS", 0.);  // ad valorem rate
 

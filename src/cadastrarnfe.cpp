@@ -2403,8 +2403,13 @@ void CadastrarNFe::preencherImpostos() {
   if (tipo == Tipo::Entrada) {
     // usar mesmos dados da NF-e de saida
 
+    const int fieldIndexCstIBS = modelProduto.fieldIndex("cstIBS");
+
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
-      for (int col = 0; col < modelProduto.columnCount(); ++col) {
+      // Limpa só os campos do sistema tributário antigo (até vCOFINS); os campos de
+      // IBS/CBS/IS (a partir de cstIBS) têm sua própria lógica de inicialização abaixo
+      // e não podem ser zerados aqui, senão o auto-populate nunca detecta "ainda não calculado".
+      for (int col = 0; col < fieldIndexCstIBS; ++col) {
         if (modelProduto.data(row, col).isNull()) {
           modelProduto.setData(row, col, 0); // limpar campos dos imposto
         }
@@ -2477,11 +2482,8 @@ void CadastrarNFe::preencherImpostos() {
       // =====================================================================
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
       // =====================================================================
-      // Check if product has valid new tax data (not just zeros from null conversion)
-      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
-      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
-      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
-      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+      const bool temIBS = !modelProduto.data(row, "cstIBS").toString().isEmpty();
+      const bool temCBS = !modelProduto.data(row, "cstCBS").toString().isEmpty();
 
       if (!temIBS && !temCBS) {
         // Product comes from old tax system NFe - convert to new taxes
@@ -2509,7 +2511,7 @@ void CadastrarNFe::preencherImpostos() {
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
-          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS);
           modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
           modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
@@ -2528,8 +2530,14 @@ void CadastrarNFe::preencherImpostos() {
     // Disable model signals during bulk updates to avoid expensive VIEW recalculations
     const bool wasBlocked = modelProduto.signalsBlocked();
     modelProduto.blockSignals(true);
+
+    const int fieldIndexCstIBS = modelProduto.fieldIndex("cstIBS");
+
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
-      for (int col = 0; col < modelProduto.columnCount(); ++col) {
+      // Limpa só os campos do sistema tributário antigo (até vCOFINS); os campos de
+      // IBS/CBS/IS (a partir de cstIBS) têm sua própria lógica de inicialização abaixo
+      // e não podem ser zerados aqui, senão o auto-populate nunca detecta "ainda não calculado".
+      for (int col = 0; col < fieldIndexCstIBS; ++col) {
         if (modelProduto.data(row, col).isNull()) {
           modelProduto.setData(row, col, 0.0); // limpar campos dos imposto
         }
@@ -2612,10 +2620,8 @@ void CadastrarNFe::preencherImpostos() {
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
       // =====================================================================
       // Check if product has valid new tax data (not just zeros from null conversion)
-      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
-      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
-      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
-      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+      const bool temIBS = !modelProduto.data(row, "cstIBS").toString().isEmpty();
+      const bool temCBS = !modelProduto.data(row, "cstCBS").toString().isEmpty();
 
       if (!temIBS && !temCBS) {
         // Product comes from old tax system - convert to new taxes
@@ -2642,7 +2648,7 @@ void CadastrarNFe::preencherImpostos() {
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
-          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS);
           modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
           modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());
@@ -2760,7 +2766,7 @@ void CadastrarNFe::preencherImpostos() {
       // 8. Set IS fields if product is subject to selective tax
       if (produtoIS && aliqIS > 0) {
         modelProduto.setData(row, "cstIS", "000");
-        modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+        modelProduto.setData(row, "cClassTribIS", cClassTribIS);
       }
       modelProduto.setData(row, "vBCIS", 0.0);
       modelProduto.setData(row, "pIS", 0.0);
@@ -2772,8 +2778,14 @@ void CadastrarNFe::preencherImpostos() {
   }
 
   if (tipo == Tipo::SaidaAposFutura) {
+    const int fieldIndexNumeroPedido = modelProduto.fieldIndex("numeroPedido");
+    const int fieldIndexCstIBS = modelProduto.fieldIndex("cstIBS");
+
     for (int row = 0; row < modelProduto.rowCount(); ++row) {
-      for (int col = modelProduto.fieldIndex("numeroPedido"); col < modelProduto.columnCount(); ++col) {
+      // Limpa só os campos do sistema tributário antigo (até vCOFINS); os campos de
+      // IBS/CBS/IS (a partir de cstIBS) têm sua própria lógica de inicialização abaixo
+      // e não podem ser zerados aqui, senão o auto-populate nunca detecta "ainda não calculado".
+      for (int col = fieldIndexNumeroPedido; col < fieldIndexCstIBS; ++col) {
         modelProduto.setData(row, col, 0); // limpar campos dos imposto
       }
 
@@ -2853,10 +2865,8 @@ void CadastrarNFe::preencherImpostos() {
       // REFORMA TRIBUTÁRIA 2025 - AUTO-POPULATE NEW TAXES FROM OLD DATA
       // =====================================================================
       // Check if product has valid new tax data (not just zeros from null conversion)
-      const QString cClassIBS = modelProduto.data(row, "cClassTribIBS").toString();
-      const QString cClassCBS = modelProduto.data(row, "cClassTribCBS").toString();
-      const bool temIBS = !cClassIBS.isEmpty() && cClassIBS != "0" && cClassIBS != "000000";
-      const bool temCBS = !cClassCBS.isEmpty() && cClassCBS != "0" && cClassCBS != "000000";
+      const bool temIBS = !modelProduto.data(row, "cstIBS").toString().isEmpty();
+      const bool temCBS = !modelProduto.data(row, "cstCBS").toString().isEmpty();
 
       if (!temIBS && !temCBS) {
         // Product comes from old tax system - convert to new taxes
@@ -2883,7 +2893,7 @@ void CadastrarNFe::preencherImpostos() {
         // IS: Populate from NCM table if product is subject to Imposto Seletivo
         if (produtoIS && aliqIS > 0) {
           modelProduto.setData(row, "cstIS", "000");  // 000 = Tributação integral
-          modelProduto.setData(row, "cClassTribIS", cClassTribIS.isEmpty() ? "620001" : cClassTribIS);
+          modelProduto.setData(row, "cClassTribIS", cClassTribIS);
           modelProduto.setData(row, "vBCIS", QString::number(vBC, 'f', 2).toDouble());
           modelProduto.setData(row, "pIS", aliqIS);
           modelProduto.setData(row, "vIS", QString::number(vBC * aliqIS / 100, 'f', 2).toDouble());

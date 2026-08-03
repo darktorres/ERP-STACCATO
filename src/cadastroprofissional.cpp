@@ -210,8 +210,8 @@ bool CadastroProfissional::viewRegister() {
   const bool bloquear = (existeVinculo and not administrativo);
 
   ui->lineEditProfissional->setReadOnly(bloquear);
-  ui->lineEditCPF->setReadOnly(bloquear);
-  ui->lineEditCNPJ->setReadOnly(bloquear);
+  ui->lineEditCPF->setReadOnly(bloquear and not data("cpf").toString().isEmpty());
+  ui->lineEditCNPJ->setReadOnly(bloquear and not data("cnpj").toString().isEmpty());
 
   ui->groupBoxPFPJ->setDisabled(bloquear);
   ui->pushButtonDesativar->setDisabled(bloquear);

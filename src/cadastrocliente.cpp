@@ -285,8 +285,8 @@ bool CadastroCliente::viewRegister() {
   const bool bloquear = verificaVinculo();
 
   ui->lineEditCliente->setReadOnly(bloquear);
-  ui->lineEditCPF->setReadOnly(bloquear);
-  ui->lineEditCNPJ->setReadOnly(bloquear);
+  ui->lineEditCPF->setReadOnly(bloquear and not data("cpf").toString().isEmpty());
+  ui->lineEditCNPJ->setReadOnly(bloquear and not data("cnpj").toString().isEmpty());
 
   ui->pushButtonAtualizarEnd->setDisabled(bloquear);
   ui->groupBoxPFPJ->setDisabled(bloquear);

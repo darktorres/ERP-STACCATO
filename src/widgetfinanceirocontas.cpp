@@ -12,8 +12,6 @@
 #include "sqlquery.h"
 #include "user.h"
 
-#include <QDebug>
-#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QScrollBar>
@@ -95,14 +93,9 @@ void WidgetFinanceiroContas::onTableScrolled(const int value) {
 
   carregandoPagina = true;
 
-  QElapsedTimer timer;
-  timer.start();
-
   try {
     auto *scrollBar = ui->table->verticalScrollBar();
     const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
-
-    qDebug() << "[WidgetFinanceiroContas] onTableScrolled: value=" << value << "max=" << scrollBar->maximum() << "threshold=" << threshold;
 
     if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
     if (value <= threshold) { model.tryLoadPrevious(); }
@@ -112,8 +105,6 @@ void WidgetFinanceiroContas::onTableScrolled(const int value) {
   }
 
   carregandoPagina = false;
-
-  qDebug() << "[WidgetFinanceiroContas] onTableScrolled: total" << timer.elapsed() << "ms";
 }
 
 void WidgetFinanceiroContas::updateTables() {
@@ -302,9 +293,12 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
       const QString sortExpr = exprPorCampo.value(sortColumn, "cp.dataPagamento");
+      // nome (sem qualificador de tabela) do mesmo campo, pro ORDER BY de exibicao - que roda sobre o
+      // wrapper "SELECT * FROM (...) x" abaixo, onde "cp" ja saiu de escopo (so os apelidos de x valem)
+      const QString sortFieldExibicao = exprPorCampo.contains(sortColumn) ? sortColumn : "dataPagamento";
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+      return [filtrosCopia, buscaCopia, sortExpr, sortFieldExibicao, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"cp.idPagamento", order}};
@@ -339,7 +333,10 @@ void WidgetFinanceiroContas::montaFiltro() {
         const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, cp.idPagamento AS idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " +
                                (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
-        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
+        // keys usa "cp." (valido dentro do capSql acima) - o ORDER BY de exibicao roda fora do wrapper
+        // "x" (ver displaySql abaixo), onde so os apelidos sem qualificador existem
+        const QVector<SqlPaginatedModel::KeyExpr> keysExibicao = {{sortFieldExibicao, order}, {"idPagamento", order}};
+        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keysExibicao, true); // exibicao sempre na ordem normal
 
         const QString displaySql = "SELECT * FROM ("
                "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataEmissao` AS `dataEmissao`, "
@@ -451,22 +448,35 @@ void WidgetFinanceiroContas::montaFiltro() {
     // (so `parcela` de fato desce, ver nota no início do arquivo de plano), independente da coluna
     // escolhida como principal (inclusive por clique de cabeçalho)
     static const QVector<SqlPaginatedModel::KeyExpr> extraKeysFixas = {{"cr.idVenda", Qt::AscendingOrder}, {"cr.tipo", Qt::AscendingOrder}, {"cr.parcela", Qt::DescendingOrder}};
+    // mesmo desempate, sem qualificador de tabela - pro ORDER BY de exibicao (roda fora do wrapper "x"
+    // abaixo, onde "cr" ja saiu de escopo)
+    static const QVector<SqlPaginatedModel::KeyExpr> extraKeysFixasExibicao = {{"idVenda", Qt::AscendingOrder}, {"tipo", Qt::AscendingOrder}, {"parcela", Qt::DescendingOrder}};
 
     const QStringList filtrosCopia = filtros;
     const QString buscaCopia = busca;
 
     const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
       const QString sortExpr = exprPorCampo.value(sortColumn, "cr.dataPagamento");
+      // nome (sem qualificador de tabela) do mesmo campo, pro ORDER BY de exibicao - que roda sobre o
+      // wrapper "SELECT * FROM (...) x" abaixo, onde "cr" ja saiu de escopo (so os apelidos de x valem)
+      const QString sortFieldExibicao = exprPorCampo.contains(sortColumn) ? sortColumn : "dataPagamento";
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
       const bool precisaJoinVenda = precisaFanOut or colunasComJoinVenda.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+      return [filtrosCopia, buscaCopia, sortExpr, sortFieldExibicao, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         QVector<SqlPaginatedModel::KeyExpr> keys;
         keys << SqlPaginatedModel::KeyExpr{sortExpr, order};
         keys += extraKeysFixas;
         keys << SqlPaginatedModel::KeyExpr{"cr.idPagamento", order};
+
+        // mesmo desempate de "keys", sem qualificador de tabela - pro ORDER BY de exibicao (ver
+        // nota equivalente no Pagar acima)
+        QVector<SqlPaginatedModel::KeyExpr> keysExibicao;
+        keysExibicao << SqlPaginatedModel::KeyExpr{sortFieldExibicao, order};
+        keysExibicao += extraKeysFixasExibicao;
+        keysExibicao << SqlPaginatedModel::KeyExpr{"idPagamento", order};
 
         QStringList capFiltros = filtrosCopia;
         QString capHaving;
@@ -495,7 +505,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                                forceIndex + capJoinVenda + capJoinPf2 + " WHERE " + (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy +
                                " LIMIT " + QString::number(1000);
 
-        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
+        const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keysExibicao, true); // exibicao sempre na ordem normal
 
         // Envolto em "SELECT * FROM (...) x": a busca referencia nomes crus (idVenda, ordemRepresentacao)
         // que tambem existem como coluna real de pf2 (pf2.idVenda, pf2.ordemRepresentacao) - direto num

@@ -3,8 +3,6 @@
 #include "application.h"
 #include "sqlquery.h"
 
-#include <QDebug>
-#include <QElapsedTimer>
 #include <QFont>
 #include <QSqlError>
 
@@ -67,9 +65,6 @@ Qt::SortOrder SqlPaginatedModel::sortOrder() const { return sortOrder_; }
 bool SqlPaginatedModel::hasMoreAfter() const { return hasMoreAfter_; }
 
 void SqlPaginatedModel::loadFirstPage() {
-  QElapsedTimer timer;
-  timer.start();
-
   QVector<QVariant> cursor; // vazio = sem cursor (1a tentativa)
   Direction direction = Direction::First;
   QVector<QVector<QVariant>> displayRows;
@@ -111,15 +106,10 @@ void SqlPaginatedModel::loadFirstPage() {
   hasMoreAfter_ = rows_.size() >= PAGE_SIZE;
 
   emitMoreAvailableIfChanged();
-
-  qDebug() << "[SqlPaginatedModel] loadFirstPage: total" << timer.elapsed() << "ms, rows=" << rows_.size() << "peeks=" << peeks;
 }
 
 void SqlPaginatedModel::tryLoadNext() {
   if (not hasMoreAfter_ or lastKeyValues_.isEmpty()) { return; }
-
-  QElapsedTimer timer;
-  timer.start();
 
   QVector<QVariant> cursor = lastKeyValues_;
   QVector<QVector<QVariant>> newRows;
@@ -152,13 +142,10 @@ void SqlPaginatedModel::tryLoadNext() {
     if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
   }
 
-  const qint64 afterQuery = timer.elapsed();
-
   if (newRows.isEmpty()) {
     lastKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
     hasMoreAfter_ = not exhausted;
     emitMoreAvailableIfChanged();
-    qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, 0 rows apos" << peeks << "peeks" << (exhausted ? "(fim do historico)" : "(limite de peeks desta rolagem)");
     return;
   }
 
@@ -167,8 +154,6 @@ void SqlPaginatedModel::tryLoadNext() {
   beginInsertRows(QModelIndex(), insertFirst, insertFirst + newRows.size() - 1);
   rows_ += newRows;
   endInsertRows();
-
-  const qint64 afterInsert = timer.elapsed();
 
   hasMoreAfter_ = newRows.size() >= PAGE_SIZE;
   hasMoreBefore_ = true; // ja existe pelo menos uma pagina carregada antes do inicio atual
@@ -187,16 +172,10 @@ void SqlPaginatedModel::tryLoadNext() {
   }
 
   emitMoreAvailableIfChanged();
-
-  qDebug() << "[SqlPaginatedModel] tryLoadNext: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
-           << "peeks=" << peeks << "totalLinhas=" << rows_.size();
 }
 
 void SqlPaginatedModel::tryLoadPrevious() {
   if (not hasMoreBefore_ or firstKeyValues_.isEmpty()) { return; }
-
-  QElapsedTimer timer;
-  timer.start();
 
   QVector<QVariant> cursor = firstKeyValues_;
   QVector<QVector<QVariant>> newRows;
@@ -232,20 +211,15 @@ void SqlPaginatedModel::tryLoadPrevious() {
     if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
   }
 
-  const qint64 afterQuery = timer.elapsed();
-
   if (newRows.isEmpty()) {
     firstKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
     hasMoreBefore_ = not exhausted;
-    qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, 0 rows apos" << peeks << "peeks" << (exhausted ? "(inicio do historico)" : "(limite de peeks desta rolagem)");
     return;
   }
 
   beginInsertRows(QModelIndex(), 0, newRows.size() - 1);
   rows_ = newRows + rows_;
   endInsertRows();
-
-  const qint64 afterInsert = timer.elapsed();
 
   hasMoreBefore_ = newRows.size() >= PAGE_SIZE;
 
@@ -263,9 +237,6 @@ void SqlPaginatedModel::tryLoadPrevious() {
     updateEdgeKeys();
     emitMoreAvailableIfChanged();
   }
-
-  qDebug() << "[SqlPaginatedModel] tryLoadPrevious: query" << afterQuery << "ms, insert+signals" << (afterInsert - afterQuery) << "ms, evict+total" << timer.elapsed() << "ms, novasLinhas=" << newRows.size()
-           << "peeks=" << peeks << "totalLinhas=" << rows_.size();
 }
 
 QStringList SqlPaginatedModel::keyFieldNames() const {
@@ -309,16 +280,9 @@ void SqlPaginatedModel::emitMoreAvailableIfChanged() {
 }
 
 QVector<QVector<QVariant>> SqlPaginatedModel::runQuery(const QString &sql) {
-  qDebug() << "[SqlPaginatedModel] runQuery SQL:" << sql;
-
-  QElapsedTimer timer;
-  timer.start();
-
   SqlQuery query;
 
   if (not query.exec(sql)) { throw RuntimeException("Erro lendo dados paginados: " + query.lastError().text()); }
-
-  const qint64 afterExec = timer.elapsed();
 
   const int columnCount = query.record().count();
 
@@ -332,8 +296,6 @@ QVector<QVector<QVariant>> SqlPaginatedModel::runQuery(const QString &sql) {
 
     result << row;
   }
-
-  qDebug() << "[SqlPaginatedModel] runQuery: exec" << afterExec << "ms, fetch" << (timer.elapsed() - afterExec) << "ms, rows=" << result.size();
 
   return result;
 }

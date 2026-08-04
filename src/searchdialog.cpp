@@ -115,10 +115,14 @@ void SearchDialog::on_lineEditBusca_textChanged() {
     for (int i = 0; i < fullTextIndexes.size(); ++i) {
       filtro1 << fullTextIndexes.at(i).index;
 
-      if (lineEdits.at(i)->text().isEmpty()) { continue; }
+      // fulltext boolean mode: os operadores tem que sair, nao ser escapados (ver Application::sanitizeFullText).
+      // A guarda e sobre o termo JA sanitizado, nao sobre o texto cru: quem digita so operadores (ex.: "(")
+      // passa pela checagem de vazio mas sobra string vazia aqui, e "+*" devolve ERROR 1064.
+      const QString termo = qApp->sanitizeFullText(lineEdits.at(i)->text());
 
-      // fulltext boolean mode: os operadores tem que sair, nao ser escapados (ver Application::sanitizeFullText)
-      filtro2 << "+" + qApp->sanitizeFullText(lineEdits.at(i)->text()) + "*";
+      if (termo.isEmpty()) { continue; }
+
+      filtro2 << "+" + termo + "*";
     }
 
     searchFilter = "MATCH(" + filtro1.join(", ") + ") AGAINST('" + filtro2.join(" ") + "' IN BOOLEAN MODE) ORDER BY numeroNFe";

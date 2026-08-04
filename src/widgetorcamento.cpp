@@ -314,7 +314,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + User::nome + "'" + " OR consultor = '" + User::nome + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + qApp->escaparSQL(User::nome) + "'" + " OR consultor = '" + qApp->escaparSQL(User::nome) + "')";
 
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 

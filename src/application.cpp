@@ -513,16 +513,21 @@ QString Application::escaparBusca(const QString &texto) {
   return escaparSQL(escapado); // nivel literal
 }
 
-// Remove os operadores do fulltext boolean mode do MySQL (+ - > < ( ) ~ * " @) e so entao escapa o
-// literal. E o unico contexto em que REMOVER e a resposta certa: em boolean mode a barra nao escapa
-// operador, entao nao ha como literalizar - e deixar o texto do usuario passar reescreve a semantica
-// da busca, ou derruba a query ("(" desbalanceado devolve ERROR 1064).
+// Neutraliza os operadores do fulltext boolean mode do MySQL (+ - > < ( ) ~ * " @) e so entao escapa
+// o literal. E o unico contexto em que nao da pra escapar: em boolean mode a barra nao escapa
+// operador, entao deixar o texto do usuario passar reescreve a semantica da busca - ou derruba a
+// query ("(" desbalanceado devolve ERROR 1064).
+//
+// Troca por ESPACO em vez de apagar. Apagar gruda os pedacos do termo, e como o fulltext tokeniza
+// justamente nesses caracteres o resultado nao casa com nada: medido no banco, procurar
+// "000021833-A" achava 2 linhas com o hifen passando direto, 0 apagando o hifen e 2 trocando por
+// espaco. O simplified() no fim evita sobra de espaco, que viraria "+ *" - tambem ERROR 1064.
 QString Application::sanitizeFullText(const QString &texto) {
   QString limpo = texto;
 
-  for (const auto caractere : {'+', '-', '>', '<', '(', ')', '~', '*', '"', '@'}) { limpo.remove(caractere); }
+  for (const auto caractere : {'+', '-', '>', '<', '(', ')', '~', '*', '"', '@'}) { limpo.replace(caractere, ' '); }
 
-  return escaparSQL(limpo);
+  return escaparSQL(limpo.simplified());
 }
 
 int Application::reservarIdEstoque() {

@@ -174,7 +174,6 @@ void WidgetNFeDistribuicao::setupTables() {
   model.setHeaderData("numeroNFe", "NF-e");
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("status", "Status");
-  model.setHeaderData("emitente", "Emitente");
   model.setHeaderData("cnpjDest", "CNPJ Dest.");
   model.setHeaderData("cnpjOrig", "CNPJ Orig.");
   model.setHeaderData("chaveAcesso", "Chave Acesso");
@@ -188,15 +187,6 @@ void WidgetNFeDistribuicao::setupTables() {
   ui->table->setModel(&model);
 
   ui->table->hideColumn("idNFe");
-  ui->table->hideColumn("idVenda");
-  ui->table->hideColumn("dataHoraEmissao");
-  ui->table->hideColumn("emitente");
-  ui->table->hideColumn("obs");
-  ui->table->hideColumn("transportadora");
-  ui->table->hideColumn("gare");
-  ui->table->hideColumn("gareData");
-  ui->table->hideColumn("infCpl");
-  ui->table->hideColumn("utilizada");
   ui->table->hideColumn("ciencia");
   ui->table->hideColumn("confirmar");
   ui->table->hideColumn("desconhecer");

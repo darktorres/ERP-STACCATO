@@ -1,5 +1,172 @@
 # Performance audit — 2026-08-04
 
+## Update 4 (2026-08-04): SQL-only follow-up — real default-state was different than measured
+
+Instructed to skip both the async-infra track and NFe Distribuição, and to keep optimizing the
+other three screens (Venda, Orçamento, `view_compras_financeiro`) via SQL only — no pagination, no
+default-filter/behavior changes. Checking each screen's *actual* default checkbox state (not the
+fully-unfiltered worst case originally measured) turned up a real correction and two more fixes:
+
+- **Venda: no fix exists, and none is needed.** The app's real default already has 13 of 15 status
+  checkboxes checked (only Cancelado/Devolvido excluded) — `ui/widgetvenda.ui`. That's 52% of rows,
+  and `EXPLAIN` confirms the optimizer correctly ignores `idx_status` (`key=NULL` despite it being a
+  `possible_keys` candidate) because a full scan is cheaper than bookmark-looking-up half the table.
+  225ms in the real default state is already optimal. The 1.39s number from the original audit was
+  the pathological "user unchecked everything" case, not what actually happens by default.
+- **Orçamento: real default is highly selective, and wasn't indexed.** `ui/widgetorcamento.ui` shows
+  only Ativo/Expirado checked by default — `status IN ('ATIVO','EXPIRADO')` matches 2,024 of 153,419
+  rows (1.3%). `orcamento.status` was buried 4th in a composite index, unusable for this filter, so
+  it still fell back to a full table scan. Added `idx_orcamento_status`:
+  **487ms → 195ms** for the default view, **2.17s → 42ms** for default+search (the most common real
+  case). Documented in `db/add_index_orcamento_status.sql`.
+- **`view_compras_financeiro`: genuinely has no default filter, but got a covering index.** Unlike
+  the other two, `WidgetFinanceiroCompra`/`WidgetCompraHistorico` have no status checkboxes at all —
+  this one really is always the full unbounded aggregation. Widened the existing
+  `idx_pf1_ordemcompra` (from the earlier Finding 3 fix) into a covering index adding
+  `status, statusFinanceiro, idCompra, fornecedor, preco, idVenda` — the exact columns the
+  `GROUP_CONCAT`/`SUM` aggregation needs, turning "Using where" (per-row bookmark lookup) into
+  "Using index" (covering scan). **931ms → 504ms** (1.85×). The narrower single-column index it
+  replaces served only Finding 3's row-click lookup; confirmed the covering index alone still
+  serves that just as well (~0.03ms), so one index now covers both use cases instead of two.
+  Documented in the updated `db/add_index_pedido_fornecedor_has_produto_ordemcompra.sql`.
+
+This still doesn't fully bound `view_compras_financeiro` (no filter exists to make it selective) —
+the Track-1 pagination sizing from Update 3 still applies if that screen needs to go further. But
+for Venda and Orçamento, the realistic day-to-day experience is now meaningfully better than the
+worst-case numbers in the original audit suggested, without any pagination or behavior change.
+
+**NFe Distribuição, added after further instruction** (SQL-only, functionality-preserving — no
+`SqlPaginatedModel` migration, that redesign is still not attempted): unlike Venda/Orçamento, all 7
+status checkboxes in `ui/widgetnfedistribuicao.ui` are checked by default, so the status filter is a
+genuine no-op — the realistic default really is the full ~35,870-row scan. A covering index over the
+view's original ~25 columns isn't possible (`infCpl varchar(5000)` alone blows past InnoDB's
+3072-byte index key limit). Before touching anything, checked every place the view is used —
+`information_schema.VIEWS`/`ROUTINES`/`TRIGGERS` (no other DB object references it), every file in
+`src/` (only `widgetnfedistribuicao.cpp`), and every report/export template in `modelos/` (none) —
+confirmed 10 of the view's columns (`idVenda`, `dataHoraEmissao`, `emitente`, `obs`,
+`transportadora`, `gare`, `gareData`, `infCpl`, `utilizada`, plus `created`/`lastUpdated` once the
+column count still didn't fit MySQL's 16-column index limit) are selected but never read anywhere
+beyond the `hideColumn()`/`setHeaderData()` calls being removed alongside them. `idNFe` and the four
+SEFAZ-workflow flag columns (`ciencia`/`confirmar`/`desconhecer`/`naoRealizar`) stay — confirmed
+still in active use (DANFE fetch, `model.setData`/`multiMatch` for the Ciência/Confirmação/etc.
+actions). Trimmed the view to 15 columns, removed the matching dead lines in
+`src/widgetnfedistribuicao.cpp`, added a 15-column covering index
+(`idx_nfe_nsu_covering`). Result: **2.28s → 86.7ms (26×)**, row count unchanged (35,870) confirming
+no functional loss. Kept the pre-existing single-column `index7_nfe` rather than dropping it —
+`widgetnfeentrada.cpp` sorts by `nsu` too, via a different query shape that wouldn't benefit from
+the new covering index. Full writeup: `db/fix_view_nfe_distribuicao_trim.sql`.
+
+## Update 3 (2026-08-04): further-optimization analysis — pagination sizing + UI-blocking track
+
+Follow-up pass, analysis only (no code changes), covering the two things left open after Update 2:
+sizing the pagination/default-filter work for the four screens that still have no real fix, and a
+newly-scoped dimension the SQL audit never covered — the app has **zero worker-thread/async
+infrastructure** anywhere, so every slow query freezes the UI. Full detail (all the grep/read
+evidence) lives in the session log; this section is the actionable summary.
+
+### Track 1 — sizing the 4 remaining unbounded screens
+
+Read `src/sqlpaginatedmodel.h/.cpp` in full plus the reference migration (`WidgetNfeSaida`,
+`src/widgetnfesaida.cpp`) to ground this in the actual mechanics: a migration needs (1) a
+`QueryBuilderFactory` that, per sort column, returns a page-cut query selecting just the id column
+via a keyset `WHERE` + `LIMIT 1000` (all filters, including search, baked into that cut — search on
+joined columns gets rewritten as a non-correlated `IN (subquery)`, same trick as the NFe fix), (2) a
+join-back query for full display columns, (3) `FORCE INDEX` tuned per sort column the same way NFe
+needed it, and (4) an audit of every action handler that reads `model.data(row, ...)` to make sure
+the key is resolved *before* any nested dialog/event loop (`SqlPaginatedModel`'s row index is a
+window position, not absolute, and resets on every `reset()` — this is exactly the bug class
+`e4515291` fixed for NFe's Cancelar/Inutilizar).
+
+| Screen | Current cost | Fix | Effort/risk | Why |
+|---|---|---|---|---|
+| **Venda** (`widgetvenda.cpp`) | 1.39s open / 0.87s search | Try **default status filter first** (cheap) | **Low** | `venda.status` already has a leading index (`idx_status`) — a "hide closed/cancelled by default" filter needs no schema change and may get this fast enough on its own before reaching for full pagination. Action handlers (`on_table_activated`, `on_pushButtonFollowup_clicked`) just read one id and open a non-modal dialog — no nested-event-loop risk. |
+| **Orçamento** (`widgetorcamento.cpp`) | 2.57s open / 2.17s search | Full pagination (same shape as NFe/Financeiro) | **Medium** | Same query shape already solved for NFe: driving table + simple 1:1 joins (cliente/usuario/profissional/orcamento_has_followup), search spans joined columns → same `IN`-subquery rewrite. `orcamento.status` is *not* leading in its composite index (`index7`), so the cheap Venda-style shortcut isn't available without also adding a new index. Action handlers are the same simple "read id, open non-modal dialog" shape as Venda — low migration risk once the query-builder is written. |
+| **`view_compras_financeiro`** (`widgetcomprahistorico.cpp` + `widgetfinanceirocompra.cpp`, 2 consumers) | 972ms, index-resistant (unbounded `GROUP BY`) | Full pagination, novel shape | **Medium-high** | Unlike NFe/Orçamento, the `GROUP BY ordemCompra` is on the *driving* table itself, not a joined dimension — the cut step would page over distinct `ordemCompra` values (using `idx_pf1_ordemcompra`) and re-aggregate only those 1000 per page. Architecturally sound but no existing precedent to copy verbatim; needs building fresh. Two consumers: `WidgetFinanceiroCompra` is a simple list (same low risk as Orçamento/Venda); `WidgetCompraHistorico` additionally drives 3 dependent detail grids off row selection (`on_tablePedidos_selectionChanged` reads `.data()` synchronously, no dialog in between — safe), so no extra risk from that, just extra call sites. The query-builder logic is identical for both consumers and should be written once, shared. |
+| **NFe Distribuição** (`widgetnfedistribuicao.cpp`) | 2.28s unfiltered | **Not a simple migration** — needs redesign first | **High** | `SqlPaginatedModel` is read-only (no `setData`/`multiMatch`), but this screen's core workflow (Ciência/Confirmação/Desconhecimento/Não Realizada) works by writing an in-memory flag column via `model.setData(row, "confirmar", true)` and then re-querying the model's *own loaded rows* via `model.multiMatch(...)` to batch up to 20 at a time for `enviarEvento()` (a SEFAZ web-service call). Migrating requires replacing that mechanism entirely (e.g. an external `QSet<idNFe>` tracked in the widget instead of an in-model flag) — not just swapping the query builder. Also has a background timer (`agendarOperacao`/`consultarSefaz`) polling the same model, which is worth a separate look regardless of pagination: worth confirming it can't race with an in-flight `enviarEvento()` call the same way the pre-`e4515291` bug did elsewhere. **Recommend scoping this one separately, not bundled with the other three.** |
+
+**Suggested order if this gets picked up**: Venda (try the cheap filter first, measure, stop there if
+good enough) → Orçamento → `view_compras_financeiro` → NFe Distribuição on its own, later, after its
+redesign is scoped.
+
+### Track 2 — UI-blocking: the app has no async DB infrastructure at all
+
+Full grep of `src/` for `QThread|moveToThread|QtConcurrent|QFuture|QRunnable` returns exactly one
+hit outside the ACBr fiscal-library wrapper, and that one is `QThread::msleep()` (a blocking sleep,
+not a worker thread). Every `SqlQuery`/`query.exec()` call in the entire codebase — including every
+multi-second query measured in this audit — runs on the GUI thread. Confirmed there is **no**
+mitigation anywhere either: grepped for `setOverrideCursor|processEvents|QProgressDialog` across the
+widgets with the slowest measured queries (`widgetestoques.cpp`, `widgetconsistencia.cpp`,
+`widgetorcamento.cpp`, `widgetvenda.cpp`, `widgetnfedistribuicao.cpp`, `widgetcomprahistorico.cpp`,
+`widgetfinanceirocompra.cpp`) plus `sql.cpp`/`sqlquery.cpp`/`application.cpp` — zero matches. The UI
+genuinely just freezes silently; anything over ~2s is long enough for Windows to mark the window
+"Not Responding".
+
+**Impact ranking** (freeze duration × how often the action is used day-to-day, from the measured
+timings already in `.claude/performance-audit-tracking.md`):
+
+| Tier | Screen/action | Freeze | Frequency | Why it ranks here |
+|---|---|---|---|---|
+| 1 | Estoque tab open | 1.45s | Constant (core daily screen) | Small number, but hit dozens of times/day by every user — cumulative pain is the highest of anything measured |
+| 1 | Orçamento/Venda tab open or search | 0.87-2.57s | Very frequent | Same reasoning — core sales-flow screens |
+| 2 | NFe Distribuição, `view_compras_financeiro` opens | 0.97-2.28s | Frequent, narrower user base (fiscal/compras staff) | Real pain for the people who use these tabs all day, less overall reach than tier 1 |
+| 3 | Estoque Contábil toggle | 4.26s | Occasional (a toggle, not the default view) | Long enough to feel broken on the occasions it's used |
+| 4 | Consistência tab (`view_consistencia_vp_op_quant`) | 11.4s | Rare (data-integrity/support tool) | Worst single number in the app, but low frequency caps its overall impact |
+| 4 | `queryExportarNCM` export | 8.18s | Rare (export action) | Same reasoning — bad in the moment, rarely hit |
+
+**Connection architecture check** (`src/application.h:96`, `application.cpp:123-176`): a single
+unnamed `QSqlDatabase::addDatabase("QMYSQL")` connection is opened once and stored as an
+`Application` member, reused by every `SqlQuery` call in the app. Notably `application.h:96` already
+has `// TODO: doc says not to store database as class member` — the concern was known, never acted
+on. Qt's standard pattern for off-main-thread DB work is a separate named connection
+(`QSqlDatabase::addDatabase("QMYSQL", "workerName")`) per thread, since MySQL connections aren't
+safe to share across threads. A **targeted** fix (a handful of `QtConcurrent::run()` calls, each
+opening its own throwaway named connection inside the worker function) is self-contained and
+wouldn't require touching the existing `Application::db`/`SqlQuery` pattern at all — a full
+connection-pool refactor is not needed to fix the worst offenders.
+
+**Mitigation options, cheapest to most invasive:**
+
+1. **Cursor + `processEvents()`** around the known-slow calls — reduces "frozen" *perception* (repaint
+   keeps happening, cursor shows busy), doesn't remove the block. Near-zero risk, ships in an hour
+   per screen. Doesn't fix the underlying freeze, just makes it visible/tolerable.
+2. **Targeted async for the worst/most-frequent offenders** — move Estoque, Consistência, and
+   whichever of the Track-1 screens end up implemented, to `QtConcurrent::run()` + `QFutureWatcher`,
+   each opening its own named connection. Bounded scope (5-8 call sites), doesn't touch the shared
+   `Application::db` pattern, moderate effort per screen (need to marshal results back via signals,
+   handle "user closed the tab / changed filter again before the worker finished" races).
+3. **General async-query infrastructure** for the whole app — largest effort by far, touches the
+   `SqlQuery` abstraction everywhere. Not recommended to scope in detail here: option 2 already
+   covers the screens that actually matter (tier 1-3 above), and a blanket rewrite risks introducing
+   new races across ~150 files for marginal benefit over doing the worst offenders by hand.
+
+**Recommendation**: option 2, scoped to tier 1-3 screens, is the right size for the actual pain
+found — not option 1 (real fix, not just a coping mechanism) and not option 3 (far more effort than
+the measured impact justifies). Implementation is a follow-up, not this pass.
+
+### Footnote: per-cell DB query in `ItemBoxDelegate`
+
+`ItemBoxDelegate::displayText()` (`src/itemboxdelegate.cpp:46-58`, used for `Tipo::Loja`/`Tipo::Conta`
+columns) calls `SearchDialog::getCacheLoja()/getCacheConta()` (`src/searchdialog.cpp:195-222`),
+which runs a synchronous `SqlQuery` per uncached id on first paint, memoized afterward. Scoped to
+financial screens only (`cadastropagamento.cpp`, `compraavulsa.cpp`, `contas.cpp`,
+`importarxml.cpp`, `inserirlancamento.cpp`, `widgetrh.cpp`) — not the big venda/orçamento/produto
+lists. Not worth its own workstream given the narrow blast radius, but noted here so it isn't lost.
+
+### Dimensions checked and ruled out (no dedicated workstream needed)
+
+- **Proxy models**: all 10 `*proxymodel.cpp` files either subclass `QIdentityProxyModel` (only
+  override `data()` for row-coloring) or `QSortFilterProxyModel` (stock Qt filtering) — no custom
+  `filterAcceptsRow` anywhere.
+- **Delegate paint costs**: zero `paint()` overrides in any `*delegate.cpp` file; the display-text
+  formatters do locale formatting only, no per-cell allocation or DB access (aside from the
+  `ItemBoxDelegate` footnote above).
+- **Startup**: confirmed lazy per-tab (`mainwindow.cpp:158/229`, `on_tabWidget_currentChanged` →
+  loads only the newly-active tab) — no eager all-tabs load anywhere in the constructor.
+- **Excel/PDF export**: `excel.cpp`/`pdf.cpp` single-document exports are a fixed small set of
+  queries, not row-count-dependent. `widgetrelatorio.cpp`'s bulk `QXlsx` export is linear
+  (`for(row) for(col)`), not quadratic — its cost is inherited from the underlying query's row
+  count, already covered by the SQL-side tracking, not a distinct problem.
+
 ## Update 2 (same day): correctness bug found and fixed in Consistência
 
 While working through the "systemic finding" list, `widgetconsistencia.cpp`'s

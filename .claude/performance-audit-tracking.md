@@ -18,6 +18,17 @@ Scope note (2026-08-04): pagination (`SqlPaginatedModel` migration) is explicitl
 for now — only query/index-level fixes count as "fixed" here. Items whose only available fix is
 pagination are marked 🔍 (measured, not fixable in current scope), not ⏳.
 
+Scope note (2026-08-04, later same day): the 4 screens needing pagination/default-filter got a
+full sizing pass (effort/risk per screen, grounded in reading `SqlPaginatedModel` + each widget's
+action handlers) — see "Update 3" in `.claude/performance-audit-2026-08-04.md`. Short version:
+Venda (try default filter first, low effort) → Orçamento (medium, same shape as NFe) →
+`view_compras_financeiro` (medium-high, novel pagination shape) → NFe Distribuição (high risk,
+`SqlPaginatedModel` is read-only but this screen needs in-model row flagging — needs a redesign,
+not a simple migration, scope separately). Same pass also found the app has **zero worker-thread/
+async infrastructure** — every query, including all the ones in this doc, blocks the GUI thread
+with no cursor/progress indication at all; see Track 2 in the same Update 3 section for the impact
+ranking and mitigation options.
+
 ---
 
 ## A. Applied fixes (log)
@@ -30,6 +41,9 @@ pagination are marked 🔍 (measured, not fixable in current scope), not ⏳.
 | 2026-08-04 | `orcamento_has_produto(idOrcamento,codComercial)` unindexed | new index `idx_op_orcamento_codcomercial` | `db/add_index_orcamento_has_produto_orcamento_codcomercial.sql` (applied local only; prod = manual) | `view_consistencia_vp_op_quant`: 19.9s → 11.6s |
 | 2026-08-04 | `view_consistencia_vp_op_quant` — **correctness bug**, not just slow: join-then-`SUM` fan-out inflated both sides whenever `orcamento_has_produto`/`venda_has_produto` had a different number of rows per product (room-by-room quote lines vs. post-copy edits) | Rewrote view to aggregate each side independently (correlated subquery for the orçamento side) before comparing — see `db/fix_view_consistencia_vp_op_quant.sql` for the full investigation | `db/fix_view_consistencia_vp_op_quant.sql` (view redefinition, applied local only; prod = manual, also needs the index above) | Flagged rows: 1549 → 682 (was over-reporting by ~2.3×); time: 11.6s → 11.4s (same ballpark, now correct) |
 | 2026-08-04 | `view_estoque_contabil` ("Estoque Contábil" toggle) — same `HAVING`-not-`WHERE` shape as Finding 1: `contabil` (`e.quant + e.ajuste + ehc.contabil`) isn't a true aggregate, `GROUP BY` only exists to undo join fan-out | Moved `contabil > 0` into `WHERE` | `src/sql.cpp` (`Sql::view_estoque_contabil`) | 8.59s → 4.26s (2×) |
+| 2026-08-04 | `orcamento.status` unindexed — buried 4th in a composite index, unusable for the app's real default filter (`status IN ('ATIVO','EXPIRADO')`, only 1.3% of rows) | new index `idx_orcamento_status` | `db/add_index_orcamento_status.sql` (applied local only; prod = manual) | Realistic default: 487ms→195ms (2.5×); default+search (most common real case): 2.17s→42ms |
+| 2026-08-04 | `pedido_fornecedor_has_produto` OC index widened to covering (superseded the single-column one from earlier today) | `idx_pf1_ordemcompra` → `idx_pf1_ordemcompra_covering (ordemCompra, status, statusFinanceiro, idCompra, fornecedor, preco, idVenda)` | `db/add_index_pedido_fornecedor_has_produto_ordemcompra.sql` (updated; local only) | `view_compras_financeiro`: 931ms→504ms (1.85×); single-OC lookup unaffected (still ~0.03ms, one index now serves both) |
+| 2026-08-04 | `view_nfe_distribuicao` — no default-filter opportunity (all 7 status checkboxes checked by default = no-op filter), and no covering index fit the original ~25-column view (`infCpl varchar(5000)` alone exceeds InnoDB's 3072-byte key limit) | Trimmed 10 confirmed-unused columns from the view (verified: zero references anywhere in the repo/schema beyond the removed `hideColumn`/`setHeaderData` calls) + matching removal in `src/widgetnfedistribuicao.cpp` + new 15-column covering index `idx_nfe_nsu_covering` | `db/fix_view_nfe_distribuicao_trim.sql` (view + index, local only) + `src/widgetnfedistribuicao.cpp` | **2.28s → 86.7ms (26×)**. Row count unchanged (35,870), confirmed no functional loss |
 
 **Still pending**: push all new index/view scripts to production (manual step, same workflow as every
 prior `db/add_index_*.sql` in this repo).
@@ -74,7 +88,7 @@ absolute numbers). `GB` = view has a `GROUP BY`.
 | 154,249 | Y | widgetlogisticarecebimento.cpp:53 | modelRecebimento | view_recebimento | ✅ | Finding 2, `idx_estoque_status` |
 | 154,249 | Y | widgetlogisticarecebimento.cpp:83 | modelFornecedor | view_fornecedor_logistica_recebimento | ✅ | confirmed free win from `idx_estoque_status`, → 0.03ms |
 | 154,249 | Y | widgetlogisticarepresentacao.cpp:44 | modelRepresentacao | view_logistica_representacao | 🔍 | 289ms, fine |
-| 153,419 | N | widgetorcamento.cpp:60 | modelOrcamento | view_orcamento | 🔍 | Finding 5 — unbounded load 2.57s, search 2.17s; no index fix exists (no `WHERE` at all on open); needs pagination or default filter, both out of scope |
+| 153,419 | N | widgetorcamento.cpp:60 | modelOrcamento | view_orcamento | ✅ | Pagination sizing still stands for the true worst case (all status checkboxes unchecked — see Update 3), but the app's *real* default (only Ativo/Expirado checked) is highly selective (1.3%) and now indexed: `idx_orcamento_status`, 487ms→195ms, default+search 2.17s→42ms |
 | 153,036 | Y | widgetrelatorio.cpp:82 | modelRelatorio | view_relatorio | 🔍 | 212ms, fine |
 | 138,057 | N | widgetgalpao.cpp:149 | modelTranspAgend | veiculo_has_produto | 🔍 | direct table, no status column to index; base-table scans on this table measured <200ms via the views below |
 | 138,057 | N | widgetlogisticaagendarcoleta.cpp:80 | modelTranspAtual | veiculo_has_produto | 🔍 | same as above |
@@ -87,16 +101,16 @@ absolute numbers). `GB` = view has a `GROUP BY`.
 | 123,168 | Y | widgetcompraconsumos.cpp:36 | modelPedido | view_ordemcompra_resumo | 🔍 | 101ms, fine |
 | 123,168 | Y | widgetcompragerar.cpp:43 | modelResumo | view_fornecedor_compra_gerar | 🔍 | 1.36ms, fine |
 | 123,168 | N | widgetcompragerar.cpp:51 | modelProdutos | view_compras_gerar | 🔍 | 12.8ms, fine |
-| 123,168 | Y | widgetcomprahistorico.cpp:49 | modelCompras | view_compras_financeiro | 🔍 | Finding 4 — `idx_pf1_ordemcompra` removed the Sort but query is unbounded (972ms→931ms); needs pagination/default filter to actually fix, out of scope |
+| 123,168 | Y | widgetcomprahistorico.cpp:49 | modelCompras | view_compras_financeiro | ✅ | Widened `idx_pf1_ordemcompra` to a covering index (`idx_pf1_ordemcompra_covering`) — 931ms→504ms (1.85×). Still unbounded (no `WHERE`, no status filter anywhere in either consumer widget) — pagination sizing from Update 3 still stands if further improvement is wanted |
 | 123,168 | N | widgetcomprahistorico.cpp:59 | modelProdutos | pedido_fornecedor_has_produto | ✅ | Finding 3 — filtered by ordemCompra on row click, now uses `idx_pf1_ordemcompra` |
 | 123,168 | N | widgetcomprapendentes.cpp:277 | model | pedido_fornecedor_has_produto | 🚫 | false positive — local, write-only model, inserts one row per "enviar produto para compras" action, never browsed |
 | 123,168 | Y | widgetcompraresumo.cpp:11 | modelResumo | view_fornecedor_compra | 🔍 | 3.68ms, fine |
 | 123,168 | N | widgetconsistencia.cpp:48 | model1 | view_consistencia_compra | 🔍 | 228ms, fine |
-| 123,168 | Y | widgetfinanceirocompra.cpp:37 | model | view_compras_financeiro | 🔍 | same as widgetcomprahistorico.cpp:49 above |
+| 123,168 | Y | widgetfinanceirocompra.cpp:37 | model | view_compras_financeiro | ✅ | same fix as widgetcomprahistorico.cpp:49 above (`idx_pf1_ordemcompra_covering`) — this is the consumer with genuinely no status/date filter anywhere, always the full unbounded aggregation |
 | 123,168 | Y | widgetlogisticarepresentacao.cpp:72 | modelFornecedor | view_fornecedor_logistica_representacao | 🔍 | 159ms, fine |
-| 68,138 | N | widgetnfedistribuicao.cpp:172 | model | view_nfe_distribuicao | 🔍 | 2.28s unfiltered (`nsu IS NOT NULL`, ~35.9k rows, no covering index possible for the ~19 needed columns off a wide table). Same shape as Findings 5/6: status-checkbox filter is optional (`WidgetNFeDistribuicao::montaFiltro`), empty-filter case hits this full cost. Fix = pagination/default-filter, out of scope |
+| 68,138 | N | widgetnfedistribuicao.cpp:172 | model | view_nfe_distribuicao | ✅ | Trimmed 10 unused columns from the view + matching C++ change + new covering index (`idx_nfe_nsu_covering`) — 2.28s→86.7ms (26×). Pagination migration for the SEFAZ-action mechanism (`SqlPaginatedModel` is read-only, this screen needs `setData`/`multiMatch`) is still not attempted — that redesign remains High effort/risk if ever wanted, but the query cost itself is now solved without it |
 | 68,138 | N | widgetnfesaida.cpp:410 | view | view_relatorio_nfe | 🔍 | False alarm on first pass (28s unfiltered) — not representative, the widget always applies a date range; with a realistic ~3-week filter it's 9.75ms via `idx_nfe_tipo_status_created` (already fixed pre-audit) |
-| 51,881 | N | widgetvenda.cpp:22 | modelVenda | view_venda | 🔍 | Finding 6 — same shape as Orçamento, smaller today (1.39s/0.87s); no index fix exists; `venda.status` already has a leading index (`idx_status`) so a default-filter fix would be cheap *if* that's ever put in scope |
+| 51,881 | N | widgetvenda.cpp:22 | modelVenda | view_venda | 🔍 | Checked the app's real default (13 of 15 status checkboxes on) — optimizer correctly full-scans anyway (52% selectivity, `idx_status` would cost more than it saves), confirmed via `EXPLAIN` (`key=NULL` despite `idx_status` in `possible_keys`). No index fix available; 225ms in the real default state is already the optimal plan for what's shown |
 | 9,908 | N | widgetcompraavulsa.cpp:13 | modelCompra | compra_avulsa | 🔍 | 75.4ms unfiltered, fine |
 | 4,668 | N | widgetrh.cpp:71 | modelFolhaPag | folha_pagamento | 🔍 | 38.1ms unfiltered, fine |
 | 4,668 | N | widgetrh.cpp:139 | modelImportar | folha_pagamento | 🚫 | import dialog |

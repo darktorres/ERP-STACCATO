@@ -316,7 +316,16 @@ QString SqlPaginatedModel::toSqlLiteral(const QVariant &value) {
     return value.toString();
   }
 
-  return "'" + qApp->sanitizeSQL(value.toString()) + "'";
+  // ESCAPA, nao remove. qApp->sanitizeSQL() apaga + @ > < ~ * ' \ do texto, e aqui isso corrompe o
+  // cursor do keyset: a comparacao passa a ser feita contra um valor DIFERENTE do que esta na linha,
+  // e a pagina seguinte comeca no lugar errado da ordenacao - linhas somem sem erro nenhum. Medido no
+  // banco real: 'C+TAFE - ARQUITETURA E ENGENHARIA' virava 'CTAFE - ...' e pulava 911 fornecedores.
+  // A barra vem primeiro, senao ela re-escaparia a aspa. Aspa dobrada ('') vale nos dois modos do
+  // MySQL, e a barra precisa de tratamento porque o servidor nao usa NO_BACKSLASH_ESCAPES.
+  QString escapado = value.toString();
+  escapado.replace('\\', "\\\\").replace('\'', "''");
+
+  return "'" + escapado + "'";
 }
 
 QString SqlPaginatedModel::buildKeysetWhere(const QVector<KeyExpr> &keys, const QVector<QVariant> &cursorValues, const bool forward) {

@@ -16,7 +16,7 @@ public:
   };
 
   static auto pesosProdutos(const QStringList &idProdutos) -> QHash<QString, ProdutoPeso>;
-  static auto queryEstoque(const QString &match, const QString &having) -> QString;
+  static auto queryEstoque(const QString &match, const QString &where) -> QString;
   static auto queryExportarNCM() -> QString;
   static auto updateFornecedoresOrcamento(const QString idOrcamento) -> void;
   static auto updateFornecedoresVenda(const QString idVenda) -> void;

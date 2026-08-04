@@ -109,9 +109,9 @@ void WidgetEstoques::on_table_activated(const QModelIndex &index) {
 void WidgetEstoques::escolheFiltro() { ui->radioButtonEstoqueContabil->isChecked() ? montaFiltroContabil() : montaFiltro(); }
 
 void WidgetEstoques::montaFiltro() {
-  const QString having = (ui->radioButtonMaior->isChecked()) ? "restante > 0" : "restante <= 0";
+  const QString whereRestante = (ui->radioButtonMaior->isChecked()) ? "restante > 0" : "restante <= 0";
 
-  model.setQuery(Sql::queryEstoque(getMatch(), having));
+  model.setQuery(Sql::queryEstoque(getMatch(), whereRestante));
 
   model.select();
 

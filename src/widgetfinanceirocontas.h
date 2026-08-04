@@ -31,6 +31,7 @@ private:
   bool isSet = false;
   bool carregandoPagina = false;
   bool tabelaConfigurada = false;
+  QString sortPadraoAtual; // ultimo sort padrao aplicado - detecta troca de radio em montaFiltro()
   SqlPaginatedModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;

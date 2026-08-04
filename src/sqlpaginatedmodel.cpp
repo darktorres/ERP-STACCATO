@@ -274,6 +274,11 @@ QVariant SqlPaginatedModel::headerData(const int section, const Qt::Orientation 
 void SqlPaginatedModel::sort(const int column, const Qt::SortOrder order) {
   if (column < 0 or column >= fieldNames_.size() or not factory_) { return; }
 
+  // Ja esta nessa ordem: nao recarrega. Alem de evitar a query redundante, e o que deixa os widgets
+  // ajustarem a seta do cabecalho de graca - o setSortIndicator() deles emite sortIndicatorChanged,
+  // que o QTableView traduz num model->sort() com a ordem que o reset() acabou de aplicar.
+  if (fieldIndex(sortColumn_, true) == column and order == sortOrder_) { return; }
+
   sortColumn_ = fieldNames_.at(column);
   sortOrder_ = order;
   builder_ = factory_(sortColumn_, sortOrder_);

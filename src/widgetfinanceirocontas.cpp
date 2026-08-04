@@ -392,7 +392,16 @@ void WidgetFinanceiroContas::montaFiltro() {
       };
     };
 
-    model.reset(fieldNames, "idPagamento", ui->radioButtonPago->isChecked() ? "dataRealizado" : "dataPagamento", Qt::AscendingOrder, {}, factory);
+    // Preserva a ordenacao escolhida por clique de cabecalho: montaFiltro() roda a cada digitacao na
+    // busca/data/status/loja, e passar a coluna fixa aqui jogava fora a escolha do usuario (a seta do
+    // cabecalho continuava nela, mas os dados voltavam pra Vencimento). So volta ao padrao quando o
+    // PROPRIO padrao muda - o que distingue "trocou o radio" de "mexeu em outro filtro".
+    const QString sortPadrao = ui->radioButtonPago->isChecked() ? "dataRealizado" : "dataPagamento";
+    const bool usarPadrao = (sortPadrao != sortPadraoAtual) or model.sortColumn().isEmpty();
+
+    sortPadraoAtual = sortPadrao;
+
+    model.reset(fieldNames, "idPagamento", usarPadrao ? sortPadrao : model.sortColumn(), usarPadrao ? Qt::AscendingOrder : model.sortOrder(), {}, factory);
   }
 
   if (tipo == Tipo::Receber) {
@@ -557,7 +566,13 @@ void WidgetFinanceiroContas::montaFiltro() {
       };
     };
 
-    model.reset(fieldNames, "idPagamento", ui->radioButtonRecebido->isChecked() ? "dataRealizado" : "dataPagamento", Qt::AscendingOrder, {"idVenda", "tipo", "parcela"}, factory);
+    // mesma logica do Pagar acima
+    const QString sortPadrao = ui->radioButtonRecebido->isChecked() ? "dataRealizado" : "dataPagamento";
+    const bool usarPadrao = (sortPadrao != sortPadraoAtual) or model.sortColumn().isEmpty();
+
+    sortPadraoAtual = sortPadrao;
+
+    model.reset(fieldNames, "idPagamento", usarPadrao ? sortPadrao : model.sortColumn(), usarPadrao ? Qt::AscendingOrder : model.sortOrder(), {"idVenda", "tipo", "parcela"}, factory);
   }
 
   if (tipo == Tipo::Receber) {
@@ -595,6 +610,13 @@ void WidgetFinanceiroContas::montaFiltro() {
   // linha, e num model paginado o indice N vira outro registro depois de um reset (a janela volta
   // pra origem 0). Era o que deixava uma linha destacada que o usuario nunca escolheu - e fazia
   // "Reverter Pagamento"/"Excluir Lançamento" agirem nela.
+
+  // Mantem a seta do cabecalho coerente com a ordenacao que o model realmente aplicou. O QHeaderView
+  // nasce apontando pra secao 0 (DESC) e so muda por clique do usuario, entao sem isso ele mente ja
+  // na 1a abertura. Nao dispara recarga: SqlPaginatedModel::sort() sai cedo quando a ordem ja e essa.
+  const int secaoOrdenada = model.fieldIndex(model.sortColumn(), true);
+
+  if (secaoOrdenada != -1) { ui->table->horizontalHeader()->setSortIndicator(secaoOrdenada, model.sortOrder()); }
 
   // resto da configuracao da tabela depende so das colunas do model (fixas): basta uma vez
   if (tabelaConfigurada) { return; }

@@ -346,6 +346,13 @@ void WidgetNfeEntrada::montaFiltro() {
   const QString sortColumnAtual = model.sortColumn().isEmpty() ? "dataHoraEmissao" : model.sortColumn();
 
   model.reset(fieldNames, "idNFe", sortColumnAtual, model.sortOrder(), {}, factory);
+
+  // Mantem a seta do cabecalho coerente com a ordenacao que o model realmente aplicou. O QHeaderView
+  // nasce apontando pra secao 0 (DESC) e so muda por clique do usuario, entao sem isso ele mente ja
+  // na 1a abertura. Nao dispara recarga: SqlPaginatedModel::sort() sai cedo quando a ordem ja e essa.
+  const int secaoOrdenada = model.fieldIndex(model.sortColumn(), true);
+
+  if (secaoOrdenada != -1) { ui->table->horizontalHeader()->setSortIndicator(secaoOrdenada, model.sortOrder()); }
 }
 
 void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {

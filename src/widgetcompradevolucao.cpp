@@ -225,7 +225,7 @@ void WidgetCompraDevolucao::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }

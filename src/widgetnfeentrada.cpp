@@ -229,7 +229,7 @@ void WidgetNfeEntrada::montaFiltro() {
   // Vai junto no corte, nao num WHERE externo: assim o corte devolve direto as ~1000 linhas que
   // casam, em vez de o model ter que varrer o historico janela por janela ate achar alguma.
 
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
   const bool temBusca = not text.isEmpty();
 
   if (temBusca) { filtrosNFe << "(n.emitente LIKE '%" + text + "%' OR n.numeroNFe LIKE '%" + text + "%' OR r.ordemCompra LIKE '%" + text + "%' OR r.idVenda LIKE '%" + text + "%')"; }

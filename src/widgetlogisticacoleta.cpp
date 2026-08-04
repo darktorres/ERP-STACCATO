@@ -162,7 +162,7 @@ void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool checked) {
 void WidgetLogisticaColeta::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetLogisticaColeta::montaFiltro() {
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
 
   modelColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
 }

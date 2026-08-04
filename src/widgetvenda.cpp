@@ -100,13 +100,13 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
+  const QString fornecedor = qApp->escaparBusca(ui->comboBoxFornecedores->currentText());
   const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 
-  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + qApp->sanitizeSQL(User::nome) + "'" + " OR consultor = '" + qApp->sanitizeSQL(User::nome) + "')";
+  const QString filtroRadio = (ui->radioButtonTodos->isChecked()) ? "" : "(vendedor = '" + qApp->escaparSQL(User::nome) + "'" + " OR consultor = '" + qApp->escaparSQL(User::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -137,7 +137,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca +
                               "%' OR `ordemRepresentacao` LIKE '%" + textoBusca + "%')";
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }

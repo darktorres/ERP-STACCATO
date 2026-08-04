@@ -44,6 +44,8 @@ public:
   auto enqueueException(const QString &exception, QWidget *parent = nullptr) -> void;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
+  auto escaparBusca(const QString &texto) -> QString;
+  auto escaparSQL(const QString &texto) -> QString;
   auto findTag(const QString &texto, const QString &tag) -> QString;
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
@@ -64,7 +66,7 @@ public:
   auto rollbackTransaction(const QString &message) -> void;
   auto roundDouble(const double value) -> double;
   auto roundDouble(const double value, const int decimais) -> double;
-  auto sanitizeSQL(const QString &string) -> QString;
+  auto sanitizeFullText(const QString &texto) -> QString;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
   auto setSilent(const bool value) -> void;

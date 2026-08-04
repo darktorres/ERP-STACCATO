@@ -202,7 +202,7 @@ void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool check
 void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetLogisticaRecebimento::montaFiltro() {
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
 
   modelRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
 }

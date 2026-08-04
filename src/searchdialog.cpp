@@ -97,7 +97,7 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
   const auto lineEdits = ui->frameLineEdit->findChildren<QLineEdit *>();
 
-  for (const auto *lineEdit : lineEdits) { text += qApp->sanitizeSQL(lineEdit->text()); }
+  for (const auto *lineEdit : lineEdits) { text += qApp->sanitizeFullText(lineEdit->text()); }
 
   if (text.isEmpty() and model.tableName() == "profissional") { return model.setFilter("idProfissional = 1"); }
 
@@ -117,7 +117,8 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
       if (lineEdits.at(i)->text().isEmpty()) { continue; }
 
-      filtro2 << "+" + qApp->sanitizeSQL(lineEdits.at(i)->text()) + "*";
+      // fulltext boolean mode: os operadores tem que sair, nao ser escapados (ver Application::sanitizeFullText)
+      filtro2 << "+" + qApp->sanitizeFullText(lineEdits.at(i)->text()) + "*";
     }
 
     searchFilter = "MATCH(" + filtro1.join(", ") + ") AGAINST('" + filtro2.join(" ") + "' IN BOOLEAN MODE) ORDER BY numeroNFe";
@@ -129,7 +130,7 @@ void SearchDialog::on_lineEditBusca_textChanged() {
 
       QStringList parteFiltro;
 
-      parteFiltro << fullTextIndexes.at(i).index + " LIKE '%" + qApp->sanitizeSQL(lineEdits.at(i)->text()) + "%'";
+      parteFiltro << fullTextIndexes.at(i).index + " LIKE '%" + qApp->escaparBusca(lineEdits.at(i)->text()) + "%'";
 
       filtroLike << ("(" + parteFiltro.join(" AND ") + ")");
     }

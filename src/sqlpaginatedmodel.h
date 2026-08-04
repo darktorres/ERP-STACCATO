@@ -73,7 +73,7 @@ public:
   // ultima chave, assumida NOT NULL).
   static auto buildOrderBy(const QVector<KeyExpr> &keys, bool forward) -> QString;
 
-  // Converte um QVariant num literal SQL seguro (strings escapadas via qApp->sanitizeSQL, NULL,
+  // Converte um QVariant num literal SQL seguro (strings escapadas via qApp->escaparSQL, NULL,
   // datas/números formatados). Usado internamente e pelo widget ao montar os fragmentos acima.
   static auto toSqlLiteral(const QVariant &value) -> QString;
 

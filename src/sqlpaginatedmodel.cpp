@@ -316,16 +316,13 @@ QString SqlPaginatedModel::toSqlLiteral(const QVariant &value) {
     return value.toString();
   }
 
-  // ESCAPA, nao remove. qApp->sanitizeSQL() apaga + @ > < ~ * ' \ do texto, e aqui isso corrompe o
-  // cursor do keyset: a comparacao passa a ser feita contra um valor DIFERENTE do que esta na linha,
-  // e a pagina seguinte comeca no lugar errado da ordenacao - linhas somem sem erro nenhum. Medido no
-  // banco real: 'C+TAFE - ARQUITETURA E ENGENHARIA' virava 'CTAFE - ...' e pulava 911 fornecedores.
-  // A barra vem primeiro, senao ela re-escaparia a aspa. Aspa dobrada ('') vale nos dois modos do
-  // MySQL, e a barra precisa de tratamento porque o servidor nao usa NO_BACKSLASH_ESCAPES.
-  QString escapado = value.toString();
-  escapado.replace('\\', "\\\\").replace('\'', "''");
-
-  return "'" + escapado + "'";
+  // ESCAPA, nao remove: o antigo sanitizeSQL apagava + @ > < ~ * ' \ do texto, e aqui isso corrompia
+  // o cursor do keyset - a comparacao passava a ser feita contra um valor DIFERENTE do que esta na
+  // linha, e a pagina seguinte comecava no lugar errado da ordenacao, sumindo com linhas sem erro
+  // nenhum. Medido no banco real: 'C+TAFE - ARQUITETURA E ENGENHARIA' virava 'CTAFE - ...' e pulava
+  // 911 fornecedores. Curinga de LIKE nao entra aqui (isto e comparacao, nao padrao), por isso
+  // escaparSQL e nao escaparBusca.
+  return "'" + qApp->escaparSQL(value.toString()) + "'";
 }
 
 QString SqlPaginatedModel::buildKeysetWhere(const QVector<KeyExpr> &keys, const QVector<QVariant> &cursorValues, const bool forward) {

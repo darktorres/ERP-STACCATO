@@ -308,7 +308,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
+  const QString fornecedor = qApp->escaparBusca(ui->comboBoxFornecedores->currentText());
   const QString filtroFornecedor = (fornecedor == "Fornecedores") ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
@@ -338,7 +338,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
   const QString filtroBusca = "(idOrcamento LIKE '%" + textoBusca + "%' OR vendedor LIKE '%" + textoBusca + "%' OR cliente LIKE '%" + textoBusca + "%' OR profissional LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }

@@ -363,7 +363,7 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
   const QString filtroBusca = textoBusca.isEmpty() ? "" : montarLike(textoBusca);
 
   //-------------------------------------

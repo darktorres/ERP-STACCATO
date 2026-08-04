@@ -200,7 +200,7 @@ void WidgetNfeSaida::montaFiltro() {
   // "IN (subquery)" NAO correlacionado - o MySQL materializa o conjunto de idVenda uma unica vez
   // (~117ms) em vez de consultar cliente por linha de nfe.
 
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
   const bool temBusca = not text.isEmpty();
 
   if (temBusca) {

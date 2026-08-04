@@ -279,7 +279,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     // Data, termo sem match): ~25 s varrendo janela a janela contra ~1,3 s assim. As mesmas 7 colunas
     // de antes continuam pesquisáveis.
 
-    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+    const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
 
     if (not text.isEmpty()) {
       // Um ÚNICO "IN" no nível de cp: com dois IN irmãos o MySQL deixa de materializar o segundo e
@@ -461,7 +461,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     // fan-out para filtrar: "IN (subquery)" NÃO correlacionado resolve o conjunto de idVenda uma
     // única vez (mesma lógica do Pagar acima). Medido ~0,32 s no pior caso.
 
-    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+    const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
 
     if (not text.isEmpty()) {
       filtros << "(cr.idVenda LIKE '%" + text + "%' OR cr.contraParte LIKE '%" + text + "%' OR cr.observacao LIKE '%" + text +

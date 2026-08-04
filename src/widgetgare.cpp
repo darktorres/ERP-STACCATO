@@ -85,7 +85,7 @@ void WidgetGare::montaFiltro() {
 
   //------------------------------------- filtro busca
 
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
 
   if (not textoBusca.isEmpty()) { filtros << "n.numeroNFe LIKE '%" + textoBusca + "%'"; }
 

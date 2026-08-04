@@ -127,7 +127,7 @@ void WidgetEstoques::montaFiltroContabil() {
 }
 
 QString WidgetEstoques::getMatch() const {
-  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString textoBusca = qApp->escaparBusca(ui->lineEditBusca->text());
 
   if (textoBusca.isEmpty()) { return QString(); }
 

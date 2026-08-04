@@ -490,12 +490,39 @@ double Application::roundDouble(const double value, const int decimais) {
   return std::round(value * multiploDez) / multiploDez;
 }
 
-QString Application::sanitizeSQL(const QString &string) {
-  QString sanitized = string;
+// Escapa um texto para caber num literal SQL ('...'). Serve para igualdade e para qualquer texto
+// embutido numa query montada como string. A barra vem antes da aspa, senao ela re-escaparia a aspa;
+// e a barra precisa de tratamento porque o servidor nao usa NO_BACKSLASH_ESCAPES.
+QString Application::escaparSQL(const QString &texto) {
+  QString escapado = texto;
 
-  sanitized.remove("+").remove("@").remove(">").remove("<").remove("~").remove("*").remove("'").remove(R"(\)");
+  escapado.replace('\\', R"(\\)").replace('\'', "''");
 
-  return sanitized;
+  return escapado;
+}
+
+// Idem, mais os curingas do LIKE. Sao DOIS niveis de escape, nesta ordem: primeiro o padrao do LIKE
+// (onde a barra e o caractere de escape), depois o literal SQL - que redobra as barras postas pelo
+// passo anterior, que e exatamente o que o MySQL espera ao interpretar o literal antes do LIKE.
+// Ex.: o usuario digita 100%  ->  100\\%  ->  o MySQL le o literal como 100\%  ->  o LIKE casa "100%".
+QString Application::escaparBusca(const QString &texto) {
+  QString escapado = texto;
+
+  escapado.replace('\\', R"(\\)").replace('%', R"(\%)").replace('_', R"(\_)"); // nivel LIKE
+
+  return escaparSQL(escapado); // nivel literal
+}
+
+// Remove os operadores do fulltext boolean mode do MySQL (+ - > < ( ) ~ * " @) e so entao escapa o
+// literal. E o unico contexto em que REMOVER e a resposta certa: em boolean mode a barra nao escapa
+// operador, entao nao ha como literalizar - e deixar o texto do usuario passar reescreve a semantica
+// da busca, ou derruba a query ("(" desbalanceado devolve ERROR 1064).
+QString Application::sanitizeFullText(const QString &texto) {
+  QString limpo = texto;
+
+  for (const auto caractere : {'+', '-', '>', '<', '(', ')', '~', '*', '"', '@'}) { limpo.remove(caractere); }
+
+  return escaparSQL(limpo);
 }
 
 int Application::reservarIdEstoque() {

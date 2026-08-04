@@ -134,7 +134,7 @@ void WidgetCompraConsumos::desfazerConsumo(const QModelIndexList &list) {
 void WidgetCompraConsumos::on_lineEditBusca_textChanged() { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
-  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const QString text = qApp->escaparBusca(ui->lineEditBusca->text());
   const QString filtroBusca = text.isEmpty() ? "0" : "(Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%')";
 
   modelPedido.setFilter(filtroBusca);

@@ -17,12 +17,10 @@
 
 #include <QAuthenticator>
 #include <QComboBox>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
-#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFile>
 #include <QFormLayout>
@@ -91,6 +89,7 @@ void WidgetNfeEntrada::unsetConnections() {
   disconnect(ui->lineEditBusca, &LineEdit::delayedTextChanged, this, &WidgetNfeEntrada::montaFiltro);
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked);
   disconnect(ui->pushButtonExportarExcel, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarExcel_clicked);
+  disconnect(ui->pushButtonExportarMes, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportarMes_clicked);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonFollowup_clicked);
   disconnect(ui->pushButtonInutilizarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
@@ -103,12 +102,12 @@ void WidgetNfeEntrada::updateTables() {
     ui->dateEditAte->setDate(qApp->serverDate());
     ui->dateEditDe->setDate(QDate(qApp->serverDate().year(), qApp->serverDate().month(), 1));
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-    setupTables();
+    setupTables(); // ja chama montaFiltro() para popular as colunas do model
     setConnections();
     isSet = true;
+  } else {
+    montaFiltro();
   }
-
-  montaFiltro();
 
   // ---------------------------------------------------
 
@@ -165,6 +164,7 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->tableResumo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->tableResumo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 }
 
 void WidgetNfeEntrada::onTableScrolled(const int value) {
@@ -172,25 +172,24 @@ void WidgetNfeEntrada::onTableScrolled(const int value) {
 
   carregandoPagina = true;
 
-  QElapsedTimer timer;
-  timer.start();
-
   try {
     auto *scrollBar = ui->table->verticalScrollBar();
     const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
 
-    qDebug() << "[WidgetNfeEntrada] onTableScrolled: value=" << value << "max=" << scrollBar->maximum() << "threshold=" << threshold;
+    // ver nota em WidgetFinanceiroContas::onTableScrolled: o QTableView nao reancora o scrollbar
+    // quando linhas entram/saem acima do viewport
+    int deslocamento = 0;
 
-    if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
-    if (value <= threshold) { model.tryLoadPrevious(); }
+    if (value >= scrollBar->maximum() - threshold) { deslocamento += model.tryLoadNext(); }
+    if (value <= threshold) { deslocamento += model.tryLoadPrevious(); }
+
+    if (deslocamento != 0) { scrollBar->setValue(scrollBar->value() + deslocamento); }
   } catch (...) {
     carregandoPagina = false;
     throw;
   }
 
   carregandoPagina = false;
-
-  qDebug() << "[WidgetNfeEntrada] onTableScrolled: total" << timer.elapsed() << "ms";
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
@@ -219,14 +218,16 @@ void WidgetNfeEntrada::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtrosNFe;    // tocam só n.* — entram na subquery de corte, antes do JOIN
-  QStringList filtrosResumo; // tocam r.* (join com nfe_resumo_compra) — só no WHERE externo, depois do join
+  QStringList filtrosNFe; // entram na subquery de corte (o corte ja junta nfe_resumo_compra)
 
   //------------------------------------- filtro texto
+  // Vai junto no corte, nao num WHERE externo: assim o corte devolve direto as ~1000 linhas que
+  // casam, em vez de o model ter que varrer o historico janela por janela ate achar alguma.
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const bool temBusca = not text.isEmpty();
 
-  if (not text.isEmpty()) { filtrosResumo << "(n.emitente LIKE '%" + text + "%' OR n.numeroNFe LIKE '%" + text + "%' OR r.ordemCompra LIKE '%" + text + "%' OR r.idVenda LIKE '%" + text + "%')"; }
+  if (temBusca) { filtrosNFe << "(n.emitente LIKE '%" + text + "%' OR n.numeroNFe LIKE '%" + text + "%' OR r.ordemCompra LIKE '%" + text + "%' OR r.idVenda LIKE '%" + text + "%')"; }
 
   //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
@@ -286,13 +287,18 @@ void WidgetNfeEntrada::montaFiltro() {
       {"dataFollowup", "nhf.dataFollowup"}, {"observacao", "nhf.observacao"},
   };
 
+  // "Data Followup"/"Observação" vêm de nfe_has_followup: ordenar por elas exige repetir esse join
+  // na subquery de corte (mesma lógica da Saída) — sem isso o corte referencia "nhf." sem tê-lo no
+  // FROM e o MySQL devolve "Unknown column 'nhf.dataFollowup' in 'field list'"
+  static const QSet<QString> colunasComJoinFollowup = {"dataFollowup", "observacao"};
+
   const QStringList filtrosNFeCopia = filtrosNFe;
-  const QStringList filtrosResumoCopia = filtrosResumo;
 
-  const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosNFeCopia, filtrosResumoCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+  const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosNFeCopia, temBusca](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
     const QString sortExpr = exprPorCampo.value(sortColumn, "n.dataHoraEmissao");
+    const bool precisaJoinFollowup = colunasComJoinFollowup.contains(sortColumn);
 
-    return [filtrosNFeCopia, filtrosResumoCopia, sortExpr, order](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+    return [filtrosNFeCopia, temBusca, sortExpr, order, precisaJoinFollowup](const SqlPaginatedModel::PageRequest &request) -> QString {
       const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
       QStringList capFiltros;
@@ -307,16 +313,19 @@ void WidgetNfeEntrada::montaFiltro() {
 
       // FORCE INDEX: sem isso o otimizador as vezes escolhe um indice so de status (nao-covering,
       // bookmark lookup linha a linha) quando ha filtro de status/utilizada sem filtro de data -
-      // medido ~2-4s contra ~50-170ms com o indice forcado (ver db/add_index_nfe_tipo_status_utilizada_data.sql)
-      // SELECT traz tambem a coluna de ordenacao (alem do idNFe): usado como rawPeekSql pelo model
-      // pra avancar o cursor quando a busca (filtrosResumoCopia, aplicado so depois do JOIN) filtra
-      // uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
-      const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, n.idNFe AS idNFe FROM nfe n FORCE INDEX (idx_nfe_tipo_status_utilizada_data) LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe WHERE " +
-                             capFiltros.join(" AND ") + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+      // medido ~2-4s contra ~50-170ms com o indice forcado (ver db/add_index_nfe_tipo_status_utilizada_data.sql).
+      // MAS com busca ativa ele atrapalha: o indice nao cobre emitente/numeroNFe, entao o MySQL le a
+      // linha inteira de `nfe` (tabela de ~2,9 GB por causa da coluna xml) - medido 1,6s com o indice
+      // forcado contra 0,5s deixando o otimizador escolher.
+      const QString forceIndex = temBusca ? "" : " FORCE INDEX (idx_nfe_tipo_status_utilizada_data)";
+      const QString capJoinFollowup = precisaJoinFollowup ? " LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" : "";
+
+      const QString capSql = "SELECT n.idNFe AS idNFe FROM nfe n" + forceIndex + " LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe" + capJoinFollowup + " WHERE " + capFiltros.join(" AND ") +
+                             " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
       const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
-      const QString displaySql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
+      return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjDest AS `CNPJ Dest`, n.emitente AS Emitente, "
              "r.fornecedor AS Fornecedor, n.numeroNFe AS NFe, n.status AS Status, "
              "r.recebidoPor AS `Recebido Por`, r.dataRealReceb AS `Data Receb`, "
              "r.gare AS GARE, r.garePagoEm AS `GARE Pago Em`, "
@@ -328,10 +337,9 @@ void WidgetNfeEntrada::montaFiltro() {
              ") lim "
              "JOIN nfe n ON n.idNFe = lim.idNFe "
              "LEFT JOIN nfe_resumo_compra r ON r.idNFe = n.idNFe "
-             "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)" +
-             (filtrosResumoCopia.isEmpty() ? "" : " WHERE " + filtrosResumoCopia.join(" AND ")) + " ORDER BY " + exibicaoOrderBy;
-
-      return {displaySql, capSql};
+             "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup)"
+             " ORDER BY " +
+             exibicaoOrderBy;
     };
   };
 
@@ -349,12 +357,18 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 
   const int row = selection.first().row();
 
+  // idNFe resolvido ANTES do diálogo: o model é paginado (janela deslizante), então index.row() só
+  // identifica uma linha enquanto a janela não for recarregada — e o event loop aninhado do
+  // msgBox.exec() permite que um timer (busca com atraso, reconexão do banco) dispare montaFiltro()
+  // e troque as linhas debaixo do índice. Inutilizar a NF-e errada apaga estoque/compras/GARE.
+  const QVariant idNFe = model.data(row, "idNFe");
+
   //--------------------------------------------------------------
 
   SqlQuery query;
   query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'SEPARADO', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
-  query.bindValue(":idNFe", model.data(row, "idNFe"));
+  query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { throw RuntimeException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
@@ -374,7 +388,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
 
   qApp->startTransaction("WidgetNfeEntrada::on_pushButtonInutilizarNFe");
 
-  inutilizar(row);
+  inutilizar(idNFe);
 
   qApp->endTransaction();
 
@@ -382,7 +396,7 @@ void WidgetNfeEntrada::on_pushButtonInutilizarNFe_clicked() {
   qApp->enqueueInformation("Inutilizado com sucesso!", this);
 }
 
-void WidgetNfeEntrada::inutilizar(const int row) {
+void WidgetNfeEntrada::inutilizar(const QVariant &idNFe) {
   // TODO: em vez de deletar linhas apenas marcar como cancelado?
 
   SqlQuery queryPedidoFornecedor;
@@ -390,7 +404,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
       "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
       "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryPedidoFornecedor.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryPedidoFornecedor.bindValue(":idNFe", idNFe);
 
   if (not queryPedidoFornecedor.exec()) { throw RuntimeException("Erro voltando compra para faturamento: " + queryPedidoFornecedor.lastError().text()); }
 
@@ -401,7 +415,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
       "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
       "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` IN (SELECT "
       "`idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryVendaProduto.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryVendaProduto.bindValue(":idNFe", idNFe);
 
   if (not queryVendaProduto.exec()) { throw RuntimeException("Erro voltando venda para faturamento: " + queryVendaProduto.lastError().text()); }
 
@@ -409,7 +423,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryEstoque;
   queryEstoque.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
-  queryEstoque.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryEstoque.bindValue(":idNFe", idNFe);
 
   if (not queryEstoque.exec()) { throw RuntimeException("Erro buscando consumos: " + queryEstoque.lastError().text()); }
 
@@ -426,7 +440,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryDeleteCompra;
   queryDeleteCompra.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
-  queryDeleteCompra.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryDeleteCompra.bindValue(":idNFe", idNFe);
 
   if (not queryDeleteCompra.exec()) { throw RuntimeException("Erro removendo compras: " + queryDeleteCompra.lastError().text()); }
 
@@ -434,7 +448,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryProduto;
   queryProduto.prepare("UPDATE produto SET desativado = TRUE WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  queryProduto.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryProduto.bindValue(":idNFe", idNFe);
 
   if (not queryProduto.exec()) { throw RuntimeException("Erro removendo produto estoque: " + queryProduto.lastError().text()); }
 
@@ -442,7 +456,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryCancelaEstoque;
   queryCancelaEstoque.prepare("UPDATE estoque SET status = 'CANCELADO', idNFe = NULL WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  queryCancelaEstoque.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryCancelaEstoque.bindValue(":idNFe", idNFe);
 
   if (not queryCancelaEstoque.exec()) { throw RuntimeException("Erro removendo estoque: " + queryCancelaEstoque.lastError().text()); }
 
@@ -450,7 +464,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryCancelaGare;
   queryCancelaGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE idNFe = :idNFe AND status IN ('PENDENTE GARE', 'LIBERADO GARE')");
-  queryCancelaGare.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryCancelaGare.bindValue(":idNFe", idNFe);
 
   if (not queryCancelaGare.exec()) { throw RuntimeException("Erro removendo GARE: " + queryCancelaGare.lastError().text()); }
 
@@ -458,7 +472,7 @@ void WidgetNfeEntrada::inutilizar(const int row) {
 
   SqlQuery queryUpdateNFe;
   queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE WHERE idNFe = :idNFe");
-  queryUpdateNFe.bindValue(":idNFe", model.data(row, "idNFe"));
+  queryUpdateNFe.bindValue(":idNFe", idNFe);
 
   if (not queryUpdateNFe.exec()) { throw RuntimeException("Erro marcando NF-e como não utilizada: " + queryUpdateNFe.lastError().text()); }
 }

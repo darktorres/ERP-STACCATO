@@ -30,6 +30,7 @@ private:
   // attributes
   bool isSet = false;
   bool carregandoPagina = false;
+  bool tabelaConfigurada = false;
   SqlPaginatedModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
@@ -38,6 +39,7 @@ private:
   // methods
   auto filtrarPorResumo(const QModelIndex &index, const SqlQueryModel &resumo) -> void;
   auto filtrosContasPagar() const -> QString;
+  auto idsPagamentoSelecionados() const -> QVariantList;
   auto montaFiltro() -> void;
   auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
   auto onTableScrolled(const int value) -> void;

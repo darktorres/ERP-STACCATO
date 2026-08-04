@@ -70,8 +70,12 @@ void TableView::setStoredSelection(bool newStoredSelection) {
   if (not mdl) { return; }
 
   if (storedSelection) {
-    connect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection);
-    connect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection);
+    // UniqueConnection: alguns widgets chamam setStoredSelection() a cada montaFiltro(), o que sem
+    // isso acumula uma conexao nova por filtragem ao longo da sessao
+    const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+    connect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection, connectionType);
+    connect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection, connectionType);
   } else {
     disconnect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection);
     disconnect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection);
@@ -121,8 +125,8 @@ int TableView::rowCount() const { return model()->rowCount(); }
 void TableView::storeSelection() {
   const auto selection = selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return; }
-
+  // limpa tambem quando nao ha selecao: sem isso a selecao anterior fica guardada e o
+  // restoreSelection() do proximo reset "ressuscita" linhas que o usuario ja tinha desmarcado
   selectedRows.clear();
 
   for (auto index : selection) { selectedRows << index.row(); }
@@ -190,11 +194,15 @@ void TableView::setModel(QAbstractItemModel *model) {
   //---------------------------------------
 
   // Connect signals using the generic model (works for both SQL and non-SQL models)
-  connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView);
-  connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView);
-  connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView);
-  connect(model, &QAbstractItemModel::rowsInserted, this, &TableView::redoView);
-  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView);
+  // UniqueConnection: widgets que chamam setModel(&model) com o mesmo ponteiro a cada montaFiltro()
+  // (ex.: WidgetFinanceiroContas) acumulariam uma conexao nova por filtragem
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView, connectionType);
+  connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView, connectionType);
+  connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView, connectionType);
+  connect(model, &QAbstractItemModel::rowsInserted, this, &TableView::redoView, connectionType);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView, connectionType);
 
   //---------------------------------------
 

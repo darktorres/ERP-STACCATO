@@ -16,6 +16,10 @@
 // Quem monta o SQL de cada pagina e quem chama (nao a classe): ela só pede, via
 // QueryBuilderFactory, "me dê o construtor de página para esta coluna/ordem", e usa o construtor
 // devolvido para pedir cada página (1a, seguinte, anterior).
+//
+// IMPORTANTE para quem consome: o indice de linha e a posicao dentro da JANELA carregada, nao a
+// posicao absoluta no resultado - e a janela volta pra origem 0 a cada reset(). Nunca guarde um
+// indice de linha atravessando um dialogo/event loop aninhado; resolva a chave (id) antes.
 class SqlPaginatedModel final : public QAbstractTableModel {
   Q_OBJECT
 
@@ -38,20 +42,12 @@ public:
     Direction direction = Direction::First;
   };
 
-  // SQL de uma pagina: displaySql e a query completa de exibicao (joins + busca aplicada, como
-  // antes). rawPeekSql e a subquery de corte "crua" sozinha (sem busca, sem os joins de exibicao),
-  // com o SELECT estendido para trazer as colunas de keyset (coluna de ordenacao + extraKeys +
-  // idField, nessa ordem - mesma ordem de keyFieldNames()) em vez de so o id. Normalmente e o
-  // "capSql" que o widget ja monta internamente, devolvido tal e qual. Usado pelo model pra
-  // continuar avançando o cursor quando a busca filtra uma pagina inteira (ver tryLoadNext()).
-  struct PageSql {
-    QString displaySql;
-    QString rawPeekSql;
-  };
-
   // Monta o SQL completo de uma pagina dado o pedido. Implementado pelo widget (reaproveita a
-  // logica de filtros/joins que ele ja tem).
-  using PageQueryBuilder = std::function<PageSql(const PageRequest &request)>;
+  // logica de filtros/joins que ele ja tem). O widget e responsavel por aplicar TODOS os filtros
+  // (inclusive a busca por texto) ja na subquery de corte, de modo que a query devolva exatamente
+  // as linhas da pagina - o model conta com "linhas devolvidas == tamanho do corte" para saber se
+  // ainda ha historico adiante.
+  using PageQueryBuilder = std::function<QString(const PageRequest &request)>;
 
   // Dado o nome da coluna de ordenacao (um de fieldNames) e a ordem, devolve o construtor de
   // pagina pra essa combinacao especifica (permite ao widget mudar quais tabelas o JOIN de corte
@@ -85,7 +81,7 @@ public:
   // colunas na ordem do SELECT de cada pagina (usado por data(row,QString) e headerData()).
   // idFieldName: campo (dentre fieldNames) usado como desempate final/unico da paginacao por
   // keyset - deve ser NOT NULL (ex.: "idNFe", "idPagamento"). extraKeyFieldNames: desempates fixos
-  // adicionais aplicados entre a coluna de ordenacao (que pode mudar por clique de cabecalho, via
+  // adicionais aplicados entre a coluna de ordenacao (que pode mudar por clique de cabeçalho, via
   // sort()) e idFieldName - vazio na maioria dos casos; usado quando a ordem padrão da tela
   // precisa preservar um desempate composto (ex.: Financeiro Receber: idVenda, tipo, parcela).
   auto reset(const QStringList &fieldNames, const QString &idFieldName, const QString &sortColumn, Qt::SortOrder order, const QStringList &extraKeyFieldNames, const QueryBuilderFactory &factory) -> void;
@@ -96,9 +92,12 @@ public:
   auto sortOrder() const -> Qt::SortOrder;
   auto hasMoreAfter() const -> bool;
 
-  // Chamado pelo widget quando a rolagem chega perto do fim/inicio da janela carregada.
-  auto tryLoadNext() -> void;
-  auto tryLoadPrevious() -> void;
+  // Chamado pelo widget quando a rolagem chega perto do fim/inicio da janela carregada. Devolve
+  // quantas linhas foram acrescentadas ACIMA do indice 0 menos quantas foram removidas de la - ou
+  // seja, de quanto o conteudo deslizou. O widget soma isso ao valor do scrollbar para o usuario
+  // continuar vendo as mesmas linhas (o QTableView nao reancora sozinho).
+  auto tryLoadNext() -> int;
+  auto tryLoadPrevious() -> int;
 
   // Acessores no estilo dos outros models do projeto (SqlQueryModel/SqlTableModel).
   auto data(const int row, const QString &column) const -> QVariant;
@@ -112,26 +111,15 @@ public:
   auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant override;
   auto sort(int column, Qt::SortOrder order = Qt::AscendingOrder) -> void override;
 
-signals:
-  void moreAvailableChanged(bool moreAvailable);
-
 private:
   static constexpr int PAGE_SIZE = 1000;
   static constexpr int MAX_ROWS = 3 * PAGE_SIZE;
-  // Quando a busca filtra uma janela inteira, o model "espia" (rawPeekSql, sem busca/joins) e
-  // avanca o cursor pra tentar a proxima janela, repetindo ate achar linhas ou esgotar o cru. Limite
-  // por chamada de tryLoadNext/tryLoadPrevious (rolagem) - se estourar, o cursor fica avancado e a
-  // proxima rolagem continua dali (nao reinicia). Bem maior em loadFirstPage() pois lá, se parar sem
-  // achar nada, a tabela fica sem linha nenhuma (sem scrollbar) e o usuario nao tem como pedir mais.
-  static constexpr int MAX_PEEK_LOOPS_SCROLL = 50;
-  static constexpr int MAX_PEEK_LOOPS_FIRST = 10000;
 
   auto loadFirstPage() -> void;
   auto runQuery(const QString &sql) -> QVector<QVector<QVariant>>;
   auto keyFieldNames() const -> QStringList; // {sortColumn_} + extraKeyFieldNames_ + {idFieldName_}
   auto edgeKeyValues(const QVector<QVariant> &row) const -> QVector<QVariant>;
   auto updateEdgeKeys() -> void;
-  auto emitMoreAvailableIfChanged() -> void;
 
   QStringList fieldNames_;
   QHash<QString, QString> headerLabels_;
@@ -147,5 +135,4 @@ private:
   QVector<QVariant> lastKeyValues_;
   bool hasMoreAfter_ = false;
   bool hasMoreBefore_ = false;
-  bool lastMoreAvailable_ = false;
 };

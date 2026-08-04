@@ -99,8 +99,16 @@ void WidgetFinanceiroContas::onTableScrolled(const int value) {
     auto *scrollBar = ui->table->verticalScrollBar();
     const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
 
-    if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
-    if (value <= threshold) { model.tryLoadPrevious(); }
+    // O QTableView guarda o indice da 1a linha visivel como valor do scrollbar e nao o reancora
+    // quando linhas entram/saem ACIMA do viewport. Sem somar o deslocamento, carregar uma pagina faz
+    // o conteudo sob o cursor pular ~1000 linhas - e, rolando pra cima, dispara em cascata (o valor
+    // continua dentro do threshold, entao o proximo evento carrega outra pagina).
+    int deslocamento = 0;
+
+    if (value >= scrollBar->maximum() - threshold) { deslocamento += model.tryLoadNext(); }
+    if (value <= threshold) { deslocamento += model.tryLoadPrevious(); }
+
+    if (deslocamento != 0) { scrollBar->setValue(scrollBar->value() + deslocamento); }
   } catch (...) {
     carregandoPagina = false;
     throw;
@@ -258,13 +266,32 @@ void WidgetFinanceiroContas::montaFiltro() {
     const QString loja = (ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty()) ? "cp.idLoja = " + ui->itemBoxLojas->getId().toString() : "";
     if (not loja.isEmpty()) { filtros << loja; }
 
-    //------------------------------------- busca: toca colunas agregadas (GROUP_CONCAT via o fan-out
-    // cp2->pf2->ehc->e->n) — só pode ser aplicada depois do GROUP BY, na página já cortada (<=1000 linhas)
+    //------------------------------------- busca: entra na própria subquery de corte
+    // As colunas O.C./NF-e/Venda(pf2)/Cód. Forn. só existem via o fan-out cp2->pf2->ehc->e->n, mas
+    // não é preciso rodar o fan-out para filtrar: basta perguntar às tabelas filhas quais idPagamento
+    // casam, com "IN (subquery)" NÃO correlacionado — o MySQL materializa cada conjunto uma única vez
+    // em vez de consultá-lo por linha de cp. Medido no banco real (pior caso: "Todos", sem filtro de
+    // Data, termo sem match): ~25 s varrendo janela a janela contra ~1,3 s assim. As mesmas 7 colunas
+    // de antes continuam pesquisáveis.
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = text.isEmpty() ? ""
-                                         : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text +
-                                               "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%' OR codFornecedor LIKE '%" + text + "%')";
+
+    if (not text.isEmpty()) {
+      // Um ÚNICO "IN" no nível de cp: com dois IN irmãos o MySQL deixa de materializar o segundo e
+      // passa a reavaliá-lo por linha (medido 4,9 s contra 1,8 s aninhando o ramo de NF-e dentro do
+      // mesmo IN). O termo de numeroNFe entra como mais um OR do pf2, não como um IN separado.
+      filtros << "(cp.contraParte LIKE '%" + text + "%' OR cp.idVenda LIKE '%" + text + "%' OR cp.observacao LIKE '%" + text +
+                     "%'"
+                     " OR cp.idPagamento IN (SELECT cp2.idPagamento FROM conta_a_pagar_has_idcompra cp2"
+                     " WHERE cp2.idCompra IN (SELECT pf2.idCompra FROM pedido_fornecedor_has_produto2 pf2"
+                     " WHERE pf2.ordemCompra LIKE '%" +
+                     text + "%' OR pf2.idVenda LIKE '%" + text + "%' OR pf2.codFornecedor LIKE '%" + text +
+                     "%'"
+                     " OR pf2.idPedido2 IN (SELECT ehc.idPedido2 FROM estoque_has_compra ehc"
+                     " WHERE ehc.idEstoque IN (SELECT e.idEstoque FROM estoque e"
+                     " WHERE e.idNFe IN (SELECT n.idNFe FROM nfe n WHERE n.numeroNFe LIKE '%" +
+                     text + "%'))))))";
+    }
 
     //------------------------------------- colunas, expressao SQL de cada uma (pra ORDER BY/keyset da paginacao)
 
@@ -291,16 +318,15 @@ void WidgetFinanceiroContas::montaFiltro() {
     static const QSet<QString> colunasComFanOut = {"ordemCompra", "numeroNFe", "idNFe", "statusFinanceiro", "pf2_idVenda", "codFornecedor"};
 
     const QStringList filtrosCopia = filtros;
-    const QString buscaCopia = busca;
 
-    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
       const QString sortExpr = exprPorCampo.value(sortColumn, "cp.dataPagamento");
       // nome (sem qualificador de tabela) do mesmo campo, pro ORDER BY de exibicao - que roda sobre o
       // wrapper "SELECT * FROM (...) x" abaixo, onde "cp" ja saiu de escopo (so os apelidos de x valem)
       const QString sortFieldExibicao = exprPorCampo.contains(sortColumn) ? sortColumn : "dataPagamento";
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, sortFieldExibicao, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+      return [filtrosCopia, sortExpr, sortFieldExibicao, order, precisaFanOut](const SqlPaginatedModel::PageRequest &request) -> QString {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         const QVector<SqlPaginatedModel::KeyExpr> keys = {{sortExpr, order}, {"cp.idPagamento", order}};
@@ -329,18 +355,15 @@ void WidgetFinanceiroContas::montaFiltro() {
         const QString capGroupBy = precisaFanOut ? " GROUP BY cp.idPagamento" : "";
         const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
 
-        // SELECT traz tambem a coluna de ordenacao (alem do idPagamento): usado como rawPeekSql
-        // pelo model pra avancar o cursor quando a busca (aplicada so depois do JOIN/GROUP BY, no
-        // wrapper "x" abaixo) filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
-        const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, cp.idPagamento AS idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " +
+        const QString capSql = "SELECT cp.idPagamento AS idPagamento FROM conta_a_pagar_has_pagamento cp" + forceIndex + capJoins + " WHERE " +
                                (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
 
         // keys usa "cp." (valido dentro do capSql acima) - o ORDER BY de exibicao roda fora do wrapper
-        // "x" (ver displaySql abaixo), onde so os apelidos sem qualificador existem
+        // "x" (a query de exibicao abaixo), onde so os apelidos sem qualificador existem
         const QVector<SqlPaginatedModel::KeyExpr> keysExibicao = {{sortFieldExibicao, order}, {"idPagamento", order}};
         const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keysExibicao, true); // exibicao sempre na ordem normal
 
-        const QString displaySql = "SELECT * FROM ("
+        return "SELECT * FROM ("
                "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataEmissao` AS `dataEmissao`, "
                "`cp`.`dataPagamento` AS `dataPagamento`, `cp`.`dataRealizado` AS `dataRealizado`, `cp`.`idVenda` AS `idVenda`, "
                "GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
@@ -359,12 +382,13 @@ void WidgetFinanceiroContas::montaFiltro() {
                "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON cp2.idCompra = pf2.idCompra "
                "LEFT JOIN estoque_has_compra ehc ON ehc.idPedido2 = pf2.idPedido2 "
                "LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque "
-               "LEFT JOIN nfe n ON n.idNFe = e.idNFe "
+               // FORCE INDEX: só precisamos de numeroNFe/idNFe, e nfe_tipo_index (idNFe, tipo, numeroNFe)
+               // cobre isso. Sem ele o MySQL lê a linha inteira de `nfe` — tabela de ~2,9 GB por causa da
+               // coluna xml — medido 450 ms contra 119 ms por janela de 1000 linhas.
+               "LEFT JOIN nfe n FORCE INDEX (nfe_tipo_index) ON n.idNFe = e.idNFe "
                "GROUP BY cp.idPagamento"
-               ") x " +
-               buscaCopia + " ORDER BY " + exibicaoOrderBy;
-
-        return {displaySql, capSql};
+               ") x ORDER BY " +
+               exibicaoOrderBy;
       };
     };
 
@@ -418,11 +442,19 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     filtros << "cr.representacao = FALSE";
 
-    //------------------------------------- busca: "ordemRepresentacao" só existe via o fan-out
-    // venda->pf2 (1:N) — usa os apelidos da página já agregada/cortada (<=1000 linhas), igual ao Pagar
+    //------------------------------------- busca: entra na própria subquery de corte
+    // "ordemRepresentacao" só existe via o fan-out venda->pf2 (1:N), mas não é preciso rodar o
+    // fan-out para filtrar: "IN (subquery)" NÃO correlacionado resolve o conjunto de idVenda uma
+    // única vez (mesma lógica do Pagar acima). Medido ~0,32 s no pior caso.
 
     const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
-    const QString busca = text.isEmpty() ? "" : "(idVenda LIKE '%" + text + "%' OR ordemRepresentacao LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
+
+    if (not text.isEmpty()) {
+      filtros << "(cr.idVenda LIKE '%" + text + "%' OR cr.contraParte LIKE '%" + text + "%' OR cr.observacao LIKE '%" + text +
+                     "%'"
+                     " OR cr.idVenda IN (SELECT pf2.idVenda FROM pedido_fornecedor_has_produto2 pf2 WHERE pf2.ordemRepresentacao LIKE '%" +
+                     text + "%'))";
+    }
 
     //------------------------------------- colunas, expressao SQL de cada uma (pra ORDER BY/keyset da paginacao)
 
@@ -455,9 +487,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     static const QVector<SqlPaginatedModel::KeyExpr> extraKeysFixasExibicao = {{"idVenda", Qt::AscendingOrder}, {"tipo", Qt::AscendingOrder}, {"parcela", Qt::DescendingOrder}};
 
     const QStringList filtrosCopia = filtros;
-    const QString buscaCopia = busca;
-
-    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia, buscaCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+    const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
       const QString sortExpr = exprPorCampo.value(sortColumn, "cr.dataPagamento");
       // nome (sem qualificador de tabela) do mesmo campo, pro ORDER BY de exibicao - que roda sobre o
       // wrapper "SELECT * FROM (...) x" abaixo, onde "cr" ja saiu de escopo (so os apelidos de x valem)
@@ -465,7 +495,7 @@ void WidgetFinanceiroContas::montaFiltro() {
       const bool precisaFanOut = colunasComFanOut.contains(sortColumn);
       const bool precisaJoinVenda = precisaFanOut or colunasComJoinVenda.contains(sortColumn);
 
-      return [filtrosCopia, buscaCopia, sortExpr, sortFieldExibicao, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+      return [filtrosCopia, sortExpr, sortFieldExibicao, order, precisaFanOut, precisaJoinVenda](const SqlPaginatedModel::PageRequest &request) -> QString {
         const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
         QVector<SqlPaginatedModel::KeyExpr> keys;
@@ -499,11 +529,7 @@ void WidgetFinanceiroContas::montaFiltro() {
         const QString capGroupBy = precisaFanOut ? " GROUP BY cr.idPagamento" : "";
         const QString capHavingClause = capHaving.isEmpty() ? "" : " HAVING " + capHaving;
 
-        // SELECT traz tambem as colunas de ordenacao/desempate (alem do idPagamento), na mesma
-        // ordem de keyFieldNames() (sortColumn + idVenda/tipo/parcela + idPagamento): usado como
-        // rawPeekSql pelo model pra avancar o cursor quando a busca (aplicada so no wrapper "x"
-        // abaixo) filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
-        const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, cr.idVenda AS idVenda, cr.tipo AS tipo, cr.parcela AS parcela, cr.idPagamento AS idPagamento FROM conta_a_receber_has_pagamento cr" +
+        const QString capSql = "SELECT cr.idPagamento AS idPagamento FROM conta_a_receber_has_pagamento cr" +
                                forceIndex + capJoinVenda + capJoinPf2 + " WHERE " + (capFiltros.isEmpty() ? "1" : capFiltros.join(" AND ")) + capGroupBy + capHavingClause + " ORDER BY " + capOrderBy +
                                " LIMIT " + QString::number(1000);
 
@@ -513,7 +539,7 @@ void WidgetFinanceiroContas::montaFiltro() {
         // que tambem existem como coluna real de pf2 (pf2.idVenda, pf2.ordemRepresentacao) - direto num
         // HAVING dessa mesma query isso e ambiguo pro MySQL; via a tabela derivada x (que so expoe os
         // apelidos já resolvidos) a referencia deixa de ser ambigua. Mesmo mecanismo usado no Pagar acima.
-        const QString displaySql = "SELECT * FROM ("
+        return "SELECT * FROM ("
                "SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, "
                "`cr`.`dataEmissao` AS `dataEmissao`, `cr`.`dataPagamento` AS `dataPagamento`, `cr`.`dataRealizado` AS `dataRealizado`, `cr`.`idVenda` AS `idVenda`, "
                "GROUP_CONCAT(DISTINCT `pf2`.`ordemRepresentacao`) AS `ordemRepresentacao`, "
@@ -527,9 +553,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                "LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON v.idVenda = pf2.idVenda "
                "GROUP BY cr.idPagamento"
                ") x " +
-               (buscaCopia.isEmpty() ? "" : "WHERE " + buscaCopia + " ") + "ORDER BY " + exibicaoOrderBy;
-
-        return {displaySql, capSql};
+               "ORDER BY " + exibicaoOrderBy;
       };
     };
 
@@ -566,7 +590,16 @@ void WidgetFinanceiroContas::montaFiltro() {
   // Qt::UniqueConnection: montaFiltro() roda a cada mudanca de filtro/ordenacao - setModel(&model) com
   // o mesmo ponteiro so recria o selectionModel na 1a vez, entao isso reconecta sem duplicar
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetFinanceiroContas::somarSelecao, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
-  ui->table->setStoredSelection(true);
+
+  // setStoredSelection() ficou de fora de proposito: ele guarda/restaura a selecao pelo INDICE da
+  // linha, e num model paginado o indice N vira outro registro depois de um reset (a janela volta
+  // pra origem 0). Era o que deixava uma linha destacada que o usuario nunca escolheu - e fazia
+  // "Reverter Pagamento"/"Excluir Lançamento" agirem nela.
+
+  // resto da configuracao da tabela depende so das colunas do model (fixas): basta uma vez
+  if (tabelaConfigurada) { return; }
+
+  tabelaConfigurada = true;
 
   // "R$"/"R$ Real" (não "valor"/"valorReal"): o model paginado não é QSqlQueryModel, então TableView
   // resolve a coluna via headerData() (o rótulo renomeado acima), não via record() (nome cru da coluna SQL)
@@ -618,6 +651,10 @@ void WidgetFinanceiroContas::setTipo(const Tipo novoTipo) {
     ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
     ui->radioButtonAgendado->hide();
+    // ambos leem colunas que so existem no model de Pagar (idNFe / codFornecedor / pf2_idVenda):
+    // em Receber lancavam "não encontrado no model paginado!" ao serem clicados
+    ui->pushButtonAbrirDANFE->hide();
+    ui->pushButtonRemessaItau->hide();
     ui->lineEditBusca->setPlaceholderText("Venda/O.C. Rep./Contraparte/Obs.");
   }
 }
@@ -675,31 +712,55 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
   transferencia->show();
 }
 
+// Resolve os idPagamento da selecao ANTES de qualquer dialogo. O model e paginado (janela
+// deslizante), entao index.row() so identifica uma linha enquanto a janela nao for recarregada - e
+// qualquer QMessageBox::exec()/QInputDialog roda um event loop aninhado onde um timer (busca com
+// atraso do LineEdit, reconexao do ping do banco) pode disparar montaFiltro() e trocar as linhas
+// debaixo dos indices ja capturados.
+QVariantList WidgetFinanceiroContas::idsPagamentoSelecionados() const {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  QVariantList ids;
+
+  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento"); }
+
+  return ids;
+}
+
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
-  const auto selection = ui->table->selectionModel()->selectedRows();
+  const QVariantList ids = idsPagamentoSelecionados();
 
-  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+  if (ids.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
+  // a tabela e MultiSelection: antes so a primeira linha era cancelada, sem aviso
+  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir " + QString::number(ids.size()) + " lançamento(s)?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Excluir");
   msgBox.button(QMessageBox::No)->setText("Voltar");
 
-  if (msgBox.exec() == QMessageBox::Yes) {
-    SqlQuery query;
-    query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'CANCELADO' WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", model.data(selection.first().row(), "idPagamento"));
+  if (msgBox.exec() != QMessageBox::Yes) { return; }
+
+  qApp->startTransaction("WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked");
+
+  SqlQuery query;
+  query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'CANCELADO' WHERE idPagamento = :idPagamento");
+
+  for (const auto &id : ids) {
+    query.bindValue(":idPagamento", id);
 
     if (not query.exec()) { throw RuntimeException("Erro excluindo lançamento: " + query.lastError().text(), this); }
-
-    montaFiltro();
-
-    qApp->enqueueInformation("Lançamento excluído com sucesso!", this);
+    if (query.numRowsAffected() == 0) { throw RuntimeException("Nenhum lançamento encontrado com o id '" + id.toString() + "'!", this); }
   }
+
+  qApp->endTransaction();
+
+  montaFiltro();
+
+  qApp->enqueueInformation("Lançamento(s) excluído(s) com sucesso!", this);
 }
 
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
@@ -715,48 +776,47 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   if (selection.size() != 1) { throw RuntimeError("Deve selecionar apenas uma linha!", this); }
 
+  // id e data resolvidos ANTES do diálogo (ver idsPagamentoSelecionados): sem isso as validações
+  // abaixo rodariam numa linha e o UPDATE em outra, contornando as próprias guardas
+  const QVariant idPagamento = model.data(selection.first().row(), "idPagamento");
+  const QDate realizado = model.data(selection.first().row(), "dataRealizado").toDate();
+
   SqlQuery queryPagamento;
   queryPagamento.prepare("SELECT grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
+  queryPagamento.bindValue(":idPagamento", idPagamento);
 
-  for (const auto &index : selection) {
-    queryPagamento.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
+  if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-    if (not queryPagamento.exec()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+  if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: '" + idPagamento.toString() + "'"); }
 
-    if (not queryPagamento.first()) { throw RuntimeException("Dados do pagamento não encontrado para o pagamento com id: '" + model.data(index.row(), "idPagamento").toString() + "'"); }
+  if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
 
-    if (queryPagamento.value("grupo").toString() == "TRANSFERÊNCIA") { throw RuntimeError("Não pode reverter transferência!", this); }
+  // ---------------------------------------------------------------
 
-    // ---------------------------------------------------------------
+  const bool mais30dias = realizado < qApp->serverDate().addDays(-30);
 
-    const QDate realizado = model.data(index.row(), "dataRealizado").toDate();
-    const bool mais30dias = realizado < qApp->serverDate().addDays(-30);
-
-    if (not User::isAdmin() and mais30dias) { throw RuntimeError("O pagamento foi realizado a mais de 30 dias!", this); }
-  }
+  if (not User::isAdmin() and mais30dias) { throw RuntimeError("O pagamento foi realizado a mais de 30 dias!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.button(QMessageBox::Yes)->setText("Reverter");
   msgBox.button(QMessageBox::No)->setText("Voltar");
 
-  if (msgBox.exec() == QMessageBox::Yes) {
-    qApp->startTransaction("WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked");
+  if (msgBox.exec() != QMessageBox::Yes) { return; }
 
-    SqlQuery query;
-    query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
+  qApp->startTransaction("WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked");
 
-    for (const auto &index : selection) {
-      query.bindValue(":idPagamento", model.data(index.row(), "idPagamento"));
+  SqlQuery query;
+  query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
+  query.bindValue(":idPagamento", idPagamento);
 
-      if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
-    }
+  if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
+  if (query.numRowsAffected() == 0) { throw RuntimeException("Nenhum lançamento encontrado com o id '" + idPagamento.toString() + "'!", this); }
 
-    qApp->endTransaction();
+  qApp->endTransaction();
 
-    updateTables();
+  updateTables();
 
-    qApp->enqueueInformation("Lançamentos revertidos com sucesso!", this);
-  }
+  qApp->enqueueInformation("Lançamento revertido com sucesso!", this);
 }
 
 void WidgetFinanceiroContas::verificaCabecalho(QXlsx::Document &xlsx) {
@@ -839,12 +899,15 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
     if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { throw RuntimeError("Pagamento selecionado não é transferência ITAÚ!", this); }
   }
 
-  CNAB cnab(this);
-  const QString idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
-
+  // ids resolvidos ANTES da remessa (ver idsPagamentoSelecionados): remessaPagamentoItau240() abre
+  // diálogo de arquivo, e no event loop aninhado o model pode ser recarregado — os índices deixariam
+  // de apontar para os mesmos pagamentos que acabaram de entrar no arquivo CNAB
   QStringList ids;
 
-  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
+  for (const auto &id : idsPagamentoSelecionados()) { ids << id.toString(); }
+
+  CNAB cnab(this);
+  const QString idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
 
   SqlQuery query;
 

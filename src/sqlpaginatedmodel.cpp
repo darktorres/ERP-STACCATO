@@ -6,8 +6,6 @@
 #include <QFont>
 #include <QSqlError>
 
-#include <algorithm>
-
 namespace {
 
 // "Antes do cursor ou depois dele" (NULL-safe, nulos sempre por ultimo) para uma UNICA chave
@@ -56,7 +54,13 @@ void SqlPaginatedModel::reset(const QStringList &fieldNames, const QString &idFi
   loadFirstPage();
 }
 
-void SqlPaginatedModel::setHeaderLabel(const QString &fieldName, const QString &label) { headerLabels_.insert(fieldName, label); }
+void SqlPaginatedModel::setHeaderLabel(const QString &fieldName, const QString &label) {
+  headerLabels_.insert(fieldName, label);
+
+  // sem isso o cabecalho so reflete o novo rotulo no proximo reset - e o QHeaderView nao recalcula
+  // a largura em ResizeToContents
+  if (not fieldNames_.isEmpty()) { emit headerDataChanged(Qt::Horizontal, 0, fieldNames_.size() - 1); }
+}
 
 QString SqlPaginatedModel::sortColumn() const { return sortColumn_; }
 
@@ -65,38 +69,17 @@ Qt::SortOrder SqlPaginatedModel::sortOrder() const { return sortOrder_; }
 bool SqlPaginatedModel::hasMoreAfter() const { return hasMoreAfter_; }
 
 void SqlPaginatedModel::loadFirstPage() {
-  QVector<QVariant> cursor; // vazio = sem cursor (1a tentativa)
-  Direction direction = Direction::First;
-  QVector<QVector<QVariant>> displayRows;
-  int peeks = 0;
+  PageRequest request;
+  request.direction = Direction::First; // sem cursor
 
-  // Se a busca filtrar a 1a janela inteira, espia (sem busca/joins) e avanca o cursor pra tentar a
-  // proxima - repete ate achar linhas ou esgotar o corte cru. Sem isso a tabela ficaria vazia (e sem
-  // scrollbar, ou seja sem chance do usuario "pedir mais") sempre que o termo buscado nao estiver na
-  // 1a janela de ~1000 linhas (ex.: filtro "Todos"/sem data, termo real mas antigo/recente demais).
-  while (true) {
-    PageRequest request;
-    request.cursorValues = cursor;
-    request.direction = direction;
-
-    const PageSql sql = builder_(request);
-
-    displayRows = runQuery(sql.displaySql);
-
-    if (not displayRows.isEmpty()) { break; }
-    if (++peeks >= MAX_PEEK_LOOPS_FIRST) { break; } // salvaguarda - nao deveria disparar na pratica
-
-    const auto peekRows = runQuery(sql.rawPeekSql);
-
-    if (peekRows.size() < PAGE_SIZE) { break; } // corte cru esgotou - fim genuino do historico
-
-    cursor = peekRows.last();
-    direction = Direction::Next;
-  }
+  // O widget aplica TODOS os filtros (inclusive a busca) na subquery de corte, entao a query ja
+  // devolve exatamente as linhas da pagina - nao existe mais o caso de "a busca esvaziou a janela"
+  // que antes obrigava a espiar o corte cru e avancar o cursor janela por janela.
+  const auto pageRows = runQuery(builder_(request));
 
   beginResetModel();
 
-  rows_ = displayRows;
+  rows_ = pageRows;
   hasMoreBefore_ = false;
 
   endResetModel();
@@ -104,49 +87,20 @@ void SqlPaginatedModel::loadFirstPage() {
   updateEdgeKeys();
 
   hasMoreAfter_ = rows_.size() >= PAGE_SIZE;
-
-  emitMoreAvailableIfChanged();
 }
 
-void SqlPaginatedModel::tryLoadNext() {
-  if (not hasMoreAfter_ or lastKeyValues_.isEmpty()) { return; }
+int SqlPaginatedModel::tryLoadNext() {
+  if (not hasMoreAfter_ or lastKeyValues_.isEmpty()) { return 0; }
 
-  QVector<QVariant> cursor = lastKeyValues_;
-  QVector<QVector<QVariant>> newRows;
-  int peeks = 0;
-  bool exhausted = false;
+  PageRequest request;
+  request.cursorValues = lastKeyValues_;
+  request.direction = Direction::Next;
 
-  while (true) {
-    PageRequest request;
-    request.cursorValues = cursor;
-    request.direction = Direction::Next;
-
-    const PageSql sql = builder_(request);
-
-    newRows = runQuery(sql.displaySql);
-
-    if (not newRows.isEmpty()) { break; }
-
-    ++peeks;
-
-    const auto peekRows = runQuery(sql.rawPeekSql);
-
-    if (peekRows.size() < PAGE_SIZE) {
-      exhausted = true;
-      if (not peekRows.isEmpty()) { cursor = peekRows.last(); }
-      break;
-    }
-
-    cursor = peekRows.last();
-
-    if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
-  }
+  const auto newRows = runQuery(builder_(request));
 
   if (newRows.isEmpty()) {
-    lastKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
-    hasMoreAfter_ = not exhausted;
-    emitMoreAvailableIfChanged();
-    return;
+    hasMoreAfter_ = false;
+    return 0;
   }
 
   const int insertFirst = rows_.size();
@@ -160,6 +114,8 @@ void SqlPaginatedModel::tryLoadNext() {
 
   updateEdgeKeys();
 
+  int deslocamento = 0;
+
   // só descarta quando ha folga alem do limite, pra nao remover linhas perto da area visivel logo apos inserir
   if (rows_.size() > MAX_ROWS) {
     const int removeCount = rows_.size() - MAX_ROWS;
@@ -169,52 +125,26 @@ void SqlPaginatedModel::tryLoadNext() {
     endRemoveRows();
 
     updateEdgeKeys();
+
+    deslocamento = -removeCount; // conteudo subiu: o widget desce o scrollbar na mesma medida
   }
 
-  emitMoreAvailableIfChanged();
+  return deslocamento;
 }
 
-void SqlPaginatedModel::tryLoadPrevious() {
-  if (not hasMoreBefore_ or firstKeyValues_.isEmpty()) { return; }
+int SqlPaginatedModel::tryLoadPrevious() {
+  if (not hasMoreBefore_ or firstKeyValues_.isEmpty()) { return 0; }
 
-  QVector<QVariant> cursor = firstKeyValues_;
-  QVector<QVector<QVariant>> newRows;
-  int peeks = 0;
-  bool exhausted = false;
+  PageRequest request;
+  request.cursorValues = firstKeyValues_;
+  request.direction = Direction::Previous;
 
-  while (true) {
-    PageRequest request;
-    request.cursorValues = cursor;
-    request.direction = Direction::Previous;
-
-    const PageSql sql = builder_(request);
-
-    newRows = runQuery(sql.displaySql); // ja vem na ordem de exibicao (exibicaoOrderBy e sempre forward=true no widget)
-
-    if (not newRows.isEmpty()) { break; }
-
-    ++peeks;
-
-    const auto peekRows = runQuery(sql.rawPeekSql);
-
-    if (peekRows.size() < PAGE_SIZE) {
-      exhausted = true;
-      if (not peekRows.isEmpty()) { cursor = peekRows.last(); }
-      break;
-    }
-
-    // capSql (rawPeekSql) sempre ordena do mais perto do cursor pro mais longe, tanto pra Next
-    // quanto pra Previous (buildOrderBy com forward=false so inverte a direcao efetiva, nao troca
-    // "perto/longe" de lado) - por isso .last() continua correto aqui tambem.
-    cursor = peekRows.last();
-
-    if (peeks >= MAX_PEEK_LOOPS_SCROLL) { break; } // limite desta rolagem - a proxima continua do cursor avancado
-  }
+  // ja vem na ordem de exibicao (exibicaoOrderBy e sempre forward=true no widget)
+  const auto newRows = runQuery(builder_(request));
 
   if (newRows.isEmpty()) {
-    firstKeyValues_ = cursor; // avanca mesmo sem linhas novas, p/ a proxima chamada continuar dali
-    hasMoreBefore_ = not exhausted;
-    return;
+    hasMoreBefore_ = false;
+    return 0;
   }
 
   beginInsertRows(QModelIndex(), 0, newRows.size() - 1);
@@ -224,6 +154,8 @@ void SqlPaginatedModel::tryLoadPrevious() {
   hasMoreBefore_ = newRows.size() >= PAGE_SIZE;
 
   updateEdgeKeys();
+
+  const int deslocamento = newRows.size(); // conteudo desceu: o widget sobe o scrollbar na mesma medida
 
   if (rows_.size() > MAX_ROWS) {
     const int removeCount = rows_.size() - MAX_ROWS;
@@ -235,8 +167,9 @@ void SqlPaginatedModel::tryLoadPrevious() {
 
     hasMoreAfter_ = true;
     updateEdgeKeys();
-    emitMoreAvailableIfChanged();
   }
+
+  return deslocamento;
 }
 
 QStringList SqlPaginatedModel::keyFieldNames() const {
@@ -270,13 +203,6 @@ void SqlPaginatedModel::updateEdgeKeys() {
 
   firstKeyValues_ = edgeKeyValues(rows_.first());
   lastKeyValues_ = edgeKeyValues(rows_.last());
-}
-
-void SqlPaginatedModel::emitMoreAvailableIfChanged() {
-  if (hasMoreAfter_ != lastMoreAvailable_) {
-    lastMoreAvailable_ = hasMoreAfter_;
-    emit moreAvailableChanged(hasMoreAfter_);
-  }
 }
 
 QVector<QVector<QVariant>> SqlPaginatedModel::runQuery(const QString &sql) {

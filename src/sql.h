@@ -15,9 +15,7 @@ public:
     bool vemDoSul = false;
   };
 
-  static auto contasPagar(const QString &filtros, const QString &busca) -> QString;
   static auto pesosProdutos(const QStringList &idProdutos) -> QHash<QString, ProdutoPeso>;
-  static auto contasReceber(const QString &filtros) -> QString;
   static auto queryEstoque(const QString &match, const QString &having) -> QString;
   static auto queryExportarNCM() -> QString;
   static auto updateFornecedoresOrcamento(const QString idOrcamento) -> void;

@@ -32,7 +32,7 @@ private:
   // methods
   auto ajustarGroupBoxStatus() -> void;
   auto ajustarGroupBoxUtilizada() -> void;
-  auto inutilizar(const int row) -> void;
+  auto inutilizar(const QVariant &idNFe) -> void;
   auto montaFiltro() -> void;
   auto onTableScrolled(const int value) -> void;
   auto on_dateEditDe_dateChanged(const QDate date) -> void;

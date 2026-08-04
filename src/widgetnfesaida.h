@@ -32,7 +32,7 @@ private:
   // methods
   auto ajustarGroupBoxStatus() -> void;
   auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> void;
-  auto cancelarNFe(const QString &chaveAcesso, const int row) -> void;
+  auto cancelarNFe(const QString &chaveAcesso, const QVariant &idNFe) -> void;
   auto gravarArquivo(const QString &resposta, const QString &chaveAcesso) -> void;
   auto montaFiltro() -> void;
   auto onTableScrolled(const int value) -> void;

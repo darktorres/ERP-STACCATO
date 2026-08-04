@@ -15,10 +15,8 @@
 #include "lrreportengine.h"
 #endif
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
-#include <QElapsedTimer>
 #include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -83,12 +81,12 @@ void WidgetNfeSaida::updateTables() {
     ui->lineEditBusca->setDelayed();
     ui->dateEditAte->setDate(qApp->serverDate());
     ui->dateEditDe->setDate(QDate(qApp->serverDate().year(), qApp->serverDate().month(), 1));
-    setupTables();
+    setupTables(); // ja chama montaFiltro() para popular as colunas do model
     setConnections();
     isSet = true;
+  } else {
+    montaFiltro();
   }
-
-  montaFiltro();
 
   // ---------------------------------------------------
 
@@ -138,6 +136,7 @@ void WidgetNfeSaida::setupTables() {
 
   ui->tableResumo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->tableResumo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 }
 
 void WidgetNfeSaida::onTableScrolled(const int value) {
@@ -145,25 +144,24 @@ void WidgetNfeSaida::onTableScrolled(const int value) {
 
   carregandoPagina = true;
 
-  QElapsedTimer timer;
-  timer.start();
-
   try {
     auto *scrollBar = ui->table->verticalScrollBar();
     const int threshold = ui->table->verticalHeader()->defaultSectionSize() * 5;
 
-    qDebug() << "[WidgetNfeSaida] onTableScrolled: value=" << value << "max=" << scrollBar->maximum() << "threshold=" << threshold;
+    // ver nota em WidgetFinanceiroContas::onTableScrolled: o QTableView nao reancora o scrollbar
+    // quando linhas entram/saem acima do viewport
+    int deslocamento = 0;
 
-    if (value >= scrollBar->maximum() - threshold) { model.tryLoadNext(); }
-    if (value <= threshold) { model.tryLoadPrevious(); }
+    if (value >= scrollBar->maximum() - threshold) { deslocamento += model.tryLoadNext(); }
+    if (value <= threshold) { deslocamento += model.tryLoadPrevious(); }
+
+    if (deslocamento != 0) { scrollBar->setValue(scrollBar->value() + deslocamento); }
   } catch (...) {
     carregandoPagina = false;
     throw;
   }
 
   carregandoPagina = false;
-
-  qDebug() << "[WidgetNfeSaida] onTableScrolled: total" << timer.elapsed() << "ms";
 }
 
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
@@ -189,14 +187,22 @@ void WidgetNfeSaida::montaFiltro() {
 
   //-------------------------------------
 
-  QStringList filtrosPre; // tocam só n.* — entram na subquery de corte, antes do JOIN
-  QStringList filtrosPos; // tocam colunas ligadas por join (CPF/CNPJ, Cliente) — só no WHERE externo
+  QStringList filtrosPre; // entram na subquery de corte, antes do JOIN
 
   //------------------------------------- filtro texto
+  // Vai junto no corte, nao num HAVING externo: assim o corte devolve direto as ~1000 linhas que
+  // casam, em vez de o model varrer o historico janela por janela. Cliente/CPF-CNPJ entram por um
+  // "IN (subquery)" NAO correlacionado - o MySQL materializa o conjunto de idVenda uma unica vez
+  // (~117ms) em vez de consultar cliente por linha de nfe.
 
   const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+  const bool temBusca = not text.isEmpty();
 
-  if (not text.isEmpty()) { filtrosPos << "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')"; }
+  if (temBusca) {
+    filtrosPre << "(n.numeroNFe LIKE '%" + text + "%' OR n.idVenda LIKE '%" + text +
+                      "%' OR n.idVenda IN (SELECT v.idVenda FROM venda v JOIN cliente c ON c.idCliente = v.idCliente WHERE c.nome_razao LIKE '%" + text +
+                      "%' OR IF(c.pfpj = 'PF', c.cpf, c.cnpj) LIKE '%" + text + "%'))";
+  }
 
   //------------------------------------- filtro data (comparacao direta na coluna, sem funcao, para poder usar indice)
 
@@ -235,14 +241,13 @@ void WidgetNfeSaida::montaFiltro() {
   static const QSet<QString> colunasComJoinFollowup = {"dataFollowup", "observacao"};
 
   const QStringList filtrosPreCopia = filtrosPre;
-  const QStringList filtrosPosCopia = filtrosPos;
 
-  const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosPreCopia, filtrosPosCopia](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
+  const SqlPaginatedModel::QueryBuilderFactory factory = [filtrosPreCopia, temBusca](const QString &sortColumn, const Qt::SortOrder order) -> SqlPaginatedModel::PageQueryBuilder {
     const QString sortExpr = exprPorCampo.value(sortColumn, "n.dataHoraEmissao");
     const bool precisaJoinCliente = colunasComJoinCliente.contains(sortColumn);
     const bool precisaJoinFollowup = colunasComJoinFollowup.contains(sortColumn);
 
-    return [filtrosPreCopia, filtrosPosCopia, sortExpr, order, precisaJoinCliente, precisaJoinFollowup](const SqlPaginatedModel::PageRequest &request) -> SqlPaginatedModel::PageSql {
+    return [filtrosPreCopia, temBusca, sortExpr, order, precisaJoinCliente, precisaJoinFollowup](const SqlPaginatedModel::PageRequest &request) -> QString {
       const bool forward = request.direction != SqlPaginatedModel::Direction::Previous;
 
       QStringList capFiltros;
@@ -262,17 +267,17 @@ void WidgetNfeSaida::montaFiltro() {
       // bookmark lookup linha a linha) quando ha filtro de status sem filtro de data - mesmo problema
       // medido em Entrada (ver db/add_index_nfe_tipo_status_utilizada_data.sql). Ordenar por
       // Cliente/CPF-CNPJ precisa do indice de idVenda (ja validado antes, ver add_index_nfe_tipo_idvenda.sql).
-      const QString forceIndex = precisaJoinCliente ? " FORCE INDEX (idx_nfe_tipo_idvenda)" : " FORCE INDEX (idx_nfe_tipo_status_utilizada_data)";
+      // Com busca ativa nenhum dos dois serve: eles nao cobrem numeroNFe/idVenda, entao o MySQL le a
+      // linha inteira de `nfe` (tabela de ~2,9 GB por causa da coluna xml) - medido 5,6s com o indice
+      // forcado contra 0,8s deixando o otimizador escolher.
+      const QString forceIndex = temBusca ? "" : (precisaJoinCliente ? " FORCE INDEX (idx_nfe_tipo_idvenda)" : " FORCE INDEX (idx_nfe_tipo_status_utilizada_data)");
 
-      // SELECT traz tambem a coluna de ordenacao (alem do idNFe): usado como rawPeekSql pelo model
-      // pra avancar o cursor quando a busca (filtrosPosCopia, aplicado so depois do JOIN/GROUP BY)
-      // filtra uma pagina inteira - ver SqlPaginatedModel::tryLoadNext()/tryLoadPrevious().
-      const QString capSql = "SELECT " + sortExpr + " AS `_peekSort`, n.idNFe AS idNFe FROM nfe n" + forceIndex + capJoinFollowup + capJoinCliente + " WHERE " + capFiltros.join(" AND ") +
-                             " ORDER BY " + capOrderBy + " LIMIT " + QString::number(1000);
+      const QString capSql = "SELECT n.idNFe AS idNFe FROM nfe n" + forceIndex + capJoinFollowup + capJoinCliente + " WHERE " + capFiltros.join(" AND ") + " ORDER BY " + capOrderBy + " LIMIT " +
+                             QString::number(1000);
 
       const QString exibicaoOrderBy = SqlPaginatedModel::buildOrderBy(keys, true); // exibicao sempre na ordem normal
 
-      const QString displaySql = "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
+      return "SELECT n.idNFe AS idNFe, n.chaveAcesso AS chaveAcesso, n.cnpjOrig AS Emitente, n.numeroNFe AS NFe, n.status AS Status, "
              "n.idVenda AS Venda, IF(c.pfpj = 'PF', c.cpf, c.cnpj) AS `CPF/CNPJ`, c.nome_razao AS Cliente, "
              "n.valor AS valor, n.dataHoraEmissao AS dataHoraEmissao, nhf.dataFollowup AS dataFollowup, nhf.observacao AS observacao "
              "FROM (" +
@@ -282,10 +287,8 @@ void WidgetNfeSaida::montaFiltro() {
              "LEFT JOIN venda v ON (n.idVenda = v.idVenda) "
              "LEFT JOIN cliente c ON (c.idCliente = v.idCliente) "
              "LEFT JOIN nfe_has_followup nhf ON (n.idFollowup = nhf.idFollowup) "
-             "GROUP BY n.idNFe" +
-             (filtrosPosCopia.isEmpty() ? "" : " HAVING " + filtrosPosCopia.join(" AND ")) + " ORDER BY " + exibicaoOrderBy;
-
-      return {displaySql, capSql};
+             "GROUP BY n.idNFe ORDER BY " +
+             exibicaoOrderBy;
     };
   };
 
@@ -300,6 +303,14 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
+
+  // chave e id resolvidos ANTES dos diálogos: o model é paginado (janela deslizante), então
+  // index.row() só identifica uma linha enquanto a janela não for recarregada — e daqui até o envio
+  // rodam DOIS event loops aninhados (msgBox.exec() e QInputDialog::getText), em que um timer
+  // (busca com atraso, reconexão do banco) pode disparar montaFiltro() e trocar as linhas debaixo
+  // do índice. Cancelar a NF-e errada na SEFAZ é irreversível.
+  const QString chaveAcesso = model.data(selection.first().row(), "chaveAcesso").toString();
+  const QVariant idNFe = model.data(selection.first().row(), "idNFe");
 
   // -------------------------------------------------------------------------
 
@@ -336,10 +347,6 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const int row = selection.first().row();
-
-  const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
-
   ACBr acbr;
 
   const QString resposta = acbr.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")", "Cancelando NF-e...");
@@ -349,7 +356,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe");
 
-  cancelarNFe(chaveAcesso, row);
+  cancelarNFe(chaveAcesso, idNFe);
 
   qApp->endTransaction();
 
@@ -572,7 +579,7 @@ void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
   if (not query.exec()) { throw RuntimeException("Erro atualizando XML da NF-e: " + query.lastError().text()); }
 }
 
-void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
+void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const QVariant &idNFe) {
   SqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADA' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
@@ -580,8 +587,6 @@ void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   if (not query.exec()) { throw RuntimeException("Erro marcando NF-e como cancelada: " + query.lastError().text()); }
 
   // ---------------------------------------------------------
-
-  const int idNFe = model.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);

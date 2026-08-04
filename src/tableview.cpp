@@ -63,25 +63,6 @@ void TableView::resizeEvent(QResizeEvent *event) {
   QTableView::resizeEvent(event);
 }
 
-void TableView::setStoredSelection(bool newStoredSelection) {
-  storedSelection = newStoredSelection;
-
-  auto *mdl = model();
-  if (not mdl) { return; }
-
-  if (storedSelection) {
-    // UniqueConnection: alguns widgets chamam setStoredSelection() a cada montaFiltro(), o que sem
-    // isso acumula uma conexao nova por filtragem ao longo da sessao
-    const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
-
-    connect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection, connectionType);
-    connect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection, connectionType);
-  } else {
-    disconnect(mdl, &QAbstractItemModel::modelAboutToBeReset, this, &TableView::storeSelection);
-    disconnect(mdl, &QAbstractItemModel::modelReset, this, &TableView::restoreSelection);
-  }
-}
-
 void TableView::setCopyHeaders(const bool newCopyHeaders) { copyHeaders = newCopyHeaders; }
 
 int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
@@ -121,24 +102,6 @@ void TableView::resort() { model()->sort(horizontalHeader()->sortIndicatorSectio
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(columnIndex(column), order); }
 
 int TableView::rowCount() const { return model()->rowCount(); }
-
-void TableView::storeSelection() {
-  const auto selection = selectionModel()->selectedRows();
-
-  // limpa tambem quando nao ha selecao: sem isso a selecao anterior fica guardada e o
-  // restoreSelection() do proximo reset "ressuscita" linhas que o usuario ja tinha desmarcado
-  selectedRows.clear();
-
-  for (auto index : selection) { selectedRows << index.row(); }
-}
-
-void TableView::restoreSelection() {
-  if (selectedRows.isEmpty()) { return; }
-
-  QSignalBlocker blocker(selectionModel());
-
-  for (auto row : selectedRows) { selectRow(row); }
-}
 
 void TableView::redoView() {
   if (persistentColumns.isEmpty()) { return; }

@@ -155,7 +155,12 @@ void WidgetNfeSaida::onTableScrolled(const int value) {
     if (value >= scrollBar->maximum() - threshold) { deslocamento += model.tryLoadNext(); }
     if (value <= threshold) { deslocamento += model.tryLoadPrevious(); }
 
-    if (deslocamento != 0) { scrollBar->setValue(scrollBar->value() + deslocamento); }
+    if (deslocamento != 0) {
+      // O QTableView adia o layout apos inserir/remover linhas (rowCountChanged -> doDelayedItemsLayout),
+      // entao a faixa do scrollbar ainda seria a antiga aqui e o setValue poderia ser recortado nela
+      ui->table->executarLayoutPendente();
+      scrollBar->setValue(scrollBar->value() + deslocamento);
+    }
   } catch (...) {
     carregandoPagina = false;
     throw;

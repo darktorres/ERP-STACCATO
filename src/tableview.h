@@ -14,6 +14,10 @@ public:
   auto columnCount() const -> int;
   auto columnIndex(const QString &column) const -> int;
   auto columnIndex(const QString &column, const bool silent) const -> int;
+  // Forca o layout que o QTableView adia apos inserir/remover linhas (QTableView::rowCountChanged ->
+  // doDelayedItemsLayout). Sem isso a faixa do scrollbar ainda e a antiga logo depois de uma carga de
+  // pagina, e reposicionar o scroll pode ser recortado no range obsoleto.
+  auto executarLayoutPendente() -> void { executeDelayedItemsLayout(); }
   auto hideColumn(const QString &column) -> void;
   auto redoView() -> void;
   auto resort() -> void;
@@ -23,7 +27,6 @@ public:
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
-  auto setStoredSelection(bool newStoredSelection) -> void;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 
@@ -36,15 +39,11 @@ private:
   // attributes
   bool autoResize = true;
   bool copyHeaders = true;
-  bool storedSelection = false;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
-  QVector<int> selectedRows;
   // methods
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto resizeColumnsToContents() -> void;
-  auto restoreSelection() -> void;
   auto setConnections() -> void;
   auto showContextMenu(const QPoint pos) -> void;
-  auto storeSelection() -> void;
 };

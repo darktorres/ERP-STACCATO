@@ -108,7 +108,12 @@ void WidgetFinanceiroContas::onTableScrolled(const int value) {
     if (value >= scrollBar->maximum() - threshold) { deslocamento += model.tryLoadNext(); }
     if (value <= threshold) { deslocamento += model.tryLoadPrevious(); }
 
-    if (deslocamento != 0) { scrollBar->setValue(scrollBar->value() + deslocamento); }
+    if (deslocamento != 0) {
+      // O QTableView adia o layout apos inserir/remover linhas (rowCountChanged -> doDelayedItemsLayout),
+      // entao a faixa do scrollbar ainda seria a antiga aqui e o setValue poderia ser recortado nela
+      ui->table->executarLayoutPendente();
+      scrollBar->setValue(scrollBar->value() + deslocamento);
+    }
   } catch (...) {
     carregandoPagina = false;
     throw;
@@ -739,6 +744,20 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 // qualquer QMessageBox::exec()/QInputDialog roda um event loop aninhado onde um timer (busca com
 // atraso do LineEdit, reconexao do ping do banco) pode disparar montaFiltro() e trocar as linhas
 // debaixo dos indices ja capturados.
+// Chamado quando um UPDATE reporta 0 linhas afetadas. O MySQL conta linhas ALTERADAS, nao
+// encontradas (o app nao liga CLIENT_FOUND_ROWS - ver Application::setConnectOptions), entao 0 tanto
+// pode ser "o id nao existe" - o caso que os UPDATEs querem pegar, porque um indice fora da janela
+// paginada vira bind NULL - quanto "a linha ja estava nesse status", que e normal e nao e erro.
+void WidgetFinanceiroContas::verificarPagamentoExiste(const QVariant &idPagamento) {
+  SqlQuery query;
+  query.prepare("SELECT 1 FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
+  query.bindValue(":idPagamento", idPagamento);
+
+  if (not query.exec()) { throw RuntimeException("Erro verificando lançamento: " + query.lastError().text(), this); }
+
+  if (not query.first()) { throw RuntimeException("Nenhum lançamento encontrado com o id '" + idPagamento.toString() + "'!", this); }
+}
+
 QVariantList WidgetFinanceiroContas::idsPagamentoSelecionados() const {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
@@ -775,7 +794,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
     query.bindValue(":idPagamento", id);
 
     if (not query.exec()) { throw RuntimeException("Erro excluindo lançamento: " + query.lastError().text(), this); }
-    if (query.numRowsAffected() == 0) { throw RuntimeException("Nenhum lançamento encontrado com o id '" + id.toString() + "'!", this); }
+    if (query.numRowsAffected() == 0) { verificarPagamentoExiste(id); } // 0 = id inexistente OU ja cancelado
   }
 
   qApp->endTransaction();
@@ -832,7 +851,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   query.bindValue(":idPagamento", idPagamento);
 
   if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
-  if (query.numRowsAffected() == 0) { throw RuntimeException("Nenhum lançamento encontrado com o id '" + idPagamento.toString() + "'!", this); }
+  if (query.numRowsAffected() == 0) { verificarPagamentoExiste(idPagamento); } // 0 = id inexistente OU ja pendente
 
   qApp->endTransaction();
 

@@ -4,9 +4,40 @@
 
 #include <QStack>
 
+#include <optional>
+
 namespace Ui {
 class Orcamento;
 }
+
+// Item-entry sub-form: caixas is the canonical driver, quant/totalItem are derived from it.
+struct ItemFormState {
+  double caixas = 0.;
+  double stepQt = 0.;  // ui->doubleSpinBoxQuant->singleStep(), set when a produto is selected
+  double stepCx = 0.;  // ui->doubleSpinBoxCaixas->singleStep(), set when a produto is selected
+  double prcUn = 0.;   // set when a produto is selected
+  double descPct = 0.; // desconto do item, 0-100
+
+  auto quant() const -> double { return caixas * stepQt; }
+  auto totalItem() const -> double { return quant() * prcUn * (1. - descPct / 100.); }
+};
+
+// Header totals: descontoReais is the canonical driver (matches the on-disk source of truth), total is always derived.
+struct OrcamentoTotais {
+  double subTotalBruto = 0.;
+  double subTotalLiq = 0.;
+  double frete = 0.;
+  double descontoReais = 0.;
+
+  auto descontoPorc() const -> double { return qFuzzyIsNull(subTotalLiq) ? 0. : descontoReais / subTotalLiq * 100.; }
+  auto total() const -> double { return subTotalLiq - descontoReais + frete; }
+};
+
+struct FreteResultado {
+  double valor = 0.;
+  double minimo = 0.;
+  bool forcado = false; // true only for the "serviços especiais" branch, which overrides even a floor-only request
+};
 
 class Orcamento final : public RegisterDialog {
   Q_OBJECT
@@ -24,10 +55,12 @@ private:
   bool currentItemIsEstoque = false;
   bool isReadOnly = false;
   double minimoFrete = 0.;
-  double minimoGerente = 0.;
+  double freteMinimoAtual = 0.;
   double porcFrete = 0.;
   int currentItemIsPromocao = 0;
   int currentRowItem = -1;
+  ItemFormState itemFormState;
+  OrcamentoTotais totais;
   QDataWidgetMapper mapperItem;
   QList<QSqlRecord> backupItem;
   QStack<int> blockingSignals;
@@ -35,6 +68,8 @@ private:
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
+  auto aplicarDescontoAosItens(const double descontoPorc) -> void;
+  auto aplicarFreteCalculado(const FreteResultado &resultado) -> void;
   auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
   auto buscarConsultor() -> void;
@@ -42,13 +77,12 @@ private:
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
-  auto calcularFrete(const bool updateSpinBox) -> void;
+  auto calcularFrete() -> std::optional<FreteResultado>;
   auto calcularPeso() -> double;
   auto calcularPesoTotal() -> void;
   auto calcularTotais() -> std::tuple<double, double, double>;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
-  auto corrigirValores() -> void;
   auto dataItem(const QString &key) const -> QVariant;
   auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto generateId() -> void;
@@ -92,6 +126,8 @@ private:
   auto redoBackupItem() -> void;
   auto registerMode() -> void final;
   auto removeItem() -> void;
+  auto renderItemForm() -> void;
+  auto renderTotais() -> void;
   auto resizeSpinBoxes() -> void;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
@@ -111,4 +147,13 @@ private:
   auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
+  // pure reducers — no Qt, no side effects, one per possible user edit
+  static auto reduceSetCaixas(ItemFormState state, const double caixasRaw) -> ItemFormState;
+  static auto reduceSetQuant(ItemFormState state, const double quantRaw) -> ItemFormState;
+  static auto reduceSetDesconto(ItemFormState state, const double descPct) -> ItemFormState;
+  static auto reduceSetTotalItem(ItemFormState state, const double totalItemValor) -> ItemFormState;
+  static auto reduceSetFrete(OrcamentoTotais totaisAtuais, const double frete) -> OrcamentoTotais;
+  static auto reduceSetDescontoReais(OrcamentoTotais totaisAtuais, const double descontoReais) -> OrcamentoTotais;
+  static auto reduceSetDescontoPorc(OrcamentoTotais totaisAtuais, const double descontoPorc) -> OrcamentoTotais;
+  static auto reduceSetTotal(OrcamentoTotais totaisAtuais, const double total) -> OrcamentoTotais;
 };

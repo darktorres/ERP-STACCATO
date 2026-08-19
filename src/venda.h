@@ -6,9 +6,29 @@
 
 #include <QStack>
 
+#include <optional>
+
 namespace Ui {
 class Venda;
 }
+
+// Header totals: descontoReais is the canonical driver (matches the on-disk source of truth), total is always derived.
+// Named distinctly from Orcamento's OrcamentoTotais (this header pulls in orcamento.h transitively via venda.cpp).
+struct VendaTotais {
+  double subTotalBruto = 0.;
+  double subTotalLiq = 0.;
+  double frete = 0.;
+  double descontoReais = 0.;
+
+  auto descontoPorc() const -> double { return qFuzzyIsNull(subTotalLiq) ? 0. : descontoReais / subTotalLiq * 100.; }
+  auto total() const -> double { return subTotalLiq - descontoReais + frete; }
+};
+
+struct VendaFreteResultado {
+  double valor = 0.;
+  double minimo = 0.;
+  bool forcado = false; // true only for the "serviços especiais" branch, which overrides even a floor-only request
+};
 
 class Venda final : public RegisterDialog {
   Q_OBJECT
@@ -28,7 +48,7 @@ private:
   bool financeiro = false;
   bool representacao = false;
   double minimoFrete = 0;
-  double minimoGerente = 0.;
+  double freteMinimoAtual = 0.;
   double porcFrete = 0;
   int idLoja = 0;
   QList<QSqlRecord> backupItem;
@@ -39,17 +59,19 @@ private:
   SqlTableModel modelItem;
   SqlTreeModel modelTree;
   Ui::Venda *ui;
+  VendaTotais totais;
   // methods
+  auto aplicarFreteCalculado(const VendaFreteResultado &resultado) -> void;
   auto atualizarCredito() -> void;
+  auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
-  auto calcularFrete(const bool updateSpinBox) -> void;
+  auto calcularFrete() -> std::optional<VendaFreteResultado>;
   auto calcularPesoTotal() -> void;
   auto calcularTotais() -> std::tuple<double, double, double>;
   auto cancelamento() -> void;
   auto clearFields() -> void final;
   auto connectLineEditsToDirty() -> void final;
   auto copiaProdutosOrcamento() -> void;
-  auto corrigirValores() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;
   auto eventFilter(QObject *obj, QEvent *event) -> bool final;
@@ -85,6 +107,7 @@ private:
   auto on_treeView_doubleClicked(const QModelIndex &index) -> void;
   auto processarPagamento(Pagamento *pgt) -> void;
   auto registerMode() -> void final;
+  auto renderTotais() -> void;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setItemBoxes() -> void;
@@ -101,4 +124,9 @@ private:
   auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
+  // pure reducers — no Qt, no side effects, one per possible user edit
+  static auto reduceSetFrete(VendaTotais totaisAtuais, const double frete) -> VendaTotais;
+  static auto reduceSetDescontoReais(VendaTotais totaisAtuais, const double descontoReais) -> VendaTotais;
+  static auto reduceSetDescontoPorc(VendaTotais totaisAtuais, const double descontoPorc) -> VendaTotais;
+  static auto reduceSetTotal(VendaTotais totaisAtuais, const double total) -> VendaTotais;
 };

@@ -30,8 +30,29 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QNetworkReply>
+#include <QSignalBlocker>
 #include <QSqlError>
 #include <QSqlRecord>
+
+#include <vector>
+
+namespace {
+// Scoped, per-widget signal suppression for a render step — narrower than the class-wide
+// unsetConnections()/setConnections() pattern used elsewhere: only the widgets actually being
+// written to are blocked, not every connection Venda owns. Safe here because renderTotais() only
+// ever touches plain QDoubleSpinBox widgets, never ItemBox or model-backed views (see the
+// qsignalblocker-incompatibility note on why that boundary matters).
+class RenderGuard {
+public:
+  explicit RenderGuard(const std::initializer_list<QWidget *> widgets) {
+    blockers.reserve(widgets.size());
+    for (auto *widget : widgets) { blockers.emplace_back(widget); }
+  }
+
+private:
+  std::vector<QSignalBlocker> blockers;
+};
+} // namespace
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
@@ -341,46 +362,45 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->itemBoxEndereco->setId(queryOrc.value("idEnderecoEntrega"));
   ui->dateTimeEditOrc->setDateTime(queryOrc.value("data").toDateTime());
   ui->plainTextEditObs->setPlainText(queryOrc.value("observacao").toString());
-  ui->doubleSpinBoxSubTotalBruto->setValue(queryOrc.value("subTotalBru").toDouble());
-  ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
 
-  const double frete = queryOrc.value("frete").toDouble();
+  idLoja = queryOrc.value("idLoja").toInt();
+
+  // -------------------------------------------------------------------------
+
+  // Carrega minimoFrete/porcFrete ANTES do primeiro calcularFrete() abaixo — antes deste fix, esses campos
+  // só eram lidos depois (mais adiante nesta função), então o primeiro cálculo de frete usava 0/0 e ignorava
+  // silenciosamente o piso/percentual configurado na loja. buscarParametrosFrete() faz a mesma query.
+  buscarParametrosFrete();
+
+  totais.subTotalBruto = queryOrc.value("subTotalBru").toDouble();
+  totais.subTotalLiq = queryOrc.value("subTotalLiq").toDouble();
+  totais.frete = queryOrc.value("frete").toDouble();
+  totais.descontoReais = queryOrc.value("descontoReais").toDouble();
+  freteMinimoAtual = totais.frete;
+
   canChangeFrete = queryOrc.value("freteManual").toBool();
 
-  if (User::isGerente() and not canChangeFrete) { calcularFrete(false); }
-  ui->doubleSpinBoxFrete->setValue(frete);
+  if (User::isGerente() and not canChangeFrete) {
+    if (const auto resultado = calcularFrete()) {
+      if (resultado->forcado) { totais = reduceSetFrete(totais, resultado->valor); }
+      freteMinimoAtual = resultado->minimo;
+    }
+  }
 
   if (canChangeFrete) {
     ui->checkBoxFreteManual->setChecked(true);
     ui->checkBoxFreteManual->setDisabled(true);
-    ui->doubleSpinBoxFrete->setMinimum(0);
+    freteMinimoAtual = 0.;
   }
 
-  ui->doubleSpinBoxDescontoGlobal->setValue(queryOrc.value("descontoPorc").toDouble());
-  ui->doubleSpinBoxDescontoGlobalReais->setValue(queryOrc.value("descontoReais").toDouble());
-  ui->doubleSpinBoxTotal->setValue(queryOrc.value("total").toDouble());
   ui->spinBoxPrazoEntrega->setValue(queryOrc.value("prazoEntrega").toInt());
 
-  idLoja = queryOrc.value("idLoja").toInt();
   representacao = queryOrc.value("representacao").toBool();
 
   if (representacao) {
     ui->checkBoxFreteManual->setDisabled(true);
     ui->checkBoxFreteManual->setChecked(true);
   }
-
-  // -------------------------------------------------------------------------
-
-  SqlQuery queryFrete;
-  queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
-  queryFrete.bindValue(":idLoja", idLoja);
-
-  if (not queryFrete.exec()) { throw RuntimeException("Erro buscando parâmetros do frete: " + queryFrete.lastError().text()); }
-
-  if (not queryFrete.first()) { throw RuntimeException("Dados do frete não encontrado!"); }
-
-  minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
-  porcFrete = queryFrete.value("porcentagemFrete").toDouble();
 
   if (not representacao) { ui->tableFluxoCaixa->hideColumn("representacao"); }
 
@@ -400,8 +420,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->widgetPgts->setIdLoja(idLoja);
   ui->widgetPgts->setRepresentacao(representacao);
-  ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
-  ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
 
   ui->widgetPgts->setMinimumWidth(550);
 
@@ -422,32 +440,16 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
+  // Deriva Total (e empurra frete/total para o widgetPgts) a partir de 'totais', nunca do valor de 'total'
+  // salvo no orçamento — essa cópia direta era a causa do "Erro nos valores!" ao gerar venda: o piso de
+  // frete do gerente podia elevar o frete acima do que o orçamento tinha, e o Total salvo não acompanhava.
+  renderTotais();
+
   calcularPesoTotal();
 
   // -------------------------------------------------------------------------
 
   setConnections();
-}
-
-void Venda::corrigirValores() {
-  // Recalcula o total dos itens pelo desconto do cabeçalho (descontoReais/subTotalLiq) em precisão cheia,
-  // não pelo descGlobal por linha arredondado a 4 casas — que, em base grande, desviava o total e (quando
-  // o descGlobal da linha estava 0/desatualizado) chegava a apagar o desconto do item.
-  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double descontoFrac = qFuzzyIsNull(subTotalLiq) ? 0. : ui->doubleSpinBoxDescontoGlobalReais->value() / subTotalLiq;
-
-  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
-    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
-
-    const double quant = modelItem.data(row, "quant").toDouble();
-    const double prcUnitario = modelItem.data(row, "prcUnitario").toDouble();
-    const double descUnitario = modelItem.data(row, "descUnitario").toDouble();
-
-    modelItem.setData(row, "parcial", prcUnitario * quant);
-    modelItem.setData(row, "parcialDesc", descUnitario * quant);
-    modelItem.setData(row, "descGlobal", descontoFrac * 100);
-    modelItem.setData(row, "total", (descUnitario * quant) * (1 - descontoFrac));
-  }
 }
 
 std::tuple<double, double, double> Venda::calcularTotais() {
@@ -466,25 +468,83 @@ std::tuple<double, double, double> Venda::calcularTotais() {
   return std::make_tuple<>(subTotalBruto, subTotalLiq, total);
 }
 
+// -----------------------------------------------------------------------------------------------
+// Pure reducers — one per possible user edit, no Qt types, no side effects. Each is a direct port
+// of the math that used to live inline in the corresponding on_doubleSpinBox*_valueChanged slot.
+// -----------------------------------------------------------------------------------------------
+
+VendaTotais Venda::reduceSetFrete(VendaTotais totaisAtuais, const double frete) {
+  totaisAtuais.frete = frete;
+  return totaisAtuais;
+}
+
+VendaTotais Venda::reduceSetDescontoReais(VendaTotais totaisAtuais, const double descontoReais) {
+  totaisAtuais.descontoReais = descontoReais;
+  return totaisAtuais;
+}
+
+VendaTotais Venda::reduceSetDescontoPorc(VendaTotais totaisAtuais, const double descontoPorc) {
+  totaisAtuais.descontoReais = totaisAtuais.subTotalLiq * (descontoPorc / 100.);
+  return totaisAtuais;
+}
+
+VendaTotais Venda::reduceSetTotal(VendaTotais totaisAtuais, const double total) {
+  totaisAtuais.descontoReais = totaisAtuais.subTotalLiq + totaisAtuais.frete - total;
+  return totaisAtuais;
+}
+
+// -----------------------------------------------------------------------------------------------
+// Render — the only place these widgets get written to. Whatever a reducer didn't touch gets
+// written back unchanged (harmless no-op), so a single unconditional render is always safe.
+// -----------------------------------------------------------------------------------------------
+
+void Venda::renderTotais() {
+  const RenderGuard guard({ui->doubleSpinBoxSubTotalBruto, ui->doubleSpinBoxSubTotalLiq, ui->doubleSpinBoxFrete, ui->doubleSpinBoxDescontoGlobal,
+                            ui->doubleSpinBoxDescontoGlobalReais, ui->doubleSpinBoxTotal});
+
+  ui->doubleSpinBoxSubTotalBruto->setValue(totais.subTotalBruto);
+  ui->doubleSpinBoxSubTotalLiq->setValue(totais.subTotalLiq);
+
+  ui->doubleSpinBoxFrete->setMinimum(freteMinimoAtual);
+  ui->doubleSpinBoxFrete->setValue(totais.frete);
+
+  ui->doubleSpinBoxDescontoGlobalReais->setValue(totais.descontoReais);
+  ui->doubleSpinBoxDescontoGlobal->setValue(totais.descontoPorc());
+
+  ui->doubleSpinBoxTotal->setValue(totais.total());
+
+  const double descontoFrac = totais.descontoPorc() / 100.;
+
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+
+    modelItem.setData(row, "descGlobal", totais.descontoPorc());
+    modelItem.setData(row, "total", parcialDesc * (1. - descontoFrac));
+  }
+
+  ui->widgetPgts->setFrete(totais.frete);
+  ui->widgetPgts->setTotal(totais.total());
+  montarFluxoCaixa();
+}
+
+void Venda::aplicarFreteCalculado(const VendaFreteResultado &resultado) {
+  freteMinimoAtual = resultado.minimo;
+  totais = reduceSetFrete(totais, resultado.valor);
+  renderTotais();
+}
+
 QString Venda::montarLog() {
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
-
-  const double spinBruto = ui->doubleSpinBoxSubTotalBruto->value();
-  const double spinLiq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double spinDescR = ui->doubleSpinBoxDescontoGlobalReais->value();
-  const double spinFrete = ui->doubleSpinBoxFrete->value();
-  const double spinTotal = ui->doubleSpinBoxTotal->value();
 
   QStringList logString;
 
   logString << "IdVenda: " + ui->lineEditVenda->text();
   logString << "IdOrcamento: " + ui->lineEditIdOrcamento->text();
-  logString << "\nsubTotalBruto: " + QString::number(subTotalBruto) + "\nspinBoxBruto: " + QString::number(spinBruto);
-  logString << "\nsubTotalLiq: " + QString::number(subTotalLiq) + "\nspinBoxLiq: " + QString::number(spinLiq);
-  logString << "\ntotal (itens): " + QString::number(total) + "\nspinBoxTotal: " + QString::number(spinTotal);
-  logString << "\nspinBoxFrete: " + QString::number(spinFrete);
-  logString << "\nspinBoxDescontoReais: " + QString::number(spinDescR);
-  logString << "\ninvariante (spinLiq - spinDescR + spinFrete): " + QString::number(spinLiq - spinDescR + spinFrete);
+  logString << "\nsubTotalBruto (itens): " + QString::number(subTotalBruto) + "\ntotais.subTotalBruto: " + QString::number(totais.subTotalBruto);
+  logString << "\nsubTotalLiq (itens): " + QString::number(subTotalLiq) + "\ntotais.subTotalLiq: " + QString::number(totais.subTotalLiq);
+  logString << "\ntotal (itens): " + QString::number(total) + "\ntotais.total(): " + QString::number(totais.total());
+  logString << "\ntotais.frete: " + QString::number(totais.frete);
+  logString << "\ntotais.descontoReais: " + QString::number(totais.descontoReais);
   logString << "";
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -505,36 +565,23 @@ QString Venda::montarLog() {
 void Venda::verificarTotais() {
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
 
-  const double spinBruto = ui->doubleSpinBoxSubTotalBruto->value();
-  const double spinLiq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double spinDescR = ui->doubleSpinBoxDescontoGlobalReais->value();
-  const double spinFrete = ui->doubleSpinBoxFrete->value();
-  const double spinTotal = ui->doubleSpinBoxTotal->value();
-
   // Tolerância proporcional à base: os valores são DECIMAL(15,4) e os spin boxes de dinheiro têm 2 casas,
   // então um limite fixo de 0.1 é mais fino que a precisão dos dados e gera falso erro em bases grandes.
-  const double tol = std::max(0.1, spinLiq * 1e-6);
+  const double tol = std::max(0.1, totais.subTotalLiq * 1e-6);
 
-  const bool brutoErrado = abs(subTotalBruto - spinBruto) > tol;
-  const bool liquidoErrado = abs(subTotalLiq - spinLiq) > tol;
-  const bool totalErrado = abs(total - (spinTotal - spinFrete)) > tol;
-  const bool freteErrado = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > tol;
+  // O invariante de frete/desconto/total é garantido por construção — renderTotais() sempre deriva Total a
+  // partir de subTotalLiq/descontoReais/frete, não existe mais um caminho que o defina de forma independente
+  // (era essa a causa do "Erro nos valores!" ao gerar venda a partir de um orçamento). O único desvio ainda
+  // possível é 'modelItem' divergir do que 'totais' pensa conter — recomputa a agregação a partir dele e
+  // compara, sem retry: se isso falhar agora, o desvio é real, não um estado transitório para corrigir.
+  const bool brutoErrado = abs(subTotalBruto - totais.subTotalBruto) > tol;
+  const bool liquidoErrado = abs(subTotalLiq - totais.subTotalLiq) > tol;
+  const bool itensErrado = abs(total - (totais.subTotalLiq - totais.descontoReais)) > tol;
 
-  if (brutoErrado or liquidoErrado or totalErrado or freteErrado) {
-    corrigirValores();
+  if (brutoErrado or liquidoErrado or itensErrado) {
+    Log::createLog("Exceção", montarLog());
 
-    const auto [subTotalBruto2, subTotalLiq2, total2] = calcularTotais();
-
-    const bool brutoErrado2 = abs(subTotalBruto2 - spinBruto) > tol;
-    const bool liquidoErrado2 = abs(subTotalLiq2 - spinLiq) > tol;
-    const bool totalErrado2 = abs(total2 - (spinTotal - spinFrete)) > tol;
-    const bool freteErrado2 = abs(spinTotal - (spinLiq - spinDescR + spinFrete)) > tol;
-
-    if (brutoErrado2 or liquidoErrado2 or totalErrado2 or freteErrado2) {
-      Log::createLog("Exceção", montarLog());
-
-      throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
-    }
+    throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
   }
 }
 
@@ -604,14 +651,11 @@ void Venda::savingProcedures() {
   setData("data2", data("data").toDate().toString("yyyy-MM"));
   setData("data3", data("data").toDate().toString("yyyy-MM-dd"));
   setData("dataOrc", ui->dateTimeEditOrc->dateTime());
-  // descontoReais é a fonte de verdade (em reais), derivada do total que o usuário definiu; o percentual é só exibição.
-  // Garante o invariante total = subTotalLiq - descontoReais + frete de forma exata, independente da base.
-  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
-  const double descontoReais = subTotalLiq + frete - ui->doubleSpinBoxTotal->value();
-  setData("descontoPorc", qFuzzyIsNull(subTotalLiq) ? 0. : descontoReais / subTotalLiq * 100.);
-  setData("descontoReais", descontoReais);
-  setData("frete", ui->doubleSpinBoxFrete->value());
+  // 'totais' já garante o invariante total = subTotalLiq - descontoReais + frete de forma exata — grava os
+  // mesmos campos que o header exibe, sem reler os widgets (que renderTotais() sempre manteve em sincronia).
+  setData("descontoPorc", totais.descontoPorc());
+  setData("descontoReais", totais.descontoReais);
+  setData("frete", totais.frete);
   setData("freteManual", ui->checkBoxFreteManual->isChecked());
   setData("idCliente", ui->itemBoxCliente->getId());
   setData("idEnderecoEntrega", ui->itemBoxEndereco->getId());
@@ -628,9 +672,9 @@ void Venda::savingProcedures() {
   setData("prazoEntrega", ui->spinBoxPrazoEntrega->value());
   setData("representacao", ui->lineEditVenda->text().endsWith("R") ? 1 : 0);
   setData("rt", ui->doubleSpinBoxPontuacao->value());
-  setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value());
-  setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value());
-  setData("total", ui->doubleSpinBoxTotal->value());
+  setData("subTotalBru", totais.subTotalBruto);
+  setData("subTotalLiq", totais.subTotalLiq);
+  setData("total", totais.total());
 }
 
 void Venda::registerMode() {
@@ -733,6 +777,19 @@ bool Venda::viewRegister() {
     idLoja = data("idLoja").toInt();
     representacao = data("representacao").toBool();
 
+    // O mapper (dentro de RegisterDialog::viewRegister() acima) já escreveu frete/subTotalBruto/subTotalLiq/
+    // descontoReais direto nos widgets — sincroniza 'totais' a partir deles agora. NUNCA lê 'total' do widget:
+    // ele é sempre derivado por renderTotais() ao final desta função. buscarParametrosFrete() também nunca
+    // era chamado aqui antes deste fix — um endereço editado por um Administrativo (abaixo) recalculava o
+    // frete com minimoFrete/porcFrete zerados, ignorando silenciosamente o piso/percentual da loja.
+    totais.subTotalBruto = ui->doubleSpinBoxSubTotalBruto->value();
+    totais.subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    totais.frete = ui->doubleSpinBoxFrete->value();
+    totais.descontoReais = ui->doubleSpinBoxDescontoGlobalReais->value();
+    freteMinimoAtual = totais.frete;
+
+    buscarParametrosFrete();
+
     if (not representacao) { ui->tableFluxoCaixa->hideColumn("representacao"); }
 
     if (financeiro) {
@@ -784,6 +841,8 @@ bool Venda::viewRegister() {
       ui->labelConsultor->show();
       ui->itemBoxConsultor->show();
     }
+
+    renderTotais();
 
     calcularPesoTotal();
 
@@ -870,6 +929,19 @@ void Venda::verificaFreteLoja() {
   if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
 }
 
+void Venda::buscarParametrosFrete() {
+  SqlQuery queryFrete;
+  queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
+  queryFrete.bindValue(":idLoja", idLoja);
+
+  if (not queryFrete.exec()) { throw RuntimeException("Erro buscando parâmetros do frete: " + queryFrete.lastError().text()); }
+
+  if (not queryFrete.first()) { throw RuntimeException("Dados do frete não encontrado!"); }
+
+  minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
+  porcFrete = queryFrete.value("porcentagemFrete").toDouble();
+}
+
 void Venda::on_pushButtonVoltar_clicked() {
   auto *orcamento = new Orcamento(parentWidget());
   orcamento->viewRegisterById(ui->lineEditIdOrcamento->text());
@@ -906,35 +978,8 @@ void Venda::montarFluxoCaixa() {
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
-  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-
-  if (qFuzzyIsNull(subTotalLiq)) { return; }
-
-  unsetConnections();
-
-  try {
-    const double frete = ui->doubleSpinBoxFrete->value();
-    const double descontoReais = subTotalLiq + frete - total;
-    const double descontoPorc = descontoReais / subTotalLiq;
-
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
-
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
-
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
-
-    ui->widgetPgts->setTotal(total);
-    montarFluxoCaixa();
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
-
-  setConnections();
+  totais = reduceSetTotal(totais, total);
+  renderTotais();
 }
 
 void Venda::on_checkBoxMostrarCancelados_toggled(const bool checked) {
@@ -975,85 +1020,18 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
 }
 
 void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
-  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double desconto = ui->doubleSpinBoxDescontoGlobalReais->value();
-
-  unsetConnections();
-
-  try {
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
-    ui->widgetPgts->setFrete(frete);
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    montarFluxoCaixa();
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
-
-  setConnections();
+  totais = reduceSetFrete(totais, frete);
+  renderTotais();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
-  unsetConnections();
-
-  try {
-    // Mesma forma canônica (em reais) dos demais slots: deriva descontoReais e o total pelo invariante
-    // total = subTotalLiq - descontoReais + frete, e aplica uma única fração a todos os itens.
-    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    const double frete = ui->doubleSpinBoxFrete->value();
-    const double descontoFrac = descontoPorc / 100;
-    const double descontoReais = subTotalLiq * descontoFrac;
-
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoFrac * 100);
-
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoFrac));
-    }
-
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
-
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    montarFluxoCaixa();
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
-
-  setConnections();
+  totais = reduceSetDescontoPorc(totais, descontoPorc);
+  renderTotais();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
-  const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-
-  if (qFuzzyIsNull(subTotalLiq)) { return; }
-
-  unsetConnections();
-
-  try {
-    const double descontoPorc = descontoReais / subTotalLiq;
-
-    for (int row = 0; row < modelItem.rowCount(); ++row) {
-      modelItem.setData(row, "descGlobal", descontoPorc * 100);
-
-      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc));
-    }
-
-    const double frete = ui->doubleSpinBoxFrete->value();
-
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
-    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
-
-    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-    montarFluxoCaixa();
-  } catch (std::exception &) {
-    setConnections();
-    throw;
-  }
-
-  setConnections();
+  totais = reduceSetDescontoReais(totais, descontoReais);
+  renderTotais();
 }
 
 void Venda::on_pushButtonGerarPdf_clicked() {
@@ -1552,7 +1530,7 @@ void Venda::on_checkBoxRT_toggled(const bool checked) {
 }
 
 void Venda::on_itemBoxEndereco_idChanged() {
-  if (User::isGerente()) { minimoGerente = 0.; }
+  if (User::isGerente()) { freteMinimoAtual = 0.; }
   canChangeFrete = false;
   ui->checkBoxFreteManual->setChecked(false);
   ui->checkBoxFreteManual->setEnabled(true);
@@ -1560,14 +1538,17 @@ void Venda::on_itemBoxEndereco_idChanged() {
   if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(0); }
 
   try {
-    calcularFrete(true);
+    if (const auto resultado = calcularFrete()) { aplicarFreteCalculado(*resultado); }
   } catch (std::exception &e) {
     Log::createLog("Exceção", "calcularFrete: " + QString(e.what()));
     qApp->enqueueInformation("Erro no cálculo do frete. Verifique o valor manualmente.", this);
     canChangeFrete = true;
   }
 
-  if (not representacao) { ui->doubleSpinBoxFrete->setMinimum(not qFuzzyIsNull(minimoGerente) ? minimoGerente : ui->doubleSpinBoxFrete->value()); }
+  if (not representacao) {
+    if (qFuzzyIsNull(freteMinimoAtual)) { freteMinimoAtual = ui->doubleSpinBoxFrete->value(); }
+    renderTotais();
+  }
 
   const QString disclaimer = "O VALOR CALCULADO PARA O FRETE É VÁLIDO APENAS PARA AS REGIÕES DE SÃO PAULO, BARUERI E JUNDIAÍ.";
   QString observacao = ui->plainTextEditObs->toPlainText();
@@ -1589,22 +1570,17 @@ bool Venda::verificaServicosEspeciais() {
 
   fornecedores.removeDuplicates();
 
-  if (fornecedores.size() == 1 and fornecedores.first() == "STACCATO SERVIÇOS ESPECIAIS (SSE)") {
-    ui->doubleSpinBoxFrete->setMinimum(0);
-    ui->doubleSpinBoxFrete->setValue(0);
-    return true;
-  }
-
-  return false;
+  return fornecedores.size() == 1 and fornecedores.first() == "STACCATO SERVIÇOS ESPECIAIS (SSE)";
 }
 
-void Venda::calcularFrete(const bool updateSpinBox) {
-  if (ui->checkBoxFreteManual->isChecked()) { return; }
+std::optional<VendaFreteResultado> Venda::calcularFrete() {
+  if (ui->checkBoxFreteManual->isChecked()) { return std::nullopt; }
 
-  if (verificaServicosEspeciais()) { return; }
+  if (verificaServicosEspeciais()) { return VendaFreteResultado{0., 0., true}; }
 
   double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);
+  double minimoGerenteNovo = freteMinimoAtual; // preserva o valor anterior se o bloco de endereço abaixo não recalcular
 
   qDebug() << "fretePorcentagem: R$" << fretePorcentagem;
   qDebug() << "freteMinimo: R$" << minimoFrete;
@@ -1651,19 +1627,15 @@ void Venda::calcularFrete(const bool updateSpinBox) {
 
     if (User::isGerente()) {
       const double freteMenor = qMin(freteQualp, freteMaior);
-      minimoGerente = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 1.2;
-      qDebug() << "minimoGerente: R$" << minimoGerente;
+      minimoGerenteNovo = qFuzzyIsNull(freteMenor) ? freteMaior : freteMenor * 0.8;
+      qDebug() << "minimoGerente: R$" << minimoGerenteNovo;
     }
   }
 
-  ui->doubleSpinBoxFrete->setMinimum(User::isGerente() ? minimoGerente : freteMaior);
-
-  if (updateSpinBox) {
-    qDebug() << "freteFinal: R$" << freteMaior;
-    ui->doubleSpinBoxFrete->setValue(freteMaior);
-  }
-
+  qDebug() << "freteFinal: R$" << freteMaior;
   qDebug() << "--------------------------------------";
+
+  return VendaFreteResultado{freteMaior, User::isGerente() ? minimoGerenteNovo : freteMaior, false};
 }
 
 void Venda::on_itemBoxProfissional_textChanged() {

@@ -639,15 +639,17 @@ std::tuple<double, double, double> Orcamento::calcularTotais() {
 // -----------------------------------------------------------------------------------------------
 
 ItemFormState Orcamento::reduceSetCaixas(ItemFormState state, const double caixasRaw) {
-  const double resto = fmod(caixasRaw, state.stepCx);
-  state.caixas = qFuzzyIsNull(resto) ? caixasRaw : ceil(caixasRaw);
+  // ceil() de uma divisão que "deveria" cair exatamente num inteiro é sensível a para qual lado o
+  // arredondamento de ponto flutuante empurra o resultado — roundDouble() (o mesmo helper já usado em
+  // outros lugares para limpar ruído de double) elimina esse ruído antes do ceil(), na precisão real
+  // dos dados (DECIMAL(15,4)). Também corrige o bug de arredondar para o inteiro mais próximo em vez
+  // do múltiplo de stepCx mais próximo, que existia aqui antes.
+  state.caixas = ceil(qApp->roundDouble(caixasRaw / state.stepCx)) * state.stepCx;
   return state;
 }
 
 ItemFormState Orcamento::reduceSetQuant(ItemFormState state, const double quantRaw) {
-  const double resto = fmod(quantRaw, state.stepQt);
-  const double quant2 = qFuzzyIsNull(resto) ? quantRaw : ceil(quantRaw / state.stepQt) * state.stepQt;
-  state.caixas = quant2 / state.stepQt;
+  state.caixas = ceil(qApp->roundDouble(quantRaw / state.stepQt));
   return state;
 }
 

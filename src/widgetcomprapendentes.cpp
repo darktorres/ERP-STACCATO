@@ -312,8 +312,11 @@ void WidgetCompraPendentes::on_doubleSpinBoxAvulsoCaixas_valueChanged(const doub
   unsetConnections();
 
   try {
-    const double resto = fmod(caixas, stepCx);
-    const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+    // ceil() de uma divisão que "deveria" cair exatamente num inteiro é sensível a para qual lado o
+    // arredondamento de ponto flutuante empurra o resultado — roundDouble() elimina esse ruído antes
+    // do ceil(), na precisão real dos dados (DECIMAL(15,4)). Também corrige o bug de arredondar para
+    // o inteiro mais próximo em vez do múltiplo de stepCx mais próximo, que existia aqui antes.
+    const double caixas2 = ceil(qApp->roundDouble(caixas / stepCx)) * stepCx;
     ui->doubleSpinBoxAvulsoCaixas->setValue(caixas2);
 
     const double quant2 = caixas2 * stepQt;
@@ -332,8 +335,7 @@ void WidgetCompraPendentes::on_doubleSpinBoxAvulsoQuant_valueChanged(const doubl
   unsetConnections();
 
   try {
-    const double resto = fmod(quant, stepQt);
-    const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / stepQt) * stepQt : quant;
+    const double quant2 = ceil(qApp->roundDouble(quant / stepQt)) * stepQt;
     ui->doubleSpinBoxAvulsoQuant->setValue(quant2);
 
     const double caixas2 = quant2 / stepQt;

@@ -165,6 +165,26 @@
               <item row="1" column="2">
                <widget class="ItemBox" name="itemBoxContaDestino"/>
               </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Taxa Fixa</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxTaxaFixa">
+                <property name="correctionMode">
+                 <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+                </property>
+                <property name="prefix">
+                 <string>R$ </string>
+                </property>
+                <property name="maximum">
+                 <double>99999.990000000005239</double>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item row="0" column="1" rowspan="2">

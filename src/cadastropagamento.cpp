@@ -5,6 +5,7 @@
 #include "checkboxdelegate.h"
 #include "itemboxdelegate.h"
 #include "porcentagemdelegate.h"
+#include "reaisdelegate.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -92,6 +93,7 @@ void CadastroPagamento::setupTables() {
   modelPagamentos.setHeaderData("dMaisUm", "D+1");
   modelPagamentos.setHeaderData("centavoSobressalente", "Centavo 1ª parcela");
   modelPagamentos.setHeaderData("apenasRepresentacao", "Apenas Representação");
+  modelPagamentos.setHeaderData("taxaFixa", "Taxa Fixa");
 
   modelPagamentos.select();
 
@@ -105,6 +107,7 @@ void CadastroPagamento::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn("dMaisUm", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("centavoSobressalente", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("apenasRepresentacao", new CheckBoxDelegate(true, this));
+  ui->tablePagamentos->setItemDelegateForColumn("taxaFixa", new ReaisDelegate(2, true, this));
 
   ui->tablePagamentos->setPersistentColumns({"pula1Mes", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
 
@@ -138,6 +141,7 @@ void CadastroPagamento::setupTables() {
   ui->tableAssocia1->hideColumn("dMaisUm");
   ui->tableAssocia1->hideColumn("centavoSobressalente");
   ui->tableAssocia1->hideColumn("apenasRepresentacao");
+  ui->tableAssocia1->hideColumn("taxaFixa");
 
   // -------------------------------------------------------------------------
 
@@ -169,6 +173,7 @@ void CadastroPagamento::setupMapper() {
   mapperPagamento.addMapping(ui->checkBoxDMaisUm, modelPagamentos.fieldIndex("dMaisUm"));
   mapperPagamento.addMapping(ui->checkBoxCentavoSobressalente, modelPagamentos.fieldIndex("centavoSobressalente"));
   mapperPagamento.addMapping(ui->checkBoxApenasRepresentacao, modelPagamentos.fieldIndex("apenasRepresentacao"));
+  mapperPagamento.addMapping(ui->doubleSpinBoxTaxaFixa, modelPagamentos.fieldIndex("taxaFixa"));
 }
 
 void CadastroPagamento::limparSelecao() {
@@ -180,6 +185,7 @@ void CadastroPagamento::limparSelecao() {
   ui->checkBoxDMaisUm->setChecked(false);
   ui->checkBoxCentavoSobressalente->setChecked(false);
   ui->checkBoxApenasRepresentacao->setChecked(false);
+  ui->doubleSpinBoxTaxaFixa->setValue(0);
 
   //--------------------------------------
 
@@ -220,6 +226,7 @@ void CadastroPagamento::adicionarPagamento() {
   modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
   modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
   modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
+  modelPagamentos.setData(row, "taxaFixa", ui->doubleSpinBoxTaxaFixa->value());
 
   modelPagamentos.submitAll();
 
@@ -261,6 +268,7 @@ void CadastroPagamento::atualizarPagamento() {
   modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
   modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
   modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
+  modelPagamentos.setData(row, "taxaFixa", ui->doubleSpinBoxTaxaFixa->value());
 
   //--------------------------------------
 

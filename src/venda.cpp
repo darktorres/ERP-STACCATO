@@ -1867,7 +1867,7 @@ void Venda::processarPagamento(Pagamento *pgt) {
   }
 
   SqlQuery query2;
-  query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa "
+  query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fp.taxaFixa, fpt.taxa "
                  "FROM forma_pagamento fp "
                  "LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
                  "WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
@@ -1884,6 +1884,7 @@ void Venda::processarPagamento(Pagamento *pgt) {
   const bool dMaisUm = query2.value("dMaisUm").toBool();
   const bool centavoPrimeiraParcela = query2.value("centavoSobressalente").toBool();
   const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
+  const double taxaFixa = query2.value("taxaFixa").toDouble();
 
   //-----------------------------------------------------------------
   // calcular pagamento
@@ -1898,6 +1899,10 @@ void Venda::processarPagamento(Pagamento *pgt) {
   const double valorTaxa = qApp->roundDouble(valor * porcentagemTaxa, 2) * -1;
   const double parcelaTaxa = qApp->roundDouble(valorTaxa / parcelas, 2);
   const double restoTaxa = qApp->roundDouble(valorTaxa - (parcelaTaxa * parcelas), 2);
+
+  const double valorTaxaFixa = taxaFixa * -1;
+  const double parcelaTaxaFixa = qApp->roundDouble(valorTaxaFixa / parcelas, 2);
+  const double restoTaxaFixa = qApp->roundDouble(valorTaxaFixa - (parcelaTaxaFixa * parcelas), 2);
 
   const QDate dataEmissao = (correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate());
 
@@ -1959,6 +1964,33 @@ void Venda::processarPagamento(Pagamento *pgt) {
       modelFluxoCaixa2.setData(rowTaxa, "idConta", idConta);
       modelFluxoCaixa2.setData(rowTaxa, "centroCusto", idLoja);
       modelFluxoCaixa2.setData(rowTaxa, "grupo", "Tarifas Cartão");
+    }
+
+    //-----------------------------------------------------------------
+    // calcular taxa fixa (ex.: R$0,40 por link de pagamento do Safra)
+
+    const bool calculaTaxaFixa = (not qFuzzyIsNull(valorTaxaFixa) and not isRepresentacao and not tipoPgt.contains("CONTA CLIENTE"));
+
+    if (calculaTaxaFixa) {
+      const int rowTaxaFixa = modelFluxoCaixa2.insertRowAtEnd();
+
+      modelFluxoCaixa2.setData(rowTaxaFixa, "contraParte", "Administradora Cartão");
+      modelFluxoCaixa2.setData(rowTaxaFixa, "dataEmissao", dataEmissao);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "idVenda", ui->lineEditVenda->text());
+      modelFluxoCaixa2.setData(rowTaxaFixa, "idLoja", idLoja);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "dataPagamento", dataPgt);
+
+      double val2 = parcelaTaxaFixa;
+
+      if ((centavoPrimeiraParcela and primeiraParcela) or (not centavoPrimeiraParcela and ultimaParcela)) { val2 += restoTaxaFixa; }
+
+      modelFluxoCaixa2.setData(rowTaxaFixa, "valor", val2);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "tipo", QString::number(pgt->posicao) + ". Taxa Link");
+      modelFluxoCaixa2.setData(rowTaxaFixa, "parcela", parcela + 1);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "taxa", true);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "idConta", idConta);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "centroCusto", idLoja);
+      modelFluxoCaixa2.setData(rowTaxaFixa, "grupo", "Tarifas Cartão");
     }
 
     //-----------------------------------------------------------------

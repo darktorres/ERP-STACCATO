@@ -233,7 +233,7 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
 
   auto *sdCliente = new SearchDialog("Buscar Cliente", "cliente", "idCliente", {"nome_razao"}, fullTextIndex, "desativado = FALSE", "nome_razao", true, parent);
 
-  sdCliente->hideColumns({"idCliente", "inscEstadual", "credito", "idUsuarioRel", "idCadastroRel", "idProfissionalRel", "incompleto", "desativado"});
+  sdCliente->hideColumns({"idCliente", "inscEstadual", "credito", "idUsuarioRel", "idCadastroRel", "idProfissionalRel", "incompleto", "exibirLogo", "desativado"});
 
   sdCliente->setHeaderData("pfpj", "Tipo");
   sdCliente->setHeaderData("nome_razao", "Cliente");

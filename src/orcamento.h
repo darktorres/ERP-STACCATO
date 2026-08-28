@@ -1,5 +1,6 @@
 #pragma once
 
+#include "log.h"
 #include "registerdialog.h"
 
 #include <QStack>
@@ -52,6 +53,7 @@ private:
   // attributes
   bool replicando = false;
   bool canChangeFrete = false;
+  bool carregando = false; // true durante viewRegister/select — separa "já estava errado no disco" de "esta edição quebrou"
   bool currentItemIsEstoque = false;
   bool isReadOnly = false;
   double minimoFrete = 0.;
@@ -65,11 +67,14 @@ private:
   QList<QSqlRecord> backupItem;
   QStack<int> blockingSignals;
   SqlTableModel modelItem;
+  TotaisTrace totaisTrace;
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto aplicarDescontoAosItens(const double descontoPorc) -> void;
   auto aplicarFreteCalculado(const FreteResultado &resultado) -> void;
+  // Ponto único de escrita em 'totais': atribui e registra no trace. Toda mutação passa por aqui.
+  auto aplicarTotais(const QString &origem, const QString &argumento, const OrcamentoTotais &novo) -> void;
   auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
   auto buscarConsultor() -> void;
@@ -86,7 +91,10 @@ private:
   auto dataItem(const QString &key) const -> QVariant;
   auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto generateId() -> void;
-  auto montarLog() -> QString;
+  auto montarChecks() -> QVector<TotaisCheck>;
+  auto montarDiagnostico(const QString &contexto, const QVector<TotaisCheck> &checks) -> TotaisDiagnostico;
+  auto montarFlags() const -> QString;
+  auto montarItensSujos() -> QString;
   auto newRegister() -> bool final;
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
@@ -125,6 +133,8 @@ private:
   auto on_tableProdutos_selectionChanged() -> void;
   auto redoBackupItem() -> void;
   auto registerMode() -> void final;
+  // Registra no trace uma operação que mexeu no agregado dos ITENS sem tocar em 'totais'.
+  auto registrarItens(const QString &origem, const QString &argumento) -> void;
   auto removeItem() -> void;
   auto renderItemForm() -> void;
   auto renderTotais() -> void;
@@ -144,6 +154,9 @@ private:
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaSeFoiAlterado() -> void;
   auto verificaServicosEspeciais() -> bool;
+  // Mesma checagem de verificarTotais(), mas só grava log — nunca lança. Roda a cada render, para
+  // pegar o instante em que o invariante quebra em vez de só no save, muito depois.
+  auto verificarInvariante(const QString &contexto) -> void;
   auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "log.h"
 #include "registerdialog.h"
 #include "sqltreemodel.h"
 #include "widgetpagamentos.h"
@@ -44,6 +45,7 @@ public:
 private:
   // attributes
   bool canChangeFrete = false;
+  bool carregando = false; // true durante prepararVenda/viewRegister — separa "já estava errado no disco" de "esta edição quebrou"
   bool correcao = false;
   bool financeiro = false;
   bool representacao = false;
@@ -58,10 +60,13 @@ private:
   SqlTableModel modelItem2;
   SqlTableModel modelItem;
   SqlTreeModel modelTree;
+  TotaisTrace totaisTrace;
   Ui::Venda *ui;
   VendaTotais totais;
   // methods
   auto aplicarFreteCalculado(const VendaFreteResultado &resultado) -> void;
+  // Ponto único de escrita em 'totais': atribui e registra no trace. Toda mutação passa por aqui.
+  auto aplicarTotais(const QString &origem, const QString &argumento, const VendaTotais &novo) -> void;
   auto atualizarCredito() -> void;
   auto buscarParametrosFrete() -> void;
   auto cadastrar() -> void final;
@@ -77,8 +82,11 @@ private:
   auto eventFilter(QObject *obj, QEvent *event) -> bool final;
   auto financeiroSalvar() -> void;
   auto generateId() -> void;
+  auto montarChecks() -> QVector<TotaisCheck>;
+  auto montarDiagnostico(const QString &contexto, const QVector<TotaisCheck> &checks) -> TotaisDiagnostico;
+  auto montarFlags() const -> QString;
   auto montarFluxoCaixa() -> void;
-  auto montarLog() -> QString;
+  auto montarItensSujos() -> QString;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxMostrarCancelados_toggled(const bool checked) -> void;
   auto on_checkBoxPontuacaoIsento_toggled(const bool checked) -> void;
@@ -107,6 +115,8 @@ private:
   auto on_treeView_doubleClicked(const QModelIndex &index) -> void;
   auto processarPagamento(Pagamento *pgt) -> void;
   auto registerMode() -> void final;
+  // Registra no trace uma operação que mexeu no agregado dos ITENS sem tocar em 'totais'.
+  auto registrarItens(const QString &origem, const QString &argumento) -> void;
   auto renderTotais() -> void;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
@@ -121,6 +131,9 @@ private:
   auto verificaDisponibilidadeEstoque() -> void;
   auto verificaFreteLoja() -> void;
   auto verificaServicosEspeciais() -> bool;
+  // Mesma checagem de verificarTotais(), mas só grava log — nunca lança. Roda a cada render, para
+  // pegar o instante em que o invariante quebra em vez de só no save, muito depois.
+  auto verificarInvariante(const QString &contexto) -> void;
   auto verificarTotais() -> void;
   auto verifyFields() -> void final;
   auto viewRegister() -> bool final;

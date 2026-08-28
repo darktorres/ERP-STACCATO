@@ -334,6 +334,11 @@ void Venda::setupTables() {
 }
 
 void Venda::prepararVenda(const QString &idOrcamento) {
+  // Marca a carga para que a checagem de invariante em renderTotais() saiba distinguir "veio errado do
+  // orçamento" de "esta edição quebrou". Este é o caminho histórico da maior parte das falhas.
+  carregando = true;
+  totaisTrace.limpar();
+
   ui->lineEditIdOrcamento->setText(idOrcamento);
   ui->lineEditVenda->setText("Auto gerado");
   ui->dateTimeEdit->setDate(qApp->serverDate());
@@ -372,17 +377,16 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   // silenciosamente o piso/percentual configurado na loja. buscarParametrosFrete() faz a mesma query.
   buscarParametrosFrete();
 
-  totais.subTotalBruto = queryOrc.value("subTotalBru").toDouble();
-  totais.subTotalLiq = queryOrc.value("subTotalLiq").toDouble();
-  totais.frete = queryOrc.value("frete").toDouble();
-  totais.descontoReais = queryOrc.value("descontoReais").toDouble();
+  aplicarTotais("prepararVenda:orcamento", idOrcamento,
+                {queryOrc.value("subTotalBru").toDouble(), queryOrc.value("subTotalLiq").toDouble(), queryOrc.value("frete").toDouble(),
+                 queryOrc.value("descontoReais").toDouble()});
   freteMinimoAtual = totais.frete;
 
   canChangeFrete = queryOrc.value("freteManual").toBool();
 
   if (User::isGerente() and not canChangeFrete) {
     if (const auto resultado = calcularFrete()) {
-      if (resultado->forcado) { totais = reduceSetFrete(totais, resultado->valor); }
+      if (resultado->forcado) { aplicarTotais("prepararVenda:freteForcado", Log::dinheiro(resultado->valor), reduceSetFrete(totais, resultado->valor)); }
       freteMinimoAtual = resultado->minimo;
     }
   }
@@ -448,6 +452,8 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   calcularPesoTotal();
 
   // -------------------------------------------------------------------------
+
+  carregando = false;
 
   setConnections();
 }
@@ -525,64 +531,147 @@ void Venda::renderTotais() {
   ui->widgetPgts->setFrete(totais.frete);
   ui->widgetPgts->setTotal(totais.total());
   montarFluxoCaixa();
+
+  // Última instrução: o invariante só vale depois que os itens receberam o desconto global. Pega o
+  // instante em que a divergência aparece, em vez de descobri-la no save muitas ações depois.
+  verificarInvariante(carregando ? "render:load" : "render:edit");
 }
 
 void Venda::aplicarFreteCalculado(const VendaFreteResultado &resultado) {
   freteMinimoAtual = resultado.minimo;
-  totais = reduceSetFrete(totais, resultado.valor);
+  aplicarTotais("aplicarFreteCalculado", Log::dinheiro(resultado.valor), reduceSetFrete(totais, resultado.valor));
   renderTotais();
 }
 
-QString Venda::montarLog() {
-  const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
+// -----------------------------------------------------------------------------------------------
+// Diagnóstico do invariante de totais. Espelho do que existe em orcamento.cpp — ver o comentário
+// longo lá para o porquê de cada regra. Em resumo: o antigo montarLog() gravava um retrato mudo no
+// instante do throw, sem dizer qual comparação falhou nem por quanto, e com precisão mais grossa
+// que a própria tolerância testada.
+// -----------------------------------------------------------------------------------------------
 
-  QStringList logString;
+void Venda::aplicarTotais(const QString &origem, const QString &argumento, const VendaTotais &novo) {
+  totais = novo;
 
-  logString << "IdVenda: " + ui->lineEditVenda->text();
-  logString << "IdOrcamento: " + ui->lineEditIdOrcamento->text();
-  logString << "\nsubTotalBruto (itens): " + QString::number(subTotalBruto) + "\ntotais.subTotalBruto: " + QString::number(totais.subTotalBruto);
-  logString << "\nsubTotalLiq (itens): " + QString::number(subTotalLiq) + "\ntotais.subTotalLiq: " + QString::number(totais.subTotalLiq);
-  logString << "\ntotal (itens): " + QString::number(total) + "\ntotais.total(): " + QString::number(totais.total());
-  logString << "\ntotais.frete: " + QString::number(totais.frete);
-  logString << "\ntotais.descontoReais: " + QString::number(totais.descontoReais);
-  logString << "";
-
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
-
-    logString << "--------------------";
-
-    logString << "\nId: " + modelItem.data(row, "idVendaProduto1").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
-                     "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
-                     "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
-                     "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
-                     "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString();
-  }
-
-  return logString.join("\n");
+  registrarItens(origem, argumento);
 }
 
-void Venda::verificarTotais() {
+void Venda::registrarItens(const QString &origem, const QString &argumento) {
+  const double subTotalLiqItens = std::get<1>(calcularTotais());
+
+  totaisTrace.registrar(origem, argumento, {totais.subTotalBruto, totais.subTotalLiq, totais.frete, totais.descontoReais}, modelItem.rowCount(), subTotalLiqItens);
+}
+
+QVector<TotaisCheck> Venda::montarChecks() {
   const auto [subTotalBruto, subTotalLiq, total] = calcularTotais();
 
   // Tolerância proporcional à base: os valores são DECIMAL(15,4) e os spin boxes de dinheiro têm 2 casas,
   // então um limite fixo de 0.1 é mais fino que a precisão dos dados e gera falso erro em bases grandes.
   const double tol = std::max(0.1, totais.subTotalLiq * 1e-6);
 
-  // O invariante de frete/desconto/total é garantido por construção — renderTotais() sempre deriva Total a
-  // partir de subTotalLiq/descontoReais/frete, não existe mais um caminho que o defina de forma independente
-  // (era essa a causa do "Erro nos valores!" ao gerar venda a partir de um orçamento). O único desvio ainda
-  // possível é 'modelItem' divergir do que 'totais' pensa conter — recomputa a agregação a partir dele e
-  // compara, sem retry: se isso falhar agora, o desvio é real, não um estado transitório para corrigir.
-  const bool brutoErrado = abs(subTotalBruto - totais.subTotalBruto) > tol;
-  const bool liquidoErrado = abs(subTotalLiq - totais.subTotalLiq) > tol;
-  const bool itensErrado = abs(total - (totais.subTotalLiq - totais.descontoReais)) > tol;
+  return {
+      {"bruto", subTotalBruto, totais.subTotalBruto, tol},
+      {"liquido", subTotalLiq, totais.subTotalLiq, tol},
+      {"itens", total, totais.subTotalLiq - totais.descontoReais, tol},
+      // Era exatamente este termo que falhava nos casos históricos de "gerar venda a partir de um orçamento",
+      // e ele não era verificado nem impresso. Tolerância 0.01 = uma casa do spin box, que tem 2 contra as 4
+      // de DECIMAL(15,4).
+      {"widgetTotal", ui->doubleSpinBoxTotal->value(), totais.total(), 0.01},
+  };
+}
 
-  if (brutoErrado or liquidoErrado or itensErrado) {
-    Log::createLog("Exceção", montarLog());
+QString Venda::montarFlags() const {
+  return "idOrcamento=" + ui->lineEditIdOrcamento->text() +                                     //
+         " freteManual=" + QString::number(ui->checkBoxFreteManual->isChecked()) +              //
+         " representacao=" + QString::number(representacao) +                                   //
+         " freteMinimoAtual=" + Log::dinheiro(freteMinimoAtual) +                               //
+         " canChangeFrete=" + QString::number(canChangeFrete) +                                 //
+         " porcFrete=" + Log::dinheiro(porcFrete) +                                             //
+         " tipo=" + (tipo == Tipo::Cadastrar ? QString("Cadastrar") : QString("Atualizar")) +   //
+         " correcao=" + QString::number(correcao) +                                             //
+         " financeiro=" + QString::number(financeiro) +                                         //
+         " carregando=" + QString::number(carregando) +                                         //
+         " itens=" + QString::number(modelItem.rowCount());
+}
 
-    throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
+QString Venda::montarItensSujos() {
+  const auto linhaSuja = [&](const int row) {
+    for (int col = 0, colCount = modelItem.columnCount(); col < colCount; ++col) {
+      if (modelItem.isDirty(modelItem.index(row, col))) { return true; }
+    }
+
+    return false;
+  };
+
+  QStringList linhas;
+  int considerados = 0;
+
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; } // skip item pending deletion
+
+    ++considerados;
+
+    // As linhas já persistidas estão em venda_has_produto1 e podem ser consultadas a qualquer momento pelo id
+    // do cabeçalho — despejá-las aqui era a maior parte do volume do log antigo e não acrescentava nada.
+    if (not linhaSuja(row)) { continue; }
+
+    linhas << "  row=" + QString::number(row) +                                                    //
+                  " id=" + modelItem.data(row, "idVendaProduto1").toString() +                     //
+                  " codComercial=" + modelItem.data(row, "codComercial").toString() +              //
+                  " quant=" + Log::dinheiro(modelItem.data(row, "quant").toDouble()) +             //
+                  " prcUn=" + Log::dinheiro(modelItem.data(row, "prcUnitario").toDouble()) +       //
+                  " desc=" + Log::dinheiro(modelItem.data(row, "desconto").toDouble()) +           //
+                  " parcial=" + Log::dinheiro(modelItem.data(row, "parcial").toDouble()) +         //
+                  " parcialDesc=" + Log::dinheiro(modelItem.data(row, "parcialDesc").toDouble()) + //
+                  " descGlobal=" + Log::dinheiro(modelItem.data(row, "descGlobal").toDouble()) +   //
+                  " total=" + Log::dinheiro(modelItem.data(row, "total").toDouble());
   }
+
+  if (linhas.isEmpty()) { return "itens sujos: nenhum (0 de " + QString::number(considerados) + " — todos já persistidos, consulte venda_has_produto1)"; }
+
+  linhas.prepend("itens sujos (" + QString::number(linhas.size()) + " de " + QString::number(considerados) + " — só linhas não persistidas):");
+
+  return linhas.join("\n");
+}
+
+TotaisDiagnostico Venda::montarDiagnostico(const QString &contexto, const QVector<TotaisCheck> &checks) {
+  return {"Venda",
+          contexto,
+          ui->lineEditVenda->text(),
+          checks,
+          {totais.subTotalBruto, totais.subTotalLiq, totais.frete, totais.descontoReais},
+          montarFlags(),
+          montarItensSujos()};
+}
+
+void Venda::verificarInvariante(const QString &contexto) {
+  // Nunca lança nem interrompe quem está usando: só registra o instante em que o invariante quebrou.
+  try {
+    const QVector<TotaisCheck> checks = montarChecks();
+
+    // Caminho normal sai aqui: roda a cada render, então nada de montar flags/itens/mensagem à toa.
+    if (not algumCheckFalhou(checks)) { return; }
+
+    const TotaisDiagnostico diagnostico = montarDiagnostico(contexto, checks);
+
+    // Uma falha idêntica repetida não gera linha nova; uma falha diferente gera.
+    if (not totaisTrace.primeiraVez(diagnostico.assinatura())) { return; }
+
+    Log::createLogTotais(diagnostico, totaisTrace);
+  } catch (std::exception &e) { qDebug() << "verificarInvariante falhou:" << e.what(); }
+}
+
+void Venda::verificarTotais() {
+  const QVector<TotaisCheck> checks = montarChecks();
+
+  // Sem retry: se falhar aqui o desvio é real, não um estado transitório para corrigir.
+  if (not algumCheckFalhou(checks)) { return; }
+
+  // Sem dedup no save: cada tentativa que falha para o usuário é um evento que importa por si, e o trace
+  // difere entre elas.
+  Log::createLogTotais(montarDiagnostico("save", checks), totaisTrace);
+
+  throw RuntimeException("Erro nos valores! Entre em contato com o suporte!");
 }
 
 void Venda::verifyFields() {
@@ -755,6 +844,9 @@ void Venda::updateMode() {
 bool Venda::viewRegister() {
   unsetConnections();
 
+  carregando = true;
+  totaisTrace.limpar();
+
   const auto ok = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
@@ -782,10 +874,9 @@ bool Venda::viewRegister() {
     // ele é sempre derivado por renderTotais() ao final desta função. buscarParametrosFrete() também nunca
     // era chamado aqui antes deste fix — um endereço editado por um Administrativo (abaixo) recalculava o
     // frete com minimoFrete/porcFrete zerados, ignorando silenciosamente o piso/percentual da loja.
-    totais.subTotalBruto = ui->doubleSpinBoxSubTotalBruto->value();
-    totais.subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
-    totais.frete = ui->doubleSpinBoxFrete->value();
-    totais.descontoReais = ui->doubleSpinBoxDescontoGlobalReais->value();
+    aplicarTotais("viewRegister:sync", "-",
+                  {ui->doubleSpinBoxSubTotalBruto->value(), ui->doubleSpinBoxSubTotalLiq->value(), ui->doubleSpinBoxFrete->value(),
+                   ui->doubleSpinBoxDescontoGlobalReais->value()});
     freteMinimoAtual = totais.frete;
 
     buscarParametrosFrete();
@@ -848,6 +939,8 @@ bool Venda::viewRegister() {
 
     return true;
   }();
+
+  carregando = false;
 
   setConnections();
 
@@ -978,7 +1071,7 @@ void Venda::montarFluxoCaixa() {
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
-  totais = reduceSetTotal(totais, total);
+  aplicarTotais("setTotal", Log::dinheiro(total), reduceSetTotal(totais, total));
   renderTotais();
 }
 
@@ -1020,17 +1113,17 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
 }
 
 void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
-  totais = reduceSetFrete(totais, frete);
+  aplicarTotais("setFrete", Log::dinheiro(frete), reduceSetFrete(totais, frete));
   renderTotais();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
-  totais = reduceSetDescontoPorc(totais, descontoPorc);
+  aplicarTotais("setDescontoPorc", Log::dinheiro(descontoPorc), reduceSetDescontoPorc(totais, descontoPorc));
   renderTotais();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
-  totais = reduceSetDescontoReais(totais, descontoReais);
+  aplicarTotais("setDescontoReais", Log::dinheiro(descontoReais), reduceSetDescontoReais(totais, descontoReais));
   renderTotais();
 }
 
@@ -1687,6 +1780,11 @@ void Venda::copiaProdutosOrcamento() {
   }
 
   for (int row = 0; row < modelItem.rowCount(); ++row) { backupItem.append(modelItem.record(row)); }
+
+  // Os itens já estão no model, mas 'totais' ainda vem do cabeçalho do orçamento (prepararVenda os copia
+  // logo em seguida). Registrar aqui deixa visível no trace o agregado dos itens ANTES desse acoplamento —
+  // é onde uma divergência orçamento/venda aparece primeiro.
+  registrarItens("copiaProdutosOrcamento", ui->lineEditIdOrcamento->text());
 }
 
 void Venda::on_pushButtonComprovantes_clicked() {

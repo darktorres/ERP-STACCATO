@@ -61,6 +61,31 @@ void Sql::updateOrdemRepresentacaoVenda(const QString idVendas) {
   }
 }
 
+void Sql::separarProdutos(const QList<int> &idsVendaProduto2, const bool marcarSeparado) {
+  const QString statusAtual = marcarSeparado ? "ESTOQUE" : "SEPARADO";
+  const QString novoStatus = marcarSeparado ? "SEPARADO" : "ESTOQUE";
+
+  SqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = :novoStatus WHERE status = :statusAtual AND idVendaProduto2 = :idVendaProduto2");
+
+  SqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = :novoStatus WHERE status = :statusAtual AND idVendaProduto2 = :idVendaProduto2");
+
+  for (const int idVendaProduto2 : idsVendaProduto2) {
+    queryVenda.bindValue(":novoStatus", novoStatus);
+    queryVenda.bindValue(":statusAtual", statusAtual);
+    queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
+
+    if (not queryVenda.exec()) { throw RuntimeException("Erro salvando venda_produto: " + queryVenda.lastError().text()); }
+
+    queryCompra.bindValue(":novoStatus", novoStatus);
+    queryCompra.bindValue(":statusAtual", statusAtual);
+    queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
+
+    if (not queryCompra.exec()) { throw RuntimeException("Erro salvando pedido_fornecedor: " + queryCompra.lastError().text()); }
+  }
+}
+
 // clang-format off
 
 QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &filtroCheck, const QString &filtroStatus, const QString& filtroAtelier, const QString& filtroServico) {
@@ -80,6 +105,8 @@ QString Sql::view_entrega_pendente(const QString &filtroBusca, const QString &fi
          "     SUM(`vp2`.`status` IN ('ESTOQUE', 'SEPARADO')) AS `Estoque`,"
          "     SUM(`vp2`.`status` IN ('ENTREGUE' , 'EM ENTREGA', 'ENTREGA AGEND.')) AS `Agend/Entregue`,"
          "     SUM(`vp2`.`status` NOT IN ('ESTOQUE' , 'ENTREGUE', 'EM ENTREGA', 'SEPARADO', 'ENTREGA AGEND.', 'DEVOLVIDO', 'QUEBRADO')) AS `Outros`,"
+         "     SUM(`vp2`.`status` = 'SEPARADO') AS `Separado`,"
+         "     COUNT(*) AS `TotalProdutos`,"
          "     CONCAT(lat, ';', lng, ';', REPLACE(v.idVenda,'&','&amp'), ';', REPLACE(che.logradouro, ' ', '%20'), ',%20', REPLACE(che.numero, ' ', '%20'), '%20-%20', REPLACE(che.bairro, ' ', '%20'), ',%20', REPLACE(che.cidade, ' ', '%20')) AS mapa"
          " FROM "
          "     `venda_has_produto2` `vp2` "
@@ -595,6 +622,103 @@ QString Sql::view_galpao(const QString &idBloco, const QString &filtroText) {
          " WHERE "
          "     idEstoque_idConsumo IS NOT NULL " +
          filtroBloco + filtro;
+}
+
+QString Sql::view_produto_localizacao(const QString &filtro) {
+  // Duplicado de proposito a partir da view do banco `view_galpao` (nao editar essa view - e
+  // sincronizada pelo MySQL Workbench): aquele view restringe o branch CLIENTE a um subconjunto de
+  // status que exclui REPO. ENTREGA/REPO. RECEB., e a busca por produto (Recebimento) precisa achar
+  // reposicao com estoque fisico ja vinculado. Se `view_galpao` mudar no banco, esta query nao
+  // acompanha automaticamente.
+  //
+  // O filtro entra dentro de cada branch do UNION (nao depois, no derived table) para nao obrigar o
+  // MySQL a materializar as ~226 mil linhas das duas tabelas antes de filtrar - medido no banco:
+  // filtrar depois custava 1,4s, filtrar dentro de cada branch custa 0,74s (mesmo resultado).
+  const QString filtroCliente = filtro.isEmpty() ? "" : " AND (ehc.codComercial LIKE '%" + filtro + "%' OR ehc.descricao LIKE '%" + filtro + "%')";
+  const QString filtroLoja = filtro.isEmpty() ? "" : " AND (e.codComercial LIKE '%" + filtro + "%' OR e.descricao LIKE '%" + filtro + "%')";
+
+  return " SELECT "
+         "     x.tipo, "
+         "     x.status, "
+         "     x.idVenda, "
+         "     x.idVendaProduto2, "
+         "     x.idEstoque, "
+         "     x.codComercial, "
+         "     x.descricao, "
+         "     x.formComercial, "
+         "     x.caixas, "
+         "     x.quant, "
+         "     x.un, "
+         "     x.lote, "
+         "     x.numeroNFe, "
+         "     g.label AS bloco "
+         " FROM "
+         "     (SELECT "
+         "          ehc.idEstoque AS idEstoque, "
+         "          e.status AS status, "
+         "          vp2.idVenda AS idVenda, "
+         "          vp2.idVendaProduto2 AS idVendaProduto2, "
+         "          ehc.codComercial AS codComercial, "
+         "          ehc.descricao AS descricao, "
+         "          p.formComercial AS formComercial, "
+         "          ABS(ehc.caixas) AS caixas, "
+         "          ABS(ehc.quant) AS quant, "
+         "          ehc.un AS un, "
+         "          ehc.idBloco AS idBloco, "
+         "          e.lote AS lote, "
+         "          n.numeroNFe AS numeroNFe, "
+         "          'CLIENTE' AS tipo "
+         "      FROM "
+         "          estoque_has_consumo ehc "
+         "      LEFT JOIN "
+         "          estoque e ON ehc.idEstoque = e.idEstoque "
+         "      LEFT JOIN "
+         "          nfe n ON e.idNFe = n.idNFe "
+         "      LEFT JOIN "
+         "          venda_has_produto2 vp2 ON ehc.idVendaProduto2 = vp2.idVendaProduto2 "
+         "      LEFT JOIN "
+         "          produto p ON ehc.idProduto = p.idProduto "
+         "      WHERE "
+         "          vp2.status IN ('ESTOQUE', 'SEPARADO', 'EM COLETA', 'EM RECEBIMENTO', 'ENTREGA AGEND.', 'EM ENTREGA', 'REPO. ENTREGA', 'REPO. RECEB.') "
+         // ehc.status e coluna propria de estoque_has_consumo (nao e vp2.status): o sinal de quant
+         // muda conforme o tipo de evento (CONSUMO/QUEBRADO negativo = saiu do lote; DEVOLVIDO
+         // positivo = voltou pro lote) - sem esse filtro, uma devolucao antiga aparece como se fosse
+         // reserva ativa. Mesma exclusao ja usada em estoque.cpp e widgetnfeentrada.cpp.
+         "          AND ehc.status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO') "
+         "          AND e.status <> 'cancelado' "
+         "          AND ehc.quant != 0 " +
+         filtroCliente +
+         // UNION ALL, nao UNION: linhas com idEstoque/idVendaProduto2/caixas/quant identicos sao
+         // eventos de consumo DIFERENTES (idConsumo distinto) - UNION (com DISTINCT implicito)
+         // colapsaria lancamentos reais em um so, escondendo dado que existe de verdade na tabela.
+         "      UNION ALL "
+         "      SELECT "
+         "          e.idEstoque AS idEstoque, "
+         "          e.status AS status, "
+         "          NULL AS idVenda, "
+         "          NULL AS idVendaProduto2, "
+         "          e.codComercial AS codComercial, "
+         "          e.descricao AS descricao, "
+         "          p.formComercial AS formComercial, "
+         "          (e.restante / p.quantCaixa) AS caixas, "
+         "          e.restante AS quant, "
+         "          e.un AS un, "
+         "          e.idBloco AS idBloco, "
+         "          e.lote AS lote, "
+         "          n.numeroNFe AS numeroNFe, "
+         "          'EST. LOJA' AS tipo "
+         "      FROM "
+         "          estoque e "
+         "      LEFT JOIN "
+         "          nfe n ON e.idNFe = n.idNFe "
+         "      LEFT JOIN "
+         "          produto p ON e.idProduto = p.idProduto "
+         "      WHERE "
+         "          e.restante > 0 AND e.status <> 'cancelado'" +
+         filtroLoja +
+         "     ) x "
+         " LEFT JOIN "
+         "     galpao g ON x.idBloco = g.idBloco";
 }
 
 QString Sql::view_followup_venda_misto(const QString &idVenda) {

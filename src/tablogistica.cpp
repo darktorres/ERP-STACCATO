@@ -19,6 +19,7 @@ void TabLogistica::resetTables() {
   ui->widgetColeta->resetTables();
   ui->widgetRecebimento->resetTables();
   ui->widgetAgendaEntrega->resetTables();
+  ui->widgetSeparacao->resetTables();
   ui->widgetCalendarioEntrega->resetTables();
   ui->widgetCaminhao->resetTables();
   ui->widgetRepresentacao->resetTables();
@@ -40,6 +41,7 @@ void TabLogistica::updateTables() {
   if (currentTab == "Coleta") { ui->widgetColeta->updateTables(); }
   if (currentTab == "Recebimento") { ui->widgetRecebimento->updateTables(); }
   if (currentTab == "Agendar Entrega") { ui->widgetAgendaEntrega->updateTables(); }
+  if (currentTab == "Separação") { ui->widgetSeparacao->updateTables(); }
   if (currentTab == "Entregas") { ui->widgetCalendarioEntrega->updateTables(); }
   if (currentTab == "Caminhões") { ui->widgetCaminhao->updateTables(); }
   if (currentTab == "Representação") { ui->widgetRepresentacao->updateTables(); }

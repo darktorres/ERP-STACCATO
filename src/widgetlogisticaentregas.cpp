@@ -409,8 +409,8 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   const int idEvento = modelCarga.data(list.first().row(), "idEvento").toInt();
 
   SqlQuery queryEvento;
-  queryEvento.prepare(
-      "SELECT vhp.idVendaProduto2, ehc.idConsumo FROM veiculo_has_produto vhp LEFT JOIN estoque_has_consumo ehc ON vhp.idVendaProduto2 = ehc.idVendaProduto2 WHERE idEvento = :idEvento");
+  queryEvento.prepare("SELECT vhp.idVendaProduto2, ehc.idConsumo, vp2.statusOriginal FROM veiculo_has_produto vhp LEFT JOIN estoque_has_consumo ehc ON vhp.idVendaProduto2 = ehc.idVendaProduto2 LEFT JOIN "
+                       "venda_has_produto2 vp2 ON vhp.idVendaProduto2 = vp2.idVendaProduto2 WHERE idEvento = :idEvento");
   queryEvento.bindValue(":idEvento", idEvento);
 
   if (not queryEvento.exec() or queryEvento.size() == 0) { throw RuntimeException("Erro buscando produtos: " + queryEvento.lastError().text()); }
@@ -420,10 +420,11 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
 
   SqlQuery queryCompra;
   queryCompra.prepare(
-      "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+      "UPDATE pedido_fornecedor_has_produto2 SET status = :status, dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   while (queryEvento.next()) {
-    const QString status = (queryEvento.value("idConsumo").toInt() == 0) ? "PENDENTE" : "ESTOQUE";
+    const QString statusOriginal = queryEvento.value("statusOriginal").toString();
+    const QString status = (queryEvento.value("idConsumo").toInt() == 0) ? "PENDENTE" : (statusOriginal.isEmpty() ? "ESTOQUE" : statusOriginal);
 
     queryVenda.bindValue(":status", status);
     queryVenda.bindValue(":idVendaProduto2", queryEvento.value("idVendaProduto2"));
@@ -433,6 +434,7 @@ void WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
     //----------------------------------------
     // linhas que não possuem consumo não irão ter linha de compra
 
+    queryCompra.bindValue(":status", status);
     queryCompra.bindValue(":idVendaProduto2", queryEvento.value("idVendaProduto2"));
 
     if (not queryCompra.exec()) { throw RuntimeException("Erro voltando status produto compra: " + queryCompra.lastError().text()); }

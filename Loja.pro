@@ -224,6 +224,7 @@ SOURCES += \
     src/reaisdelegate.cpp \
     src/registeraddressdialog.cpp \
     src/registerdialog.cpp \
+    src/romaneio.cpp \
     src/scrollarea.cpp \
     src/searchdialog.cpp \
     src/sendmail.cpp \
@@ -279,6 +280,7 @@ SOURCES += \
     src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
+    src/widgetlogisticaseparacao.cpp \
     src/widgetnfedistribuicao.cpp \
     src/widgetnfeentrada.cpp \
     src/widgetnfesaida.cpp \
@@ -368,6 +370,7 @@ HEADERS  += \
     src/reaisdelegate.h \
     src/registeraddressdialog.h \
     src/registerdialog.h \
+    src/romaneio.h \
     src/scrollarea.h \
     src/searchdialog.h \
     src/sendmail.h \
@@ -423,6 +426,7 @@ HEADERS  += \
     src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
+    src/widgetlogisticaseparacao.h \
     src/widgetnfedistribuicao.h \
     src/widgetnfeentrada.h \
     src/widgetnfesaida.h \
@@ -512,6 +516,7 @@ FORMS += \
     ui/widgetlogisticaentregues.ui \
     ui/widgetlogisticarecebimento.ui \
     ui/widgetlogisticarepresentacao.ui \
+    ui/widgetlogisticaseparacao.ui \
     ui/widgetnfedistribuicao.ui \
     ui/widgetnfeentrada.ui \
     ui/widgetnfesaida.ui \

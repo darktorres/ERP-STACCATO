@@ -126,6 +126,31 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabSeparacao">
+       <attribute name="title">
+        <string>Separação</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_28">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="WidgetLogisticaSeparacao" name="widgetSeparacao" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabEntregas">
        <attribute name="title">
         <string>Entregas</string>
@@ -277,6 +302,12 @@
    <class>WidgetLogisticaAgendarEntrega</class>
    <extends>QWidget</extends>
    <header>src/widgetlogisticaagendarentrega.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetLogisticaSeparacao</class>
+   <extends>QWidget</extends>
+   <header>src/widgetlogisticaseparacao.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

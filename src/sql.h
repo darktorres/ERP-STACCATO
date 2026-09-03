@@ -3,6 +3,7 @@
 #include "application.h"
 
 #include <QHash>
+#include <QList>
 #include <QString>
 
 class Sql {
@@ -18,6 +19,7 @@ public:
   static auto pesosProdutos(const QStringList &idProdutos) -> QHash<QString, ProdutoPeso>;
   static auto queryEstoque(const QString &match, const QString &where) -> QString;
   static auto queryExportarNCM() -> QString;
+  static auto separarProdutos(const QList<int> &idsVendaProduto2, const bool marcarSeparado) -> void;
   static auto updateFornecedoresOrcamento(const QString idOrcamento) -> void;
   static auto updateFornecedoresVenda(const QString idVenda) -> void;
   static auto updateOrdemRepresentacaoVenda(const QString idVenda) -> void;
@@ -37,6 +39,7 @@ public:
   static auto view_estoque(const QString &idEstoque) -> QString;
   static auto view_estoque_contabil(const QString &match, const QString &data = qApp->serverDate().toString("yyyy-MM-dd")) -> QString;
   static auto view_galpao(const QString &idBloco, const QString &filtroText = {}) -> QString;
+  static auto view_produto_localizacao(const QString &filtro = {}) -> QString;
   static auto view_relatorio_loja(const QString &mes = {}, const QString &idUsuario = {}, const QString &idUsuarioConsultor = {}, const QString &loja = {}) -> QString;
   static auto view_relatorio_vendedor(const QString &mes = {}, const QString &idUsuario = {}, const QString &idUsuarioConsultor = {}, const QString &loja = {}) -> QString;
 };

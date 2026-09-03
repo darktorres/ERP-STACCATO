@@ -365,6 +365,20 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QRadioButton" name="radioButtonTotalSeparado">
+               <property name="text">
+                <string>100% separado</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButtonParcialSeparado">
+               <property name="text">
+                <string>Parcialmente separado</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -956,6 +970,8 @@
   <tabstop>radioButtonTotalEstoque</tabstop>
   <tabstop>radioButtonParcialEstoque</tabstop>
   <tabstop>radioButtonSemEstoque</tabstop>
+  <tabstop>radioButtonTotalSeparado</tabstop>
+  <tabstop>radioButtonParcialSeparado</tabstop>
   <tabstop>groupBoxStatus</tabstop>
   <tabstop>checkBoxPendente</tabstop>
   <tabstop>checkBoxIniciado</tabstop>

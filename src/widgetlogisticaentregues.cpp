@@ -164,12 +164,12 @@ void WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE `idVendaProduto2` = :idVendaProduto2");
 
   SqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+  query2.prepare("UPDATE venda_has_produto2 SET status = COALESCE(statusOriginal, 'ESTOQUE'), entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = "
+                 ":idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   SqlQuery query3;
-  query3.prepare(
-      "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = COALESCE((SELECT statusOriginal FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2), 'ESTOQUE'), dataPrevEnt = NULL, "
+                 "dataRealEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (const auto &index : list) {
     query1.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));

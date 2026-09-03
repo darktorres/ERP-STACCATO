@@ -1215,9 +1215,6 @@ color: rgb(0, 0, 0);</string>
                   <property name="text">
                    <string>Atualizar</string>
                   </property>
-                  <property name="default">
-                   <bool>true</bool>
-                  </property>
                  </widget>
                 </item>
                 <item>

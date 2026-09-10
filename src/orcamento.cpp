@@ -147,11 +147,7 @@ void Orcamento::on_tableProdutos_selectionChanged() {
     mapperItem.setCurrentModelIndex(index);
     setarParametrosProduto();
 
-    // setarParametrosProduto() só carrega stepQt/stepCx/prcUn (dados do produto); caixas/descPct da
-    // linha selecionada vêm do mapper, que já populou os widgets acima. Sem isto itemFormState.caixas
-    // ficava em 0 (herdado da última linha limpa/adicionada), e reduceSetTotalItem() — cujo guard de
-    // itemBruto==0 existe para não dividir por zero — bailava e renderItemForm() reescrevia o campo de
-    // volta para 0 no primeiro edit de valor da linha.
+    // setarParametrosProduto() só carrega stepQt/stepCx/prcUn; caixas/descPct vêm do mapper.
     itemFormState.caixas = ui->doubleSpinBoxCaixas->value();
     itemFormState.descPct = ui->doubleSpinBoxDesconto->value();
   } catch (std::exception &) {
@@ -655,12 +651,8 @@ std::tuple<double, double, double> Orcamento::calcularTotais() {
 // -----------------------------------------------------------------------------------------------
 
 ItemFormState Orcamento::reduceSetCaixas(ItemFormState state, const double caixasRaw) {
-  // ceil() de uma divisão que "deveria" cair exatamente num inteiro é sensível a para qual lado o
-  // arredondamento de ponto flutuante empurra o resultado — roundDouble() (o mesmo helper já usado em
-  // outros lugares para limpar ruído de double) elimina esse ruído antes do ceil(), na precisão real
-  // dos dados (DECIMAL(15,4)). Também corrige o bug de arredondar para o inteiro mais próximo em vez
-  // do múltiplo de stepCx mais próximo, que existia aqui antes.
-  state.caixas = ceil(qApp->roundDouble(caixasRaw / state.stepCx)) * state.stepCx;
+  // caixas precisa ser inteiro para quant()=caixas*stepQt ficar múltiplo de stepQt.
+  state.caixas = ceil(qApp->roundDouble(caixasRaw));
   return state;
 }
 
@@ -1579,8 +1571,10 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   }
 
   if (User::temPermissao("ajusteFrete")) {
+    freteMinimoAtual = 0;
     ui->doubleSpinBoxFrete->setMinimum(0);
   } else {
+    freteMinimoAtual = User::valorMinimoFrete;
     ui->doubleSpinBoxFrete->setMinimum(User::valorMinimoFrete);
     ui->doubleSpinBoxFrete->setValue(User::valorMinimoFrete);
     User::valorMinimoFrete = -1;

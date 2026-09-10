@@ -11,6 +11,7 @@
 #include "sqlquerymodel.h"
 #include "user.h"
 
+#include <QDesktopServices>
 #include <QDir>
 #include <QSqlError>
 #include <QStringList>
@@ -132,7 +133,7 @@ QString Romaneio::gerar(const QString &idVenda, const QDate &dataEntrega, QWidge
 
   if (not report.printToPDF(fileName)) { throw RuntimeException("Erro gerando PDF do romaneio: " + report.lastError(), parent); }
 
-  report.printReport();
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(fileName))) { throw RuntimeException("Erro abrindo arquivo: " + fileName, parent); }
 
   return fileName;
 #else

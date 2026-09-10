@@ -1671,7 +1671,7 @@ std::optional<VendaFreteResultado> Venda::calcularFrete() {
 
   if (verificaServicosEspeciais()) { return VendaFreteResultado{0., 0., true}; }
 
-  double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+  double fretePorcentagem = totais.subTotalBruto * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);
   double minimoGerenteNovo = freteMinimoAtual; // preserva o valor anterior se o bloco de endereço abaixo não recalcular
 

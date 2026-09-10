@@ -120,7 +120,7 @@ void Excel::gerarExcel() {
 
   const QString pgtQuery = "SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
                            "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                           id + "' AND tipo LIKE '%1%' AND tipo NOT IN ('%1. Comissão', '%1. Taxa Cartão') AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')"
+                           id + "' AND tipo LIKE '%1%' AND tipo NOT IN ('%1. Comissão', '%1. Taxa Cartão', '%1. Taxa Link') AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')"
                            " AND comissao = FALSE";
 
   for (int i = 1; i <= 5; ++i) {

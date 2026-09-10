@@ -146,6 +146,14 @@ void Orcamento::on_tableProdutos_selectionChanged() {
 
     mapperItem.setCurrentModelIndex(index);
     setarParametrosProduto();
+
+    // setarParametrosProduto() só carrega stepQt/stepCx/prcUn (dados do produto); caixas/descPct da
+    // linha selecionada vêm do mapper, que já populou os widgets acima. Sem isto itemFormState.caixas
+    // ficava em 0 (herdado da última linha limpa/adicionada), e reduceSetTotalItem() — cujo guard de
+    // itemBruto==0 existe para não dividir por zero — bailava e renderItemForm() reescrevia o campo de
+    // volta para 0 no primeiro edit de valor da linha.
+    itemFormState.caixas = ui->doubleSpinBoxCaixas->value();
+    itemFormState.descPct = ui->doubleSpinBoxDesconto->value();
   } catch (std::exception &) {
     setConnections();
     throw;

@@ -143,7 +143,7 @@ private:
   auto setConnections() -> void;
   auto setDataItem(const QString &key, const QVariant &value, const bool adjustValue = true) -> void;
   auto setItemBoxes() -> void;
-  auto setarParametrosProduto() -> void;
+  auto setarParametrosProduto(const bool refreshCatalogFields = true) -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;

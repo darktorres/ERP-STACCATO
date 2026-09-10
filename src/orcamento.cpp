@@ -145,7 +145,7 @@ void Orcamento::on_tableProdutos_selectionChanged() {
     ui->doubleSpinBoxQuant->setMaximum(9'999'999.000000);
 
     mapperItem.setCurrentModelIndex(index);
-    setarParametrosProduto();
+    setarParametrosProduto(false);
 
     // setarParametrosProduto() só carrega stepQt/stepCx/prcUn; caixas/descPct vêm do mapper.
     itemFormState.caixas = ui->doubleSpinBoxCaixas->value();
@@ -254,7 +254,7 @@ bool Orcamento::viewRegister() {
   carregando = true;
   totaisTrace.limpar();
 
-  auto load = [&] {
+  const auto loadImpl = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
     //-----------------------------------------------------------------
@@ -349,8 +349,14 @@ bool Orcamento::viewRegister() {
 
     if (User::isGerente()) {
       if (const auto resultado = calcularFrete()) {
-        if (resultado->forcado) { aplicarTotais("viewRegister:freteForcado", Log::dinheiro(resultado->valor), reduceSetFrete(totais, resultado->valor)); }
-        freteMinimoAtual = resultado->minimo;
+        if (resultado->forcado) {
+          aplicarTotais("viewRegister:freteForcado", Log::dinheiro(resultado->valor), reduceSetFrete(totais, resultado->valor));
+          freteMinimoAtual = resultado->minimo;
+        } else {
+          // não eleva silenciosamente o piso acima do frete já salvo/exibido — só o próximo recalculo
+          // em edição (calcPrecoGlobalTotal) aplica um piso mais alto de fato.
+          freteMinimoAtual = qMin(resultado->minimo, totais.frete);
+        }
       }
     }
 
@@ -393,7 +399,17 @@ bool Orcamento::viewRegister() {
     buscarIdVenda();
 
     return true;
-  }();
+  };
+
+  bool load;
+
+  try {
+    load = loadImpl();
+  } catch (std::exception &) {
+    carregando = false;
+    setConnections();
+    throw;
+  }
 
   carregando = false;
 
@@ -896,7 +912,12 @@ void Orcamento::verificarTotais() {
 void Orcamento::verifyFields() {
   verificaSeFoiAlterado();
 
-  if (modelItem.rowCount() == 0) { throw RuntimeError("Adicione pelo menos um item ao orçamento!", this); }
+  int itemCount = 0;
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) != "!") { ++itemCount; }
+  }
+
+  if (itemCount == 0) { throw RuntimeError("Adicione pelo menos um item ao orçamento!", this); }
 
   verificaDisponibilidadeEstoque();
 
@@ -960,7 +981,10 @@ void Orcamento::buscarConsultor() {
 
   QStringList fornecedores;
 
-  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
+    if (modelItem.headerData(row, Qt::Vertical) == "!") { continue; }
+    fornecedores << modelItem.data(row, "fornecedor").toString();
+  }
 
   fornecedores.removeDuplicates();
 
@@ -985,7 +1009,7 @@ void Orcamento::atualizaReplica() {
   if (ui->lineEditReplicaDe->text().isEmpty()) { return; }
 
   SqlQuery query;
-  query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento AND status = 'EXPIRADO'");
+  query.prepare("UPDATE orcamento SET status = 'REPLICADO', replicadoEm = :idReplica WHERE idOrcamento = :idOrcamento AND status NOT IN ('ATIVO', 'REPLICADO')");
   query.bindValue(":idReplica", ui->lineEditOrcamento->text());
   query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
 
@@ -1046,6 +1070,8 @@ void Orcamento::swapItens(const int rowA, const int rowB) {
     modelItem.setData(rowA, col, valueB, false);
     modelItem.setData(rowB, col, valueA, false);
   }
+
+  redoBackupItem();
 
   registrarItens("swapItens", QString::number(rowA) + "<->" + QString::number(rowB));
 }
@@ -1314,14 +1340,26 @@ void Orcamento::on_itemBoxProduto_idChanged() {
 
   // -------------------------------------------------------------------------
 
-  setarParametrosProduto();
+  unsetConnections();
+
+  try {
+    setarParametrosProduto();
+  } catch (std::exception &) {
+    setConnections();
+    throw;
+  }
+
+  setConnections();
+
+  itemFormState = reduceSetQuant(itemFormState, ui->doubleSpinBoxQuant->value());
+  renderItemForm();
 
   // -------------------------------------------------------------------------
 
   resizeSpinBoxes();
 }
 
-void Orcamento::setarParametrosProduto() {
+void Orcamento::setarParametrosProduto(const bool refreshCatalogFields) {
   SqlQuery query;
   query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
@@ -1333,11 +1371,14 @@ void Orcamento::setarParametrosProduto() {
   // -------------------------------------------------------------------------
 
   ui->doubleSpinBoxEstoque->setValue(query.value("estoqueRestante").toDouble());
-  ui->doubleSpinBoxPrecoUn->setValue(query.value("precoVenda").toDouble());
-  ui->lineEditCodComercial->setText(query.value("codComercial").toString());
-  ui->lineEditFormComercial->setText(query.value("formComercial").toString());
-  ui->lineEditFornecedor->setText(query.value("fornecedor").toString());
-  ui->lineEditUn->setText(query.value("un").toString().toUpper());
+
+  if (refreshCatalogFields) {
+    ui->doubleSpinBoxPrecoUn->setValue(query.value("precoVenda").toDouble());
+    ui->lineEditCodComercial->setText(query.value("codComercial").toString());
+    ui->lineEditFormComercial->setText(query.value("formComercial").toString());
+    ui->lineEditFornecedor->setText(query.value("fornecedor").toString());
+    ui->lineEditUn->setText(query.value("un").toString().toUpper());
+  }
 
   // -------------------------------------------------------------------------
 
@@ -1417,7 +1458,7 @@ void Orcamento::setarParametrosProduto() {
 
   itemFormState.stepQt = ui->doubleSpinBoxQuant->singleStep();
   itemFormState.stepCx = ui->doubleSpinBoxCaixas->singleStep();
-  itemFormState.prcUn = query.value("precoVenda").toDouble();
+  itemFormState.prcUn = refreshCatalogFields ? query.value("precoVenda").toDouble() : ui->doubleSpinBoxPrecoUn->value();
 }
 
 void Orcamento::on_itemBoxProfissional_idChanged() {
@@ -1446,6 +1487,7 @@ void Orcamento::on_itemBoxCliente_textChanged() {
 
   if (not queryCliente.first()) { throw RuntimeException("Dados do cliente não encontrados!"); }
 
+  ui->itemBoxProfissional->clear();
   ui->itemBoxProfissional->setId(queryCliente.value("idProfissionalRel"));
   ui->itemBoxEndereco->setEnabled(true);
   ui->itemBoxEndereco->clear();
@@ -1493,7 +1535,7 @@ std::optional<FreteResultado> Orcamento::calcularFrete() {
   if (verificaServicosEspeciais()) { return FreteResultado{0., 0., true}; }
   if (replicando) { return std::nullopt; }
 
-  double fretePorcentagem = ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100.;
+  double fretePorcentagem = totais.subTotalBruto * porcFrete / 100.;
   double freteMaior = qMax(fretePorcentagem, minimoFrete);
   double minimoGerenteNovo = freteMinimoAtual; // preserva o valor anterior se o bloco de endereço abaixo não recalcular
 
@@ -1692,7 +1734,14 @@ void Orcamento::cadastrar() {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
     unsetConnections();
-    savingProcedures();
+
+    try {
+      savingProcedures();
+    } catch (std::exception &) {
+      setConnections();
+      throw;
+    }
+
     setConnections();
 
     model.submitAll();

@@ -24,6 +24,16 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
 
   if (not User::isAdmin()) { ui->table->hide(); }
 
+  if (not User::isAdministrativo()) {
+    ui->lineEditNomeBancario->setEnabled(false);
+    ui->lineEditCPFBancario->setEnabled(false);
+    ui->lineEditCNPJBancario->setEnabled(false);
+    ui->lineEditBanco->setEnabled(false);
+    ui->lineEditAgencia->setEnabled(false);
+    ui->lineEditCC->setEnabled(false);
+    ui->checkBoxPoupanca->setEnabled(false);
+  }
+
   setConnections();
 }
 

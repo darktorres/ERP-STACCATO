@@ -6,6 +6,7 @@
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "searchdialog.h"
 #include "sqlquery.h"
@@ -16,6 +17,7 @@
 
 InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.inserirLancamento");
 
   setWindowFlags(Qt::Window);
 

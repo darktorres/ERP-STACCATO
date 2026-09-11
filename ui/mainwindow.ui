@@ -416,6 +416,7 @@ QTabWidget::pane {
     <addaction name="actionGerenciar_staccatoOff"/>
     <addaction name="actionGerenciar_Transportadoras"/>
     <addaction name="actionCadastrarUsuario"/>
+    <addaction name="actionGerenciar_Permissoes"/>
    </widget>
    <widget class="QMenu" name="menuVenda">
     <property name="title">
@@ -474,6 +475,11 @@ QTabWidget::pane {
    </property>
    <property name="toolTip">
     <string>Cadastrar usuário</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_Permissoes">
+   <property name="text">
+    <string>Gerenciar Permissões</string>
    </property>
   </action>
   <action name="actionCadastrarProfissional">

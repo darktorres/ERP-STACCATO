@@ -2,6 +2,7 @@
 #include "ui_pagamentosdia.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 
 #include <QDate>
@@ -10,6 +11,7 @@
 
 PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::PagamentosDia) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.pagamentosDia");
 
   setWindowFlags(Qt::Window);
 

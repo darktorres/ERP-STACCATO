@@ -30,6 +30,9 @@ protected:
   int currentRow = -1;
   QString primaryId;
   QString primaryKey;
+  // Prefixo da chave de permissao desta tela (ex.: "vendas.venda"). Cada subclasse seta no
+  // construtor; save() usa para montar "<prefixo>.salvar".
+  QString prefixoPermissao;
   SqlTableModel model;
   Tipo tipo = Tipo::Cadastrar;
   // methods

@@ -3,6 +3,7 @@
 
 #include "comboboxdelegate.h"
 #include "compraavulsa.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 
 WidgetCompraAvulsa::WidgetCompraAvulsa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraAvulsa) { ui->setupUi(this); }
@@ -126,6 +127,7 @@ void WidgetCompraAvulsa::updateTables() {
     setupTables();
     setConnections();
     montaFiltro();
+    Permissao::aplicarTela(this, "compras.avulso");
     isSet = true;
   }
 

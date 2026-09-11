@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
+#include "permissao.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 
@@ -11,6 +12,7 @@
 
 CadastroFuncionario::CadastroFuncionario(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroFuncionario) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.funcionario");
   setupTables();
   fillComboBoxRegime();
   setConnections();

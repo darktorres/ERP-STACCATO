@@ -4,6 +4,7 @@
 #include "acbrlib.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -49,6 +50,7 @@ void WidgetGare::updateTables() {
     ui->dateEditFiltro->setDate(qApp->serverDate());
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "financeiro.gare");
     isSet = true;
   }
 

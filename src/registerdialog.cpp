@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "itembox.h"
+#include "permissao.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -120,8 +121,15 @@ void RegisterDialog::verifyRequiredField(const QLineEdit &line) {
 
 bool RegisterDialog::askSaveBeforeClosing() {
   if (isDirty) {
-    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Deseja salvar as alterações?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-    msgBox.button(QMessageBox::Yes)->setText("Salvar");
+    // Sem permissao de salvar, nao oferecer "Salvar": save() lancaria, a excecao subiria pelo
+    // closeEvent e o dialogo nao fecharia - prendendo quem editou campos e nao pode gravar. Tres
+    // portas chegam aqui: o X, Ctrl+Q e Escape (keyPressEvent).
+    const bool podeSalvar = prefixoPermissao.isEmpty() or Permissao::tem(prefixoPermissao + ".salvar");
+
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!",
+                       podeSalvar ? "Deseja salvar as alterações?" : "Você não tem permissão para salvar. Descartar as alterações?",
+                       podeSalvar ? (QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel) : (QMessageBox::No | QMessageBox::Cancel), this);
+    if (podeSalvar) { msgBox.button(QMessageBox::Yes)->setText("Salvar"); }
     msgBox.button(QMessageBox::No)->setText("Descartar");
     msgBox.button(QMessageBox::Cancel)->setText("Cancelar");
 
@@ -152,6 +160,16 @@ bool RegisterDialog::newRegister() {
 }
 
 void RegisterDialog::save(const bool silent) {
+  // Guard autoritativo: 'enabled' e higiene de UI, nao autorizacao - o Ctrl+S de setConnections()
+  // chega aqui mesmo com o botao Salvar desabilitado.
+  //
+  // O 'not silent' e essencial: save(true) e auto-save interno, disparado pelo proprio codigo dentro
+  // do fluxo de Gerar Venda (orcamento.cpp:1253) e a cada item adicionado/removido/reordenado num
+  // orcamento ja salvo (orcamento.cpp:1012,1026,1229), alem de cadastrocliente.cpp:378 e
+  // cadastrofornecedor.cpp:305. Guardar incondicionalmente faria quem clicou em 'Gerar Venda'
+  // receber "sem permissao para salvar", que nao e o que ele pediu.
+  if (not silent and not prefixoPermissao.isEmpty()) { Permissao::exigir(prefixoPermissao + ".salvar"); }
+
   verifyFields();
 
   cadastrar();

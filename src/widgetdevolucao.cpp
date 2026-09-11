@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cadastrarnfe.h"
+#include "permissao.h"
 
 WidgetDevolucao::WidgetDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetDevolucao) { ui->setupUi(this); }
 
@@ -18,6 +19,8 @@ void WidgetDevolucao::updateTables() {
     setupTables();
 
     setConnections();
+
+    Permissao::aplicarTela(this, "logistica.devolucao");
     isSet = true;
   }
 

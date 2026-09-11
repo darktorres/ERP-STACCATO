@@ -1,9 +1,27 @@
 #include "tabcompras.h"
 #include "ui_tabcompras.h"
 
+#include "permissao.h"
+
 TabCompras::TabCompras(QWidget *parent) : QWidget(parent), ui(new Ui::TabCompras) {
   ui->setupUi(this);
   setConnections();
+
+  // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+  // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+  ui->widgetDevolucao->setProperty("prefixoPermissao", "compras.devolucoes");
+  ui->widgetResumo->setProperty("prefixoPermissao", "compras.resumo");
+  ui->widgetPendentes->setProperty("prefixoPermissao", "compras.pendentes");
+  ui->widgetGerar->setProperty("prefixoPermissao", "compras.comprar");
+  ui->widgetConfirmar->setProperty("prefixoPermissao", "compras.confirmar");
+  ui->widgetFaturar->setProperty("prefixoPermissao", "compras.faturamento");
+  ui->widgetOC->setProperty("prefixoPermissao", "compras.consumos");
+  ui->widgetHistorico->setProperty("prefixoPermissao", "compras.historico");
+  ui->widgetFinanceiro->setProperty("prefixoPermissao", "compras.financeiro");
+  ui->widgetCompraAvulsa->setProperty("prefixoPermissao", "compras.avulso");
+
+  Permissao::aplicarTela(this, "compras");
+
 }
 
 TabCompras::~TabCompras() { delete ui; }

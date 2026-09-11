@@ -5,6 +5,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "log.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -21,6 +22,7 @@
 
 CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::CalculoFrete) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.calculoFrete");
 
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);

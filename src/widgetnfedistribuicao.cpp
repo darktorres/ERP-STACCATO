@@ -5,6 +5,7 @@
 #include "application.h"
 #include "log.h"
 #include "nfeproxymodel.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "user.h"
 
@@ -97,6 +98,7 @@ void WidgetNFeDistribuicao::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "nfe.distribuicao");
     isSet = true;
   }
 

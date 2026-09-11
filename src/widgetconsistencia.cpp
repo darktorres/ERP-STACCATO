@@ -2,6 +2,7 @@
 #include "ui_widgetconsistencia.h"
 
 #include "application.h"
+#include "permissao.h"
 
 #include <QSqlError>
 
@@ -25,6 +26,7 @@ void WidgetConsistencia::updateTables() {
   if (not isSet) {
     ui->dateEditMes->setDate(qApp->serverDate());
     setupTables();
+    Permissao::aplicarTela(this, "consistencia");
     isSet = true;
   }
 

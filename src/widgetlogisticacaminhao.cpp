@@ -2,6 +2,7 @@
 #include "ui_widgetlogisticacaminhao.h"
 
 #include "doubledelegate.h"
+#include "permissao.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -44,6 +45,7 @@ void WidgetLogisticaCaminhao::updateTables() {
   if (not isSet) {
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "logistica.caminhoes");
     isSet = true;
   }
 

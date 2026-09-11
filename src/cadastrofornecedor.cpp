@@ -4,7 +4,8 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "user.h"
+#include "permissao.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QInputDialog>
@@ -13,17 +14,14 @@
 
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.fornecedor";
+  Permissao::aplicarTela(this, "cadastros.fornecedor");
 
   connectLineEditsToDirty();
   setupUi();
   setupTables();
   setupMapper();
   newRegister();
-
-  if (not User::isAdministrativo()) {
-    ui->pushButtonDesativar->setDisabled(true);
-    ui->pushButtonDesativarEnd->setDisabled(true);
-  }
 
   setConnections();
 }

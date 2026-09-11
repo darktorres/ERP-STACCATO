@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "file.h"
+#include "permissao.h"
 #include "smtp.h"
 #include "user.h"
 
@@ -13,6 +14,7 @@
 SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &fornecedor, QWidget *parent) : QDialog(parent), fornecedor(fornecedor), tipo(tipo), ui(new Ui::SendMail) {
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.email");
 
   setWindowFlags(Qt::Window);
 

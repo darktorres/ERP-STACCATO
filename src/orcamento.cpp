@@ -11,6 +11,7 @@
 #include "log.h"
 #include "logindialog.h"
 #include "pdf.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
@@ -49,6 +50,8 @@ private:
 
 Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento", parent), ui(new Ui::Orcamento) {
   ui->setupUi(this);
+  prefixoPermissao = "orcamento.orcamento";
+  Permissao::aplicarTela(this, "orcamento.orcamento");
 
   for (auto spinbox : findChildren<QSpinBox *>()) {
     spinbox->installEventFilter(this);

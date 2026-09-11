@@ -2,6 +2,7 @@
 #include "ui_cadastroStaccatoOff.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "produtoproxymodel.h"
 #include "sqlquery.h"
 
@@ -12,6 +13,7 @@
 
 CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroStaccatoOff) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.staccatoOff");
 
   setWindowTitle("Gerenciar promoção");
   setWindowFlags(Qt::Window);

@@ -7,6 +7,7 @@
 #include "followup.h"
 #include "itemboxdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -34,6 +35,7 @@ void WidgetCompraHistorico::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "compras.historico");
     isSet = true;
   }
 

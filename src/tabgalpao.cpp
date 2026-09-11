@@ -1,8 +1,18 @@
 #include "tabgalpao.h"
 #include "ui_tabgalpao.h"
 
+#include "permissao.h"
+
 TabGalpao::TabGalpao(QWidget *parent) : QWidget(parent), ui(new Ui::TabGalpao) {
   ui->setupUi(this);
+
+  // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+  // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+  ui->widgetGalpao->setProperty("prefixoPermissao", "galpao.galpao");
+  ui->widgetGalpaoPeso->setProperty("prefixoPermissao", "galpao.peso");
+
+  Permissao::aplicarTela(this, "galpao");
+
   setConnections();
 }
 

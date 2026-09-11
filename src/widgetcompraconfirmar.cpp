@@ -6,6 +6,7 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialogproduto.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -65,6 +66,7 @@ void WidgetCompraConfirmar::updateTables() {
   if (not isSet) {
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "compras.confirmar");
     isSet = true;
   }
 

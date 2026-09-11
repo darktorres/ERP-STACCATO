@@ -6,6 +6,7 @@
 #include "editdelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -17,6 +18,7 @@
 
 ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "compras.produtosPendentes");
 
   setWindowFlags(Qt::Window);
   setupTables();

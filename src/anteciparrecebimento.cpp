@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
@@ -13,6 +14,7 @@
 
 AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.anteciparRecebimento");
 
   setWindowFlags(Qt::Window);
 

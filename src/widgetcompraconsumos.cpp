@@ -4,6 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
+#include "permissao.h"
 #include "sql.h"
 
 #include <QMessageBox>
@@ -19,6 +20,7 @@ void WidgetCompraConsumos::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "compras.consumos");
     isSet = true;
   }
 

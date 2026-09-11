@@ -5,6 +5,7 @@
 #include "followup.h"
 #include "orcamento.h"
 #include "orcamentoproxymodel.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "user.h"
 
@@ -236,6 +237,7 @@ void WidgetOrcamento::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "orcamento.lista");
     isSet = true;
   }
 

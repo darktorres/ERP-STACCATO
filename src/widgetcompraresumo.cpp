@@ -3,6 +3,8 @@
 
 #include <QSqlError>
 
+#include "permissao.h"
+
 WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraResumo) { ui->setupUi(this); }
 
 WidgetCompraResumo::~WidgetCompraResumo() { delete ui; }
@@ -20,6 +22,7 @@ void WidgetCompraResumo::setupTables() {
 void WidgetCompraResumo::updateTables() {
   if (not isSet) {
     setupTables();
+    Permissao::aplicarTela(this, "compras.resumo");
     isSet = true;
   }
 

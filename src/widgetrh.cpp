@@ -7,6 +7,7 @@
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
@@ -26,6 +27,7 @@ void WidgetRh::updateTables() {
     ui->dateEdit->setDate(qApp->serverDate());
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "rh");
     isSet = true;
   }
 

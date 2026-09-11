@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QSqlError>
 
+#include "permissao.h"
+
 TabLogistica::TabLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::TabLogistica) { ui->setupUi(this); }
 
 TabLogistica::~TabLogistica() { delete ui; }
@@ -32,6 +34,23 @@ void TabLogistica::updateTables() {
     ui->splitter->setStretchFactor(0, 1);
     ui->splitter->setStretchFactor(1, 0);
     setConnections();
+
+    // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+    // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+    ui->widgetAgendarColeta->setProperty("prefixoPermissao", "logistica.agendarColeta");
+    ui->widgetColeta->setProperty("prefixoPermissao", "logistica.coleta");
+    ui->widgetRecebimento->setProperty("prefixoPermissao", "logistica.recebimento");
+    ui->widgetAgendaEntrega->setProperty("prefixoPermissao", "logistica.agendarEntrega");
+    ui->widgetSeparacao->setProperty("prefixoPermissao", "logistica.separacao");
+    ui->widgetCalendarioEntrega->setProperty("prefixoPermissao", "logistica.entregas");
+    ui->widgetCaminhao->setProperty("prefixoPermissao", "logistica.caminhoes");
+    ui->widgetRepresentacao->setProperty("prefixoPermissao", "logistica.representacao");
+    ui->widgetEntregues->setProperty("prefixoPermissao", "logistica.entregues");
+    ui->widgetCalendario->setProperty("prefixoPermissao", "logistica.calendario");
+    ui->widgetDevolucao->setProperty("prefixoPermissao", "logistica.devolucao");
+
+    Permissao::aplicarTela(this, "logistica");
+
     isSet = true;
   }
 

@@ -6,6 +6,7 @@
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialogconfirmacao.h"
+#include "permissao.h"
 #include "sql.h"
 #include "sqlquery.h"
 
@@ -179,6 +180,7 @@ void WidgetLogisticaAgendarColeta::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "logistica.agendarColeta");
     isSet = true;
   }
 

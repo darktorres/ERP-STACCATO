@@ -9,6 +9,7 @@
 #include "file.h"
 #include "itemboxdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -23,6 +24,7 @@
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate dataFaturamento, QWidget *parent)
     : QDialog(parent), dataFaturamento(dataFaturamento), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "nfe.importarXml");
   setWindowFlags(Qt::Window);
 
   SqlQuery query;

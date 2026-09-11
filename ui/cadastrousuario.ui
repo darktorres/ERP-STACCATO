@@ -332,7 +332,11 @@ color: rgb(0, 0, 0);</string>
         </widget>
        </item>
        <item row="9" column="0" colspan="2">
-        <widget class="QTableView" name="table"/>
+        <widget class="QPushButton" name="pushButtonPermissoes">
+         <property name="text">
+          <string>Permissões…</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -448,7 +452,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditPasswd</tabstop>
   <tabstop>lineEditPasswd_2</tabstop>
   <tabstop>lineEditEmail</tabstop>
-  <tabstop>table</tabstop>
+  <tabstop>pushButtonPermissoes</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

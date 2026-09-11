@@ -2,13 +2,16 @@
 #include "ui_cadastroproduto.h"
 
 #include "application.h"
-#include "user.h"
+#include "permissao.h"
+#include "sqlquery.h"
 
 #include <QDebug>
 #include <QSqlError>
 
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.produto";
+  Permissao::aplicarTela(this, "cadastros.produto");
 
   connectLineEditsToDirty();
   setupUi();
@@ -21,8 +24,6 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
   ui->itemBoxFornecedor->setRegisterDialog("CadastroFornecedor");
-
-  if (not User::isAdministrativo()) { ui->pushButtonDesativar->setDisabled(true); }
 
   setConnections();
 }

@@ -189,6 +189,7 @@ SOURCES += \
     src/file.cpp \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
+    src/gerenciarpermissoes.cpp \
     src/followupproxymodel.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
@@ -214,6 +215,7 @@ SOURCES += \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
+    src/permissao.cpp \
     src/pagamentosdia.cpp \
     src/palletitem.cpp \
     src/pdf.cpp \
@@ -336,6 +338,7 @@ HEADERS  += \
     src/file.h \
     src/financeiroproxymodel.h \
     src/followup.h \
+    src/gerenciarpermissoes.h \
     src/followupproxymodel.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
@@ -359,6 +362,7 @@ HEADERS  += \
     src/nfeproxymodel.h \
     src/noeditdelegate.h \
     src/orcamento.h \
+    src/permissao.h \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
     src/palletitem.h \
@@ -462,6 +466,7 @@ FORMS += \
     ui/devolucao.ui \
     ui/estoque.ui \
     ui/followup.ui \
+    ui/gerenciarpermissoes.ui \
     ui/importaprodutos.ui \
     ui/importarxml.ui \
     ui/inputdialog.ui \

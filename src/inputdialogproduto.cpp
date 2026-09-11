@@ -5,6 +5,7 @@
 #include "comboboxdelegate.h"
 #include "editdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
@@ -17,6 +18,7 @@
 
 InputDialogProduto::InputDialogProduto(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.produto");
 
   setWindowFlags(Qt::Window);
 

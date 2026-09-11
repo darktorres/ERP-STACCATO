@@ -5,6 +5,7 @@
 #include "doubledelegate.h"
 #include "file.h"
 #include "lineedit.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
@@ -23,6 +24,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
                            const QString &sortColumn, const bool naoListar, QWidget *parent)
     : QDialog(parent), naoListarBuscaVazia(naoListar), fullTextIndexes(fullTextIndexes_), primaryKey(primaryKey_), filter(filter_), textKeys(textKeys_), model(1000), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.busca");
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);

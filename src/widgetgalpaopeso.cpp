@@ -2,6 +2,7 @@
 #include "ui_widgetgalpaopeso.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "sqlquery.h"
 
 #include <QSqlError>
@@ -67,6 +68,7 @@ void WidgetGalpaoPeso::updateTables() {
     setupTables();
     setChart();
     setConnections();
+    Permissao::aplicarTela(this, "galpao.peso");
     isSet = true;
   }
 

@@ -18,6 +18,8 @@
 #include "importaprodutos.h"
 #include "importatabelaibpt.h"
 #include "orcamento.h"
+#include "gerenciarpermissoes.h"
+#include "permissao.h"
 #include "precoestoque.h"
 #include "user.h"
 #include "userconfig.h"
@@ -54,46 +56,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->gridLayout->addWidget(ui->tabWidget, 1, 0);
   }
 
-  if (not User::isAdmin()) { ui->actionCadastrarUsuario->setVisible(false); }
+  // Menu e abas saem do catalogo de permissoes. Antes: dois blocos isAdmin()/isAdministrativo() com
+  // setVisible() fixo + um SELECT * em usuario_has_permissao.
+  Permissao::aplicarMenu(this, "menu");
 
-  if (not User::isAdministrativo()) {
-    ui->actionCadastrarFornecedor->setVisible(false);
-    ui->actionCadastrarProdutos->setVisible(false);
-    ui->actionGerenciar_Lojas->setVisible(false);
-    ui->actionGerenciar_NCMs->setVisible(false);
-    ui->actionGerenciar_Transportadoras->setVisible(false);
-    ui->actionGerenciar_dados_bancarios->setVisible(false);
-    ui->actionGerenciar_pagamentos->setVisible(false);
-    ui->actionGerenciar_preco_estoque->setVisible(false);
-    ui->actionGerenciar_staccatoOff->setVisible(false);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), Permissao::tem("orcamento.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabVendas), Permissao::tem("vendas.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabCompras), Permissao::tem("compras.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabLogistica), Permissao::tem("logistica.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabNFe), Permissao::tem("nfe.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEstoque), Permissao::tem("estoque.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGalpao), Permissao::tem("galpao.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), Permissao::tem("financeiro.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), Permissao::tem("relatorios.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), Permissao::tem("graficos.ver"));
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), Permissao::tem("rh.ver"));
 
-    ui->menuImportar_tabela_fornecedor->menuAction()->setVisible(false);
-    ui->actionImportar_tabela_IBPT->setVisible(false);
-  }
-
-  // -------------------------------------------------------------------------
-
-  SqlQuery query;
-  query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
-  query.bindValue(":idUsuario", User::idUsuario);
-
-  if (not query.exec()) { throw RuntimeException("Erro lendo permissões: " + query.lastError().text(), this); }
-
-  if (not query.first()) { throw RuntimeException("Permissões não encontradas para usuário com id: '" + User::idUsuario + "'", this); }
-
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabVendas), query.value("view_tab_venda").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabCompras), query.value("view_tab_compra").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabLogistica), query.value("view_tab_logistica").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabNFe), query.value("view_tab_nfe").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEstoque), query.value("view_tab_estoque").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGalpao), query.value("view_tab_galpao").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), query.value("view_tab_grafico").toBool());
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
-
-  ui->actionCalcular_frete->setVisible(query.value("ajusteFrete").toBool());
+  // Consistencia era gateada por nome de pessoa (e um dos tres nomes nunca casava: o usuario real e
+  // EDUARDO PINTO DE OLIVEIRA, nao EDUARDO OLIVEIRA). Agora e perfil, como o resto.
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), Permissao::tem("consistencia.ver"));
 
   // -------------------------------------------------------------------------
 
@@ -105,14 +86,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->statusBar->addWidget(pushButtonStatus);
 
   connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::reconnectDb);
-
-  //---------------------------------------------------------------------------
-
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
-
-  const QString nomeUsuario = User::nome;
-
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "RODRIGO TORRES") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 
   //---------------------------------------------------------------------------
 
@@ -138,6 +111,7 @@ void MainWindow::setConnections() {
   connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered, connectionType);
   connect(ui->actionCadastrarProfissional, &QAction::triggered, this, &MainWindow::on_actionCadastrarProfissional_triggered, connectionType);
   connect(ui->actionCadastrarUsuario, &QAction::triggered, this, &MainWindow::on_actionCadastrarUsuario_triggered, connectionType);
+  connect(ui->actionGerenciar_Permissoes, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Permissoes_triggered, connectionType);
   connect(ui->actionCalculadora, &QAction::triggered, this, &MainWindow::on_actionCalculadora_triggered, connectionType);
   connect(ui->actionCalcular_frete, &QAction::triggered, this, &MainWindow::on_actionCalcular_frete_triggered, connectionType);
   connect(ui->actionClaro, &QAction::triggered, this, &MainWindow::on_actionClaro_triggered, connectionType);
@@ -250,6 +224,12 @@ void MainWindow::on_actionCadastrarUsuario_triggered() {
   auto *cad = new CadastroUsuario(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
   cad->show();
+}
+
+void MainWindow::on_actionGerenciar_Permissoes_triggered() {
+  auto *permissoes = new GerenciarPermissoes(this);
+  permissoes->setAttribute(Qt::WA_DeleteOnClose);
+  permissoes->show();
 }
 
 void MainWindow::on_actionCadastrarProfissional_triggered() {

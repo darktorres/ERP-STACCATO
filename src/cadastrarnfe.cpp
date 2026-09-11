@@ -5,6 +5,7 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -16,6 +17,7 @@
 
 CadastrarNFe::CadastrarNFe(const QString &idVenda_, const QStringList &items, const Tipo tipo_, QWidget *parent) : QDialog(parent), idVenda(idVenda_), tipo(tipo_), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "nfe.cadastrarNFe");
 
   setWindowFlags(Qt::Window);
 

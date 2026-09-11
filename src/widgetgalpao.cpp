@@ -9,6 +9,7 @@
 #include "file.h"
 #include "followup.h"
 #include "logindialog.h"
+#include "permissao.h"
 #include "sql.h"
 #include "sqlquery.h"
 #include "user.h"
@@ -135,6 +136,8 @@ void WidgetGalpao::updateTables() {
     setupTables();
 
     setConnections();
+
+    Permissao::aplicarTela(this, "galpao.galpao");
     isSet = true;
   }
 

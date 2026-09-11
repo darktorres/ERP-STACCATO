@@ -5,6 +5,7 @@
 #include "estoque.h"
 #include "file.h"
 #include "followup.h"
+#include "permissao.h"
 #include "sql.h"
 #include "user.h"
 #include "xlsxdocument.h"
@@ -89,6 +90,8 @@ void WidgetEstoques::updateTables() {
     setupTables();
 
     setConnections();
+
+    Permissao::aplicarTela(this, "estoque.estoques");
     isSet = true;
     return; // to avoid double selecting table
   }

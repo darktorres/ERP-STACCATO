@@ -2,27 +2,28 @@
 #include "ui_cadastrousuario.h"
 
 #include "application.h"
-#include "checkboxdelegate.h"
 #include "file.h"
+#include "gerenciarpermissoes.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QDebug>
 #include <QSqlError>
-#include <QTransposeProxyModel>
 
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.usuario";
+  Permissao::aplicarTela(this, "cadastros.usuario");
 
   connectLineEditsToDirty();
   fillComboBoxLoja();
-  setupTables();
   setupMapper();
   newRegister();
 
   ui->labelEspecialidade->hide();
   ui->comboBoxEspecialidade->hide();
 
-  if (not User::isAdmin()) { ui->table->hide(); }
+  if (not Permissao::tem("menu.gerenciarPermissoes")) { ui->pushButtonPermissoes->hide(); }
 
   if (not User::isAdministrativo()) {
     ui->lineEditNomeBancario->setEnabled(false);
@@ -49,44 +50,7 @@ void CadastroUsuario::setConnections() {
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked, connectionType);
   connect(ui->pushButtonDesativar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonDesativar_clicked, connectionType);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked, connectionType);
-}
-
-void CadastroUsuario::setupTables() {
-  modelPermissoes.setTable("usuario_has_permissao");
-
-  modelPermissoes.setHeaderData("view_tab_orcamento", "Ver Orçamentos?");
-  modelPermissoes.setHeaderData("view_tab_venda", "Ver Vendas?");
-  modelPermissoes.setHeaderData("view_tab_compra", "Ver Compras?");
-  modelPermissoes.setHeaderData("view_tab_logistica", "Ver Logística?");
-  modelPermissoes.setHeaderData("view_tab_nfe", "Ver NF-e?");
-  modelPermissoes.setHeaderData("view_tab_estoque", "Ver Estoque?");
-  modelPermissoes.setHeaderData("view_tab_galpao", "Ver Galpão?");
-  modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
-  modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
-  modelPermissoes.setHeaderData("view_tab_grafico", "Ver Gráfico?");
-  modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");
-
-  modelPermissoes.setHeaderData("webdav_documentos", "Rede - Documentos");
-  modelPermissoes.setHeaderData("webdav_compras", "Rede - Compras");
-  modelPermissoes.setHeaderData("webdav_financeiro", "Rede - Financeiro");
-  modelPermissoes.setHeaderData("webdav_rh", "Rede - RH");
-  modelPermissoes.setHeaderData("webdav_obras", "Rede - Obras");
-  modelPermissoes.setHeaderData("webdav_logistica", "Rede - Logística");
-
-  modelPermissoes.setHeaderData("ajusteFrete", "Ajustar Frete");
-
-  auto *transposeProxyModel = new QTransposeProxyModel(this);
-  transposeProxyModel->setSourceModel(&modelPermissoes);
-
-  ui->table->setModel(transposeProxyModel);
-
-  ui->table->hideRow(0);                                  // idUsuario
-  ui->table->hideRow(ui->table->model()->rowCount() - 2); // created
-  ui->table->hideRow(ui->table->model()->rowCount() - 1); // lastUpdated
-
-  for (int row = 1; row < modelPermissoes.columnCount() - 2; ++row) { ui->table->setItemDelegateForRow(row, new CheckBoxDelegate(this)); }
-
-  ui->table->horizontalHeader()->hide();
+  connect(ui->pushButtonPermissoes, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonPermissoes_clicked, connectionType);
 }
 
 void CadastroUsuario::modificarUsuario() {
@@ -212,11 +176,6 @@ bool CadastroUsuario::viewRegister() {
   ui->lineEditPasswd->setText("********");
   ui->lineEditPasswd_2->setText("********");
 
-  modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
-
-  modelPermissoes.select();
-
-  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(ui->table->model()->index(row, 0)); }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt()); }
 
@@ -236,6 +195,15 @@ void CadastroUsuario::on_pushButtonCadastrar_clicked() { save(); }
 void CadastroUsuario::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroUsuario::on_pushButtonNovoCad_clicked() { newRegister(); }
+
+void CadastroUsuario::on_pushButtonPermissoes_clicked() {
+  if (data("idUsuario").isNull()) { throw RuntimeError("Cadastre o usuário antes de configurar as permissões!", this); }
+
+  auto *permissoes = new GerenciarPermissoes(this);
+  permissoes->setAttribute(Qt::WA_DeleteOnClose);
+  permissoes->mostrarUsuario(data("idUsuario").toString());
+  permissoes->show();
+}
 
 void CadastroUsuario::on_pushButtonDesativar_clicked() {
   // TODO: encerrar conexoes no SQL do usuario desativado
@@ -263,17 +231,12 @@ void CadastroUsuario::cadastrar() {
 
     if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
-    if (tipo == Tipo::Cadastrar) { modelPermissoes.setData(0, "idUsuario", primaryId); }
-
-    modelPermissoes.submitAll();
-
     qApp->endTransaction();
 
     if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
   } catch (std::exception &e) {
     qApp->rollbackTransaction(e.what());
     model.select();
-    modelPermissoes.select();
 
     throw;
   }
@@ -334,19 +297,7 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
 bool CadastroUsuario::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }
 
-  modelPermissoes.setFilter("0");
-
-  modelPermissoes.select();
-
-  const int row = modelPermissoes.insertRowAtEnd();
-
-  modelPermissoes.setData(row, "view_tab_orcamento", 1);
-  modelPermissoes.setData(row, "view_tab_venda", 1);
-  modelPermissoes.setData(row, "view_tab_estoque", 1);
-  modelPermissoes.setData(row, "view_tab_relatorio", 1);
-  modelPermissoes.setData(row, "webdav_documentos", 1);
-
-  for (int row2 = 0; row2 < ui->table->model()->rowCount(); ++row2) { ui->table->openPersistentEditor(ui->table->model()->index(row2, 0)); }
+  // Usuário novo não nasce com exceção nenhuma: herda 100% do perfil do próprio tipo.
 
   return true;
 }

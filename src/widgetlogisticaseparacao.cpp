@@ -2,6 +2,7 @@
 #include "ui_widgetlogisticaseparacao.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "romaneio.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -22,6 +23,8 @@ void WidgetLogisticaSeparacao::updateTables() {
     setupTables();
 
     setConnections();
+
+    Permissao::aplicarTela(this, "logistica.separacao");
 
     isSet = true;
   }

@@ -5,6 +5,7 @@
 #include "estoqueprazoproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "permissao.h"
 #include "sql.h"
 #include "sqlquery.h"
 
@@ -36,6 +37,7 @@ void WidgetLogisticaColeta::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "logistica.coleta");
     isSet = true;
   }
 

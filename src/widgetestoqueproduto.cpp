@@ -1,6 +1,7 @@
 #include "widgetestoqueproduto.h"
 #include "ui_widgetestoqueproduto.h"
 
+#include "permissao.h"
 #include "produtoproxymodel.h"
 
 #include <QDebug>
@@ -63,6 +64,7 @@ void WidgetEstoqueProduto::updateTables() {
     ui->lineEditBusca->setDelayed();
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "estoque.produtos");
     isSet = true;
   }
 

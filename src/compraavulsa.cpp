@@ -6,6 +6,7 @@
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
@@ -14,6 +15,7 @@
 
 CompraAvulsa::CompraAvulsa(QWidget *parent) : QDialog(parent), ui(new Ui::CompraAvulsa) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "compras.compraAvulsa");
   ui->itemBoxNFe->setSearchDialog(SearchDialog::nfe(false, false, this));
 
   setWindowFlags(Qt::Window);

@@ -6,6 +6,7 @@
 #include "followup.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "permissao.h"
 #include "sql.h"
 #include "sqlquery.h"
 
@@ -37,6 +38,7 @@ void WidgetLogisticaRecebimento::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "logistica.recebimento");
     isSet = true;
   }
 

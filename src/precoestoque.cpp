@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 
@@ -12,6 +13,7 @@
 
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.precoEstoque");
 
   ui->lineEditBusca->setDelayed();
 

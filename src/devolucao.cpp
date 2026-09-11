@@ -4,6 +4,7 @@
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "doubledelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "user.h"
@@ -15,6 +16,7 @@
 
 Devolucao::Devolucao(const QString &idVenda_, const bool isRepresentacao_, QWidget *parent) : QDialog(parent), isRepresentacao(isRepresentacao_), idVenda(idVenda_), ui(new Ui::Devolucao) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "vendas.devolucao");
 
   setWindowFlags(Qt::Window);
   setWindowTitle(idVenda);

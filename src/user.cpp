@@ -1,7 +1,9 @@
 #include "user.h"
 
 #include "application.h"
+#include "permissao.h"
 
+#include <QHash>
 #include <QSqlError>
 
 QVariant User::getSetting(const QString &key) { return settings->value(key); }
@@ -28,13 +30,18 @@ void User::setSetting(const QString &key, const QVariant &value) { settings->set
 bool User::temPermissao(const QString &permissao) {
   if (permissao.isEmpty()) { throw RuntimeException("Erro na consulta de permissão!"); }
 
-  SqlQuery query;
+  // Mantém a assinatura antiga e delega para o catálogo novo, para os call sites não mudarem:
+  // orcamento.cpp:1556, venda.cpp:1089, widgetgalpao.cpp:591 e widgetnfeentrada.cpp:595 seguem
+  // chamando com o nome da coluna legada. A semântica do fluxo de autorização por LoginDialog fica
+  // intacta porque User::autorizacao() não altera User::idUsuario.
+  static const QHash<QString, QString> legado = {
+      {"webdav_documentos", "sistema.webdavDocumentos"}, {"webdav_compras", "sistema.webdavCompras"},
+      {"webdav_financeiro", "sistema.webdavFinanceiro"}, {"webdav_rh", "sistema.webdavRh"},
+      {"webdav_obras", "sistema.webdavObras"},           {"webdav_logistica", "sistema.webdavLogistica"},
+      {"ajusteFrete", "sistema.ajusteFrete"},
+  };
 
-  if (not query.exec("SELECT " + permissao + " FROM usuario_has_permissao WHERE idUsuario = " + idUsuario)) { throw RuntimeException("Erro lendo permissões: " + query.lastError().text()); }
-
-  if (not query.first()) { throw RuntimeException("Permissões não encontradas para usuário com id: '" + User::idUsuario + "'"); }
-
-  return query.value(permissao).toBool();
+  return Permissao::tem(legado.value(permissao, permissao));
 }
 
 void User::login(const QString &user, const QString &password) {

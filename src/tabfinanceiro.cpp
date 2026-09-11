@@ -3,8 +3,22 @@
 
 #include <QDebug>
 
+#include "permissao.h"
+
 TabFinanceiro::TabFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::TabFinanceiro) {
   ui->setupUi(this);
+
+  // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+  // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+  ui->widgetFluxoCaixa->setProperty("prefixoPermissao", "financeiro.fluxoCaixa");
+  ui->widgetPagar->setProperty("prefixoPermissao", "financeiro.contasPagar");
+  ui->widgetReceber->setProperty("prefixoPermissao", "financeiro.contasReceber");
+  ui->widgetGare->setProperty("prefixoPermissao", "financeiro.gare");
+  ui->widgetVenda->setProperty("prefixoPermissao", "financeiro.venda");
+  ui->widgetCompra->setProperty("prefixoPermissao", "financeiro.compra");
+
+  Permissao::aplicarTela(this, "financeiro");
+
 
   ui->widgetPagar->setTipo(WidgetFinanceiroContas::Tipo::Pagar);
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);

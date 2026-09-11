@@ -2,6 +2,7 @@
 #include "ui_widgetgraficos.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QSqlError>
@@ -121,6 +122,7 @@ void WidgetGraficos::updateTables() {
     setComboBoxLojas();
     setChart();
     setConnections();
+    Permissao::aplicarTela(this, "graficos");
     isSet = true;
   }
 

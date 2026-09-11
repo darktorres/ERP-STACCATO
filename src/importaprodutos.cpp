@@ -4,6 +4,7 @@
 #include "application.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -56,6 +57,7 @@ const QStringList ImportaProdutos::PREVIEW_COLUMNS = {
 
 ImportaProdutos::ImportaProdutos(const Tipo tipo_, QWidget *parent) : QDialog(parent), tipo(tipo_), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.importarProdutos");
 
   setWindowFlags(Qt::Window);
 

@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "followup.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "user.h"
 #include "venda.h"
@@ -292,6 +293,9 @@ void WidgetVenda::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    // Prefixo injetado pelo pai: esta classe tambem e embutida em Financeiro > Vendas
+    // (tabfinanceiro.cpp), que precisa configurar aquela instancia separadamente da aba Vendas.
+    Permissao::aplicarTela(this, property("prefixoPermissao").toString().isEmpty() ? QString("vendas.lista") : property("prefixoPermissao").toString());
     isSet = true;
   }
 

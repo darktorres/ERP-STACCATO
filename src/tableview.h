@@ -27,6 +27,12 @@ public:
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
+  // Trava de permissao. setEditTriggers() nao e virtual no Qt, entao esta sobrecarga esconde a da
+  // classe base por name-hiding - funciona porque todas as chamadas do projeto sao feitas pelo
+  // ponteiro estatico TableView* (venda.cpp:838,1574; compraavulsa.cpp:417-418), nenhuma por
+  // QTableView*/QAbstractItemView*. Sem isso, venda.cpp:1574 reabre a edicao depois da trava.
+  auto setSomenteLeitura(const bool value) -> void;
+  auto setEditTriggers(const EditTriggers triggers) -> void;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 
@@ -39,6 +45,7 @@ private:
   // attributes
   bool autoResize = true;
   bool copyHeaders = true;
+  bool somenteLeitura = false;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
   // methods

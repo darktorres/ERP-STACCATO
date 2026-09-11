@@ -5,6 +5,7 @@
 #include "comboboxdelegate.h"
 #include "editdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
@@ -17,6 +18,7 @@
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.financeiro");
 
   setWindowFlags(Qt::Window);
 

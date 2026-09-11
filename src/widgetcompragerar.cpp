@@ -6,6 +6,7 @@
 #include "file.h"
 #include "followup.h"
 #include "inputdialogproduto.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
 #include "sql.h"
@@ -120,6 +121,7 @@ void WidgetCompraGerar::updateTables() {
   if (not isSet) {
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "compras.comprar");
     isSet = true;
   }
 

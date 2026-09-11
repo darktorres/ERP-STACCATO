@@ -8,6 +8,7 @@
 #include "followup.h"
 #include "inputdialog.h"
 #include "pdf.h"
+#include "permissao.h"
 #include "produtospendentes.h"
 
 #include <QDebug>
@@ -124,6 +125,8 @@ void WidgetCompraPendentes::updateTables() {
     montaFiltro();
 
     setConnections();
+
+    Permissao::aplicarTela(this, "compras.pendentes");
     isSet = true;
   }
 

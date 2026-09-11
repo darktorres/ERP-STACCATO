@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "inputdialogfinanceiro.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 
 WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
@@ -22,6 +23,11 @@ void WidgetFinanceiroCompra::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    // Prefixo injetado pelo pai: esta classe serve mais de uma tela (Contas a Pagar e a
+    // Receber, Compras e Financeiro), entao a chave nao pode ser hardcoded aqui.
+    Permissao::aplicarTela(this, property("prefixoPermissao").toString().isEmpty()
+                                     ? QString("financeiro.compra")
+                                     : property("prefixoPermissao").toString());
     isSet = true;
   }
 

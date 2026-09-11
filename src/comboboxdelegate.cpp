@@ -19,6 +19,14 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   QStringList list;
 
+  // Coluna "Exceção" da tela de permissões. "Herda" = sem linha em usuario_has_permissao_override;
+  // Sim/Não gravam o override que sobrepõe o perfil do tipo.
+  if (tipo == Tipo::HerdaSimNao) {
+    list << "Herda"
+         << "Sim"
+         << "Não";
+  }
+
   if (tipo == Tipo::CompraAvulsa) {
     list << "PEND. APROV."
          << "CONFERIDO"

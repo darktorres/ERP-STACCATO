@@ -7,6 +7,7 @@
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "noeditdelegate.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "searchdialog.h"
 #include "sortfilterproxymodel.h"
@@ -18,6 +19,7 @@
 
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.contasDialogo");
 
   if (tipo == Tipo::Pagar) { setWindowTitle("Contas a pagar"); }
   if (tipo == Tipo::Receber) { setWindowTitle("Contas a receber"); }

@@ -20,7 +20,6 @@ private:
   // attributes
   bool limitado = false;
   SearchDialog *const sdUsuario = SearchDialog::usuario(this);
-  SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
   auto cadastrar() -> void final;
@@ -35,11 +34,11 @@ private:
   auto on_pushButtonCadastrar_clicked() -> void;
   auto on_pushButtonDesativar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
+  auto on_pushButtonPermissoes_clicked() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setupMapper() -> void final;
-  auto setupTables() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
   auto verificaUsuarioDisponivel() -> void;

@@ -4,10 +4,12 @@
 
 #ifdef Q_OS_WIN
 #include "acbrlib.h"
+#include "permissao.h"
 #endif
 
 XML_Viewer::XML_Viewer(const QString &content, QWidget *parent) : QDialog(parent), xml(content), ui(new Ui::XML_Viewer) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "nfe.visualizarXml");
 
   setWindowFlags(Qt::Window);
 

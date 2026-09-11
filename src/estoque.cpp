@@ -5,6 +5,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoqueproxymodel.h"
+#include "permissao.h"
 #include "sql.h"
 #include "user.h"
 
@@ -15,6 +16,7 @@
 
 Estoque::Estoque(const QVariant &idEstoque_, QWidget *parent) : QDialog(parent), idEstoque(idEstoque_.toString()), ui(new Ui::Estoque) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "estoque.item");
 
   setWindowFlags(Qt::Window);
 

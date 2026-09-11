@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GerenciarPermissoes</class>
+ <widget class="QDialog" name="GerenciarPermissoes">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Gerenciar Permissões</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabPerfis">
+      <attribute name="title">
+       <string>Perfis</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayoutPerfis">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="layoutBuscaPerfis">
+         <item>
+          <widget class="QLabel" name="labelBuscar">
+           <property name="text">
+            <string>Buscar:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineEdit" name="lineEditBuscar">
+           <property name="placeholderText">
+            <string>filtrar por nome ou chave</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonTodas">
+           <property name="text">
+            <string>Todas</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonEscrita">
+           <property name="text">
+            <string>Escrita</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonNegadas">
+           <property name="text">
+            <string>Negadas</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonAlteradas">
+           <property name="text">
+            <string>Alteradas</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <layout class="QHBoxLayout" name="layoutAcoesPerfis">
+         <item>
+          <widget class="QPushButton" name="pushButtonExpandir">
+           <property name="text">
+            <string>Expandir</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonRecolher">
+           <property name="text">
+            <string>Recolher</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonCopiarPerfil">
+           <property name="text">
+            <string>Copiar perfil…</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerPerfis">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelAlteracoes">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0">
+        <widget class="QTreeWidget" name="treePerfis">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>Permissão</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <layout class="QHBoxLayout" name="layoutRodapePerfis">
+         <item>
+          <widget class="QLabel" name="labelLegenda">
+           <property name="text">
+            <string>✎ ação de escrita   ·   parcial = os filhos divergem</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerRodapePerfis">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonSalvar">
+           <property name="text">
+            <string>Salvar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonDescartar">
+           <property name="text">
+            <string>Descartar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabUsuarios">
+      <attribute name="title">
+       <string>Usuários</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayoutUsuarios">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="layoutTopoUsuarios">
+         <item>
+          <widget class="QLabel" name="labelUsuario">
+           <property name="text">
+            <string>Usuário:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBoxUsuario">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="minimumWidth">
+            <number>320</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelPerfilUsuario">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerUsuarios">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxSoExcecoes">
+           <property name="text">
+            <string>Mostrar só as exceções</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeWidget" name="treeUsuario">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>Permissão</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Perfil</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Exceção</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Efetivo</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="layoutRodapeUsuarios">
+         <item>
+          <widget class="QLabel" name="labelAvisoLogin">
+           <property name="text">
+            <string>As alterações valem para o usuário no próximo login dele.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerRodapeUsuarios">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelAlteracoesUsuario">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonSalvarUsuario">
+           <property name="text">
+            <string>Salvar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonDescartarUsuario">
+           <property name="text">
+            <string>Descartar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabQuemPode">
+      <attribute name="title">
+       <string>Quem pode?</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayoutQuemPode">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="layoutTopoQuemPode">
+         <item>
+          <widget class="QLabel" name="labelPermissao">
+           <property name="text">
+            <string>Permissão:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBoxPermissao">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="minimumWidth">
+            <number>520</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerQuemPode">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelResumoQuemPode">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="TableView" name="tableQuemPode">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>lineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>tableview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

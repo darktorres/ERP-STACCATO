@@ -3,9 +3,19 @@
 
 #include <QDebug>
 
+#include "permissao.h"
+
 TabEstoque::TabEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::TabEstoque) {
   ui->setupUi(this);
   setConnections();
+
+  // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+  // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+  ui->widgetEstoques->setProperty("prefixoPermissao", "estoque.estoques");
+  ui->widgetProdutos->setProperty("prefixoPermissao", "estoque.produtos");
+
+  Permissao::aplicarTela(this, "estoque");
+
 }
 
 TabEstoque::~TabEstoque() { delete ui; }

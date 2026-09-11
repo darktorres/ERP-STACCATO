@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "file.h"
+#include "permissao.h"
 #include "sortfilterproxymodel.h"
 #include "sqlquery.h"
 #include "user.h"
@@ -19,6 +20,7 @@
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.confirmacao");
 
   setWindowFlags(Qt::Window);
 

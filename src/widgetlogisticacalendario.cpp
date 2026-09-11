@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "collapsiblewidget.h"
+#include "permissao.h"
 #include "sqlquery.h"
 
 #include <QCheckBox>
@@ -64,6 +65,7 @@ void WidgetLogisticaCalendario::updateTables() {
     listarVeiculos();
     setConnections();
     ui->checkBoxMostrarFiltros->toggle();
+    Permissao::aplicarTela(this, "logistica.calendario");
     isSet = true;
   }
 

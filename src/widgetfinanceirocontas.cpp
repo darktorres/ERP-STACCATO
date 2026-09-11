@@ -7,6 +7,7 @@
 #include "contas.h"
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -137,6 +138,11 @@ void WidgetFinanceiroContas::updateTables() {
 
     setupTables();
     setConnections();
+    // Prefixo injetado pelo pai: esta classe serve mais de uma tela (Contas a Pagar e a
+    // Receber, Compras e Financeiro), entao a chave nao pode ser hardcoded aqui.
+    Permissao::aplicarTela(this, property("prefixoPermissao").toString().isEmpty()
+                                     ? QString("financeiro.contasPagar")
+                                     : property("prefixoPermissao").toString());
     isSet = true;
   }
 

@@ -9,6 +9,7 @@
 #include "followup.h"
 #include "inputdialog.h"
 #include "log.h"
+#include "permissao.h"
 #include "romaneio.h"
 #include "sql.h"
 #include "user.h"
@@ -307,6 +308,8 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
     setConnections();
+
+    Permissao::aplicarTela(this, "logistica.agendarEntrega");
     isSet = true;
 
     return;

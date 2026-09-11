@@ -2,12 +2,14 @@
 #include "ui_baixaorcamento.h"
 
 #include "application.h"
+#include "permissao.h"
 
 #include <QRegularExpression>
 #include <QSqlError>
 
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "orcamento.baixa");
 
   setupTables(idOrcamento);
 

@@ -7,6 +7,7 @@
 #include "doubledelegate.h"
 #include "file.h"
 #include "followup.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "sqltablemodel.h"
@@ -83,6 +84,7 @@ void WidgetNfeSaida::updateTables() {
     ui->dateEditDe->setDate(QDate(qApp->serverDate().year(), qApp->serverDate().month(), 1));
     setupTables(); // ja chama montaFiltro() para popular as colunas do model
     setConnections();
+    Permissao::aplicarTela(this, "nfe.saida");
     isSet = true;
   } else {
     montaFiltro();

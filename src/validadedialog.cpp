@@ -2,9 +2,11 @@
 #include "ui_validadedialog.h"
 
 #include "application.h"
+#include "permissao.h"
 
 ValidadeDialog::ValidadeDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ValidadeDialog) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.validade");
 
   ui->dateEdit->setDate(qApp->serverDate());
 

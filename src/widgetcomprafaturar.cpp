@@ -8,6 +8,7 @@
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -81,6 +82,7 @@ void WidgetCompraFaturar::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "compras.faturamento");
     isSet = true;
   }
 

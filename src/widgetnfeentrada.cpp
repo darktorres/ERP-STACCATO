@@ -8,6 +8,7 @@
 #include "doubledelegate.h"
 #include "file.h"
 #include "followup.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
 #include "user.h"
@@ -104,6 +105,7 @@ void WidgetNfeEntrada::updateTables() {
     ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
     setupTables(); // ja chama montaFiltro() para popular as colunas do model
     setConnections();
+    Permissao::aplicarTela(this, "nfe.entrada");
     isSet = true;
   } else {
     montaFiltro();

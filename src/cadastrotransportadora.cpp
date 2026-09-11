@@ -4,7 +4,7 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "user.h"
+#include "permissao.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -12,17 +12,14 @@
 
 CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.transportadora";
+  Permissao::aplicarTela(this, "cadastros.transportadora");
 
   connectLineEditsToDirty();
   setupUi();
   setupTables();
   setupMapper();
   newRegister();
-
-  if (not User::isAdministrativo()) {
-    ui->pushButtonDesativar->setDisabled(true);
-    ui->pushButtonDesativarEnd->setDisabled(true);
-  }
 
   setConnections();
 }

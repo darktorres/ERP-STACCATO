@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cadastrousuario.h"
 #include "file.h"
+#include "permissao.h"
 #include "sendmail.h"
 #include "user.h"
 #include "webdav.h"
@@ -15,6 +16,7 @@
 
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "sistema.config");
 
   setWindowFlags(Qt::Window);
 

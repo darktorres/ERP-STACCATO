@@ -17,6 +17,7 @@
 #include "noeditdelegate.h"
 #include "orcamento.h"
 #include "pdf.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "produtoproxymodel.h"
 #include "reaisdelegate.h"
@@ -56,6 +57,8 @@ private:
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
+  prefixoPermissao = "vendas.venda";
+  Permissao::aplicarTela(this, "vendas.venda");
 
   for (auto spinbox : findChildren<QSpinBox *>()) {
     spinbox->installEventFilter(this);

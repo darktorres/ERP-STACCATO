@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "logindialog.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QDebug>
@@ -300,6 +301,14 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
 
 void WidgetPagamentos::setTipo(const Tipo novoTipo) {
   if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
+
+  // Prefixo injetado pelo pai: esta classe serve mais de uma tela (Contas a Pagar e a Receber,
+  // Compras e Financeiro), entao a chave nao pode ser hardcoded aqui. Fica em setTipo() e nao no
+  // construtor porque o pai so tem chance de chamar setProperty("prefixoPermissao", ...) depois que
+  // o proprio setupUi() (que ja constroi esta instancia) retorna - no construtor seria tarde demais.
+  Permissao::aplicarTela(this, property("prefixoPermissao").toString().isEmpty()
+                                   ? QString("financeiro.pagamentos")
+                                   : property("prefixoPermissao").toString());
 
   tipo = novoTipo;
 

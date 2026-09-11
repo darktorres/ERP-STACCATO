@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QDebug>
@@ -12,6 +13,8 @@
 
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.cliente";
+  Permissao::aplicarTela(this, "cadastros.cliente");
 
   connectLineEditsToDirty();
   setItemBoxes();

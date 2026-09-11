@@ -3,12 +3,14 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 
 #include <QDebug>
 
 CadastroNCM::CadastroNCM(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroNCM) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.ncm");
 
   setWindowFlags(Qt::Window);
 

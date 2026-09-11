@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "file.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -147,6 +148,7 @@ void WidgetRelatorio::updateTables() {
 
     setupTables();
     setConnections();
+    Permissao::aplicarTela(this, "relatorios");
     isSet = true;
   }
 

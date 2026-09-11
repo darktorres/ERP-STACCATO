@@ -4,6 +4,7 @@
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "itemboxdelegate.h"
+#include "permissao.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sqlquery.h"
@@ -13,6 +14,7 @@
 
 CadastroPagamento::CadastroPagamento(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroPagamento) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "cadastros.pagamento");
 
   setWindowFlags(Qt::Window);
 

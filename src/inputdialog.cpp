@@ -2,12 +2,14 @@
 #include "ui_inputdialog.h"
 
 #include "application.h"
+#include "permissao.h"
 
 #include <QDebug>
 #include <QSqlError>
 
 InputDialog::InputDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "comum.dialogo");
 
   setWindowFlags(Qt::Window);
 

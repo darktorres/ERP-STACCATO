@@ -3,6 +3,7 @@
 #include "QSimpleUpdater.h"
 #include "file.h"
 #include "log.h"
+#include "permissao.h"
 #include "user.h"
 
 #ifndef BENCHMARK_BUILD
@@ -197,6 +198,11 @@ void Application::dbConnect(const QString &hostname, const QString &user, const 
   if (User::isOperacional()) { throw RuntimeError("Operacional bloqueado!"); }
 
   userLogin(user);
+
+  // Uma query so, aqui. User::temPermissao() fazia um SELECT por chamada - inviavel com uma consulta
+  // por botao. Nao vai em dbReconnect(), que nao refaz o login; main.cpp:45-49 garante que isto roda
+  // antes de new MainWindow.
+  Permissao::carregar();
 
   // ------------------------------------------------------------
 

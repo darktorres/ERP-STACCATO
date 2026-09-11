@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "pagamentosdia.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 
 #include <QDebug>
@@ -54,6 +55,8 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     filtroData = (ui->groupBoxMes->isChecked()) ? "WHERE DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
 
     setConnections();
+
+    Permissao::aplicarTela(this, "financeiro.fluxoCaixa");
 
     isSet = true;
   }

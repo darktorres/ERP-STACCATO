@@ -2,6 +2,7 @@
 #include "ui_inserirtransferencia.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "sqlquery.h"
 
 #include <QDebug>
@@ -9,6 +10,7 @@
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.inserirTransferencia");
 
   setupTables();
 

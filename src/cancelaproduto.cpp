@@ -2,6 +2,7 @@
 #include "ui_cancelaproduto.h"
 
 #include "application.h"
+#include "permissao.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -10,6 +11,7 @@
 
 CancelaProduto::CancelaProduto(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "vendas.cancelarProduto");
 
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);

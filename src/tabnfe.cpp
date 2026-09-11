@@ -1,8 +1,19 @@
 #include "tabnfe.h"
 #include "ui_tabnfe.h"
 
+#include "permissao.h"
+
 TabNFe::TabNFe(QWidget *parent) : QWidget(parent), ui(new Ui::TabNFe) {
   ui->setupUi(this);
+
+  // Marca as telas-filhas antes de aplicar: a poda de aplicarTela para nessas subarvores
+  // (cada uma tem prefixo proprio), entao aqui so as paginas do QTabWidget sao gateadas.
+  ui->widgetEntrada->setProperty("prefixoPermissao", "nfe.entrada");
+  ui->widgetSaida->setProperty("prefixoPermissao", "nfe.saida");
+  ui->widgetDistribuicao->setProperty("prefixoPermissao", "nfe.distribuicao");
+
+  Permissao::aplicarTela(this, "nfe");
+
   setConnections();
 }
 

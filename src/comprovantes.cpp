@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "file.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QAuthenticator>
@@ -24,6 +25,7 @@ QString CustomDelegate::displayText(const QVariant &value, const QLocale &locale
 
 Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(parent), m_idVenda(idVenda), ui(new Ui::Comprovantes) {
   ui->setupUi(this);
+  Permissao::aplicarTela(this, "financeiro.comprovantes");
 
   setWindowFlags(Qt::Window);
 

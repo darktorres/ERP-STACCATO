@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "permissao.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "sqlquery.h"
@@ -35,6 +36,7 @@ void WidgetLogisticaEntregues::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "logistica.entregues");
     isSet = true;
   }
 

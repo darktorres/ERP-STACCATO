@@ -278,3 +278,17 @@ void TableView::keyPressEvent(QKeyEvent *event) {
 
   QTableView::keyPressEvent(event);
 }
+
+void TableView::setSomenteLeitura(const bool value) {
+  somenteLeitura = value;
+
+  if (somenteLeitura) { QTableView::setEditTriggers(NoEditTriggers); }
+}
+
+void TableView::setEditTriggers(const EditTriggers triggers) {
+  // Ignora enquanto travado por permissao. venda.cpp:1574 reabre a edicao do fluxo de caixa em
+  // runtime; sem esta guarda a trava so valeria ate o usuario abrir aquela aba.
+  if (somenteLeitura) { return; }
+
+  QTableView::setEditTriggers(triggers);
+}

@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "followup.h"
+#include "permissao.h"
 #include "sql.h"
 
 #include <QDebug>
@@ -35,6 +36,7 @@ void WidgetCompraDevolucao::updateTables() {
     setupTables();
     montaFiltro();
     setConnections();
+    Permissao::aplicarTela(this, "compras.devolucoes");
     isSet = true;
   }
 

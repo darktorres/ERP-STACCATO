@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
+#include "permissao.h"
 #include "user.h"
 
 #include <QDebug>
@@ -12,6 +13,8 @@
 
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
+  prefixoPermissao = "cadastros.profissional";
+  Permissao::aplicarTela(this, "cadastros.profissional");
 
   connectLineEditsToDirty();
   setItemBoxes();

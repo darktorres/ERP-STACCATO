@@ -1065,7 +1065,7 @@ void Orcamento::swapItens(const int rowA, const int rowB) {
   for (int col = 0, colCount = record.count(); col < colCount; ++col) {
     const QString field = record.fieldName(col);
 
-    if (field == "idOrcamentoProduto" or field == "ordem") { continue; }
+    if (field == "idOrcamentoProduto" or field == "ordem" or field == "created" or field == "lastUpdated") { continue; }
 
     const QVariant valueA = modelItem.data(rowA, col);
     const QVariant valueB = modelItem.data(rowB, col);
